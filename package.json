@@ -5,18 +5,19 @@
   "license": "MIT",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "frontend",
+    "backend"
   ],
   "scripts": {
-    "lint": "eslint 'packages/**/*.{js,jsx,ts,tsx}'",
-    "format": "prettier --write 'packages/**/*.{js,jsx,ts,tsx,json,css,md}'",
+    "lint": "eslint '**/*.{js,jsx,ts,tsx}'",
+    "format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,md}'",
     "start:frontend": "yarn workspace frontend dev",
     "start:backend": "yarn workspace backend dev",
     "start": "concurrently \"yarn start:frontend\" \"yarn start:backend\"",
     "prepare": "husky"
   },
   "lint-staged": {
-    "packages/**/*.{js,jsx,ts,tsx,json,css,md}": [
+    "**/*.{js,jsx,ts,tsx,json,css,md}": [
       "prettier --write",
       "git add"
     ]
