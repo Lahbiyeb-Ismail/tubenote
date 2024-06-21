@@ -2,6 +2,7 @@ import compression from "compression";
 import express, { type Express } from "express";
 import helmet from "helmet";
 
+import noteRoutes from "./routes/noteRoutes";
 import videoRoutes from "./routes/videoRoutes";
 import compressFilter from "./utils/compressFilter";
 
@@ -20,5 +21,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(compression({ filter: compressFilter }));
 
 app.use("/api/v1", videoRoutes);
+app.use("/api/v1", noteRoutes);
 
 export default app;
