@@ -11,5 +11,9 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.4"
-  }
+  },
+  "eslintConfig": {
+    "extends": "../../.eslintrc.json"
+  },
+  "prettier": "../../.prettierrc"
 }
