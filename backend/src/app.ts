@@ -2,6 +2,7 @@ import compression from "compression";
 import express, { type Express } from "express";
 import helmet from "helmet";
 
+import videoRoutes from "./routes/videoRoutes";
 import compressFilter from "./utils/compressFilter";
 
 const app: Express = express();
@@ -17,5 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Compression is used to reduce the size of the response body
 app.use(compression({ filter: compressFilter }));
+
+app.use("/api/v1", videoRoutes);
 
 export default app;
