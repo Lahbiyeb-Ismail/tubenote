@@ -1,18 +1,17 @@
 import { Router } from "express";
+import { getVideoInfo } from "src/controllers/videoControllers";
 
 const router = Router();
 
 /**
  * GET /videos/:video_id
- * Retrieves a specific video by its ID.
+ * Retrieves a specific video data by its ID.
  *
  * @route GET /videos/:video_id
  * @param {Request} req - The request object.
  * @param {Response} res - The response object.
  * @returns {void}
  */
-router
-  .route("/videos/:video_id")
-  .get((req, res) => res.send("GET /videos/:video_id"));
+router.route("/videos/:video_id").get(getVideoInfo);
 
 export default router;
