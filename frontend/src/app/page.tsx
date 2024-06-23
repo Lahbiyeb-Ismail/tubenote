@@ -1,9 +1,9 @@
-import Image from "next/image";
+import HeroSection from "@/sections/HeroSection";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      hello world
+    <main className="height_viewport grid h-screen place-content-center">
+      <HeroSection />
     </main>
   );
 }
