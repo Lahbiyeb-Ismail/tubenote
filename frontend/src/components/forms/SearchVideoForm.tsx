@@ -32,7 +32,7 @@ function SearchVideoForm() {
           type="submit"
           className="ml-4 rounded-md bg-slate-500 px-6 py-2 text-lg font-semibold text-white hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-opacity-50"
         >
-          Search
+          {isSubmitting ? "Loading..." : "Search"}
         </button>
       </form>
       {errors.videoUrl && (
