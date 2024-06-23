@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-import prisma from "../libs/prismaDB";
+import prisma from "../lib/prismaDB";
 import type { Note } from "../types/video";
 
 export async function getVideoNotes(req: Request, res: Response) {

@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { Request, Response } from "express";
 
-import prisma from "../libs/prismaDB";
+import prisma from "../lib/prismaDB";
 import type {
   VideoPart,
   YouTubeAPIResponse,

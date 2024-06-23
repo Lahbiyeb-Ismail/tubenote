@@ -1,7 +1,7 @@
 import { Router } from "express";
-import checkVideoExists from "src/middlewares/checkVideoExists";
 
 import { createVideoNote, getVideoNotes } from "../controllers/noteControllers";
+import checkVideoExists from "../middlewares/checkVideoExists";
 
 const router = Router();
 
