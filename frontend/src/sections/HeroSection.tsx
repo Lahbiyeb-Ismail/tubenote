@@ -19,7 +19,7 @@ function HeroSection() {
             sidekick for conquering knowledge from the video galaxies.
           </p>
           <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-x-4 sm:space-y-0 lg:mb-16">
-            <Button href="/videos/search">
+            <Button href="/search">
               Get Started
               <ArrowRightIcon className="-mr-1 ml-2 size-5" />
             </Button>
