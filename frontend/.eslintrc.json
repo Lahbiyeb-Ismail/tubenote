@@ -10,8 +10,8 @@
   ],
   "plugins": ["prettier", "react", "react-hooks", "tailwindcss"],
   "parserOptions": {
-    "project": "./tsconfig.json",
-    "extraFileExtensions": [".css"]
+    "project": ["./tsconfig.json", "./frontend/.eslintrc.json"],
+    "extraFileExtensions": [".css", ".json"]
   },
   "rules": {
     "prettier/prettier": ["error", {}, { "usePrettierrc": true }],
@@ -28,5 +28,5 @@
     "tailwindcss/migration-from-tailwind-2": 0,
     "consistent-return": 0
   },
-  "ignorePatterns": ["*.css"]
+  "ignorePatterns": ["*.css", "*.json"]
 }
