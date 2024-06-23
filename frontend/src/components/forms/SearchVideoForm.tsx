@@ -1,20 +1,44 @@
 "use client";
 
 import React from "react";
-import searchYoutubeVideo from "@/actions/searchYoutubeVideo";
+import getVideoData from "@/actions/getVideoData";
+import extractVideoId from "@/helpers/extractVideoId";
 import { searchFormSchema } from "@/schemas";
 import type { SearchFormType } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 
 function SearchVideoForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { isSubmitting, errors },
   } = useForm<SearchFormType>({
     resolver: zodResolver(searchFormSchema),
   });
+
+  const searchYoutubeVideo: SubmitHandler<SearchFormType> = async (
+    data: SearchFormType
+  ) => {
+    const { videoUrl } = data;
+
+    try {
+      // Extract the video ID from the URL
+      const videoId = extractVideoId(videoUrl) as string;
+
+      // Fetch the video data
+      const videoData = await getVideoData(videoId);
+
+      return videoData;
+    } catch (error: any) {
+      setError("videoUrl", {
+        type: "manual",
+        message:
+          error.message || "Failed to fetch video data. Please try again.",
+      });
+    }
+  };
 
   return (
     <div className="w-full">
