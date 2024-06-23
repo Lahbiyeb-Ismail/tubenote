@@ -1,14 +1,19 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import getVideoData from "@/actions/getVideoData";
 import extractVideoId from "@/helpers/extractVideoId";
 import { searchFormSchema } from "@/schemas";
+import useVideoDataStore from "@/stores/videoDataStore";
 import type { SearchFormType } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 function SearchVideoForm() {
+  const { setVideoData } = useVideoDataStore();
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -30,7 +35,8 @@ function SearchVideoForm() {
       // Fetch the video data
       const videoData = await getVideoData(videoId);
 
-      return videoData;
+      setVideoData(videoData);
+      router.push(`/notes/video/${videoId}`);
     } catch (error: any) {
       setError("videoUrl", {
         type: "manual",
