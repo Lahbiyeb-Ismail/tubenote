@@ -1,3 +1,5 @@
+import type { VideoDataResponseType } from "@/types";
+
 async function getVideoData(videoId: string) {
   try {
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -6,8 +8,9 @@ async function getVideoData(videoId: string) {
     if (!res.ok) {
       throw new Error("Failed to fetch video data. Video not found.");
     } else {
-      const videoData = await res.json();
-      return videoData;
+      const { videoInfo } = await res.json();
+
+      return videoInfo as VideoDataResponseType;
     }
   } catch (error: any) {
     throw new Error(
