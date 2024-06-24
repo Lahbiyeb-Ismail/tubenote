@@ -1,7 +1,7 @@
-import { Router } from "express";
+import { Router } from 'express';
 
-import { createVideoNote, getVideoNotes } from "../controllers/noteControllers";
-import checkVideoExists from "../middlewares/checkVideoExists";
+import { createVideoNote, getVideoNotes } from '../controllers/noteControllers';
+import checkVideoExists from '../middlewares/checkVideoExists';
 
 const router = Router();
 
@@ -11,7 +11,7 @@ const router = Router();
  * @route GET /videos/:video_id/notes
  * @returns {Array<Note>} An array of notes for the specified video.
  */
-router.route("/videos/:video_id/notes").get(getVideoNotes);
+router.route('/videos/:video_id/notes').get(getVideoNotes);
 
 /**
  * Creates a new note for a specific video.
@@ -20,6 +20,6 @@ router.route("/videos/:video_id/notes").get(getVideoNotes);
  * @param {Note} noteData - The data of the note to be created.
  * @returns {Note} The created note.
  */
-router.route("/videos/:video_id/notes").post(checkVideoExists, createVideoNote);
+router.route('/videos/:video_id/notes').post(checkVideoExists, createVideoNote);
 
 export default router;
