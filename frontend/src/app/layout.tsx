@@ -3,6 +3,8 @@ import { Montserrat } from "next/font/google";
 
 import "./globals.css";
 
+import ReactQueryProvider from "@/providers/ReactQueryProvider";
+
 import Navbar from "@/components/global/Navbar";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
@@ -20,8 +22,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={montserrat.className}>
-        <Navbar />
-        {children}
+        <ReactQueryProvider>
+          <Navbar />
+
+          {children}
+        </ReactQueryProvider>
       </body>
     </html>
   );

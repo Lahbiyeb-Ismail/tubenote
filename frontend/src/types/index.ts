@@ -17,3 +17,9 @@ export type VideoDataResponseType = {
   commentCount: string;
   favoriteCount: string;
 };
+
+export type Note = {
+  title: string;
+  videoId: string;
+  content?: string;
+};

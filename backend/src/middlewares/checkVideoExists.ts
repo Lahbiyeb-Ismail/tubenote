@@ -1,17 +1,17 @@
-import type { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from 'express';
 
-import prisma from "../lib/prismaDB";
+import prisma from '../lib/prismaDB';
 
 async function checkVideoExists(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
-  const video_id = req.params["video_id"] as string;
+  const video_id = req.params['video_id'] as string;
 
   const videoExists = await prisma.video.findUnique({
     where: {
-      videoUrlId: video_id,
+      id: video_id,
     },
   });
 

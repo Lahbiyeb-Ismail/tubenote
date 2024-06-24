@@ -8,56 +8,41 @@ import { useCreateBlockNote } from "@blocknote/react";
 import "@blocknote/mantine/style.css";
 import "@/app/globals.css";
 
+import createNewNote from "@/actions/createNewNote";
 import useVideoDataStore from "@/stores/videoDataStore";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 // import { Button } from "../ui/button";
-
-type Note = {
-  title: string;
-  videoId: string;
-  content?: string;
-};
 
 function TextEditor() {
   // Creates a new editor instance.
   const editor = useCreateBlockNote();
+  const queryClient = useQueryClient();
 
   const { id } = useVideoDataStore((state) => state.videoData);
 
-  const createNewNote = async (videoId: string, noteContent?: string) => {
-    try {
-      const note: Note = {
-        title: "Note",
-        videoId,
-        content: noteContent,
-      };
-      const apiUrl = `http://localhost:5500/api/v1/videos/${videoId}/notes`;
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(note),
-      });
+  const { isPending, mutate, data } = useMutation({
+    mutationFn: createNewNote,
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
 
-      const data = await response.json();
-
-      console.log(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
   return (
     <div className="h-full overflow-auto">
       <div className="mb-4 flex items-center justify-end">
         <button
           type="button"
-          // onClick={() =>
-          //   createNewNote(id, JSON.stringify(editor.document, null, 2))
-          // }
-          className="focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md border-2 bg-[#282828] px-4 py-2 text-center text-sm font-medium text-white transition-all hover:border-[#282828] hover:bg-white hover:text-[#282828] focus:ring-[#282828] focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 dark:focus:ring-[#282828]"
+          onClick={() =>
+            mutate({
+              videoId: id,
+              noteContent: JSON.stringify(editor.document, null, 2),
+            })
+          }
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-md border-2 bg-[#282828] px-4 py-2 text-center text-sm font-medium text-white transition-all hover:border-[#282828] hover:bg-white hover:text-[#282828] focus:ring-[#282828] focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 dark:focus:ring-[#282828]"
         >
-          Save
+          {isPending ? "Saving..." : "Save"}
         </button>
       </div>
       <BlockNoteView

@@ -7,9 +7,9 @@ interface VideoDataState {
 }
 
 const getInitialVideoData = () =>
-  JSON.parse(
-    localStorage.getItem("videoData") || "{}"
-  ) as VideoDataResponseType;
+  typeof window !== "undefined"
+    ? JSON.parse(localStorage.getItem("videoData") || "{}")
+    : ({} as VideoDataResponseType);
 
 const useVideoDataStore = create<VideoDataState>((set) => ({
   videoData: getInitialVideoData(),
