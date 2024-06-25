@@ -14,3 +14,11 @@ export const loginSchema = {
     password: z.string().min(6),
   }),
 };
+
+export const noteSchema = {
+  body: z.object({
+    videoId: z.string(),
+    title: z.string(),
+    content: z.string(),
+  }),
+};
