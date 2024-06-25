@@ -17,7 +17,6 @@ export const loginSchema = {
 
 export const noteSchema = {
   body: z.object({
-    videoId: z.string(),
     title: z.string(),
     content: z.string(),
   }),

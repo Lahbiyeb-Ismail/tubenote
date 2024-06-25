@@ -2,14 +2,21 @@ import { Request, Response } from 'express';
 
 import prisma from '../lib/prismaDB';
 import type { Note } from '../types/video';
+import type { JwtPayload } from 'jsonwebtoken';
 
-export async function getVideoNotes(req: Request, res: Response) {
-  const video_id = req.params['video_id'] as string;
+interface CustomRequest extends Request {
+  payload?: JwtPayload;
+}
+
+export async function getVideoNotes(req: CustomRequest, res: Response) {
+  const videoId = req.params['video_id'] as string;
+  const userId = req.payload && req.payload['id'];
 
   try {
     const notes = await prisma.note.findMany({
       where: {
-        videoId: video_id,
+        videoId,
+        userId,
       },
     });
 
@@ -22,15 +29,18 @@ export async function getVideoNotes(req: Request, res: Response) {
   }
 }
 
-export async function createVideoNote(req: Request, res: Response) {
-  try {
-    const { title, content, videoId } = req.body as Note;
+export async function createVideoNote(req: CustomRequest, res: Response) {
+  const videoId = req.params['video_id'] as string;
+  const userId = req.payload && req.payload['id'];
 
+  const { title, content } = req.body as Note;
+  try {
     const note = await prisma.note.create({
       data: {
         title,
         content,
         videoId,
+        userId,
       },
     });
 

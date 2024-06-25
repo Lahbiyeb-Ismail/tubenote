@@ -4,6 +4,7 @@ import { createVideoNote, getVideoNotes } from '../controllers/noteControllers';
 import checkVideoExists from '../middlewares/checkVideoExists';
 import validateRequestBody from '../middlewares/validateRequestBody';
 import { noteSchema } from '../schemas';
+import isAuthenticated from '../middlewares/isAuthenticated';
 
 const router = Router();
 
@@ -13,7 +14,7 @@ const router = Router();
  * @route GET /videos/:video_id/notes
  * @returns {Array<Note>} An array of notes for the specified video.
  */
-router.route('/videos/:video_id/notes').get(getVideoNotes);
+router.route('/videos/:video_id/notes').get(isAuthenticated, getVideoNotes);
 
 /**
  * Creates a new note for a specific video.
@@ -24,6 +25,11 @@ router.route('/videos/:video_id/notes').get(getVideoNotes);
  */
 router
   .route('/videos/:video_id/notes')
-  .post(checkVideoExists, validateRequestBody(noteSchema), createVideoNote);
+  .post(
+    isAuthenticated,
+    checkVideoExists,
+    validateRequestBody(noteSchema),
+    createVideoNote,
+  );
 
 export default router;

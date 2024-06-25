@@ -21,10 +21,9 @@ export interface YouTubeAPIResponse {
   items: YouTubeVideoItem[];
 }
 
-export type VideoPart = "snippet, statistics, player";
+export type VideoPart = 'snippet, statistics, player';
 
-interface Note {
+export interface Note {
   title: string;
   content: string;
-  videoId: string;
 }
