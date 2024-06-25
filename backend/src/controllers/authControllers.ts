@@ -3,17 +3,18 @@ import httpStatus from 'http-status';
 import bcrypt from 'bcryptjs';
 
 import prisma from '../lib/prismaDB';
+import generateToken from '../utils/generateToken';
 
 export async function handleSignup(req: Request, res: Response) {
+  const { username, email, password } = req.body;
+
+  if (!username || !email || !password) {
+    return res.status(httpStatus.BAD_REQUEST).json({
+      message: 'All fields are required. Please provide all fields',
+    });
+  }
+
   try {
-    const { username, email, password } = req.body;
-
-    if (!username || !email || !password) {
-      return res.status(httpStatus.BAD_REQUEST).json({
-        message: 'All fields are required. Please provide all fields',
-      });
-    }
-
     const isUserExists = await prisma.user.findUnique({
       where: {
         email,
@@ -28,7 +29,7 @@ export async function handleSignup(req: Request, res: Response) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await prisma.user.create({
+    const newUser = await prisma.user.create({
       data: {
         username,
         email,
@@ -38,6 +39,7 @@ export async function handleSignup(req: Request, res: Response) {
 
     res.status(httpStatus.CREATED).json({
       message: 'New User created successfully',
+      token: generateToken({ id: newUser.id, email: newUser.email }, '1d'),
     });
   } catch (error) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
