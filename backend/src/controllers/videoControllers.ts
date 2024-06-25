@@ -1,43 +1,8 @@
-import dotenv from 'dotenv';
 import { Request, Response } from 'express';
-
 import prisma from '../lib/prismaDB';
-import type {
-  VideoPart,
-  YouTubeAPIResponse,
-  YouTubeVideoItem,
-} from '../types/video';
 import httpStatus from 'http-status';
 
-dotenv.config();
-
-const URL = 'https://www.googleapis.com/youtube/v3/videos?id=';
-
-async function getYoutubeVideoData(
-  video_id: string | undefined,
-  part: VideoPart,
-): Promise<YouTubeVideoItem[] | undefined> {
-  if (!video_id) {
-    console.error('Video ID is undefined');
-    return undefined;
-  }
-
-  try {
-    const response = await fetch(
-      `${URL}${video_id}&key=${process.env['YOUTUBE_API_KEY']}&part=${part}`,
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: YouTubeAPIResponse = await response.json();
-    return data.items;
-  } catch (error) {
-    console.error('Error fetching video description:', error);
-    return undefined;
-  }
-}
+import getYoutubeVideoData from '../utils/getYoutubeVideoData';
 
 async function createVideo(videoId: string, res: Response) {
   try {
