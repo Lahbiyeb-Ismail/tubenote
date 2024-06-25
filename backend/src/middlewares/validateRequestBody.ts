@@ -11,7 +11,7 @@ type RequestValidationSchema = Record<'body', ZodSchema>;
  *
  * @returns An Express middleware function that validates the request data and returns a 400 BAD REQUEST if validation fails, or calls next if validation succeeds.
  */
-const validateRequestData =
+const validateRequestBody =
   (schema: RequestValidationSchema) =>
   (req: Request, res: Response, next: NextFunction) => {
     const bodySchema = schema.body ?? z.object({});
@@ -46,4 +46,4 @@ const validateRequestData =
     }
   };
 
-export default validateRequestData;
+export default validateRequestBody;
