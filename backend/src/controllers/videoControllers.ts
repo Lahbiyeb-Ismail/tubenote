@@ -1,29 +1,30 @@
-import dotenv from "dotenv";
-import { Request, Response } from "express";
+import dotenv from 'dotenv';
+import { Request, Response } from 'express';
 
-import prisma from "../lib/prismaDB";
+import prisma from '../lib/prismaDB';
 import type {
   VideoPart,
   YouTubeAPIResponse,
   YouTubeVideoItem,
-} from "../types/video";
+} from '../types/video';
+import httpStatus from 'http-status';
 
 dotenv.config();
 
-const URL = "https://www.googleapis.com/youtube/v3/videos?id=";
+const URL = 'https://www.googleapis.com/youtube/v3/videos?id=';
 
-async function getVideoData(
+async function getYoutubeVideoData(
   video_id: string | undefined,
-  part: VideoPart
+  part: VideoPart,
 ): Promise<YouTubeVideoItem[] | undefined> {
   if (!video_id) {
-    console.error("Video ID is undefined");
+    console.error('Video ID is undefined');
     return undefined;
   }
 
   try {
     const response = await fetch(
-      `${URL}${video_id}&key=${process.env["YOUTUBE_API_KEY"]}&part=${part}`
+      `${URL}${video_id}&key=${process.env['YOUTUBE_API_KEY']}&part=${part}`,
     );
 
     if (!response.ok) {
@@ -33,22 +34,27 @@ async function getVideoData(
     const data: YouTubeAPIResponse = await response.json();
     return data.items;
   } catch (error) {
-    console.error("Error fetching video description:", error);
+    console.error('Error fetching video description:', error);
     return undefined;
   }
 }
 
-async function createVideo(video_id: string, res: Response) {
+async function createVideo(videoId: string, res: Response) {
   try {
-    const items = await getVideoData(video_id, "snippet, statistics, player");
+    const items = await getYoutubeVideoData(
+      videoId,
+      'snippet, statistics, player',
+    );
 
     if (!items || items.length === 0) {
-      return res.status(404);
+      return res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: 'No video found with the provided id.' });
     }
 
     const videoExsit = await prisma.video.findUnique({
       where: {
-        videoUrlId: video_id,
+        videoUrlId: videoId,
       },
     });
 
@@ -68,17 +74,17 @@ async function createVideo(video_id: string, res: Response) {
 
       await prisma.video.create({
         data: {
-          videoUrlId: video_id,
-          title: title ?? "",
-          description: description ?? "",
-          publishedAt: publishedAt ?? "",
-          channelTitle: channelTitle ?? "",
-          viewCount: viewCount ?? "",
-          likeCount: likeCount ?? "",
-          dislikeCount: dislikeCount ?? "",
-          commentCount: commentCount ?? "",
-          favoriteCount: favoriteCount ?? "",
-          videoPlayer: videoPlayer ?? "",
+          videoUrlId: videoId,
+          title: title ?? '',
+          description: description ?? '',
+          publishedAt: publishedAt ?? '',
+          channelTitle: channelTitle ?? '',
+          viewCount: viewCount ?? '',
+          likeCount: likeCount ?? '',
+          dislikeCount: dislikeCount ?? '',
+          commentCount: commentCount ?? '',
+          favoriteCount: favoriteCount ?? '',
+          videoPlayer: videoPlayer ?? '',
         },
       });
     }
@@ -87,22 +93,24 @@ async function createVideo(video_id: string, res: Response) {
   }
 }
 
-export async function getVideoInfo(req: Request, res: Response) {
-  const video_id = req.params["video_id"] as string;
+export async function getVideoData(req: Request, res: Response) {
+  const videoId = req.params['video_id'] as string;
   try {
-    const data = await createVideo(video_id, res);
+    const data = await createVideo(videoId, res);
 
-    if (data?.statusCode === 404) {
-      return res.status(404).json({ message: "Video not found" });
+    if (data?.statusCode === httpStatus.NOT_FOUND) {
+      return res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: 'Video not found' });
     } else {
-      const videoInfo = await prisma.video.findUnique({
+      const videoData = await prisma.video.findUnique({
         where: {
-          videoUrlId: video_id,
+          videoUrlId: videoId,
         },
       });
 
       return res.json({
-        videoInfo,
+        videoData,
       });
     }
   } catch (error) {

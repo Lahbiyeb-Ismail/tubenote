@@ -1,6 +1,6 @@
-import { Router } from "express";
+import { Router } from 'express';
 
-import { getVideoInfo } from "../controllers/videoControllers";
+import { getVideoData } from '../controllers/videoControllers';
 
 const router = Router();
 
@@ -13,6 +13,6 @@ const router = Router();
  * @param {Response} res - The response object.
  * @returns {void}
  */
-router.route("/videos/:video_id").get(getVideoInfo);
+router.route('/videos/:video_id').get(getVideoData);
 
 export default router;
