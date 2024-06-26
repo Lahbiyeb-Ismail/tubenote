@@ -46,10 +46,9 @@ model Note {
 model User {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String   @unique
+  kindeId   String   @unique
   username  String
-  password  String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   notes Note[]
 }

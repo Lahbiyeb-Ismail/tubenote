@@ -21,3 +21,11 @@ export const noteSchema = {
     content: z.string(),
   }),
 };
+
+export const userSchema = {
+  body: z.object({
+    kindeId: z.string(),
+    username: z.string(),
+    email: z.string().email(),
+  }),
+};

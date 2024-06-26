@@ -6,6 +6,7 @@ import cors from 'cors';
 import noteRoutes from './routes/noteRoutes';
 import videoRoutes from './routes/videoRoutes';
 import authRoutes from './routes/authRoutes';
+import userRoutes from './routes/userRoutes';
 import compressFilter from './utils/compressFilter';
 
 const app: Express = express();
@@ -33,5 +34,6 @@ app.use(
 app.use('/api/v1', videoRoutes);
 app.use('/api/v1', noteRoutes);
 app.use('/api/v1', authRoutes);
+app.use('/api/v1', userRoutes);
 
 export default app;
