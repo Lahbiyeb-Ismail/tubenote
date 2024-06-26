@@ -1,15 +1,31 @@
-import React from "react";
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+/* eslint-disable @typescript-eslint/naming-convention */
+
+"use client";
+
+import React, { useEffect } from "react";
+import useAuthStore from "@/stores/authStore";
 
 import { Button } from "./Button";
 import MaxWidthWrapper from "./MaxWidthWrapper";
 import TubeNoteLogo from "./TubenoteLogo";
 
-async function Navbar() {
-  const { getUser, isAuthenticated } = getKindeServerSession();
+function Navbar() {
+  const { setAuthData, userData } = useAuthStore();
 
-  const isAuth = await isAuthenticated();
-  const user = await getUser();
+  useEffect(() => {
+    async function getUserSession() {
+      const res = await fetch("/api/auth/user_session");
+      const { user, authenticated } = await res.json();
+
+      if (authenticated && user) {
+        const { id, email, picture, family_name, given_name } = user;
+        const username = `${given_name} ${family_name}`;
+        setAuthData({ id, email, picture, username });
+      }
+    }
+
+    getUserSession();
+  }, [setAuthData]);
 
   return (
     <header className="sticky inset-x-0 top-0 z-[100] h-14 w-full backdrop-blur-lg transition-all">
@@ -17,7 +33,7 @@ async function Navbar() {
         <nav className="flex h-14 items-center justify-between">
           <TubeNoteLogo />
 
-          {isAuth && user ? (
+          {userData ? (
             <div>
               <Button href="/dashboard" size="md" className="mr-3">
                 Dashboard

@@ -23,3 +23,10 @@ export type Note = {
   videoId: string;
   content?: string;
 };
+
+export type UserDataType = {
+  id: string;
+  username: string;
+  email: string | null;
+  picture: string | null;
+};
