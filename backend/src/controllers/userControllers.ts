@@ -30,3 +30,34 @@ export async function createNewUser(req: Request, res: Response) {
     });
   }
 }
+
+export async function getUserById(req: Request, res: Response) {
+  const kindeId = req.params['user_id'];
+
+  if (!kindeId)
+    return res.status(httpStatus.BAD_REQUEST).json({
+      message: 'User ID is required. Please provide a user ID',
+    });
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        kindeId,
+      },
+    });
+
+    if (!user)
+      return res.status(httpStatus.NOT_FOUND).json({
+        message: 'User not found. Please provide a valid user ID',
+      });
+
+    res.status(httpStatus.OK).json({
+      message: 'User succefully found!',
+      data: user,
+    });
+  } catch (error) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: 'Internal Server Error',
+    });
+  }
+}
