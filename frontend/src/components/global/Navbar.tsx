@@ -1,8 +1,5 @@
 import React from "react";
-import {
-  getKindeServerSession,
-  LoginLink,
-} from "@kinde-oss/kinde-auth-nextjs/server";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 import { Button } from "./Button";
 import MaxWidthWrapper from "./MaxWidthWrapper";
