@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import getUserSession from "@/actions/getUserSession";
 import useAuthStore from "@/stores/authStore";
 import { useQuery } from "@tanstack/react-query";
@@ -15,18 +15,23 @@ import UserAvatar from "./UserAvatar";
 function Navbar() {
   const { setAuthData, userData } = useAuthStore();
 
-  const { error, data, isSuccess } = useQuery({
+  const {
+    error,
+    data: session,
+    isSuccess,
+  } = useQuery({
     queryKey: ["userData"],
     queryFn: getUserSession,
   });
 
   useEffect(() => {
-    if (data?.user && isSuccess && !error) {
-      const { id, email, picture, family_name, given_name } = data.user;
+    if (session?.user && isSuccess && !error) {
+      const { id, email, picture, family_name, given_name } = session.user;
       const username = `${given_name} ${family_name}`;
+
       setAuthData({ id, email, picture, username });
     }
-  }, [data, setAuthData, isSuccess, error]);
+  }, [session, setAuthData, isSuccess, error]);
 
   return (
     <header className="sticky inset-x-0 top-0 z-[100] h-14 w-full backdrop-blur-lg transition-all">
