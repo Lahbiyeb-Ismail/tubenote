@@ -24,7 +24,7 @@ async function createVideo(videoId: string, res: Response) {
     });
 
     if (!videoExsit) {
-      const { title, description, publishedAt, channelTitle } =
+      const { title, description, publishedAt, channelTitle, thumbnails } =
         items[0]?.snippet || {};
 
       const {
@@ -50,6 +50,7 @@ async function createVideo(videoId: string, res: Response) {
           commentCount: commentCount ?? '',
           favoriteCount: favoriteCount ?? '',
           videoPlayer: videoPlayer ?? '',
+          videoThumbnail: thumbnails?.high?.url ?? '',
         },
       });
     }

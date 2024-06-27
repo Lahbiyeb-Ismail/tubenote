@@ -4,6 +4,13 @@ export interface YouTubeVideoItem {
     description: string;
     publishedAt: string;
     channelTitle: string;
+    thumbnails: {
+      high: {
+        url: string;
+        width: number;
+        height: number;
+      };
+    };
   };
   player: {
     embedHtml: string;
