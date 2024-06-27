@@ -1,6 +1,6 @@
 import React from "react";
 
-import Sidebar from "@/components/global/Sidebar";
+import Sidebar from "@/components/dashboard/Sidebar";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -8,9 +8,9 @@ type LayoutProps = {
 
 function Layout({ children }: LayoutProps) {
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-gray-100">
       <Sidebar />
-      <div className="w-full">{children}</div>
+      {children}
     </div>
   );
 }

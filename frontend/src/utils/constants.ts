@@ -12,7 +12,7 @@ import {
   VideoIcon,
 } from "lucide-react";
 
-export const sidebarOptions = [
+export const sidebarNavOptions = [
   { name: "Dashboard", Component: LayoutDashboard, href: "/dashboard" },
   { name: "Notes", Component: NotebookIcon, href: "/notes" },
   { name: "Videos", Component: VideoIcon, href: "/videos" },
