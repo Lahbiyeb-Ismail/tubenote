@@ -31,13 +31,14 @@ model Video {
 }
 
 model Note {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  videoId   String   @db.ObjectId
-  title     String
-  content   String
-  userId    String   @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  videoId        String   @db.ObjectId
+  userId         String   @db.ObjectId
+  noteContent    String
+  videoThumbnail String
+  videoTitle     String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   video Video @relation(fields: [videoId], references: [id])
   User  User? @relation(fields: [userId], references: [id])

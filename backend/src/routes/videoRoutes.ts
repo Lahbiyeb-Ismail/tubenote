@@ -1,7 +1,6 @@
 import { Router } from 'express';
 
 import { getVideoData } from '../controllers/videoControllers';
-import isAuthenticated from '../middlewares/isAuthenticated';
 
 const router = Router();
 
@@ -14,6 +13,6 @@ const router = Router();
  * @param {Response} res - The response object.
  * @returns {void}
  */
-router.route('/videos/:video_id').get(isAuthenticated, getVideoData);
+router.route('/videos/:video_id').get(getVideoData);
 
 export default router;

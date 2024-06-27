@@ -8,14 +8,12 @@ interface CustomRequest extends Request {
   payload?: JwtPayload;
 }
 
-export async function getVideoNotes(req: CustomRequest, res: Response) {
-  const videoId = req.params['video_id'] as string;
-  const userId = req.payload && req.payload['id'];
+export async function getUserNotes(req: CustomRequest, res: Response) {
+  const userId = req.params['user_id'] as string;
 
   try {
     const notes = await prisma.note.findMany({
       where: {
-        videoId,
         userId,
       },
     });
@@ -30,15 +28,15 @@ export async function getVideoNotes(req: CustomRequest, res: Response) {
 }
 
 export async function createVideoNote(req: CustomRequest, res: Response) {
-  const videoId = req.params['video_id'] as string;
-  const userId = req.payload && req.payload['id'];
+  const { userId, videoId, noteContent, videoThumbnail, videoTitle } =
+    req.body as Note;
 
-  const { title, content } = req.body as Note;
   try {
     const note = await prisma.note.create({
       data: {
-        title,
-        content,
+        noteContent,
+        videoThumbnail,
+        videoTitle,
         videoId,
         userId,
       },
