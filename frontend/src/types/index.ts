@@ -29,4 +29,5 @@ export type UserDataType = {
   username: string;
   email: string | null;
   picture: string | null;
+  userId: string;
 };

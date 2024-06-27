@@ -6,15 +6,8 @@ interface AuthData {
   setAuthData: (data: UserDataType) => void;
 }
 
-// const getInitialUserData = () => {
-//   if (typeof window === "undefined") return null;
-
-//   const userData = localStorage.getItem("user");
-//   return userData && userData !== "{}" ? JSON.parse(userData) : null;
-// };
-
 const useAuthStore = create<AuthData>((set) => ({
-  userData: null,
+  userData: JSON.parse(localStorage.getItem("user") || "null") || null,
   setAuthData: (data) =>
     set(() => {
       return { userData: data };

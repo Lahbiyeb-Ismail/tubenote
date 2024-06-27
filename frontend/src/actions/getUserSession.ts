@@ -10,10 +10,19 @@ async function getUserSession() {
 
     const isUserExists = await userExists(user.id);
 
-    if (!isUserExists)
-      await createNewUser({ kindeId: user.id, email: user.email, username });
+    let newUser = null;
 
-    return { user, authenticated };
+    if (!isUserExists) {
+      newUser = await createNewUser({
+        kindeId: user.id,
+        email: user.email,
+        username,
+      });
+    }
+
+    const userId = isUserExists ? isUserExists.id : newUser.data.id;
+
+    return { user, authenticated, userId };
   } catch (error: any) {
     throw new Error(
       error.message || "Failed to fetch user's data. Please try again."

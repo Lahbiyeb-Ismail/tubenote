@@ -2,10 +2,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type AvatarProps = {
   imgSrc: string | null;
-  username: string;
+  username?: string;
 };
 
-function UserAvatar({ imgSrc, username }: AvatarProps) {
+function UserAvatar({ imgSrc, username = "us" }: AvatarProps) {
   const src = imgSrc || "https://github.com/shadcn.png";
   const avatarFallback = username[0].toUpperCase() + username[1].toUpperCase();
 
