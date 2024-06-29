@@ -26,6 +26,7 @@ export type Note = {
   userId: string;
   noteContent: string;
   videoThumbnail: string;
+  createdAt: string;
 };
 
 export type UserDataType = {

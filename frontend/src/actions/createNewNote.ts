@@ -2,7 +2,7 @@ import type { Note } from "@/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-type NoteBody = Omit<Note, "id">;
+type NoteBody = Omit<Note, "id" | "createdAt">;
 
 const createNewNote = async (note: NoteBody) => {
   try {

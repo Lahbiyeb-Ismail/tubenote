@@ -1,4 +1,5 @@
 import Image from "next/image";
+import formatDate from "@/helpers/formatDate";
 import type { Note } from "@/types";
 
 type NoteCardProps = {
@@ -27,8 +28,8 @@ function NoteCard({ note }: NoteCardProps) {
             {note.noteContent}
           </p>
         </div>
-        {/* <div className="mt-4 flex items-center justify-between">
-          <div className="flex space-x-2">
+        <div className="mt-4 flex items-center justify-between">
+          {/* <div className="flex space-x-2">
             {note.tags.map((tag) => (
               <span
                 key={tag}
@@ -37,9 +38,11 @@ function NoteCard({ note }: NoteCardProps) {
                 {tag}
               </span>
             ))}
-          </div>
-          <p className="text-xs text-gray-500">{note.dateCreated}</p>
-        </div> */}
+          </div> */}
+          <p className="text-xs text-gray-500">
+            Creation Date: {formatDate(note.createdAt)}
+          </p>
+        </div>
       </div>
       <div className="px-4 py-3 sm:px-6">
         <div className="flex justify-end space-x-3">
