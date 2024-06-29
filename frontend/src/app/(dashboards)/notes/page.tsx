@@ -2,6 +2,7 @@
 
 import useUserNotes from "@/hooks/useUserNotes";
 import Header from "@/components/dashboard/Header";
+import Loader from "@/components/global/Loader";
 import AddNoteForm from "@/components/notes/AddNoteForm";
 import NoNotes from "@/components/notes/NoNotes";
 import NoteLists from "@/components/notes/NoteLists";
@@ -9,7 +10,7 @@ import NoteLists from "@/components/notes/NoteLists";
 function NotesPage() {
   const { data, isNotesLoading, isUserLoading } = useUserNotes();
 
-  if (isNotesLoading || isUserLoading) return <p>Loading...</p>;
+  if (isNotesLoading || isUserLoading) return <Loader />;
 
   return (
     <div className="min-h-screen flex-1 bg-gray-100">
