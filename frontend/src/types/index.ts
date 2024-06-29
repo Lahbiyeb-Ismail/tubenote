@@ -20,9 +20,12 @@ export type VideoDataResponseType = {
 };
 
 export type Note = {
-  title: string;
+  id: string;
+  videoTitle: string;
   videoId: string;
-  content?: string;
+  userId: string;
+  noteContent: string;
+  videoThumbnail: string;
 };
 
 export type UserDataType = {

@@ -12,16 +12,17 @@ import createNewNote from "@/actions/createNewNote";
 import useVideoDataStore from "@/stores/videoDataStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-// import { Button } from "../ui/button";
+import { useUserSession } from "@/hooks/useUserSession";
 
 function TextEditor() {
   // Creates a new editor instance.
   const editor = useCreateBlockNote();
   const queryClient = useQueryClient();
 
-  const { id } = useVideoDataStore((state) => state.videoData);
+  const { videoData } = useVideoDataStore();
+  const { userData } = useUserSession();
 
-  const { isPending, mutate, data } = useMutation({
+  const { isPending, mutate } = useMutation({
     mutationFn: createNewNote,
     onSuccess: () => {
       // Invalidate and refetch
@@ -36,8 +37,11 @@ function TextEditor() {
           type="button"
           onClick={() =>
             mutate({
-              videoId: id,
+              videoId: videoData?.id as string,
               noteContent: JSON.stringify(editor.document, null, 2),
+              userId: userData?.userId as string,
+              videoThumbnail: videoData?.videoThumbnail as string,
+              videoTitle: videoData?.title as string,
             })
           }
           className="inline-flex items-center justify-center whitespace-nowrap rounded-md border-2 bg-[#282828] px-4 py-2 text-center text-sm font-medium text-white transition-all hover:border-[#282828] hover:bg-white hover:text-[#282828] focus:ring-[#282828] focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 dark:focus:ring-[#282828]"

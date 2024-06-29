@@ -1,14 +1,5 @@
 import Image from "next/image";
-
-type Note = {
-  id: number;
-  videoTitle: string;
-  videoThumbnail: string;
-  noteContent: string;
-  timestamp: string;
-  dateCreated: string;
-  tags: string[];
-};
+import type { Note } from "@/types";
 
 type NoteCardProps = {
   note: Note;
@@ -29,14 +20,14 @@ function NoteCard({ note }: NoteCardProps) {
           <h2 className="text-lg font-semibold text-gray-900">
             {note.videoTitle}
           </h2>
-          <p className="text-sm text-gray-500">Timestamp: {note.timestamp}</p>
+          {/* <p className="text-sm text-gray-500">Timestamp: {note.timestamp}</p> */}
         </div>
         <div className="mt-4">
           <p className="line-clamp-3 text-sm text-gray-600">
             {note.noteContent}
           </p>
         </div>
-        <div className="mt-4 flex items-center justify-between">
+        {/* <div className="mt-4 flex items-center justify-between">
           <div className="flex space-x-2">
             {note.tags.map((tag) => (
               <span
@@ -48,7 +39,7 @@ function NoteCard({ note }: NoteCardProps) {
             ))}
           </div>
           <p className="text-xs text-gray-500">{note.dateCreated}</p>
-        </div>
+        </div> */}
       </div>
       <div className="bg-gray-50 px-4 py-3 sm:px-6">
         <div className="flex justify-end space-x-3">

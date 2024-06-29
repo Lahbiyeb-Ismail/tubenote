@@ -2,19 +2,11 @@ import type { Note } from "@/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-type CreateNewNote = {
-  videoId: string;
-  noteContent: string;
-};
+type NoteBody = Omit<Note, "id">;
 
-const createNewNote = async ({ videoId, noteContent }: CreateNewNote) => {
+const createNewNote = async (note: NoteBody) => {
   try {
-    const note: Note = {
-      title: "Note",
-      videoId,
-      content: noteContent,
-    };
-    const apiUrl = `${API_URL}/videos/${videoId}/notes`;
+    const apiUrl = `${API_URL}/notes`;
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
