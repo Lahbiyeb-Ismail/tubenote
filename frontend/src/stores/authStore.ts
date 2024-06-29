@@ -7,7 +7,7 @@ interface AuthData {
 }
 
 const useAuthStore = create<AuthData>((set) => ({
-  userData: JSON.parse(localStorage.getItem("user") || "null") || null,
+  userData: null,
   setAuthData: (data) =>
     set(() => {
       return { userData: data };

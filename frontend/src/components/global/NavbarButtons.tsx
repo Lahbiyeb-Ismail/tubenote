@@ -2,35 +2,12 @@
 
 "use client";
 
-import { useEffect } from "react";
-import getUserSession from "@/actions/getUserSession";
-import useAuthStore from "@/stores/authStore";
-import { useQuery } from "@tanstack/react-query";
-
+import { useUserSession } from "@/hooks/useUserSession";
 import { Button } from "./Button";
 import UserAvatar from "./UserAvatar";
 
 function NavbarButtons() {
-  const { setAuthData, userData } = useAuthStore();
-
-  const { data: session, isLoading } = useQuery({
-    queryKey: ["userSession"],
-    queryFn: getUserSession,
-  });
-
-  useEffect(() => {
-    if (session) {
-      const { id, email, picture, family_name, given_name } = session.user;
-      const { userId } = session;
-      const username = `${given_name} ${family_name}`;
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify({ id, email, picture, username, userId })
-      );
-      setAuthData({ id, email, picture, username, userId });
-    }
-  }, [session, setAuthData]);
+  const { session, isLoading, userData } = useUserSession();
 
   return (
     <>
@@ -39,12 +16,7 @@ function NavbarButtons() {
           <Button href="/dashboard" size="md">
             Dashboard
           </Button>
-          <Button
-            href="/api/auth/logout"
-            size="md"
-            variant="secondary"
-            onClick={() => localStorage.removeItem("user")}
-          >
+          <Button href="/api/auth/logout" size="md" variant="secondary">
             Logout
           </Button>
           <UserAvatar imgSrc={userData.picture} username={userData.username} />
