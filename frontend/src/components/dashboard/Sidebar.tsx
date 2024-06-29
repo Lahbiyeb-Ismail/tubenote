@@ -11,7 +11,7 @@ function Sidebar() {
   const pathName = usePathname();
 
   return (
-    <div className="flex w-64 flex-col bg-white p-6">
+    <div className="fixed left-0 top-0 flex h-full w-64 flex-col bg-white px-6 pb-6 pt-16">
       <SidebarLogo />
       <SidebarNav pathName={pathName} />
       <UserProfile />
