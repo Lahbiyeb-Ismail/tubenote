@@ -16,6 +16,7 @@ export type VideoDataResponseType = {
   dislikeCount: string;
   commentCount: string;
   favoriteCount: string;
+  videoThumbnail: string;
 };
 
 export type Note = {

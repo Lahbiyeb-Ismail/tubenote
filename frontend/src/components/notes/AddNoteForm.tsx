@@ -36,7 +36,7 @@ function AddNoteForm() {
       const videoData = await getVideoData(videoId);
 
       setVideoData(videoData);
-      router.push(`/notes/${videoId}`);
+      router.push(`/videos/${videoId}/note`);
     } catch (error: any) {
       setError("videoUrl", {
         type: "manual",

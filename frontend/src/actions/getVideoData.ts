@@ -8,9 +8,9 @@ async function getVideoData(videoId: string) {
     if (!res.ok) {
       throw new Error("Failed to fetch video data. Video not found.");
     } else {
-      const { videoInfo } = await res.json();
+      const { videoData } = await res.json();
 
-      return videoInfo as VideoDataResponseType;
+      return videoData as VideoDataResponseType;
     }
   } catch (error: any) {
     throw new Error(

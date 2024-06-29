@@ -2,7 +2,7 @@ import type { VideoDataResponseType } from "@/types";
 import { create } from "zustand";
 
 interface VideoDataState {
-  videoData: VideoDataResponseType;
+  videoData: VideoDataResponseType | null;
   setVideoData: (data: VideoDataResponseType) => void;
 }
 
