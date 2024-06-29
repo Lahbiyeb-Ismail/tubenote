@@ -15,44 +15,46 @@ async function createVideo(videoId: string, res: Response) {
       return res
         .status(httpStatus.NOT_FOUND)
         .json({ message: 'No video found with the provided id.' });
-    }
-
-    const videoExsit = await prisma.video.findUnique({
-      where: {
-        videoUrlId: videoId,
-      },
-    });
-
-    if (!videoExsit) {
-      const { title, description, publishedAt, channelTitle, thumbnails } =
-        items[0]?.snippet || {};
-
-      const {
-        viewCount,
-        likeCount,
-        dislikeCount,
-        commentCount,
-        favoriteCount,
-      } = items[0]?.statistics || {};
-
-      const videoPlayer = items[0]?.player?.embedHtml;
-
-      await prisma.video.create({
-        data: {
+    } else {
+      const videoExsit = await prisma.video.findUnique({
+        where: {
           videoUrlId: videoId,
-          title: title ?? '',
-          description: description ?? '',
-          publishedAt: publishedAt ?? '',
-          channelTitle: channelTitle ?? '',
-          viewCount: viewCount ?? '',
-          likeCount: likeCount ?? '',
-          dislikeCount: dislikeCount ?? '',
-          commentCount: commentCount ?? '',
-          favoriteCount: favoriteCount ?? '',
-          videoPlayer: videoPlayer ?? '',
-          videoThumbnail: thumbnails?.high?.url ?? '',
         },
       });
+
+      if (!videoExsit) {
+        const { title, description, publishedAt, channelTitle, thumbnails } =
+          items[0]?.snippet || {};
+
+        const {
+          viewCount,
+          likeCount,
+          dislikeCount,
+          commentCount,
+          favoriteCount,
+        } = items[0]?.statistics || {};
+
+        const videoPlayer = items[0]?.player?.embedHtml;
+
+        const videoData = await prisma.video.create({
+          data: {
+            videoUrlId: videoId,
+            title: title ?? '',
+            description: description ?? '',
+            publishedAt: publishedAt ?? '',
+            channelTitle: channelTitle ?? '',
+            viewCount: viewCount ?? '',
+            likeCount: likeCount ?? '',
+            dislikeCount: dislikeCount ?? '',
+            commentCount: commentCount ?? '',
+            favoriteCount: favoriteCount ?? '',
+            videoPlayer: videoPlayer ?? '',
+            videoThumbnail: thumbnails?.high?.url ?? '',
+          },
+        });
+
+        return res.status(httpStatus.CREATED).json({ videoData });
+      }
     }
   } catch (error) {
     return res.json({ error });

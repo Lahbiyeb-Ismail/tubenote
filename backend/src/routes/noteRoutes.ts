@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { createVideoNote, getUserNotes } from '../controllers/noteControllers';
-import checkVideoExists from '../middlewares/checkVideoExists';
+// import checkVideoExists from '../middlewares/checkVideoExists';
 import validateRequestBody from '../middlewares/validateRequestBody';
 import { noteSchema } from '../schemas';
 
@@ -22,8 +22,6 @@ router.route('/notes/:user_id').get(getUserNotes);
  * @param {Note} noteData - The data of the note to be created.
  * @returns {Note} The created note.
  */
-router
-  .route('/notes')
-  .post(checkVideoExists, validateRequestBody(noteSchema), createVideoNote);
+router.route('/notes').post(validateRequestBody(noteSchema), createVideoNote);
 
 export default router;
