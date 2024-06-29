@@ -4,50 +4,27 @@ import "@blocknote/core/fonts/inter.css";
 
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";
-import { toast, Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
-import "@blocknote/mantine/style.css";
 import "@/app/globals.css";
+import "@blocknote/mantine/style.css";
 
-import createNewNote from "@/actions/createNewNote";
 import useVideoDataStore from "@/stores/videoDataStore";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import useCreateNote from "@/hooks/useCreateNote";
 import { useUserSession } from "@/hooks/useUserSession";
 
 function TextEditor() {
   // const [noteTitle, setNoteTitle] = useState("");
   // Creates a new editor instance.
   const editor = useCreateBlockNote();
-  const queryClient = useQueryClient();
 
   const { videoData } = useVideoDataStore();
   const { userData } = useUserSession();
-
-  const { isPending, mutate } = useMutation({
-    mutationFn: createNewNote,
-    onMutate: () => {
-      // Show a loading toast
-      toast.loading("Saving note...", { id: "loadingToast" });
-    },
-    onSuccess: () => {
-      // Dismiss loading toast
-      toast.dismiss("loadingToast");
-      // Show success toast
-      toast.success("Note created successfully!");
-      // Invalidate and refetch notes
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-    },
-    onError: (error: any) => {
-      // Dismiss loading toast
-      toast.dismiss("loadingToast");
-      // Show error toast
-      toast.error(error.message || "Failed to create note. Please try again.");
-    },
-  });
+  const { isPending, createNote } = useCreateNote();
 
   function handleNoteSave() {
-    mutate({
+    createNote({
       videoId: videoData?.id as string,
       noteContent: JSON.stringify(editor.document, null, 2),
       userId: userData?.userId as string,
