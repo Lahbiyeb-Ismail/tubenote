@@ -4,6 +4,7 @@ import "@blocknote/core/fonts/inter.css";
 
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";
+import { toast, Toaster } from "react-hot-toast";
 
 import "@blocknote/mantine/style.css";
 import "@/app/globals.css";
@@ -15,6 +16,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useUserSession } from "@/hooks/useUserSession";
 
 function TextEditor() {
+  // const [noteTitle, setNoteTitle] = useState("");
   // Creates a new editor instance.
   const editor = useCreateBlockNote();
   const queryClient = useQueryClient();
@@ -24,26 +26,48 @@ function TextEditor() {
 
   const { isPending, mutate } = useMutation({
     mutationFn: createNewNote,
+    onMutate: () => {
+      // Show a loading toast
+      toast.loading("Saving note...", { id: "loadingToast" });
+    },
     onSuccess: () => {
-      // Invalidate and refetch
+      // Dismiss loading toast
+      toast.dismiss("loadingToast");
+      // Show success toast
+      toast.success("Note created successfully!");
+      // Invalidate and refetch notes
       queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+    onError: (error: any) => {
+      // Dismiss loading toast
+      toast.dismiss("loadingToast");
+      // Show error toast
+      toast.error(error.message || "Failed to create note. Please try again.");
     },
   });
 
+  function handleNoteSave() {
+    mutate({
+      videoId: videoData?.id as string,
+      noteContent: JSON.stringify(editor.document, null, 2),
+      userId: userData?.userId as string,
+      videoThumbnail: videoData?.videoThumbnail as string,
+      videoTitle: videoData?.title as string,
+    });
+  }
+
   return (
     <div className="h-full overflow-auto">
-      <div className="mb-4 flex items-center justify-end">
+      <Toaster />
+      <div className="mb-4 flex items-center justify-center gap-4">
+        <input
+          type="text"
+          placeholder="Enter Note Title"
+          className="w-full rounded-md border-2 border-gray-300 px-4 py-2 text-sm font-medium"
+        />
         <button
           type="button"
-          onClick={() =>
-            mutate({
-              videoId: videoData?.id as string,
-              noteContent: JSON.stringify(editor.document, null, 2),
-              userId: userData?.userId as string,
-              videoThumbnail: videoData?.videoThumbnail as string,
-              videoTitle: videoData?.title as string,
-            })
-          }
+          onClick={handleNoteSave}
           className="inline-flex items-center justify-center whitespace-nowrap rounded-md border-2 bg-[#282828] px-4 py-2 text-center text-sm font-medium text-white transition-all hover:border-[#282828] hover:bg-white hover:text-[#282828] focus:ring-[#282828] focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 dark:focus:ring-[#282828]"
         >
           {isPending ? "Saving..." : "Save"}

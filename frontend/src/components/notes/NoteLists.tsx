@@ -1,7 +1,7 @@
 import React from "react";
 import type { Note } from "@/types";
 
-import NoteCard from "../NoteCard";
+import NoteCard from "./NoteCard";
 
 type NoteListsProps = {
   notes: Note[];
