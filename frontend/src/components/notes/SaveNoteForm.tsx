@@ -10,13 +10,21 @@ import useCreateNote from "@/hooks/useCreateNote";
 import { useUserSession } from "@/hooks/useUserSession";
 import ErrorMessage from "../global/ErrorMessage";
 
-function SaveNoteForm({ noteContent }: { noteContent: string }) {
+type SaveNoteFormProps = {
+  noteContent: string;
+  noteTitle?: string;
+};
+
+function SaveNoteForm({ noteContent, noteTitle: title }: SaveNoteFormProps) {
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<NoteTitleType>({
     resolver: zodResolver(noteTitleFormSchema),
+    defaultValues: {
+      noteTitle: title || "",
+    },
   });
 
   const { videoData } = useVideoDataStore();
