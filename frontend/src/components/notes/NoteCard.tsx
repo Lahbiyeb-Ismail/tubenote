@@ -48,17 +48,17 @@ function NoteCard({ note }: NoteCardProps) {
       <div className="px-4 py-3 sm:px-6">
         <div className="flex justify-end space-x-3">
           <Link
-            href={`/notes/${note.id}/edit`}
+            href={`/editor/${note.id}/update`}
             className="inline-flex items-center rounded-md border border-transparent bg-blue-100 px-3 py-1 text-sm font-medium leading-4 text-blue-700 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
-            Edit
+            Edit - View Note
           </Link>
-          <button
+          {/* <button
             type="button"
             className="inline-flex items-center rounded-md border border-transparent bg-green-100 px-3 py-1 text-sm font-medium leading-4 text-green-700 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
           >
             View Note
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

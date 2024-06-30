@@ -29,7 +29,9 @@ export async function getUserNotes(req: CustomRequest, res: Response) {
   }
 }
 
-export async function createVideoNote(req: CustomRequest, res: Response) {
+export async function createVideoNote(req: Request, res: Response) {
+  console.log(req.body);
+
   const {
     userId,
     videoId,

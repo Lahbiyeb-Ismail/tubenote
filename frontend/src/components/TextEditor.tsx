@@ -17,13 +17,15 @@ import SaveNoteForm from "./notes/SaveNoteForm";
 type TextEditorProps = {
   initialNoteContent?: string;
   noteTitle?: string;
-  isLoading?: boolean;
+  noteId: string;
+  operation: "create" | "update";
 };
 
 function TextEditor({
   initialNoteContent,
   noteTitle,
-  isLoading,
+  noteId,
+  operation,
 }: TextEditorProps) {
   // Creates a new editor instance.
   const editor: BlockNoteEditor = useCreateBlockNote({
@@ -35,24 +37,21 @@ function TextEditor({
 
   return (
     <div className="h-full overflow-auto">
-      {isLoading ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80">
-          <div className="text-2xl font-bold text-gray-800">Loading...</div>
-        </div>
-      ) : (
-        <>
-          <Toaster />
-          <SaveNoteForm noteContent={noteContent} noteTitle={noteTitle} />
-          <BlockNoteView
-            editor={editor}
-            onChange={() => {
-              setNoteContent(JSON.stringify(editor.document, null, 2));
-            }}
-            theme="light"
-            className="h-[90%] overflow-auto border-2 border-gray-300"
-          />
-        </>
-      )}
+      <Toaster />
+      <SaveNoteForm
+        noteContent={noteContent}
+        noteTitle={noteTitle}
+        noteId={noteId}
+        operation={operation}
+      />
+      <BlockNoteView
+        editor={editor}
+        onChange={() => {
+          setNoteContent(JSON.stringify(editor.document, null, 2));
+        }}
+        theme="light"
+        className="h-[90%] overflow-auto border-2 border-gray-300"
+      />
     </div>
   );
 }
