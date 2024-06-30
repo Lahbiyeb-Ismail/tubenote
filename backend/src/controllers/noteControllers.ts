@@ -57,6 +57,27 @@ export async function createVideoNote(req: CustomRequest, res: Response) {
   }
 }
 
+export async function getNoteById(req: Request, res: Response) {
+  const noteId = req.params['note_id'] as string;
+
+  try {
+    const note = await prisma.note.findUnique({
+      where: {
+        id: noteId,
+      },
+    });
+
+    if (!note)
+      return res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: 'Note not found' });
+
+    return res.json({ note });
+  } catch (error) {
+    return res.status(500).json({ error });
+  }
+}
+
 export async function updateVideoNote(req: CustomRequest, res: Response) {
   const noteId = req.params['note_id'] as string;
   const existsNote = req.note;

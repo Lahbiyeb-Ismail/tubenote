@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import {
   createVideoNote,
+  getNoteById,
   getUserNotes,
   updateVideoNote,
 } from '../controllers/noteControllers';
@@ -27,6 +28,8 @@ router.route('/notes/:user_id').get(getUserNotes);
  * @returns {Note} The created note.
  */
 router.route('/notes').post(validateRequestBody(noteSchema), createVideoNote);
+
+router.route('/notes/note/:note_id').get(getNoteById);
 
 router
   .route('/notes/:note_id')
