@@ -33,3 +33,10 @@ export const userSchema = {
     email: z.string().email(),
   }),
 };
+
+export const updateNoteSchema = {
+  body: z.object({
+    noteTitle: z.string().min(3).optional(),
+    noteContent: z.string().optional(),
+  }),
+};

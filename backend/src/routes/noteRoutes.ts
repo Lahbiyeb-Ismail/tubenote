@@ -1,9 +1,13 @@
 import { Router } from 'express';
 
-import { createVideoNote, getUserNotes } from '../controllers/noteControllers';
-// import checkVideoExists from '../middlewares/checkVideoExists';
+import {
+  createVideoNote,
+  getUserNotes,
+  updateVideoNote,
+} from '../controllers/noteControllers';
 import validateRequestBody from '../middlewares/validateRequestBody';
-import { noteSchema } from '../schemas';
+import { noteSchema, updateNoteSchema } from '../schemas';
+import checkNoteExists from '../middlewares/checkNoteExists';
 
 const router = Router();
 
@@ -23,5 +27,13 @@ router.route('/notes/:user_id').get(getUserNotes);
  * @returns {Note} The created note.
  */
 router.route('/notes').post(validateRequestBody(noteSchema), createVideoNote);
+
+router
+  .route('/notes/:note_id')
+  .patch(
+    checkNoteExists,
+    validateRequestBody(updateNoteSchema),
+    updateVideoNote,
+  );
 
 export default router;
