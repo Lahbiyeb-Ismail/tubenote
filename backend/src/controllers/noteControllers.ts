@@ -28,12 +28,19 @@ export async function getUserNotes(req: CustomRequest, res: Response) {
 }
 
 export async function createVideoNote(req: CustomRequest, res: Response) {
-  const { userId, videoId, noteContent, videoThumbnail, videoTitle } =
-    req.body as Note;
+  const {
+    userId,
+    videoId,
+    noteTitle,
+    noteContent,
+    videoThumbnail,
+    videoTitle,
+  }: Note = req.body;
 
   try {
     const note = await prisma.note.create({
       data: {
+        noteTitle,
         noteContent,
         videoThumbnail,
         videoTitle,

@@ -36,6 +36,7 @@ model Note {
   videoId        String   @db.ObjectId
   userId         String   @db.ObjectId
   noteContent    String
+  noteTitle      String
   videoThumbnail String
   videoTitle     String
   createdAt      DateTime @default(now())

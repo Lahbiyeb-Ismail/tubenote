@@ -31,6 +31,7 @@ export interface YouTubeAPIResponse {
 export type VideoPart = 'snippet, statistics, player';
 
 export interface Note {
+  noteTitle: string;
   noteContent: string;
   videoTitle: string;
   videoThumbnail: string;
