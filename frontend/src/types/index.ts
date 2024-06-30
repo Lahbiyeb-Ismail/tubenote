@@ -1,7 +1,9 @@
-import type { searchFormSchema } from "@/schemas";
+import type { noteTitleFormSchema, searchFormSchema } from "@/schemas";
 import { z } from "zod";
 
 export type SearchFormType = z.infer<typeof searchFormSchema>;
+
+export type NoteTitleType = z.infer<typeof noteTitleFormSchema>;
 
 export type VideoDataResponseType = {
   id: string;
@@ -21,10 +23,11 @@ export type VideoDataResponseType = {
 
 export type Note = {
   id: string;
-  videoTitle: string;
+  noteTitle: string;
+  noteContent: string;
   videoId: string;
   userId: string;
-  noteContent: string;
+  videoTitle: string;
   videoThumbnail: string;
   createdAt: string;
 };

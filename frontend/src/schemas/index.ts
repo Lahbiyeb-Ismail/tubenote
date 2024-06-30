@@ -10,3 +10,13 @@ export const searchFormSchema = z.object({
       message: "Invalid youtube URL. Please provide a valid youtube video URL.",
     }),
 });
+
+export const noteTitleFormSchema = z.object({
+  noteTitle: z
+    .string({
+      message: "Note title is required. Please enter a title.",
+    })
+    .min(3, {
+      message: "Note title must be at least 3 characters long.",
+    }),
+});
