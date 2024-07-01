@@ -26,7 +26,7 @@ app.use(compression({ filter: compressFilter }));
 // Configure CORS middleware
 app.use(
   cors({
-    origin: ['http://localhost:3000'], // Specify the allowed origin(s) for requests
+    origin: ['http://localhost:3000', "https://tubenote-frontend.vercel.app"], // Specify the allowed origin(s) for requests
     credentials: true, // Allow sending cookies along with the requests
   }),
 );
