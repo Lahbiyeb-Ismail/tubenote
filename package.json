@@ -13,7 +13,10 @@
     "format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,md}'",
     "start:frontend": "yarn workspace frontend dev",
     "start:backend": "yarn workspace backend dev",
+    "build:frontend": "yarn workspace frontend build",
+    "start-build:frontend": "yarn workspace frontend start",
     "start:dev": "concurrently \"yarn start:frontend\" \"yarn start:backend\"",
+    "start:build": "concurrently \"yarn start-build:frontend\" \"yarn start:backend\"",
     "prepare": "husky"
   },
   "lint-staged": {
