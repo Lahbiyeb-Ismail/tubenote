@@ -9,7 +9,7 @@ import useVideoDataStore from "@/stores/videoDataStore";
 function YoutubeVideoPlayer() {
   const { videoData } = useVideoDataStore();
 
-  const videoIframe = parseStringtoHtml(videoData.videoPlayer);
+  const videoIframe = parseStringtoHtml(videoData?.videoPlayer as string);
 
   return (
     <div
