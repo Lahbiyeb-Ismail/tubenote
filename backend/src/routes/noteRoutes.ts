@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import {
   createVideoNote,
+  deleteVideoNote,
   getNoteById,
   getUserNotes,
   updateVideoNote,
@@ -38,5 +39,7 @@ router
     validateRequestBody(updateNoteSchema),
     updateVideoNote,
   );
+
+router.route('/notes/:note_id').delete(checkNoteExists, deleteVideoNote);
 
 export default router;

@@ -102,3 +102,19 @@ export async function updateVideoNote(req: CustomRequest, res: Response) {
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
   }
 }
+
+export async function deleteVideoNote(req: Request, res: Response) {
+  const noteId = req.params['note_id'] as string;
+
+  try {
+    await prisma.note.delete({
+      where: {
+        id: noteId,
+      },
+    });
+
+    return res.json({ message: 'Note successfully deleted.' });
+  } catch (error) {
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
+  }
+}
