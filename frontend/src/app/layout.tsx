@@ -4,6 +4,7 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
+import { Toaster } from "react-hot-toast";
 
 import Footer from "@/sections/Footer";
 import Navbar from "@/components/global/Navbar";
@@ -24,6 +25,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={montserrat.className}>
         <ReactQueryProvider>
+          <Toaster />
           <Navbar />
           {children}
           <Footer />
