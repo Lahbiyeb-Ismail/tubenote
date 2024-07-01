@@ -1,9 +1,11 @@
 import HeroSection from "@/sections/HeroSection";
+import HowItWorksSection from "@/sections/HowItWorksSection";
 
 export default function Home() {
   return (
-    <main className="height_viewport grid h-screen place-content-center">
+    <main className="grid place-content-center">
       <HeroSection />
+      <HowItWorksSection />
     </main>
   );
 }
