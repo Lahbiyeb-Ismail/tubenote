@@ -6,7 +6,6 @@ import "./globals.css";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
 import { Toaster } from "react-hot-toast";
 
-import Footer from "@/sections/Footer";
 import Navbar from "@/components/global/Navbar";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
@@ -28,7 +27,6 @@ export default function RootLayout({
           <Toaster />
           <Navbar />
           {children}
-          <Footer />
         </ReactQueryProvider>
       </body>
     </html>
