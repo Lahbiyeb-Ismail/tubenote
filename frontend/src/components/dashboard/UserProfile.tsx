@@ -3,7 +3,7 @@ import useAuthStore from "@/stores/authStore";
 import UserAvatar from "../global/UserAvatar";
 
 function UserProfile() {
-  const { userData } = useAuthStore();
+  const userData = useAuthStore((state) => state.userData);
 
   return (
     <div className="mt-auto border-t p-4">

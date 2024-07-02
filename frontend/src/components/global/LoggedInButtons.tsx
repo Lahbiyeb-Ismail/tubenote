@@ -14,7 +14,12 @@ function LoggedInButtons({ userData }: LoggedInButtonsProps) {
       <Button href="/dashboard" size="md">
         Dashboard
       </Button>
-      <Button href="/api/auth/logout" size="md" variant="secondary">
+      <Button
+        href="/api/auth/logout"
+        size="md"
+        variant="secondary"
+        onClick={() => sessionStorage.clear()}
+      >
         Logout
       </Button>
       <UserAvatar imgSrc={userData.picture} username={userData.username} />

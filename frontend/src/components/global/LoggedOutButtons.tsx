@@ -2,13 +2,13 @@ import React from "react";
 
 import { Button } from "./Button";
 
-type LoggedOutButtonsProps = {
-  isLoading: boolean;
-};
+// type LoggedOutButtonsProps = {
+//   isLoading: boolean;
+// };
 
-function LoggedOutButtons({ isLoading }: LoggedOutButtonsProps) {
+function LoggedOutButtons() {
   return (
-    <Button href="/api/auth/login" size="md" disabled={isLoading}>
+    <Button href="/api/auth/login" size="md">
       Get Started
     </Button>
   );

@@ -5,14 +5,14 @@ import LoggedInButtons from "./LoggedInButtons";
 import LoggedOutButtons from "./LoggedOutButtons";
 
 function NavbarButtons() {
-  const { session, isLoading, userData } = useUserSession();
+  const { userData } = useUserSession();
 
   return (
     <>
-      {session?.user && userData ? (
+      {userData ? (
         <LoggedInButtons userData={userData} />
       ) : (
-        <LoggedOutButtons isLoading={isLoading} />
+        <LoggedOutButtons />
       )}
     </>
   );

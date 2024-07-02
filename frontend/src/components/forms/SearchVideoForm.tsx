@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 function SearchVideoForm() {
-  const { setVideoData } = useVideoDataStore();
+  const setVideoData = useVideoDataStore((state) => state.setVideoData);
   const router = useRouter();
 
   const {

@@ -37,7 +37,7 @@ function SaveNoteForm({
     },
   });
 
-  const { videoData } = useVideoDataStore();
+  const videoData = useVideoDataStore((state) => state.videoData);
   const { userData } = useUserSession();
   const { isPending: createNoteLoading, createNote } = useCreateNote();
   const { isPending: updateNoteLoading, update: updateNote } = useUpdateNote();

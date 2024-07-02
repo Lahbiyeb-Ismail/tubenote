@@ -7,7 +7,7 @@ import parseStringtoHtml from "@/helpers/parseStringtoHtml";
 import useVideoDataStore from "@/stores/videoDataStore";
 
 function YoutubeVideoPlayer() {
-  const { videoData } = useVideoDataStore();
+  const videoData = useVideoDataStore((state) => state.videoData);
 
   const videoIframe = parseStringtoHtml(videoData?.videoPlayer as string);
 

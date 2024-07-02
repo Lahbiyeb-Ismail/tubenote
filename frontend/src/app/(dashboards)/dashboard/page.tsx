@@ -65,6 +65,105 @@ function Header() {
   );
 }
 
+function UserStats() {
+  return (
+    <div className="mb-8 flex justify-between rounded-lg bg-white p-6 shadow">
+      <div className="text-center">
+        <h3 className="text-3xl font-bold text-blue-500">156</h3>
+        <p className="text-gray-500">Notes</p>
+      </div>
+      <div className="text-center">
+        <h3 className="text-3xl font-bold text-purple-500">42</h3>
+        <p className="text-gray-500">Videos</p>
+      </div>
+      <div className="text-center">
+        <h3 className="text-3xl font-bold text-green-500">94</h3>
+        <p className="text-gray-500">Tasks Done</p>
+      </div>
+      <div className="text-center">
+        <h3 className="text-3xl font-bold text-orange-500">23</h3>
+        <p className="text-gray-500">Tasks In Progress</p>
+      </div>
+    </div>
+  );
+}
+
+function RecentActions() {
+  return (
+    <div className="mb-8 rounded-lg bg-white p-6 shadow">
+      <h2 className="mb-4 text-2xl font-bold">Recent Actions</h2>
+      <ul className="space-y-4">
+        <li className="flex items-center">
+          <span className="mr-4 rounded-full bg-blue-100 p-2">
+            <svg
+              className="size-5 text-blue-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
+          </span>
+          <div>
+            <p className="font-semibold">Created a new note</p>
+            <p className="text-sm text-gray-500">2 hours ago</p>
+          </div>
+        </li>
+        <li className="flex items-center">
+          <span className="mr-4 rounded-full bg-purple-100 p-2">
+            <svg
+              className="size-5 text-purple-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+              />
+            </svg>
+          </span>
+          <div>
+            <p className="font-semibold">Uploaded a new video</p>
+            <p className="text-sm text-gray-500">Yesterday</p>
+          </div>
+        </li>
+        <li className="flex items-center">
+          <span className="mr-4 rounded-full bg-green-100 p-2">
+            <svg
+              className="size-5 text-green-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </span>
+          <div>
+            <p className="font-semibold">Completed a task</p>
+            <p className="text-sm text-gray-500">2 days ago</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  );
+}
+
 function TaskList() {
   return (
     <div className="rounded-lg bg-white p-6 shadow">
@@ -175,6 +274,8 @@ function DashboardPage() {
   return (
     <div className="flex-grow p-8">
       <Header />
+      <UserStats />
+      <RecentActions />
       <TaskList />
       <div className="mt-8 flex space-x-6">
         <ProductivityChart />

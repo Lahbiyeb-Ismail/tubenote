@@ -24,7 +24,7 @@ async function HeroSection() {
               Get Started
               <ArrowRightIcon className="-mr-1 ml-2 size-5" />
             </Button>
-            <Button variant="secondary" href="https://youtu.be/Q5LM985yUmQ">
+            <Button variant="secondary" href="/">
               <Video className="-ml-1 mr-2 size-5" />
               Watch Demo
             </Button>

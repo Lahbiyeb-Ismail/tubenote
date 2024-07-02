@@ -9,11 +9,13 @@ import type { UserDataType } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
 export function useUserSession() {
-  const { setAuthData, userData } = useAuthStore();
+  const userData = useAuthStore((state) => state.userData);
+  const setAuthData = useAuthStore((state) => state.setAuthData);
 
   const { data: session, isLoading } = useQuery({
     queryKey: ["userSession"],
     queryFn: getUserSession,
+    enabled: userData === null,
   });
 
   useEffect(() => {
