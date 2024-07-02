@@ -8,7 +8,7 @@ import MaxWidthWrapper from "@/components/global/MaxWidthWrapper";
 
 async function HeroSection() {
   return (
-    <MaxWidthWrapper className="height_viewport mx-0">
+    <MaxWidthWrapper className="height_viewport mx-0 flex items-center justify-center">
       <section className="flex flex-col justify-center">
         <div className="mx-auto max-w-screen-xl px-4 py-8 text-center lg:px-12 lg:py-16">
           <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
