@@ -70,17 +70,17 @@ export async function getVideoData(req: Request, res: Response) {
       return res
         .status(httpStatus.NOT_FOUND)
         .json({ message: 'Video not found' });
-    } else {
-      const videoData = await prisma.video.findUnique({
-        where: {
-          videoUrlId: videoId,
-        },
-      });
-
-      return res.json({
-        videoData,
-      });
     }
+
+    const videoData = await prisma.video.findUnique({
+      where: {
+        videoUrlId: videoId,
+      },
+    });
+
+    res.json({
+      videoData,
+    });
   } catch (error) {
     return res.json({ error });
   }
