@@ -7,7 +7,7 @@ interface AuthData {
   setAuthData: (data: UserDataType) => void;
 }
 
-export const useAuthStore = create<AuthData>()(
+const useAuthStore = create<AuthData>()(
   persist(
     (set) => ({
       userData: null,
