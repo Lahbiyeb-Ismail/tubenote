@@ -1,9 +1,9 @@
-import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import formatDate from "@/helpers/formatDate";
 import type { Note } from "@/types";
 import { Trash } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 
 import useDeleteNote from "@/hooks/useDeleteNote";
 import Modal from "../global/Modal";

@@ -2,9 +2,9 @@
 
 "use client";
 
-import React from "react";
 import parseStringtoHtml from "@/helpers/parseStringtoHtml";
 import useVideoDataStore from "@/stores/videoDataStore";
+import React from "react";
 
 function YoutubeVideoPlayer() {
   const videoData = useVideoDataStore((state) => state.videoData);

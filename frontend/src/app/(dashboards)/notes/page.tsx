@@ -1,11 +1,11 @@
 "use client";
 
-import useUserNotes from "@/hooks/useUserNotes";
 import Header from "@/components/dashboard/Header";
 import Loader from "@/components/global/Loader";
 import AddNoteForm from "@/components/notes/AddNoteForm";
 import NoNotes from "@/components/notes/NoNotes";
 import NoteLists from "@/components/notes/NoteLists";
+import useUserNotes from "@/hooks/useUserNotes";
 
 function NotesPage() {
   const { data, isNotesLoading, isUserLoading } = useUserNotes();

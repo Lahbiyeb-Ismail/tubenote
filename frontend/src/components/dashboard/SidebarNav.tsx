@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { sidebarNavOptions } from "@/utils/constants";
+import Link from "next/link";
 
 type SidebarNavProps = {
   pathName: string;

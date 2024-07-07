@@ -1,14 +1,14 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
 import getVideoData from "@/actions/getVideoData";
 import extractVideoId from "@/helpers/extractVideoId";
 import { searchFormSchema } from "@/schemas";
 import useVideoDataStore from "@/stores/videoDataStore";
 import type { SearchFormType } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import React from "react";
+import { type SubmitHandler, useForm } from "react-hook-form";
 
 function SearchVideoForm() {
   const setVideoData = useVideoDataStore((state) => state.setVideoData);

@@ -1,7 +1,7 @@
-/* eslint-disable tailwindcss/no-custom-classname */
-import React from "react";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 import { Video } from "lucide-react";
+/* eslint-disable tailwindcss/no-custom-classname */
+import React from "react";
 
 import { Button } from "@/components/global/Button";
 import MaxWidthWrapper from "@/components/global/MaxWidthWrapper";

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import getUserNotes from "@/actions/getUserNotes";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 import { useUserSession } from "@/hooks/useUserSession";
 

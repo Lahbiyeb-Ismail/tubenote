@@ -1,5 +1,5 @@
-import React from "react";
 import type { Note } from "@/types";
+import React from "react";
 
 import NoteCard from "./NoteCard";
 

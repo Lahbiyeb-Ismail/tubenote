@@ -1,5 +1,5 @@
-import React from "react";
 import type { UserDataType } from "@/types";
+import React from "react";
 
 import { Button } from "./Button";
 import UserAvatar from "./UserAvatar";

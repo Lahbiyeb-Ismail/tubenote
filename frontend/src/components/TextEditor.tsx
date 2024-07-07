@@ -9,8 +9,8 @@ import { Toaster } from "react-hot-toast";
 import "@/app/globals.css";
 import "@blocknote/mantine/style.css";
 
-import { useState } from "react";
 import type { BlockNoteEditor } from "@blocknote/core";
+import { useState } from "react";
 
 import SaveNoteForm from "./notes/SaveNoteForm";
 

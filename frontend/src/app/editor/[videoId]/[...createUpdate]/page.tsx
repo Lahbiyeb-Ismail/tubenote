@@ -1,18 +1,18 @@
 "use client";
 
-import React from "react";
-import { useParams } from "next/navigation";
 import getNoteById from "@/actions/getNoteById";
 import { useQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
+import React from "react";
 
-import Loader from "@/components/global/Loader";
 import TextEditor from "@/components/TextEditor";
+import YoutubeVideoPlayer from "@/components/YoutubeVideoPlayer";
+import Loader from "@/components/global/Loader";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import YoutubeVideoPlayer from "@/components/YoutubeVideoPlayer";
 
 function VideoNotePage() {
   const { videoId: noteId, createUpdate } = useParams();

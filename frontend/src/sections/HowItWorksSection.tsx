@@ -1,6 +1,6 @@
-import React from "react";
-import Link from "next/link";
 import { howItWorksSteps } from "@/utils/constants";
+import Link from "next/link";
+import React from "react";
 
 import StepsList from "@/components/global/StepsList";
 

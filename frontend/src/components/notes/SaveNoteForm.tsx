@@ -6,7 +6,7 @@ import { noteTitleFormSchema } from "@/schemas";
 import useVideoDataStore from "@/stores/videoDataStore";
 import type { NoteTitleType } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
 
 import useCreateNote from "@/hooks/useCreateNote";
 import useUpdateNote from "@/hooks/useUpdateNote";

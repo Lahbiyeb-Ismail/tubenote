@@ -1,5 +1,5 @@
 import type { noteTitleFormSchema, searchFormSchema } from "@/schemas";
-import { z } from "zod";
+import type { z } from "zod";
 
 export type SearchFormType = z.infer<typeof searchFormSchema>;
 

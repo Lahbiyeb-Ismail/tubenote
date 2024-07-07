@@ -2,11 +2,11 @@
 
 "use client";
 
-import { useEffect } from "react";
 import getUserSession from "@/actions/getUserSession";
 import useAuthStore from "@/stores/authStore";
 import type { UserDataType } from "@/types";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 export function useUserSession() {
   const userData = useAuthStore((state) => state.userData);

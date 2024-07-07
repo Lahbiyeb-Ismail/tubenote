@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
 import { usePathname } from "next/navigation";
+import React from "react";
 
 import SidebarLogo from "./SidebarLogo";
 import SidebarNav from "./SidebarNav";
