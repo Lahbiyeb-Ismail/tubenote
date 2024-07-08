@@ -23,7 +23,7 @@ To set up TubeNote locally, follow these steps:
 1. Clone the repository:
 
 ```
-git clone https://github.com/yourusername/tubenote.git
+git clone https://github.com/Lahbiyeb-Ismail/tubenote
 ```
 
 2. Navigate to the project directory:
