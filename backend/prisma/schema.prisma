@@ -13,6 +13,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String    @unique
+  password      String
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+
+  notes         Note[]
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  token     String   @unique
+  userId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
 model Video {
   id             String @id @default(auto()) @map("_id") @db.ObjectId
   videoUrlId     String @unique
@@ -44,14 +65,4 @@ model Note {
 
   video Video @relation(fields: [videoId], references: [id])
   User  User? @relation(fields: [userId], references: [id])
-}
-
-model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  email     String   @unique
-  kindeId   String   @unique
-  username  String
-  createdAt DateTime @default(now())
-
-  notes Note[]
 }
