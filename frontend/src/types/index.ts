@@ -1,5 +1,7 @@
-import type { noteTitleFormSchema, searchFormSchema } from "@/schemas";
+import type { AxiosError } from 'axios';
 import type { z } from "zod";
+
+import type { noteTitleFormSchema, searchFormSchema } from "@/schemas";
 
 export type SearchFormType = z.infer<typeof searchFormSchema>;
 
@@ -39,3 +41,19 @@ export type UserDataType = {
   picture: string | null;
   userId: string;
 };
+
+export type User = {
+  email: string;
+  username: string;
+};
+
+export type RegisterResponse = {
+  user: User;
+  message: string;
+};
+
+export type LoginResponse = {
+  accessToken: string;
+};
+
+export type TypedError = AxiosError<{ message: string }>;

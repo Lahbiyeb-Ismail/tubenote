@@ -18,8 +18,11 @@ import {
 import AuthLayout from "@/components/auth/AuthLayout";
 
 import { type RegisterFormData, registerFormSchema } from "@/lib/schemas";
+import { useAuth } from "@/context/useAuth";
 
 export default function RegisterPage() {
+	const { register, isLoading, state } = useAuth();
+
 	const form = useForm<RegisterFormData>({
 		resolver: zodResolver(registerFormSchema),
 		defaultValues: {
@@ -29,10 +32,15 @@ export default function RegisterPage() {
 		},
 	});
 
+	const handleRegister = (formData: RegisterFormData) => register(formData);
+
 	return (
-		<AuthLayout error="" pageTitle="Register">
+		<AuthLayout error={state.errorMessage} pageTitle="Register">
 			<Form {...form}>
-				<form onSubmit={() => {}} className="space-y-4">
+				<form
+					onSubmit={form.handleSubmit(handleRegister)}
+					className="space-y-4"
+				>
 					<FormField
 						name="username"
 						control={form.control}
@@ -72,8 +80,8 @@ export default function RegisterPage() {
 							</FormItem>
 						)}
 					/>
-					<Button type="submit" className="w-full">
-						Register
+					<Button type="submit" className="w-full" disabled={isLoading}>
+						{isLoading ? "Registering..." : "Register"}
 					</Button>
 				</form>
 			</Form>
