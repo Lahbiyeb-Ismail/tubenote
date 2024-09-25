@@ -1,12 +1,12 @@
 import compression from 'compression';
-import express, { Express } from 'express';
+import express, { type Express } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 
 import noteRoutes from './routes/noteRoutes';
 import videoRoutes from './routes/videoRoutes';
-import authRoutes from './routes/authRoutes';
-import userRoutes from './routes/userRoutes';
+import authRoutes from './routes/auth.route';
+// import userRoutes from './routes/userRoutes';
 import compressFilter from './utils/compressFilter';
 
 const app: Express = express();
@@ -26,7 +26,7 @@ app.use(compression({ filter: compressFilter }));
 // Configure CORS middleware
 app.use(
   cors({
-    origin: ['http://localhost:3000', "https://tubenote-frontend.vercel.app"], // Specify the allowed origin(s) for requests
+    origin: ['http://localhost:3000', 'https://tubenote-frontend.vercel.app'], // Specify the allowed origin(s) for requests
     credentials: true, // Allow sending cookies along with the requests
   }),
 );
@@ -34,6 +34,6 @@ app.use(
 app.use('/api/v1', videoRoutes);
 app.use('/api/v1', noteRoutes);
 app.use('/api/v1', authRoutes);
-app.use('/api/v1', userRoutes);
+// app.use('/api/v1', userRoutes);
 
 export default app;
