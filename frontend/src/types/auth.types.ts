@@ -1,5 +1,6 @@
-import type {  RegisterFormData } from '@/lib/schemas';
 import type { ReactNode } from 'react';
+
+import type {  RegisterFormData, LoginFormData } from '@/lib/schemas';
 
 export type AuthState = {
   accessToken: string | null;
@@ -9,12 +10,14 @@ export type AuthState = {
 };
 
 export type AuthAction =
+  | { type: 'LOGIN_SUCCESS'; payload: { accessToken: string } }
   | { type: 'REGISTER_SUCCESS'; payload: { successMessage: string } }
   | { type: 'REQUEST_FAIL'; payload: { errorMessage: string } }
   | { type: 'LOGOUT' };
 
 export type AuthContextType = {
   state: AuthState;
+  login: (loginCredentials: LoginFormData) => void
   register: (registerCredentials: RegisterFormData) => void;
   isLoading: boolean;
 };

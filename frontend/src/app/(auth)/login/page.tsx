@@ -18,8 +18,11 @@ import {
 import AuthLayout from "@/components/auth/AuthLayout";
 
 import { type LoginFormData, loginFormSchema } from "@/lib/schemas";
+import { useAuth } from "@/context/useAuth";
 
 export default function LoginPage() {
+	const { login, state, isLoading } = useAuth();
+
 	const form = useForm<LoginFormData>({
 		resolver: zodResolver(loginFormSchema),
 		defaultValues: {
@@ -28,10 +31,16 @@ export default function LoginPage() {
 		},
 	});
 
+	const handleLogin = (formData: LoginFormData) => login(formData);
+
 	return (
-		<AuthLayout error="" pageTitle="Login">
+		<AuthLayout
+			error={state.errorMessage}
+			success={state.successMessage}
+			pageTitle="Login"
+		>
 			<Form {...form}>
-				<form onSubmit={() => {}} className="space-y-4">
+				<form onSubmit={form.handleSubmit(handleLogin)} className="space-y-4">
 					<FormField
 						name="email"
 						control={form.control}
@@ -58,8 +67,8 @@ export default function LoginPage() {
 							</FormItem>
 						)}
 					/>
-					<Button type="submit" className="w-full">
-						Login
+					<Button type="submit" className="w-full" disabled={isLoading}>
+						{isLoading ? "Logging in..." : "Login"}
 					</Button>
 				</form>
 			</Form>

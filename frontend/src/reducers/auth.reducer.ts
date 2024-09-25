@@ -9,6 +9,13 @@ export const authInitialState: AuthState = {
 
 function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
+    case 'LOGIN_SUCCESS':
+      return {
+        ...state,
+        accessToken: action.payload.accessToken,
+        isAuthenticated: true,
+        errorMessage: '',
+      };
     case 'REGISTER_SUCCESS':
       return {
         ...state,

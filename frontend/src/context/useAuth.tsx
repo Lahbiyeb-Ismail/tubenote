@@ -6,6 +6,7 @@ import type { AuthContextType, AuthProviderProps } from "@/types/auth.types";
 
 import useRegisterMutation from "@/hooks/useRegisterMutation";
 import authReducer, { authInitialState } from "@/reducers/auth.reducer";
+import useLoginMutation from "@/hooks/useLoginMutation";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -13,11 +14,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 	const [state, dispatch] = useReducer(authReducer, authInitialState);
 
 	const registerMutation = useRegisterMutation(dispatch);
+	const loginMutation = useLoginMutation(dispatch);
 
 	const value = {
 		state,
+		login: loginMutation.mutate,
 		register: registerMutation.mutate,
-		isLoading: registerMutation.isPending,
+		isLoading: registerMutation.isPending || loginMutation.isPending,
 	};
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
