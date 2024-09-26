@@ -2,6 +2,7 @@ import compression from 'compression';
 import express, { type Express } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 import noteRoutes from './routes/noteRoutes';
 import videoRoutes from './routes/videoRoutes';
@@ -16,6 +17,8 @@ app.use(helmet());
 
 // parse json request body
 app.use(express.json());
+
+app.use(cookieParser());
 
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true }));

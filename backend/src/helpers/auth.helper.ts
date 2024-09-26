@@ -139,3 +139,15 @@ export const createAndSaveNewTokens = async (
 
   return accessToken;
 };
+
+export const getRefreshTokenFromDB = async (refreshToken: string) => {
+  return prismaClient.refreshToken.findUnique({
+    where: { token: refreshToken },
+  });
+};
+
+export const deleteRefreshTokenFromDB = async (refreshToken: string) => {
+  return prismaClient.refreshToken.delete({
+    where: { token: refreshToken },
+  });
+};

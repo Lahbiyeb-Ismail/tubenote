@@ -4,12 +4,18 @@ import httpStatus from 'http-status';
 import {
   createAndSaveNewTokens,
   createNewUser,
+  deleteRefreshTokenFromDB,
+  getRefreshTokenFromDB,
   passwordMatches,
   userExists,
 } from '../helpers/auth.helper';
 
 import type { TypedRequest } from '../types';
 import type { UserLoginCredentials } from '../types/auth';
+import config from '../config';
+import { clearRefreshTokenCookieConfig } from '../config/cookie.config';
+
+const REFRESH_TOKEN_NAME = config.jwt.refresh_token.cookie_name;
 
 export async function handleSignup(req: Request, res: Response) {
   const { username, email, password } = req.body;
@@ -29,11 +35,10 @@ export async function handleSignup(req: Request, res: Response) {
           'Email address already exists. Please select another email address.',
       });
 
-    const newUser = await createNewUser({ username, email, password });
+    await createNewUser({ username, email, password });
 
     res.status(httpStatus.CREATED).json({
       message: 'Registration successful! You can now login.',
-      user: { username: newUser.username, email: newUser.email },
     });
   } catch (error) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
@@ -84,7 +89,10 @@ export const handleLogin = async (
       const accessToken = await createAndSaveNewTokens(user.id, res);
 
       // Send the access token to the client (frontend)
-      return res.json({ accessToken });
+      return res.json({
+        accessToken,
+        user: { username: user.username, email: user.email },
+      });
     }
 
     // If the password is incorrect then we return an unauthorized status
@@ -94,4 +102,47 @@ export const handleLogin = async (
   } catch (err) {
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
   }
+};
+
+/**
+ * This function handles the logout process for users. It expects a request object with the following properties:
+ *
+ * @param {TypedRequest} req - The request object that includes a cookie with a valid refresh token
+ * @param {Response} res - The response object that will be used to send the HTTP response.
+ *
+ * @returns {Response} Returns an HTTP response that includes one of the following:
+ *   - A 204 NO CONTENT status code if the refresh token cookie is undefined
+ *   - A 204 NO CONTENT status code if the refresh token does not exists in the database
+ *   - A 204 NO CONTENT status code if the refresh token cookie is successfully cleared
+ */
+export const handleLogout = async (
+  req: TypedRequest,
+  res: Response,
+): Promise<Response> => {
+  const cookies = req.cookies;
+
+  console.log('cookies -> ', cookies);
+
+  const refreshTokenFromCookies = cookies[REFRESH_TOKEN_NAME];
+
+  if (!refreshTokenFromCookies) {
+    return res.sendStatus(httpStatus.NO_CONTENT);
+  }
+
+  // Is refreshToken in db?
+  const refreshTokenFromDB = await getRefreshTokenFromDB(
+    refreshTokenFromCookies,
+  );
+
+  if (!refreshTokenFromDB) {
+    res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
+    return res.sendStatus(httpStatus.NO_CONTENT);
+  }
+
+  // Delete refreshToken in db
+  await deleteRefreshTokenFromDB(refreshTokenFromCookies);
+
+  res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
+
+  return res.sendStatus(httpStatus.NO_CONTENT);
 };

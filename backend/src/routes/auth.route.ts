@@ -1,5 +1,9 @@
 import { Router } from 'express';
-import { handleSignup, handleLogin } from '../controllers/auth.controller';
+import {
+  handleSignup,
+  handleLogin,
+  handleLogout,
+} from '../controllers/auth.controller';
 import validateRequestBody from '../middlewares/validateRequestBody';
 import { signupSchema, loginSchema } from '../schemas';
 
@@ -10,5 +14,7 @@ router
   .post(validateRequestBody(signupSchema), handleSignup);
 
 router.route('/auth/login').post(validateRequestBody(loginSchema), handleLogin);
+
+router.route('/auth/logout').post(handleLogout);
 
 export default router;
