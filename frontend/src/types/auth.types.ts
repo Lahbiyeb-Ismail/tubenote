@@ -21,6 +21,7 @@ export type AuthContextType = {
   state: AuthState;
   login: (loginCredentials: LoginFormData) => void
   register: (registerCredentials: RegisterFormData) => void;
+  logout: () => void;
   isLoading: boolean;
 };
 

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { API_URL } from '@/utils/constants';
 import type { LoginFormData, RegisterFormData } from '@/lib/schemas';
 import type { LoginResponse, RegisterResponse } from '@/types';
+import axiosInstance from '@/lib/auth.lib';
 
 export const loginUser = async (
   loginData: LoginFormData
@@ -19,3 +20,7 @@ export const registerUser = async (
 
   return response.data;
 };
+
+export const logoutUser = async () => {
+  await axios.post(`${API_URL}/auth/logout`);
+}
