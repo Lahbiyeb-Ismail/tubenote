@@ -1,18 +1,21 @@
+"use client";
+
 import type React from "react";
 
 import Sidebar from "@/components/dashboard/Sidebar";
+import withAuth from "@/HOC/withAuth";
 
 type LayoutProps = {
-  children: React.ReactNode;
+	children: React.ReactNode;
 };
 
 function Layout({ children }: LayoutProps) {
-  return (
-    <div className="flex bg-gray-100">
-      <Sidebar />
-      <div className="ml-64 flex-1 bg-gray-100 p-4">{children}</div>
-    </div>
-  );
+	return (
+		<div className="flex bg-gray-100">
+			<Sidebar />
+			<div className="ml-64 flex-1 bg-gray-100 p-4">{children}</div>
+		</div>
+	);
 }
 
-export default Layout;
+export default withAuth(Layout);

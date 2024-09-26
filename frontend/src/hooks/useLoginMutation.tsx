@@ -26,7 +26,7 @@ function useLoginMutation(dispatch: React.Dispatch<AuthAction>) {
 			localStorage.setItem("accessToken", JSON.stringify(data.accessToken));
 			localStorage.setItem("isAuthenticated", JSON.stringify(true));
 			// Redirect on successful login
-			router.push("/");
+			router.push("/dashboard");
 		},
 		onError: (error: TypedError) => {
 			if (error.response) {
