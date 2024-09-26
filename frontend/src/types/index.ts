@@ -48,12 +48,12 @@ export type User = {
 };
 
 export type RegisterResponse = {
-  user: User;
   message: string;
 };
 
 export type LoginResponse = {
   accessToken: string;
+  user: User;
 };
 
 export type TypedError = AxiosError<{ message: string }>;

@@ -17,11 +17,14 @@ function useLoginMutation(dispatch: React.Dispatch<AuthAction>) {
 		mutationFn: loginUser,
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: ["user"] });
-			localStorage.setItem("accessToken", data.accessToken);
 			dispatch({
 				type: "LOGIN_SUCCESS",
-				payload: { accessToken: data.accessToken },
+				payload: { accessToken: data.accessToken, user: data.user },
 			});
+
+			localStorage.setItem("user", JSON.stringify(data.user));
+			localStorage.setItem("accessToken", JSON.stringify(data.accessToken));
+			localStorage.setItem("isAuthenticated", JSON.stringify(true));
 			// Redirect on successful login
 			router.push("/");
 		},

@@ -1,21 +1,15 @@
 "use client";
 
-import { useUserSession } from "@/hooks/useUserSession";
 import LoggedInButtons from "./LoggedInButtons";
 import LoggedOutButtons from "./LoggedOutButtons";
+import { useAuth } from "@/context/useAuth";
 
 function NavbarButtons() {
-  const { userData } = useUserSession();
+	const { state } = useAuth();
 
-  return (
-    <>
-      {userData ? (
-        <LoggedInButtons userData={userData} />
-      ) : (
-        <LoggedOutButtons />
-      )}
-    </>
-  );
+	return (
+		<>{state.isAuthenticated ? <LoggedInButtons /> : <LoggedOutButtons />}</>
+	);
 }
 
 export default NavbarButtons;

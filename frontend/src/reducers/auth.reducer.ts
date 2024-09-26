@@ -1,10 +1,12 @@
+import type { User } from '@/types';
 import type { AuthAction, AuthState } from '@/types/auth.types';
 
 export const authInitialState: AuthState = {
-  accessToken: null,
-  isAuthenticated: false,
+  accessToken: JSON.parse(localStorage.getItem('accessToken') as string) || null,
   errorMessage: '',
   successMessage: '',
+  isAuthenticated: JSON.parse(localStorage.getItem("isAuthenticated") as string) || false,
+  user: JSON.parse(localStorage.getItem('user') as string) as User || null,
 };
 
 function authReducer(state: AuthState, action: AuthAction): AuthState {
@@ -13,6 +15,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return {
         ...state,
         accessToken: action.payload.accessToken,
+        user: action.payload.user,
         isAuthenticated: true,
         errorMessage: '',
       };
@@ -20,8 +23,6 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return {
         ...state,
         successMessage: action.payload.successMessage,
-        isAuthenticated: false,
-        errorMessage: '',
       };
     case 'REQUEST_FAIL':
       return {
@@ -32,6 +33,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return {
         ...state,
         accessToken: null,
+        user: null,
         isAuthenticated: false,
       };
     default:
