@@ -1,4 +1,16 @@
-import { Globe, PlayCircle, BookOpen, FileCheck } from 'lucide-react';
+import {
+  Globe,
+  PlayCircle,
+  BookOpen,
+  FileCheck,
+  Home,
+  LayoutDashboard,
+  FileText,
+  Video,
+  HelpCircle,
+  Mail,
+  Shield,
+} from 'lucide-react';
 
 export const howItWorksSteps = [
   {
@@ -29,4 +41,18 @@ export const howItWorksSteps = [
       'Access your notes anytime, organized by video and timestamp for easy review.',
     color: 'text-yellow-500',
   },
+] as const;
+
+export const footerQuickLinks = [
+  { icon: Home, text: 'Home', link: '/' },
+  { icon: LayoutDashboard, text: 'Dashboard', link: '/dashboard' },
+  { icon: FileText, text: 'Notes', link: '/notes' },
+  { icon: Video, text: 'Video', link: '/video' },
+] as const;
+
+export const footerSupportLinks = [
+  { icon: HelpCircle, text: 'FAQ', link: '/faq' },
+  { icon: Mail, text: 'Contact Us', link: '/contact' },
+  { icon: HelpCircle, text: 'Help Center', link: '/help' },
+  { icon: Shield, text: 'Privacy Policy', link: '/privacy' },
 ] as const;
