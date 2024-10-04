@@ -1,11 +1,12 @@
 import Hero from "@/sections/Hero";
+import HowItWorks from "@/sections/HowItWorks";
 
 export default function Home() {
 	return (
 		<>
 			<main>
 				<Hero />
-				<section>How it work section</section>
+				<HowItWorks />
 			</main>
 
 			<footer>footer</footer>

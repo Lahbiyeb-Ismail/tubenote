@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { PlayCircle, Pencil, Brain, Rocket } from "lucide-react";
+import { PlayCircle, Pencil, Rocket } from "lucide-react";
 
 export default function Hero() {
 	return (
-		<div className="height_viewport bg-gradient-to-br from-purple-100 via-pink-100 to-red-100 flex">
+		<div className="height_viewport bg-gradient-to-br from-purple-100 via-pink-100 to-red-100 flex items-center">
 			<div className="max-w-6xl mx-auto px-4 py-8">
 				<main className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
 					<div className="space-y-6">
