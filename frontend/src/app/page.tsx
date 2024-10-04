@@ -1,8 +1,10 @@
+import Hero from "@/sections/Hero";
+
 export default function Home() {
 	return (
 		<>
 			<main>
-				<section>Hero section</section>
+				<Hero />
 				<section>How it work section</section>
 			</main>
 
