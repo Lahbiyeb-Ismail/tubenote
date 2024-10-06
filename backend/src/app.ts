@@ -2,6 +2,8 @@ import express, { type Express } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 
+import authRoutes from './routes/auth.route';
+
 const app: Express = express();
 
 app.use(helmet());
@@ -19,8 +21,6 @@ app.use(
   })
 );
 
-app.get('/', (_req, res) => {
-  res.send('Hello, world!');
-});
+app.use('/api/v1/auth', authRoutes);
 
 export default app;
