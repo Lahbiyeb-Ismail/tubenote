@@ -1,6 +1,6 @@
 import React from "react";
 import type { Control, FieldValues, FieldPath } from "react-hook-form";
-import type { LucideIcon } from "lucide-react";
+import { Eye, EyeOff, type LucideIcon } from "lucide-react";
 
 import {
 	FormControl,
@@ -28,6 +28,9 @@ function FormInput<T extends FieldValues>({
 	icon: Icon,
 	control,
 }: FormInputProps<T>) {
+	const [showPassword, setShowPassword] = React.useState(false);
+
+	const togglePasswordVisibility = () => setShowPassword(!showPassword);
 	return (
 		<FormField
 			name={name}
@@ -37,14 +40,33 @@ function FormInput<T extends FieldValues>({
 					<FormLabel>{label}</FormLabel>
 					<FormControl>
 						<div className="relative">
-							<Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
 							<Input
 								{...field}
 								id={name}
-								type={type}
+								type={
+									type === "password"
+										? showPassword
+											? "text"
+											: "password"
+										: type
+								}
 								placeholder={placeholder}
-								className="pl-10"
 							/>
+							{type === "password" ? (
+								<button
+									type="button"
+									onClick={togglePasswordVisibility}
+									className="absolute inset-y-0 right-0 pr-3 flex items-center"
+								>
+									{showPassword ? (
+										<EyeOff className="h-5 w-5 text-gray-400" />
+									) : (
+										<Eye className="h-5 w-5 text-gray-400" />
+									)}
+								</button>
+							) : (
+								<Icon className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+							)}
 						</div>
 					</FormControl>
 					<FormMessage />
