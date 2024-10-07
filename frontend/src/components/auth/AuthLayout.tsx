@@ -21,12 +21,15 @@ function AuthLayout({
 			<div className="w-full max-w-md">
 				<Card className="w-full">
 					{error && (
-						<Alert variant="destructive">
+						<Alert
+							variant="destructive"
+							className="w-[90%] text-center mx-auto mt-3"
+						>
 							<AlertDescription>{error}</AlertDescription>
 						</Alert>
 					)}
 					{success && (
-						<Alert>
+						<Alert className="w-[90%] text-center mx-auto mt-3">
 							<AlertDescription>{success}</AlertDescription>
 						</Alert>
 					)}
