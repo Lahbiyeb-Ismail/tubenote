@@ -56,3 +56,5 @@ export const footerSupportLinks = [
   { icon: HelpCircle, text: 'Help Center', link: '/help' },
   { icon: Shield, text: 'Privacy Policy', link: '/privacy' },
 ] as const;
+
+export const API_URL = process.env.NEXT_PUBLIC_API_URL;
