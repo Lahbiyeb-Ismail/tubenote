@@ -4,16 +4,17 @@ import Link from "next/link";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-import AuthLayout from "@/components/auth/AuthLayout";
+import { Lock, Mail, User } from "lucide-react";
 
 import type { RegisterFormData } from "@/types/auth.types";
 import { registerFormSchema } from "@/lib/schemas";
+
+import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
-import { Lock, Mail, User } from "lucide-react";
+import { Form } from "@/components/ui/form";
+import AuthLayout from "@/components/auth/AuthLayout";
 import FormInput from "@/components/auth/FormInput";
+import useRegister from "@/hooks/useRegister";
 
 export default function RegisterPage() {
 	const form = useForm<RegisterFormData>({
@@ -25,12 +26,13 @@ export default function RegisterPage() {
 		},
 	});
 
-	const handleRegister = (formData: RegisterFormData) => console.log(formData);
+	const { mutate, isPending, error } = useRegister();
 
-	const isLoading = false;
+	const handleRegister = (formData: RegisterFormData) => mutate(formData);
 
 	return (
 		<AuthLayout
+			error={error?.message}
 			title="Join TubeNote Today"
 			description="Unlock the full potential of video learning with our powerful tools"
 		>
@@ -67,9 +69,9 @@ export default function RegisterPage() {
 						<Button
 							type="submit"
 							className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700"
-							disabled={isLoading}
+							disabled={isPending}
 						>
-							{isLoading ? "Registering..." : "Register"}
+							{isPending ? "Registering..." : "Register"}
 						</Button>
 					</form>
 				</Form>
