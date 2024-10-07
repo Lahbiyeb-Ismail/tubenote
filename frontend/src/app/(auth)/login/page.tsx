@@ -22,6 +22,7 @@ import { loginFormSchema } from "@/lib/schemas";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Lock, Mail } from "lucide-react";
 import FormInput from "@/components/auth/FormInput";
+import useLogin from "@/hooks/useLogin";
 
 export default function LoginPage() {
 	const form = useForm<LoginFormData>({
@@ -32,14 +33,15 @@ export default function LoginPage() {
 		},
 	});
 
-	const handleLogin = (formData: LoginFormData) => console.log(formData);
+	const { mutate, isPending, error } = useLogin();
 
-	const isLoading = false;
+	const handleLogin = (formData: LoginFormData) => mutate(formData);
 
 	return (
 		<AuthLayout
 			title="Welcome Back"
 			description="Login to your account to access your notes"
+			error={error?.message}
 		>
 			<CardContent>
 				<Form {...form}>
@@ -63,9 +65,9 @@ export default function LoginPage() {
 						<Button
 							type="submit"
 							className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700"
-							disabled={isLoading}
+							disabled={isPending}
 						>
-							{isLoading ? "Logging in..." : "Login"}
+							{isPending ? "Logging in..." : "Login"}
 						</Button>
 					</form>
 				</Form>
