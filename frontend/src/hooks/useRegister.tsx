@@ -6,8 +6,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { registerUser } from "@/actions/auth.actions";
 
 import type { TypedError } from "@/types";
+import type { AuthAction } from "@/types/auth.types";
 
-function useRegister() {
+function useRegister(dispatch: React.Dispatch<AuthAction>) {
 	const queryClient = useQueryClient();
 	const router = useRouter();
 
@@ -20,9 +21,15 @@ function useRegister() {
 		},
 		onError: (error: TypedError) => {
 			if (error.response) {
-				console.log(error.response.data.message);
+				dispatch({
+					type: "REQUEST_FAIL",
+					payload: { errorMessage: error.response.data.message },
+				});
 			} else {
-				console.log("Login failed. Please try again.");
+				dispatch({
+					type: "REQUEST_FAIL",
+					payload: { errorMessage: "Failed Registration. Please try again." },
+				});
 			}
 		},
 	});
