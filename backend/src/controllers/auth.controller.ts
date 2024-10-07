@@ -1,7 +1,12 @@
 import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 
-import { createNewUser, isUserExist } from '../helpers/auth.helper';
+import {
+  checkPassword,
+  createAndSaveNewTokens,
+  createNewUser,
+  isUserExist,
+} from '../helpers/auth.helper';
 
 /**
  * Handles user registration.
@@ -42,6 +47,61 @@ export async function handleRegister(req: Request, res: Response) {
       username: newUser.username,
     });
   } catch (error) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: 'Internal Server Error',
+    });
+  }
+}
+
+/**
+ * Handles the login process for a user.
+ *
+ * @param req - The request object containing the user's email and password.
+ * @param res - The response object used to send back the appropriate HTTP response.
+ *
+ * @remarks
+ * This function performs the following steps:
+ * 1. Extracts the email and password from the request body.
+ * 2. Checks if a user with the provided email exists.
+ * 3. If the user does not exist, responds with a 404 status and an appropriate message.
+ * 4. If the user exists, checks if the provided password is correct.
+ * 5. If the password is incorrect, responds with a 401 status and an appropriate message.
+ * 6. If the password is correct, creates and saves new tokens for the user.
+ * 7. Responds with a 200 status, a success message, the access token, and user details.
+ *
+ * @throws Will respond with a 500 status and an "Internal Server Error" message if an error occurs during the process.
+ */
+export async function handleLogin(req: Request, res: Response) {
+  const { email, password } = req.body;
+
+  try {
+    const user = await isUserExist(email);
+
+    if (!user) {
+      res.status(httpStatus.NOT_FOUND).json({
+        message:
+          'No User found with this email address. Please provide a valid email address.',
+      });
+      return;
+    }
+
+    const isPasswordCorrect = await checkPassword(password, user.password);
+
+    if (!isPasswordCorrect) {
+      res.status(httpStatus.UNAUTHORIZED).json({
+        message: 'Invalid password. Please try again.',
+      });
+      return;
+    }
+
+    const accessToken = await createAndSaveNewTokens(user.id, res);
+
+    res.status(httpStatus.OK).json({
+      message: 'Login successful',
+      accessToken,
+      user: { username: user.username, email: user.email },
+    });
+  } catch (err) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: 'Internal Server Error',
     });
