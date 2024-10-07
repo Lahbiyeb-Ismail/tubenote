@@ -14,7 +14,7 @@ import { CardContent, CardFooter } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import AuthLayout from "@/components/auth/AuthLayout";
 import FormInput from "@/components/auth/FormInput";
-import useRegister from "@/hooks/useRegister";
+import { useAuth } from "@/context/useAuth";
 
 export default function RegisterPage() {
 	const form = useForm<RegisterFormData>({
@@ -26,13 +26,13 @@ export default function RegisterPage() {
 		},
 	});
 
-	const { mutate, isPending, error } = useRegister();
+	const { isLoading, register, state } = useAuth();
 
-	const handleRegister = (formData: RegisterFormData) => mutate(formData);
+	const handleRegister = (formData: RegisterFormData) => register(formData);
 
 	return (
 		<AuthLayout
-			error={error?.message}
+			error={state.errorMessage}
 			title="Join TubeNote Today"
 			description="Unlock the full potential of video learning with our powerful tools"
 		>
@@ -69,9 +69,9 @@ export default function RegisterPage() {
 						<Button
 							type="submit"
 							className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700"
-							disabled={isPending}
+							disabled={isLoading}
 						>
-							{isPending ? "Registering..." : "Register"}
+							{isLoading ? "Registering..." : "Register"}
 						</Button>
 					</form>
 				</Form>
