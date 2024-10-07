@@ -9,3 +9,12 @@ export type RegisterResponse = {
   message: string;
   username: string;
 };
+
+export type LoginResponse = {
+  message: string;
+  accessToken: string;
+  user: {
+    username: string;
+    email: string;
+  };
+};
