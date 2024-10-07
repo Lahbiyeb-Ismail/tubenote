@@ -34,10 +34,7 @@ export async function registerUser(
 export async function loginUser(
   loginCredentials: LoginFormData
 ): Promise<LoginResponse> {
-  const response = await axios.post(
-    `${API_URL}/auth/register`,
-    loginCredentials
-  );
+  const response = await axios.post(`${API_URL}/auth/login`, loginCredentials);
 
   return response.data;
 }
