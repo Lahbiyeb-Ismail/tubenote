@@ -11,6 +11,11 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['production', 'development', 'test']),
   PORT: z.string({ message: 'PORT must be a string' }).default('8080'),
   SERVER_URL: z.string({ message: 'SERVER_URL must be a string' }),
+  ACCESS_TOKEN_SECRET: z.string().min(8),
+  ACCESS_TOKEN_EXPIRE: z.string().default('20m'),
+  REFRESH_TOKEN_SECRET: z.string().min(8),
+  REFRESH_TOKEN_EXPIRE: z.string().default('1d'),
+  REFRESH_TOKEN_COOKIE_NAME: z.string().default('refresh_token'),
 });
 
 type EnvSchema = z.infer<typeof envSchema>;
@@ -38,6 +43,17 @@ const envConfig = {
   server: {
     port: validatedEnv.PORT,
     url: validatedEnv.SERVER_URL,
+  },
+  jwt: {
+    access_token: {
+      secret: validatedEnv.ACCESS_TOKEN_SECRET,
+      expire: validatedEnv.ACCESS_TOKEN_EXPIRE,
+    },
+    refresh_token: {
+      secret: validatedEnv.REFRESH_TOKEN_SECRET,
+      expire: validatedEnv.REFRESH_TOKEN_EXPIRE,
+      cookie_name: validatedEnv.REFRESH_TOKEN_COOKIE_NAME,
+    },
   },
 } as const;
 
