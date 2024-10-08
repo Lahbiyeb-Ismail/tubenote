@@ -10,6 +10,7 @@ import {
   HelpCircle,
   Mail,
   Shield,
+  Settings,
 } from 'lucide-react';
 
 export const howItWorksSteps = [
@@ -55,6 +56,13 @@ export const footerSupportLinks = [
   { icon: Mail, text: 'Contact Us', link: '/contact' },
   { icon: HelpCircle, text: 'Help Center', link: '/help' },
   { icon: Shield, text: 'Privacy Policy', link: '/privacy' },
+] as const;
+
+export const sidebarMenuLinks = [
+  { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
+  { name: 'Notes', icon: FileText, href: '/notes' },
+  { name: 'Videos', icon: Video, href: '/videos' },
+  { name: 'Settings', icon: Settings, href: '/settings' },
 ] as const;
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL;
