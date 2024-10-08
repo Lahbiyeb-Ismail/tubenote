@@ -16,6 +16,8 @@ const envSchema = z.object({
   REFRESH_TOKEN_SECRET: z.string().min(8),
   REFRESH_TOKEN_EXPIRE: z.string().default('1d'),
   REFRESH_TOKEN_COOKIE_NAME: z.string().default('refresh_token'),
+  YOUTUBE_API_URL: z.string().url().includes('www.googleapis.com'),
+  YOUTUBE_API_KEY: z.string(),
 });
 
 type EnvSchema = z.infer<typeof envSchema>;
@@ -53,6 +55,12 @@ const envConfig = {
       secret: validatedEnv.REFRESH_TOKEN_SECRET,
       expire: validatedEnv.REFRESH_TOKEN_EXPIRE,
       cookie_name: validatedEnv.REFRESH_TOKEN_COOKIE_NAME,
+    },
+  },
+  youtube: {
+    api: {
+      url: validatedEnv.YOUTUBE_API_URL,
+      key: validatedEnv.YOUTUBE_API_KEY,
     },
   },
 } as const;
