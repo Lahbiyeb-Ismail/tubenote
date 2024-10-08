@@ -14,3 +14,7 @@ export const registerFormSchema = z.object({
     .string()
     .min(6, { message: 'Password must be at least 8 characters.' }),
 });
+
+export const videoFormSchema = z.object({
+  videoUrl: z.string().url('Invalid URL.'),
+});
