@@ -1,8 +1,9 @@
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import httpStatus from 'http-status';
 
-import { getYoutubeVideoData } from '../helpers/video.helper';
+import { saveVideoData } from '../helpers/video.helper';
 import prismaClient from '../lib/prisma';
+import type { PayloadRequest } from '../types';
 
 /**
  * Retrieves video data from YouTube and stores it in the database.
@@ -18,8 +19,24 @@ import prismaClient from '../lib/prisma';
  *
  * @returns A JSON response containing the created video data or an error message.
  */
-export async function getVideoData(req: Request, res: Response) {
+
+export async function getVideoData(req: PayloadRequest, res: Response) {
   const { videoId } = req.body;
+  const userID = req.payload?.userID;
+
+  if (!userID) {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'UserID is required' });
+    return;
+  }
+
+  const user = await prismaClient.user.findUnique({
+    where: { id: userID },
+  });
+
+  if (!user) {
+    res.status(httpStatus.NOT_FOUND).json({ message: 'User not found' });
+    return;
+  }
 
   if (!videoId) {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'VideoId is required' });
@@ -27,26 +44,16 @@ export async function getVideoData(req: Request, res: Response) {
   }
 
   try {
-    const videoData = await getYoutubeVideoData(videoId);
+    const videoExists = await prismaClient.video.findFirst({
+      where: { youtubeId: videoId },
+    });
 
-    if (!videoData.length) {
-      res.status(httpStatus.NOT_FOUND).json({
-        message:
-          'No Video found with the provided id. Please provide a valid video id.',
-      });
+    if (videoExists) {
+      res.status(httpStatus.OK).json(videoExists);
       return;
     }
 
-    const video = await prismaClient.video.create({
-      data: {
-        etag: videoData[0].etag,
-        kind: videoData[0].kind,
-        youtubeId: videoData[0].id,
-        statistics: videoData[0].statistics,
-        snippet: videoData[0].snippet,
-        player: videoData[0].player,
-      },
-    });
+    const video = await saveVideoData(videoId, userID, res);
 
     res.status(httpStatus.OK).json(video);
   } catch (error) {
