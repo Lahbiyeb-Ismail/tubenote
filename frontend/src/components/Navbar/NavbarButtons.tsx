@@ -1,11 +1,16 @@
+"use client";
+
+import { useAuth } from "@/context/useAuth";
+
 import LoggedInButtons from "./LoggedInButtons";
 import LoggedOutButtons from "./LoggedOutButtons";
 
 function NavbarButtons() {
-	// for testing purposes
-	const isAuthenticated = false;
+	const { state } = useAuth();
 
-	return <>{isAuthenticated ? <LoggedInButtons /> : <LoggedOutButtons />}</>;
+	return (
+		<>{state.isAuthenticated ? <LoggedInButtons /> : <LoggedOutButtons />}</>
+	);
 }
 
 export default NavbarButtons;
