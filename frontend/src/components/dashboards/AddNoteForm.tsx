@@ -3,16 +3,12 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-} from "../ui/form";
+import { Form, FormControl, FormField, FormItem } from "../ui/form";
 import { Input } from "../ui/input";
 
 import { videoFormSchema } from "@/lib/schemas";
 import type { VideoUrl } from "@/types/note.types";
+import axiosInstance from "@/lib/axios.lib";
 
 function AddNoteForm() {
 	const form = useForm<VideoUrl>({
@@ -22,7 +18,24 @@ function AddNoteForm() {
 		},
 	});
 
-	const handleAddNote = (formData: VideoUrl) => console.log(formData);
+	const handleAddNote = async (formData: VideoUrl) => {
+		const { videoUrl } = formData;
+
+		const extractVideoId = (url: string) => {
+			const videoId = url.split("v=")[1];
+			const ampersandPosition = videoId.indexOf("&");
+			if (ampersandPosition !== -1) {
+				return videoId.substring(0, ampersandPosition);
+			}
+			return videoId;
+		};
+
+		const response = await axiosInstance.post("/videos", {
+			videoId: extractVideoId(videoUrl),
+		});
+
+		console.log(response);
+	};
 
 	return (
 		<Form {...form}>
