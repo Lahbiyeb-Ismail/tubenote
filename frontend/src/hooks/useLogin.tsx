@@ -26,8 +26,8 @@ function useLogin(dispatch: React.Dispatch<AuthAction>) {
 				},
 			});
 
-			console.log(data);
-			// router.push("/");
+			localStorage.setItem("accessToken", data.accessToken);
+			router.push("/dashboard");
 		},
 		onError: (error: TypedError) => {
 			if (error.response) {
