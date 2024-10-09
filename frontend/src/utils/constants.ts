@@ -65,4 +65,16 @@ export const sidebarMenuLinks = [
   { name: 'Settings', icon: Settings, href: '/settings' },
 ] as const;
 
+type NavItem = {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+};
+
+export const navItems: NavItem[] = [
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Notes', href: '/notes', icon: FileText },
+  { name: 'Videos', href: '/videos', icon: Video },
+];
+
 export const API_URL = process.env.NEXT_PUBLIC_API_URL;
