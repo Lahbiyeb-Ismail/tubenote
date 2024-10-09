@@ -1,6 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/dashboards/Sidebar";
+import withAuth from "@/HOC/withAuth";
 
 type LayoutProps = {
 	children: React.ReactNode;
@@ -15,4 +16,4 @@ function Layout({ children }: LayoutProps) {
 	);
 }
 
-export default Layout;
+export default withAuth(Layout);
