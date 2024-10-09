@@ -1,8 +1,5 @@
-import React from "react";
-
 import UserAvatar from "../global/UserAvatar";
-import { Button } from "../ui/button";
-import { LinkButton } from "../global/LinkButton";
+import NavbarLinks from "./NavbarLinks";
 
 function LoggedInButtons() {
 	const handleLogout = () => {
@@ -10,13 +7,8 @@ function LoggedInButtons() {
 	};
 
 	return (
-		<div className="flex gap-4">
-			<LinkButton href="/dashboard" size="md">
-				Dashboard
-			</LinkButton>
-			<Button size="default" variant="secondary" onClick={handleLogout}>
-				Logout
-			</Button>
+		<div className="flex-grow flex justify-between gap-4">
+			<NavbarLinks />
 			<UserAvatar username="Ismail" />
 		</div>
 	);
