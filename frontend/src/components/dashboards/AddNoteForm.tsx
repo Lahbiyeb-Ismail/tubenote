@@ -6,8 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "../ui/form";
 import { Input } from "../ui/input";
 
+import { useVideo } from "@/context/useVideo";
 import { videoFormSchema } from "@/lib/schemas";
-import useSaveVideoData from "@/hooks/useSaveVideoData";
 import type { VideoUrl } from "@/types/note.types";
 
 function AddNoteForm() {
@@ -18,9 +18,10 @@ function AddNoteForm() {
 		},
 	});
 
-	const { mutate, isPending } = useSaveVideoData();
+	const { isLoading, saveVideo } = useVideo();
 
-	const handleAddNote = async (formData: VideoUrl) => mutate(formData.videoUrl);
+	const handleAddNote = async (formData: VideoUrl) =>
+		saveVideo(formData.videoUrl);
 
 	return (
 		<Form {...form}>
@@ -59,9 +60,9 @@ function AddNoteForm() {
 					<button
 						className="flex-shrink-0 rounded border-4 border-[#171215] bg-[#171215] px-2 py-1 text-sm text-white hover:border-[#2c2326] hover:bg-[#2c2326]"
 						type="submit"
-						disabled={isPending}
+						disabled={isLoading}
 					>
-						{isPending ? "Saving Video" : "Take Note"}
+						{isLoading ? "Saving Video" : "Take Note"}
 					</button>
 				</div>
 			</form>
