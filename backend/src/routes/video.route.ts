@@ -4,6 +4,6 @@ import isAuthenticated from '../middlewares/isAuthenticated';
 
 const router = Router();
 
-router.route('/').post(isAuthenticated, getVideoData);
+router.route('/:videoId').get(isAuthenticated, getVideoData);
 
 export default router;
