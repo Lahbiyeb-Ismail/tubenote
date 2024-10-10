@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar/Navbar";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
 import { AuthProvider } from "@/context/useAuth";
+import { VideoProvider } from "@/context/useVideo";
 
 const geistSans = localFont({
 	src: "./fonts/GeistVF.woff",
@@ -33,9 +34,11 @@ export default function RootLayout({
 			>
 				<ReactQueryProvider>
 					<AuthProvider>
-						<Navbar />
+						<VideoProvider>
+							<Navbar />
 
-						{children}
+							{children}
+						</VideoProvider>
 					</AuthProvider>
 				</ReactQueryProvider>
 			</body>
