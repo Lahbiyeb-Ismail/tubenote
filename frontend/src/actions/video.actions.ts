@@ -11,10 +11,8 @@ import type { Video } from '@/types/video.types';
  * @returns {Promise<Video | null>} - A promise that resolves to the saved
  * video data or null if the video ID could not be extracted.
  */
-export async function saveVideoData(videoUrl: string): Promise<Video | null> {
+export async function saveVideoData(videoUrl: string): Promise<Video> {
   const videoId = extractVideoId(videoUrl);
-
-  if (!videoId) return null;
 
   const response = await axiosInstance.post('/videos', { videoId });
 
