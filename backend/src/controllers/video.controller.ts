@@ -21,7 +21,13 @@ import type { PayloadRequest } from '../types';
  */
 
 export async function getVideoData(req: PayloadRequest, res: Response) {
-  const { videoId } = req.body;
+  const { videoId } = req.params;
+
+  if (!videoId) {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'VideoId is required' });
+    return;
+  }
+
   const userID = req.payload?.userID;
 
   if (!userID) {
@@ -35,11 +41,6 @@ export async function getVideoData(req: PayloadRequest, res: Response) {
 
   if (!user) {
     res.status(httpStatus.NOT_FOUND).json({ message: 'User not found' });
-    return;
-  }
-
-  if (!videoId) {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'VideoId is required' });
     return;
   }
 
