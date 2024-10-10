@@ -21,7 +21,7 @@ import type { PayloadRequest } from '../types';
  */
 
 export async function getVideoData(req: PayloadRequest, res: Response) {
-  const { videoId } = req.params;
+  const { videoId } = req.body;
 
   if (!videoId) {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'VideoId is required' });
