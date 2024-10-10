@@ -24,6 +24,8 @@ function useSaveVideoData(dispatch: React.Dispatch<VideoAction>) {
 					success: true,
 				},
 			});
+
+			router.push(`/editor/${data.youtubeId}`);
 		},
 		onError: (error: TypedError) => {
 			console.log(error);
