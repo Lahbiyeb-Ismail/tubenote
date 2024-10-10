@@ -7,8 +7,8 @@ import { Form, FormControl, FormField, FormItem } from "../ui/form";
 import { Input } from "../ui/input";
 
 import { videoFormSchema } from "@/lib/schemas";
+import useSaveVideoData from "@/hooks/useSaveVideoData";
 import type { VideoUrl } from "@/types/note.types";
-import axiosInstance from "@/lib/axios.lib";
 
 function AddNoteForm() {
 	const form = useForm<VideoUrl>({
@@ -18,24 +18,9 @@ function AddNoteForm() {
 		},
 	});
 
-	const handleAddNote = async (formData: VideoUrl) => {
-		const { videoUrl } = formData;
+	const { mutate, isPending } = useSaveVideoData();
 
-		const extractVideoId = (url: string) => {
-			const videoId = url.split("v=")[1];
-			const ampersandPosition = videoId.indexOf("&");
-			if (ampersandPosition !== -1) {
-				return videoId.substring(0, ampersandPosition);
-			}
-			return videoId;
-		};
-
-		const response = await axiosInstance.post("/videos", {
-			videoId: extractVideoId(videoUrl),
-		});
-
-		console.log(response);
-	};
+	const handleAddNote = async (formData: VideoUrl) => mutate(formData.videoUrl);
 
 	return (
 		<Form {...form}>
@@ -74,8 +59,9 @@ function AddNoteForm() {
 					<button
 						className="flex-shrink-0 rounded border-4 border-[#171215] bg-[#171215] px-2 py-1 text-sm text-white hover:border-[#2c2326] hover:bg-[#2c2326]"
 						type="submit"
+						disabled={isPending}
 					>
-						Take Note
+						{isPending ? "Saving Video" : "Take Note"}
 					</button>
 				</div>
 			</form>
