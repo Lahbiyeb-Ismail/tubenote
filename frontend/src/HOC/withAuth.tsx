@@ -10,7 +10,14 @@ function withAuth<P extends object>(WrappedComponent: ComponentType<P>) {
 		const { state } = useAuth();
 		const router = useRouter();
 
-		if (!state.isAuthenticated) {
+		let accessToken: string | null = null;
+
+		if (typeof window !== "undefined") {
+			// This code will only run in the browser
+			accessToken = localStorage.getItem("accessToken");
+		}
+
+		if (!accessToken) {
 			router.push("/login");
 			return null; // Render nothing while redirecting
 		}
