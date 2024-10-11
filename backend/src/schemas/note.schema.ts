@@ -8,7 +8,7 @@ export const noteSchema = {
     content: z
       .string()
       .min(10, { message: 'Content must be at least 10 characters long.' }),
-    videoTile: z.string(),
+    videoTitle: z.string(),
     thumbnail: z.string(),
     videoId: z.string(),
   }),
