@@ -16,5 +16,13 @@ export const registerFormSchema = z.object({
 });
 
 export const videoFormSchema = z.object({
-  videoUrl: z.string().url('Invalid URL.'),
+  videoUrl: z
+    .string()
+    .url({
+      message: "Invalid youtube URL. Please provide a valid youtube video URL.",
+    })
+    .includes("youtube.com/watch?v=", {
+      message: "Invalid youtube URL. Please provide a valid youtube video URL.",
+    }),
 });
+
