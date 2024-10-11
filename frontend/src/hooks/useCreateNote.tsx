@@ -1,26 +1,37 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { TypedError } from "@/types";
 import { createNote } from "@/actions/note.actions";
+import type { NoteAction } from "@/types/note.types";
 
-function useCreateNote() {
+function useCreateNote(dispatch: React.Dispatch<NoteAction>) {
 	const queryClient = useQueryClient();
-	const router = useRouter();
 
 	return useMutation({
 		mutationFn: createNote,
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: ["notes"] });
-			console.log(data);
+			dispatch({
+				type: "CREATE_NOTE_SUCCESS",
+				payload: { message: data.message, note: data.note, success: true },
+			});
 		},
 		onError: (error: TypedError) => {
 			if (error.response) {
-				console.log(error.response.data.message);
+				dispatch({
+					type: "CREATE_NOTE_FAIL",
+					payload: { message: error.response.data.message, success: false },
+				});
 			} else {
-				console.log("Note Creating Failed. Please try again.");
+				dispatch({
+					type: "CREATE_NOTE_FAIL",
+					payload: {
+						message: "Note Creating Failed. Please try again.",
+						success: false,
+					},
+				});
 			}
 		},
 	});
