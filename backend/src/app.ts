@@ -4,6 +4,7 @@ import cors from 'cors';
 
 import authRoutes from './routes/auth.route';
 import videoRoutes from './routes/video.route';
+import noteRoutes from './routes/note.route';
 
 const app: Express = express();
 
@@ -24,5 +25,6 @@ app.use(
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/videos', videoRoutes);
+app.use('/api/v1/notes', noteRoutes);
 
 export default app;
