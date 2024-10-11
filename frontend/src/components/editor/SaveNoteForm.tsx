@@ -5,6 +5,8 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 
 import { saveNoteFormSchema } from "@/lib/schemas";
 import type { NoteTitle } from "@/types/note.types";
+import useCreateNote from "@/hooks/useCreateNote";
+import { useVideo } from "@/context/useVideo";
 
 type SaveNoteFormProps = {
 	noteTitle?: string;
@@ -23,10 +25,20 @@ function SaveNoteForm({ noteTitle: title, noteContent }: SaveNoteFormProps) {
 		},
 	});
 
-	const handleNoteSave: SubmitHandler<NoteTitle> = (data: NoteTitle) => {
-		const { noteTitle } = data;
+	const {
+		state: { video },
+	} = useVideo();
 
-		console.log(noteContent);
+	const { mutate, isPending } = useCreateNote();
+
+	const handleNoteSave: SubmitHandler<NoteTitle> = (data: NoteTitle) => {
+		mutate({
+			title: data.noteTitle,
+			content: noteContent,
+			videoId: video?.id,
+			thumbnail: video?.snippet.thumbnails.medium.url,
+			videoTitle: video?.snippet.title,
+		});
 	};
 
 	return (
@@ -44,8 +56,9 @@ function SaveNoteForm({ noteTitle: title, noteContent }: SaveNoteFormProps) {
 			<button
 				type="submit"
 				className="inline-flex items-center justify-center whitespace-nowrap rounded-md border-2 bg-[#282828] px-4 py-2 text-center text-sm font-medium text-white transition-all hover:border-[#282828] hover:bg-white hover:text-[#282828] focus:ring-[#282828] focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 dark:focus:ring-[#282828]"
+				disabled={isPending}
 			>
-				save
+				{isPending ? "Saving..." : "Save"}
 			</button>
 		</form>
 	);
