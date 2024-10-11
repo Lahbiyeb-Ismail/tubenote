@@ -9,6 +9,8 @@ import "@/app/globals.css";
 import "@blocknote/mantine/style.css";
 
 import type { BlockNoteEditor } from "@blocknote/core";
+import SaveNoteForm from "./SaveNoteForm";
+import { useState } from "react";
 
 type TextEditorProps = {
 	initialNoteContent?: string;
@@ -22,12 +24,18 @@ function TextEditor({ initialNoteContent }: TextEditorProps) {
 			: undefined,
 	});
 
+	const [noteContent, setNoteContent] = useState<string>(
+		initialNoteContent || "",
+	);
+
 	return (
 		<div className="h-full overflow-auto">
+			<SaveNoteForm noteContent={noteContent} />
 			<BlockNoteView
 				editor={editor}
 				theme="light"
 				className="h-[90%] overflow-auto border-2 border-gray-300"
+				onChange={() => setNoteContent(JSON.stringify(editor.document))}
 			/>
 		</div>
 	);
