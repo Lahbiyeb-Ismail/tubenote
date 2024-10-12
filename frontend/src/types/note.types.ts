@@ -37,3 +37,8 @@ export type NoteAction =
       payload: { message: string; note: Note; success: true };
     }
   | { type: 'CREATE_NOTE_FAIL'; payload: { message: string; success: false } };
+
+export type CreateNoteResponse = {
+  message: string;
+  note: Note;
+};
