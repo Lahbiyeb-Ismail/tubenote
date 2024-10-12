@@ -25,3 +25,16 @@ export async function getUserNotes(): Promise<INote[]> {
 
   return notes;
 }
+
+/**
+ * Deletes a note with the specified ID.
+ *
+ * @param {string} noteId - The ID of the note to delete.
+ * @returns {Promise<{ message: string }>} A promise that resolves
+ * to an object containing a message.
+ */
+export async function deleteNote(noteId: string): Promise<{ message: string }> {
+  const response = await axiosInstance.delete(`/notes/${noteId}`);
+
+  return response.data;
+}
