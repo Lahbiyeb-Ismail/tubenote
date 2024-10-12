@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { createNote } from '../controllers/note.controller';
+import { createNote, getUserNotes } from '../controllers/note.controller';
 
 import isAuthenticated from '../middlewares/isAuthenticated';
 import validateRequestBody from '../middlewares/validateRequestBody';
@@ -12,5 +12,7 @@ const router = Router();
 router
   .route('/')
   .post(isAuthenticated, validateRequestBody(noteSchema), createNote);
+
+router.route('/').get(isAuthenticated, getUserNotes);
 
 export default router;
