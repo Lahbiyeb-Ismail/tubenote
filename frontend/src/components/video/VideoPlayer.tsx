@@ -1,23 +1,23 @@
 "use client";
 
-import { useVideo } from "@/context/useVideo";
-import parseStringtoHtml from "@/helpers/parseStringToHtml";
 import React from "react";
+import YouTube from "react-youtube";
+
+import { useVideo } from "@/context/useVideo";
 
 function VideoPlayer() {
 	const { state } = useVideo();
 
-	const player = state.video?.player;
+	const videoId = state.video?.youtubeId;
 
-	const videoIframe = parseStringtoHtml(player?.embedHtml as string);
-
-	console.log(player);
 	return (
-		<div
-			// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
-			dangerouslySetInnerHTML={{ __html: videoIframe }}
-			className="mb-6 h-full"
-		/>
+		<div className="h-full">
+			<YouTube
+				videoId={videoId}
+				style={{ height: "100%" }}
+				opts={{ width: "100%", height: "100%" }}
+			/>
+		</div>
 	);
 }
 
