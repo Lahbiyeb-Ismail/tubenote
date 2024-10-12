@@ -126,3 +126,64 @@ export async function getUserNotes(req: PayloadRequest, res: Response) {
       .json({ message: 'Error creating note.', error });
   }
 }
+
+/**
+ * Deletes a note based on the provided note ID.
+ *
+ * @param req - The request object containing the payload and parameters.
+ * @param res - The response object used to send the response.
+ *
+ * The function performs the following steps:
+ * 1. Extracts the userID from the request payload.
+ * 2. If the userID is not present, responds with an UNAUTHORIZED status.
+ * 3. Extracts the noteId from the request parameters.
+ * 4. If the noteId is not present, responds with a BAD_REQUEST status.
+ * 5. Attempts to find the user in the database using the userID.
+ * 6. If the user is not found, responds with a NOT_FOUND status.
+ * 7. Deletes the note from the database using the noteId.
+ * 8. If successful, responds with an OK status and a success message.
+ * 9. If an error occurs during the process, responds with an
+ * INTERNAL_SERVER_ERROR status and an error message.
+ */
+export async function deleteNote(req: PayloadRequest, res: Response) {
+  const userID = req.payload?.userID;
+
+  if (!userID) {
+    res
+      .status(httpStatus.UNAUTHORIZED)
+      .json({ message: 'Unauthorized access. Please try again.' });
+    return;
+  }
+
+  const { noteId } = req.params;
+
+  if (!noteId) {
+    res
+      .status(httpStatus.BAD_REQUEST)
+      .json({ message: 'Please provide the note ID.' });
+    return;
+  }
+
+  try {
+    const user = await prismaClient.user.findUnique({
+      where: { id: userID },
+    });
+
+    if (!user) {
+      res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: 'Unauthorized access. Please try again.' });
+      return;
+    }
+
+    await prismaClient.note.delete({
+      where: { id: noteId },
+    });
+
+    res.status(httpStatus.OK).json({ message: 'Note deleted successfully.' });
+  } catch (error) {
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: 'Error creating note.', error });
+  }
+}
