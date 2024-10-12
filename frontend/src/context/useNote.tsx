@@ -6,6 +6,7 @@ import type { NoteContextType, NoteProviderProps } from "@/types/note.types";
 
 import useCreateNote from "@/hooks/useCreateNote";
 import noteReducer, { noteInitialState } from "@/reducers/note.reducer";
+import useGetUserNotes from "@/hooks/useGetUserNotes";
 
 const NoteContext = createContext<NoteContextType | undefined>(undefined);
 
@@ -13,11 +14,15 @@ export function NoteProvider({ children }: NoteProviderProps) {
 	const [state, dispatch] = useReducer(noteReducer, noteInitialState);
 
 	const createNoteMutation = useCreateNote(dispatch);
+	const { data, error, isLoading } = useGetUserNotes();
 
 	const value = {
 		state,
 		createNote: createNoteMutation.mutate,
 		isLoading: createNoteMutation.isPending,
+		notes: data,
+		getNotesError: error,
+		isNotesLoading: isLoading,
 	};
 
 	return <NoteContext.Provider value={value}>{children}</NoteContext.Provider>;
