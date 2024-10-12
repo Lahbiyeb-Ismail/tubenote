@@ -29,6 +29,9 @@ export type NoteContextType = {
   state: NoteState;
   createNote: (note: Note) => void;
   isLoading: boolean;
+  notes: INote[] | undefined;
+  getNotesError: Error | null;
+  isNotesLoading: boolean;
 };
 
 export type NoteAction =
@@ -37,8 +40,12 @@ export type NoteAction =
       payload: { message: string; note: Note; success: true };
     }
   | { type: 'CREATE_NOTE_FAIL'; payload: { message: string; success: false } };
+export interface INote extends Note {
+  id: string;
+  createdAt: string;
+}
 
 export type CreateNoteResponse = {
   message: string;
-  note: Note;
+  note: INote;
 };
