@@ -32,6 +32,7 @@ export type NoteContextType = {
   notes: INote[] | undefined;
   getNotesError: Error | null;
   isNotesLoading: boolean;
+  deleteNote: (noteId: string) => void;
 };
 
 export type NoteAction =
