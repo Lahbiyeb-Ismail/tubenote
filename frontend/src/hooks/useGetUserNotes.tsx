@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 function useGetUserNotes() {
 	return useQuery({
-		queryKey: ["user-notes"],
+		queryKey: ["notes"],
 		queryFn: () => getUserNotes(),
 	});
 }
