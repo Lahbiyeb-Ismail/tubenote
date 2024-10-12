@@ -12,12 +12,15 @@ import {
 } from "../ui/card";
 import { Button } from "../ui/button";
 import formatDate from "@/helpers/formatDate";
+import { useNote } from "@/context/useNote";
 
 type NoteCardProps = {
 	note: INote;
 };
 
 function NoteCard({ note }: NoteCardProps) {
+	const { deleteNote, isLoading } = useNote();
+
 	return (
 		<Card className="overflow-hidden bg-white shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105">
 			<div className="relative h-48 w-full">
@@ -60,7 +63,9 @@ function NoteCard({ note }: NoteCardProps) {
 				<Button
 					variant="outline"
 					size="sm"
-					className="text-red-700 hover:text-red-800 hover:bg-red-50"
+					className="text-red-700 hover:text-red-800 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+					onClick={() => deleteNote(note.id)}
+					disabled={isLoading}
 				>
 					<Trash2Icon className="mr-2 h-4 w-4" />
 					Delete
