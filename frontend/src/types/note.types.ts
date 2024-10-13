@@ -33,6 +33,7 @@ export type NoteContextType = {
   getNotesError: Error | null;
   isNotesLoading: boolean;
   deleteNote: (noteId: string) => void;
+  getNote: (noteId: string) => void;
 };
 
 export type NoteAction =
@@ -40,7 +41,12 @@ export type NoteAction =
       type: 'CREATE_NOTE_SUCCESS';
       payload: { message: string; note: Note; success: true };
     }
-  | { type: 'CREATE_NOTE_FAIL'; payload: { message: string; success: false } };
+  | { type: 'CREATE_NOTE_FAIL'; payload: { message: string; success: false } }
+  | {
+      type: 'GET_NOTE_SUCCESS';
+      payload: { note: INote; success: true };
+    }
+  | { type: 'GET_NOTE_FAIL'; payload: { message: string; success: false } };
 export interface INote extends Note {
   id: string;
   createdAt: string;
