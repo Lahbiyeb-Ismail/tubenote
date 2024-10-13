@@ -35,6 +35,19 @@ function noteReducer(state: NoteState, action: NoteAction): NoteState {
         message: action.payload.message,
         success: false,
       };
+    case 'UPDATE_NOTE_SUCCESS':
+      return {
+        ...state,
+        note: action.payload.note,
+        success: true,
+      };
+    case 'UPDATE_NOTE_FAIL':
+      return {
+        ...state,
+        note: null,
+        message: action.payload.message,
+        success: false,
+      };
     default:
       return state;
   }
