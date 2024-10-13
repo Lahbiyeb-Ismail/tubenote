@@ -21,7 +21,7 @@ export type NoteProviderProps = {
 };
 
 export type NoteState = {
-  note: Note | null;
+  note: INote | null;
   message: string | null;
   success: boolean;
 };
@@ -35,6 +35,7 @@ export type NoteContextType = {
   isNotesLoading: boolean;
   deleteNote: (noteId: string) => void;
   getNote: (noteId: string) => void;
+  updateNote: (note: UpdateNoteProps) => void;
 };
 
 export type NoteAction =
@@ -47,7 +48,13 @@ export type NoteAction =
       type: 'GET_NOTE_SUCCESS';
       payload: { note: INote; success: true };
     }
-  | { type: 'GET_NOTE_FAIL'; payload: { message: string; success: false } };
+  | { type: 'GET_NOTE_FAIL'; payload: { message: string; success: false } }
+  | {
+      type: 'UPDATE_NOTE_SUCCESS';
+      payload: { note: INote; success: true };
+    }
+  | { type: 'UPDATE_NOTE_FAIL'; payload: { message: string; success: false } };
+
 export interface INote extends Note {
   id: string;
   createdAt: string;
@@ -56,4 +63,10 @@ export interface INote extends Note {
 export type CreateNoteResponse = {
   message: string;
   note: INote;
+};
+
+export type UpdateNoteProps = {
+  noteId?: string;
+  title: string;
+  content: string;
 };
