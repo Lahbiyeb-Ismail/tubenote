@@ -11,5 +11,6 @@ export const noteSchema = {
     videoTitle: z.string(),
     thumbnail: z.string(),
     videoId: z.string(),
+    youtubeId: z.string(),
   }),
 };
