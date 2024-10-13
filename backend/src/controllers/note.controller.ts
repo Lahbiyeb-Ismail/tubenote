@@ -44,9 +44,17 @@ export async function createNote(req: PayloadRequest, res: Response) {
     return;
   }
 
-  const { title, content, videoTitle, thumbnail, videoId } = req.body;
+  const { title, content, videoTitle, thumbnail, videoId, youtubeId } =
+    req.body;
 
-  if (!title || !content || !videoTitle || !thumbnail || !videoId) {
+  if (
+    !title ||
+    !content ||
+    !videoTitle ||
+    !thumbnail ||
+    !videoId ||
+    !youtubeId
+  ) {
     res
       .status(httpStatus.BAD_REQUEST)
       .json({ message: 'Please provide all the required fields.' });
@@ -62,6 +70,7 @@ export async function createNote(req: PayloadRequest, res: Response) {
         thumbnail,
         videoId,
         userId: user.id,
+        youtubeId,
       },
     });
 
