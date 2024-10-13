@@ -4,9 +4,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getNoteById } from "@/actions/note.actions";
 import type { TypedError } from "@/types";
 import type { NoteAction } from "@/types/note.types";
+import { useRouter } from "next/navigation";
 
 function useGetNoteById(dispatch: React.Dispatch<NoteAction>) {
 	const queryClient = useQueryClient();
+	const router = useRouter();
 
 	return useMutation({
 		mutationFn: getNoteById,
@@ -21,7 +23,7 @@ function useGetNoteById(dispatch: React.Dispatch<NoteAction>) {
 				},
 			});
 
-			console.log(data);
+			router.push(`/editor/update/${data.id}`);
 		},
 		onError: (error: TypedError) => {
 			if (error.response) {
