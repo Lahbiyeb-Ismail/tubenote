@@ -187,3 +187,71 @@ export async function deleteNote(req: PayloadRequest, res: Response) {
       .json({ message: 'Error creating note.', error });
   }
 }
+
+/**
+ * Retrieves a note by its ID for the authenticated user.
+ *
+ * @param req - The request object containing the payload with userID and
+ * params with noteId.
+ * @param res - The response object used to send back the appropriate HTTP
+ * status and JSON data.
+ *
+ * @remarks
+ * - If the userID is not present in the request payload, responds with
+ * `401 Unauthorized`.
+ * - If the noteId is not provided in the request parameters, responds with
+ * `400 Bad Request`.
+ * - If the user is not found in the database, responds with `404 Not Found`.
+ * - If the note is not found for the given user, responds with `404 Not Found`.
+ * - If an error occurs during the process, responds with `500 Internal Server Error`.
+ *
+ * @returns A JSON response containing the note data if found, or an error
+ * message otherwise.
+ */
+export async function getNoteById(req: PayloadRequest, res: Response) {
+  const userID = req.payload?.userID;
+
+  if (!userID) {
+    res
+      .status(httpStatus.UNAUTHORIZED)
+      .json({ message: 'Unauthorized access. Please try again.' });
+    return;
+  }
+
+  const { noteId } = req.params;
+
+  if (!noteId) {
+    res
+      .status(httpStatus.BAD_REQUEST)
+      .json({ message: 'Please provide the note ID.' });
+    return;
+  }
+
+  try {
+    const user = await prismaClient.user.findUnique({
+      where: { id: userID },
+    });
+
+    if (!user) {
+      res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: 'Unauthorized access. Please try again.' });
+      return;
+    }
+
+    const note = await prismaClient.note.findFirst({
+      where: { id: noteId, userId: user.id },
+    });
+
+    if (!note) {
+      res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
+      return;
+    }
+
+    res.status(httpStatus.OK).json({ note });
+  } catch (error) {
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: 'Error creating note.', error });
+  }
+}
