@@ -1,5 +1,10 @@
 import axiosInstance from '@/lib/axios.lib';
-import type { CreateNoteResponse, INote, Note } from '@/types/note.types';
+import type {
+  CreateNoteResponse,
+  INote,
+  Note,
+  UpdateNoteProps,
+} from '@/types/note.types';
 
 /**
  * Creates a new note by sending a POST request to the '/notes' endpoint.
@@ -47,6 +52,28 @@ export async function deleteNote(noteId: string): Promise<{ message: string }> {
  */
 export async function getNoteById(noteId: string): Promise<INote> {
   const response = await axiosInstance.post(`/notes/${noteId}`);
+
+  return response.data.note;
+}
+
+/**
+ * Updates an existing note with the provided title and content.
+ *
+ * @param {UpdateNoteProps} params - The parameters for updating the note.
+ * @param {string} params.noteId - The ID of the note to update.
+ * @param {string} params.title - The new title for the note.
+ * @param {string} params.content - The new content for the note.
+ * @returns {Promise<INote>} A promise that resolves to the updated note.
+ */
+export async function updateNote({
+  noteId,
+  title,
+  content,
+}: UpdateNoteProps): Promise<INote> {
+  const response = await axiosInstance.patch(`/notes/${noteId}`, {
+    title,
+    content,
+  });
 
   return response.data.note;
 }
