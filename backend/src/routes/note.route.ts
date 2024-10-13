@@ -5,6 +5,7 @@ import {
   getUserNotes,
   deleteNote,
   getNoteById,
+  updateNote,
 } from '../controllers/note.controller';
 
 import isAuthenticated from '../middlewares/isAuthenticated';
@@ -23,5 +24,7 @@ router.route('/').get(isAuthenticated, getUserNotes);
 router.route('/:noteId').delete(isAuthenticated, deleteNote);
 
 router.route('/:noteId').post(isAuthenticated, getNoteById);
+
+router.route('/:noteId').patch(isAuthenticated, updateNote);
 
 export default router;

@@ -264,3 +264,82 @@ export async function getNoteById(req: PayloadRequest, res: Response) {
       .json({ message: 'Error creating note.', error });
   }
 }
+
+/**
+ * Updates an existing note for the authenticated user.
+ *
+ * @param req - The request object containing the payload, parameters, and body.
+ * @param res - The response object used to send back the appropriate HTTP response.
+ *
+ * The function performs the following steps:
+ * 1. Extracts the userID from the request payload.
+ * 2. Checks if the userID is present; if not, responds with an UNAUTHORIZED status.
+ * 3. Extracts the noteId from the request parameters.
+ * 4. Checks if the noteId is present; if not, responds with a BAD_REQUEST status.
+ * 5. Extracts the title and content from the request body.
+ * 6. Attempts to find the user in the database using the userID.
+ * 7. If the user is not found, responds with a NOT_FOUND status.
+ * 8. Attempts to find the note in the database using the noteId and userId.
+ * 9. If the note is not found, responds with a NOT_FOUND status.
+ * 10. Updates the note with the new title and content.
+ * 11. Responds with an OK status and the updated note if successful.
+ * 12. Catches any errors and responds with an INTERNAL_SERVER_ERROR status.
+ *
+ * @returns {Promise<void>} - A promise that resolves when the function completes.
+ */
+export async function updateNote(req: PayloadRequest, res: Response) {
+  const userID = req.payload?.userID;
+
+  if (!userID) {
+    res
+      .status(httpStatus.UNAUTHORIZED)
+      .json({ message: 'Unauthorized access. Please try again.' });
+    return;
+  }
+
+  const { noteId } = req.params;
+
+  if (!noteId) {
+    res
+      .status(httpStatus.BAD_REQUEST)
+      .json({ message: 'Please provide the note ID.' });
+    return;
+  }
+
+  const { title, content } = req.body;
+
+  try {
+    const user = await prismaClient.user.findUnique({
+      where: { id: userID },
+    });
+
+    if (!user) {
+      res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: 'Unauthorized access. Please try again.' });
+      return;
+    }
+
+    const note = await prismaClient.note.findFirst({
+      where: { id: noteId, userId: user.id },
+    });
+
+    if (!note) {
+      res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
+      return;
+    }
+
+    const updatedNote = await prismaClient.note.update({
+      where: { id: note.id },
+      data: { title: title || note.title, content: content || note.content },
+    });
+
+    res
+      .status(httpStatus.OK)
+      .json({ message: 'Note Updated successfully.', note: updatedNote });
+  } catch (error) {
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: 'Error creating note.', error });
+  }
+}
