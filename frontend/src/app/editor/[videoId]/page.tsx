@@ -1,3 +1,5 @@
+"use client";
+
 import {
 	ResizableHandle,
 	ResizablePanel,
@@ -5,8 +7,13 @@ import {
 } from "@/components/ui/resizable";
 import TextEditor from "@/components/editor/TextEditor";
 import VideoPlayer from "@/components/video/VideoPlayer";
+import { useVideo } from "@/context/useVideo";
 
 function EditorPage() {
+	const {
+		state: { video },
+	} = useVideo();
+
 	return (
 		<section className="height_viewport">
 			<ResizablePanelGroup
@@ -18,7 +25,7 @@ function EditorPage() {
 				</ResizablePanel>
 				<ResizableHandle withHandle />
 				<ResizablePanel defaultSize={65} className="p-2">
-					<VideoPlayer />
+					<VideoPlayer videoId={video?.youtubeId} />
 				</ResizablePanel>
 			</ResizablePanelGroup>
 		</section>

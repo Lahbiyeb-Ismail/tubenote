@@ -5,16 +5,20 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 
 import { saveNoteFormSchema } from "@/lib/schemas";
 import type { NoteTitle } from "@/types/note.types";
-import useCreateNote from "@/hooks/useCreateNote";
 import { useVideo } from "@/context/useVideo";
 import { useNote } from "@/context/useNote";
 
 type SaveNoteFormProps = {
 	noteTitle?: string;
 	noteContent: string;
+	action: "update" | "create";
 };
 
-function SaveNoteForm({ noteTitle: title, noteContent }: SaveNoteFormProps) {
+function SaveNoteForm({
+	noteTitle: title,
+	noteContent,
+	action,
+}: SaveNoteFormProps) {
 	const {
 		register,
 		handleSubmit,
@@ -30,17 +34,30 @@ function SaveNoteForm({ noteTitle: title, noteContent }: SaveNoteFormProps) {
 		state: { video },
 	} = useVideo();
 
-	const { createNote, isLoading } = useNote();
+	const {
+		createNote,
+		isLoading,
+		updateNote,
+		state: { note },
+	} = useNote();
 
 	const handleNoteSave: SubmitHandler<NoteTitle> = (data: NoteTitle) => {
-		createNote({
-			title: data.noteTitle,
-			content: noteContent,
-			videoId: video?.id,
-			thumbnail: video?.snippet.thumbnails.medium.url,
-			videoTitle: video?.snippet.title,
-			youtubeId: video?.youtubeId,
-		});
+		if (action === "create") {
+			createNote({
+				title: data.noteTitle,
+				content: noteContent,
+				videoId: video?.id,
+				thumbnail: video?.snippet.thumbnails.medium.url,
+				videoTitle: video?.snippet.title,
+				youtubeId: video?.youtubeId,
+			});
+		} else {
+			updateNote({
+				noteId: note?.id,
+				title: data.noteTitle,
+				content: noteContent,
+			});
+		}
 	};
 
 	return (

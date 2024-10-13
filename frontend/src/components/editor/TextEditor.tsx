@@ -15,9 +15,14 @@ import { useState } from "react";
 type TextEditorProps = {
 	initialNoteContent?: string;
 	noteTitle?: string;
+	action?: "update" | "create";
 };
 
-function TextEditor({ initialNoteContent, noteTitle }: TextEditorProps) {
+function TextEditor({
+	initialNoteContent,
+	noteTitle,
+	action = "create",
+}: TextEditorProps) {
 	// Creates a new editor instance.
 	const editor: BlockNoteEditor = useCreateBlockNote({
 		initialContent: initialNoteContent
@@ -31,7 +36,11 @@ function TextEditor({ initialNoteContent, noteTitle }: TextEditorProps) {
 
 	return (
 		<div className="h-full overflow-auto">
-			<SaveNoteForm noteContent={noteContent} noteTitle={noteTitle} />
+			<SaveNoteForm
+				noteContent={noteContent}
+				noteTitle={noteTitle}
+				action={action}
+			/>
 			<BlockNoteView
 				editor={editor}
 				theme="light"

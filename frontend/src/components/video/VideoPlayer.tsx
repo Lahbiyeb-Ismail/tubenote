@@ -3,13 +3,11 @@
 import React from "react";
 import YouTube from "react-youtube";
 
-import { useVideo } from "@/context/useVideo";
+type VideoPlayerProps = {
+	videoId?: string;
+};
 
-function VideoPlayer() {
-	const { state } = useVideo();
-
-	const videoId = state.video?.youtubeId;
-
+function VideoPlayer({ videoId }: VideoPlayerProps) {
 	return (
 		<div className="h-full">
 			<YouTube

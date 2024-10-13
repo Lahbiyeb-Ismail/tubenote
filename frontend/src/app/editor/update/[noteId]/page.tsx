@@ -24,11 +24,12 @@ function EditorPage() {
 					<TextEditor
 						initialNoteContent={note?.content}
 						noteTitle={note?.title}
+						action="update"
 					/>
 				</ResizablePanel>
 				<ResizableHandle withHandle />
 				<ResizablePanel defaultSize={65} className="p-2">
-					<VideoPlayer />
+					<VideoPlayer videoId={note?.youtubeId} />
 				</ResizablePanel>
 			</ResizablePanelGroup>
 		</section>
