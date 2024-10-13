@@ -17,13 +17,15 @@ import formatDate from "@/helpers/formatDate";
 import { useNote } from "@/context/useNote";
 import Modal from "../global/Modal";
 import { useState } from "react";
+import Link from "next/link";
+import useGetNoteById from "@/hooks/useGetNoteById";
 
 type NoteCardProps = {
 	note: INote;
 };
 
 function NoteCard({ note }: NoteCardProps) {
-	const { deleteNote, isLoading } = useNote();
+	const { deleteNote, isLoading, getNote } = useNote();
 
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -71,7 +73,9 @@ function NoteCard({ note }: NoteCardProps) {
 					<Button
 						variant="outline"
 						size="sm"
-						className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+						className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+						onClick={() => getNote(note.id)}
+						disabled={isLoading}
 					>
 						<PencilIcon className="mr-2 h-4 w-4" />
 						Edit
