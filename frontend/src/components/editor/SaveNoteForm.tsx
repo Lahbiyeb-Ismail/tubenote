@@ -39,6 +39,7 @@ function SaveNoteForm({ noteTitle: title, noteContent }: SaveNoteFormProps) {
 			videoId: video?.id,
 			thumbnail: video?.snippet.thumbnails.medium.url,
 			videoTitle: video?.snippet.title,
+			youtubeId: video?.youtubeId,
 		});
 	};
 
