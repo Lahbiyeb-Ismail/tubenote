@@ -13,6 +13,7 @@ export type Note = {
   videoId?: string;
   thumbnail?: string;
   videoTitle?: string;
+  youtubeId?: string;
 };
 
 export type NoteProviderProps = {
