@@ -9,6 +9,7 @@ import noteReducer, { noteInitialState } from "@/reducers/note.reducer";
 import useGetUserNotes from "@/hooks/useGetUserNotes";
 import useDeleteNote from "@/hooks/useDeleteNote";
 import useGetNoteById from "@/hooks/useGetNoteById";
+import useUpdateNote from "@/hooks/useUpdateNote";
 
 const NoteContext = createContext<NoteContextType | undefined>(undefined);
 
@@ -19,6 +20,7 @@ export function NoteProvider({ children }: NoteProviderProps) {
 	const { data, error, isLoading } = useGetUserNotes();
 	const deleteNoteMutation = useDeleteNote();
 	const getNoteMutation = useGetNoteById(dispatch);
+	const updateNoteMutation = useUpdateNote(dispatch);
 
 	const value = {
 		state,
@@ -32,6 +34,7 @@ export function NoteProvider({ children }: NoteProviderProps) {
 		isNotesLoading: isLoading,
 		deleteNote: deleteNoteMutation.mutate,
 		getNote: getNoteMutation.mutate,
+		updateNote: updateNoteMutation.mutate,
 	};
 
 	return <NoteContext.Provider value={value}>{children}</NoteContext.Provider>;
