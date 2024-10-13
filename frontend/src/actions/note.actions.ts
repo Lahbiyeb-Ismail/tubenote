@@ -38,3 +38,15 @@ export async function deleteNote(noteId: string): Promise<{ message: string }> {
 
   return response.data;
 }
+
+/**
+ * Fetches a note by its ID.
+ *
+ * @param {string} noteId - The unique identifier of the note to retrieve.
+ * @returns {Promise<INote>} A promise that resolves to the note object.
+ */
+export async function getNoteById(noteId: string): Promise<INote> {
+  const response = await axiosInstance.post(`/notes/${noteId}`);
+
+  return response.data.note;
+}
