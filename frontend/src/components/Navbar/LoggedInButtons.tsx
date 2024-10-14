@@ -1,15 +1,11 @@
-import UserAvatar from "../global/UserAvatar";
 import NavbarLinks from "./NavbarLinks";
+import DropDownNavbar from "./DropDownNavbar";
 
 function LoggedInButtons() {
-	const handleLogout = () => {
-		console.log("logout");
-	};
-
 	return (
 		<div className="flex-grow flex justify-between gap-4">
 			<NavbarLinks />
-			<UserAvatar username="Ismail" />
+			<DropDownNavbar />
 		</div>
 	);
 }
