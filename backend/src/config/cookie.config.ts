@@ -14,7 +14,7 @@ import envConfig from './envConfig';
  */
 export const refreshTokenCookieConfig: CookieOptions = {
   httpOnly: true,
-  sameSite: false,
+  sameSite: 'lax',
   secure: envConfig.node_env === 'production',
   maxAge: 24 * 60 * 60 * 1000,
 };

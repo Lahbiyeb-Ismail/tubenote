@@ -1,6 +1,7 @@
 import express, { type Express } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 import authRoutes from './routes/auth.route';
 import videoRoutes from './routes/video.route';
@@ -11,6 +12,8 @@ const app: Express = express();
 app.use(helmet());
 
 app.use(express.json());
+
+app.use(cookieParser());
 
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true }));

@@ -9,6 +9,8 @@ import { refreshTokenCookieConfig } from '../config/cookie.config';
 
 import type { RegisterCredentiels } from '../types/auth.type';
 
+const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
+
 /**
  * Checks if a user exists in the database by their email.
  *
@@ -92,11 +94,7 @@ export async function createAndSaveNewTokens(
   });
 
   // Set the new refresh token in a cookie
-  res.cookie(
-    envConfig.jwt.refresh_token.cookie_name,
-    newRefreshToken,
-    refreshTokenCookieConfig
-  );
+  res.cookie(REFRESH_TOKEN_NAME, newRefreshToken, refreshTokenCookieConfig);
 
   return accessToken;
 }
