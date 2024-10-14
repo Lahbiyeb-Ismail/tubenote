@@ -17,7 +17,6 @@ export function NoteProvider({ children }: NoteProviderProps) {
 	const [state, dispatch] = useReducer(noteReducer, noteInitialState);
 
 	const createNoteMutation = useCreateNote(dispatch);
-	const { data, error, isLoading } = useGetUserNotes();
 	const deleteNoteMutation = useDeleteNote();
 	const getNoteMutation = useGetNoteById(dispatch);
 	const updateNoteMutation = useUpdateNote(dispatch);
@@ -29,9 +28,6 @@ export function NoteProvider({ children }: NoteProviderProps) {
 			createNoteMutation.isPending ||
 			deleteNoteMutation.isPending ||
 			getNoteMutation.isPending,
-		notes: data,
-		getNotesError: error,
-		isNotesLoading: isLoading,
 		deleteNote: deleteNoteMutation.mutate,
 		getNote: getNoteMutation.mutate,
 		updateNote: updateNoteMutation.mutate,
