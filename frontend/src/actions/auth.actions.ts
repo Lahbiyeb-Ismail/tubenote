@@ -7,6 +7,7 @@ import type {
   LoginResponse,
 } from '@/types/auth.types';
 import { API_URL } from '@/utils/constants';
+import axiosInstance from '@/lib/axios.lib';
 
 /**
  * Registers a new user with the provided registration credentials.
@@ -34,7 +35,9 @@ export async function registerUser(
 export async function loginUser(
   loginCredentials: LoginFormData
 ): Promise<LoginResponse> {
-  const response = await axios.post(`${API_URL}/auth/login`, loginCredentials);
+  const response = await axios.post(`${API_URL}/auth/login`, loginCredentials, {
+    withCredentials: true,
+  });
 
   return response.data;
 }
@@ -49,5 +52,5 @@ export async function loginUser(
  * is complete.
  */
 export async function logoutUser() {
-  await axios.post(`${API_URL}/auth/logout`);
+  await axiosInstance.post(`${API_URL}/auth/logout`);
 }
