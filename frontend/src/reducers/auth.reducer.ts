@@ -32,6 +32,15 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         ...state,
         successMessage: action.payload.successMessage,
       };
+    case 'LOGOUT_SUCCESS':
+      return {
+        ...state,
+        accessToken: null,
+        user: null,
+        isAuthenticated: false,
+        errorMessage: '',
+        successMessage: '',
+      };
     case 'REQUEST_FAIL':
       return {
         ...state,
