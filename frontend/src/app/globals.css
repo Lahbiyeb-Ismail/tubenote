@@ -70,6 +70,10 @@
   height: calc(100vh - 56px);
 }
 
+.height_viewport_full {
+  height: calc(100vh - 88px);
+}
+
 .bn-editor {
   height: inherit;
   padding-top: 20px;
