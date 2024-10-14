@@ -36,12 +36,14 @@ export type AuthAction =
       payload: { message: string; accessToken: string; user: User };
     }
   | { type: 'REGISTER_SUCCESS'; payload: { successMessage: string } }
-  | { type: 'REQUEST_FAIL'; payload: { errorMessage: string } };
+  | { type: 'REQUEST_FAIL'; payload: { errorMessage: string } }
+  | { type: 'LOGOUT_SUCCESS' };
 
 export type AuthContextType = {
   state: AuthState;
   login: (loginCredentials: LoginFormData) => void;
   register: (registerCredentials: RegisterFormData) => void;
+  logout: () => void;
   isLoading: boolean;
 };
 
