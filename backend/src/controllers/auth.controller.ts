@@ -7,6 +7,11 @@ import {
   createNewUser,
   isUserExist,
 } from '../helpers/auth.helper';
+import prismaClient from '../lib/prisma';
+import { clearRefreshTokenCookieConfig } from '../config/cookie.config';
+import envConfig from '../config/envConfig';
+
+const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
 
 /**
  * Handles user registration.
@@ -102,6 +107,63 @@ export async function handleLogin(req: Request, res: Response) {
       user: { username: user.username, email: user.email },
     });
   } catch (err) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: 'Internal Server Error',
+    });
+  }
+}
+
+/**
+ * Handles the logout process by clearing the refresh token cookie
+ * and removing the token from the database.
+ *
+ * @param req - The request object containing the cookies.
+ * @param res - The response object used to send the status and clear the cookie.
+ *
+ * The function performs the following steps:
+ * 1. Retrieves the refresh token from the cookies.
+ * 2. If the refresh token is not present in the cookies, sends a NO_CONTENT status.
+ * 3. Checks if the refresh token exists in the database.
+ * 4. If the refresh token does not exist in the database, clears the cookie
+ * and sends a NO_CONTENT status.
+ * 5. Deletes the refresh token from the database.
+ * 6. Clears the refresh token cookie.
+ * 7. Sends a NO_CONTENT status.
+ *
+ * If an error occurs during the process, sends an INTERNAL_SERVER_ERROR
+ * status with an error message.
+ */
+export async function handleLogout(req: Request, res: Response) {
+  const cookies = req.cookies;
+
+  const refreshTokenFromCookies = cookies[REFRESH_TOKEN_NAME];
+
+  if (!refreshTokenFromCookies) {
+    res.sendStatus(httpStatus.NO_CONTENT);
+    return;
+  }
+
+  try {
+    // Is refreshToken in db?
+    const refreshTokenFromDB = await prismaClient.refreshToken.findUnique({
+      where: { token: refreshTokenFromCookies },
+    });
+
+    if (!refreshTokenFromDB) {
+      res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
+      res.sendStatus(httpStatus.NO_CONTENT);
+      return;
+    }
+
+    // Delete refreshToken in db
+    await prismaClient.refreshToken.delete({
+      where: { token: refreshTokenFromCookies },
+    });
+
+    res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
+
+    res.sendStatus(httpStatus.NO_CONTENT);
+  } catch (error) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: 'Internal Server Error',
     });
