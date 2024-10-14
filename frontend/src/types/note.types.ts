@@ -30,9 +30,6 @@ export type NoteContextType = {
   state: NoteState;
   createNote: (note: Note) => void;
   isLoading: boolean;
-  notes: INote[] | undefined;
-  getNotesError: Error | null;
-  isNotesLoading: boolean;
   deleteNote: (noteId: string) => void;
   getNote: (noteId: string) => void;
   updateNote: (note: UpdateNoteProps) => void;
