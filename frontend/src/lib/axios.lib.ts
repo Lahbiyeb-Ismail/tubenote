@@ -2,20 +2,28 @@ import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-let accessToken: string | null = null;
-
-if (typeof window !== 'undefined') {
-  // This code will only run in the browser
-  accessToken = localStorage.getItem('accessToken');
-}
+const getAccessToken = (): string | null => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('accessToken');
+  }
+  return null;
+};
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${accessToken}`,
   },
+});
+
+// Add an interceptor to dynamically set the Authorization header
+axiosInstance.interceptors.request.use((config) => {
+  const token = getAccessToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 export default axiosInstance;
