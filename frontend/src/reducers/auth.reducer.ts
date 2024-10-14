@@ -1,11 +1,20 @@
-import type { AuthAction, AuthState } from '@/types/auth.types';
+import type { AuthAction, AuthState, User } from '@/types/auth.types';
+
+let user: User | null = null;
+let accessToken: string | null = null;
+
+if (typeof window !== 'undefined') {
+  // This code will only run in the browser
+  user = JSON.parse(localStorage.getItem('user') ?? 'null');
+  accessToken = localStorage.getItem('accessToken');
+}
 
 export const authInitialState: AuthState = {
-  accessToken: null,
   errorMessage: '',
   successMessage: '',
   isAuthenticated: false,
-  user: null,
+  accessToken,
+  user,
 };
 
 function authReducer(state: AuthState, action: AuthAction): AuthState {
