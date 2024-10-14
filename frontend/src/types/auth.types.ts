@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 export type LoginFormData = z.infer<typeof loginFormSchema>;
 export type RegisterFormData = z.infer<typeof registerFormSchema>;
 
-type User = {
+export type User = {
   username: string;
   email: string;
 };
