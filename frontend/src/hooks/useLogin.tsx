@@ -27,6 +27,7 @@ function useLogin(dispatch: React.Dispatch<AuthAction>) {
 			});
 
 			localStorage.setItem("accessToken", data.accessToken);
+			localStorage.setItem("user", JSON.stringify(data.user));
 			router.push("/dashboard");
 		},
 		onError: (error: TypedError) => {
