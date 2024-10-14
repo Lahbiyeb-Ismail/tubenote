@@ -1,8 +1,11 @@
-import type { User } from "@/types/auth.types";
 import UserAvatar from "../global/UserAvatar";
 import { useAuth } from "@/context/useAuth";
 
-function UserProfile() {
+type UserProfileProps = {
+	isOpen: boolean;
+};
+
+function UserProfile({ isOpen }: UserProfileProps) {
 	const { state } = useAuth();
 
 	const { user } = state;
@@ -13,10 +16,12 @@ function UserProfile() {
 				{user ? (
 					<>
 						<UserAvatar />
-						<div>
-							<h3 className="font-semibold text-gray-700">{user.username}</h3>
-							<p className="text-sm text-gray-500">{user.email}</p>
-						</div>
+						{isOpen && (
+							<div className="hidden md:block">
+								<h3 className="font-semibold text-gray-700">{user.username}</h3>
+								<p className="text-sm text-gray-500">{user.email}</p>
+							</div>
+						)}
 					</>
 				) : null}
 			</div>

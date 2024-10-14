@@ -1,6 +1,10 @@
-function SidebarLogo() {
+type SidebarLogoProps = {
+	isOpen: boolean;
+};
+
+function SidebarLogo({ isOpen }: SidebarLogoProps) {
 	return (
-		<div className="px-6 py-8">
+		<div>
 			<h1 className="flex items-center text-2xl font-bold text-blue-600">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -15,7 +19,7 @@ function SidebarLogo() {
 						clipRule="evenodd"
 					/>
 				</svg>
-				TUBENOTE
+				{isOpen && "TUBENOTE"}
 			</h1>
 		</div>
 	);
