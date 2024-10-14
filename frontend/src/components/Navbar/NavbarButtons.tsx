@@ -6,11 +6,11 @@ import LoggedInButtons from "./LoggedInButtons";
 import LoggedOutButtons from "./LoggedOutButtons";
 
 function NavbarButtons() {
-	const { state } = useAuth();
+	const {
+		state: { accessToken },
+	} = useAuth();
 
-	return (
-		<>{state.isAuthenticated ? <LoggedInButtons /> : <LoggedOutButtons />}</>
-	);
+	return <>{accessToken ? <LoggedInButtons /> : <LoggedOutButtons />}</>;
 }
 
 export default NavbarButtons;

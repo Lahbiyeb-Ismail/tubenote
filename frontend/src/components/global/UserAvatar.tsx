@@ -1,12 +1,15 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/context/useAuth";
 
-type AvatarProps = {
-	username?: string;
-};
+function UserAvatar() {
+	const { state } = useAuth();
 
-function UserAvatar({ username = "us" }: AvatarProps) {
+	const { user } = state;
+
 	const src = "https://github.com/shadcn.png";
-	const avatarFallback = username[0].toUpperCase() + username[1].toUpperCase();
+	const avatarFallback =
+		(user?.username?.[0]?.toUpperCase() ?? "") +
+		(user?.username?.[1]?.toUpperCase() ?? "");
 
 	return (
 		<Avatar>

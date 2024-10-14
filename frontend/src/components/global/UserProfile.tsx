@@ -1,22 +1,21 @@
+import type { User } from "@/types/auth.types";
 import UserAvatar from "../global/UserAvatar";
+import { useAuth } from "@/context/useAuth";
 
 function UserProfile() {
-	const userData = {
-		username: "John Doe",
-		email: "jhon@gmail.com",
-	};
+	const { state } = useAuth();
+
+	const { user } = state;
 
 	return (
 		<div className="mt-auto border-t p-4">
 			<div className="flex flex-col items-center justify-center gap-2 text-center">
-				{userData ? (
+				{user ? (
 					<>
-						<UserAvatar username={userData.username} />
+						<UserAvatar />
 						<div>
-							<h3 className="font-semibold text-gray-700">
-								{userData.username}
-							</h3>
-							<p className="text-sm text-gray-500">{userData.email}</p>
+							<h3 className="font-semibold text-gray-700">{user.username}</h3>
+							<p className="text-sm text-gray-500">{user.email}</p>
 						</div>
 					</>
 				) : null}
