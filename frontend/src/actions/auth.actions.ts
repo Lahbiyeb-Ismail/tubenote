@@ -38,3 +38,16 @@ export async function loginUser(
 
   return response.data;
 }
+
+/**
+ * Logs out the currently authenticated user by making a POST request
+ * to the logout endpoint.
+ *
+ * @async
+ * @function logoutUser
+ * @returns {Promise<void>} A promise that resolves when the logout request
+ * is complete.
+ */
+export async function logoutUser() {
+  await axios.post(`${API_URL}/auth/logout`);
+}
