@@ -1,30 +1,29 @@
 "use client";
 
-import useGetUserNotes from "@/hooks/useGetUserNotes";
+import useGetUserVideos from "@/hooks/useGetUserVideos";
 
+import Loader from "@/components/global/Loader";
 import AddNoteForm from "@/components/dashboards/AddNoteForm";
 import Header from "@/components/dashboards/Header";
-import NotesList from "@/components/note/NotesList";
-import Laoder from "@/components/global/Loader";
 import NoDataFound from "@/components/dashboards/NoDataFound";
 
-function NotesPage() {
-	const { data, isLoading } = useGetUserNotes();
+function VideosPage() {
+	const { data, isLoading } = useGetUserVideos();
 
-	if (isLoading) return <Laoder />;
+	if (isLoading) return <Loader />;
 
 	return (
 		<>
 			{!data ? (
-				<NoDataFound title="You don't have any notes yet." />
+				<NoDataFound title="You don't have any videos yet." />
 			) : (
 				<div className="min-h-screen flex-1 bg-gray-100">
-					<Header title="Your Video Notes" />
+					<Header title="Your Video" />
 					<main className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
 						<div className="flex justify-end">
 							<AddNoteForm />
 						</div>
-						<NotesList notes={data} />
+						{/* <NotesList notes={data} /> */}
 					</main>
 				</div>
 			)}
@@ -32,4 +31,4 @@ function NotesPage() {
 	);
 }
 
-export default NotesPage;
+export default VideosPage;
