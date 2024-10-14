@@ -18,3 +18,14 @@ export async function saveVideoData(videoUrl: string): Promise<Video> {
 
   return response.data;
 }
+
+/**
+ * Fetches the list of videos for the user.
+ *
+ * @returns {Promise<Video[]>} A promise that resolves to an array of Video objects.
+ */
+export async function getUserVideos(): Promise<Video[]> {
+  const response = await axiosInstance.get('/videos');
+
+  return response.data;
+}
