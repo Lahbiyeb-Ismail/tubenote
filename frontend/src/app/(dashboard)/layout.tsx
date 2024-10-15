@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "@/components/dashboards/Sidebar";
 import withAuth from "@/HOC/withAuth";
 
@@ -10,6 +10,21 @@ type LayoutProps = {
 
 function Layout({ children }: LayoutProps) {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+	useEffect(() => {
+		const handleResize = () => {
+			if (window.innerWidth < 768) {
+				setIsSidebarOpen(false);
+			} else {
+				setIsSidebarOpen(true);
+			}
+		};
+
+		handleResize();
+
+		window.addEventListener("resize", handleResize);
+		return () => window.removeEventListener("resize", handleResize);
+	}, []);
 
 	const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
