@@ -3,7 +3,7 @@ import DropDownNavbar from "./DropDownNavbar";
 
 function LoggedInButtons() {
 	return (
-		<div className="flex-grow flex justify-between gap-4">
+		<div className="md:flex-grow flex justify-between gap-4">
 			<NavbarLinks />
 			<DropDownNavbar />
 		</div>
