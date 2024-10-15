@@ -44,8 +44,15 @@ export async function createNote(req: PayloadRequest, res: Response) {
     return;
   }
 
-  const { title, content, videoTitle, thumbnail, videoId, youtubeId } =
-    req.body;
+  const {
+    title,
+    content,
+    videoTitle,
+    thumbnail,
+    videoId,
+    youtubeId,
+    timestamp,
+  } = req.body;
 
   if (
     !title ||
@@ -53,7 +60,8 @@ export async function createNote(req: PayloadRequest, res: Response) {
     !videoTitle ||
     !thumbnail ||
     !videoId ||
-    !youtubeId
+    !youtubeId ||
+    !timestamp
   ) {
     res
       .status(httpStatus.BAD_REQUEST)
@@ -71,6 +79,7 @@ export async function createNote(req: PayloadRequest, res: Response) {
         videoId,
         userId: user.id,
         youtubeId,
+        timestamp,
       },
     });
 
@@ -306,7 +315,7 @@ export async function updateNote(req: PayloadRequest, res: Response) {
     return;
   }
 
-  const { title, content } = req.body;
+  const { title, content, timestamp } = req.body;
 
   try {
     const user = await prismaClient.user.findUnique({
@@ -331,7 +340,11 @@ export async function updateNote(req: PayloadRequest, res: Response) {
 
     const updatedNote = await prismaClient.note.update({
       where: { id: note.id },
-      data: { title: title || note.title, content: content || note.content },
+      data: {
+        title: title || note.title,
+        content: content || note.content,
+        timestamp: timestamp,
+      },
     });
 
     res
