@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { CalendarIcon, ClockIcon, PencilIcon, Trash2Icon } from "lucide-react";
-
 import type { INote } from "@/types/note.types";
 import {
 	Card,
@@ -17,8 +16,7 @@ import formatDate from "@/helpers/formatDate";
 import { useNote } from "@/context/useNote";
 import Modal from "../global/Modal";
 import { useState } from "react";
-import Link from "next/link";
-import useGetNoteById from "@/hooks/useGetNoteById";
+import { useLayout } from "@/context/useLayout";
 
 type NoteCardProps = {
 	note: INote;
@@ -26,7 +24,7 @@ type NoteCardProps = {
 
 function NoteCard({ note }: NoteCardProps) {
 	const { deleteNote, isLoading, getNote } = useNote();
-
+	const { isGridLayout } = useLayout();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	const handleDelete = () => {
@@ -40,57 +38,84 @@ function NoteCard({ note }: NoteCardProps) {
 
 	return (
 		<>
-			<Card className="overflow-hidden bg-white shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105">
-				<div className="relative h-48 w-full">
-					<Image
-						src={note.thumbnail || "/images/placeholder.jpg"}
-						alt={note.title}
-						fill
-						className="object-cover"
-					/>
+			<Card
+				className={`overflow-hidden bg-white shadow-md transition-all duration-300 hover:shadow-lg ${isGridLayout ? "hover:scale-105" : ""}`}
+			>
+				<div className={`${isGridLayout ? "" : "flex"}`}>
+					<div
+						className={`relative ${isGridLayout ? "h-48 w-full" : "w-40 flex-shrink-0"}`}
+					>
+						<Image
+							src={note.thumbnail || "/images/placeholder.jpg"}
+							alt={note.title}
+							fill
+							className="object-cover"
+						/>
+					</div>
+					<div
+						className={` flex-grow ${isGridLayout ? "" : "flex flex-row justify-between"}`}
+					>
+						<CardHeader
+							className={`${isGridLayout ? "space-y-2" : "space-y-0"}`}
+						>
+							<div className="flex justify-between items-start">
+								<CardTitle
+									className={`font-bold ${isGridLayout ? "text-xl line-clamp-2" : "text-lg line-clamp-1"}`}
+								>
+									{note.videoTitle}
+								</CardTitle>
+							</div>
+							<CardDescription className="text-sm text-muted-foreground line-clamp-1">
+								Note Title: {note.title}
+							</CardDescription>
+						</CardHeader>
+						{isGridLayout && (
+							<CardContent className="space-y-2">
+								<div className="flex items-center text-sm text-muted-foreground">
+									<CalendarIcon className="mr-1 h-4 w-4" />
+									Created: {formatDate(note.createdAt)}
+								</div>
+								<div className="flex items-center text-sm text-muted-foreground">
+									<ClockIcon className="mr-1 h-4 w-4" />
+									Updated: {formatDate(note.createdAt)}
+								</div>
+							</CardContent>
+						)}
+						<CardFooter
+							className={`flex justify-between ${isGridLayout ? "flex-row p-4 pt-0" : "flex-col p-4 space-y-1"}`}
+						>
+							<Button
+								variant="outline"
+								size={!isGridLayout ? "icon" : "sm"}
+								className={`text-blue-600 hover:text-blue-700 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed ${
+									!isGridLayout ? "w-10 h-10 p-0" : ""
+								}`}
+								onClick={() => getNote(note.id)}
+								disabled={isLoading}
+							>
+								<PencilIcon
+									className={`h-4 w-4 ${!isGridLayout ? "m-0" : "mr-2"}`}
+								/>
+								{isGridLayout && "Edit"}
+							</Button>
+							<Button
+								variant="outline"
+								size={!isGridLayout ? "icon" : "sm"}
+								className={`text-red-700 hover:text-red-800 hover:bg-red-50 disabled:opacity-50
+									disabled:cursor-not-allowed ${
+										!isGridLayout ? "w-10 h-10 p-0" : ""
+									}`}
+								onClick={handleDelete}
+								disabled={isLoading}
+							>
+								<Trash2Icon
+									className={`h-4 w-4 ${!isGridLayout ? "m-0" : "mr-2"}`}
+								/>
+								{isGridLayout && "Delete"}
+							</Button>
+						</CardFooter>
+					</div>
 				</div>
-				<CardHeader className="space-y-2">
-					<div className="flex justify-between items-start">
-						<CardTitle className="text-xl font-bold line-clamp-2">
-							{note.videoTitle}
-						</CardTitle>
-					</div>
-					<CardDescription className="text-sm text-muted-foreground line-clamp-1">
-						Note Title: {note.title}
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="space-y-2">
-					<div className="flex items-center text-sm text-muted-foreground">
-						<CalendarIcon className="mr-1 h-4 w-4" />
-						Created: {formatDate(note.createdAt)}
-					</div>
-					<div className="flex items-center text-sm text-muted-foreground">
-						<ClockIcon className="mr-1 h-4 w-4" />
-						Updated: {formatDate(note.createdAt)}
-					</div>
-				</CardContent>
-				<CardFooter className="p-4 pt-0 flex justify-between">
-					<Button
-						variant="outline"
-						size="sm"
-						className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
-						onClick={() => getNote(note.id)}
-						disabled={isLoading}
-					>
-						<PencilIcon className="mr-2 h-4 w-4" />
-						Edit
-					</Button>
-					<Button
-						variant="outline"
-						size="sm"
-						className="text-red-700 hover:text-red-800 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
-						onClick={handleDelete}
-						disabled={isLoading}
-					>
-						<Trash2Icon className="mr-2 h-4 w-4" />
-						Delete
-					</Button>
-				</CardFooter>
 			</Card>
 			<Modal
 				isOpen={isModalOpen}
