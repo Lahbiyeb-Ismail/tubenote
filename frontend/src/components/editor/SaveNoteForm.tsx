@@ -32,6 +32,7 @@ function SaveNoteForm({
 
 	const {
 		state: { video },
+		videoCurrentTime,
 	} = useVideo();
 
 	const {
@@ -50,12 +51,14 @@ function SaveNoteForm({
 				thumbnail: video?.snippet.thumbnails.medium.url,
 				videoTitle: video?.snippet.title,
 				youtubeId: video?.youtubeId,
+				timestamp: videoCurrentTime,
 			});
 		} else {
 			updateNote({
 				noteId: note?.id,
 				title: data.noteTitle,
 				content: noteContent,
+				timestamp: videoCurrentTime,
 			});
 		}
 	};
