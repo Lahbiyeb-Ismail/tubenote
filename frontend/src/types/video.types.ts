@@ -61,6 +61,8 @@ export type VideoContextType = {
   state: VideoState;
   saveVideo: (videoUrl: string) => void;
   isLoading: boolean;
+  videoCurrentTime: number;
+  setVideoCurrentTime: (time: number) => void;
 };
 
 export type VideoAction =
