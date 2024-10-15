@@ -9,7 +9,7 @@ function NavbarLinks() {
 	const pathname = usePathname();
 
 	return (
-		<div className="flex items-center justify-evenly flex-grow">
+		<div className="hidden md:flex items-center justify-evenly flex-grow">
 			{navItems.map((item) => (
 				<NavLink
 					key={item.name}
