@@ -1,36 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Sidebar from "@/components/dashboards/Sidebar";
 import withAuth from "@/HOC/withAuth";
+import { useLayout } from "@/context/useLayout";
+import Sidebar from "@/components/dashboards/Sidebar";
 
 type LayoutProps = {
 	children: React.ReactNode;
 };
 
 function Layout({ children }: LayoutProps) {
-	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
-	useEffect(() => {
-		const handleResize = () => {
-			if (window.innerWidth < 768) {
-				setIsSidebarOpen(false);
-			} else {
-				setIsSidebarOpen(true);
-			}
-		};
-
-		handleResize();
-
-		window.addEventListener("resize", handleResize);
-		return () => window.removeEventListener("resize", handleResize);
-	}, []);
-
-	const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+	const { isSidebarOpen } = useLayout();
 
 	return (
 		<div className="flex bg-gray-100 overflow-hidden">
-			<Sidebar toggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
+			<Sidebar />
 			<div
 				className={`flex-1 bg-gray-100 p-4 overflow-auto transition-all duration-300
 					${isSidebarOpen ? "ml-64" : "ml-20"}`}
