@@ -1,6 +1,6 @@
 function UserStats() {
 	return (
-		<div className="bg-white rounded-lg shadow-md p-6 mb-8">
+		<div className="bg-white rounded-lg shadow-md p-6 my-8">
 			<div className="flex justify-between items-center">
 				<div className="text-center">
 					<h2 className="text-4xl font-bold text-blue-500">156</h2>
