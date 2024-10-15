@@ -8,14 +8,11 @@ import SidebarNav from "./SidebarNav";
 
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useLayout } from "@/context/useLayout";
 
-type SidebarProps = {
-	toggleSidebar: () => void;
-	isSidebarOpen: boolean;
-};
-
-function Sidebar({ toggleSidebar, isSidebarOpen }: SidebarProps) {
+function Sidebar() {
 	const pathname = usePathname();
+	const { isSidebarOpen, toggleSidebar } = useLayout();
 
 	return (
 		<div
