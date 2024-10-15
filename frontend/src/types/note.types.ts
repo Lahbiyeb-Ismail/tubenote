@@ -10,6 +10,7 @@ export type NoteTitle = z.infer<typeof saveNoteFormSchema>;
 export type Note = {
   title: string;
   content: string;
+  timestamp?: number;
   videoId?: string;
   thumbnail?: string;
   videoTitle?: string;
@@ -66,4 +67,5 @@ export type UpdateNoteProps = {
   noteId?: string;
   title: string;
   content: string;
+  timestamp?: number;
 };
