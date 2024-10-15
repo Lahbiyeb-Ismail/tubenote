@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useReducer } from "react";
+import { createContext, useContext, useReducer, useState } from "react";
 
 import type { VideoContextType, VideoProviderProps } from "@/types/video.types";
 
@@ -11,6 +11,7 @@ const VideoContext = createContext<VideoContextType | undefined>(undefined);
 
 export function VideoProvider({ children }: VideoProviderProps) {
 	const [state, dispatch] = useReducer(videoReducer, videoInitialState);
+	const [videoCurrentTime, setVideoCurrentTime] = useState(0);
 
 	const saveVideoMutation = useSaveVideoData(dispatch);
 
@@ -18,6 +19,8 @@ export function VideoProvider({ children }: VideoProviderProps) {
 		state,
 		saveVideo: saveVideoMutation.mutate,
 		isLoading: saveVideoMutation.isPending,
+		setVideoCurrentTime,
+		videoCurrentTime,
 	};
 
 	return (
