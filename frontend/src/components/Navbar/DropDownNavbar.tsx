@@ -1,4 +1,11 @@
-import { LogOut, Settings, User } from "lucide-react";
+import Link from "next/link";
+import {
+	FileText,
+	LayoutDashboard,
+	LogOut,
+	Settings,
+	Video,
+} from "lucide-react";
 
 import { useAuth } from "@/context/useAuth";
 
@@ -37,15 +44,36 @@ function DropDownNavbar() {
 							</p>
 						</div>
 					</DropdownMenuLabel>
+					<DropdownMenuSeparator className="block md:hidden" />
+					<Link href="/dashboard">
+						<DropdownMenuItem className="flex items-center cursor-pointer md:hidden">
+							<LayoutDashboard className="mr-2 h-4 w-4" />
+							<span>Dashboard</span>
+						</DropdownMenuItem>
+					</Link>
+					<Link href="/notes">
+						<DropdownMenuItem className="flex items-center cursor-pointer md:hidden">
+							<FileText className="mr-2 h-4 w-4" />
+							<span>Notes</span>
+						</DropdownMenuItem>
+					</Link>
+					<Link href="/videos">
+						<DropdownMenuItem className="flex items-center cursor-pointer md:hidden">
+							<Video className="mr-2 h-4 w-4" />
+							<span>Videos</span>
+						</DropdownMenuItem>
+					</Link>
 					<DropdownMenuSeparator />
-					<DropdownMenuItem className="flex items-center cursor-pointer">
+					{/* <DropdownMenuItem className="flex items-center cursor-pointer">
 						<User className="mr-2 h-4 w-4" />
 						<span>Profile</span>
-					</DropdownMenuItem>
-					<DropdownMenuItem className="flex items-center cursor-pointer">
-						<Settings className="mr-2 h-4 w-4" />
-						<span>Settings</span>
-					</DropdownMenuItem>
+					</DropdownMenuItem> */}
+					<Link href="/settings">
+						<DropdownMenuItem className="flex items-center cursor-pointer">
+							<Settings className="mr-2 h-4 w-4" />
+							<span>Settings</span>
+						</DropdownMenuItem>
+					</Link>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem
 						className="flex items-center cursor-pointer text-red-600 
