@@ -67,5 +67,5 @@ export type UpdateNoteProps = {
   noteId?: string;
   title: string;
   content: string;
-  timestamp?: number;
+  timestamp: number;
 };
