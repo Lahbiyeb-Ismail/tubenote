@@ -69,10 +69,12 @@ export async function updateNote({
   noteId,
   title,
   content,
+  timestamp,
 }: UpdateNoteProps): Promise<INote> {
   const response = await axiosInstance.patch(`/notes/${noteId}`, {
     title,
     content,
+    timestamp,
   });
 
   return response.data.note;
