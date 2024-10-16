@@ -410,3 +410,60 @@ export async function getUserRecentNotes(req: PayloadRequest, res: Response) {
       .json({ message: 'Error creating note.', error });
   }
 }
+
+/**
+ * Retrieves the most recently updated notes for a user.
+ *
+ * @param req - The request object containing the payload with user information.
+ * @param res - The response object used to send the response back to the client.
+ *
+ * @remarks
+ * This function checks if the user is authenticated by verifying the presence of
+ * a userID in the request payload.
+ * If the user is not authenticated, it responds with a 401 Unauthorized status.
+ * If the user is authenticated, it fetches the user from the database.
+ * If the user is not found, it responds with a 404 Not Found status.
+ * If the user is found, it retrieves the most recently updated notes for the user,
+ * limited to the 2 most recent notes.
+ * If an error occurs during the process, it responds with a 500 Internal Server Error status.
+ *
+ * @returns A JSON response containing the most recently updated notes for the user or an error message.
+ */
+export async function getUserRecentlyUpdatedNotes(
+  req: PayloadRequest,
+  res: Response
+) {
+  const userID = req.payload?.userID;
+
+  if (!userID) {
+    res
+      .status(httpStatus.UNAUTHORIZED)
+      .json({ message: 'Unauthorized access. Please try again.' });
+    return;
+  }
+
+  try {
+    const user = await prismaClient.user.findUnique({
+      where: { id: userID },
+    });
+
+    if (!user) {
+      res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: 'Unauthorized access. Please try again.' });
+      return;
+    }
+
+    const notes = await prismaClient.note.findMany({
+      where: { userId: user.id },
+      orderBy: { updatedAt: 'desc' },
+      take: 2,
+    });
+
+    res.status(httpStatus.OK).json({ notes });
+  } catch (error) {
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: 'Error creating note.', error });
+  }
+}

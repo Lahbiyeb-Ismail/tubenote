@@ -7,6 +7,7 @@ import {
   getNoteById,
   updateNote,
   getUserRecentNotes,
+  getUserRecentlyUpdatedNotes,
 } from '../controllers/note.controller';
 
 import isAuthenticated from '../middlewares/isAuthenticated';
@@ -29,5 +30,9 @@ router.route('/:noteId').post(isAuthenticated, getNoteById);
 router.route('/:noteId').patch(isAuthenticated, updateNote);
 
 router.route('/recent').get(isAuthenticated, getUserRecentNotes);
+
+router
+  .route('/recently-updated')
+  .get(isAuthenticated, getUserRecentlyUpdatedNotes);
 
 export default router;
