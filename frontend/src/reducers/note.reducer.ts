@@ -48,6 +48,10 @@ function noteReducer(state: NoteState, action: NoteAction): NoteState {
         message: action.payload.message,
         success: false,
       };
+    case 'CLEAR_NOTE_STATE':
+      return {
+        ...noteInitialState,
+      };
     default:
       return state;
   }
