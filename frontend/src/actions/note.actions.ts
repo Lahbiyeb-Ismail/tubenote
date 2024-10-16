@@ -90,3 +90,14 @@ export async function getRecentNotes(): Promise<INote[]> {
 
   return response.data.notes;
 }
+
+/**
+ * Fetches the recently updated notes from the server.
+ *
+ * @returns {Promise<INote[]>} A promise that resolves to an array of recently updated notes.
+ */
+export async function getRecentlyUpdatedNotes(): Promise<INote[]> {
+  const response = await axiosInstance.get('/notes/recently-updated');
+
+  return response.data.notes;
+}
