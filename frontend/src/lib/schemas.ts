@@ -35,3 +35,30 @@ export const saveNoteFormSchema = z.object({
       message: 'Note title must be at least 3 characters long.',
     }),
 });
+
+export const updateProfileSchema = z.object({
+  username: z
+    .string()
+    .min(3, {
+      message: 'Password must be at least 8 characters.',
+    })
+    .max(20, { message: 'Username must be less than 20 characters.' }),
+  email: z.string().email(),
+});
+
+export const updatePasswordSchema = z
+  .object({
+    currentPassword: z
+      .string()
+      .min(8, { message: 'Password must be at least 8 characters.' }),
+    newPassword: z
+      .string()
+      .min(8, { message: 'Password must be at least 8 characters.' }),
+    confirmPassword: z
+      .string()
+      .min(8, { message: 'Password must be at least 8 characters.' }),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
