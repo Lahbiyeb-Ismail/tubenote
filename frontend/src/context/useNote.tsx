@@ -21,6 +21,10 @@ export function NoteProvider({ children }: NoteProviderProps) {
 	const getNoteMutation = useGetNoteById(dispatch);
 	const updateNoteMutation = useUpdateNote(dispatch);
 
+	const clearNoteState = () => {
+		dispatch({ type: "CLEAR_NOTE_STATE" });
+	};
+
 	const value = {
 		state,
 		createNote: createNoteMutation.mutate,
@@ -31,6 +35,7 @@ export function NoteProvider({ children }: NoteProviderProps) {
 		deleteNote: deleteNoteMutation.mutate,
 		getNote: getNoteMutation.mutate,
 		updateNote: updateNoteMutation.mutate,
+		clearNoteState,
 	};
 
 	return <NoteContext.Provider value={value}>{children}</NoteContext.Provider>;
