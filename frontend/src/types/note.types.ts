@@ -34,6 +34,7 @@ export type NoteContextType = {
   deleteNote: (noteId: string) => void;
   getNote: (noteId: string) => void;
   updateNote: (note: UpdateNoteProps) => void;
+  clearNoteState: () => void;
 };
 
 export type NoteAction =
@@ -51,7 +52,8 @@ export type NoteAction =
       type: 'UPDATE_NOTE_SUCCESS';
       payload: { note: INote; success: true };
     }
-  | { type: 'UPDATE_NOTE_FAIL'; payload: { message: string; success: false } };
+  | { type: 'UPDATE_NOTE_FAIL'; payload: { message: string; success: false } }
+  | { type: 'CLEAR_NOTE_STATE' };
 
 export interface INote extends Note {
   id: string;
