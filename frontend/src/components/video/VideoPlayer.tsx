@@ -1,5 +1,6 @@
 "use client";
 
+import { useNote } from "@/context/useNote";
 import { useVideo } from "@/context/useVideo";
 import React, { useRef, useState } from "react";
 import YouTube, { type YouTubeProps } from "react-youtube";
@@ -12,9 +13,16 @@ function VideoPlayer({ videoId }: VideoPlayerProps) {
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	const playerRef = useRef<any | null>(null);
 	const { setVideoCurrentTime } = useVideo();
+	const {
+		state: { note },
+	} = useNote();
 
 	const onPlayerReady: YouTubeProps["onReady"] = (event) => {
 		playerRef.current = event.target;
+
+		if (playerRef.current && note) {
+			playerRef.current.seekTo(note.timestamp);
+		}
 	};
 
 	const onStateChange: YouTubeProps["onStateChange"] = (event) => {
