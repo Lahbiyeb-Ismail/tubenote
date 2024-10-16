@@ -9,6 +9,7 @@ import { Input } from "../ui/input";
 import { useVideo } from "@/context/useVideo";
 import { videoFormSchema } from "@/lib/schemas";
 import type { VideoUrl } from "@/types/note.types";
+import { useNote } from "@/context/useNote";
 
 function AddNoteForm() {
 	const form = useForm<VideoUrl>({
@@ -19,9 +20,12 @@ function AddNoteForm() {
 	});
 
 	const { isLoading, saveVideo } = useVideo();
+	const { clearNoteState } = useNote();
 
-	const handleAddNote = async (formData: VideoUrl) =>
+	const handleAddNote = async (formData: VideoUrl) => {
+		clearNoteState();
 		saveVideo(formData.videoUrl);
+	};
 
 	return (
 		<Form {...form}>
