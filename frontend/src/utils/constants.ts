@@ -61,7 +61,7 @@ export const footerSupportLinks = [
 export const sidebarMenuLinks = [
   { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
   { name: 'Notes', icon: FileText, href: '/notes' },
-  { name: 'Videos', icon: Video, href: '/videos' },
+  // { name: 'Videos', icon: Video, href: '/videos' },
   { name: 'Settings', icon: Settings, href: '/settings' },
 ] as const;
 
