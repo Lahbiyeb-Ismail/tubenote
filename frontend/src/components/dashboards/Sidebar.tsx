@@ -1,14 +1,14 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+import { useLayout } from "@/context/useLayout";
+import { Button } from "@/components/ui/button";
 
 import UserProfile from "../global/UserProfile";
 import SidebarLogo from "./SidebarLogo";
 import SidebarNav from "./SidebarNav";
-
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useLayout } from "@/context/useLayout";
 
 function Sidebar() {
 	const pathname = usePathname();
