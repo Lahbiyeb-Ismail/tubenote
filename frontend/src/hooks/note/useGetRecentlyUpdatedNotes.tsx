@@ -10,7 +10,7 @@ function useGetRecentlyUpdatedNotes() {
 	} = useAuth();
 
 	return useQuery({
-		queryKey: ["recentlyUpdatedNotes"],
+		queryKey: ["notes", "recentlyUpdatedNotes"],
 		queryFn: () => getRecentlyUpdatedNotes(),
 		enabled: !!accessToken,
 	});

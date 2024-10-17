@@ -16,10 +16,10 @@ function useUpdateNote(dispatch: React.Dispatch<NoteAction>) {
 			toast.loading("Updating note...", { id: "loadingToast" });
 		},
 		onSuccess: (data) => {
+			queryClient.invalidateQueries({ queryKey: ["notes"] });
 			toast.dismiss("loadingToast");
 
 			toast.success("Note updated successfully.");
-			queryClient.invalidateQueries({ queryKey: ["notes"] });
 
 			dispatch({
 				type: "UPDATE_NOTE_SUCCESS",

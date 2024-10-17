@@ -11,6 +11,7 @@ function noteReducer(state: NoteState, action: NoteAction): NoteState {
     case 'CREATE_NOTE_SUCCESS':
       return {
         ...state,
+        // @ts-ignore
         note: action.payload.note,
         message: action.payload.message,
         success: true,
