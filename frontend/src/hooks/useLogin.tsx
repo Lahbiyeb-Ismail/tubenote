@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 import { loginUser } from "@/actions/auth.actions";
 
@@ -14,7 +15,14 @@ function useLogin(dispatch: React.Dispatch<AuthAction>) {
 
 	return useMutation({
 		mutationFn: loginUser,
+		onMutate: () => {
+			toast.loading("Logging in...", { id: "loadingToast" });
+		},
 		onSuccess: (data) => {
+			toast.dismiss("loadingToast");
+
+			toast.success(data.message);
+
 			queryClient.invalidateQueries({ queryKey: ["user"] });
 
 			dispatch({
@@ -33,16 +41,19 @@ function useLogin(dispatch: React.Dispatch<AuthAction>) {
 			router.push("/dashboard");
 		},
 		onError: (error: TypedError) => {
+			toast.dismiss("loadingToast");
 			if (error.response) {
-				dispatch({
-					type: "REQUEST_FAIL",
-					payload: { errorMessage: error.response.data.message },
-				});
+				toast.error(error.response.data.message);
+				// dispatch({
+				// 	type: "REQUEST_FAIL",
+				// 	payload: { errorMessage: error.response.data.message },
+				// });
 			} else {
-				dispatch({
-					type: "REQUEST_FAIL",
-					payload: { errorMessage: "Login failed. Please try again." },
-				});
+				toast.error("Login failed. Please try again.");
+				// dispatch({
+				// 	type: "REQUEST_FAIL",
+				// 	payload: { errorMessage: "Login failed. Please try again." },
+				// });
 			}
 		},
 	});
