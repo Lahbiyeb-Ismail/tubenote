@@ -116,13 +116,6 @@ export async function updateUserPassword(req: PayloadRequest, res: Response) {
     return;
   }
 
-  if (currentPassword === newPassword) {
-    res.status(httpStatus.BAD_REQUEST).json({
-      message: 'New password must be different from the current password.',
-    });
-    return;
-  }
-
   try {
     const user = await prismaClient.user.findUnique({
       where: { id: userID },
@@ -141,6 +134,13 @@ export async function updateUserPassword(req: PayloadRequest, res: Response) {
       res
         .status(httpStatus.BAD_REQUEST)
         .json({ message: 'Invalid current password. Please try again.' });
+      return;
+    }
+
+    if (currentPassword === newPassword) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: 'New password must be different from the current password.',
+      });
       return;
     }
 
