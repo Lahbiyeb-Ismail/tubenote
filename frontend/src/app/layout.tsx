@@ -7,6 +7,8 @@ import { AuthProvider } from "@/context/useAuth";
 import { VideoProvider } from "@/context/useVideo";
 import { NoteProvider } from "@/context/useNote";
 import { LayoutProvider } from "@/context/useLayout";
+import { User } from "lucide-react";
+import { UserProvider } from "@/context/useUser";
 
 const geistSans = localFont({
 	src: "./fonts/GeistVF.woff",
@@ -36,15 +38,17 @@ export default function RootLayout({
 			>
 				<ReactQueryProvider>
 					<AuthProvider>
-						<VideoProvider>
-							<NoteProvider>
-								<LayoutProvider>
-									<Navbar />
+						<UserProvider>
+							<VideoProvider>
+								<NoteProvider>
+									<LayoutProvider>
+										<Navbar />
 
-									{children}
-								</LayoutProvider>
-							</NoteProvider>
-						</VideoProvider>
+										{children}
+									</LayoutProvider>
+								</NoteProvider>
+							</VideoProvider>
+						</UserProvider>
 					</AuthProvider>
 				</ReactQueryProvider>
 			</body>
