@@ -18,8 +18,8 @@ export default function Hero() {
 							Unleash your inner note-taking powers with TubeNote - the ultimate
 							sidekick for conquering knowledge from the video galaxies.
 						</p>
-						<div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center md:justify-normal">
-							<Link href="/dashboard">
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-center md:justify-start">
+							<Link href="/dashboard" className="grid">
 								<Button
 									size="lg"
 									className="bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700"
@@ -28,14 +28,16 @@ export default function Hero() {
 									<Rocket className="ml-2 h-5 w-5" />
 								</Button>
 							</Link>
-							<Button
-								size="lg"
-								variant="outline"
-								className="border-gray-400 text-gray-700 hover:bg-gray-100"
-							>
-								<PlayCircle className="mr-2 h-5 w-5" />
-								Watch Demo
-							</Button>
+							<Link href="/" className="grid">
+								<Button
+									size="lg"
+									variant="outline"
+									className="border-gray-400 text-gray-700 hover:bg-gray-100"
+								>
+									<PlayCircle className="mr-2 h-5 w-5" />
+									Watch Demo
+								</Button>
+							</Link>
 						</div>
 					</div>
 					<div className="relative hidden md:block">
