@@ -11,7 +11,7 @@ import { Form } from "@/components/ui/form";
 import { updateProfileSchema } from "@/lib/schemas";
 import type { UpdateProfileData } from "@/types/auth.types";
 import { useAuth } from "@/context/useAuth";
-import useUpdateCurrentUser from "@/hooks/useUpdateCurrentUser";
+import useUpdateCurrentUser from "@/hooks/user/useUpdateCurrentUser";
 import { useUser } from "@/context/useUser";
 
 function UpdateProfileForm() {

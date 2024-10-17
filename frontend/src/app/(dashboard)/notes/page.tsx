@@ -1,6 +1,6 @@
 "use client";
 
-import useGetUserNotes from "@/hooks/useGetUserNotes";
+import useGetUserNotes from "@/hooks/note/useGetUserNotes";
 
 import AddNoteForm from "@/components/dashboards/AddNoteForm";
 import Header from "@/components/dashboards/Header";

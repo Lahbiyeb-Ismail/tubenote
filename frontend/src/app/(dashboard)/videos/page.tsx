@@ -1,6 +1,6 @@
 "use client";
 
-import useGetUserVideos from "@/hooks/useGetUserVideos";
+import useGetUserVideos from "@/hooks/note/useGetUserVideos";
 
 import Loader from "@/components/global/Loader";
 import AddNoteForm from "@/components/dashboards/AddNoteForm";

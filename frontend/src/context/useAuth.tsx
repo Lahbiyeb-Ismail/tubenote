@@ -4,10 +4,10 @@ import { createContext, useContext, useReducer } from "react";
 
 import type { AuthContextType, AuthProviderProps } from "@/types/auth.types";
 
-import useRegister from "@/hooks/useRegister";
-import useLogin from "@/hooks/useLogin";
+import useRegister from "@/hooks/auth/useRegister";
+import useLogin from "@/hooks/auth/useLogin";
 import authReducer, { authInitialState } from "@/reducers/auth.reducer";
-import useLogout from "@/hooks/useLogout";
+import useLogout from "@/hooks/auth/useLogout";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

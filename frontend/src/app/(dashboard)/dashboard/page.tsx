@@ -3,8 +3,8 @@
 import Header from "@/components/dashboards/Header";
 import RecentNoteList from "@/components/dashboards/RecentNotesList";
 
-import useGetRecentNotes from "@/hooks/useGetRecentNotes";
-import useGetRecentlyUpdatedNotes from "@/hooks/useGetRecentlyUpdatedNotes";
+import useGetRecentNotes from "@/hooks/note/useGetRecentNotes";
+import useGetRecentlyUpdatedNotes from "@/hooks/note/useGetRecentlyUpdatedNotes";
 
 function DashboardPage() {
 	const { data: recentNotes } = useGetRecentNotes();

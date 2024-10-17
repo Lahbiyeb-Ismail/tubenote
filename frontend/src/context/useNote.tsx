@@ -4,12 +4,12 @@ import { createContext, useContext, useReducer } from "react";
 
 import type { NoteContextType, NoteProviderProps } from "@/types/note.types";
 
-import useCreateNote from "@/hooks/useCreateNote";
+import useCreateNote from "@/hooks/note/useCreateNote";
+import useDeleteNote from "@/hooks/note/useDeleteNote";
+import useGetNoteById from "@/hooks/note/useGetNoteById";
+import useUpdateNote from "@/hooks/note/useUpdateNote";
+
 import noteReducer, { noteInitialState } from "@/reducers/note.reducer";
-import useGetUserNotes from "@/hooks/useGetUserNotes";
-import useDeleteNote from "@/hooks/useDeleteNote";
-import useGetNoteById from "@/hooks/useGetNoteById";
-import useUpdateNote from "@/hooks/useUpdateNote";
 
 const NoteContext = createContext<NoteContextType | undefined>(undefined);
 

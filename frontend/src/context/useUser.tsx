@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useReducer } from "react";
 
-import useUpdateCurrentUser from "@/hooks/useUpdateCurrentUser";
+import useUpdateCurrentUser from "@/hooks/user/useUpdateCurrentUser";
 import type {
 	UserContextType,
 	UserProviderProps,

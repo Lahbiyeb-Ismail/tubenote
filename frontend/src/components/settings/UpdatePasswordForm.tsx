@@ -10,7 +10,7 @@ import { Form } from "@/components/ui/form";
 
 import { updatePasswordSchema } from "@/lib/schemas";
 import type { UpdatePasswordData } from "@/types/auth.types";
-import useUpdatePassword from "@/hooks/useUpdatePassword";
+import useUpdatePassword from "@/hooks/user/useUpdatePassword";
 
 function UpdatePasswordForm() {
 	const form = useForm<UpdatePasswordData>({

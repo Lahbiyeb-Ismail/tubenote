@@ -4,7 +4,7 @@ import { createContext, useContext, useReducer, useState } from "react";
 
 import type { VideoContextType, VideoProviderProps } from "@/types/video.types";
 
-import useSaveVideoData from "@/hooks/useSaveVideoData";
+import useSaveVideoData from "@/hooks/video/useSaveVideoData";
 import videoReducer, { videoInitialState } from "@/reducers/video.reducer";
 
 const VideoContext = createContext<VideoContextType | undefined>(undefined);
