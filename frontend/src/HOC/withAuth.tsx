@@ -1,20 +1,28 @@
 "use client";
 
-import type { ComponentType } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/context/useAuth";
 
-function withAuth<P extends object>(WrappedComponent: ComponentType<P>) {
+function withAuth<P extends object>(WrappedComponent: React.ComponentType<P>) {
 	return function WithAuth(props: P) {
+		const [isAuthenticated, setIsAuthenticated] = useState(false);
 		const {
 			state: { accessToken },
 		} = useAuth();
 		const router = useRouter();
 
-		if (!accessToken) {
-			router.push("/login");
-			return null; // Render nothing while redirecting
+		useEffect(() => {
+			if (!accessToken) {
+				router.push("/login");
+			} else {
+				setIsAuthenticated(true);
+			}
+		}, [accessToken, router]);
+
+		if (!isAuthenticated) {
+			return null; // Render nothing while checking authentication
 		}
 
 		// If authenticated, render the wrapped component
