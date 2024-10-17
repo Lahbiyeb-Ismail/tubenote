@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Mail, User, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 
 import FormInput from "@/components/auth/FormInput";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Form } from "@/components/ui/form";
 
 import { updatePasswordSchema } from "@/lib/schemas";
 import type { UpdatePasswordData } from "@/types/auth.types";
+import useUpdatePassword from "@/hooks/useUpdatePassword";
 
 function UpdatePasswordForm() {
 	const form = useForm<UpdatePasswordData>({
@@ -21,8 +22,10 @@ function UpdatePasswordForm() {
 		},
 	});
 
+	const { mutate, isPending } = useUpdatePassword();
+
 	const handleUpdatePassword = (data: UpdatePasswordData) => {
-		console.log(data);
+		mutate(data);
 	};
 
 	return (
@@ -62,11 +65,10 @@ function UpdatePasswordForm() {
 					/>
 					<Button
 						type="submit"
-						className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700
-            hover:to-purple-700"
-						// disabled={isLoading}
+						className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+						disabled={isPending}
 					>
-						Update Password
+						{isPending ? "Updating..." : "Update Password"}
 					</Button>
 				</form>
 			</Form>
