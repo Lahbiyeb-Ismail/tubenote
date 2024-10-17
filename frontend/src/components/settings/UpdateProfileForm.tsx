@@ -10,18 +10,27 @@ import { Form } from "@/components/ui/form";
 
 import { updateProfileSchema } from "@/lib/schemas";
 import type { UpdateProfileData } from "@/types/auth.types";
+import { useAuth } from "@/context/useAuth";
+import useUpdateCurrentUser from "@/hooks/useUpdateCurrentUser";
+import { useUser } from "@/context/useUser";
 
 function UpdateProfileForm() {
+	const {
+		state: { user },
+	} = useAuth();
+
 	const form = useForm<UpdateProfileData>({
 		resolver: zodResolver(updateProfileSchema),
 		defaultValues: {
-			username: "",
-			email: "",
+			username: user?.username ?? "",
+			email: user?.email ?? "",
 		},
 	});
 
+	const { updateUser, isLoading } = useUser();
+
 	const handleUpdateProfile = (data: UpdateProfileData) => {
-		console.log(data);
+		updateUser(data);
 	};
 
 	return (
@@ -52,10 +61,11 @@ function UpdateProfileForm() {
 					/>
 					<Button
 						type="submit"
-						className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700"
-						// disabled={isLoading}
+						className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white
+						hover:from-red-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+						disabled={isLoading}
 					>
-						Update Profile
+						{isLoading ? "Updating..." : "Update Profile"}
 					</Button>
 				</form>
 			</Form>
