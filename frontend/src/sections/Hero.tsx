@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { PlayCircle, Pencil, Rocket } from "lucide-react";
+import Link from "next/link";
 
 export default function Hero() {
 	return (
@@ -18,13 +19,15 @@ export default function Hero() {
 							sidekick for conquering knowledge from the video galaxies.
 						</p>
 						<div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center md:justify-normal">
-							<Button
-								size="lg"
-								className="bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700"
-							>
-								Get Started
-								<Rocket className="ml-2 h-5 w-5" />
-							</Button>
+							<Link href="/dashboard">
+								<Button
+									size="lg"
+									className="bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700"
+								>
+									Get Started
+									<Rocket className="ml-2 h-5 w-5" />
+								</Button>
+							</Link>
 							<Button
 								size="lg"
 								variant="outline"

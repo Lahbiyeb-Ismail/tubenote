@@ -2,6 +2,7 @@ import StepsList from "@/components/global/StepsList";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Globe, PlayCircle, BookOpen, FileCheck } from "lucide-react";
+import Link from "next/link";
 
 export default function HowItWorks() {
 	return (
@@ -22,12 +23,14 @@ export default function HowItWorks() {
 				<StepsList />
 
 				<div className="text-center mt-12">
-					<Button
-						size="lg"
-						className="bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700"
-					>
-						Get Started Now
-					</Button>
+					<Link href="dashboard">
+						<Button
+							size="lg"
+							className="bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700"
+						>
+							Get Started Now
+						</Button>
+					</Link>
 				</div>
 			</div>
 		</section>
