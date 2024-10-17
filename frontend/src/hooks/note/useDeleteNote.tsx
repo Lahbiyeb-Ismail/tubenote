@@ -15,17 +15,15 @@ function useDeleteNote() {
 			toast.loading("Deleting note...", { id: "loadingToast" });
 		},
 		onSuccess: (data) => {
-			toast.dismiss("loadingToast");
-
-			toast.success(data.message);
-
 			queryClient.invalidateQueries({ queryKey: ["notes"] });
+
+			toast.dismiss("loadingToast");
+			toast.success(data.message);
 		},
 		onError: (error: TypedError) => {
 			toast.dismiss("loadingToast");
 
 			if (error.response) {
-				console.log(error.response.data.message);
 				toast.error(error.response.data.message);
 			} else {
 				toast.error("Delete note failed. Please try again.");
