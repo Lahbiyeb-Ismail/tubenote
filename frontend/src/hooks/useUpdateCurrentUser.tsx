@@ -9,12 +9,16 @@ function useUpdateCurrentUser(dispatch: React.Dispatch<UserAction>) {
 	return useMutation({
 		mutationFn: updateCurrentUser,
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: ["users"] });
+			queryClient.invalidateQueries({ queryKey: ["user"] });
 
 			dispatch({
 				type: "UPDATE_USER",
-				payload: { user: data, message: "User updated successfully." },
+				payload: { user: data.user, message: "User updated successfully." },
 			});
+
+			localStorage.setItem("user", JSON.stringify(data.user));
+
+			window.location.reload();
 		},
 		onError(error: TypedError) {
 			if (error.response) {
