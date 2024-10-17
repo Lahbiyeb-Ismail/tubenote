@@ -1,9 +1,10 @@
 import type { Response } from 'express';
 import httpStatus from 'http-status';
+import bcrypt from 'bcryptjs';
 
 import type { PayloadRequest } from '../types';
 import prismaClient from '../lib/prisma';
-import { isUserExist } from '../helpers/auth.helper';
+import { checkPassword, isUserExist } from '../helpers/auth.helper';
 
 /**
  * Updates the current user's information based on the provided request payload.
@@ -76,5 +77,87 @@ export async function updateCurrentUser(req: PayloadRequest, res: Response) {
     res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
       .json({ message: 'Error updating the current user.', error });
+  }
+}
+
+/**
+ * Updates the password of the current user.
+ *
+ * @param req - The request object containing the payload and body.
+ * @param res - The response object used to send the response.
+ *
+ * The function performs the following steps:
+ * 1. Extracts the userID from the request payload.
+ * 2. Validates the presence of userID, currentPassword, and newPassword.
+ * 3. Ensures the new password is different from the current password.
+ * 4. Fetches the user from the database using the userID.
+ * 5. Validates the current password.
+ * 6. Hashes the new password and updates it in the database.
+ * 7. Sends appropriate responses based on the success or failure of each step.
+ *
+ * @throws {Error} If there is an issue updating the password in the database.
+ */
+export async function updateUserPassword(req: PayloadRequest, res: Response) {
+  const userID = req.payload?.userID;
+
+  if (!userID) {
+    res
+      .status(httpStatus.UNAUTHORIZED)
+      .json({ message: 'Unauthorized access. Please try again.' });
+    return;
+  }
+
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    res
+      .status(httpStatus.BAD_REQUEST)
+      .json({ message: 'All fields are required.' });
+    return;
+  }
+
+  if (currentPassword === newPassword) {
+    res.status(httpStatus.BAD_REQUEST).json({
+      message: 'New password must be different from the current password.',
+    });
+    return;
+  }
+
+  try {
+    const user = await prismaClient.user.findUnique({
+      where: { id: userID },
+    });
+
+    if (!user) {
+      res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: 'Unauthorized access. Please try again.' });
+      return;
+    }
+
+    const isPasswordValid = await checkPassword(currentPassword, user.password);
+
+    if (!isPasswordValid) {
+      res
+        .status(httpStatus.BAD_REQUEST)
+        .json({ message: 'Invalid current password. Please try again.' });
+      return;
+    }
+
+    const newHashedPassword = await bcrypt.hash(newPassword, 10);
+
+    const updatedUser = await prismaClient.user.update({
+      where: { id: userID },
+      data: { password: newHashedPassword },
+      omit: { password: true },
+    });
+
+    res
+      .status(httpStatus.OK)
+      .json({ message: 'Password updated successfully.', user: updatedUser });
+  } catch (error) {
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: 'Error updating the current user password.', error });
   }
 }
