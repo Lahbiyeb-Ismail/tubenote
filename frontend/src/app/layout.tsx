@@ -7,8 +7,9 @@ import { AuthProvider } from "@/context/useAuth";
 import { VideoProvider } from "@/context/useVideo";
 import { NoteProvider } from "@/context/useNote";
 import { LayoutProvider } from "@/context/useLayout";
-import { User } from "lucide-react";
 import { UserProvider } from "@/context/useUser";
+
+import { Toaster } from "react-hot-toast";
 
 const geistSans = localFont({
 	src: "./fonts/GeistVF.woff",
@@ -42,8 +43,8 @@ export default function RootLayout({
 							<VideoProvider>
 								<NoteProvider>
 									<LayoutProvider>
+										<Toaster />
 										<Navbar />
-
 										{children}
 									</LayoutProvider>
 								</NoteProvider>
