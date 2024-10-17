@@ -15,7 +15,7 @@ function NotesPage() {
 
 	return (
 		<>
-			{!data ? (
+			{!data || data.length === 0 ? (
 				<NoDataFound title="You don't have any notes yet." />
 			) : (
 				<div className="min-h-screen flex-1 bg-gray-100">
