@@ -11,3 +11,14 @@ export const updateUserSchema = {
       .email({ message: 'Invalid email address. Please try another one.' }),
   }),
 };
+
+export const updatePasswordSchema = {
+  body: z.object({
+    currentPassword: z
+      .string()
+      .min(8, { message: 'Password must be at least 8 characters long.' }),
+    newPassword: z
+      .string()
+      .min(8, { message: 'Password must be at least 8 characters long.' }),
+  }),
+};
