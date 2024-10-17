@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateCurrentUser } from "@/actions/user.actions";
 import type { TypedError } from "@/types";
-import type { UserAction } from "@/context/useUser";
+import type { UserAction } from "@/types/user.types";
 
 function useUpdateCurrentUser(dispatch: React.Dispatch<UserAction>) {
 	const queryClient = useQueryClient();
