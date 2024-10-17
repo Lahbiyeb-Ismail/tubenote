@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.route';
 import videoRoutes from './routes/video.route';
 import noteRoutes from './routes/note.route';
+import userRoutes from './routes/user.route';
 
 const app: Express = express();
 
@@ -29,5 +30,6 @@ app.use(
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/videos', videoRoutes);
 app.use('/api/v1/notes', noteRoutes);
+app.use('/api/v1/users', userRoutes);
 
 export default app;
