@@ -1,5 +1,19 @@
 import axiosInstance from '@/lib/axios.lib';
 import type { User } from '@/types/auth.types';
+import type { IUser } from '@/types/user.types';
+
+/**
+ * Fetches the current user's information from the server.
+ *
+ * @returns {Promise<{ user: IUser }>} A promise that resolves to an object containing the user information.
+ *
+ * @throws {Error} Throws an error if the request fails.
+ */
+export async function getCurrentUser(): Promise<{ user: IUser }> {
+  const response = await axiosInstance.get('/users/me');
+
+  return response.data;
+}
 
 /**
  * Updates the current user's information.
