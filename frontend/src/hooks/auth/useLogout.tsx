@@ -20,10 +20,12 @@ function useLogout(dispatch: React.Dispatch<AuthAction>) {
 			toast.dismiss("loadingToast");
 
 			toast.success("Logged out successfully.");
-			queryClient.invalidateQueries({ queryKey: ["user"] });
+			queryClient.invalidateQueries({ queryKey: ["user", "current-user"] });
 
 			localStorage.clear();
 			dispatch({ type: "LOGOUT_SUCCESS" });
+
+			window.location.reload();
 		},
 		onError(error: TypedError) {
 			toast.dismiss("loadingToast");
