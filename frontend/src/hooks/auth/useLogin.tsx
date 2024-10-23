@@ -8,22 +8,26 @@ import { loginUser } from "@/actions/auth.actions";
 
 import type { TypedError } from "@/types";
 import type { AuthAction } from "@/types/auth.types";
+import useGetCurrentUser from "../user/useGetCurrentUser";
 
 function useLogin(dispatch: React.Dispatch<AuthAction>) {
 	const queryClient = useQueryClient();
 	const router = useRouter();
+	const { refetch: refetchCurrentUser } = useGetCurrentUser();
 
 	return useMutation({
 		mutationFn: loginUser,
 		onMutate: () => {
 			toast.loading("Logging in...", { id: "loadingToast" });
 		},
-		onSuccess: (data) => {
+		onSuccess: async (data) => {
 			toast.dismiss("loadingToast");
 
 			toast.success(data.message);
 
-			queryClient.invalidateQueries({ queryKey: ["user"] });
+			queryClient.invalidateQueries({ queryKey: ["user", "current-user"] });
+
+			localStorage.setItem("accessToken", data.accessToken);
 
 			dispatch({
 				type: "LOGIN_SUCCESS",
@@ -34,8 +38,7 @@ function useLogin(dispatch: React.Dispatch<AuthAction>) {
 				},
 			});
 
-			localStorage.setItem("accessToken", data.accessToken);
-			localStorage.setItem("user", JSON.stringify(data.user));
+			await refetchCurrentUser();
 
 			// Redirect to dashboard after successful login
 			router.push("/dashboard");
