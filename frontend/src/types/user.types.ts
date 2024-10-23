@@ -1,5 +1,11 @@
 import type { User } from './auth.types';
 
+export interface IUser extends User {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type UserState = {
   user: User | null;
   message: string;
