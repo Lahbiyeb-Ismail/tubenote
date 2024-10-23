@@ -20,10 +20,13 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import useGetCurrentUser from "@/hooks/user/useGetCurrentUser";
 
 function DropDownNavbar() {
-	const { state, logout } = useAuth();
-	const { user } = state;
+	const { logout } = useAuth();
+	const { data } = useGetCurrentUser();
+
+	const currentUser = data?.user;
 
 	return (
 		<div className="flex items-center">
@@ -37,10 +40,10 @@ function DropDownNavbar() {
 					<DropdownMenuLabel className="font-normal">
 						<div className="flex flex-col space-y-1">
 							<p className="text-sm font-medium leading-none">
-								{user?.username}
+								{currentUser?.username}
 							</p>
 							<p className="text-xs leading-none text-muted-foreground">
-								{user?.email}
+								{currentUser?.email}
 							</p>
 						</div>
 					</DropdownMenuLabel>

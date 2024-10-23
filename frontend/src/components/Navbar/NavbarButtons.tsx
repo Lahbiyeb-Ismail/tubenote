@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useAuth } from "@/context/useAuth";
+import useGetCurrentUser from "@/hooks/user/useGetCurrentUser";
 
 const LoggedInButtons = dynamic(() => import("./LoggedInButtons"), {
 	ssr: false,
@@ -11,11 +11,17 @@ const LoggedOutButtons = dynamic(() => import("./LoggedOutButtons"), {
 });
 
 function NavbarButtons() {
-	const {
-		state: { accessToken },
-	} = useAuth();
+	const { data: currentUser, isLoading } = useGetCurrentUser();
 
-	return <>{accessToken ? <LoggedInButtons /> : <LoggedOutButtons />}</>;
+	return (
+		<>
+			{currentUser && !isLoading ? (
+				<LoggedInButtons />
+			) : (
+				<LoggedOutButtons />
+			)}
+		</>
+	);
 }
 
 export default NavbarButtons;
