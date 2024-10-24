@@ -1,3 +1,5 @@
+import 'express-async-errors';
+
 import express, { type Express } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -7,6 +9,7 @@ import authRoutes from './routes/auth.route';
 import videoRoutes from './routes/video.route';
 import noteRoutes from './routes/note.route';
 import userRoutes from './routes/user.route';
+import { errorHandler, notFoundRoute } from './middlewares/errorsMiddleware';
 
 const app: Express = express();
 
@@ -31,5 +34,9 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/videos', videoRoutes);
 app.use('/api/v1/notes', noteRoutes);
 app.use('/api/v1/users', userRoutes);
+
+// ?: Global Error middleware
+app.use(notFoundRoute);
+app.use(errorHandler);
 
 export default app;
