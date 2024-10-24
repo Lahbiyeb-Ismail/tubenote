@@ -11,14 +11,30 @@ import type { RegisterCredentiels } from '../types/auth.type';
 
 const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
 
+type UserIdentifier = {
+  email?: string;
+  id?: string;
+};
+
 /**
- * Checks if a user exists in the database by their email.
+ * Checks if a user exists in the database by email or id.
  *
- * @param email - The email of the user to check.
- * @returns A promise that resolves to the user object if found, otherwise null.
+ * @param {UserIdentifier} param0 - An object containing the user's email and id.
+ * @param {string} param0.email - The email of the user.
+ * @param {string} param0.id - The id of the user.
+ * @param {boolean} [withPassword=true] - A flag indicating whether to include the password in the returned user object.
+ * @returns {Promise<User | null>} A promise that resolves to the user object if found, otherwise null.
  */
-export async function isUserExist(email: string): Promise<User | null> {
-  const user = await prismaClient.user.findUnique({ where: { email } });
+export async function isUserExist(
+  { email, id }: UserIdentifier,
+  withPassword = true
+): Promise<User | null> {
+  const user = await prismaClient.user.findFirst({
+    where: {
+      OR: [{ email: email as string }, { id: id as string }],
+    },
+    omit: { password: withPassword },
+  });
 
   return user;
 }
