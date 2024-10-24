@@ -33,7 +33,9 @@ export async function handleRegister(req: Request, res: Response) {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
-    res.status(400).json({ message: 'Please fill in all fields' });
+    res
+      .status(httpStatus.BAD_REQUEST)
+      .json({ message: 'Please fill in all fields' });
     return;
   }
 
@@ -74,6 +76,13 @@ export async function handleRegister(req: Request, res: Response) {
  */
 export async function handleLogin(req: Request, res: Response) {
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    res.status(httpStatus.BAD_REQUEST).json({
+      message: 'Please provide an email and password.',
+    });
+    return;
+  }
 
   const user = await isUserExist(email);
 
