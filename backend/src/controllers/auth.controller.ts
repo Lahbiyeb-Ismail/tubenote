@@ -39,7 +39,7 @@ export async function handleRegister(req: Request, res: Response) {
     return;
   }
 
-  const user = await isUserExist(email);
+  const user = await isUserExist({ email });
 
   if (user) {
     res.status(httpStatus.CONFLICT).json({
@@ -84,7 +84,7 @@ export async function handleLogin(req: Request, res: Response) {
     return;
   }
 
-  const user = await isUserExist(email);
+  const user = await isUserExist({ email }, false);
 
   if (!user) {
     res.status(httpStatus.NOT_FOUND).json({
