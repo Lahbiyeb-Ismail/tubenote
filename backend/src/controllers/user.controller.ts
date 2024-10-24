@@ -4,7 +4,11 @@ import bcrypt from 'bcryptjs';
 
 import type { PayloadRequest } from '../types';
 import prismaClient from '../lib/prisma';
-import { checkPassword, isUserExist } from '../helpers/auth.helper';
+import {
+  checkPassword,
+  isUserExist,
+  verifyUserId,
+} from '../helpers/auth.helper';
 
 /**
  * Retrieves the current user based on the user ID present in the request payload.
@@ -20,19 +24,9 @@ import { checkPassword, isUserExist } from '../helpers/auth.helper';
  * @returns A JSON response containing the user data if found, or an error message if not.
  */
 export async function getCurrentUser(req: PayloadRequest, res: Response) {
-  const userID = req.payload?.userID;
+  const userID = verifyUserId(req, res) as string;
 
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-    omit: { password: true },
-  });
+  const user = await isUserExist({ id: userID });
 
   if (!user) {
     res
@@ -63,20 +57,10 @@ export async function getCurrentUser(req: PayloadRequest, res: Response) {
  * @throws Will throw an error if the database operation fails.
  */
 export async function updateCurrentUser(req: PayloadRequest, res: Response) {
-  const userID = req.payload?.userID;
-
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
   const { username, email } = req.body;
+  const userID = verifyUserId(req, res) as string;
 
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
+  const user = await isUserExist({ id: userID });
 
   if (!user) {
     res
@@ -85,7 +69,7 @@ export async function updateCurrentUser(req: PayloadRequest, res: Response) {
     return;
   }
 
-  const isEmailTaken = await isUserExist(email);
+  const isEmailTaken = await isUserExist({ email });
 
   if (isEmailTaken && isEmailTaken.id !== user.id) {
     res
@@ -130,14 +114,7 @@ export async function updateCurrentUser(req: PayloadRequest, res: Response) {
  * @throws {Error} If there is an issue updating the password in the database.
  */
 export async function updateUserPassword(req: PayloadRequest, res: Response) {
-  const userID = req.payload?.userID;
-
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
+  const userID = verifyUserId(req, res) as string;
 
   const { currentPassword, newPassword } = req.body;
 
@@ -148,9 +125,7 @@ export async function updateUserPassword(req: PayloadRequest, res: Response) {
     return;
   }
 
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
+  const user = await isUserExist({ id: userID });
 
   if (!user) {
     res
