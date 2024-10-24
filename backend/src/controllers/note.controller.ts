@@ -69,28 +69,22 @@ export async function createNote(req: PayloadRequest, res: Response) {
     return;
   }
 
-  try {
-    const note = await prismaClient.note.create({
-      data: {
-        title,
-        content,
-        videoTitle,
-        thumbnail,
-        videoId,
-        userId: user.id,
-        youtubeId,
-        timestamp,
-      },
-    });
+  const note = await prismaClient.note.create({
+    data: {
+      title,
+      content,
+      videoTitle,
+      thumbnail,
+      videoId,
+      userId: user.id,
+      youtubeId,
+      timestamp,
+    },
+  });
 
-    res
-      .status(httpStatus.CREATED)
-      .json({ message: 'Note created successfully.', note });
-  } catch (error) {
-    res
-      .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: 'Error creating note.', error });
-  }
+  res
+    .status(httpStatus.CREATED)
+    .json({ message: 'Note created successfully.', note });
 }
 
 /**
@@ -121,28 +115,22 @@ export async function getUserNotes(req: PayloadRequest, res: Response) {
     return;
   }
 
-  try {
-    const user = await prismaClient.user.findUnique({
-      where: { id: userID },
-    });
+  const user = await prismaClient.user.findUnique({
+    where: { id: userID },
+  });
 
-    if (!user) {
-      res
-        .status(httpStatus.NOT_FOUND)
-        .json({ message: 'Unauthorized access. Please try again.' });
-      return;
-    }
-
-    const notes = await prismaClient.note.findMany({
-      where: { userId: user.id },
-    });
-
-    res.status(httpStatus.OK).json({ notes });
-  } catch (error) {
+  if (!user) {
     res
-      .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: 'Error creating note.', error });
+      .status(httpStatus.NOT_FOUND)
+      .json({ message: 'Unauthorized access. Please try again.' });
+    return;
   }
+
+  const notes = await prismaClient.note.findMany({
+    where: { userId: user.id },
+  });
+
+  res.status(httpStatus.OK).json({ notes });
 }
 
 /**
@@ -182,28 +170,22 @@ export async function deleteNote(req: PayloadRequest, res: Response) {
     return;
   }
 
-  try {
-    const user = await prismaClient.user.findUnique({
-      where: { id: userID },
-    });
+  const user = await prismaClient.user.findUnique({
+    where: { id: userID },
+  });
 
-    if (!user) {
-      res
-        .status(httpStatus.NOT_FOUND)
-        .json({ message: 'Unauthorized access. Please try again.' });
-      return;
-    }
-
-    await prismaClient.note.delete({
-      where: { id: noteId },
-    });
-
-    res.status(httpStatus.OK).json({ message: 'Note deleted successfully.' });
-  } catch (error) {
+  if (!user) {
     res
-      .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: 'Error creating note.', error });
+      .status(httpStatus.NOT_FOUND)
+      .json({ message: 'Unauthorized access. Please try again.' });
+    return;
   }
+
+  await prismaClient.note.delete({
+    where: { id: noteId },
+  });
+
+  res.status(httpStatus.OK).json({ message: 'Note deleted successfully.' });
 }
 
 /**
@@ -245,33 +227,27 @@ export async function getNoteById(req: PayloadRequest, res: Response) {
     return;
   }
 
-  try {
-    const user = await prismaClient.user.findUnique({
-      where: { id: userID },
-    });
+  const user = await prismaClient.user.findUnique({
+    where: { id: userID },
+  });
 
-    if (!user) {
-      res
-        .status(httpStatus.NOT_FOUND)
-        .json({ message: 'Unauthorized access. Please try again.' });
-      return;
-    }
-
-    const note = await prismaClient.note.findFirst({
-      where: { id: noteId, userId: user.id },
-    });
-
-    if (!note) {
-      res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
-      return;
-    }
-
-    res.status(httpStatus.OK).json({ note });
-  } catch (error) {
+  if (!user) {
     res
-      .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: 'Error creating note.', error });
+      .status(httpStatus.NOT_FOUND)
+      .json({ message: 'Unauthorized access. Please try again.' });
+    return;
   }
+
+  const note = await prismaClient.note.findFirst({
+    where: { id: noteId, userId: user.id },
+  });
+
+  if (!note) {
+    res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
+    return;
+  }
+
+  res.status(httpStatus.OK).json({ note });
 }
 
 /**
@@ -317,44 +293,38 @@ export async function updateNote(req: PayloadRequest, res: Response) {
 
   const { title, content, timestamp } = req.body;
 
-  try {
-    const user = await prismaClient.user.findUnique({
-      where: { id: userID },
-    });
+  const user = await prismaClient.user.findUnique({
+    where: { id: userID },
+  });
 
-    if (!user) {
-      res
-        .status(httpStatus.NOT_FOUND)
-        .json({ message: 'Unauthorized access. Please try again.' });
-      return;
-    }
-
-    const note = await prismaClient.note.findFirst({
-      where: { id: noteId, userId: user.id },
-    });
-
-    if (!note) {
-      res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
-      return;
-    }
-
-    const updatedNote = await prismaClient.note.update({
-      where: { id: note.id },
-      data: {
-        title: title || note.title,
-        content: content || note.content,
-        timestamp: timestamp,
-      },
-    });
-
+  if (!user) {
     res
-      .status(httpStatus.OK)
-      .json({ message: 'Note Updated successfully.', note: updatedNote });
-  } catch (error) {
-    res
-      .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: 'Error creating note.', error });
+      .status(httpStatus.NOT_FOUND)
+      .json({ message: 'Unauthorized access. Please try again.' });
+    return;
   }
+
+  const note = await prismaClient.note.findFirst({
+    where: { id: noteId, userId: user.id },
+  });
+
+  if (!note) {
+    res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
+    return;
+  }
+
+  const updatedNote = await prismaClient.note.update({
+    where: { id: note.id },
+    data: {
+      title: title || note.title,
+      content: content || note.content,
+      timestamp: timestamp,
+    },
+  });
+
+  res
+    .status(httpStatus.OK)
+    .json({ message: 'Note Updated successfully.', note: updatedNote });
 }
 
 /**
@@ -385,30 +355,24 @@ export async function getUserRecentNotes(req: PayloadRequest, res: Response) {
     return;
   }
 
-  try {
-    const user = await prismaClient.user.findUnique({
-      where: { id: userID },
-    });
+  const user = await prismaClient.user.findUnique({
+    where: { id: userID },
+  });
 
-    if (!user) {
-      res
-        .status(httpStatus.NOT_FOUND)
-        .json({ message: 'Unauthorized access. Please try again.' });
-      return;
-    }
-
-    const notes = await prismaClient.note.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: 'desc' },
-      take: 2,
-    });
-
-    res.status(httpStatus.OK).json({ notes });
-  } catch (error) {
+  if (!user) {
     res
-      .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: 'Error creating note.', error });
+      .status(httpStatus.NOT_FOUND)
+      .json({ message: 'Unauthorized access. Please try again.' });
+    return;
   }
+
+  const notes = await prismaClient.note.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: 'desc' },
+    take: 2,
+  });
+
+  res.status(httpStatus.OK).json({ notes });
 }
 
 /**
@@ -442,28 +406,22 @@ export async function getUserRecentlyUpdatedNotes(
     return;
   }
 
-  try {
-    const user = await prismaClient.user.findUnique({
-      where: { id: userID },
-    });
+  const user = await prismaClient.user.findUnique({
+    where: { id: userID },
+  });
 
-    if (!user) {
-      res
-        .status(httpStatus.NOT_FOUND)
-        .json({ message: 'Unauthorized access. Please try again.' });
-      return;
-    }
-
-    const notes = await prismaClient.note.findMany({
-      where: { userId: user.id },
-      orderBy: { updatedAt: 'desc' },
-      take: 2,
-    });
-
-    res.status(httpStatus.OK).json({ notes });
-  } catch (error) {
+  if (!user) {
     res
-      .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: 'Error creating note.', error });
+      .status(httpStatus.NOT_FOUND)
+      .json({ message: 'Unauthorized access. Please try again.' });
+    return;
   }
+
+  const notes = await prismaClient.note.findMany({
+    where: { userId: user.id },
+    orderBy: { updatedAt: 'desc' },
+    take: 2,
+  });
+
+  res.status(httpStatus.OK).json({ notes });
 }

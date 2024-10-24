@@ -29,25 +29,19 @@ export async function getCurrentUser(req: PayloadRequest, res: Response) {
     return;
   }
 
-  try {
-    const user = await prismaClient.user.findUnique({
-      where: { id: userID },
-      omit: { password: true },
-    });
+  const user = await prismaClient.user.findUnique({
+    where: { id: userID },
+    omit: { password: true },
+  });
 
-    if (!user) {
-      res
-        .status(httpStatus.NOT_FOUND)
-        .json({ message: 'User not found. Please try again.' });
-      return;
-    }
-
-    res.status(httpStatus.OK).json({ user });
-  } catch (error) {
+  if (!user) {
     res
-      .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: 'Error fetching the current user.', error });
+      .status(httpStatus.NOT_FOUND)
+      .json({ message: 'User not found. Please try again.' });
+    return;
   }
+
+  res.status(httpStatus.OK).json({ user });
 }
 
 /**
@@ -80,48 +74,42 @@ export async function updateCurrentUser(req: PayloadRequest, res: Response) {
 
   const { username, email } = req.body;
 
-  try {
-    const user = await prismaClient.user.findUnique({
-      where: { id: userID },
-    });
+  const user = await prismaClient.user.findUnique({
+    where: { id: userID },
+  });
 
-    if (!user) {
-      res
-        .status(httpStatus.NOT_FOUND)
-        .json({ message: 'Unauthorized access. Please try again.' });
-      return;
-    }
-
-    const isEmailTaken = await isUserExist(email);
-
-    if (isEmailTaken && isEmailTaken.id !== user.id) {
-      res
-        .status(httpStatus.BAD_REQUEST)
-        .json({ message: 'Email is already taken. Please try another one.' });
-      return;
-    }
-
-    if (username === user.username && email === user.email) {
-      res.status(httpStatus.OK).json({
-        message: 'No changes detected. User information remains the same.',
-      });
-      return;
-    }
-
-    const updatedUser = await prismaClient.user.update({
-      where: { id: userID },
-      data: { username, email },
-      omit: { password: true, id: true },
-    });
-
+  if (!user) {
     res
-      .status(httpStatus.OK)
-      .json({ message: 'User updated successfully.', user: updatedUser });
-  } catch (error) {
-    res
-      .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: 'Error updating the current user.', error });
+      .status(httpStatus.NOT_FOUND)
+      .json({ message: 'Unauthorized access. Please try again.' });
+    return;
   }
+
+  const isEmailTaken = await isUserExist(email);
+
+  if (isEmailTaken && isEmailTaken.id !== user.id) {
+    res
+      .status(httpStatus.BAD_REQUEST)
+      .json({ message: 'Email is already taken. Please try another one.' });
+    return;
+  }
+
+  if (username === user.username && email === user.email) {
+    res.status(httpStatus.OK).json({
+      message: 'No changes detected. User information remains the same.',
+    });
+    return;
+  }
+
+  const updatedUser = await prismaClient.user.update({
+    where: { id: userID },
+    data: { username, email },
+    omit: { password: true, id: true },
+  });
+
+  res
+    .status(httpStatus.OK)
+    .json({ message: 'User updated successfully.', user: updatedUser });
 }
 
 /**
@@ -160,48 +148,42 @@ export async function updateUserPassword(req: PayloadRequest, res: Response) {
     return;
   }
 
-  try {
-    const user = await prismaClient.user.findUnique({
-      where: { id: userID },
-    });
+  const user = await prismaClient.user.findUnique({
+    where: { id: userID },
+  });
 
-    if (!user) {
-      res
-        .status(httpStatus.NOT_FOUND)
-        .json({ message: 'Unauthorized access. Please try again.' });
-      return;
-    }
-
-    const isPasswordValid = await checkPassword(currentPassword, user.password);
-
-    if (!isPasswordValid) {
-      res
-        .status(httpStatus.BAD_REQUEST)
-        .json({ message: 'Invalid current password. Please try again.' });
-      return;
-    }
-
-    if (currentPassword === newPassword) {
-      res.status(httpStatus.BAD_REQUEST).json({
-        message: 'New password must be different from the current password.',
-      });
-      return;
-    }
-
-    const newHashedPassword = await bcrypt.hash(newPassword, 10);
-
-    const updatedUser = await prismaClient.user.update({
-      where: { id: userID },
-      data: { password: newHashedPassword },
-      omit: { password: true },
-    });
-
+  if (!user) {
     res
-      .status(httpStatus.OK)
-      .json({ message: 'Password updated successfully.', user: updatedUser });
-  } catch (error) {
-    res
-      .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: 'Error updating the current user password.', error });
+      .status(httpStatus.NOT_FOUND)
+      .json({ message: 'Unauthorized access. Please try again.' });
+    return;
   }
+
+  const isPasswordValid = await checkPassword(currentPassword, user.password);
+
+  if (!isPasswordValid) {
+    res
+      .status(httpStatus.BAD_REQUEST)
+      .json({ message: 'Invalid current password. Please try again.' });
+    return;
+  }
+
+  if (currentPassword === newPassword) {
+    res.status(httpStatus.BAD_REQUEST).json({
+      message: 'New password must be different from the current password.',
+    });
+    return;
+  }
+
+  const newHashedPassword = await bcrypt.hash(newPassword, 10);
+
+  const updatedUser = await prismaClient.user.update({
+    where: { id: userID },
+    data: { password: newHashedPassword },
+    omit: { password: true },
+  });
+
+  res
+    .status(httpStatus.OK)
+    .json({ message: 'Password updated successfully.', user: updatedUser });
 }

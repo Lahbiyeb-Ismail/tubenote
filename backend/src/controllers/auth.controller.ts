@@ -32,30 +32,26 @@ const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
 export async function handleRegister(req: Request, res: Response) {
   const { username, email, password } = req.body;
 
-  if (!username || !email || !password)
+  if (!username || !email || !password) {
     res.status(400).json({ message: 'Please fill in all fields' });
-
-  try {
-    const user = await isUserExist(email);
-
-    if (user) {
-      res.status(httpStatus.CONFLICT).json({
-        message: 'Email address already in use. Please select another one.',
-      });
-      return;
-    }
-
-    const newUser = await createNewUser({ username, email, password });
-
-    res.status(httpStatus.CREATED).json({
-      message: 'User created successfully',
-      username: newUser.username,
-    });
-  } catch (error) {
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
-      message: 'Internal Server Error',
-    });
+    return;
   }
+
+  const user = await isUserExist(email);
+
+  if (user) {
+    res.status(httpStatus.CONFLICT).json({
+      message: 'Email address already in use. Please select another one.',
+    });
+    return;
+  }
+
+  const newUser = await createNewUser({ username, email, password });
+
+  res.status(httpStatus.CREATED).json({
+    message: 'User created successfully',
+    username: newUser.username,
+  });
 }
 
 /**
@@ -79,38 +75,32 @@ export async function handleRegister(req: Request, res: Response) {
 export async function handleLogin(req: Request, res: Response) {
   const { email, password } = req.body;
 
-  try {
-    const user = await isUserExist(email);
+  const user = await isUserExist(email);
 
-    if (!user) {
-      res.status(httpStatus.NOT_FOUND).json({
-        message:
-          'No User found with this email address. Please provide a valid email address.',
-      });
-      return;
-    }
-
-    const isPasswordCorrect = await checkPassword(password, user.password);
-
-    if (!isPasswordCorrect) {
-      res.status(httpStatus.UNAUTHORIZED).json({
-        message: 'Invalid password. Please try again.',
-      });
-      return;
-    }
-
-    const accessToken = await createAndSaveNewTokens(user.id, res);
-
-    res.status(httpStatus.OK).json({
-      message: 'Login successful',
-      accessToken,
-      user: { username: user.username, email: user.email },
+  if (!user) {
+    res.status(httpStatus.NOT_FOUND).json({
+      message:
+        'No User found with this email address. Please provide a valid email address.',
     });
-  } catch (err) {
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
-      message: 'Internal Server Error',
-    });
+    return;
   }
+
+  const isPasswordCorrect = await checkPassword(password, user.password);
+
+  if (!isPasswordCorrect) {
+    res.status(httpStatus.UNAUTHORIZED).json({
+      message: 'Invalid password. Please try again.',
+    });
+    return;
+  }
+
+  const accessToken = await createAndSaveNewTokens(user.id, res);
+
+  res.status(httpStatus.OK).json({
+    message: 'Login successful',
+    accessToken,
+    user: { username: user.username, email: user.email },
+  });
 }
 
 /**
@@ -143,29 +133,23 @@ export async function handleLogout(req: Request, res: Response) {
     return;
   }
 
-  try {
-    // Is refreshToken in db?
-    const refreshTokenFromDB = await prismaClient.refreshToken.findUnique({
-      where: { token: refreshTokenFromCookies },
-    });
+  // Is refreshToken in db?
+  const refreshTokenFromDB = await prismaClient.refreshToken.findUnique({
+    where: { token: refreshTokenFromCookies },
+  });
 
-    if (!refreshTokenFromDB) {
-      res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
-      res.sendStatus(httpStatus.NO_CONTENT);
-      return;
-    }
-
-    // Delete refreshToken in db
-    await prismaClient.refreshToken.delete({
-      where: { token: refreshTokenFromCookies },
-    });
-
+  if (!refreshTokenFromDB) {
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
-
     res.sendStatus(httpStatus.NO_CONTENT);
-  } catch (error) {
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
-      message: 'Internal Server Error',
-    });
+    return;
   }
+
+  // Delete refreshToken in db
+  await prismaClient.refreshToken.delete({
+    where: { token: refreshTokenFromCookies },
+  });
+
+  res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
+
+  res.sendStatus(httpStatus.NO_CONTENT);
 }

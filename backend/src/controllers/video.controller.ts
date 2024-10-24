@@ -44,24 +44,18 @@ export async function getVideoData(req: PayloadRequest, res: Response) {
     return;
   }
 
-  try {
-    const videoExists = await prismaClient.video.findFirst({
-      where: { youtubeId: videoId },
-    });
+  const videoExists = await prismaClient.video.findFirst({
+    where: { youtubeId: videoId },
+  });
 
-    if (videoExists) {
-      res.status(httpStatus.OK).json(videoExists);
-      return;
-    }
-
-    const video = await saveVideoData(videoId, userID, res);
-
-    res.status(httpStatus.OK).json(video);
-  } catch (error) {
-    res
-      .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: 'Error creating video', error });
+  if (videoExists) {
+    res.status(httpStatus.OK).json(videoExists);
+    return;
   }
+
+  const video = await saveVideoData(videoId, userID, res);
+
+  res.status(httpStatus.OK).json(video);
 }
 
 /**
@@ -90,26 +84,20 @@ export async function getUserVideos(req: PayloadRequest, res: Response) {
     return;
   }
 
-  try {
-    const user = await prismaClient.user.findUnique({
-      where: { id: userID },
-    });
+  const user = await prismaClient.user.findUnique({
+    where: { id: userID },
+  });
 
-    if (!user) {
-      res
-        .status(httpStatus.NOT_FOUND)
-        .json({ message: 'Unauthorized access. Please try again.' });
-      return;
-    }
-
-    const videos = await prismaClient.video.findMany({
-      where: { userId: user.id },
-    });
-
-    res.status(httpStatus.OK).json({ videos });
-  } catch (error) {
+  if (!user) {
     res
-      .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: 'Error creating note.', error });
+      .status(httpStatus.NOT_FOUND)
+      .json({ message: 'Unauthorized access. Please try again.' });
+    return;
   }
+
+  const videos = await prismaClient.video.findMany({
+    where: { userId: user.id },
+  });
+
+  res.status(httpStatus.OK).json({ videos });
 }
