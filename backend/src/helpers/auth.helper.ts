@@ -123,14 +123,14 @@ export async function createAndSaveNewTokens(
  * @param res - The response object used to send an unauthorized status if the user ID is not present.
  * @returns The user ID if it exists in the request payload; otherwise, sends an unauthorized response.
  */
-export function verifyUserId(req: Request, res: Response) {
+export function verifyUserId(req: Request, res: Response): string | null {
   const userID = req.userId;
 
   if (!userID) {
     res
       .status(httpStatus.UNAUTHORIZED)
       .json({ message: 'Unauthorized access. Please try again.' });
-    return;
+    return null;
   }
 
   return userID;
