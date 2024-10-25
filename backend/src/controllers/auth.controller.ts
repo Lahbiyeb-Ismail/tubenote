@@ -10,7 +10,8 @@ import {
 import prismaClient from '../lib/prisma';
 import { clearRefreshTokenCookieConfig } from '../config/cookie.config';
 import envConfig from '../config/envConfig';
-
+import type { TypedRequest } from '../types';
+import type { LoginCredentials, RegisterCredentiels } from '../types/auth.type';
 const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
 
 /**
@@ -29,7 +30,10 @@ const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
  * @throws Will send a 409 status code if the email address is already in use.
  * @throws Will send a 500 status code if there is an internal server error.
  */
-export async function handleRegister(req: Request, res: Response) {
+export async function handleRegister(
+  req: TypedRequest<RegisterCredentiels>,
+  res: Response
+) {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
@@ -74,7 +78,10 @@ export async function handleRegister(req: Request, res: Response) {
  *
  * @throws Will respond with a 500 status and an "Internal Server Error" message if an error occurs during the process.
  */
-export async function handleLogin(req: Request, res: Response) {
+export async function handleLogin(
+  req: TypedRequest<LoginCredentials>,
+  res: Response
+) {
   const { email, password } = req.body;
 
   if (!email || !password) {
