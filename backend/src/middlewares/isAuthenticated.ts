@@ -1,9 +1,18 @@
-import type { NextFunction, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import jwt from 'jsonwebtoken';
 
 import envConfig from '../config/envConfig';
-import type { PayloadRequest, Payload } from '../types';
+import type { Payload } from '../types';
+
+// Extend the Express Request interface to include the userId property from the payload
+declare global {
+  namespace Express {
+    interface Request {
+      userId?: string;
+    }
+  }
+}
 
 const { verify } = jwt;
 const JWT_SECRET = envConfig.jwt.access_token.secret;
@@ -26,7 +35,7 @@ const JWT_SECRET = envConfig.jwt.access_token.secret;
  * @throws {Error} If the token is invalid or missing.
  */
 async function isAuthenticated(
-  req: PayloadRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) {
@@ -50,9 +59,9 @@ async function isAuthenticated(
   }
 
   try {
-    const payload = verify(token, JWT_SECRET);
+    const { userID } = verify(token, JWT_SECRET) as Payload;
 
-    req.payload = payload as Payload;
+    req.userId = userID;
 
     next();
   } catch (error) {
