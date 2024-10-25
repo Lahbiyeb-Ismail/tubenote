@@ -27,7 +27,7 @@ type UserIdentifier = {
  * @param {boolean} [withPassword=true] - A flag indicating whether to include the password in the returned user object.
  * @returns {Promise<User | null>} A promise that resolves to the user object if found, otherwise null.
  */
-export async function isUserExist(
+export async function getUser(
   { email, id }: UserIdentifier,
   withPassword = true
 ): Promise<User | null> {

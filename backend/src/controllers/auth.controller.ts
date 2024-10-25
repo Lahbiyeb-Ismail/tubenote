@@ -5,7 +5,7 @@ import {
   checkPassword,
   createAndSaveNewTokens,
   createNewUser,
-  isUserExist,
+  getUser,
 } from '../helpers/auth.helper';
 import prismaClient from '../lib/prisma';
 import { clearRefreshTokenCookieConfig } from '../config/cookie.config';
@@ -39,7 +39,7 @@ export async function handleRegister(req: Request, res: Response) {
     return;
   }
 
-  const user = await isUserExist({ email });
+  const user = await getUser({ email });
 
   if (user) {
     res.status(httpStatus.CONFLICT).json({
@@ -84,7 +84,7 @@ export async function handleLogin(req: Request, res: Response) {
     return;
   }
 
-  const user = await isUserExist({ email }, false);
+  const user = await getUser({ email }, false);
 
   if (!user) {
     res.status(httpStatus.NOT_FOUND).json({

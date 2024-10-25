@@ -4,11 +4,7 @@ import bcrypt from 'bcryptjs';
 
 import type { PayloadRequest } from '../types';
 import prismaClient from '../lib/prisma';
-import {
-  checkPassword,
-  isUserExist,
-  verifyUserId,
-} from '../helpers/auth.helper';
+import { checkPassword, getUser, verifyUserId } from '../helpers/auth.helper';
 
 /**
  * Retrieves the current user based on the user ID present in the request payload.
@@ -26,7 +22,7 @@ import {
 export async function getCurrentUser(req: PayloadRequest, res: Response) {
   const userID = verifyUserId(req, res) as string;
 
-  const user = await isUserExist({ id: userID });
+  const user = await getUser({ id: userID });
 
   if (!user) {
     res
@@ -60,7 +56,7 @@ export async function updateCurrentUser(req: PayloadRequest, res: Response) {
   const { username, email } = req.body;
   const userID = verifyUserId(req, res) as string;
 
-  const user = await isUserExist({ id: userID });
+  const user = await getUser({ id: userID });
 
   if (!user) {
     res
@@ -69,7 +65,7 @@ export async function updateCurrentUser(req: PayloadRequest, res: Response) {
     return;
   }
 
-  const isEmailTaken = await isUserExist({ email });
+  const isEmailTaken = await getUser({ email });
 
   if (isEmailTaken && isEmailTaken.id !== user.id) {
     res
@@ -125,7 +121,7 @@ export async function updateUserPassword(req: PayloadRequest, res: Response) {
     return;
   }
 
-  const user = await isUserExist({ id: userID });
+  const user = await getUser({ id: userID });
 
   if (!user) {
     res
