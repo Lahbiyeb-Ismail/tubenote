@@ -9,6 +9,7 @@ import envConfig from '../config/envConfig';
 import { refreshTokenCookieConfig } from '../config/cookie.config';
 
 import type { RegisterCredentiels } from '../types/auth.type';
+import type { TypedRequest } from 'src/types';
 
 const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
 
@@ -123,7 +124,10 @@ export async function createAndSaveNewTokens(
  * @param res - The response object used to send an unauthorized status if the user ID is not present.
  * @returns The user ID if it exists in the request payload; otherwise, sends an unauthorized response.
  */
-export function verifyUserId(req: Request, res: Response): string | null {
+export function verifyUserId(
+  req: Request | TypedRequest,
+  res: Response
+): string | null {
   const userID = req.userId;
 
   if (!userID) {
