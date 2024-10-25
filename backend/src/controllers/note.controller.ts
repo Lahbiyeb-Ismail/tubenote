@@ -2,6 +2,8 @@ import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 
 import prismaClient from '../lib/prisma';
+import type { TypedRequest } from '../types';
+import type { NoteBody } from '../types/note.type';
 
 /**
  * Creates a new note for the authenticated user.
@@ -22,7 +24,7 @@ import prismaClient from '../lib/prisma';
  *
  * @throws {Error} If there is an issue with the database operation.
  */
-export async function createNote(req: Request, res: Response) {
+export async function createNote(req: TypedRequest<NoteBody>, res: Response) {
   const userID = req.userId;
 
   if (!userID) {
@@ -70,12 +72,12 @@ export async function createNote(req: Request, res: Response) {
 
   const note = await prismaClient.note.create({
     data: {
+      userId: user.id,
       title,
       content,
       videoTitle,
       thumbnail,
       videoId,
-      userId: user.id,
       youtubeId,
       timestamp,
     },
@@ -392,10 +394,7 @@ export async function getUserRecentNotes(req: Request, res: Response) {
  *
  * @returns A JSON response containing the most recently updated notes for the user or an error message.
  */
-export async function getUserRecentlyUpdatedNotes(
-  req: Request,
-  res: Response
-) {
+export async function getUserRecentlyUpdatedNotes(req: Request, res: Response) {
   const userID = req.userId;
 
   if (!userID) {
