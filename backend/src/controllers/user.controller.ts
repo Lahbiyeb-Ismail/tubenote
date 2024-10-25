@@ -1,8 +1,7 @@
-import type { Response } from 'express';
+import type { Response, Request } from 'express';
 import httpStatus from 'http-status';
 import bcrypt from 'bcryptjs';
 
-import type { PayloadRequest } from '../types';
 import prismaClient from '../lib/prisma';
 import { checkPassword, getUser, verifyUserId } from '../helpers/auth.helper';
 
@@ -19,7 +18,7 @@ import { checkPassword, getUser, verifyUserId } from '../helpers/auth.helper';
  *
  * @returns A JSON response containing the user data if found, or an error message if not.
  */
-export async function getCurrentUser(req: PayloadRequest, res: Response) {
+export async function getCurrentUser(req: Request, res: Response) {
   const userID = verifyUserId(req, res) as string;
 
   const user = await getUser({ id: userID });
@@ -52,7 +51,7 @@ export async function getCurrentUser(req: PayloadRequest, res: Response) {
  *
  * @throws Will throw an error if the database operation fails.
  */
-export async function updateCurrentUser(req: PayloadRequest, res: Response) {
+export async function updateCurrentUser(req: Request, res: Response) {
   const { username, email } = req.body;
   const userID = verifyUserId(req, res) as string;
 
@@ -109,7 +108,7 @@ export async function updateCurrentUser(req: PayloadRequest, res: Response) {
  *
  * @throws {Error} If there is an issue updating the password in the database.
  */
-export async function updateUserPassword(req: PayloadRequest, res: Response) {
+export async function updateUserPassword(req: Request, res: Response) {
   const userID = verifyUserId(req, res) as string;
 
   const { currentPassword, newPassword } = req.body;

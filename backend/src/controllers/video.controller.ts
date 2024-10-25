@@ -1,9 +1,8 @@
-import type { Response } from 'express';
+import type { Response, Request } from 'express';
 import httpStatus from 'http-status';
 
 import { saveVideoData } from '../helpers/video.helper';
 import prismaClient from '../lib/prisma';
-import type { PayloadRequest } from '../types';
 
 /**
  * Retrieves video data from YouTube and stores it in the database.
@@ -20,7 +19,7 @@ import type { PayloadRequest } from '../types';
  * @returns A JSON response containing the created video data or an error message.
  */
 
-export async function getVideoData(req: PayloadRequest, res: Response) {
+export async function getVideoData(req: Request, res: Response) {
   const { videoId } = req.body;
 
   if (!videoId) {
@@ -28,7 +27,7 @@ export async function getVideoData(req: PayloadRequest, res: Response) {
     return;
   }
 
-  const userID = req.payload?.userID;
+  const userID = req.userId;
 
   if (!userID) {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'UserID is required' });
@@ -74,8 +73,8 @@ export async function getVideoData(req: PayloadRequest, res: Response) {
  *
  * @throws {Error} If there is an issue with the database query or any other unexpected error.
  */
-export async function getUserVideos(req: PayloadRequest, res: Response) {
-  const userID = req.payload?.userID;
+export async function getUserVideos(req: Request, res: Response) {
+  const userID = req.userId;
 
   if (!userID) {
     res

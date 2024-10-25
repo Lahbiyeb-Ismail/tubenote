@@ -1,8 +1,7 @@
-import type { Response } from 'express';
-
-import type { PayloadRequest } from '../types';
-import prismaClient from '../lib/prisma';
+import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
+
+import prismaClient from '../lib/prisma';
 
 /**
  * Creates a new note for the authenticated user.
@@ -23,8 +22,8 @@ import httpStatus from 'http-status';
  *
  * @throws {Error} If there is an issue with the database operation.
  */
-export async function createNote(req: PayloadRequest, res: Response) {
-  const userID = req.payload?.userID;
+export async function createNote(req: Request, res: Response) {
+  const userID = req.userId;
 
   if (!userID) {
     res
@@ -105,8 +104,8 @@ export async function createNote(req: PayloadRequest, res: Response) {
  *
  * @returns A promise that resolves to void.
  */
-export async function getUserNotes(req: PayloadRequest, res: Response) {
-  const userID = req.payload?.userID;
+export async function getUserNotes(req: Request, res: Response) {
+  const userID = req.userId;
 
   if (!userID) {
     res
@@ -151,8 +150,8 @@ export async function getUserNotes(req: PayloadRequest, res: Response) {
  * 9. If an error occurs during the process, responds with an
  * INTERNAL_SERVER_ERROR status and an error message.
  */
-export async function deleteNote(req: PayloadRequest, res: Response) {
-  const userID = req.payload?.userID;
+export async function deleteNote(req: Request, res: Response) {
+  const userID = req.userId;
 
   if (!userID) {
     res
@@ -208,8 +207,8 @@ export async function deleteNote(req: PayloadRequest, res: Response) {
  * @returns A JSON response containing the note data if found, or an error
  * message otherwise.
  */
-export async function getNoteById(req: PayloadRequest, res: Response) {
-  const userID = req.payload?.userID;
+export async function getNoteById(req: Request, res: Response) {
+  const userID = req.userId;
 
   if (!userID) {
     res
@@ -272,8 +271,8 @@ export async function getNoteById(req: PayloadRequest, res: Response) {
  *
  * @returns {Promise<void>} - A promise that resolves when the function completes.
  */
-export async function updateNote(req: PayloadRequest, res: Response) {
-  const userID = req.payload?.userID;
+export async function updateNote(req: Request, res: Response) {
+  const userID = req.userId;
 
   if (!userID) {
     res
@@ -345,8 +344,8 @@ export async function updateNote(req: PayloadRequest, res: Response) {
  *
  * @returns A JSON response containing the user's most recent notes or an error message.
  */
-export async function getUserRecentNotes(req: PayloadRequest, res: Response) {
-  const userID = req.payload?.userID;
+export async function getUserRecentNotes(req: Request, res: Response) {
+  const userID = req.userId;
 
   if (!userID) {
     res
@@ -394,10 +393,10 @@ export async function getUserRecentNotes(req: PayloadRequest, res: Response) {
  * @returns A JSON response containing the most recently updated notes for the user or an error message.
  */
 export async function getUserRecentlyUpdatedNotes(
-  req: PayloadRequest,
+  req: Request,
   res: Response
 ) {
-  const userID = req.payload?.userID;
+  const userID = req.userId;
 
   if (!userID) {
     res

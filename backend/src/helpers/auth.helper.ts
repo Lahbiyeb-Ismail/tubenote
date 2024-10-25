@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import type { Response } from 'express';
+import type { Response, Request } from 'express';
 import type { User } from '@prisma/client';
 import httpStatus from 'http-status';
 
@@ -9,7 +9,6 @@ import envConfig from '../config/envConfig';
 import { refreshTokenCookieConfig } from '../config/cookie.config';
 
 import type { RegisterCredentiels } from '../types/auth.type';
-import type { PayloadRequest } from '../types';
 
 const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
 
@@ -124,8 +123,8 @@ export async function createAndSaveNewTokens(
  * @param res - The response object used to send an unauthorized status if the user ID is not present.
  * @returns The user ID if it exists in the request payload; otherwise, sends an unauthorized response.
  */
-export function verifyUserId(req: PayloadRequest, res: Response) {
-  const userID = req.payload?.userID;
+export function verifyUserId(req: Request, res: Response) {
+  const userID = req.userId;
 
   if (!userID) {
     res
