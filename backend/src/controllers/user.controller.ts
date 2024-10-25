@@ -4,6 +4,8 @@ import bcrypt from 'bcryptjs';
 
 import prismaClient from '../lib/prisma';
 import { checkPassword, getUser, verifyUserId } from '../helpers/auth.helper';
+import type { TypedRequest } from 'src/types';
+import type { UpdateUserBody } from 'src/types/user.type';
 
 /**
  * Retrieves the current user based on the user ID present in the request payload.
@@ -53,8 +55,18 @@ export async function getCurrentUser(req: Request, res: Response) {
  *
  * @throws Will throw an error if the database operation fails.
  */
-export async function updateCurrentUser(req: Request, res: Response) {
+export async function updateCurrentUser(
+  req: TypedRequest<UpdateUserBody>,
+  res: Response
+) {
   const { username, email } = req.body;
+
+  if (!username || !email) {
+    res
+      .status(httpStatus.BAD_REQUEST)
+      .json({ message: 'Please provide username or email to update.' });
+    return;
+  }
 
   const userID = verifyUserId(req, res);
 
