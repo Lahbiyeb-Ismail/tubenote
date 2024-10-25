@@ -19,7 +19,9 @@ import { checkPassword, getUser, verifyUserId } from '../helpers/auth.helper';
  * @returns A JSON response containing the user data if found, or an error message if not.
  */
 export async function getCurrentUser(req: Request, res: Response) {
-  const userID = verifyUserId(req, res) as string;
+  const userID = verifyUserId(req, res);
+
+  if (!userID) return;
 
   const user = await getUser({ id: userID });
 
@@ -53,7 +55,10 @@ export async function getCurrentUser(req: Request, res: Response) {
  */
 export async function updateCurrentUser(req: Request, res: Response) {
   const { username, email } = req.body;
-  const userID = verifyUserId(req, res) as string;
+
+  const userID = verifyUserId(req, res);
+
+  if (!userID) return;
 
   const user = await getUser({ id: userID });
 
@@ -109,7 +114,9 @@ export async function updateCurrentUser(req: Request, res: Response) {
  * @throws {Error} If there is an issue updating the password in the database.
  */
 export async function updateUserPassword(req: Request, res: Response) {
-  const userID = verifyUserId(req, res) as string;
+  const userID = verifyUserId(req, res);
+
+  if (!userID) return;
 
   const { currentPassword, newPassword } = req.body;
 
