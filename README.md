@@ -115,3 +115,27 @@ The frontend is built with Next.js. Key files include:
 - `src/components/`: Contains reusable components.
 - `next.config.mjs`: Next.js configuration file.
 - `tailwind.config.ts`: Tailwind CSS configuration file.
+
+## Implemented Features
+
+Below is a checklist of features that has been implemented:
+
+- [x] User authentication (login, registration, logout)
+- [x] Note-taking on YouTube videos
+- [x] Dashboard to view recent notes
+- [x] Responsive design
+
+## Features in progress:
+
+Below is a checklist of features planned for this application:
+
+- [ ] Add a new Editor (mdx editor)
+- [ ] Dark mode support
+- [ ] Refresh token feat
+- [ ] Email verification feat
+- [ ] Forgot password feat
+- [ ] User authentication whit google
+- [ ] Search functionality for notes
+- [ ] Cashing functionality using Redis
+- [ ] Export notes to PDF
+- [ ] Share notes with other users
