@@ -41,6 +41,8 @@ import {
 import "@mdxeditor/editor/style.css";
 
 import { Button } from "../ui/button";
+import Modal from "../global/Modal";
+import useModal from "@/context/useModal";
 
 function whenInAdmonition(editorInFocus: EditorInFocus | null) {
 	const node = editorInFocus?.rootNode;
@@ -151,6 +153,11 @@ const myPlugins = [
 
 const AppMDXEditor = () => {
 	const ref = useRef<MDXEditorMethods | null>(null);
+	const { setIsModalOpen } = useModal();
+
+	const confirmSave = () => {
+		console.log("Saving note...");
+	};
 
 	return (
 		<>
@@ -163,9 +170,16 @@ const AppMDXEditor = () => {
 			<Button
 				size="icon"
 				className="absolute bottom-3 right-9 bg-slate-900 hover:bg-slate-100 hover:text-slate-900 border-2 border-slate-100 hover:border-slate-900 hover:shadow-lg"
+				onClick={() => setIsModalOpen(true)}
 			>
 				<SaveIcon />
 			</Button>
+			<Modal
+				action="save"
+				onConfirm={confirmSave}
+				title="Confirm Save Note"
+				message={"Are you sure you want to save this note?"}
+			/>
 		</>
 	);
 };
