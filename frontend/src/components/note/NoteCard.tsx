@@ -17,6 +17,7 @@ import { useNote } from "@/context/useNote";
 import Modal from "../global/Modal";
 import { useState } from "react";
 import { useLayout } from "@/context/useLayout";
+import useModal from "@/context/useModal";
 
 type NoteCardProps = {
 	note: INote;
@@ -25,7 +26,9 @@ type NoteCardProps = {
 function NoteCard({ note }: NoteCardProps) {
 	const { deleteNote, isLoading, getNote } = useNote();
 	const { isGridLayout } = useLayout();
-	const [isModalOpen, setIsModalOpen] = useState(false);
+	const { isModalOpen, setIsModalOpen } = useModal();
+
+	// const [isModalOpen, setIsModalOpen] = useState(false);
 
 	const handleDelete = () => {
 		setIsModalOpen(true);
@@ -118,8 +121,6 @@ function NoteCard({ note }: NoteCardProps) {
 				</div>
 			</Card>
 			<Modal
-				isOpen={isModalOpen}
-				onClose={() => setIsModalOpen(false)}
 				onConfirm={confirmDelete}
 				title="Confirm Delete"
 				message={`Are you sure you want to delete the note titled "${note.title}"? This action cannot be undone.`}
