@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Toaster } from "react-hot-toast";
+
 import "./globals.css";
+
 import Navbar from "@/components/Navbar/Navbar";
+
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
+
 import { AuthProvider } from "@/context/useAuth";
 import { VideoProvider } from "@/context/useVideo";
 import { NoteProvider } from "@/context/useNote";
 import { LayoutProvider } from "@/context/useLayout";
 import { UserProvider } from "@/context/useUser";
-
-import { Toaster } from "react-hot-toast";
+import { ModalProvider } from "@/context/useModal";
 
 const geistSans = localFont({
 	src: "./fonts/GeistVF.woff",
@@ -43,9 +47,11 @@ export default function RootLayout({
 							<VideoProvider>
 								<NoteProvider>
 									<LayoutProvider>
-										<Toaster />
-										<Navbar />
-										{children}
+										<ModalProvider>
+											<Toaster />
+											<Navbar />
+											{children}
+										</ModalProvider>
 									</LayoutProvider>
 								</NoteProvider>
 							</VideoProvider>
