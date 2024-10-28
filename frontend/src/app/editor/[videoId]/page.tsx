@@ -5,10 +5,17 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import TextEditor from "@/components/editor/TextEditor";
 import VideoPlayer from "@/components/video/VideoPlayer";
 import { useVideo } from "@/context/useVideo";
 import { useEffect, useState } from "react";
+
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
+
+const AppMDXEditor = dynamic(
+	() => import("../../../components/editor/EditorComponent"),
+	{ ssr: false },
+);
 
 function EditorPage() {
 	const {
@@ -37,11 +44,13 @@ function EditorPage() {
 	return (
 		<section className="height_viewport">
 			<ResizablePanelGroup direction={direction} className="flex w-full border">
-				<ResizablePanel defaultSize={35} className="p-2">
-					<TextEditor />
+				<ResizablePanel defaultSize={50} className="p-2 relative">
+					<Suspense fallback={null}>
+						<AppMDXEditor />
+					</Suspense>
 				</ResizablePanel>
 				<ResizableHandle withHandle />
-				<ResizablePanel defaultSize={65} className="p-2">
+				<ResizablePanel defaultSize={50} className="p-2">
 					<VideoPlayer videoId={video?.youtubeId} />
 				</ResizablePanel>
 			</ResizablePanelGroup>
