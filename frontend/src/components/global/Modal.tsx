@@ -11,18 +11,21 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import useModal from "@/context/useModal";
 
 type ModalProps = {
-	isOpen: boolean;
-	onClose: () => void;
 	onConfirm: () => void;
 	title: string;
 	message: string;
 };
 
-function Modal({ isOpen, onClose, onConfirm, title, message }: ModalProps) {
+function Modal({ onConfirm, title, message }: ModalProps) {
+	const { isModalOpen, setIsModalOpen } = useModal();
+
+	const onClose = () => setIsModalOpen(false);
+
 	return (
-		<Dialog open={isOpen} onOpenChange={onClose}>
+		<Dialog open={isModalOpen} onOpenChange={onClose}>
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
 					<DialogTitle>{title}</DialogTitle>
