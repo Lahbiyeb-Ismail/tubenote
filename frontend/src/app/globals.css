@@ -79,6 +79,44 @@
   padding-top: 20px;
 }
 
+.mdxeditor {
+  height: 100%;
+  overflow: auto;
+}
+
+.mdxeditor .mdxeditor-diff-source-wrapper {
+  height: 90%;
+}
+
+.mdxeditor-rich-text-editor {
+  height: 100%;
+}
+
+.mdxeditor-rich-text-editor div {
+  height: 100%;
+}
+
+.mdxeditor h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin-top: 0.67em;
+  margin-bottom: 0.67em;
+}
+
+.mdxeditor h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-top: 0.83em;
+  margin-bottom: 0.83em;
+}
+
+.mdxeditor h3 {
+  font-size: 1.17em;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
 @layer base {
   * {
     @apply border-border;
