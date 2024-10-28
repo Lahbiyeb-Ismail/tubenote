@@ -121,6 +121,7 @@ function NoteCard({ note }: NoteCardProps) {
 				</div>
 			</Card>
 			<Modal
+				action="delete"
 				onConfirm={confirmDelete}
 				title="Confirm Delete"
 				message={`Are you sure you want to delete the note titled "${note.title}"? This action cannot be undone.`}
