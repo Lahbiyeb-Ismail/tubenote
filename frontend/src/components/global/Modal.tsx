@@ -17,9 +17,10 @@ type ModalProps = {
 	onConfirm: () => void;
 	title: string;
 	message: string;
+	action: "delete" | "save" | "update";
 };
 
-function Modal({ onConfirm, title, message }: ModalProps) {
+function Modal({ onConfirm, title, message, action }: ModalProps) {
 	const { isModalOpen, setIsModalOpen } = useModal();
 
 	const onClose = () => setIsModalOpen(false);
@@ -42,11 +43,11 @@ function Modal({ onConfirm, title, message }: ModalProps) {
 					</Button>
 					<Button
 						type="button"
-						variant="destructive"
+						variant={action === "delete" ? "destructive" : "outline"}
 						onClick={onConfirm}
-						className="w-full sm:w-auto"
+						className={`w-full sm:w-auto border-2 ${action !== "delete" ? "bg-slate-900 text-white hover:bg-white hover:text-slate-900 hover:border-slate-900" : ""}`}
 					>
-						Delete
+						{action}
 					</Button>
 				</DialogFooter>
 				<button
