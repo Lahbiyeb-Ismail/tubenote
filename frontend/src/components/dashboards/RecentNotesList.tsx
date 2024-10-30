@@ -4,6 +4,7 @@ import type { INote } from "@/types/note.types";
 
 import NoteCard from "../note/NoteCard";
 import { Button } from "../ui/button";
+import { useLayout } from "@/context/useLayout";
 
 interface RecentNoteListProps {
 	title: string;
@@ -12,11 +13,17 @@ interface RecentNoteListProps {
 }
 
 function RecentNoteList({ title, notes, emptyMessage }: RecentNoteListProps) {
+	const hasNotes = notes && notes?.length > 0;
+
+	const { isGridLayout } = useLayout();
+
 	return (
 		<div className="bg-white rounded-lg shadow-md p-6">
 			<h2 className="text-xl font-semibold mb-4">{title}</h2>
-			{notes && notes?.length > 0 ? (
-				<div className="space-y-4">
+			{hasNotes ? (
+				<div
+					className={`${isGridLayout ? "grid grid-cols-1 gap-6 lg:grid-cols-2" : "space-y-4"}`}
+				>
 					{notes?.map((note) => (
 						<NoteCard key={note.id} note={note} />
 					))}
