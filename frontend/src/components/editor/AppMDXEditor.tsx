@@ -43,6 +43,7 @@ import "@mdxeditor/editor/style.css";
 import { Button } from "../ui/button";
 import Modal from "../global/Modal";
 import useModal from "@/context/useModal";
+import SaveNoteForm from "./SaveNoteForm";
 
 function whenInAdmonition(editorInFocus: EditorInFocus | null) {
 	const node = editorInFocus?.rootNode;
@@ -151,19 +152,27 @@ const myPlugins = [
 	markdownShortcutPlugin(),
 ];
 
-const AppMDXEditor = () => {
+type AppMDXEditorProps = {
+	initialNoteContent?: string;
+	noteTitle?: string;
+	action: "create" | "update";
+};
+
+const AppMDXEditor = ({
+	initialNoteContent,
+	noteTitle,
+	action,
+}: AppMDXEditorProps) => {
 	const ref = useRef<MDXEditorMethods | null>(null);
 	const { setIsModalOpen } = useModal();
 
-	const confirmSave = () => {
-		console.log("Saving note...");
-	};
+	const noteContent = ref.current?.getMarkdown() || "";
 
 	return (
 		<>
 			<MDXEditor
 				ref={ref}
-				markdown=""
+				markdown={initialNoteContent || ""}
 				plugins={myPlugins}
 				className="mdxeditor"
 			/>
@@ -176,10 +185,15 @@ const AppMDXEditor = () => {
 			</Button>
 			<Modal
 				action="save"
-				onConfirm={confirmSave}
 				title="Confirm Save Note"
-				message={"Are you sure you want to save this note?"}
-			/>
+				message="Are you sure you want to save this note?"
+			>
+				<SaveNoteForm
+					action={action}
+					noteContent={noteContent}
+					noteTitle={noteTitle}
+				/>
+			</Modal>
 		</>
 	);
 };
