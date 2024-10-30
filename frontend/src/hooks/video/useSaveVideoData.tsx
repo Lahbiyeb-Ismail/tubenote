@@ -33,7 +33,7 @@ function useSaveVideoData(dispatch: React.Dispatch<VideoAction>) {
 				},
 			});
 
-			router.push(`/editor/${data.youtubeId}`);
+			router.push(`/editor/create/${data.youtubeId}`);
 		},
 		onError: (error: TypedError) => {
 			toast.dismiss("loadingToast");
