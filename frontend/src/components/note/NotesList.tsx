@@ -13,9 +13,9 @@ function NotesList({ notes }: NotesListProps) {
 	const { isGridLayout } = useLayout();
 
 	return (
-		<div className="px-4 py-6 sm:px-0">
+		<div className="md:px-4 py-6">
 			<div
-				className={`${isGridLayout ? "grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" : "space-y-4"}`}
+				className={`${isGridLayout ? "grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4" : "space-y-4"}`}
 			>
 				{notes?.map((note) => (
 					<NoteCard key={note.id} note={note} />
