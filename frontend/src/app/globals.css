@@ -92,7 +92,7 @@
   height: 100%;
 }
 
-.mdxeditor-rich-text-editor div {
+.mdxeditor-rich-text-editor > div {
   height: 100%;
 }
 
