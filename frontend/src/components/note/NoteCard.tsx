@@ -72,7 +72,7 @@ function NoteCard({ note }: NoteCardProps) {
 								Note Title: {note.title}
 							</CardDescription>
 						</CardHeader>
-						{isGridLayout && (
+						{/* {isGridLayout && (
 							<CardContent className="space-y-2">
 								<div className="flex items-center text-sm text-muted-foreground">
 									<CalendarIcon className="mr-1 h-4 w-4" />
@@ -83,7 +83,7 @@ function NoteCard({ note }: NoteCardProps) {
 									Updated: {formatDate(note.createdAt)}
 								</div>
 							</CardContent>
-						)}
+						)} */}
 						<CardFooter
 							className={`flex justify-between ${isGridLayout ? "flex-row p-4 pt-0" : "flex-col p-4 space-y-1"}`}
 						>
