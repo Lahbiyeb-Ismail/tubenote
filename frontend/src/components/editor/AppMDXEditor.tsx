@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { SaveIcon } from "lucide-react";
 import {
 	AdmonitionDirectiveDescriptor,
@@ -41,9 +41,8 @@ import {
 import "@mdxeditor/editor/style.css";
 
 import { Button } from "../ui/button";
-import Modal from "../global/Modal";
-import useModal from "@/context/useModal";
 import SaveNoteForm from "./SaveNoteForm";
+import ConfirmationModal from "../global/ConfirmationModal";
 
 function whenInAdmonition(editorInFocus: EditorInFocus | null) {
 	const node = editorInFocus?.rootNode;
@@ -164,7 +163,7 @@ const AppMDXEditor = ({
 	action,
 }: AppMDXEditorProps) => {
 	const ref = useRef<MDXEditorMethods | null>(null);
-	const { setIsModalOpen } = useModal();
+	const [isSavingModalOpen, setIsSavingModalOpen] = useState(false);
 
 	const noteContent = ref.current?.getMarkdown() || "";
 
@@ -179,21 +178,25 @@ const AppMDXEditor = ({
 			<Button
 				size="icon"
 				className="absolute bottom-3 right-9 bg-slate-900 hover:bg-slate-100 hover:text-slate-900 border-2 border-slate-100 hover:border-slate-900 hover:shadow-lg"
-				onClick={() => setIsModalOpen(true)}
+				onClick={() => setIsSavingModalOpen(true)}
 			>
 				<SaveIcon />
 			</Button>
-			<Modal
+			<ConfirmationModal
+				isOpen={isSavingModalOpen}
+				onClose={() => setIsSavingModalOpen(false)}
 				action="save"
 				title="Confirm Save Note"
 				message="Are you sure you want to save this note?"
+				cancelText="Cancel"
+				confirmText="Save"
 			>
 				<SaveNoteForm
 					action={action}
 					noteContent={noteContent}
 					noteTitle={noteTitle}
 				/>
-			</Modal>
+			</ConfirmationModal>
 		</>
 	);
 };
