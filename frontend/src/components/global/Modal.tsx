@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { type PropsWithChildren } from "react";
 import { X } from "lucide-react";
 import {
 	Dialog,
@@ -13,14 +13,14 @@ import {
 import { Button } from "@/components/ui/button";
 import useModal from "@/context/useModal";
 
-type ModalProps = {
-	onConfirm: () => void;
+type ModalProps = PropsWithChildren<{
+	onConfirm?: () => void;
 	title: string;
 	message: string;
 	action: "delete" | "save" | "update";
-};
+}>;
 
-function Modal({ onConfirm, title, message, action }: ModalProps) {
+function Modal({ children, onConfirm, title, message, action }: ModalProps) {
 	const { isModalOpen, setIsModalOpen } = useModal();
 
 	const onClose = () => setIsModalOpen(false);
@@ -32,6 +32,7 @@ function Modal({ onConfirm, title, message, action }: ModalProps) {
 					<DialogTitle>{title}</DialogTitle>
 					<DialogDescription>{message}</DialogDescription>
 				</DialogHeader>
+				{children ? <DialogDescription>{children}</DialogDescription> : null}
 				<DialogFooter className="sm:justify-start">
 					<Button
 						type="button"
@@ -41,14 +42,16 @@ function Modal({ onConfirm, title, message, action }: ModalProps) {
 					>
 						Cancel
 					</Button>
-					<Button
-						type="button"
-						variant={action === "delete" ? "destructive" : "outline"}
-						onClick={onConfirm}
-						className={`w-full sm:w-auto border-2 ${action !== "delete" ? "bg-slate-900 text-white hover:bg-white hover:text-slate-900 hover:border-slate-900" : ""}`}
-					>
-						{action}
-					</Button>
+					{action === "delete" ? (
+						<Button
+							type="button"
+							variant="destructive"
+							onClick={onConfirm}
+							className="w-full sm:w-auto"
+						>
+							{action}
+						</Button>
+					) : null}
 				</DialogFooter>
 				<button
 					className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
