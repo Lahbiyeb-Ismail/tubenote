@@ -1,4 +1,5 @@
-import type { PropsWithChildren } from "react";
+"use client";
+
 import {
 	Dialog,
 	DialogContent,
@@ -8,43 +9,52 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useModal } from "@/context/useModal";
+import SaveNoteForm from "../editor/SaveNoteForm";
 
-type ConfirmationModalProps = PropsWithChildren<{
-	isOpen: boolean;
-	onClose: () => void;
-	onConfirm?: () => void;
-	title: string;
-	message: string;
-	action: "delete" | "save" | "update";
-	confirmText?: string;
-	cancelText?: string;
-}>;
+function ConfirmationModal() {
+	const { isOpen, modalContent, closeModal } = useModal();
 
-function ConfirmationModal({
-	children,
-	onConfirm,
-	title,
-	message,
-	action,
-	isOpen,
-	onClose,
-	confirmText = "Confirm",
-	cancelText = "Cancel",
-}: ConfirmationModalProps) {
+	if (!modalContent) return null;
+
+	const {
+		title,
+		description,
+		confirmText,
+		cancelText,
+		onConfirm,
+		action,
+		noteContent,
+		noteTitle,
+	} = modalContent;
+
+	const handleConfirm = () => {
+		onConfirm?.();
+		closeModal();
+	};
+
 	return (
-		<Dialog open={isOpen} onOpenChange={onClose}>
+		<Dialog open={isOpen} onOpenChange={closeModal}>
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
 					<DialogTitle>{title}</DialogTitle>
-					<DialogDescription>{message}</DialogDescription>
+					<DialogDescription>{description}</DialogDescription>
 				</DialogHeader>
-				{children ? <DialogDescription>{children}</DialogDescription> : null}
+				{action !== "delete" && (
+					<DialogDescription>
+						<SaveNoteForm
+							action={action}
+							noteContent={noteContent || ""}
+							noteTitle={noteTitle}
+						/>
+					</DialogDescription>
+				)}
 				<DialogFooter>
-					<Button variant="outline" onClick={onClose}>
+					<Button variant="outline" onClick={closeModal}>
 						{cancelText}
 					</Button>
 					{action === "delete" && (
-						<Button variant="destructive" onClick={onConfirm}>
+						<Button variant="destructive" onClick={handleConfirm}>
 							{confirmText}
 						</Button>
 					)}
