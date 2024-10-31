@@ -14,6 +14,7 @@ import { NoteProvider } from "@/context/useNote";
 import { LayoutProvider } from "@/context/useLayout";
 import { UserProvider } from "@/context/useUser";
 import { ModalProvider } from "@/context/useModal";
+import ConfirmationModal from "@/components/global/ConfirmationModal";
 
 const geistSans = localFont({
 	src: "./fonts/GeistVF.woff",
@@ -51,6 +52,7 @@ export default function RootLayout({
 											<Toaster />
 											<Navbar />
 											{children}
+											<ConfirmationModal />
 										</ModalProvider>
 									</LayoutProvider>
 								</NoteProvider>
