@@ -43,22 +43,22 @@ export default function RootLayout({
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
 				<ReactQueryProvider>
-					<AuthProvider>
-						<UserProvider>
-							<VideoProvider>
-								<NoteProvider>
-									<LayoutProvider>
-										<ModalProvider>
+					<LayoutProvider>
+						<ModalProvider>
+							<AuthProvider>
+								<UserProvider>
+									<VideoProvider>
+										<NoteProvider>
 											<Toaster />
 											<Navbar />
 											{children}
 											<ConfirmationModal />
-										</ModalProvider>
-									</LayoutProvider>
-								</NoteProvider>
-							</VideoProvider>
-						</UserProvider>
-					</AuthProvider>
+										</NoteProvider>
+									</VideoProvider>
+								</UserProvider>
+							</AuthProvider>
+						</ModalProvider>
+					</LayoutProvider>
 				</ReactQueryProvider>
 			</body>
 		</html>
