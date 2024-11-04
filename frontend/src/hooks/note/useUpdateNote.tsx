@@ -1,14 +1,20 @@
 "use client";
 
-import { updateNote } from "@/actions/note.actions";
-import type { TypedError } from "@/types";
-import type { NoteAction } from "@/types/note.types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { updateNote } from "@/actions/note.actions";
+import { useModal } from "@/context/useModal";
+
+import type { NoteAction } from "@/types/note.types";
+import type { TypedError } from "@/types";
 
 function useUpdateNote(dispatch: React.Dispatch<NoteAction>) {
 	const queryClient = useQueryClient();
+	const router = useRouter();
+	const { closeModal } = useModal();
 
 	return useMutation({
 		mutationFn: updateNote,
@@ -25,6 +31,10 @@ function useUpdateNote(dispatch: React.Dispatch<NoteAction>) {
 				type: "UPDATE_NOTE_SUCCESS",
 				payload: { note: data, success: true },
 			});
+
+			closeModal();
+
+			router.push("/notes");
 		},
 		onError: (error: TypedError) => {
 			toast.dismiss("loadingToast");
