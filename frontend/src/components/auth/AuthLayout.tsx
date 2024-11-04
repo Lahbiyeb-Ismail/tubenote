@@ -1,5 +1,12 @@
 import { Alert, AlertDescription } from "../ui/alert";
-import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "../ui/card";
+import GoogleAuthButton from "./GoogleAuthButton";
 
 type AuthLayoutProps = {
 	error?: string;
@@ -17,7 +24,7 @@ function AuthLayout({
 	children,
 }: AuthLayoutProps) {
 	return (
-		<div className="height_viewport bg-gradient-to-br from-purple-100 via-pink-100 to-red-100 flex flex-col justify-center items-center p-4">
+		<div className="h-[100vh] bg-gradient-to-br from-purple-100 via-pink-100 to-red-100 flex flex-col justify-center items-center p-4">
 			<div className="w-full max-w-md">
 				<Card className="w-full">
 					{error && (
@@ -41,7 +48,20 @@ function AuthLayout({
 							{description}
 						</CardDescription>
 					</CardHeader>
-					{children}
+					<CardContent className="space-y-4">
+						<GoogleAuthButton />
+						<div className="relative">
+							<div className="absolute inset-0 flex items-center">
+								<span className="w-full border-t" />
+							</div>
+							<div className="relative flex justify-center text-xs uppercase">
+								<span className="bg-background px-2 text-muted-foreground">
+									Or continue with
+								</span>
+							</div>
+						</div>
+						{children}
+					</CardContent>
 				</Card>
 			</div>
 		</div>
