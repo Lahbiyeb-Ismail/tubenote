@@ -40,25 +40,26 @@ function ConfirmationModal() {
 					<DialogTitle>{title}</DialogTitle>
 					<DialogDescription>{description}</DialogDescription>
 				</DialogHeader>
-				{action !== "delete" && (
+				{action === "delete" ? (
+					<DialogFooter>
+						<Button variant="outline" onClick={closeModal}>
+							{cancelText}
+						</Button>
+						<Button variant="destructive" onClick={handleConfirm}>
+							{confirmText}
+						</Button>
+					</DialogFooter>
+				) : (
 					<DialogDescription>
 						<SaveNoteForm
 							action={action}
 							noteContent={noteContent || ""}
 							noteTitle={noteTitle}
+							cancelText={cancelText}
+							closeModal={closeModal}
 						/>
 					</DialogDescription>
 				)}
-				<DialogFooter>
-					<Button variant="outline" onClick={closeModal}>
-						{cancelText}
-					</Button>
-					{action === "delete" && (
-						<Button variant="destructive" onClick={handleConfirm}>
-							{confirmText}
-						</Button>
-					)}
-				</DialogFooter>
 			</DialogContent>
 		</Dialog>
 	);
