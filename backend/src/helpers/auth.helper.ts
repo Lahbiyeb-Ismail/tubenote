@@ -55,7 +55,8 @@ export async function getUser(
 export async function createNewUser(
   registerCredentiels: RegisterCredentiels
 ): Promise<User> {
-  const { username, email, password } = registerCredentiels;
+  const { username, email, password, emailVerified, googleId, profilePicture } =
+    registerCredentiels;
 
   const hashedpassword = await bcrypt.hash(password, 10);
 
@@ -64,6 +65,9 @@ export async function createNewUser(
       username: username,
       email: email,
       password: hashedpassword,
+      emailVerified,
+      googleId,
+      profilePicture,
     },
   });
 
@@ -186,5 +190,50 @@ export async function getGoogleOAuthTokens(
   } catch (error) {
     console.error(error);
     throw new Error('Failed to get Google OAuth tokens');
+  }
+}
+
+type GetGoogleUser = {
+  id_token: string;
+  access_token: string;
+};
+
+type GoogleUser = {
+  id: string;
+  email: string;
+  verified_email: boolean;
+  name: string;
+  given_name: string;
+  family_name: string;
+  picture: string;
+};
+
+/**
+ * Fetches the Google user information using the provided ID token and access token.
+ *
+ * @param {Object} params - The parameters for fetching the Google user.
+ * @param {string} params.id_token - The ID token for authorization.
+ * @param {string} params.access_token - The access token for fetching user info.
+ * @returns {Promise<GoogleUser>} A promise that resolves to the Google user information.
+ * @throws {Error} Throws an error if the request to fetch Google user information fails.
+ */
+export async function getGoogleUser({
+  id_token,
+  access_token,
+}: GetGoogleUser): Promise<GoogleUser> {
+  try {
+    const res = await axios.get(
+      `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${access_token}`,
+      {
+        headers: {
+          Authorization: `Bearer ${id_token}`,
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error) {
+    console.log(error);
+    throw new Error('Failed to get Google user');
   }
 }
