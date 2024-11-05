@@ -1,3 +1,5 @@
+import qs from 'qs';
+import axios from 'axios';
 import bcrypt from 'bcryptjs';
 import type { Response, Request } from 'express';
 import type { User } from '@prisma/client';
@@ -138,4 +140,51 @@ export function verifyUserId(
   }
 
   return userID;
+}
+
+type GoogleOAuthTokens = {
+  access_token: string;
+  id_token: string;
+  scope: string;
+  token_type: string;
+  expires_in: number;
+  refresh_token: string;
+};
+
+/**
+ * Retrieves Google OAuth tokens using the provided authorization code.
+ *
+ * @param code - The authorization code received from the Google OAuth flow.
+ * @returns A promise that resolves to the Google OAuth tokens.
+ * @throws An error if the request to get the tokens fails.
+ */
+export async function getGoogleOAuthTokens(
+  code: string
+): Promise<GoogleOAuthTokens> {
+  const url = 'https://oauth2.googleapis.com/token';
+
+  const options = {
+    code,
+    client_id: envConfig.google.client_id,
+    client_secret: envConfig.google.client_secret,
+    redirect_uri: envConfig.google.redirect_uri,
+    grant_type: 'authorization_code',
+  };
+
+  try {
+    const response = await axios.post<GoogleOAuthTokens>(
+      url,
+      qs.stringify(options),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error('Failed to get Google OAuth tokens');
+  }
 }
