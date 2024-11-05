@@ -5,6 +5,8 @@ import {
   checkPassword,
   createAndSaveNewTokens,
   createNewUser,
+  getGoogleOAuthTokens,
+  getGoogleUser,
   getUser,
 } from '../helpers/auth.helper';
 import prismaClient from '../lib/prisma';
@@ -52,7 +54,14 @@ export async function handleRegister(
     return;
   }
 
-  const newUser = await createNewUser({ username, email, password });
+  const newUser = await createNewUser({
+    username,
+    email,
+    password,
+    emailVerified: false,
+    googleId: null,
+    profilePicture: null,
+  });
 
   res.status(httpStatus.CREATED).json({
     message: 'User created successfully',
@@ -114,6 +123,63 @@ export async function handleLogin(
 
   res.status(httpStatus.OK).json({
     message: 'Login successful',
+    accessToken,
+    user: { username: user.username, email: user.email },
+  });
+}
+
+/**
+ * Handles Google login by exchanging the authorization code for tokens,
+ * retrieving the user's information from Google, and creating or updating
+ * the user in the database.
+ *
+ * @param req - The request object containing the authorization code in the query parameters.
+ * @param res - The response object used to send the response back to the client.
+ *
+ * @returns A JSON response indicating the success or failure of the login process.
+ *
+ * @throws Will throw an error if the email is not verified.
+ */
+export async function handleGoogleLogin(req: TypedRequest, res: Response) {
+  // biome-ignore lint/complexity/useLiteralKeys: <explanation>
+  const code = req.query['code'] as string;
+
+  const { access_token, id_token } = await getGoogleOAuthTokens(code);
+
+  const { id, email, name, picture, verified_email } = await getGoogleUser({
+    access_token,
+    id_token,
+  });
+
+  if (!verified_email) {
+    res.status(httpStatus.UNAUTHORIZED).json({
+      message: 'Email not verified. Please try again.',
+    });
+    return;
+  }
+
+  let user = await getUser({ email });
+
+  if (!user) {
+    user = await createNewUser({
+      username: name,
+      email,
+      password: id,
+      profilePicture: picture,
+      googleId: id,
+      emailVerified: true,
+    });
+  } else if (!user.googleId) {
+    user = await prismaClient.user.update({
+      where: { id: user.id },
+      data: { googleId: id },
+    });
+  }
+
+  const accessToken = await createAndSaveNewTokens(user.id, res);
+
+  res.status(httpStatus.OK).json({
+    message: 'Google login successful',
     accessToken,
     user: { username: user.username, email: user.email },
   });
