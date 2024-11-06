@@ -66,8 +66,8 @@ export async function createNewUser(
       email: email,
       password: hashedpassword,
       emailVerified,
-      googleId,
-      profilePicture,
+      googleId: googleId || null,
+      profilePicture: profilePicture || null,
     },
   });
 
