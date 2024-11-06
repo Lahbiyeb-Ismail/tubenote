@@ -4,6 +4,7 @@ import express, { type Express } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import passport from './lib/passportAuth';
 
 import authRoutes from './routes/auth.route';
 import videoRoutes from './routes/video.route';
@@ -18,6 +19,8 @@ app.use(helmet());
 app.use(express.json());
 
 app.use(cookieParser());
+
+app.use(passport.initialize());
 
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true }));
