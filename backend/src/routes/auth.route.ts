@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import passport from '../lib/passportAuth';
+
 import {
   handleRegister,
   handleLogin,
@@ -18,6 +20,12 @@ router.route('/login').post(validateRequestBody(loginSchema), handleLogin);
 
 router.route('/logout').post(handleLogout);
 
-router.route('/google').get(handleGoogleLogin);
+router
+  .route('/google')
+  .get(passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+router
+  .route('/google/callback')
+  .get(passport.authenticate('google', { session: false }), handleGoogleLogin);
 
 export default router;
