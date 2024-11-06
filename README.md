@@ -124,18 +124,18 @@ Below is a checklist of features that has been implemented:
 - [x] Note-taking on YouTube videos
 - [x] Dashboard to view recent notes
 - [x] Responsive design
+- [x] Add a new Editor (mdx editor)
+- [x] User authentication whit google
 
 ## Features in progress:
 
 Below is a checklist of features planned for this application:
 
-- [ ] Add a new Editor (mdx editor)
-- [ ] Dark mode support
 - [ ] Refresh token feat
 - [ ] Email verification feat
 - [ ] Forgot password feat
-- [ ] User authentication whit google
 - [ ] Search functionality for notes
-- [ ] Cashing functionality using Redis
 - [ ] Export notes to PDF
 - [ ] Share notes with other users
+- [ ] Cashing functionality using Redis
+- [ ] Dark mode support
