@@ -1,19 +1,20 @@
 import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
+import type { Profile } from 'passport-google-oauth20';
 
 import {
   checkPassword,
   createAndSaveNewTokens,
   createNewUser,
-  getGoogleOAuthTokens,
-  getGoogleUser,
   getUser,
 } from '../helpers/auth.helper';
 import prismaClient from '../lib/prisma';
 import { clearRefreshTokenCookieConfig } from '../config/cookie.config';
 import envConfig from '../config/envConfig';
+
 import type { TypedRequest } from '../types';
 import type { LoginCredentials, RegisterCredentiels } from '../types/auth.type';
+
 const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
 
 /**
@@ -128,61 +129,74 @@ export async function handleLogin(
   });
 }
 
+type GoogleUser = {
+  sub: string;
+  email: string;
+  email_verified: boolean;
+  name: string;
+  given_name: string;
+  family_name: string;
+  picture: string;
+};
 /**
- * Handles Google login by exchanging the authorization code for tokens,
- * retrieving the user's information from Google, and creating or updating
- * the user in the database.
+ * Handles Google login by processing the user profile received from Google,
+ * verifying the email, and creating or updating the user in the database.
+ * If the login is successful, it generates and saves new tokens and redirects
+ * the user to the client callback URL with the access token.
  *
- * @param req - The request object containing the authorization code in the query parameters.
- * @param res - The response object used to send the response back to the client.
+ * @param req - The request object containing the user profile from Google.
+ * @param res - The response object used to send the response.
  *
- * @returns A JSON response indicating the success or failure of the login process.
- *
- * @throws Will throw an error if the email is not verified.
+ * @returns {Promise<void>} - A promise that resolves when the login process is complete.
  */
 export async function handleGoogleLogin(req: TypedRequest, res: Response) {
-  // biome-ignore lint/complexity/useLiteralKeys: <explanation>
-  const code = req.query['code'] as string;
+  const user = req.user as Profile;
 
-  const { access_token, id_token } = await getGoogleOAuthTokens(code);
+  if (!user) {
+    res.status(httpStatus.UNAUTHORIZED).json({
+      message: 'Google login failed. Please try again.',
+    });
+    return;
+  }
 
-  const { id, email, name, picture, verified_email } = await getGoogleUser({
-    access_token,
-    id_token,
-  });
+  const {
+    sub: googleId,
+    email,
+    email_verified,
+    name,
+    picture,
+  } = user._json as GoogleUser;
 
-  if (!verified_email) {
+  if (!email_verified) {
     res.status(httpStatus.UNAUTHORIZED).json({
       message: 'Email not verified. Please try again.',
     });
     return;
   }
 
-  let user = await getUser({ email });
+  let foundUser = await getUser({ email });
 
-  if (!user) {
-    user = await createNewUser({
+  if (!foundUser) {
+    foundUser = await createNewUser({
       username: name,
-      email,
-      password: id,
+      emailVerified: email_verified,
+      password: googleId,
       profilePicture: picture,
-      googleId: id,
-      emailVerified: true,
+      email,
+      googleId,
     });
-  } else if (!user.googleId) {
-    user = await prismaClient.user.update({
-      where: { id: user.id },
-      data: { googleId: id },
+  } else if (!foundUser.googleId) {
+    foundUser = await prismaClient.user.update({
+      where: { id: foundUser.id },
+      data: { googleId },
     });
   }
 
-  const accessToken = await createAndSaveNewTokens(user.id, res);
+  const accessToken = await createAndSaveNewTokens(foundUser.id, res);
 
-  res.status(httpStatus.OK).json({
-    message: 'Google login successful',
-    accessToken,
-    user: { username: user.username, email: user.email },
-  });
+  res.redirect(
+    `${envConfig.client.url}/auth/callback?access_token=${encodeURIComponent(JSON.stringify(accessToken))}`
+  );
 }
 
 /**
