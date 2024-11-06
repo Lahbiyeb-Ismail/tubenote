@@ -4,6 +4,7 @@ export interface IUser extends User {
   id: string;
   createdAt: string;
   updatedAt: string;
+  profilePicture: string | null;
 }
 
 export type UserState = {
