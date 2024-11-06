@@ -1,19 +1,21 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/context/useAuth";
+import useGetCurrentUser from "@/hooks/user/useGetCurrentUser";
 
 function UserAvatar() {
-	const { state } = useAuth();
+	const { data } = useGetCurrentUser();
 
-	const { user } = state;
+	const currentUser = data?.user;
 
 	const src = "https://github.com/shadcn.png";
 	const avatarFallback =
-		(user?.username?.[0]?.toUpperCase() ?? "") +
-		(user?.username?.[1]?.toUpperCase() ?? "");
+		(currentUser?.username?.[0]?.toUpperCase() ?? "") +
+		(currentUser?.username?.[1]?.toUpperCase() ?? "");
+
+	const imgSrc = currentUser?.profilePicture ?? src;
 
 	return (
 		<Avatar>
-			<AvatarImage src={src} alt="user avatar" />
+			<AvatarImage src={imgSrc} alt="user avatar" />
 			<AvatarFallback>{avatarFallback}</AvatarFallback>
 		</Avatar>
 	);
