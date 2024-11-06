@@ -60,8 +60,6 @@ export async function handleRegister(
     email,
     password,
     emailVerified: false,
-    googleId: null,
-    profilePicture: null,
   });
 
   res.status(httpStatus.CREATED).json({
