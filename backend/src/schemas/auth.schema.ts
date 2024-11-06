@@ -9,8 +9,8 @@ export const registrationSchema = {
     password: z
       .string()
       .min(8, { message: 'Password must be at least 8 characters long.' }),
-    googleId: z.string().or(z.literal(null)),
-    profilePicture: z.string().or(z.literal(null)),
+    profilePicture: z.string().url().nullable().optional(),
+    googleId: z.string().nullable().optional(),
     emailVerified: z.boolean().default(false),
   }),
 };
