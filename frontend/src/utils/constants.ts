@@ -11,6 +11,7 @@ import {
   Mail,
   Shield,
   Settings,
+  User,
 } from 'lucide-react';
 
 export const howItWorksSteps = [
@@ -61,7 +62,7 @@ export const footerSupportLinks = [
 export const sidebarMenuLinks = [
   { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
   { name: 'Notes', icon: FileText, href: '/notes' },
-  // { name: 'Videos', icon: Video, href: '/videos' },
+  { name: 'Profile', icon: User, href: '/profile' },
   { name: 'Settings', icon: Settings, href: '/settings' },
 ] as const;
 
