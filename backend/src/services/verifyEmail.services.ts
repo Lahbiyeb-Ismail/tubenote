@@ -28,3 +28,18 @@ export async function createEmailVericationToken(userId: string) {
 
   return token;
 }
+
+export async function deleteEmailVericationToken(userId: string) {
+  await prismaClient.emailVerificationToken.deleteMany({
+    where: { userId },
+  });
+}
+
+export async function findVerificationToken(token: string) {
+  const verificationToken =
+    await prismaClient.emailVerificationToken.findUnique({
+      where: { token },
+    });
+
+  return verificationToken;
+}
