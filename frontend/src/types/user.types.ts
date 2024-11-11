@@ -5,6 +5,7 @@ export interface IUser extends User {
   createdAt: string;
   updatedAt: string;
   profilePicture: string | null;
+  emailVerified: boolean;
 }
 
 export type UserState = {
