@@ -1,14 +1,20 @@
 import httpStatus from 'http-status';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 
 import type { TypedRequest } from '../types';
-import { getUser } from '../helpers/auth.helper';
 import type { SendVerifyEmail } from '../types/verifyEmail.type';
+
 import { sendVerifyEmail } from '../utils/sendEmail';
+
+import { getUser } from '../helpers/auth.helper';
+
 import {
   createEmailVericationToken,
+  deleteEmailVericationToken,
+  findVerificationToken,
   getEmailVericationToken,
 } from '../services/verifyEmail.services';
+import { verifyUserEmail } from '../services/user.services';
 
 /**
  * Handles the request to send a verification email.
@@ -80,4 +86,45 @@ export async function sendVerificationEmailHandler(
 
   // Responds with an OK status indicating that the verification email has been sent.
   res.status(httpStatus.OK).json({ message: 'Verification email sent.' });
+}
+
+/**
+ * Handles the email verification process.
+ *
+ * @param req - The request object containing the verification token in the parameters.
+ * @param res - The response object used to send the response back to the client.
+ *
+ * @remarks
+ * The function performs the following steps:
+ * 1. Extracts the token from the request parameters.
+ * 2. Checks if the token is present. If not, responds with a 400 Bad Request status.
+ * 3. Finds the verification token in the database.
+ * 4. Checks if the token is valid and not expired. If invalid or expired, responds with a 404 Not Found status.
+ * 5. Updates the user's emailVerified status to true.
+ * 6. Deletes the email verification token from the database.
+ * 7. Responds with a 200 OK status indicating that the email was verified successfully.
+ */
+export async function verifyEmailHandler(req: Request, res: Response) {
+  const { token } = req.params;
+
+  if (!token) {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Token is required.' });
+    return;
+  }
+
+  const verificationToken = await findVerificationToken(token);
+
+  if (!verificationToken || verificationToken.expiresAt < new Date()) {
+    res
+      .status(httpStatus.NOT_FOUND)
+      .json({ message: 'Invalid or Expired token.' });
+    return;
+  }
+
+  // Updates the user's emailVerified status to true.
+  await verifyUserEmail(verificationToken.userId);
+
+  await deleteEmailVericationToken(verificationToken.userId);
+
+  res.status(httpStatus.OK).json({ message: 'Email verified successfully.' });
 }

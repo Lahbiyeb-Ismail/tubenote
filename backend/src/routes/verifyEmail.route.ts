@@ -1,7 +1,14 @@
 import { Router } from 'express';
 import validateRequestBody from '../middlewares/validateRequestBody';
-import { sendVerifyEmailSchema } from '../schemas/verifyEmail.schema';
-import { sendVerificationEmailHandler } from '../controllers/verifyEmail.controller';
+import validateRequestParams from '../middlewares/validateRequestParams';
+import {
+  sendVerifyEmailSchema,
+  verifyEmailSchema,
+} from '../schemas/verifyEmail.schema';
+import {
+  sendVerificationEmailHandler,
+  verifyEmailHandler,
+} from '../controllers/verifyEmail.controller';
 
 const router = Router();
 
@@ -11,5 +18,10 @@ router
     validateRequestBody(sendVerifyEmailSchema),
     sendVerificationEmailHandler
   );
+
+// /verify-email
+router
+  .route('/verify-email/:token')
+  .get(validateRequestParams(verifyEmailSchema), verifyEmailHandler);
 
 export default router;
