@@ -10,6 +10,8 @@ import authRoutes from './routes/auth.route';
 import videoRoutes from './routes/video.route';
 import noteRoutes from './routes/note.route';
 import userRoutes from './routes/user.route';
+import verifyEmailRoutes from './routes/verifyEmail.route';
+
 import { errorHandler, notFoundRoute } from './middlewares/errorsMiddleware';
 
 const app: Express = express();
@@ -37,6 +39,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/videos', videoRoutes);
 app.use('/api/v1/notes', noteRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1', verifyEmailRoutes);
 
 // ?: Global Error middleware
 app.use(notFoundRoute);
