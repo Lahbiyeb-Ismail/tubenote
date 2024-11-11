@@ -22,6 +22,11 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
   GOOGLE_REDIRECT_URI: z.string(),
+  SMTP_HOST: z.string(),
+  SMTP_PORT: z.string(),
+  SMTP_USER: z.string(),
+  SMTP_PASSWORD: z.string(),
+  EMAIL_FROM: z.string(),
 });
 
 type EnvSchema = z.infer<typeof envSchema>;
@@ -74,6 +79,17 @@ const envConfig = {
     client_id: validatedEnv.GOOGLE_CLIENT_ID,
     client_secret: validatedEnv.GOOGLE_CLIENT_SECRET,
     redirect_uri: validatedEnv.GOOGLE_REDIRECT_URI,
+  },
+  email: {
+    smtp: {
+      host: validatedEnv.SMTP_HOST,
+      port: validatedEnv.SMTP_PORT,
+      auth: {
+        user: validatedEnv.SMTP_USER,
+        password: validatedEnv.SMTP_PASSWORD,
+      },
+    },
+    from: validatedEnv.EMAIL_FROM,
   },
 } as const;
 
