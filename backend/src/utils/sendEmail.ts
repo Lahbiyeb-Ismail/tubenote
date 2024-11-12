@@ -7,13 +7,24 @@ import envConfig from '../config/envConfig';
  * @param {string} email - The email of the user
  * @param {string} token - The email verification token
  */
-export const sendVerifyEmail = async (email: string, token: string) => {
-  const verifyLink = `${envConfig.server.url}/api/v1/verify-email/${token}`;
+
+type SendEmailProps = {
+  emailRecipient: string;
+  emailSubject: string;
+  emailBody: string;
+};
+
+export const sendEmail = async ({
+  emailRecipient,
+  emailSubject,
+  emailBody,
+}: SendEmailProps) => {
+  // const verifyLink = `${envConfig.server.url}/api/v1/verify-email/${token}`;
   const mailOptions = {
     from: envConfig.email.from,
-    to: email,
-    subject: 'Email verification',
-    html: `Please click <a href="${verifyLink}">here</a> to verify your email.`,
+    to: emailRecipient,
+    subject: emailSubject,
+    html: emailBody,
   };
 
   await transporter.sendMail(mailOptions, (error, info) => {
