@@ -121,6 +121,13 @@ export async function handleLogin(
     return;
   }
 
+  if (!user.emailVerified) {
+    res.status(httpStatus.UNAUTHORIZED).json({
+      message: 'Email not verified. Please verify your email address.',
+    });
+    return;
+  }
+
   const isPasswordCorrect = await checkPassword(password, user.password);
 
   if (!isPasswordCorrect) {
