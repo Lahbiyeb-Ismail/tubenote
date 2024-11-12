@@ -12,7 +12,10 @@ export default function ProfilePage() {
 
 	return (
 		<div className="min-h-screen bg-gray-100 p-4 md:p-8">
-			<EmailConfirmationAlert emailVerified={data.user.emailVerified} />
+			<EmailConfirmationAlert
+				emailVerified={data.user.emailVerified}
+				email={data.user.email}
+			/>
 
 			<h1 className="text-3xl font-bold mb-8">Profile</h1>
 
