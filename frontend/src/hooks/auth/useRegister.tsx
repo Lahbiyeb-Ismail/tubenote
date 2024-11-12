@@ -25,6 +25,8 @@ function useRegister(dispatch: React.Dispatch<AuthAction>) {
 
 			queryClient.invalidateQueries({ queryKey: ["user"] });
 
+			localStorage.setItem("userEmail", data.email);
+
 			router.push("/verify-email");
 		},
 		onError: (error: TypedError) => {
