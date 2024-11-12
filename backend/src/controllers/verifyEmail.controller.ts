@@ -4,7 +4,7 @@ import type { Request, Response } from 'express';
 import type { TypedRequest } from '../types';
 import type { SendVerifyEmail } from '../types/verifyEmail.type';
 
-import { sendVerifyEmail } from '../utils/sendEmail';
+import { sendEmail } from '../utils/sendEmail';
 
 import { getUser } from '../helpers/auth.helper';
 
@@ -15,6 +15,7 @@ import {
   getEmailVericationToken,
 } from '../services/verifyEmail.services';
 import { verifyUserEmail } from '../services/user.services';
+import verifyEmailTemplate from '../utils/verifyEmailTemplate';
 
 /**
  * Handles the request to send a verification email.
@@ -82,7 +83,11 @@ export async function sendVerificationEmailHandler(
   const token = await createEmailVericationToken(user.id);
 
   // Sends the verification email to the provided email address.
-  await sendVerifyEmail(email, token);
+  await sendEmail({
+    emailRecipient: email,
+    emailSubject: 'Verification Email',
+    emailBody: verifyEmailTemplate(token),
+  });
 
   // Responds with an OK status indicating that the verification email has been sent.
   res.status(httpStatus.OK).json({ message: 'Verification email sent.' });
