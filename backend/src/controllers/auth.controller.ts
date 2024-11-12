@@ -75,8 +75,8 @@ export async function handleRegister(
   });
 
   res.status(httpStatus.CREATED).json({
-    message:
-      'A verification email has been sent to your email. Please verify your email address.',
+    message: 'A verification email has been sent to your email.',
+    email: newUser.email,
   });
 }
 
