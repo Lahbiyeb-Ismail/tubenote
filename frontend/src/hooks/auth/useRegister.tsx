@@ -18,14 +18,14 @@ function useRegister(dispatch: React.Dispatch<AuthAction>) {
 		onMutate: () => {
 			toast.loading("Registering...", { id: "loadingToast" });
 		},
-		onSuccess: () => {
+		onSuccess: (data) => {
 			toast.dismiss("loadingToast");
 
-			toast.success("Registered successfully. Please login to continue.");
+			toast.success(data.message);
 
 			queryClient.invalidateQueries({ queryKey: ["user"] });
 
-			router.push("/login");
+			router.push("/verify-email");
 		},
 		onError: (error: TypedError) => {
 			toast.dismiss("loadingToast");
