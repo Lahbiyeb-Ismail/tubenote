@@ -1,6 +1,6 @@
-import envConfig from '../config/envConfig';
+import envConfig from '../../config/envConfig';
 
-export default function verifyEmailTemplate(token: string) {
+export default function sendVerificationEmailTemplate(token: string) {
   const verificationLink = `${envConfig.server.url}/api/v1/verify-email/${token}`;
 
   return `

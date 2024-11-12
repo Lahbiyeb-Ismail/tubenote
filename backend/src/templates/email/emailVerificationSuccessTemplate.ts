@@ -1,6 +1,6 @@
 import envConfig from '../../config/envConfig';
 
-export function generateEmailVerificationSuccessTemplate() {
+export default function emailVerificationSuccessTemplate() {
   const loginRedirectUrl = `${envConfig.client.url}/login`;
 
   return `
