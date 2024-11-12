@@ -4,8 +4,6 @@ import { Toaster } from "react-hot-toast";
 
 import "./globals.css";
 
-import Navbar from "@/components/Navbar/Navbar";
-
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
 
 import { AuthProvider } from "@/context/useAuth";
@@ -50,7 +48,6 @@ export default function RootLayout({
 									<VideoProvider>
 										<NoteProvider>
 											<Toaster />
-											<Navbar />
 											{children}
 											<ConfirmationModal />
 										</NoteProvider>
