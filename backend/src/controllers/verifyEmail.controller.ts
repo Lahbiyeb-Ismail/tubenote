@@ -15,8 +15,9 @@ import {
   getEmailVericationToken,
 } from '../services/verifyEmail.services';
 import { verifyUserEmail } from '../services/user.services';
-import verifyEmailTemplate from '../utils/verifyEmailTemplate';
-import { generateEmailVerificationSuccessTemplate } from '../templates/email/generateEmailVerificationSuccessTemplate';
+
+import sendVerificationEmailTemplate from '../templates/email/sendVerificationEmailTemplate';
+import emailVerificationSuccessTemplate from '../templates/email/emailVerificationSuccessTemplate';
 
 /**
  * Handles the request to send a verification email.
@@ -87,7 +88,7 @@ export async function sendVerificationEmailHandler(
   await sendEmail({
     emailRecipient: email,
     emailSubject: 'Verification Email',
-    emailBody: verifyEmailTemplate(token),
+    emailBody: sendVerificationEmailTemplate(token),
   });
 
   // Responds with an OK status indicating that the verification email has been sent.
@@ -133,5 +134,5 @@ export async function verifyEmailHandler(req: Request, res: Response) {
   await deleteEmailVericationToken(verificationToken.userId);
 
   // Send HTML response with success message and client-side redirect
-  res.status(httpStatus.OK).send(generateEmailVerificationSuccessTemplate());
+  res.status(httpStatus.OK).send(emailVerificationSuccessTemplate());
 }
