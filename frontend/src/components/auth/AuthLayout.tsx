@@ -1,4 +1,5 @@
 import { Alert, AlertDescription } from "../ui/alert";
+
 import {
 	Card,
 	CardContent,
@@ -6,6 +7,9 @@ import {
 	CardHeader,
 	CardTitle,
 } from "../ui/card";
+
+import HomeButton from "../global/HomeButton";
+
 import GoogleAuthButton from "./GoogleAuthButton";
 
 type AuthLayoutProps = {
@@ -24,7 +28,8 @@ function AuthLayout({
 	children,
 }: AuthLayoutProps) {
 	return (
-		<div className="h-[100vh] bg-gradient-to-br from-purple-100 via-pink-100 to-red-100 flex flex-col justify-center items-center p-4">
+		<div className="relative min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-red-100 flex flex-col justify-center items-center p-4">
+			<HomeButton />
 			<div className="w-full max-w-md">
 				<Card className="w-full">
 					{error && (

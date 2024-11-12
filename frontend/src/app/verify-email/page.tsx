@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { CheckCircle, Mail } from "lucide-react";
+import HomeButton from "@/components/global/HomeButton";
 
 export default function VerifyEmail() {
 	const [email, setEmail] = useState("");
@@ -13,7 +14,9 @@ export default function VerifyEmail() {
 	}, []);
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+		<div className="relative min-h-screen bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+			<HomeButton />
+
 			<div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg">
 				<div>
 					<div className="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-blue-100">
