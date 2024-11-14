@@ -16,8 +16,10 @@ import {
 } from '../services/verifyEmail.services';
 import { verifyUserEmail } from '../services/user.services';
 
-import sendVerificationEmailTemplate from '../templates/email/sendVerificationEmailTemplate';
-import emailVerificationSuccessTemplate from '../templates/email/emailVerificationSuccessTemplate';
+import {
+  createVerificationEmail,
+  createVerifiedEmail,
+} from '../helpers/verifyEmail.helper';
 
 /**
  * Handles the request to send a verification email.
@@ -84,11 +86,14 @@ export async function sendVerificationEmailHandler(
   // Creates a new email verification token for the user.
   const token = await createEmailVericationToken(user.id);
 
+  const { htmlContent, textContent } = createVerificationEmail(token);
+
   // Sends the verification email to the provided email address.
   await sendEmail({
     emailRecipient: email,
     emailSubject: 'Verification Email',
-    emailBody: sendVerificationEmailTemplate(token),
+    htmlContent,
+    textContent,
   });
 
   // Responds with an OK status indicating that the verification email has been sent.
@@ -133,6 +138,8 @@ export async function verifyEmailHandler(req: Request, res: Response) {
 
   await deleteEmailVericationToken(verificationToken.userId);
 
+  const { htmlContent } = createVerifiedEmail();
+
   // Send HTML response with success message and client-side redirect
-  res.status(httpStatus.OK).send(emailVerificationSuccessTemplate());
+  res.status(httpStatus.OK).send(htmlContent);
 }
