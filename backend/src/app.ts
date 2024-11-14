@@ -11,6 +11,7 @@ import videoRoutes from './routes/video.route';
 import noteRoutes from './routes/note.route';
 import userRoutes from './routes/user.route';
 import verifyEmailRoutes from './routes/verifyEmail.route';
+import resetPasswordRoutes from './routes/resetPassword.route';
 
 import { errorHandler, notFoundRoute } from './middlewares/errorsMiddleware';
 
@@ -40,6 +41,7 @@ app.use('/api/v1/videos', videoRoutes);
 app.use('/api/v1/notes', noteRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1', verifyEmailRoutes);
+app.use('/api/v1', resetPasswordRoutes);
 
 // ?: Global Error middleware
 app.use(notFoundRoute);
