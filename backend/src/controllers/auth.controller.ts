@@ -15,8 +15,8 @@ import envConfig from '../config/envConfig';
 import type { TypedRequest } from '../types';
 import type { LoginCredentials, RegisterCredentiels } from '../types/auth.type';
 import { sendEmail } from '../utils/sendEmail';
-import sendVerificationEmailTemplate from '../templates/email/sendVerificationEmailTemplate';
 import { createEmailVericationToken } from '../services/verifyEmail.services';
+import { createVerificationEmail } from '../helpers/verifyEmail.helper';
 
 const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
 
@@ -68,10 +68,13 @@ export async function handleRegister(
   // Creates a new email verification token for the user.
   const token = await createEmailVericationToken(newUser.id);
 
+  const { htmlContent, textContent } = createVerificationEmail(token);
+
   await sendEmail({
     emailRecipient: newUser.email,
     emailSubject: 'Email Verification',
-    emailBody: sendVerificationEmailTemplate(token),
+    htmlContent,
+    textContent,
   });
 
   res.status(httpStatus.CREATED).json({
