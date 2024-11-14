@@ -1,0 +1,13 @@
+Email Verified Successfully!
+
+Congratulations! Your email address has been successfully verified. Thank you for completing this important step in securing your account.
+
+You can now log in to your account and start using our services.
+
+To log in to your account, please visit the following link:
+
+{{loginLink}}
+
+If you have any questions or need assistance, please don't hesitate to contact our support team.
+
+Your Company, 2023
