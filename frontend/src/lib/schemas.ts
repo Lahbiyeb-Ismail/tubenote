@@ -64,3 +64,7 @@ export const updatePasswordSchema = z
     message: "Passwords don't match",
     path: ['confirmPassword'],
   });
+
+export const resetPasswordSchema = z.object({
+  email: z.string().email('Invalid email address'),
+});
