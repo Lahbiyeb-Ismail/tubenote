@@ -23,7 +23,7 @@ import { createResetPasswordEmail } from '../helpers/resetPassword.helper';
  *
  * @returns Sends an HTTP response with the status and message indicating the result of the operation.
  */
-export async function sendResetPasswordEmailHandler(
+export async function handleForgotPassword(
   req: TypedRequest<ResetPasswordBody>,
   res: Response
 ) {
