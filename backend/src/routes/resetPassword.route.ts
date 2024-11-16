@@ -1,15 +1,28 @@
 import { Router } from 'express';
 import validateRequestBody from '../middlewares/validateRequestBody';
-import { sendResetPasswordEmailSchema } from '../schemas/resetPassword.schema';
-import { handleForgotPassword } from '../controllers/resetPassword.controller';
+import {
+  passwordResetBodySchema,
+  passwordResetParamsSchema,
+  forgotPasswordBodySchema,
+} from '../schemas/resetPassword.schema';
+import {
+  handleForgotPassword,
+  handleResetPassword,
+} from '../controllers/resetPassword.controller';
+import validateRequestParams from '../middlewares/validateRequestParams';
 
 const router = Router();
 
 router
   .route('/forgot-password')
+  .post(validateRequestBody(forgotPasswordBodySchema), handleForgotPassword);
+
+router
+  .route('/reset-password/:token')
   .post(
-    validateRequestBody(sendResetPasswordEmailSchema),
-    handleForgotPassword
+    validateRequestParams(passwordResetParamsSchema),
+    validateRequestBody(passwordResetBodySchema),
+    handleResetPassword
   );
 
 export default router;
