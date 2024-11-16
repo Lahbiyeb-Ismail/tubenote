@@ -2,7 +2,7 @@ import type { Response } from 'express';
 import httpStatus from 'http-status';
 
 import type { TypedRequest } from '../types';
-import type { ResetPasswordBody } from '../types/resetPassword.type';
+import type { ForgotPasswordBody } from '../types/resetPassword.type';
 import { getUser } from '../helpers/auth.helper';
 import {
   createResetPasswordToken,
@@ -24,7 +24,7 @@ import { createResetPasswordEmail } from '../helpers/resetPassword.helper';
  * @returns Sends an HTTP response with the status and message indicating the result of the operation.
  */
 export async function handleForgotPassword(
-  req: TypedRequest<ResetPasswordBody>,
+  req: TypedRequest<ForgotPasswordBody>,
   res: Response
 ) {
   const { email } = req.body;
