@@ -6,7 +6,7 @@ import Handlebars from 'handlebars';
 import envConfig from '../config/envConfig';
 
 export function createResetPasswordEmail(token: string) {
-  const resetLink = `${envConfig.server.url}/api/v1/reset-password/${token}`;
+  const resetLink = `${envConfig.client.url}/password-reset/${token}/`;
 
   // Read the email templates
   const htmlTemplate = fs.readFileSync(

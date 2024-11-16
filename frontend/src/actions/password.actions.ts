@@ -6,7 +6,7 @@ import axiosInstance from '@/lib/axios.lib';
  * @param email - The email address to send the password reset email to.
  * @returns A promise that resolves to an object containing a message.
  */
-export async function sendPasswordResetEmail(
+export async function sendForgotPasswordEmail(
   email: string
 ): Promise<{ message: string }> {
   const res = await axiosInstance.post('/reset-password', { email });

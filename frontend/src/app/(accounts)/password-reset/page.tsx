@@ -1,7 +1,7 @@
-import PasswordResetForm from "@/components/forms/PasswordResetForm";
+import ForgotPasswordForm from "@/components/forms/ForgotPasswordForm";
 
-function PasswordResetPage() {
-	return <PasswordResetForm />;
+function ForgotPasswordPage() {
+	return <ForgotPasswordForm />;
 }
 
-export default PasswordResetPage;
+export default ForgotPasswordPage;

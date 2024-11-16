@@ -10,24 +10,24 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { CardContent, CardFooter } from "@/components/ui/card";
 
-import { passwordResetSchema } from "@/lib/schemas";
-import useSendPasswordResetEmail from "@/hooks/password-reset/useSendPasswordResetEmail";
+import { forgotPasswordSchema } from "@/lib/schemas";
+import useSendForgotPasswordEmail from "@/hooks/password-reset/useSendForgotPasswordEmail";
 
-type PasswordResetFormData = {
+type ForgotPasswordFormData = {
 	email: string;
 };
 
-function PasswordResetForm() {
-	const { mutate, isPending } = useSendPasswordResetEmail();
+function ForgotPasswordForm() {
+	const { mutate, isPending } = useSendForgotPasswordEmail();
 
-	const form = useForm<PasswordResetFormData>({
-		resolver: zodResolver(passwordResetSchema),
+	const form = useForm<ForgotPasswordFormData>({
+		resolver: zodResolver(forgotPasswordSchema),
 		defaultValues: {
 			email: "",
 		},
 	});
 
-	const handlePasswordReset = async (formData: PasswordResetFormData) => {
+	const handleForgotPassword = async (formData: ForgotPasswordFormData) => {
 		mutate(formData.email);
 	};
 
@@ -39,7 +39,7 @@ function PasswordResetForm() {
 			<CardContent>
 				<Form {...form}>
 					<form
-						onSubmit={form.handleSubmit(handlePasswordReset)}
+						onSubmit={form.handleSubmit(handleForgotPassword)}
 						className="space-y-4"
 					>
 						<FormInput
@@ -73,4 +73,4 @@ function PasswordResetForm() {
 	);
 }
 
-export default PasswordResetForm;
+export default ForgotPasswordForm;

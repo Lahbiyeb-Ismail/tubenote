@@ -2,14 +2,14 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
-import { sendPasswordResetEmail } from "@/actions/password.actions";
+import { sendForgotPasswordEmail } from "@/actions/password.actions";
 import type { TypedError } from "@/types";
 
-function useSendPasswordResetEmail() {
+function useSendForgotPasswordEmail() {
 	const router = useRouter();
 
 	return useMutation({
-		mutationFn: sendPasswordResetEmail,
+		mutationFn: sendForgotPasswordEmail,
 		onMutate: () => {
 			toast.loading("Sending...", { id: "loadingToast" });
 		},
@@ -31,4 +31,4 @@ function useSendPasswordResetEmail() {
 	});
 }
 
-export default useSendPasswordResetEmail;
+export default useSendForgotPasswordEmail;
