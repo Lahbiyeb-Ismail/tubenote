@@ -15,6 +15,8 @@ import { Form } from "@/components/ui/form";
 import AuthLayout from "@/components/auth/AuthLayout";
 import FormInput from "@/components/auth/FormInput";
 import { useAuth } from "@/context/useAuth";
+import GoogleAuthButton from "../auth/GoogleAuthButton";
+import { DividerWithText } from "../global/DividerWithText";
 
 function RegisterForm() {
 	const form = useForm<RegisterFormData>({
@@ -36,6 +38,10 @@ function RegisterForm() {
 			title="Join TubeNote Today"
 			description="Unlock the full potential of video learning with our powerful tools"
 		>
+			<GoogleAuthButton />
+
+			<DividerWithText text="Or continue with" />
+
 			<CardContent>
 				<Form {...form}>
 					<form
