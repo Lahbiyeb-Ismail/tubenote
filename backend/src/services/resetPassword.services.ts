@@ -1,22 +1,25 @@
 import { randomUUID } from 'node:crypto';
 
 import prismaClient from '../lib/prisma';
+import type { ResetPasswordToken, Prisma } from '@prisma/client';
 
 /**
- * Checks if there is a valid (not expired) reset password token for the given user ID.
+ * Finds a reset password token that matches the given parameters and is not expired.
  *
- * @param userId - The unique identifier of the user.
- * @returns A promise that resolves to `true` if a valid reset password token exists, otherwise `false`.
+ * @param params - The parameters to filter the reset password tokens.
+ * @returns A promise that resolves to the reset password token if found, or null if not found.
  */
-export async function getResetPasswordToken(userId: string): Promise<boolean> {
+export async function findResetPasswordToken(
+  params: Prisma.ResetPasswordTokenWhereInput
+): Promise<ResetPasswordToken | null> {
   const resetPasswordToken = await prismaClient.resetPasswordToken.findFirst({
     where: {
-      userId,
-      expiresAt: { gt: new Date() },
+      ...params,
+      expiresAt: { gt: new Date() }, // Always check if the token is not expired
     },
   });
 
-  return !!resetPasswordToken;
+  return resetPasswordToken;
 }
 
 /**
@@ -43,4 +46,16 @@ export async function createResetPasswordToken(
   });
 
   return token;
+}
+
+/**
+ * Deletes all reset password tokens associated with a given user ID.
+ *
+ * @param userId - The ID of the user whose reset password tokens are to be deleted.
+ * @returns A promise that resolves when the tokens have been deleted.
+ */
+export async function deleteResetPasswordToken(userId: string): Promise<void> {
+  await prismaClient.resetPasswordToken.deleteMany({
+    where: { userId },
+  });
 }
