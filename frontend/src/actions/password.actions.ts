@@ -9,7 +9,31 @@ import axiosInstance from '@/lib/axios.lib';
 export async function sendForgotPasswordEmail(
   email: string
 ): Promise<{ message: string }> {
-  const res = await axiosInstance.post('/reset-password', { email });
+  const res = await axiosInstance.post('/forgot-password', { email });
+
+  return res.data;
+}
+
+/**
+ * Resets the user's password using the provided token.
+ *
+ * @param password - The new password to set for the user.
+ * @param token - The token used to authorize the password reset.
+ * @returns A promise that resolves to an object containing a message.
+ */
+
+type ResetPassword = {
+  password: string;
+  token: string;
+};
+
+export async function resetPassword({
+  password,
+  token,
+}: ResetPassword): Promise<{ message: string }> {
+  const res = await axiosInstance.post(`/reset-password/${token}`, {
+    password,
+  });
 
   return res.data;
 }
