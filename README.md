@@ -126,13 +126,13 @@ Below is a checklist of features that has been implemented:
 - [x] Responsive design
 - [x] Add a new Editor (mdx editor)
 - [x] User authentication whit google
+- [x] Email verification functionality
 
 ## Features in progress:
 
 Below is a checklist of features planned for this application:
 
 - [ ] Refresh token feat
-- [ ] Email verification feat
 - [ ] Forgot password feat
 - [ ] Search functionality for notes
 - [ ] Export notes to PDF
