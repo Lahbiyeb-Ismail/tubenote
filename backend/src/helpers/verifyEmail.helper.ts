@@ -1,60 +1,29 @@
-import fs from 'node:fs';
-import path from 'node:path';
-
-import Handlebars from 'handlebars';
-
+import type { EmailContent } from 'src/types/email.type';
 import envConfig from '../config/envConfig';
+import compileTemplate from '../utils/compileTemplate';
 
-export function createVerificationEmail(token: string) {
+/**
+ * Creates the content for a verification email.
+ *
+ * @param token - The token to be included in the verification link.
+ * @returns A promise that resolves to the email content.
+ */
+export async function createVerificationEmail(
+  token: string
+): Promise<EmailContent> {
   const verificationLink = `${envConfig.server.url}/api/v1/verify-email/${token}`;
-
-  // Read the email templates
-  const htmlTemplate = fs.readFileSync(
-    path.join(
-      __dirname,
-      '../templates/html',
-      'verification-email-template.html'
-    ),
-    'utf-8'
-  );
-  const textTemplate = fs.readFileSync(
-    path.join(__dirname, '../templates/txt', 'verification-email-template.txt'),
-    'utf-8'
-  );
-
-  const logoPath = path.join(process.cwd(), 'public/images/tubenote-logo.png');
-
-  // Compile the templates
-  const compiledHtmlTemplate = Handlebars.compile(htmlTemplate);
-  const compiledTextTemplate = Handlebars.compile(textTemplate);
-
-  const htmlContent = compiledHtmlTemplate({ verificationLink });
-  const textContent = compiledTextTemplate({ verificationLink });
-
-  return { htmlContent, textContent, logoPath };
+  return compileTemplate('verification-email', { verificationLink });
 }
 
-export function createVerifiedEmail() {
+/**
+ * Creates the content for a verified email.
+ *
+ * This function generates a login link using the client URL from the environment configuration
+ * and compiles an email template named 'email-verified' with the login link.
+ *
+ * @returns {Promise<EmailContent>} A promise that resolves to the compiled email content.
+ */
+export async function createVerifiedEmail(): Promise<EmailContent> {
   const loginLink = `${envConfig.client.url}/login`;
-
-  // Read the email templates
-  const htmlTemplate = fs.readFileSync(
-    path.join(__dirname, '../templates/html', 'email-verified-template.html'),
-    'utf-8'
-  );
-  const textTemplate = fs.readFileSync(
-    path.join(__dirname, '../templates/txt', 'email-verified-template.txt'),
-    'utf-8'
-  );
-
-  const logoPath = path.join(process.cwd(), 'public/images/tubenote-logo.png');
-
-  // Compile the templates
-  const compiledHtmlTemplate = Handlebars.compile(htmlTemplate);
-  const compiledTextTemplate = Handlebars.compile(textTemplate);
-
-  const htmlContent = compiledHtmlTemplate({ loginLink });
-  const textContent = compiledTextTemplate({ loginLink });
-
-  return { htmlContent, textContent, logoPath };
+  return compileTemplate('email-verified', { loginLink });
 }
