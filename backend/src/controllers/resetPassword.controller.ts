@@ -130,3 +130,38 @@ export async function handleResetPassword(
 
   res.status(httpStatus.OK).json({ message: 'Password reset successful.' });
 }
+
+/**
+ * Verifies the password reset token provided in the request parameters.
+ *
+ * @param req - The request object containing the token in the parameters.
+ * @param res - The response object used to send back the appropriate HTTP status and message.
+ *
+ * @returns A promise that resolves to a JSON response indicating whether the token is valid or not.
+ *
+ * - If the token is not provided, responds with a 400 Bad Request status and a message indicating that the token is required.
+ * - If the token is invalid or expired, responds with a 400 Bad Request status and a message indicating that the token is invalid or expired.
+ * - If the token is valid, responds with a 200 OK status and a message indicating that the token is valid.
+ */
+export async function verifyPasswordResetToken(
+  req: TypedRequest,
+  res: Response
+) {
+  const { token } = req.params;
+
+  if (!token) {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Token is required.' });
+    return;
+  }
+
+  const resetToken = await findResetPasswordToken({ token });
+
+  if (!resetToken) {
+    res
+      .status(httpStatus.BAD_REQUEST)
+      .json({ message: 'Invalid or expired token.' });
+    return;
+  }
+
+  res.status(httpStatus.OK).json({ message: 'Token is valid.' });
+}
