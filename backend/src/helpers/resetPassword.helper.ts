@@ -18,6 +18,8 @@ export function createResetPasswordEmail(token: string) {
     'utf-8'
   );
 
+  const logoPath = path.join(process.cwd(), 'public/images/tubenote-logo.png');
+
   // Compile the templates
   const compiledHtmlTemplate = Handlebars.compile(htmlTemplate);
   const compiledTextTemplate = Handlebars.compile(textTemplate);
@@ -26,5 +28,5 @@ export function createResetPasswordEmail(token: string) {
   const htmlContent = compiledHtmlTemplate({ resetLink });
   const textContent = compiledTextTemplate({ resetLink });
 
-  return { htmlContent, textContent };
+  return { htmlContent, textContent, logoPath };
 }

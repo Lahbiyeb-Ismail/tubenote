@@ -22,6 +22,8 @@ export function createVerificationEmail(token: string) {
     'utf-8'
   );
 
+  const logoPath = path.join(process.cwd(), 'public/images/tubenote-logo.png');
+
   // Compile the templates
   const compiledHtmlTemplate = Handlebars.compile(htmlTemplate);
   const compiledTextTemplate = Handlebars.compile(textTemplate);
@@ -29,7 +31,7 @@ export function createVerificationEmail(token: string) {
   const htmlContent = compiledHtmlTemplate({ verificationLink });
   const textContent = compiledTextTemplate({ verificationLink });
 
-  return { htmlContent, textContent };
+  return { htmlContent, textContent, logoPath };
 }
 
 export function createVerifiedEmail() {
@@ -45,6 +47,8 @@ export function createVerifiedEmail() {
     'utf-8'
   );
 
+  const logoPath = path.join(process.cwd(), 'public/images/tubenote-logo.png');
+
   // Compile the templates
   const compiledHtmlTemplate = Handlebars.compile(htmlTemplate);
   const compiledTextTemplate = Handlebars.compile(textTemplate);
@@ -52,5 +56,5 @@ export function createVerifiedEmail() {
   const htmlContent = compiledHtmlTemplate({ loginLink });
   const textContent = compiledTextTemplate({ loginLink });
 
-  return { htmlContent, textContent };
+  return { htmlContent, textContent, logoPath };
 }
