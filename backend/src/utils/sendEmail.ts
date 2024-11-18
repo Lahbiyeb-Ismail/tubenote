@@ -13,6 +13,7 @@ type SendEmailProps = {
   emailSubject: string;
   htmlContent: string;
   textContent: string;
+  logoPath: string;
 };
 
 export const sendEmail = async ({
@@ -20,6 +21,7 @@ export const sendEmail = async ({
   emailSubject,
   htmlContent,
   textContent,
+  logoPath,
 }: SendEmailProps) => {
   const mailOptions = {
     from: envConfig.email.from,
@@ -27,6 +29,13 @@ export const sendEmail = async ({
     subject: emailSubject,
     html: htmlContent,
     text: textContent,
+    attachments: [
+      {
+        filename: 'logo.png',
+        path: logoPath,
+        cid: 'logo',
+      },
+    ],
   };
 
   await transporter.sendMail(mailOptions, (error, info) => {
