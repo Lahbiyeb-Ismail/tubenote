@@ -37,3 +37,17 @@ export async function resetPassword({
 
   return res.data;
 }
+
+/**
+ * Verifies the password reset token by making a GET request to the server.
+ *
+ * @param token - The password reset token to be verified.
+ * @returns A promise that resolves to an object containing a message.
+ */
+export async function verifyPasswordResetToken(
+  token: string
+): Promise<{ message: string }> {
+  const res = await axiosInstance.get(`/reset-password/${token}/verify`);
+
+  return res.data;
+}
