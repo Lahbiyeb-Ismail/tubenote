@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Lock, Eye, EyeOff } from "lucide-react";
+import { Lock } from "lucide-react";
 
 import AuthLayout from "@/components/auth/AuthLayout";
 import FormInput from "@/components/auth/FormInput";
@@ -11,7 +11,12 @@ import { Form } from "@/components/ui/form";
 import { CardContent, CardFooter } from "@/components/ui/card";
 
 import { resetPasswordSchema } from "@/lib/schemas";
+
 import useResetPassword from "@/hooks/password-reset/useResetPassword";
+import useVerifyResetToken from "@/hooks/password-reset/useVerifyResetToken";
+
+import PasswordResetLoadingState from "../password-reset/PasswordResetLoadingState";
+import PasswordResetErrorState from "../password-reset/PasswordResetErrorState";
 
 type ResetPasswordFormData = {
 	password: string;
@@ -23,6 +28,7 @@ type ResetPasswordFormProps = {
 };
 
 function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+	const { isError, isLoading } = useVerifyResetToken(token);
 	const { mutate, isPending } = useResetPassword();
 
 	const form = useForm<ResetPasswordFormData>({
@@ -36,6 +42,10 @@ function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 	const handleResetPassword = async (formData: ResetPasswordFormData) => {
 		mutate({ token, password: formData.password });
 	};
+
+	if (isLoading) return <PasswordResetLoadingState />;
+
+	if (isError) return <PasswordResetErrorState />;
 
 	return (
 		<AuthLayout title="Reset Password" description="Enter your new password">
