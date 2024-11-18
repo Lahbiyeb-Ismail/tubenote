@@ -63,7 +63,7 @@ export async function handleForgotPassword(
   const newResetToken = await createResetPasswordToken(user.id);
 
   const { htmlContent, textContent, logoPath } =
-    createResetPasswordEmail(newResetToken);
+    await createResetPasswordEmail(newResetToken);
 
   await sendEmail({
     emailSubject: 'Reset Password',
