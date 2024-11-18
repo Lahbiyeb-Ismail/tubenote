@@ -8,6 +8,7 @@ import {
 import {
   handleForgotPassword,
   handleResetPassword,
+  verifyPasswordResetToken,
 } from '../controllers/resetPassword.controller';
 import validateRequestParams from '../middlewares/validateRequestParams';
 
@@ -16,6 +17,13 @@ const router = Router();
 router
   .route('/forgot-password')
   .post(validateRequestBody(forgotPasswordBodySchema), handleForgotPassword);
+
+router
+  .route('/reset-password/:token/verify')
+  .get(
+    validateRequestParams(passwordResetParamsSchema),
+    verifyPasswordResetToken
+  );
 
 router
   .route('/reset-password/:token')
