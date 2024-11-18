@@ -18,7 +18,7 @@ function useSendForgotPasswordEmail() {
 
 			toast.success(data.message);
 
-			router.push("/password-reset/done");
+			router.push("/forgot-password/done");
 		},
 		onError: (error: TypedError) => {
 			toast.dismiss("loadingToast");
