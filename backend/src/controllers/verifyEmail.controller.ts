@@ -86,7 +86,7 @@ export async function sendVerificationEmailHandler(
   // Creates a new email verification token for the user.
   const token = await createEmailVericationToken(user.id);
 
-  const { htmlContent, textContent } = createVerificationEmail(token);
+  const { htmlContent, textContent, logoPath } = createVerificationEmail(token);
 
   // Sends the verification email to the provided email address.
   await sendEmail({
@@ -94,6 +94,7 @@ export async function sendVerificationEmailHandler(
     emailSubject: 'Verification Email',
     htmlContent,
     textContent,
+    logoPath,
   });
 
   // Responds with an OK status indicating that the verification email has been sent.

@@ -68,13 +68,14 @@ export async function handleRegister(
   // Creates a new email verification token for the user.
   const token = await createEmailVericationToken(newUser.id);
 
-  const { htmlContent, textContent } = createVerificationEmail(token);
+  const { htmlContent, textContent, logoPath } = createVerificationEmail(token);
 
   await sendEmail({
     emailRecipient: newUser.email,
     emailSubject: 'Email Verification',
     htmlContent,
     textContent,
+    logoPath,
   });
 
   res.status(httpStatus.CREATED).json({
