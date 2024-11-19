@@ -1,5 +1,23 @@
 import prismaClient from '../lib/prisma';
-import type { User } from '@prisma/client';
+import type { Prisma, User } from '@prisma/client';
+
+/**
+ * Finds a user based on the provided parameters.
+ *
+ * @param params - The parameters to filter the user by.
+ * @returns A promise that resolves to the found user or null if no user is found.
+ */
+export async function findUser(
+  params: Prisma.UserWhereInput
+): Promise<User | null> {
+  const user = await prismaClient.user.findFirst({
+    where: {
+      ...params,
+    },
+  });
+
+  return user;
+}
 
 /**
  * Verifies the email of a user by updating the `emailVerified` field to `true`.
