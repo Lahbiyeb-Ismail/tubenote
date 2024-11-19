@@ -2,11 +2,7 @@ import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import type { Profile } from 'passport-google-oauth20';
 
-import {
-  checkPassword,
-  createAndSaveNewTokens,
-  createNewUser,
-} from '../helpers/auth.helper';
+import { checkPassword, createAndSaveNewTokens } from '../helpers/auth.helper';
 import prismaClient from '../lib/prisma';
 import { clearRefreshTokenCookieConfig } from '../config/cookie.config';
 import envConfig from '../config/envConfig';
@@ -17,6 +13,7 @@ import { sendEmail } from '../utils/sendEmail';
 import { createEmailVericationToken } from '../services/verifyEmail.services';
 import { createVerificationEmail } from '../helpers/verifyEmail.helper';
 import { findUser } from '../services/user.services';
+import { createNewUser } from '../services/auth.services';
 
 const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
 
