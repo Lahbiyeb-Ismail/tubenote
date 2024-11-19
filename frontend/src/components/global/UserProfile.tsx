@@ -11,7 +11,7 @@ function UserProfile({ isOpen }: UserProfileProps) {
 	const currentUser = data?.user;
 
 	return (
-		<div className="mt-auto border-t p-4">
+		<div className="p-4">
 			<div className="flex flex-col items-center justify-center gap-2 text-center">
 				{currentUser ? (
 					<>
