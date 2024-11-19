@@ -2,9 +2,12 @@ import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import type { Profile } from 'passport-google-oauth20';
 
-import { checkPassword, createAndSaveNewTokens } from '../helpers/auth.helper';
+import { checkPassword, createNewTokens } from '../helpers/auth.helper';
 import prismaClient from '../lib/prisma';
-import { clearRefreshTokenCookieConfig } from '../config/cookie.config';
+import {
+  clearRefreshTokenCookieConfig,
+  refreshTokenCookieConfig,
+} from '../config/cookie.config';
 import envConfig from '../config/envConfig';
 
 import type { TypedRequest } from '../types';
@@ -14,8 +17,7 @@ import { createEmailVericationToken } from '../services/verifyEmail.services';
 import { createVerificationEmail } from '../helpers/verifyEmail.helper';
 import { findUser } from '../services/user.services';
 import { createNewUser } from '../services/auth.services';
-
-const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
+import { REFRESH_TOKEN_NAME } from '../constants/auth';
 
 /**
  * Handles user registration.
@@ -139,7 +141,9 @@ export async function handleLogin(
     return;
   }
 
-  const accessToken = await createAndSaveNewTokens(user.id, res);
+  const { accessToken, refreshToken } = await createNewTokens(user.id);
+
+  res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
   res.status(httpStatus.OK).json({
     message: 'Login successful',
@@ -211,7 +215,9 @@ export async function handleGoogleLogin(req: TypedRequest, res: Response) {
     });
   }
 
-  const accessToken = await createAndSaveNewTokens(foundUser.id, res);
+  const { accessToken, refreshToken } = await createNewTokens(foundUser.id);
+
+  res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
   res.redirect(
     `${envConfig.client.url}/auth/callback?access_token=${encodeURIComponent(JSON.stringify(accessToken))}`
