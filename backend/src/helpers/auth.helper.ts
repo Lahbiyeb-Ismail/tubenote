@@ -11,37 +11,9 @@ import envConfig from '../config/envConfig';
 import { refreshTokenCookieConfig } from '../config/cookie.config';
 
 import type { RegisterCredentiels } from '../types/auth.type';
-import type { TypedRequest } from 'src/types';
+import type { TypedRequest } from '../types';
 
 const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
-
-type UserIdentifier = {
-  email?: string;
-  id?: string;
-};
-
-/**
- * Checks if a user exists in the database by email or id.
- *
- * @param {UserIdentifier} param0 - An object containing the user's email and id.
- * @param {string} param0.email - The email of the user.
- * @param {string} param0.id - The id of the user.
- * @param {boolean} [withPassword=true] - A flag indicating whether to include the password in the returned user object.
- * @returns {Promise<User | null>} A promise that resolves to the user object if found, otherwise null.
- */
-export async function getUser(
-  { email, id }: UserIdentifier,
-  withPassword = true
-): Promise<User | null> {
-  const user = await prismaClient.user.findFirst({
-    where: {
-      OR: [{ email: email as string }, { id: id as string }],
-    },
-    omit: { password: withPassword },
-  });
-
-  return user;
-}
 
 /**
  * Creates a new user with the provided registration credentials.
