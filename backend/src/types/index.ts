@@ -2,7 +2,7 @@ import type { Request } from 'express';
 import type { DeepPartial } from 'utility-types';
 
 export type Payload = {
-  userID: string;
+  userId: string;
   iat: number;
   exp: number;
 };

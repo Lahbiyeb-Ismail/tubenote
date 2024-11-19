@@ -59,9 +59,9 @@ async function isAuthenticated(
   }
 
   try {
-    const { userID } = verify(token, JWT_SECRET) as Payload;
+    const { userId } = verify(token, JWT_SECRET) as Payload;
 
-    req.userId = userID;
+    req.userId = userId;
 
     next();
   } catch (error) {
