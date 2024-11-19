@@ -6,15 +6,13 @@ import type { SendVerifyEmail } from '../types/verifyEmail.type';
 
 import { sendEmail } from '../utils/sendEmail';
 
-import { getUser } from '../helpers/auth.helper';
-
 import {
   createEmailVericationToken,
   deleteEmailVericationToken,
   findVerificationToken,
   getEmailVericationToken,
 } from '../services/verifyEmail.services';
-import { verifyUserEmail } from '../services/user.services';
+import { findUser, verifyUserEmail } from '../services/user.services';
 
 import {
   createVerificationEmail,
@@ -53,7 +51,7 @@ export async function sendVerificationEmailHandler(
   }
 
   // Retrieves the user associated with the provided email.
-  const user = await getUser({ email });
+  const user = await findUser({ email });
 
   // If no user is found, responds with an UNAUTHORIZED status.
   if (!user) {

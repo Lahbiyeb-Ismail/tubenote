@@ -3,9 +3,10 @@ import httpStatus from 'http-status';
 import bcrypt from 'bcryptjs';
 
 import prismaClient from '../lib/prisma';
-import { checkPassword, getUser, verifyUserId } from '../helpers/auth.helper';
-import type { TypedRequest } from 'src/types';
-import type { UpdatePasswordBody, UpdateUserBody } from 'src/types/user.type';
+import { checkPassword, verifyUserId } from '../helpers/auth.helper';
+import type { TypedRequest } from '../types';
+import type { UpdatePasswordBody, UpdateUserBody } from '../types/user.type';
+import { findUser } from '../services/user.services';
 
 /**
  * Retrieves the current user based on the user ID present in the request payload.
@@ -25,7 +26,7 @@ export async function getCurrentUser(req: Request, res: Response) {
 
   if (!userID) return;
 
-  const user = await getUser({ id: userID });
+  const user = await findUser({ id: userID });
 
   if (!user) {
     res
@@ -72,7 +73,7 @@ export async function updateCurrentUser(
 
   if (!userID) return;
 
-  const user = await getUser({ id: userID });
+  const user = await findUser({ id: userID });
 
   if (!user) {
     res
@@ -81,7 +82,7 @@ export async function updateCurrentUser(
     return;
   }
 
-  const isEmailTaken = await getUser({ email });
+  const isEmailTaken = await findUser({ email });
 
   if (isEmailTaken && isEmailTaken.id !== user.id) {
     res
@@ -142,7 +143,7 @@ export async function updateUserPassword(
     return;
   }
 
-  const user = await getUser({ id: userID });
+  const user = await findUser({ id: userID });
 
   if (!user) {
     res

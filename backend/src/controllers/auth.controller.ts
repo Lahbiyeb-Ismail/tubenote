@@ -6,7 +6,6 @@ import {
   checkPassword,
   createAndSaveNewTokens,
   createNewUser,
-  getUser,
 } from '../helpers/auth.helper';
 import prismaClient from '../lib/prisma';
 import { clearRefreshTokenCookieConfig } from '../config/cookie.config';
@@ -17,6 +16,7 @@ import type { LoginCredentials, RegisterCredentiels } from '../types/auth.type';
 import { sendEmail } from '../utils/sendEmail';
 import { createEmailVericationToken } from '../services/verifyEmail.services';
 import { createVerificationEmail } from '../helpers/verifyEmail.helper';
+import { findUser } from '../services/user.services';
 
 const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
 
@@ -49,7 +49,7 @@ export async function handleRegister(
     return;
   }
 
-  const user = await getUser({ email });
+  const user = await findUser({ email });
 
   if (user) {
     res.status(httpStatus.CONFLICT).json({
@@ -116,7 +116,7 @@ export async function handleLogin(
     return;
   }
 
-  const user = await getUser({ email }, false);
+  const user = await findUser({ email });
 
   if (!user) {
     res.status(httpStatus.NOT_FOUND).json({
@@ -196,7 +196,7 @@ export async function handleGoogleLogin(req: TypedRequest, res: Response) {
     return;
   }
 
-  let foundUser = await getUser({ email });
+  let foundUser = await findUser({ email });
 
   if (!foundUser) {
     foundUser = await createNewUser({

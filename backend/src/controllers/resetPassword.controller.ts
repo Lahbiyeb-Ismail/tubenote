@@ -6,7 +6,6 @@ import type {
   ForgotPasswordBody,
   ResetPasswordBody,
 } from '../types/resetPassword.type';
-import { getUser } from '../helpers/auth.helper';
 import {
   createResetPasswordToken,
   deleteResetPasswordToken,
@@ -15,7 +14,7 @@ import {
 import { sendEmail } from '../utils/sendEmail';
 import { createResetPasswordEmail } from '../helpers/resetPassword.helper';
 import { hashPassword } from '../services/auth.services';
-import { updateUser } from '../services/user.services';
+import { findUser, updateUser } from '../services/user.services';
 
 /**
  * Handles the password reset process for a user.
@@ -40,7 +39,7 @@ export async function handleForgotPassword(
     return;
   }
 
-  const user = await getUser({ email });
+  const user = await findUser({ email });
 
   if (!user || !user.emailVerified) {
     res
