@@ -139,3 +139,4 @@ Below is a checklist of features planned for this application:
 - [ ] Share notes with other users
 - [ ] Cashing functionality using Redis
 - [ ] Dark mode support
+- [ ] Add code Editor
