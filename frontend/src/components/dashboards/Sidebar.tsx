@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import { useLayout } from "@/context/useLayout";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import UserProfile from "../global/UserProfile";
 import SidebarLogo from "./SidebarLogo";
 import SidebarNav from "./SidebarNav";
 import Link from "next/link";
+import LogoutButton from "../auth/LogoutButton";
 
 function Sidebar() {
 	const pathname = usePathname();
@@ -31,7 +32,14 @@ function Sidebar() {
 				</Button>
 			</div>
 			<SidebarNav isOpen={isSidebarOpen} pathname={pathname} />
-			<UserProfile isOpen={isSidebarOpen} />
+			<ul
+				className={`mt-auto border-t pt-3 space-y-2 transition-all duration-300 ${
+					isSidebarOpen ? "px-4" : "px-0"
+				}`}
+			>
+				<LogoutButton />
+				<UserProfile isOpen={isSidebarOpen} />
+			</ul>
 		</aside>
 	);
 }
