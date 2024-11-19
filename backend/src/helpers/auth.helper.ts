@@ -2,7 +2,6 @@ import qs from 'qs';
 import axios from 'axios';
 import bcrypt from 'bcryptjs';
 import type { Response, Request } from 'express';
-import type { User } from '@prisma/client';
 import httpStatus from 'http-status';
 
 import prismaClient from '../lib/prisma';
@@ -10,41 +9,9 @@ import { createAccessToken, createRefreshToken } from './generateTokens';
 import envConfig from '../config/envConfig';
 import { refreshTokenCookieConfig } from '../config/cookie.config';
 
-import type { RegisterCredentiels } from '../types/auth.type';
 import type { TypedRequest } from '../types';
 
 const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
-
-/**
- * Creates a new user with the provided registration credentials.
- *
- * @param registerCredentiels - An object containing the user's registration credentials.
- * @param registerCredentiels.username - The username of the new user.
- * @param registerCredentiels.email - The email address of the new user.
- * @param registerCredentiels.password - The password of the new user.
- * @returns A promise that resolves to the newly created user.
- */
-export async function createNewUser(
-  registerCredentiels: RegisterCredentiels
-): Promise<User> {
-  const { username, email, password, emailVerified, googleId, profilePicture } =
-    registerCredentiels;
-
-  const hashedpassword = await bcrypt.hash(password, 10);
-
-  const newUser = await prismaClient.user.create({
-    data: {
-      username: username,
-      email: email,
-      password: hashedpassword,
-      emailVerified,
-      googleId: googleId || null,
-      profilePicture: profilePicture || null,
-    },
-  });
-
-  return newUser;
-}
 
 /**
  * Compares a plain text password with a hashed password to check if they match.
