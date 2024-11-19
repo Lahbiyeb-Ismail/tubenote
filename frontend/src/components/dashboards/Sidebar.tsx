@@ -16,7 +16,7 @@ function Sidebar() {
 	const { isSidebarOpen, toggleSidebar } = useLayout();
 
 	return (
-		<div
+		<aside
 			className={`fixed left-0 top-0 flex h-full flex-col py-6  bg-white p-2 shadow-lg
 				transition-all duration-300 ${isSidebarOpen ? "w-64" : "w-20"}`}
 		>
@@ -25,12 +25,14 @@ function Sidebar() {
 					<SidebarLogo isOpen={isSidebarOpen} />
 				</Link>
 				<Button variant="ghost" size="icon" onClick={toggleSidebar}>
-					{isSidebarOpen ? <ChevronLeft /> : <ChevronRight />}
+					<ChevronRight
+						className={`transition-transform duration-300 ${isSidebarOpen ? "rotate-180" : ""}`}
+					/>
 				</Button>
 			</div>
 			<SidebarNav isOpen={isSidebarOpen} pathname={pathname} />
 			<UserProfile isOpen={isSidebarOpen} />
-		</div>
+		</aside>
 	);
 }
 
