@@ -4,14 +4,17 @@ import bcrypt from 'bcryptjs';
 import type { Response, Request } from 'express';
 import httpStatus from 'http-status';
 
-import prismaClient from '../lib/prisma';
-import { createAccessToken, createRefreshToken } from './generateTokens';
+import generateAuthToken from './generateAuthToken';
 import envConfig from '../config/envConfig';
-import { refreshTokenCookieConfig } from '../config/cookie.config';
 
 import type { TypedRequest } from '../types';
-
-const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
+import { createRefreshToken } from '../services/refreshToken.services';
+import {
+  ACCESS_TOKEN_EXPIRE,
+  ACCESS_TOKEN_SECRET,
+  REFRESH_TOKEN_EXPIRE,
+  REFRESH_TOKEN_SECRET,
+} from '../constants/auth';
 
 /**
  * Compares a plain text password with a hashed password to check if they match.
@@ -28,38 +31,32 @@ export async function checkPassword(
 }
 
 /**
- * Creates and saves new access and refresh tokens for a user.
+ * Creates new access and refresh tokens for a given user.
  *
  * @param userId - The ID of the user for whom the tokens are being created.
- * @param res - The HTTP response object used to set the refresh token cookie.
- * @returns A promise that resolves to the new access token.
- *
- * @remarks
- * This function generates a new access token and a new refresh token for the specified user.
- * The refresh token is saved in the database and also set in a cookie in the response.
+ * @returns A promise that resolves to an object containing the new access token and refresh token.
  */
-export async function createAndSaveNewTokens(
-  userId: string,
-  res: Response
-): Promise<string> {
-  // Create new access token
-  const accessToken = createAccessToken(userId);
-
-  // Create new refresh token
-  const newRefreshToken = createRefreshToken(userId);
-
-  // Save the new refresh token in db
-  await prismaClient.refreshToken.create({
-    data: {
-      token: newRefreshToken,
-      userId,
-    },
+export async function createNewTokens(
+  userId: string
+): Promise<{ accessToken: string; refreshToken: string }> {
+  // Generate new access token
+  const accessToken = generateAuthToken({
+    userId,
+    secret: ACCESS_TOKEN_SECRET,
+    expire: ACCESS_TOKEN_EXPIRE,
   });
 
-  // Set the new refresh token in a cookie
-  res.cookie(REFRESH_TOKEN_NAME, newRefreshToken, refreshTokenCookieConfig);
+  // Generate new refresh token
+  const refreshToken = generateAuthToken({
+    userId,
+    secret: REFRESH_TOKEN_SECRET,
+    expire: REFRESH_TOKEN_EXPIRE,
+  });
 
-  return accessToken;
+  // Save the new refresh token in db
+  await createRefreshToken({ userId, token: refreshToken });
+
+  return { accessToken, refreshToken };
 }
 
 /**
