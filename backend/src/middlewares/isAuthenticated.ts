@@ -2,20 +2,10 @@ import type { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import jwt from 'jsonwebtoken';
 
-import envConfig from '../config/envConfig';
 import type { Payload } from '../types';
-
-// Extend the Express Request interface to include the userId property from the payload
-declare global {
-  namespace Express {
-    interface Request {
-      userId?: string;
-    }
-  }
-}
+import { ACCESS_TOKEN_SECRET } from 'src/constants/auth';
 
 const { verify } = jwt;
-const JWT_SECRET = envConfig.jwt.access_token.secret;
 
 /**
  * Middleware to check if the request is authenticated.
@@ -59,14 +49,21 @@ async function isAuthenticated(
   }
 
   try {
-    const { userId } = verify(token, JWT_SECRET) as Payload;
+    const { userId } = verify(token, ACCESS_TOKEN_SECRET) as Payload;
+
+    if (!userId) {
+      res.status(httpStatus.FORBIDDEN).json({
+        message: 'Unauthorized access. Please try again.',
+      });
+      return;
+    }
 
     req.userId = userId;
 
     next();
   } catch (error) {
     res.status(httpStatus.FORBIDDEN).json({
-      message: 'Invalid token. Please log in again.',
+      message: 'Unauthorized access. Please try again.',
     });
   }
 }
