@@ -1,9 +1,17 @@
 import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 
-import prismaClient from '../lib/prisma';
 import type { TypedRequest } from '../types';
 import type { NoteBody } from '../types/note.type';
+import { findUser } from '../services/user.services';
+import {
+  deleteNoteById,
+  editNote,
+  fetchLatestUserNotes,
+  fetchNoteById,
+  fetchUserNotes,
+  saveNote,
+} from '../services/note.services';
 
 /**
  * Creates a new note for the authenticated user.
@@ -34,9 +42,7 @@ export async function createNote(req: TypedRequest<NoteBody>, res: Response) {
     return;
   }
 
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
+  const user = await findUser({ id: userID });
 
   if (!user) {
     res
@@ -70,18 +76,18 @@ export async function createNote(req: TypedRequest<NoteBody>, res: Response) {
     return;
   }
 
-  const note = await prismaClient.note.create({
-    data: {
-      userId: user.id,
-      title,
-      content,
-      videoTitle,
-      thumbnail,
-      videoId,
-      youtubeId,
-      timestamp,
-    },
-  });
+  const noteData = {
+    title,
+    content,
+    videoTitle,
+    thumbnail,
+    videoId,
+    youtubeId,
+    timestamp,
+    userId: user.id,
+  };
+
+  const note = await saveNote(noteData);
 
   res
     .status(httpStatus.CREATED)
@@ -116,9 +122,7 @@ export async function getUserNotes(req: Request, res: Response) {
     return;
   }
 
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
+  const user = await findUser({ id: userID });
 
   if (!user) {
     res
@@ -127,9 +131,7 @@ export async function getUserNotes(req: Request, res: Response) {
     return;
   }
 
-  const notes = await prismaClient.note.findMany({
-    where: { userId: user.id },
-  });
+  const notes = await fetchUserNotes(userID);
 
   res.status(httpStatus.OK).json({ notes });
 }
@@ -171,9 +173,7 @@ export async function deleteNote(req: Request, res: Response) {
     return;
   }
 
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
+  const user = await findUser({ id: userID });
 
   if (!user) {
     res
@@ -182,9 +182,7 @@ export async function deleteNote(req: Request, res: Response) {
     return;
   }
 
-  await prismaClient.note.delete({
-    where: { id: noteId },
-  });
+  await deleteNoteById(noteId);
 
   res.status(httpStatus.OK).json({ message: 'Note deleted successfully.' });
 }
@@ -228,9 +226,7 @@ export async function getNoteById(req: Request, res: Response) {
     return;
   }
 
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
+  const user = await findUser({ id: userID });
 
   if (!user) {
     res
@@ -239,9 +235,7 @@ export async function getNoteById(req: Request, res: Response) {
     return;
   }
 
-  const note = await prismaClient.note.findFirst({
-    where: { id: noteId, userId: user.id },
-  });
+  const note = await fetchNoteById({ noteId, userId: user.id });
 
   if (!note) {
     res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
@@ -294,9 +288,7 @@ export async function updateNote(req: Request, res: Response) {
 
   const { title, content, timestamp } = req.body;
 
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
+  const user = await findUser({ id: userID });
 
   if (!user) {
     res
@@ -305,22 +297,16 @@ export async function updateNote(req: Request, res: Response) {
     return;
   }
 
-  const note = await prismaClient.note.findFirst({
-    where: { id: noteId, userId: user.id },
-  });
+  const note = await fetchNoteById({ noteId, userId: user.id });
 
   if (!note) {
     res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
     return;
   }
 
-  const updatedNote = await prismaClient.note.update({
-    where: { id: note.id },
-    data: {
-      title: title || note.title,
-      content: content || note.content,
-      timestamp: timestamp,
-    },
+  const updatedNote = await editNote({
+    noteId,
+    data: { title, content, timestamp },
   });
 
   res
@@ -356,9 +342,7 @@ export async function getUserRecentNotes(req: Request, res: Response) {
     return;
   }
 
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
+  const user = await findUser({ id: userID });
 
   if (!user) {
     res
@@ -367,11 +351,7 @@ export async function getUserRecentNotes(req: Request, res: Response) {
     return;
   }
 
-  const notes = await prismaClient.note.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: 'desc' },
-    take: 2,
-  });
+  const notes = await fetchLatestUserNotes({ userId: user.id, take: 2 });
 
   res.status(httpStatus.OK).json({ notes });
 }
@@ -404,9 +384,7 @@ export async function getUserRecentlyUpdatedNotes(req: Request, res: Response) {
     return;
   }
 
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
+  const user = await findUser({ id: userID });
 
   if (!user) {
     res
@@ -415,10 +393,10 @@ export async function getUserRecentlyUpdatedNotes(req: Request, res: Response) {
     return;
   }
 
-  const notes = await prismaClient.note.findMany({
-    where: { userId: user.id },
-    orderBy: { updatedAt: 'desc' },
+  const notes = await fetchLatestUserNotes({
+    userId: user.id,
     take: 2,
+    orderBy: { updatedAt: 'desc' },
   });
 
   res.status(httpStatus.OK).json({ notes });
