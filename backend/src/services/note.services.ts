@@ -77,3 +77,27 @@ export async function fetchNoteById({
 
   return note;
 }
+
+type EditNoteProps = {
+  noteId: string;
+  data: Prisma.NoteUpdateInput;
+};
+
+/**
+ * Edits an existing note with the provided data.
+ *
+ * @param {EditNoteProps} param0 - The properties required to edit a note.
+ * @param {string} param0.noteId - The ID of the note to be edited.
+ * @param {Partial<Note>} param0.data - The new data to update the note with.
+ * @returns {Promise<Note>} - A promise that resolves to the updated note.
+ */
+export async function editNote({ noteId, data }: EditNoteProps): Promise<Note> {
+  const updatedNote = await prismaClient.note.update({
+    where: {
+      id: noteId,
+    },
+    data,
+  });
+
+  return updatedNote;
+}
