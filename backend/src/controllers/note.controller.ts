@@ -3,7 +3,6 @@ import httpStatus from 'http-status';
 
 import type { TypedRequest } from '../types';
 import type { NoteBody } from '../types/note.type';
-import { findUser } from '../services/user.services';
 import {
   deleteNoteById,
   editNote,
@@ -33,23 +32,7 @@ import {
  * @throws {Error} If there is an issue with the database operation.
  */
 export async function createNote(req: TypedRequest<NoteBody>, res: Response) {
-  const userID = req.userId;
-
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const user = await findUser({ id: userID });
-
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
+  const userId = req.userId;
 
   const {
     title,
@@ -84,7 +67,7 @@ export async function createNote(req: TypedRequest<NoteBody>, res: Response) {
     videoId,
     youtubeId,
     timestamp,
-    userId: user.id,
+    userId,
   };
 
   const note = await saveNote(noteData);
@@ -113,25 +96,9 @@ export async function createNote(req: TypedRequest<NoteBody>, res: Response) {
  * @returns A promise that resolves to void.
  */
 export async function getUserNotes(req: Request, res: Response) {
-  const userID = req.userId;
+  const userId = req.userId;
 
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const user = await findUser({ id: userID });
-
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const notes = await fetchUserNotes(userID);
+  const notes = await fetchUserNotes(userId);
 
   res.status(httpStatus.OK).json({ notes });
 }
@@ -155,30 +122,12 @@ export async function getUserNotes(req: Request, res: Response) {
  * INTERNAL_SERVER_ERROR status and an error message.
  */
 export async function deleteNote(req: Request, res: Response) {
-  const userID = req.userId;
-
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
   const { noteId } = req.params;
 
   if (!noteId) {
     res
       .status(httpStatus.BAD_REQUEST)
       .json({ message: 'Please provide the note ID.' });
-    return;
-  }
-
-  const user = await findUser({ id: userID });
-
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
     return;
   }
 
@@ -208,15 +157,6 @@ export async function deleteNote(req: Request, res: Response) {
  * message otherwise.
  */
 export async function getNoteById(req: Request, res: Response) {
-  const userID = req.userId;
-
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
   const { noteId } = req.params;
 
   if (!noteId) {
@@ -226,16 +166,7 @@ export async function getNoteById(req: Request, res: Response) {
     return;
   }
 
-  const user = await findUser({ id: userID });
-
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const note = await fetchNoteById({ noteId, userId: user.id });
+  const note = await fetchNoteById({ noteId });
 
   if (!note) {
     res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
@@ -268,16 +199,8 @@ export async function getNoteById(req: Request, res: Response) {
  * @returns {Promise<void>} - A promise that resolves when the function completes.
  */
 export async function updateNote(req: Request, res: Response) {
-  const userID = req.userId;
-
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
   const { noteId } = req.params;
+  const { title, content, timestamp } = req.body;
 
   if (!noteId) {
     res
@@ -286,18 +209,7 @@ export async function updateNote(req: Request, res: Response) {
     return;
   }
 
-  const { title, content, timestamp } = req.body;
-
-  const user = await findUser({ id: userID });
-
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const note = await fetchNoteById({ noteId, userId: user.id });
+  const note = await fetchNoteById({ noteId });
 
   if (!note) {
     res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
@@ -333,25 +245,9 @@ export async function updateNote(req: Request, res: Response) {
  * @returns A JSON response containing the user's most recent notes or an error message.
  */
 export async function getUserRecentNotes(req: Request, res: Response) {
-  const userID = req.userId;
+  const userId = req.userId;
 
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const user = await findUser({ id: userID });
-
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const notes = await fetchLatestUserNotes({ userId: user.id, take: 2 });
+  const notes = await fetchLatestUserNotes({ userId, take: 2 });
 
   res.status(httpStatus.OK).json({ notes });
 }
@@ -375,26 +271,10 @@ export async function getUserRecentNotes(req: Request, res: Response) {
  * @returns A JSON response containing the most recently updated notes for the user or an error message.
  */
 export async function getUserRecentlyUpdatedNotes(req: Request, res: Response) {
-  const userID = req.userId;
-
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const user = await findUser({ id: userID });
-
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
+  const userId = req.userId;
 
   const notes = await fetchLatestUserNotes({
-    userId: user.id,
+    userId,
     take: 2,
     orderBy: { updatedAt: 'desc' },
   });
