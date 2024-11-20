@@ -21,6 +21,7 @@ declare global {
   namespace Express {
     interface Request {
       resetToken: ResetPasswordToken;
+      userId: string;
     }
   }
 }
