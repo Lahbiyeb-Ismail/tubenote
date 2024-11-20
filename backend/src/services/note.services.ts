@@ -101,3 +101,37 @@ export async function editNote({ noteId, data }: EditNoteProps): Promise<Note> {
 
   return updatedNote;
 }
+
+type FetchLatestUserNotesProps = {
+  userId: string;
+  take: number;
+  orderBy?:
+    | Prisma.NoteOrderByWithRelationInput
+    | Prisma.NoteOrderByWithRelationInput[];
+};
+
+/**
+ * Fetches the latest notes for a specific user.
+ *
+ * @param {Object} params - The parameters for fetching the latest user notes.
+ * @param {string} params.userId - The ID of the user whose notes are to be fetched.
+ * @param {number} params.take - The number of notes to fetch.
+ * @param {Object} [params.orderBy={ createdAt: 'desc' }] - The order by which to sort the notes.
+ * @param {string} params.orderBy.createdAt - The field by which to order the notes, default is 'desc'.
+ * @returns {Promise<Note[]>} A promise that resolves to an array of notes.
+ */
+export async function fetchLatestUserNotes({
+  userId,
+  take,
+  orderBy = { createdAt: 'desc' },
+}: FetchLatestUserNotesProps): Promise<Note[]> {
+  const notes = await prismaClient.note.findMany({
+    where: {
+      userId,
+    },
+    orderBy,
+    take,
+  });
+
+  return notes;
+}
