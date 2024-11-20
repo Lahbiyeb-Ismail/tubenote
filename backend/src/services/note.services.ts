@@ -53,7 +53,6 @@ export async function deleteNoteById(noteId: string): Promise<Note> {
 
 type FetchNoteByIdProps = {
   noteId: string;
-  userId: string;
 };
 
 /**
@@ -66,12 +65,10 @@ type FetchNoteByIdProps = {
  */
 export async function fetchNoteById({
   noteId,
-  userId,
 }: FetchNoteByIdProps): Promise<Note | null> {
   const note = await prismaClient.note.findUnique({
     where: {
       id: noteId,
-      userId,
     },
   });
 
