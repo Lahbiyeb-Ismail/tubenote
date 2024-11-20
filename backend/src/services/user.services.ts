@@ -32,20 +32,23 @@ export async function verifyUserEmail(userId: string) {
   });
 }
 
+type UpdateUserProps = {
+  userId: string;
+  data: Prisma.UserUpdateInput;
+};
+
 /**
- * Updates a user with the given data.
+ * Updates a user in the database with the provided data.
  *
- * @param userId - The ID of the user to update.
- * @param data - The data to update the user with.
- * @returns A promise that resolves to the updated user.
+ * @param {UpdateUserProps} params - The parameters for updating the user.
+ * @param {string} params.userId - The ID of the user to update.
+ * @param {Partial<User>} params.data - The data to update the user with.
+ * @returns {Promise<User>} A promise that resolves to the updated user.
  */
-
-type UpdateUserInput = Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>>;
-
-export async function updateUser(
-  userId: string,
-  data: UpdateUserInput
-): Promise<User> {
+export async function updateUser({
+  userId,
+  data,
+}: UpdateUserProps): Promise<User> {
   const updatedUser = await prismaClient.user.update({
     where: { id: userId },
     data,

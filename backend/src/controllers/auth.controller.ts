@@ -15,7 +15,7 @@ import type { LoginCredentials, RegisterCredentiels } from '../types/auth.type';
 import { sendEmail } from '../utils/sendEmail';
 import { createEmailVericationToken } from '../services/verifyEmail.services';
 import { createVerificationEmail } from '../helpers/verifyEmail.helper';
-import { findUser } from '../services/user.services';
+import { findUser, updateUser } from '../services/user.services';
 import { createNewUser } from '../services/auth.services';
 import { REFRESH_TOKEN_NAME } from '../constants/auth';
 
@@ -209,10 +209,7 @@ export async function handleGoogleLogin(req: TypedRequest, res: Response) {
       googleId,
     });
   } else if (!foundUser.googleId) {
-    foundUser = await prismaClient.user.update({
-      where: { id: foundUser.id },
-      data: { googleId },
-    });
+    foundUser = await updateUser({ userId: foundUser.id, data: { googleId } });
   }
 
   const { accessToken, refreshToken } = await createNewTokens(foundUser.id);
