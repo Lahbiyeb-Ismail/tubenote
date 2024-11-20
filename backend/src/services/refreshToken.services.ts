@@ -45,3 +45,17 @@ export async function findRefreshToken(
 
   return refreshToken;
 }
+
+/**
+ * Deletes a refresh token from the database.
+ *
+ * @param token - The refresh token to be deleted.
+ * @returns A promise that resolves when the token is deleted.
+ */
+export async function deleteRefreshToken(token: string): Promise<void> {
+  await prismaClient.refreshToken.delete({
+    where: {
+      token,
+    },
+  });
+}
