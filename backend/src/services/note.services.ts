@@ -1,13 +1,27 @@
 import type { Note, Prisma } from '@prisma/client';
 import prismaClient from '../lib/prisma';
 
+type UserIdParam = { userId: string };
+type NoteIdParam = { noteId: string };
+type OrderByParam = {
+  orderBy?:
+    | Prisma.NoteOrderByWithRelationInput
+    | Prisma.NoteOrderByWithRelationInput[];
+};
+type FetchLatestUserNotesProps = UserIdParam & OrderByParam & { take: number };
+
+type EditNoteProps = UserIdParam &
+  NoteIdParam & {
+    data: Prisma.NoteUpdateInput;
+  };
+
 /**
  * Fetches all notes associated with a specific user.
  *
  * @param userId - The unique identifier of the user whose notes are to be fetched.
  * @returns A promise that resolves to an array of `Note` objects belonging to the specified user.
  */
-export async function fetchUserNotes(userId: string): Promise<Note[]> {
+export async function fetchUserNotes({ userId }: UserIdParam): Promise<Note[]> {
   const notes = await prismaClient.note.findMany({
     where: {
       userId,
@@ -36,24 +50,26 @@ export async function saveNote(
 }
 
 /**
- * Deletes a note by its ID.
+ * Deletes a note by its ID for a specific user.
  *
- * @param {string} noteId - The ID of the note to be deleted.
+ * @param {UserIdParam & NoteIdParam} params - The parameters containing the user ID and note ID.
+ * @param {string} params.userId - The ID of the user.
+ * @param {string} params.noteId - The ID of the note to be deleted.
  * @returns {Promise<Note>} A promise that resolves to the deleted note.
  */
-export async function deleteNoteById(noteId: string): Promise<Note> {
+export async function deleteNoteById({
+  userId,
+  noteId,
+}: UserIdParam & NoteIdParam): Promise<Note> {
   const note = await prismaClient.note.delete({
     where: {
       id: noteId,
+      userId,
     },
   });
 
   return note;
 }
-
-type FetchNoteByIdProps = {
-  noteId: string;
-};
 
 /**
  * Fetches a note by its ID and the user ID.
@@ -65,47 +81,42 @@ type FetchNoteByIdProps = {
  */
 export async function fetchNoteById({
   noteId,
-}: FetchNoteByIdProps): Promise<Note | null> {
+  userId,
+}: UserIdParam & NoteIdParam): Promise<Note | null> {
   const note = await prismaClient.note.findUnique({
     where: {
       id: noteId,
+      userId,
     },
   });
 
   return note;
 }
 
-type EditNoteProps = {
-  noteId: string;
-  data: Prisma.NoteUpdateInput;
-};
-
 /**
- * Edits an existing note with the provided data.
+ * Edits a note for a specific user.
  *
- * @param {EditNoteProps} param0 - The properties required to edit a note.
- * @param {string} param0.noteId - The ID of the note to be edited.
- * @param {Partial<Note>} param0.data - The new data to update the note with.
- * @returns {Promise<Note>} - A promise that resolves to the updated note.
+ * @param {Object} params - The parameters for editing the note.
+ * @param {string} params.userId - The ID of the user who owns the note.
+ * @param {string} params.noteId - The ID of the note to be edited.
+ * @param {Object} params.data - The new data for the note.
+ * @returns {Promise<Note>} The updated note.
  */
-export async function editNote({ noteId, data }: EditNoteProps): Promise<Note> {
+export async function editNote({
+  userId,
+  noteId,
+  data,
+}: EditNoteProps): Promise<Note> {
   const updatedNote = await prismaClient.note.update({
     where: {
       id: noteId,
+      userId,
     },
     data,
   });
 
   return updatedNote;
 }
-
-type FetchLatestUserNotesProps = {
-  userId: string;
-  take: number;
-  orderBy?:
-    | Prisma.NoteOrderByWithRelationInput
-    | Prisma.NoteOrderByWithRelationInput[];
-};
 
 /**
  * Fetches the latest notes for a specific user.

@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import jwt from 'jsonwebtoken';
 
 import type { Payload } from '../types';
-import { ACCESS_TOKEN_SECRET } from 'src/constants/auth';
+import { ACCESS_TOKEN_SECRET } from '../constants/auth';
 
 const { verify } = jwt;
 
@@ -53,7 +53,7 @@ async function isAuthenticated(
 
     if (!userId) {
       res.status(httpStatus.FORBIDDEN).json({
-        message: 'Unauthorized access. Please try again.',
+        message: 'Unauthorized access. Please try again!!',
       });
       return;
     }
