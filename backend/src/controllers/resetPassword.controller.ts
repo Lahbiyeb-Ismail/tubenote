@@ -106,8 +106,9 @@ export async function handleResetPassword(
 
   const hashedPassword = await hashPassword(password);
 
-  await updateUser(resetToken.userId, {
-    password: hashedPassword,
+  await updateUser({
+    userId: resetToken.userId,
+    data: { password: hashedPassword },
   });
 
   await deleteResetPasswordToken(resetToken.userId);
