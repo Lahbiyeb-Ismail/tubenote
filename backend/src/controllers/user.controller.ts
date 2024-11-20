@@ -2,11 +2,10 @@ import type { Response, Request } from 'express';
 import httpStatus from 'http-status';
 import bcrypt from 'bcryptjs';
 
-import prismaClient from '../lib/prisma';
-import { checkPassword, verifyUserId } from '../helpers/auth.helper';
+import { checkPassword } from '../helpers/auth.helper';
 import type { TypedRequest } from '../types';
 import type { UpdatePasswordBody, UpdateUserBody } from '../types/user.type';
-import { findUser } from '../services/user.services';
+import { findUser, updateUser } from '../services/user.services';
 
 /**
  * Retrieves the current user based on the user ID present in the request payload.
@@ -22,11 +21,9 @@ import { findUser } from '../services/user.services';
  * @returns A JSON response containing the user data if found, or an error message if not.
  */
 export async function getCurrentUser(req: Request, res: Response) {
-  const userID = verifyUserId(req, res);
+  const userId = req.userId;
 
-  if (!userID) return;
-
-  const user = await findUser({ id: userID });
+  const user = await findUser({ id: userId });
 
   if (!user) {
     res
@@ -60,6 +57,7 @@ export async function updateCurrentUser(
   req: TypedRequest<UpdateUserBody>,
   res: Response
 ) {
+  const userId = req.userId;
   const { username, email } = req.body;
 
   if (!username || !email) {
@@ -69,11 +67,7 @@ export async function updateCurrentUser(
     return;
   }
 
-  const userID = verifyUserId(req, res);
-
-  if (!userID) return;
-
-  const user = await findUser({ id: userID });
+  const user = await findUser({ id: userId });
 
   if (!user) {
     res
@@ -98,15 +92,9 @@ export async function updateCurrentUser(
     return;
   }
 
-  const updatedUser = await prismaClient.user.update({
-    where: { id: userID },
-    data: { username, email },
-    omit: { password: true, id: true },
-  });
+  await updateUser({ userId, data: { username, email } });
 
-  res
-    .status(httpStatus.OK)
-    .json({ message: 'User updated successfully.', user: updatedUser });
+  res.status(httpStatus.OK).json({ message: 'User updated successfully.' });
 }
 
 /**
@@ -130,9 +118,7 @@ export async function updateUserPassword(
   req: TypedRequest<UpdatePasswordBody>,
   res: Response
 ) {
-  const userID = verifyUserId(req, res);
-
-  if (!userID) return;
+  const userId = req.userId;
 
   const { currentPassword, newPassword } = req.body;
 
@@ -143,7 +129,7 @@ export async function updateUserPassword(
     return;
   }
 
-  const user = await findUser({ id: userID });
+  const user = await findUser({ id: userId });
 
   if (!user) {
     res
@@ -170,13 +156,7 @@ export async function updateUserPassword(
 
   const newHashedPassword = await bcrypt.hash(newPassword, 10);
 
-  const updatedUser = await prismaClient.user.update({
-    where: { id: userID },
-    data: { password: newHashedPassword },
-    omit: { password: true },
-  });
+  await updateUser({ userId, data: { password: newHashedPassword } });
 
-  res
-    .status(httpStatus.OK)
-    .json({ message: 'Password updated successfully.', user: updatedUser });
+  res.status(httpStatus.OK).json({ message: 'Password updated successfully.' });
 }
