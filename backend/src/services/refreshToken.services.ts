@@ -27,3 +27,21 @@ export async function createRefreshToken({
 
   return refreshToken;
 }
+
+/**
+ * Finds a refresh token in the database.
+ *
+ * @param token - The refresh token string to search for.
+ * @returns A promise that resolves to the found `RefreshToken` object or `null` if not found.
+ */
+export async function findRefreshToken(
+  token: string
+): Promise<RefreshToken | null> {
+  const refreshToken = await prismaClient.refreshToken.findUnique({
+    where: {
+      token,
+    },
+  });
+
+  return refreshToken;
+}
