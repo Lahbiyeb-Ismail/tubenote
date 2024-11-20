@@ -34,3 +34,19 @@ export async function saveNote(
 
   return note;
 }
+
+/**
+ * Deletes a note by its ID.
+ *
+ * @param {string} noteId - The ID of the note to be deleted.
+ * @returns {Promise<Note>} A promise that resolves to the deleted note.
+ */
+export async function deleteNoteById(noteId: string): Promise<Note> {
+  const note = await prismaClient.note.delete({
+    where: {
+      id: noteId,
+    },
+  });
+
+  return note;
+}
