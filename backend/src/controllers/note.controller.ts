@@ -98,7 +98,7 @@ export async function createNote(req: TypedRequest<NoteBody>, res: Response) {
 export async function getUserNotes(req: Request, res: Response) {
   const userId = req.userId;
 
-  const notes = await fetchUserNotes(userId);
+  const notes = await fetchUserNotes({ userId });
 
   res.status(httpStatus.OK).json({ notes });
 }
@@ -122,6 +122,7 @@ export async function getUserNotes(req: Request, res: Response) {
  * INTERNAL_SERVER_ERROR status and an error message.
  */
 export async function deleteNote(req: Request, res: Response) {
+  const userId = req.userId;
   const { noteId } = req.params;
 
   if (!noteId) {
@@ -131,7 +132,7 @@ export async function deleteNote(req: Request, res: Response) {
     return;
   }
 
-  await deleteNoteById(noteId);
+  await deleteNoteById({ userId, noteId });
 
   res.status(httpStatus.OK).json({ message: 'Note deleted successfully.' });
 }
@@ -157,6 +158,7 @@ export async function deleteNote(req: Request, res: Response) {
  * message otherwise.
  */
 export async function getNoteById(req: Request, res: Response) {
+  const userId = req.userId;
   const { noteId } = req.params;
 
   if (!noteId) {
@@ -166,7 +168,7 @@ export async function getNoteById(req: Request, res: Response) {
     return;
   }
 
-  const note = await fetchNoteById({ noteId });
+  const note = await fetchNoteById({ noteId, userId });
 
   if (!note) {
     res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
@@ -199,6 +201,7 @@ export async function getNoteById(req: Request, res: Response) {
  * @returns {Promise<void>} - A promise that resolves when the function completes.
  */
 export async function updateNote(req: Request, res: Response) {
+  const userId = req.userId;
   const { noteId } = req.params;
   const { title, content, timestamp } = req.body;
 
@@ -209,7 +212,7 @@ export async function updateNote(req: Request, res: Response) {
     return;
   }
 
-  const note = await fetchNoteById({ noteId });
+  const note = await fetchNoteById({ noteId, userId });
 
   if (!note) {
     res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
@@ -217,6 +220,7 @@ export async function updateNote(req: Request, res: Response) {
   }
 
   const updatedNote = await editNote({
+    userId,
     noteId,
     data: { title, content, timestamp },
   });
