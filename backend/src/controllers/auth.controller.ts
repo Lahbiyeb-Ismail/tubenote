@@ -3,7 +3,6 @@ import httpStatus from 'http-status';
 import type { Profile } from 'passport-google-oauth20';
 
 import { checkPassword, createNewTokens } from '../helpers/auth.helper';
-import prismaClient from '../lib/prisma';
 import {
   clearRefreshTokenCookieConfig,
   refreshTokenCookieConfig,
@@ -18,6 +17,10 @@ import { createVerificationEmail } from '../helpers/verifyEmail.helper';
 import { findUser, updateUser } from '../services/user.services';
 import { createNewUser } from '../services/auth.services';
 import { REFRESH_TOKEN_NAME } from '../constants/auth';
+import {
+  deleteRefreshToken,
+  findRefreshToken,
+} from '../services/refreshToken.services';
 
 /**
  * Handles user registration.
@@ -252,9 +255,7 @@ export async function handleLogout(req: Request, res: Response) {
   }
 
   // Is refreshToken in db?
-  const refreshTokenFromDB = await prismaClient.refreshToken.findUnique({
-    where: { token: refreshTokenFromCookies },
-  });
+  const refreshTokenFromDB = await findRefreshToken(refreshTokenFromCookies);
 
   if (!refreshTokenFromDB) {
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
@@ -263,9 +264,7 @@ export async function handleLogout(req: Request, res: Response) {
   }
 
   // Delete refreshToken in db
-  await prismaClient.refreshToken.delete({
-    where: { token: refreshTokenFromCookies },
-  });
+  await deleteRefreshToken(refreshTokenFromCookies);
 
   res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
