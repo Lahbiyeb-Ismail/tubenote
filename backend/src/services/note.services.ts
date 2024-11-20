@@ -50,3 +50,30 @@ export async function deleteNoteById(noteId: string): Promise<Note> {
 
   return note;
 }
+
+type FetchNoteByIdProps = {
+  noteId: string;
+  userId: string;
+};
+
+/**
+ * Fetches a note by its ID and the user ID.
+ *
+ * @param {Object} params - The parameters for fetching the note.
+ * @param {string} params.noteId - The ID of the note to fetch.
+ * @param {string} params.userId - The ID of the user who owns the note.
+ * @returns {Promise<Note | null>} A promise that resolves to the note if found, otherwise null.
+ */
+export async function fetchNoteById({
+  noteId,
+  userId,
+}: FetchNoteByIdProps): Promise<Note | null> {
+  const note = await prismaClient.note.findUnique({
+    where: {
+      id: noteId,
+      userId,
+    },
+  });
+
+  return note;
+}
