@@ -1,8 +1,8 @@
 import type { Response, Request } from 'express';
 import httpStatus from 'http-status';
 
-import { saveVideoData } from '../helpers/video.helper';
 import prismaClient from '../lib/prisma';
+import { createVideoEntry, findVideo } from '../services/video.services';
 
 /**
  * Retrieves video data from YouTube and stores it in the database.
@@ -19,7 +19,8 @@ import prismaClient from '../lib/prisma';
  * @returns A JSON response containing the created video data or an error message.
  */
 
-export async function getVideoData(req: Request, res: Response) {
+export async function getVideoData(req: Request, res: Response): Promise<void> {
+  const userId = req.userId;
   const { videoId } = req.body;
 
   if (!videoId) {
@@ -27,32 +28,14 @@ export async function getVideoData(req: Request, res: Response) {
     return;
   }
 
-  const userID = req.userId;
-
-  if (!userID) {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'UserID is required' });
-    return;
-  }
-
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
-
-  if (!user) {
-    res.status(httpStatus.NOT_FOUND).json({ message: 'User not found' });
-    return;
-  }
-
-  const videoExists = await prismaClient.video.findFirst({
-    where: { youtubeId: videoId },
-  });
+  const videoExists = await findVideo(videoId);
 
   if (videoExists) {
     res.status(httpStatus.OK).json(videoExists);
     return;
   }
 
-  const video = await saveVideoData(videoId, userID, res);
+  const video = await createVideoEntry(videoId, userId);
 
   res.status(httpStatus.OK).json(video);
 }
