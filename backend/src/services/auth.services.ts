@@ -1,19 +1,8 @@
-import bcrypt from 'bcryptjs';
 import type { Prisma, User } from '@prisma/client';
 
 import prismaClient from '../lib/prisma';
-
-/**
- * Hashes a given password using bcrypt.
- *
- * @param password - The plain text password to be hashed.
- * @returns A promise that resolves to the hashed password.
- */
-export async function hashPassword(password: string): Promise<string> {
-  const salt = await bcrypt.genSalt(10);
-
-  return bcrypt.hash(password, salt);
-}
+import handleAsyncOperation from '../utils/handleAsyncOperation';
+import { hashPassword } from '../helpers/auth.helper';
 
 /**
  * Creates a new user in the database with the provided user data.
@@ -27,12 +16,14 @@ export async function createNewUser(
 ): Promise<User> {
   const hashedpassword = await hashPassword(userData.password);
 
-  const newUser = await prismaClient.user.create({
-    data: {
-      ...userData,
-      password: hashedpassword,
-    },
-  });
-
-  return newUser;
+  return handleAsyncOperation(
+    () =>
+      prismaClient.user.create({
+        data: {
+          ...userData,
+          password: hashedpassword,
+        },
+      }),
+    { errorMessage: 'Failed to create new user.' }
+  );
 }

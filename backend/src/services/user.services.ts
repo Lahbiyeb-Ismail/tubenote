@@ -1,5 +1,7 @@
-import prismaClient from '../lib/prisma';
 import type { Prisma, User } from '@prisma/client';
+
+import prismaClient from '../lib/prisma';
+import handleAsyncOperation from '../utils/handleAsyncOperation';
 
 /**
  * Finds a user based on the provided parameters.
@@ -10,11 +12,15 @@ import type { Prisma, User } from '@prisma/client';
 export async function findUser(
   params: Prisma.UserWhereInput
 ): Promise<User | null> {
-  const user = await prismaClient.user.findFirst({
-    where: {
-      ...params,
-    },
-  });
+  const user = handleAsyncOperation(
+    () =>
+      prismaClient.user.findFirst({
+        where: {
+          ...params,
+        },
+      }),
+    { errorMessage: 'Failed to find user.' }
+  );
 
   return user;
 }
@@ -25,11 +31,15 @@ export async function findUser(
  * @param userId - The unique identifier of the user whose email is to be verified.
  * @returns A promise that resolves when the user's email verification status has been updated.
  */
-export async function verifyUserEmail(userId: string) {
-  await prismaClient.user.update({
-    where: { id: userId },
-    data: { emailVerified: true },
-  });
+export async function verifyUserEmail(userId: string): Promise<void> {
+  handleAsyncOperation(
+    () =>
+      prismaClient.user.update({
+        where: { id: userId },
+        data: { emailVerified: true },
+      }),
+    { errorMessage: 'Failed to verify user email.' }
+  );
 }
 
 type UpdateUserProps = {
@@ -49,10 +59,12 @@ export async function updateUser({
   userId,
   data,
 }: UpdateUserProps): Promise<User> {
-  const updatedUser = await prismaClient.user.update({
-    where: { id: userId },
-    data,
-  });
-
-  return updatedUser;
+  return handleAsyncOperation(
+    () =>
+      prismaClient.user.update({
+        where: { id: userId },
+        data,
+      }),
+    { errorMessage: 'Failed to update user.' }
+  );
 }

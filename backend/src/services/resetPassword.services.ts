@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
+import type { ResetPasswordToken, Prisma } from '@prisma/client';
 
 import prismaClient from '../lib/prisma';
-import type { ResetPasswordToken, Prisma } from '@prisma/client';
+import handleAsyncOperation from '../utils/handleAsyncOperation';
 
 /**
  * Finds a reset password token that matches the given parameters and is not expired.
@@ -12,14 +13,16 @@ import type { ResetPasswordToken, Prisma } from '@prisma/client';
 export async function findResetPasswordToken(
   params: Prisma.ResetPasswordTokenWhereInput
 ): Promise<ResetPasswordToken | null> {
-  const resetPasswordToken = await prismaClient.resetPasswordToken.findFirst({
-    where: {
-      ...params,
-      expiresAt: { gt: new Date() }, // Always check if the token is not expired
-    },
-  });
-
-  return resetPasswordToken;
+  return handleAsyncOperation(
+    () =>
+      prismaClient.resetPasswordToken.findFirst({
+        where: {
+          ...params,
+          expiresAt: { gt: new Date() },
+        },
+      }),
+    { errorMessage: 'Failed to find reset password token.' }
+  );
 }
 
 /**
@@ -37,13 +40,17 @@ export async function createResetPasswordToken(
   const token = randomUUID();
   const expiresAt = new Date(Date.now() + 3600000); // Token expires in 1 hour
 
-  await prismaClient.resetPasswordToken.create({
-    data: {
-      token,
-      userId,
-      expiresAt,
-    },
-  });
+  handleAsyncOperation(
+    () =>
+      prismaClient.resetPasswordToken.create({
+        data: {
+          token,
+          userId,
+          expiresAt,
+        },
+      }),
+    { errorMessage: 'Failed to create reset password token.' }
+  );
 
   return token;
 }
@@ -55,7 +62,13 @@ export async function createResetPasswordToken(
  * @returns A promise that resolves when the tokens have been deleted.
  */
 export async function deleteResetPasswordToken(userId: string): Promise<void> {
-  await prismaClient.resetPasswordToken.deleteMany({
-    where: { userId },
-  });
+  handleAsyncOperation(
+    () =>
+      prismaClient.resetPasswordToken.deleteMany({
+        where: {
+          userId,
+        },
+      }),
+    { errorMessage: 'Failed to delete reset password tokens.' }
+  );
 }

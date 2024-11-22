@@ -1,5 +1,7 @@
 import type { Note, Prisma } from '@prisma/client';
+
 import prismaClient from '../lib/prisma';
+import handleAsyncOperation from '../utils/handleAsyncOperation';
 
 type UserIdParam = { userId: string };
 type NoteIdParam = { noteId: string };
@@ -22,13 +24,15 @@ type EditNoteProps = UserIdParam &
  * @returns A promise that resolves to an array of `Note` objects belonging to the specified user.
  */
 export async function fetchUserNotes({ userId }: UserIdParam): Promise<Note[]> {
-  const notes = await prismaClient.note.findMany({
-    where: {
-      userId,
-    },
-  });
-
-  return notes;
+  return handleAsyncOperation(
+    () =>
+      prismaClient.note.findMany({
+        where: {
+          userId,
+        },
+      }),
+    { errorMessage: 'Failed to fetch user notes.' }
+  );
 }
 
 /**
@@ -40,13 +44,15 @@ export async function fetchUserNotes({ userId }: UserIdParam): Promise<Note[]> {
 export async function saveNote(
   noteData: Prisma.NoteCreateInput
 ): Promise<Note> {
-  const note = await prismaClient.note.create({
-    data: {
-      ...noteData,
-    },
-  });
-
-  return note;
+  return handleAsyncOperation(
+    () =>
+      prismaClient.note.create({
+        data: {
+          ...noteData,
+        },
+      }),
+    { errorMessage: 'Failed to create note.' }
+  );
 }
 
 /**
@@ -61,14 +67,16 @@ export async function deleteNoteById({
   userId,
   noteId,
 }: UserIdParam & NoteIdParam): Promise<Note> {
-  const note = await prismaClient.note.delete({
-    where: {
-      id: noteId,
-      userId,
-    },
-  });
-
-  return note;
+  return handleAsyncOperation(
+    () =>
+      prismaClient.note.delete({
+        where: {
+          id: noteId,
+          userId,
+        },
+      }),
+    { errorMessage: 'Failed to delete note.' }
+  );
 }
 
 /**
@@ -83,14 +91,16 @@ export async function fetchNoteById({
   noteId,
   userId,
 }: UserIdParam & NoteIdParam): Promise<Note | null> {
-  const note = await prismaClient.note.findUnique({
-    where: {
-      id: noteId,
-      userId,
-    },
-  });
-
-  return note;
+  return handleAsyncOperation(
+    () =>
+      prismaClient.note.findFirst({
+        where: {
+          id: noteId,
+          userId,
+        },
+      }),
+    { errorMessage: 'Failed to find note.' }
+  );
 }
 
 /**
@@ -107,15 +117,17 @@ export async function editNote({
   noteId,
   data,
 }: EditNoteProps): Promise<Note> {
-  const updatedNote = await prismaClient.note.update({
-    where: {
-      id: noteId,
-      userId,
-    },
-    data,
-  });
-
-  return updatedNote;
+  return handleAsyncOperation(
+    () =>
+      prismaClient.note.update({
+        where: {
+          id: noteId,
+          userId,
+        },
+        data,
+      }),
+    { errorMessage: 'Failed to update note.' }
+  );
 }
 
 /**
@@ -133,13 +145,15 @@ export async function fetchLatestUserNotes({
   take,
   orderBy = { createdAt: 'desc' },
 }: FetchLatestUserNotesProps): Promise<Note[]> {
-  const notes = await prismaClient.note.findMany({
-    where: {
-      userId,
-    },
-    orderBy,
-    take,
-  });
-
-  return notes;
+  return handleAsyncOperation(
+    () =>
+      prismaClient.note.findMany({
+        where: {
+          userId,
+        },
+        orderBy,
+        take,
+      }),
+    { errorMessage: 'Failed to find latest user notes.' }
+  );
 }
