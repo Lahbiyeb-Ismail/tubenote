@@ -49,7 +49,7 @@ import {
 export async function handleRegister(
   req: TypedRequest<RegisterCredentiels>,
   res: Response
-) {
+): Promise<void> {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
@@ -116,7 +116,7 @@ export async function handleRegister(
 export async function handleLogin(
   req: TypedRequest<LoginCredentials>,
   res: Response
-) {
+): Promise<void> {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -174,7 +174,10 @@ export async function handleLogin(
  *
  * @returns {Promise<void>} - A promise that resolves when the login process is complete.
  */
-export async function handleGoogleLogin(req: TypedRequest, res: Response) {
+export async function handleGoogleLogin(
+  req: TypedRequest,
+  res: Response
+): Promise<void> {
   const user = req.user as Profile;
 
   if (!user) {
@@ -243,7 +246,7 @@ export async function handleGoogleLogin(req: TypedRequest, res: Response) {
  * If an error occurs during the process, sends an INTERNAL_SERVER_ERROR
  * status with an error message.
  */
-export async function handleLogout(req: Request, res: Response) {
+export async function handleLogout(req: Request, res: Response): Promise<void> {
   const cookies = req.cookies;
 
   const refreshTokenFromCookies = cookies[REFRESH_TOKEN_NAME];
