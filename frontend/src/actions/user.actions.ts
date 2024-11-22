@@ -1,6 +1,5 @@
 import axiosInstance from '@/lib/axios.lib';
-import type { User } from '@/types/auth.types';
-import type { IUser } from '@/types/user.types';
+import type { User } from '@/types';
 
 /**
  * Fetches the current user's information from the server.
@@ -9,7 +8,7 @@ import type { IUser } from '@/types/user.types';
  *
  * @throws {Error} Throws an error if the request fails.
  */
-export async function getCurrentUser(): Promise<{ user: IUser }> {
+export async function getCurrentUser(): Promise<{ user: User }> {
   const response = await axiosInstance.get('/users/me');
 
   return response.data;
@@ -19,11 +18,11 @@ export async function getCurrentUser(): Promise<{ user: IUser }> {
  * Updates the current user's information.
  *
  * @param {User} user - The user object containing updated information.
- * @returns {Promise<User>} A promise that resolves to the updated user object.
+ * @returns {Promise<{ message: string }>} A promise that resolves to an object containing a message.
  */
 export async function updateCurrentUser(
   user: User
-): Promise<{ user: User; message: string }> {
+): Promise<{ message: string }> {
   const response = await axiosInstance.patch('/users/update-current', user);
 
   return response.data;
@@ -35,18 +34,17 @@ type UpdatePassword = {
 };
 
 /**
- * Updates the user's password.
+ * Updates the user's password by sending a PATCH request to the server.
  *
  * @param {Object} params - The parameters for updating the password.
  * @param {string} params.currentPassword - The user's current password.
- * @param {string} params.newPassword - The new password to set.
- * @returns {Promise<{ message: string; user: User }>} A promise that resolves
- * to an object containing a message and the updated user information.
+ * @param {string} params.newPassword - The new password to be set.
+ * @returns {Promise<{ message: string }>} A promise that resolves to an object containing a message.
  */
 export async function updatePassword({
   currentPassword,
   newPassword,
-}: UpdatePassword): Promise<{ message: string; user: User }> {
+}: UpdatePassword): Promise<{ message: string }> {
   const response = await axiosInstance.patch('/users/update-password', {
     currentPassword,
     newPassword,
