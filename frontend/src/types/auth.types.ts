@@ -19,15 +19,14 @@ export type User = {
   email: string;
 };
 
-export type RegisterResponse = {
+export type RegisterUserResponse = {
   message: string;
   email: string;
 };
 
-export type LoginResponse = {
+export type LoginUserResponse = {
   message: string;
   accessToken: string;
-  user: User;
 };
 
 export type AuthState = {
