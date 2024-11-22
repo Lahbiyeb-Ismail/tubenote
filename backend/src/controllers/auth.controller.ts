@@ -2,21 +2,29 @@ import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import type { Profile } from 'passport-google-oauth20';
 
-import { checkPassword, createNewTokens } from '../helpers/auth.helper';
+import { REFRESH_TOKEN_NAME } from '../constants/auth';
+
+import type { TypedRequest } from '../types';
+import type {
+  GoogleUser,
+  LoginCredentials,
+  RegisterCredentiels,
+} from '../types/auth.type';
+
 import {
   clearRefreshTokenCookieConfig,
   refreshTokenCookieConfig,
 } from '../config/cookie.config';
 import envConfig from '../config/envConfig';
 
-import type { TypedRequest } from '../types';
-import type { LoginCredentials, RegisterCredentiels } from '../types/auth.type';
 import { sendEmail } from '../utils/sendEmail';
-import { createEmailVericationToken } from '../services/verifyEmail.services';
+
+import { checkPassword, createNewTokens } from '../helpers/auth.helper';
 import { createVerificationEmail } from '../helpers/verifyEmail.helper';
+
+import { createEmailVericationToken } from '../services/verifyEmail.services';
 import { findUser, updateUser } from '../services/user.services';
 import { createNewUser } from '../services/auth.services';
-import { REFRESH_TOKEN_NAME } from '../constants/auth';
 import {
   deleteRefreshToken,
   findRefreshToken,
@@ -155,15 +163,6 @@ export async function handleLogin(
   });
 }
 
-type GoogleUser = {
-  sub: string;
-  email: string;
-  email_verified: boolean;
-  name: string;
-  given_name: string;
-  family_name: string;
-  picture: string;
-};
 /**
  * Handles Google login by processing the user profile received from Google,
  * verifying the email, and creating or updating the user in the database.
