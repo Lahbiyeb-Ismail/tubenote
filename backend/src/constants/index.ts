@@ -1,5 +1,7 @@
 import path from 'node:path';
 
+import envConfig from '../config/envConfig';
+
 /**
  * The directory path where the template files are stored.
  * This path is relative to the current directory of the file.
@@ -20,3 +22,19 @@ export const LOGO_PATH = path.join(
   process.cwd(),
   'public/images/tubenote-logo.png'
 );
+
+/**
+ * The base URL for the YouTube API.
+ *
+ * This constant is retrieved from the environment configuration.
+ *
+ * @constant {string} YOUTUBE_API_URL - The URL for accessing YouTube API.
+ */
+export const YOUTUBE_API_URL = envConfig.youtube.api.url;
+
+/**
+ * The API key used to authenticate requests to the YouTube API.
+ *
+ * @constant {string}
+ */
+export const YOUTUBE_API_KEY = envConfig.youtube.api.key;
