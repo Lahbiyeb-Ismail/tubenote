@@ -3,29 +3,41 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { useAuth } from "@/context/useAuth";
-
 function withAuth<P extends object>(WrappedComponent: React.ComponentType<P>) {
 	return function WithAuth(props: P) {
-		const [isAuthenticated, setIsAuthenticated] = useState(false);
-		const {
-			state: { accessToken },
-		} = useAuth();
+		const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(
+			null,
+		);
 		const router = useRouter();
 
 		useEffect(() => {
-			if (!accessToken) {
-				router.push("/login");
-			} else {
-				setIsAuthenticated(true);
-			}
-		}, [accessToken, router]);
+			let isMounted = true;
 
-		if (!isAuthenticated) {
-			return null; // Render nothing while checking authentication
+			const checkAuth = () => {
+				try {
+					const accessToken = localStorage.getItem("accessToken");
+					if (!accessToken) {
+						router.push("/login");
+					} else if (isMounted) {
+						setIsAuthenticated(true);
+					}
+				} catch (error) {
+					console.error("Error checking authentication:", error);
+					router.push("/login");
+				}
+			};
+
+			checkAuth();
+
+			return () => {
+				isMounted = false;
+			};
+		}, [router]);
+
+		if (isAuthenticated === null) {
+			return null; // or a loading spinner
 		}
 
-		// If authenticated, render the wrapped component
 		return <WrappedComponent {...props} />;
 	};
 }
