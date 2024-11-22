@@ -159,7 +159,6 @@ export async function handleLogin(
   res.status(httpStatus.OK).json({
     message: 'Login successful',
     accessToken,
-    user: { username: user.username, email: user.email },
   });
 }
 
