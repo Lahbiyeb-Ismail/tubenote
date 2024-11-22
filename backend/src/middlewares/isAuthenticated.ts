@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import jwt from 'jsonwebtoken';
 
-import type { Payload } from '../types';
+import type { JwtPayload } from '../types';
 import { ACCESS_TOKEN_SECRET } from '../constants/auth';
 
 const { verify } = jwt;
@@ -56,7 +56,7 @@ async function isAuthenticated(
       return;
     }
 
-    const userId = (payload as Payload).userId;
+    const userId = (payload as JwtPayload).userId;
 
     req.userId = userId;
 

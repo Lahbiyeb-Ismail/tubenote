@@ -1,16 +1,20 @@
 import type { Request } from 'express';
 import type { DeepPartial } from 'utility-types';
 
-export type Payload = {
+import type { ResetPasswordToken } from '@prisma/client';
+
+/**
+ * Represents the payload of a JSON Web Token (JWT).
+ *
+ * @property {string} userId - The unique identifier of the user.
+ * @property {number} iat - The issued at timestamp, indicating when the token was created.
+ * @property {number} exp - The expiration timestamp, indicating when the token will expire.
+ */
+export type JwtPayload = {
   userId: string;
   iat: number;
   exp: number;
 };
-export interface PayloadRequest extends Request {
-  payload?: Payload;
-}
-
-import type { ResetPasswordToken } from '@prisma/client';
 
 /**
  * Extends the Express Request interface to include a `resetToken` property.
