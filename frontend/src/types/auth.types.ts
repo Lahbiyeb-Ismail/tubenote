@@ -8,16 +8,13 @@ import type {
 } from '@/lib/schemas';
 import type { ReactNode } from 'react';
 
+import type { User } from '.';
+
 export type LoginFormData = z.infer<typeof loginFormSchema>;
 export type RegisterFormData = z.infer<typeof registerFormSchema>;
 
 export type UpdateProfileData = z.infer<typeof updateProfileSchema>;
 export type UpdatePasswordData = z.infer<typeof updatePasswordSchema>;
-
-export type User = {
-  username: string;
-  email: string;
-};
 
 export type RegisterUserResponse = {
   message: string;

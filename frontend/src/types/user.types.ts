@@ -1,12 +1,4 @@
-import type { User } from './auth.types';
-
-export interface IUser extends User {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  profilePicture: string | null;
-  emailVerified: boolean;
-}
+import type { User } from '.';
 
 export type UserState = {
   user: User | null;
