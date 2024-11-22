@@ -34,7 +34,7 @@ import { sendEmail } from '../utils/sendEmail';
 export async function handleForgotPassword(
   req: TypedRequest<ForgotPasswordBody>,
   res: Response
-) {
+): Promise<void> {
   const { email } = req.body;
 
   if (!email) {
@@ -96,7 +96,7 @@ export async function handleForgotPassword(
 export async function handleResetPassword(
   req: TypedRequest<ResetPasswordBody>,
   res: Response
-) {
+): Promise<void> {
   const { password } = req.body;
   const resetToken = req.resetToken;
 
@@ -130,6 +130,6 @@ export async function handleResetPassword(
 export async function handleResetPasswordTokenVerification(
   _req: TypedRequest,
   res: Response
-) {
+): Promise<void> {
   res.status(httpStatus.OK).json({ message: 'Token is valid.' });
 }
