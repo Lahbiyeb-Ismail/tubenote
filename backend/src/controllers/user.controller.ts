@@ -37,7 +37,17 @@ export async function getCurrentUser(
     return;
   }
 
-  res.status(httpStatus.OK).json({ user });
+  res.status(httpStatus.OK).json({
+    user: {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      profilePicture: user.profilePicture,
+      emailVeified: user.emailVerified,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    },
+  });
 }
 
 /**
