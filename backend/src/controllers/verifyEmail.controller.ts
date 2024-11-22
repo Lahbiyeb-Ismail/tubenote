@@ -41,7 +41,7 @@ import {
 export async function sendVerificationEmailHandler(
   req: TypedRequest<SendVerifyEmail>,
   res: Response
-) {
+): Promise<void> {
   const { email } = req.body;
 
   // Checks if the email is provided; if not, responds with a BAD_REQUEST status.
@@ -116,7 +116,10 @@ export async function sendVerificationEmailHandler(
  * 6. Deletes the email verification token from the database.
  * 7. Responds with a 200 OK status indicating that the email was verified successfully.
  */
-export async function verifyEmailHandler(req: Request, res: Response) {
+export async function verifyEmailHandler(
+  req: Request,
+  res: Response
+): Promise<void> {
   const { token } = req.params;
 
   if (!token) {
