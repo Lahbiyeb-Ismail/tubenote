@@ -48,24 +48,20 @@ async function isAuthenticated(
     return;
   }
 
-  try {
-    const { userId } = verify(token, ACCESS_TOKEN_SECRET) as Payload;
-
-    if (!userId) {
-      res.status(httpStatus.FORBIDDEN).json({
-        message: 'Unauthorized access. Please try again!!',
+  verify(token, ACCESS_TOKEN_SECRET, (err, payload) => {
+    if (err) {
+      res.status(httpStatus.UNAUTHORIZED).json({
+        message: 'Unauthorized access. Please try again.',
       });
       return;
     }
 
+    const userId = (payload as Payload).userId;
+
     req.userId = userId;
 
     next();
-  } catch (error) {
-    res.status(httpStatus.FORBIDDEN).json({
-      message: 'Unauthorized access. Please try again.',
-    });
-  }
+  });
 }
 
 export default isAuthenticated;
