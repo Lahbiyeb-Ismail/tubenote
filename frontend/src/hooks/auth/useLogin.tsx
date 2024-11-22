@@ -34,7 +34,6 @@ function useLogin(dispatch: React.Dispatch<AuthAction>) {
 				payload: {
 					message: data.message,
 					accessToken: data.accessToken,
-					user: data.user,
 				},
 			});
 

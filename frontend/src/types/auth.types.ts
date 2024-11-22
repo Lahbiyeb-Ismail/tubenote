@@ -8,8 +8,6 @@ import type {
 } from '@/lib/schemas';
 import type { ReactNode } from 'react';
 
-import type { User } from '.';
-
 export type LoginFormData = z.infer<typeof loginFormSchema>;
 export type RegisterFormData = z.infer<typeof registerFormSchema>;
 
@@ -31,13 +29,12 @@ export type AuthState = {
   errorMessage?: string;
   successMessage?: string;
   isAuthenticated: boolean;
-  user: User | null;
 };
 
 export type AuthAction =
   | {
       type: 'LOGIN_SUCCESS';
-      payload: { message: string; accessToken: string; user: User };
+      payload: { message: string; accessToken: string };
     }
   | { type: 'REGISTER_SUCCESS'; payload: { successMessage: string } }
   | { type: 'REQUEST_FAIL'; payload: { errorMessage: string } }
