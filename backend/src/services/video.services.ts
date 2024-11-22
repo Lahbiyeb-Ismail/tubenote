@@ -70,3 +70,20 @@ export async function createVideoEntry(
     { errorMessage: 'Failed to create video entry' }
   );
 }
+
+/**
+ * Finds and returns a list of videos associated with a specific user.
+ *
+ * @param userId - The unique identifier of the user whose videos are to be retrieved.
+ * @returns A promise that resolves to an array of Video objects.
+ * @throws Will throw an error with a message 'Failed to find user videos' if the operation fails.
+ */
+export async function findUserVideos(userId: string): Promise<Video[]> {
+  return handleAsyncOperation(
+    () =>
+      prismaClient.video.findMany({
+        where: { userId },
+      }),
+    { errorMessage: 'Failed to find user videos' }
+  );
+}
