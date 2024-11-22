@@ -2,9 +2,11 @@ import type { Response, Request } from 'express';
 import httpStatus from 'http-status';
 import bcrypt from 'bcryptjs';
 
-import { checkPassword } from '../helpers/auth.helper';
 import type { TypedRequest } from '../types';
 import type { UpdatePasswordBody, UpdateUserBody } from '../types/user.type';
+
+import { checkPassword } from '../helpers/auth.helper';
+
 import { findUser, updateUser } from '../services/user.services';
 
 /**
@@ -20,7 +22,10 @@ import { findUser, updateUser } from '../services/user.services';
  *
  * @returns A JSON response containing the user data if found, or an error message if not.
  */
-export async function getCurrentUser(req: Request, res: Response) {
+export async function getCurrentUser(
+  req: Request,
+  res: Response
+): Promise<void> {
   const userId = req.userId;
 
   const user = await findUser({ id: userId });
@@ -56,7 +61,7 @@ export async function getCurrentUser(req: Request, res: Response) {
 export async function updateCurrentUser(
   req: TypedRequest<UpdateUserBody>,
   res: Response
-) {
+): Promise<void> {
   const userId = req.userId;
   const { username, email } = req.body;
 
@@ -117,7 +122,7 @@ export async function updateCurrentUser(
 export async function updateUserPassword(
   req: TypedRequest<UpdatePasswordBody>,
   res: Response
-) {
+): Promise<void> {
   const userId = req.userId;
 
   const { currentPassword, newPassword } = req.body;
