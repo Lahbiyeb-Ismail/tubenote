@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 
 import type { TypedRequest } from '../types';
 import type { NoteBody } from '../types/note.type';
+
 import {
   deleteNoteById,
   editNote,
@@ -31,7 +32,10 @@ import {
  *
  * @throws {Error} If there is an issue with the database operation.
  */
-export async function createNote(req: TypedRequest<NoteBody>, res: Response) {
+export async function createNote(
+  req: TypedRequest<NoteBody>,
+  res: Response
+): Promise<void> {
   const userId = req.userId;
 
   const {
@@ -95,7 +99,7 @@ export async function createNote(req: TypedRequest<NoteBody>, res: Response) {
  *
  * @returns A promise that resolves to void.
  */
-export async function getUserNotes(req: Request, res: Response) {
+export async function getUserNotes(req: Request, res: Response): Promise<void> {
   const userId = req.userId;
 
   const notes = await fetchUserNotes({ userId });
@@ -121,7 +125,7 @@ export async function getUserNotes(req: Request, res: Response) {
  * 9. If an error occurs during the process, responds with an
  * INTERNAL_SERVER_ERROR status and an error message.
  */
-export async function deleteNote(req: Request, res: Response) {
+export async function deleteNote(req: Request, res: Response): Promise<void> {
   const userId = req.userId;
   const { noteId } = req.params;
 
@@ -157,7 +161,7 @@ export async function deleteNote(req: Request, res: Response) {
  * @returns A JSON response containing the note data if found, or an error
  * message otherwise.
  */
-export async function getNoteById(req: Request, res: Response) {
+export async function getNoteById(req: Request, res: Response): Promise<void> {
   const userId = req.userId;
   const { noteId } = req.params;
 
@@ -200,7 +204,7 @@ export async function getNoteById(req: Request, res: Response) {
  *
  * @returns {Promise<void>} - A promise that resolves when the function completes.
  */
-export async function updateNote(req: Request, res: Response) {
+export async function updateNote(req: Request, res: Response): Promise<void> {
   const userId = req.userId;
   const { noteId } = req.params;
   const { title, content, timestamp } = req.body;
@@ -248,7 +252,10 @@ export async function updateNote(req: Request, res: Response) {
  *
  * @returns A JSON response containing the user's most recent notes or an error message.
  */
-export async function getUserRecentNotes(req: Request, res: Response) {
+export async function getUserRecentNotes(
+  req: Request,
+  res: Response
+): Promise<void> {
   const userId = req.userId;
 
   const notes = await fetchLatestUserNotes({ userId, take: 2 });
@@ -274,7 +281,10 @@ export async function getUserRecentNotes(req: Request, res: Response) {
  *
  * @returns A JSON response containing the most recently updated notes for the user or an error message.
  */
-export async function getUserRecentlyUpdatedNotes(req: Request, res: Response) {
+export async function getUserRecentlyUpdatedNotes(
+  req: Request,
+  res: Response
+): Promise<void> {
   const userId = req.userId;
 
   const notes = await fetchLatestUserNotes({
