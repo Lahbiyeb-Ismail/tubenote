@@ -6,15 +6,18 @@ import type {
   ForgotPasswordBody,
   ResetPasswordBody,
 } from '../types/resetPassword.type';
+
 import {
   createResetPasswordToken,
   deleteResetPasswordToken,
   findResetPasswordToken,
 } from '../services/resetPassword.services';
-import { sendEmail } from '../utils/sendEmail';
-import { createResetPasswordEmail } from '../helpers/resetPassword.helper';
-import { hashPassword } from '../services/auth.services';
 import { findUser, updateUser } from '../services/user.services';
+
+import { createResetPasswordEmail } from '../helpers/resetPassword.helper';
+import { hashPassword } from '../helpers/auth.helper';
+
+import { sendEmail } from '../utils/sendEmail';
 
 /**
  * Handles the password reset process for a user.
