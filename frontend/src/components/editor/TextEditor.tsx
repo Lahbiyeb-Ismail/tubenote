@@ -11,6 +11,7 @@ import "@blocknote/mantine/style.css";
 import type { BlockNoteEditor } from "@blocknote/core";
 import SaveNoteForm from "./SaveNoteForm";
 import { useState } from "react";
+import { useModal } from "@/context/useModal";
 
 type TextEditorProps = {
 	initialNoteContent?: string;
@@ -34,12 +35,16 @@ function TextEditor({
 		initialNoteContent || "",
 	);
 
+	const { closeModal } = useModal();
+
 	return (
 		<div className="h-full overflow-auto">
 			<SaveNoteForm
 				noteContent={noteContent}
 				noteTitle={noteTitle}
 				action={action}
+				cancelText="Cancel"
+				closeModal={closeModal}
 			/>
 			<BlockNoteView
 				editor={editor}

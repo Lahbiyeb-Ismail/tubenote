@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import { useLayout } from "@/context/useLayout";
 import { Button } from "@/components/ui/button";
@@ -10,13 +10,14 @@ import UserProfile from "../global/UserProfile";
 import SidebarLogo from "./SidebarLogo";
 import SidebarNav from "./SidebarNav";
 import Link from "next/link";
+import LogoutButton from "../auth/LogoutButton";
 
 function Sidebar() {
 	const pathname = usePathname();
 	const { isSidebarOpen, toggleSidebar } = useLayout();
 
 	return (
-		<div
+		<aside
 			className={`fixed left-0 top-0 flex h-full flex-col py-6  bg-white p-2 shadow-lg
 				transition-all duration-300 ${isSidebarOpen ? "w-64" : "w-20"}`}
 		>
@@ -25,12 +26,21 @@ function Sidebar() {
 					<SidebarLogo isOpen={isSidebarOpen} />
 				</Link>
 				<Button variant="ghost" size="icon" onClick={toggleSidebar}>
-					{isSidebarOpen ? <ChevronLeft /> : <ChevronRight />}
+					<ChevronRight
+						className={`transition-transform duration-300 ${isSidebarOpen ? "rotate-180" : ""}`}
+					/>
 				</Button>
 			</div>
 			<SidebarNav isOpen={isSidebarOpen} pathname={pathname} />
-			<UserProfile isOpen={isSidebarOpen} />
-		</div>
+			<ul
+				className={`mt-auto border-t pt-3 space-y-2 transition-all duration-300 ${
+					isSidebarOpen ? "px-4" : "px-0"
+				}`}
+			>
+				<LogoutButton />
+				<UserProfile isOpen={isSidebarOpen} />
+			</ul>
+		</aside>
 	);
 }
 

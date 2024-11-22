@@ -1,8 +1,11 @@
 import type { Response, Request } from 'express';
 import httpStatus from 'http-status';
 
-import { saveVideoData } from '../helpers/video.helper';
-import prismaClient from '../lib/prisma';
+import {
+  createVideoEntry,
+  findUserVideos,
+  findVideo,
+} from '../services/video.services';
 
 /**
  * Retrieves video data from YouTube and stores it in the database.
@@ -19,7 +22,8 @@ import prismaClient from '../lib/prisma';
  * @returns A JSON response containing the created video data or an error message.
  */
 
-export async function getVideoData(req: Request, res: Response) {
+export async function getVideoData(req: Request, res: Response): Promise<void> {
+  const userId = req.userId;
   const { videoId } = req.body;
 
   if (!videoId) {
@@ -27,76 +31,29 @@ export async function getVideoData(req: Request, res: Response) {
     return;
   }
 
-  const userID = req.userId;
-
-  if (!userID) {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'UserID is required' });
-    return;
-  }
-
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
-
-  if (!user) {
-    res.status(httpStatus.NOT_FOUND).json({ message: 'User not found' });
-    return;
-  }
-
-  const videoExists = await prismaClient.video.findFirst({
-    where: { youtubeId: videoId },
-  });
+  const videoExists = await findVideo(videoId);
 
   if (videoExists) {
     res.status(httpStatus.OK).json(videoExists);
     return;
   }
 
-  const video = await saveVideoData(videoId, userID, res);
+  const video = await createVideoEntry(videoId, userId);
 
   res.status(httpStatus.OK).json(video);
 }
 
 /**
- * Retrieves videos associated with the authenticated user.
+ * Retrieves the videos associated with a specific user.
  *
- * @param req - The request object containing the payload with user information.
- * @param res - The response object used to send back the appropriate HTTP response.
- *
- * @remarks
- * This function checks if the user is authenticated by verifying the presence of `userID` in the request payload.
- * If the user is not authenticated, it responds with a 401 Unauthorized status.
- * If the user is authenticated, it attempts to fetch the user from the database.
- * If the user is not found, it responds with a 404 Not Found status.
- * If the user is found, it fetches all videos associated with the user and responds with a 200 OK status along with the videos.
- * In case of any errors during the process, it responds with a 500 Internal Server Error status.
- *
- * @throws {Error} If there is an issue with the database query or any other unexpected error.
+ * @param req - The request object, which contains the userId.
+ * @param res - The response object used to send back the videos.
+ * @returns A JSON response containing the user's videos.
  */
 export async function getUserVideos(req: Request, res: Response) {
-  const userID = req.userId;
+  const userId = req.userId;
 
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
-
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const videos = await prismaClient.video.findMany({
-    where: { userId: user.id },
-  });
+  const videos = await findUserVideos(userId);
 
   res.status(httpStatus.OK).json({ videos });
 }

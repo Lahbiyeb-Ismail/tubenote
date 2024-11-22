@@ -6,18 +6,18 @@ import type { SendVerifyEmail } from '../types/verifyEmail.type';
 
 import { sendEmail } from '../utils/sendEmail';
 
-import { getUser } from '../helpers/auth.helper';
-
 import {
   createEmailVericationToken,
   deleteEmailVericationToken,
   findVerificationToken,
   getEmailVericationToken,
 } from '../services/verifyEmail.services';
-import { verifyUserEmail } from '../services/user.services';
+import { findUser, verifyUserEmail } from '../services/user.services';
 
-import sendVerificationEmailTemplate from '../templates/email/sendVerificationEmailTemplate';
-import emailVerificationSuccessTemplate from '../templates/email/emailVerificationSuccessTemplate';
+import {
+  createVerificationEmail,
+  createVerifiedEmail,
+} from '../helpers/verifyEmail.helper';
 
 /**
  * Handles the request to send a verification email.
@@ -41,7 +41,7 @@ import emailVerificationSuccessTemplate from '../templates/email/emailVerificati
 export async function sendVerificationEmailHandler(
   req: TypedRequest<SendVerifyEmail>,
   res: Response
-) {
+): Promise<void> {
   const { email } = req.body;
 
   // Checks if the email is provided; if not, responds with a BAD_REQUEST status.
@@ -51,7 +51,7 @@ export async function sendVerificationEmailHandler(
   }
 
   // Retrieves the user associated with the provided email.
-  const user = await getUser({ email });
+  const user = await findUser({ email });
 
   // If no user is found, responds with an UNAUTHORIZED status.
   if (!user) {
@@ -84,11 +84,16 @@ export async function sendVerificationEmailHandler(
   // Creates a new email verification token for the user.
   const token = await createEmailVericationToken(user.id);
 
+  const { htmlContent, textContent, logoPath } =
+    await createVerificationEmail(token);
+
   // Sends the verification email to the provided email address.
   await sendEmail({
     emailRecipient: email,
     emailSubject: 'Verification Email',
-    emailBody: sendVerificationEmailTemplate(token),
+    htmlContent,
+    textContent,
+    logoPath,
   });
 
   // Responds with an OK status indicating that the verification email has been sent.
@@ -111,7 +116,10 @@ export async function sendVerificationEmailHandler(
  * 6. Deletes the email verification token from the database.
  * 7. Responds with a 200 OK status indicating that the email was verified successfully.
  */
-export async function verifyEmailHandler(req: Request, res: Response) {
+export async function verifyEmailHandler(
+  req: Request,
+  res: Response
+): Promise<void> {
   const { token } = req.params;
 
   if (!token) {
@@ -133,6 +141,8 @@ export async function verifyEmailHandler(req: Request, res: Response) {
 
   await deleteEmailVericationToken(verificationToken.userId);
 
+  const { htmlContent } = await createVerifiedEmail();
+
   // Send HTML response with success message and client-side redirect
-  res.status(httpStatus.OK).send(emailVerificationSuccessTemplate());
+  res.status(httpStatus.OK).send(htmlContent);
 }

@@ -10,6 +10,8 @@ import { useEffect, useState } from "react";
 
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import Sidebar from "../dashboards/Sidebar";
+import { useLayout } from "@/context/useLayout";
 
 const AppMDXEditor = dynamic(() => import("./AppMDXEditor"), { ssr: false });
 
@@ -29,6 +31,7 @@ function EditorPage({
 	const [direction, setDirection] = useState<"horizontal" | "vertical">(
 		"horizontal",
 	);
+	const { isSidebarOpen } = useLayout();
 
 	useEffect(() => {
 		function changeDirection() {
@@ -46,23 +49,31 @@ function EditorPage({
 	}, []);
 
 	return (
-		<section className="height_viewport">
-			<ResizablePanelGroup direction={direction} className="flex w-full border">
-				<ResizablePanel defaultSize={50} className="p-2 relative">
-					<Suspense fallback={null}>
-						<AppMDXEditor
-							action={action}
-							initialNoteContent={initialNoteContent}
-							noteTitle={noteTitle}
-						/>
-					</Suspense>
-				</ResizablePanel>
-				<ResizableHandle withHandle />
-				<ResizablePanel defaultSize={50} className="p-2">
-					<VideoPlayer videoId={videoId} />
-				</ResizablePanel>
-			</ResizablePanelGroup>
-		</section>
+		<div className="flex h-screen">
+			<Sidebar />
+			<div
+				className={`flex-grow transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-20"}`}
+			>
+				<ResizablePanelGroup
+					direction={direction}
+					className="flex w-full h-full"
+				>
+					<ResizablePanel defaultSize={50} className="p-2 relative">
+						<Suspense fallback={null}>
+							<AppMDXEditor
+								action={action}
+								initialNoteContent={initialNoteContent}
+								noteTitle={noteTitle}
+							/>
+						</Suspense>
+					</ResizablePanel>
+					<ResizableHandle withHandle />
+					<ResizablePanel defaultSize={50} className="p-2">
+						<VideoPlayer videoId={videoId} />
+					</ResizablePanel>
+				</ResizablePanelGroup>
+			</div>
+		</div>
 	);
 }
 

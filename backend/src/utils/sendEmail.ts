@@ -11,20 +11,31 @@ import envConfig from '../config/envConfig';
 type SendEmailProps = {
   emailRecipient: string;
   emailSubject: string;
-  emailBody: string;
+  htmlContent: string;
+  textContent: string;
+  logoPath: string;
 };
 
 export const sendEmail = async ({
   emailRecipient,
   emailSubject,
-  emailBody,
+  htmlContent,
+  textContent,
+  logoPath,
 }: SendEmailProps) => {
-  // const verifyLink = `${envConfig.server.url}/api/v1/verify-email/${token}`;
   const mailOptions = {
     from: envConfig.email.from,
     to: emailRecipient,
     subject: emailSubject,
-    html: emailBody,
+    html: htmlContent,
+    text: textContent,
+    attachments: [
+      {
+        filename: 'logo.png',
+        path: logoPath,
+        cid: 'logo',
+      },
+    ],
   };
 
   await transporter.sendMail(mailOptions, (error, info) => {

@@ -16,6 +16,9 @@ import { loginFormSchema } from "@/lib/schemas";
 import { useAuth } from "@/context/useAuth";
 
 import type { LoginFormData } from "@/types/auth.types";
+import ForogotPasswordLink from "../auth/ForogotPasswordLink";
+import GoogleAuthButton from "../auth/GoogleAuthButton";
+import { DividerWithText } from "../global/DividerWithText";
 
 function LoginForm() {
 	const form = useForm<LoginFormData>({
@@ -36,6 +39,10 @@ function LoginForm() {
 			description="Login to your account to access your notes"
 			error={state.errorMessage}
 		>
+			<GoogleAuthButton />
+
+			<DividerWithText text="Or continue with" />
+
 			<CardContent>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(handleLogin)} className="space-y-4">
@@ -55,6 +62,7 @@ function LoginForm() {
 							icon={Lock}
 							control={form.control}
 						/>
+						<ForogotPasswordLink />
 						<Button
 							type="submit"
 							className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700"

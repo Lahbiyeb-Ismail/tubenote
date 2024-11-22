@@ -1,0 +1,11 @@
+Verify Your Email Address
+
+Thank you for signing up! To complete your registration and activate your account, please verify your email address by visiting the following link:
+
+{{verificationLink}}
+
+This verification link will expire in 24 hours.
+
+If you didn't create an account with us, please ignore this email.
+
+Your Company, 2023

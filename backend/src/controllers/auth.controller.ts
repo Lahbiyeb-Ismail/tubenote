@@ -2,23 +2,33 @@ import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import type { Profile } from 'passport-google-oauth20';
 
-import {
-  checkPassword,
-  createAndSaveNewTokens,
-  createNewUser,
-  getUser,
-} from '../helpers/auth.helper';
-import prismaClient from '../lib/prisma';
-import { clearRefreshTokenCookieConfig } from '../config/cookie.config';
-import envConfig from '../config/envConfig';
+import { REFRESH_TOKEN_NAME } from '../constants/auth';
 
 import type { TypedRequest } from '../types';
-import type { LoginCredentials, RegisterCredentiels } from '../types/auth.type';
-import { sendEmail } from '../utils/sendEmail';
-import sendVerificationEmailTemplate from '../templates/email/sendVerificationEmailTemplate';
-import { createEmailVericationToken } from '../services/verifyEmail.services';
+import type {
+  GoogleUser,
+  LoginCredentials,
+  RegisterCredentiels,
+} from '../types/auth.type';
 
-const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
+import {
+  clearRefreshTokenCookieConfig,
+  refreshTokenCookieConfig,
+} from '../config/cookie.config';
+import envConfig from '../config/envConfig';
+
+import { sendEmail } from '../utils/sendEmail';
+
+import { checkPassword, createNewTokens } from '../helpers/auth.helper';
+import { createVerificationEmail } from '../helpers/verifyEmail.helper';
+
+import { createEmailVericationToken } from '../services/verifyEmail.services';
+import { findUser, updateUser } from '../services/user.services';
+import { createNewUser } from '../services/auth.services';
+import {
+  deleteRefreshToken,
+  findRefreshToken,
+} from '../services/refreshToken.services';
 
 /**
  * Handles user registration.
@@ -39,7 +49,7 @@ const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
 export async function handleRegister(
   req: TypedRequest<RegisterCredentiels>,
   res: Response
-) {
+): Promise<void> {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
@@ -49,7 +59,7 @@ export async function handleRegister(
     return;
   }
 
-  const user = await getUser({ email });
+  const user = await findUser({ email });
 
   if (user) {
     res.status(httpStatus.CONFLICT).json({
@@ -68,10 +78,15 @@ export async function handleRegister(
   // Creates a new email verification token for the user.
   const token = await createEmailVericationToken(newUser.id);
 
+  const { htmlContent, textContent, logoPath } =
+    await createVerificationEmail(token);
+
   await sendEmail({
     emailRecipient: newUser.email,
     emailSubject: 'Email Verification',
-    emailBody: sendVerificationEmailTemplate(token),
+    htmlContent,
+    textContent,
+    logoPath,
   });
 
   res.status(httpStatus.CREATED).json({
@@ -101,7 +116,7 @@ export async function handleRegister(
 export async function handleLogin(
   req: TypedRequest<LoginCredentials>,
   res: Response
-) {
+): Promise<void> {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -111,7 +126,7 @@ export async function handleLogin(
     return;
   }
 
-  const user = await getUser({ email }, false);
+  const user = await findUser({ email });
 
   if (!user) {
     res.status(httpStatus.NOT_FOUND).json({
@@ -137,7 +152,9 @@ export async function handleLogin(
     return;
   }
 
-  const accessToken = await createAndSaveNewTokens(user.id, res);
+  const { accessToken, refreshToken } = await createNewTokens(user.id);
+
+  res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
   res.status(httpStatus.OK).json({
     message: 'Login successful',
@@ -146,15 +163,6 @@ export async function handleLogin(
   });
 }
 
-type GoogleUser = {
-  sub: string;
-  email: string;
-  email_verified: boolean;
-  name: string;
-  given_name: string;
-  family_name: string;
-  picture: string;
-};
 /**
  * Handles Google login by processing the user profile received from Google,
  * verifying the email, and creating or updating the user in the database.
@@ -166,7 +174,10 @@ type GoogleUser = {
  *
  * @returns {Promise<void>} - A promise that resolves when the login process is complete.
  */
-export async function handleGoogleLogin(req: TypedRequest, res: Response) {
+export async function handleGoogleLogin(
+  req: TypedRequest,
+  res: Response
+): Promise<void> {
   const user = req.user as Profile;
 
   if (!user) {
@@ -191,7 +202,7 @@ export async function handleGoogleLogin(req: TypedRequest, res: Response) {
     return;
   }
 
-  let foundUser = await getUser({ email });
+  let foundUser = await findUser({ email });
 
   if (!foundUser) {
     foundUser = await createNewUser({
@@ -203,13 +214,12 @@ export async function handleGoogleLogin(req: TypedRequest, res: Response) {
       googleId,
     });
   } else if (!foundUser.googleId) {
-    foundUser = await prismaClient.user.update({
-      where: { id: foundUser.id },
-      data: { googleId },
-    });
+    foundUser = await updateUser({ userId: foundUser.id, data: { googleId } });
   }
 
-  const accessToken = await createAndSaveNewTokens(foundUser.id, res);
+  const { accessToken, refreshToken } = await createNewTokens(foundUser.id);
+
+  res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
   res.redirect(
     `${envConfig.client.url}/auth/callback?access_token=${encodeURIComponent(JSON.stringify(accessToken))}`
@@ -236,7 +246,7 @@ export async function handleGoogleLogin(req: TypedRequest, res: Response) {
  * If an error occurs during the process, sends an INTERNAL_SERVER_ERROR
  * status with an error message.
  */
-export async function handleLogout(req: Request, res: Response) {
+export async function handleLogout(req: Request, res: Response): Promise<void> {
   const cookies = req.cookies;
 
   const refreshTokenFromCookies = cookies[REFRESH_TOKEN_NAME];
@@ -247,9 +257,7 @@ export async function handleLogout(req: Request, res: Response) {
   }
 
   // Is refreshToken in db?
-  const refreshTokenFromDB = await prismaClient.refreshToken.findUnique({
-    where: { token: refreshTokenFromCookies },
-  });
+  const refreshTokenFromDB = await findRefreshToken(refreshTokenFromCookies);
 
   if (!refreshTokenFromDB) {
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
@@ -258,9 +266,7 @@ export async function handleLogout(req: Request, res: Response) {
   }
 
   // Delete refreshToken in db
-  await prismaClient.refreshToken.delete({
-    where: { token: refreshTokenFromCookies },
-  });
+  await deleteRefreshToken(refreshTokenFromCookies);
 
   res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 

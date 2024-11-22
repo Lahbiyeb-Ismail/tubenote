@@ -1,9 +1,17 @@
 import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 
-import prismaClient from '../lib/prisma';
 import type { TypedRequest } from '../types';
 import type { NoteBody } from '../types/note.type';
+
+import {
+  deleteNoteById,
+  editNote,
+  fetchLatestUserNotes,
+  fetchNoteById,
+  fetchUserNotes,
+  saveNote,
+} from '../services/note.services';
 
 /**
  * Creates a new note for the authenticated user.
@@ -24,26 +32,11 @@ import type { NoteBody } from '../types/note.type';
  *
  * @throws {Error} If there is an issue with the database operation.
  */
-export async function createNote(req: TypedRequest<NoteBody>, res: Response) {
-  const userID = req.userId;
-
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
-
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
+export async function createNote(
+  req: TypedRequest<NoteBody>,
+  res: Response
+): Promise<void> {
+  const userId = req.userId;
 
   const {
     title,
@@ -70,18 +63,18 @@ export async function createNote(req: TypedRequest<NoteBody>, res: Response) {
     return;
   }
 
-  const note = await prismaClient.note.create({
-    data: {
-      userId: user.id,
-      title,
-      content,
-      videoTitle,
-      thumbnail,
-      videoId,
-      youtubeId,
-      timestamp,
-    },
-  });
+  const noteData = {
+    title,
+    content,
+    videoTitle,
+    thumbnail,
+    videoId,
+    youtubeId,
+    timestamp,
+    userId,
+  };
+
+  const note = await saveNote(noteData);
 
   res
     .status(httpStatus.CREATED)
@@ -106,30 +99,10 @@ export async function createNote(req: TypedRequest<NoteBody>, res: Response) {
  *
  * @returns A promise that resolves to void.
  */
-export async function getUserNotes(req: Request, res: Response) {
-  const userID = req.userId;
+export async function getUserNotes(req: Request, res: Response): Promise<void> {
+  const userId = req.userId;
 
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
-
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const notes = await prismaClient.note.findMany({
-    where: { userId: user.id },
-  });
+  const notes = await fetchUserNotes({ userId });
 
   res.status(httpStatus.OK).json({ notes });
 }
@@ -152,16 +125,8 @@ export async function getUserNotes(req: Request, res: Response) {
  * 9. If an error occurs during the process, responds with an
  * INTERNAL_SERVER_ERROR status and an error message.
  */
-export async function deleteNote(req: Request, res: Response) {
-  const userID = req.userId;
-
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
+export async function deleteNote(req: Request, res: Response): Promise<void> {
+  const userId = req.userId;
   const { noteId } = req.params;
 
   if (!noteId) {
@@ -171,20 +136,7 @@ export async function deleteNote(req: Request, res: Response) {
     return;
   }
 
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
-
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  await prismaClient.note.delete({
-    where: { id: noteId },
-  });
+  await deleteNoteById({ userId, noteId });
 
   res.status(httpStatus.OK).json({ message: 'Note deleted successfully.' });
 }
@@ -209,16 +161,8 @@ export async function deleteNote(req: Request, res: Response) {
  * @returns A JSON response containing the note data if found, or an error
  * message otherwise.
  */
-export async function getNoteById(req: Request, res: Response) {
-  const userID = req.userId;
-
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
+export async function getNoteById(req: Request, res: Response): Promise<void> {
+  const userId = req.userId;
   const { noteId } = req.params;
 
   if (!noteId) {
@@ -228,20 +172,7 @@ export async function getNoteById(req: Request, res: Response) {
     return;
   }
 
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
-
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const note = await prismaClient.note.findFirst({
-    where: { id: noteId, userId: user.id },
-  });
+  const note = await fetchNoteById({ noteId, userId });
 
   if (!note) {
     res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
@@ -273,17 +204,10 @@ export async function getNoteById(req: Request, res: Response) {
  *
  * @returns {Promise<void>} - A promise that resolves when the function completes.
  */
-export async function updateNote(req: Request, res: Response) {
-  const userID = req.userId;
-
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
+export async function updateNote(req: Request, res: Response): Promise<void> {
+  const userId = req.userId;
   const { noteId } = req.params;
+  const { title, content, timestamp } = req.body;
 
   if (!noteId) {
     res
@@ -292,35 +216,17 @@ export async function updateNote(req: Request, res: Response) {
     return;
   }
 
-  const { title, content, timestamp } = req.body;
-
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
-
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const note = await prismaClient.note.findFirst({
-    where: { id: noteId, userId: user.id },
-  });
+  const note = await fetchNoteById({ noteId, userId });
 
   if (!note) {
     res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
     return;
   }
 
-  const updatedNote = await prismaClient.note.update({
-    where: { id: note.id },
-    data: {
-      title: title || note.title,
-      content: content || note.content,
-      timestamp: timestamp,
-    },
+  const updatedNote = await editNote({
+    userId,
+    noteId,
+    data: { title, content, timestamp },
   });
 
   res
@@ -346,32 +252,13 @@ export async function updateNote(req: Request, res: Response) {
  *
  * @returns A JSON response containing the user's most recent notes or an error message.
  */
-export async function getUserRecentNotes(req: Request, res: Response) {
-  const userID = req.userId;
+export async function getUserRecentNotes(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const userId = req.userId;
 
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
-
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const notes = await prismaClient.note.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: 'desc' },
-    take: 2,
-  });
+  const notes = await fetchLatestUserNotes({ userId, take: 2 });
 
   res.status(httpStatus.OK).json({ notes });
 }
@@ -394,31 +281,16 @@ export async function getUserRecentNotes(req: Request, res: Response) {
  *
  * @returns A JSON response containing the most recently updated notes for the user or an error message.
  */
-export async function getUserRecentlyUpdatedNotes(req: Request, res: Response) {
-  const userID = req.userId;
+export async function getUserRecentlyUpdatedNotes(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const userId = req.userId;
 
-  if (!userID) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const user = await prismaClient.user.findUnique({
-    where: { id: userID },
-  });
-
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
-
-  const notes = await prismaClient.note.findMany({
-    where: { userId: user.id },
-    orderBy: { updatedAt: 'desc' },
+  const notes = await fetchLatestUserNotes({
+    userId,
     take: 2,
+    orderBy: { updatedAt: 'desc' },
   });
 
   res.status(httpStatus.OK).json({ notes });
