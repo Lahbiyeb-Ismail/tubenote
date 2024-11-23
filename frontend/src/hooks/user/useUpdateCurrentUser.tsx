@@ -21,10 +21,8 @@ function useUpdateCurrentUser(dispatch: React.Dispatch<UserAction>) {
 
 			dispatch({
 				type: "UPDATE_USER",
-				payload: { user: data.user, message: "User updated successfully." },
+				payload: { message: "User updated successfully." },
 			});
-
-			localStorage.setItem("user", JSON.stringify(data.user));
 
 			window.location.reload();
 		},
@@ -34,13 +32,13 @@ function useUpdateCurrentUser(dispatch: React.Dispatch<UserAction>) {
 				toast.error(error.response.data.message);
 				dispatch({
 					type: "UPDATE_USER_FAILD",
-					payload: { message: error.response.data.message, user: null },
+					payload: { message: error.response.data.message },
 				});
 			} else {
 				toast.error("User update faild. Please try again.");
 				dispatch({
 					type: "UPDATE_USER_FAILD",
-					payload: { message: "User update faild.", user: null },
+					payload: { message: "User update faild." },
 				});
 			}
 		},
