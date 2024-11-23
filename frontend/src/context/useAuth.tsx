@@ -4,15 +4,16 @@ import { createContext, useContext, useReducer } from "react";
 
 import type { AuthContextType, AuthProviderProps } from "@/types/auth.types";
 
+import { useAuthReducer } from "@/reducers/auth.reducer";
+
 import useRegister from "@/hooks/auth/useRegister";
 import useLogin from "@/hooks/auth/useLogin";
-import  {  useAuthReducer } from "@/reducers/auth.reducer";
 import useLogout from "@/hooks/auth/useLogout";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: AuthProviderProps) {
-	const {authInitialState, authReducer} = useAuthReducer();
+	const { authInitialState, authReducer } = useAuthReducer();
 	const [state, dispatch] = useReducer(authReducer, authInitialState);
 
 	const registerMutation = useRegister(dispatch);
