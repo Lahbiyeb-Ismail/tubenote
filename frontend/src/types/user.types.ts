@@ -1,19 +1,23 @@
 import type { User } from '.';
 
+export type UpdateUserProps = {
+  username: string;
+  email: string;
+};
+
 export type UserState = {
-  user: User | null;
   message: string;
 };
 
 export type UserContextType = {
   state: UserState;
-  updateUser: (user: User) => void;
+  updateUser: (user: UpdateUserProps) => void;
   isLoading: boolean;
 };
 
 export type UserAction = {
   type: string;
-  payload: { user: User | null; message: string };
+  payload: { message: string };
 };
 
 export type UserProviderProps = {
