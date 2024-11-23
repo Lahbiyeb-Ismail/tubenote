@@ -1,41 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import useGetCurrentUser from "@/hooks/user/useGetCurrentUser";
 
 function withAuth<P extends object>(WrappedComponent: React.ComponentType<P>) {
 	return function WithAuth(props: P) {
-		const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(
-			null,
-		);
+		const { data: user, isLoading, isError } = useGetCurrentUser();
 		const router = useRouter();
 
 		useEffect(() => {
-			let isMounted = true;
+			if (!isLoading && !user) {
+				router.push("/login");
+			}
+		}, [user, isLoading, router]);
 
-			const checkAuth = () => {
-				try {
-					const accessToken = localStorage.getItem("accessToken");
-					if (!accessToken) {
-						router.push("/login");
-					} else if (isMounted) {
-						setIsAuthenticated(true);
-					}
-				} catch (error) {
-					console.error("Error checking authentication:", error);
-					router.push("/login");
-				}
-			};
+		if (isError) {
+			// Handle error state, maybe show an error message or redirect
+			router.push("/error");
+			return null;
+		}
 
-			checkAuth();
-
-			return () => {
-				isMounted = false;
-			};
-		}, [router]);
-
-		if (isAuthenticated === null) {
-			return null; // or a loading spinner
+		if (!user) {
+			return null; // This will be briefly shown before redirecting
 		}
 
 		return <WrappedComponent {...props} />;
