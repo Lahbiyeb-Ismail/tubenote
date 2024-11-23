@@ -1,17 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
 
 import { getCurrentUser } from "@/actions/user.actions";
+import { useLocalStorage } from "../global/useLocalStorage";
 
 function useGetCurrentUser() {
-	const accessToken = useMemo(() => {
-		if (typeof window !== "undefined") {
-			return localStorage.getItem("accessToken");
-		}
-		return null;
-	}, []);
+	const [accessToken] = useLocalStorage("accessToken", null);
 
 	return useQuery({
 		queryKey: ["current-user", accessToken],
