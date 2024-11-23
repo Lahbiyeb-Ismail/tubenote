@@ -1,13 +1,11 @@
 "use client";
 
 import { getRecentNotes } from "@/actions/note.actions";
-import { useAuth } from "@/context/useAuth";
 import { useQuery } from "@tanstack/react-query";
+import { useLocalStorage } from "../global/useLocalStorage";
 
 function useGetRecentNotes() {
-	const {
-		state: { accessToken },
-	} = useAuth();
+	const [accessToken] = useLocalStorage("accessToken", null);
 
 	return useQuery({
 		queryKey: ["notes", "recentNotes"],
