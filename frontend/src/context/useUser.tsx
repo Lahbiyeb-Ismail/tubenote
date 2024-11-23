@@ -13,7 +13,6 @@ import userReducer from "@/reducers/user.reducer";
 const userContext = createContext<UserContextType | undefined>(undefined);
 
 const userInitialState: UserState = {
-	user: null,
 	message: "",
 };
 
