@@ -9,10 +9,16 @@ import { loginUser } from "@/actions/auth.actions";
 import type { TypedError } from "@/types";
 import type { AuthAction } from "@/types/auth.types";
 import useGetCurrentUser from "../user/useGetCurrentUser";
+import { useLocalStorage } from "../global/useLocalStorage";
 
 function useLogin(dispatch: React.Dispatch<AuthAction>) {
 	const queryClient = useQueryClient();
 	const router = useRouter();
+
+	const [_, setAccessToken] = useLocalStorage<string | null>(
+		"accessToken",
+		null,
+	);
 	const { refetch: refetchCurrentUser } = useGetCurrentUser();
 
 	return useMutation({
@@ -27,7 +33,7 @@ function useLogin(dispatch: React.Dispatch<AuthAction>) {
 
 			queryClient.invalidateQueries({ queryKey: ["user", "current-user"] });
 
-			localStorage.setItem("accessToken", data.accessToken);
+			setAccessToken(data.accessToken);
 
 			dispatch({
 				type: "LOGIN_SUCCESS",
