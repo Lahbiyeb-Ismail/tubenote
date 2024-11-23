@@ -1,4 +1,6 @@
 import axiosInstance from '@/lib/axios.lib';
+
+import type { UpdateUserProps } from '@/types/user.types';
 import type { User } from '@/types';
 
 /**
@@ -20,10 +22,14 @@ export async function getCurrentUser(): Promise<{ user: User }> {
  * @param {User} user - The user object containing updated information.
  * @returns {Promise<{ message: string }>} A promise that resolves to an object containing a message.
  */
-export async function updateCurrentUser(
-  user: User
-): Promise<{ message: string }> {
-  const response = await axiosInstance.patch('/users/update-current', user);
+export async function updateCurrentUser({
+  username,
+  email,
+}: UpdateUserProps): Promise<{ message: string }> {
+  const response = await axiosInstance.patch('/users/update-current', {
+    username,
+    email,
+  });
 
   return response.data;
 }
