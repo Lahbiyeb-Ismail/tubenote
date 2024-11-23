@@ -28,13 +28,12 @@ function RegisterForm() {
 		},
 	});
 
-	const { isLoading, register, state } = useAuth();
+	const { isLoading, register } = useAuth();
 
 	const handleRegister = (formData: RegisterFormData) => register(formData);
 
 	return (
 		<AuthLayout
-			error={state.errorMessage}
 			title="Join TubeNote Today"
 			description="Unlock the full potential of video learning with our powerful tools"
 		>

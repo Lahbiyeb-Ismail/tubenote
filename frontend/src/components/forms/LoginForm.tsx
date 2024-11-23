@@ -29,7 +29,7 @@ function LoginForm() {
 		},
 	});
 
-	const { login, isLoading, state } = useAuth();
+	const { login, isLoading } = useAuth();
 
 	const handleLogin = (formData: LoginFormData) => login(formData);
 
@@ -37,7 +37,6 @@ function LoginForm() {
 		<AuthLayout
 			title="Welcome Back"
 			description="Login to your account to access your notes"
-			error={state.errorMessage}
 		>
 			<GoogleAuthButton />
 
