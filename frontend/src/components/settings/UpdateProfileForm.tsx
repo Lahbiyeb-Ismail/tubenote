@@ -10,20 +10,17 @@ import { Form } from "@/components/ui/form";
 
 import { updateProfileSchema } from "@/lib/schemas";
 import type { UpdateProfileData } from "@/types/auth.types";
-import { useAuth } from "@/context/useAuth";
-import useUpdateCurrentUser from "@/hooks/user/useUpdateCurrentUser";
 import { useUser } from "@/context/useUser";
+import useGetCurrentUser from "@/hooks/user/useGetCurrentUser";
 
 function UpdateProfileForm() {
-	const {
-		state: { user },
-	} = useAuth();
+	const { data } = useGetCurrentUser();
 
 	const form = useForm<UpdateProfileData>({
 		resolver: zodResolver(updateProfileSchema),
 		defaultValues: {
-			username: user?.username ?? "",
-			email: user?.email ?? "",
+			username: data?.user?.username ?? "",
+			email: data?.user?.email ?? "",
 		},
 	});
 
