@@ -1,11 +1,12 @@
 import type { AuthAction, AuthState } from '@/types/auth.types';
-import { useLocalStorage } from '@/hooks/global/useLocalStorage';
+import {
+  removeStorageValue,
+  getStorageValue,
+  setStorageValue,
+} from '@/utils/localStorage';
 
 export function useAuthReducer() {
-  const [accessToken, setAccessToken] = useLocalStorage<string | null>(
-    'accessToken',
-    null
-  );
+  const accessToken = getStorageValue<string>('accessToken');
 
   const authInitialState: AuthState = {
     errorMessage: '',
@@ -17,7 +18,7 @@ export function useAuthReducer() {
   function authReducer(state: AuthState, action: AuthAction): AuthState {
     switch (action.type) {
       case 'LOGIN_SUCCESS':
-        setAccessToken(action.payload.accessToken);
+        setStorageValue('accessToken', action.payload.accessToken);
         return {
           ...state,
           accessToken: action.payload.accessToken,
@@ -30,7 +31,7 @@ export function useAuthReducer() {
           successMessage: action.payload.successMessage,
         };
       case 'LOGOUT_SUCCESS':
-        setAccessToken(null);
+        removeStorageValue('accessToken');
         return {
           ...state,
           accessToken: null,
