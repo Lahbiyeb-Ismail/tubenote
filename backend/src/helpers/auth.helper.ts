@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 import generateAuthToken from './generateAuthToken';
 
@@ -9,6 +10,7 @@ import {
   REFRESH_TOKEN_EXPIRE,
   REFRESH_TOKEN_SECRET,
 } from '../constants/auth';
+import type { JwtPayload } from 'src/types';
 
 /**
  * Hashes a given password using bcrypt.
@@ -63,4 +65,27 @@ export async function createNewTokens(
   await createRefreshToken({ userId, token: refreshToken });
 
   return { accessToken, refreshToken };
+}
+
+/**
+ * Verifies a JWT token using the provided secret.
+ *
+ * @param token - The JWT token to verify.
+ * @param secret - The secret key to use for verification.
+ * @returns A promise that resolves with the decoded JWT payload if the token is valid, or rejects with an error if the token is invalid.
+ */
+export async function verifyToken(
+  token: string,
+  secret: string
+): Promise<JwtPayload> {
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, secret, (err, payload) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      resolve(payload as JwtPayload);
+    });
+  });
 }
