@@ -2,8 +2,9 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+
 import useGetCurrentUser from "@/hooks/user/useGetCurrentUser";
-import { useLocalStorage } from "@/hooks/global/useLocalStorage";
+import { setStorageValue } from "@/utils/localStorage";
 
 function AuthCallbackContent() {
 	const router = useRouter();
@@ -11,10 +12,6 @@ function AuthCallbackContent() {
 	const { refetch: refetchCurrentUser } = useGetCurrentUser();
 	const [status, setStatus] = useState<"loading" | "success" | "error">(
 		"loading",
-	);
-	const [_, setAccessToken] = useLocalStorage<string | null>(
-		"accessToken",
-		null,
 	);
 
 	useEffect(() => {
@@ -29,7 +26,7 @@ function AuthCallbackContent() {
 			}
 
 			try {
-				setAccessToken(parsedAccessToken);
+				setStorageValue("accessToken", parsedAccessToken);
 
 				await refetchCurrentUser();
 				setStatus("success");
@@ -42,7 +39,7 @@ function AuthCallbackContent() {
 		}
 
 		handleAccessToken();
-	}, [searchParams, router, refetchCurrentUser, setAccessToken]);
+	}, [searchParams, router, refetchCurrentUser]);
 
 	return (
 		<div className="flex min-h-screen items-center justify-center">
