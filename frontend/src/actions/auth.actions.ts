@@ -6,8 +6,10 @@ import type {
   LoginFormData,
   LoginUserResponse,
 } from '@/types/auth.types';
-import { API_URL } from '@/utils/constants';
 import axiosInstance from '@/lib/axios.lib';
+
+import { API_URL } from '@/utils/constants';
+import { setStorageValue } from '@/utils/localStorage';
 
 /**
  * Registers a new user with the provided registration credentials.
@@ -53,4 +55,26 @@ export async function loginUser(
  */
 export async function logoutUser(): Promise<void> {
   await axiosInstance.post(`${API_URL}/auth/logout`);
+}
+
+/**
+ * Refreshes the access token by making a POST request to the refresh endpoint.
+ *
+ * @returns {Promise<void>} A promise that resolves when the access token is refreshed.
+ *
+ * @throws Will log an error message if the token refresh fails.
+ */
+export async function refreshAccessToken(): Promise<void> {
+  try {
+    const response = await axios.post(
+      `${API_URL}/auth/refresh`,
+      {},
+      { withCredentials: true }
+    );
+    const newAccessToken = response.data.accessToken;
+    setStorageValue('accessToken', newAccessToken);
+    return newAccessToken;
+  } catch (error) {
+    console.error('Error refreshing token:', error);
+  }
 }
