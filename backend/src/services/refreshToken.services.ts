@@ -69,3 +69,24 @@ export async function deleteRefreshToken(token: string): Promise<void> {
     { errorMessage: 'Failed to delete refresh token.' }
   );
 }
+
+/**
+ * Deletes all refresh tokens associated with a given user ID.
+ *
+ * @param userId - The ID of the user whose refresh tokens are to be deleted.
+ * @returns A promise that resolves when the operation is complete.
+ * @throws Will throw an error if the operation fails.
+ */
+export async function deleteRefreshTokenByUserId(
+  userId: string
+): Promise<void> {
+  handleAsyncOperation(
+    () =>
+      prismaClient.refreshToken.deleteMany({
+        where: {
+          userId,
+        },
+      }),
+    { errorMessage: 'Failed to delete refresh token.' }
+  );
+}
