@@ -6,6 +6,7 @@ import {
   handleLogin,
   handleLogout,
   handleGoogleLogin,
+  handleRefreshToken,
 } from '../controllers/auth.controller';
 import validateRequestBody from '../middlewares/validateRequestBody';
 import { registrationSchema, loginSchema } from '../schemas/auth.schema';
@@ -19,6 +20,8 @@ router
 router.route('/login').post(validateRequestBody(loginSchema), handleLogin);
 
 router.route('/logout').post(handleLogout);
+
+router.route('/refresh').post(handleRefreshToken);
 
 router
   .route('/google')
