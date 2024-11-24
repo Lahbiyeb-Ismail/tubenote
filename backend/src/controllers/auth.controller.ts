@@ -1,10 +1,12 @@
-import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
+import jwt from 'jsonwebtoken';
+
+import type { Request, Response } from 'express';
 import type { Profile } from 'passport-google-oauth20';
 
-import { REFRESH_TOKEN_NAME } from '../constants/auth';
+import { REFRESH_TOKEN_NAME, REFRESH_TOKEN_SECRET } from '../constants/auth';
 
-import type { TypedRequest } from '../types';
+import type { JwtPayload, TypedRequest } from '../types';
 import type {
   GoogleUser,
   LoginCredentials,
@@ -27,8 +29,10 @@ import { findUser, updateUser } from '../services/user.services';
 import { createNewUser } from '../services/auth.services';
 import {
   deleteRefreshToken,
+  deleteRefreshTokenByUserId,
   findRefreshToken,
 } from '../services/refreshToken.services';
+import prismaClient from '../lib/prisma';
 
 /**
  * Handles user registration.
@@ -270,4 +274,90 @@ export async function handleLogout(req: Request, res: Response): Promise<void> {
   res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
   res.sendStatus(httpStatus.NO_CONTENT);
+}
+
+/**
+ * Handles the refresh token process for authentication.
+ *
+ * This function performs the following steps:
+ * 1. Retrieves the refresh token from the request cookies.
+ * 2. If the refresh token is not present, responds with an unauthorized status.
+ * 3. Clears the refresh token cookie.
+ * 4. Checks if the refresh token exists in the database.
+ * 5. If the refresh token is not found in the database, verifies the token and deletes all tokens for the user if the token is valid.
+ * 6. Deletes the refresh token from the database.
+ * 7. Verifies the refresh token and creates new access and refresh tokens if valid.
+ * 8. Sets the new refresh token in the response cookies and returns the new access token.
+ *
+ * @param req - The request object containing the cookies.
+ * @param res - The response object used to send the response.
+ * @returns A promise that resolves to void.
+ */
+export async function handleRefreshToken(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const cookies = req.cookies;
+
+  const refreshTokenFromCookies: string | undefined =
+    cookies[REFRESH_TOKEN_NAME];
+
+  if (!refreshTokenFromCookies) {
+    res.status(httpStatus.UNAUTHORIZED).json({
+      message: 'Unauthorized access. Please try again.',
+    });
+    return;
+  }
+
+  res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
+
+  const refreshTokenFromDB = await findRefreshToken(refreshTokenFromCookies);
+
+  // Detected refresh token reuse!
+  if (!refreshTokenFromDB) {
+    jwt.verify(
+      refreshTokenFromCookies,
+      REFRESH_TOKEN_SECRET,
+      async (err, payload) => {
+        if (err) {
+          res.sendStatus(httpStatus.FORBIDDEN);
+          return;
+        }
+
+        const { userId } = payload as JwtPayload;
+
+        // Delete all tokens of the user because we detected that a token was stolen from him
+        await deleteRefreshTokenByUserId(userId);
+      }
+    );
+    res.status(httpStatus.FORBIDDEN);
+    return;
+  }
+
+  // delete from db
+  await prismaClient.refreshToken.delete({
+    where: {
+      token: refreshTokenFromCookies,
+    },
+  });
+
+  // evaluate jwt
+  jwt.verify(
+    refreshTokenFromCookies,
+    REFRESH_TOKEN_SECRET,
+
+    async (err, payload) => {
+      const { userId } = payload as JwtPayload;
+      if (err || refreshTokenFromDB.userId !== userId) {
+        res.sendStatus(httpStatus.FORBIDDEN);
+        return;
+      }
+
+      const { accessToken, refreshToken } = await createNewTokens(userId);
+
+      res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+
+      res.json({ accessToken });
+    }
+  );
 }
