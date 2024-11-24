@@ -3,10 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { getRecentlyUpdatedNotes } from "@/actions/note.actions";
-import { useLocalStorage } from "../global/useLocalStorage";
+import { getStorageValue } from "@/utils/localStorage";
 
 function useGetRecentlyUpdatedNotes() {
-	const [accessToken] = useLocalStorage("accessToken", null);
+	const accessToken = getStorageValue<string>("accessToken");
 
 	return useQuery({
 		queryKey: ["notes", "recentlyUpdatedNotes"],

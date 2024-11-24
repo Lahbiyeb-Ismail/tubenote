@@ -3,10 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { getUserVideos } from "@/actions/video.actions";
-import { useLocalStorage } from "../global/useLocalStorage";
+import { getStorageValue } from "@/utils/localStorage";
 
 function useGetUserVideos() {
-	const [accessToken] = useLocalStorage("accessToken", null);
+	const accessToken = getStorageValue<string>("accessToken");
 
 	return useQuery({
 		queryKey: ["videos"],

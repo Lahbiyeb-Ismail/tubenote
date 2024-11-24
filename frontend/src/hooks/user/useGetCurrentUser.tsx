@@ -3,10 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { getCurrentUser } from "@/actions/user.actions";
-import { useLocalStorage } from "../global/useLocalStorage";
+import { getStorageValue } from "@/utils/localStorage";
 
 function useGetCurrentUser() {
-	const [accessToken] = useLocalStorage("accessToken", null);
+	const accessToken = getStorageValue<string>("accessToken");
 
 	return useQuery({
 		queryKey: ["current-user", accessToken],
