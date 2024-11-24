@@ -11,14 +11,13 @@
 	"scripts": {
 		"lint": "eslint '**/*.{js,jsx,ts,tsx}'",
 		"format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,md}'",
-		"dev:frontend": "yarn workspace frontend dev",
-		"dev:backend": "yarn workspace backend dev",
-		"build:frontend": "yarn workspace frontend build",
-		"build:backend": "yarn workspace backend build",
-		"start:frontend": "yarn workspace frontend start",
-		"start:backend": "yarn workspace backend start",
-		"start:dev": "concurrently \"yarn dev:frontend\" \"yarn dev:backend\"",
-		"start:build": "concurrently \"yarn start:frontend\" \"yarn start:backend\"",
+		"dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+		"dev:frontend": "npm run dev --workspace=frontend",
+		"dev:backend": "npm run dev --workspace=backend",
+		"build": "npm run build --workspaces",
+		"start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
+		"start:frontend": "npm run start --workspace=frontend",
+		"start:backend": "npm run start --workspace=backend",
 		"prepare": "husky"
 	},
 	"lint-staged": {
@@ -34,5 +33,9 @@
 		"lint-staged": "^15.2.7",
 		"prettier": "^3.3.2",
 		"pretty-quick": "^4.0.0"
+	},
+	"engines": {
+		"node": ">=14.0.0",
+		"npm": ">=6.14.0"
 	}
 }
