@@ -1,8 +1,17 @@
-import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import type {
+  AxiosError,
+  AxiosInstance,
+  InternalAxiosRequestConfig,
+} from 'axios';
 
 import { refreshAccessToken } from '@/actions/auth.actions';
-import { getStorageValue } from '@/utils/localStorage';
+import {
+  getStorageValue,
+  removeStorageValue,
+  setStorageValue,
+} from '@/utils/localStorage';
 import { isTokenExpired } from '@/utils/tokenUtils';
+import { set } from 'zod';
 
 /**
  * Handles the refresh token process by attempting to refresh the access token.
@@ -18,11 +27,13 @@ async function handleRefreshToken(
 ): Promise<void> {
   try {
     const newAccessToken = await refreshAccessToken();
+    setStorageValue('accessToken', newAccessToken);
     config.headers.Authorization = `Bearer ${newAccessToken}`;
   } catch (error) {
     // If refresh fails, redirect to login
+    removeStorageValue('accessToken');
     window.location.href = '/login';
-    return Promise.reject(error);
+    throw error;
   }
 }
 
@@ -52,7 +63,7 @@ export function setupRequestInterceptor(instance: AxiosInstance): void {
 
       return config;
     },
-    (error) => Promise.reject(error)
+    (error: AxiosError) => Promise.reject(error)
   );
 }
 
@@ -77,10 +88,18 @@ export function setupResponseInterceptor(instance: AxiosInstance): void {
 
         try {
           const newAccessToken = await refreshAccessToken();
+          setStorageValue('accessToken', newAccessToken);
+
           instance.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          }
+
           return instance(originalRequest);
         } catch (refreshError) {
+          removeStorageValue('accessToken');
+
           window.location.href = '/login';
           return Promise.reject(refreshError);
         }
