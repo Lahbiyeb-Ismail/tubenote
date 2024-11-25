@@ -66,6 +66,7 @@ export async function deleteRefreshToken(token: string): Promise<boolean> {
       error.code === 'P2025'
     ) {
       // Record not found, which is fine in this case
+      console.log(`Attempted to delete non-existent refresh token: ${token}`);
       return false;
     }
     // Re-throw other errors
