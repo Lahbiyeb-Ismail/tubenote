@@ -134,6 +134,7 @@ Below is a checklist of features that has been implemented:
 
 Below is a checklist of features planned for this application:
 
+- [ ] Pagination functionality
 - [ ] Search functionality for notes
 - [ ] Export notes to PDF
 - [ ] Share notes with other users
