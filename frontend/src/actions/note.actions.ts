@@ -6,6 +6,19 @@ import type {
   UpdateNoteProps,
 } from '@/types/note.types';
 
+type UserNotes = {
+  page: number;
+  limit: number;
+};
+
+export type Pagination = {
+  totalNotes: number;
+  totalPages: number;
+  currentPage: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+};
+
 /**
  * Creates a new note by sending a POST request to the '/notes' endpoint.
  *
@@ -19,16 +32,22 @@ export async function createNote(note: Note): Promise<CreateNoteResponse> {
 }
 
 /**
- * Fetches the notes for the current user.
+ * Fetches user notes with pagination.
  *
- * @returns {Promise<Note[]>} A promise that resolves to an array of notes.
+ * @param {Object} params - The parameters for fetching user notes.
+ * @param {number} params.page - The page number to fetch.
+ * @param {number} params.limit - The number of notes per page.
+ * @returns {Promise<{ notes: INote[]; pagination: Pagination }>} A promise that resolves to an object containing the notes and pagination information.
  */
-export async function getUserNotes(): Promise<INote[]> {
-  const response = await axiosInstance('/notes');
+export async function getUserNotes({
+  page,
+  limit,
+}: UserNotes): Promise<{ notes: INote[]; pagination: Pagination }> {
+  const response = await axiosInstance(`/notes?page=${page}&limit=${limit}`);
 
-  const notes = response.data.notes;
+  const { notes, pagination } = response.data;
 
-  return notes;
+  return { notes, pagination };
 }
 
 /**
