@@ -343,7 +343,16 @@ export async function handleRefreshToken(
     REFRESH_TOKEN_SECRET,
 
     async (err, payload) => {
-      const { userId } = payload as JwtPayload;
+      const { userId, exp } = payload as JwtPayload;
+
+      // Check if the token is expired
+      if (exp && Date.now() >= exp * 1000) {
+        res
+          .status(httpStatus.UNAUTHORIZED)
+          .json({ message: 'Refresh token expired. Please log in again.' });
+        return;
+      }
+
       if (err || refreshTokenFromDB.userId !== userId) {
         res.sendStatus(httpStatus.FORBIDDEN);
         return;
