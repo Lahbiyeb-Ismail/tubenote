@@ -32,7 +32,6 @@ import {
   deleteRefreshTokenByUserId,
   findRefreshToken,
 } from '../services/refreshToken.services';
-// import prismaClient from '../lib/prisma';
 
 /**
  * Handles user registration.
@@ -330,7 +329,9 @@ export async function handleRefreshToken(
         await deleteRefreshTokenByUserId(userId);
       }
     );
-    res.status(httpStatus.FORBIDDEN);
+    res.status(httpStatus.FORBIDDEN).json({
+      message: 'Invalid refresh token. Please log in again.',
+    });
     return;
   }
 
