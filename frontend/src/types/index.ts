@@ -11,3 +11,11 @@ export type User = {
   createAt: string;
   updatedAt: string;
 };
+
+export type Pagination = {
+  totalNotes: number;
+  totalPages: number;
+  currentPage: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+};

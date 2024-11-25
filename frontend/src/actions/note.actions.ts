@@ -1,4 +1,5 @@
 import axiosInstance from '@/lib/axios.lib';
+import type { Pagination } from '@/types';
 import type {
   CreateNoteResponse,
   INote,
@@ -9,14 +10,6 @@ import type {
 type UserNotes = {
   page: number;
   limit: number;
-};
-
-export type Pagination = {
-  totalNotes: number;
-  totalPages: number;
-  currentPage: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
 };
 
 /**

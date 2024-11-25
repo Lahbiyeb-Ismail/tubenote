@@ -2,9 +2,11 @@
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 
-import { getUserNotes, type Pagination } from "@/actions/note.actions";
+import { getUserNotes } from "@/actions/note.actions";
 import { getStorageValue } from "@/utils/localStorage";
+
 import type { INote } from "@/types/note.types";
+import type { Pagination } from "@/types";
 
 function useGetUserNotes({
 	page = 1,
