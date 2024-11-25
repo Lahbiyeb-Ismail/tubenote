@@ -11,6 +11,7 @@ import {
   fetchNoteById,
   fetchUserNotes,
   saveNote,
+  userNotesCount,
 } from '../services/note.services';
 
 /**
@@ -82,29 +83,45 @@ export async function createNote(
 }
 
 /**
- * Retrieves the notes for a specific user based on the user ID provided in the request payload.
+ * Retrieves the notes for a specific user with pagination.
  *
- * @param req - The request object containing the payload with the user ID.
- * @param res - The response object used to send back the appropriate HTTP response.
- *
- * @remarks
- * - If the user ID is not present in the request payload, the function responds
- * with a 401 Unauthorized status.
- * - If the user is not found in the database, the function responds with a
- * 404 Not Found status.
- * - If the notes are successfully retrieved, the function responds with a
- * 200 OK status and the notes data.
- * - If an error occurs during the process, the function responds with a
- * 500 Internal Server Error status.
- *
+ * @param req - The request object containing userId and query parameters for pagination.
+ * @param res - The response object used to send the notes and pagination information.
  * @returns A promise that resolves to void.
+ *
+ * The function extracts the userId from the request object and retrieves the page and limit
+ * query parameters for pagination. It calculates the number of notes to skip based on the
+ * current page and limit. Then, it fetches the total count of notes and the notes for the
+ * user concurrently. Finally, it calculates the total number of pages and sends the notes
+ * along with pagination information in the response.
  */
 export async function getUserNotes(req: Request, res: Response): Promise<void> {
   const userId = req.userId;
 
-  const notes = await fetchUserNotes({ userId });
+  // biome-ignore lint/complexity/useLiteralKeys: <explanation>
+  const page = req.query['page'] ? Number(req.query['page']) : 1;
+  // biome-ignore lint/complexity/useLiteralKeys: <explanation>
+  const limit = req.query['limit'] ? Number(req.query['limit']) : 8;
 
-  res.status(httpStatus.OK).json({ notes });
+  const skip = (page - 1) * limit;
+
+  const [notesCount, notes] = await Promise.all([
+    userNotesCount({ userId }),
+    fetchUserNotes({ userId, limit, skip }),
+  ]);
+
+  const totalPages = Math.ceil(notesCount / limit);
+
+  res.status(httpStatus.OK).json({
+    notes,
+    pagination: {
+      totalPages,
+      currentPage: page,
+      totalNotes: notesCount,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+    },
+  });
 }
 
 /**
