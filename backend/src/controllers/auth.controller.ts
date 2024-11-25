@@ -1,5 +1,5 @@
 import httpStatus from 'http-status';
-import jwt from 'jsonwebtoken';
+// import jwt from 'jsonwebtoken';
 
 import type { Request, Response } from 'express';
 import type { Profile } from 'passport-google-oauth20';
@@ -21,7 +21,11 @@ import envConfig from '../config/envConfig';
 
 import { sendEmail } from '../utils/sendEmail';
 
-import { checkPassword, createNewTokens } from '../helpers/auth.helper';
+import {
+  checkPassword,
+  createNewTokens,
+  verifyToken,
+} from '../helpers/auth.helper';
 import { createVerificationEmail } from '../helpers/verifyEmail.helper';
 
 import { createEmailVericationToken } from '../services/verifyEmail.services';
@@ -310,25 +314,28 @@ export async function handleRefreshToken(
 
   res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
+  const payload = await verifyToken(
+    refreshTokenFromCookies,
+    REFRESH_TOKEN_SECRET
+  );
+
+  const { userId, exp } = payload as JwtPayload;
+
+  // Check if the token is expired
+  if (exp && Date.now() >= exp * 1000) {
+    await deleteRefreshTokenByUserId(userId);
+    res
+      .status(httpStatus.UNAUTHORIZED)
+      .json({ message: 'Refresh token expired. Please log in again.' });
+    return;
+  }
+
   const refreshTokenFromDB = await findRefreshToken(refreshTokenFromCookies);
 
   // Detected refresh token reuse!
   if (!refreshTokenFromDB) {
-    jwt.verify(
-      refreshTokenFromCookies,
-      REFRESH_TOKEN_SECRET,
-      async (err, payload) => {
-        if (err) {
-          res.sendStatus(httpStatus.FORBIDDEN);
-          return;
-        }
+    await deleteRefreshTokenByUserId(userId);
 
-        const { userId } = payload as JwtPayload;
-
-        // Delete all tokens of the user because we detected that a token was stolen from him
-        await deleteRefreshTokenByUserId(userId);
-      }
-    );
     res.status(httpStatus.FORBIDDEN).json({
       message: 'Invalid refresh token. Please log in again.',
     });
@@ -337,32 +344,14 @@ export async function handleRefreshToken(
 
   await deleteRefreshToken(refreshTokenFromCookies);
 
-  // evaluate jwt
-  jwt.verify(
-    refreshTokenFromCookies,
-    REFRESH_TOKEN_SECRET,
+  if (refreshTokenFromDB.userId !== userId) {
+    res.sendStatus(httpStatus.FORBIDDEN);
+    return;
+  }
 
-    async (err, payload) => {
-      const { userId, exp } = payload as JwtPayload;
+  const { accessToken, refreshToken } = await createNewTokens(userId);
 
-      // Check if the token is expired
-      if (exp && Date.now() >= exp * 1000) {
-        res
-          .status(httpStatus.UNAUTHORIZED)
-          .json({ message: 'Refresh token expired. Please log in again.' });
-        return;
-      }
+  res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
-      if (err || refreshTokenFromDB.userId !== userId) {
-        res.sendStatus(httpStatus.FORBIDDEN);
-        return;
-      }
-
-      const { accessToken, refreshToken } = await createNewTokens(userId);
-
-      res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
-
-      res.json({ accessToken });
-    }
-  );
+  res.json({ accessToken });
 }
