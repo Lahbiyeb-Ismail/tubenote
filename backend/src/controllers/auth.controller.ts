@@ -32,7 +32,7 @@ import {
   deleteRefreshTokenByUserId,
   findRefreshToken,
 } from '../services/refreshToken.services';
-import prismaClient from '../lib/prisma';
+// import prismaClient from '../lib/prisma';
 
 /**
  * Handles user registration.
@@ -334,12 +334,7 @@ export async function handleRefreshToken(
     return;
   }
 
-  // delete from db
-  await prismaClient.refreshToken.delete({
-    where: {
-      token: refreshTokenFromCookies,
-    },
-  });
+  await deleteRefreshToken(refreshTokenFromCookies);
 
   // evaluate jwt
   jwt.verify(
