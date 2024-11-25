@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useGetCurrentUser from "@/hooks/user/useGetCurrentUser";
+import { removeStorageValue } from "@/utils/localStorage";
 
 function withAuth<P extends object>(WrappedComponent: React.ComponentType<P>) {
 	return function WithAuth(props: P) {
@@ -11,13 +12,15 @@ function withAuth<P extends object>(WrappedComponent: React.ComponentType<P>) {
 
 		useEffect(() => {
 			if (!isLoading && !user) {
+				removeStorageValue("accessToken");
 				router.push("/login");
 			}
 		}, [user, isLoading, router]);
 
 		if (isError) {
 			// Handle error state, maybe show an error message or redirect
-			router.push("/error");
+			removeStorageValue("accessToken");
+			router.push("/login");
 			return null;
 		}
 
