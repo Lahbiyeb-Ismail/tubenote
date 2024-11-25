@@ -17,21 +17,52 @@ type EditNoteProps = UserIdParam &
     data: Prisma.NoteUpdateInput;
   };
 
+type FetchUserNotesProps = UserIdParam &
+  OrderByParam & {
+    limit: number;
+    skip: number;
+  };
 /**
- * Fetches all notes associated with a specific user.
+ * Fetches notes for a specific user with pagination and sorting options.
  *
- * @param userId - The unique identifier of the user whose notes are to be fetched.
- * @returns A promise that resolves to an array of `Note` objects belonging to the specified user.
+ * @param {Object} params - The parameters for fetching user notes.
+ * @param {string} params.userId - The ID of the user whose notes are to be fetched.
+ * @param {number} params.limit - The maximum number of notes to fetch.
+ * @param {number} params.skip - The number of notes to skip (for pagination).
+ * @param {Object} [params.orderBy={ createdAt: 'desc' }] - The sorting order of the notes.
+ * @param {string} params.orderBy.createdAt - The sorting order based on the creation date.
+ * @returns {Promise<Note[]>} A promise that resolves to an array of notes.
+ * @throws Will throw an error if the notes could not be fetched.
  */
-export async function fetchUserNotes({ userId }: UserIdParam): Promise<Note[]> {
+export async function fetchUserNotes({
+  userId,
+  limit,
+  skip,
+  orderBy = { createdAt: 'desc' },
+}: FetchUserNotesProps): Promise<Note[]> {
   return handleAsyncOperation(
     () =>
       prismaClient.note.findMany({
         where: {
           userId,
         },
+        take: limit,
+        skip,
+        orderBy,
       }),
     { errorMessage: 'Failed to fetch user notes.' }
+  );
+}
+
+export async function userNotesCount({ userId }: UserIdParam): Promise<number> {
+  return handleAsyncOperation(
+    () =>
+      prismaClient.note.count({
+        where: {
+          userId,
+        },
+      }),
+    { errorMessage: 'Failed to count user notes.' }
   );
 }
 
