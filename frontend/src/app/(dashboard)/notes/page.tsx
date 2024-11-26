@@ -15,7 +15,7 @@ function NotesPage() {
 		defaultPage: 1,
 	});
 
-	const { data, isLoading } = useGetUserNotes({ page: currentPage, limit: 2 });
+	const { data, isLoading } = useGetUserNotes({ page: currentPage, limit: 8 });
 
 	if (isLoading) return <Laoder />;
 
