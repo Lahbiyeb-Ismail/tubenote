@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { DEFAULT_PAGE } from "@/utils/constants";
 
 interface UsePaginationProps {
 	defaultPage?: number;
 }
 
-function usePagination({ defaultPage = 1 }: UsePaginationProps) {
+function usePagination({ defaultPage = DEFAULT_PAGE }: UsePaginationProps) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 

@@ -10,12 +10,15 @@ import Laoder from "@/components/global/Loader";
 import NoDataFound from "@/components/dashboards/NoDataFound";
 import PaginationComponent from "@/components/global/Pagination";
 
-function NotesPage() {
-	const { currentPage, setPage } = usePagination({
-		defaultPage: 1,
-	});
+import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
 
-	const { data, isLoading } = useGetUserNotes({ page: currentPage, limit: 8 });
+function NotesPage() {
+	const { currentPage, setPage } = usePagination({ defaultPage: DEFAULT_PAGE });
+
+	const { data, isLoading } = useGetUserNotes({
+		page: currentPage,
+		limit: PAGE_LIMIT,
+	});
 
 	if (isLoading) return <Laoder />;
 

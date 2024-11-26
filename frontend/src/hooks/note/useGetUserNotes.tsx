@@ -8,9 +8,11 @@ import { getStorageValue } from "@/utils/localStorage";
 import type { INote } from "@/types/note.types";
 import type { Pagination } from "@/types";
 
+import { PAGE_LIMIT, DEFAULT_PAGE } from "@/utils/constants";
+
 function useGetUserNotes({
-	page = 1,
-	limit = 8,
+	page = DEFAULT_PAGE,
+	limit = PAGE_LIMIT,
 }: { page: number; limit: number }): UseQueryResult<{
 	notes: INote[];
 	pagination: Pagination;
