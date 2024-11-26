@@ -1,7 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+	Pagination,
+	PaginationContent,
+	PaginationEllipsis,
+	PaginationItem,
+	PaginationLink,
+	PaginationNext,
+	PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface PaginationProps {
 	currentPage: number;
@@ -9,36 +16,98 @@ interface PaginationProps {
 	onPageChange: (page: number) => void;
 }
 
-function Pagination({
+export default function PaginationComponent({
 	currentPage,
 	totalPages,
 	onPageChange,
 }: PaginationProps) {
+	const maxVisiblePages = 5;
+	const halfDisplayedPageCount = Math.floor(maxVisiblePages / 2);
+
+	let firstPage = Math.max(currentPage - halfDisplayedPageCount, 1);
+	const lastPage = Math.min(firstPage + maxVisiblePages - 1, totalPages);
+
+	if (lastPage - firstPage + 1 < maxVisiblePages) {
+		firstPage = Math.max(lastPage - maxVisiblePages + 1, 1);
+	}
+
+	const pageNumbers = Array.from(
+		{ length: totalPages },
+		(_, i) => firstPage + i,
+	);
+
 	return (
-		<div className="flex items-center justify-center space-x-6 mt-8">
-			<Button
-				variant="outline"
-				size="icon"
-				onClick={() => onPageChange(currentPage - 1)}
-				disabled={currentPage === 1}
-			>
-				<ChevronLeft className="h-4 w-4" />
-				<span className="sr-only">Previous page</span>
-			</Button>
-			<span className="text-sm font-medium">
-				Page {currentPage} of {totalPages}
-			</span>
-			<Button
-				variant="outline"
-				size="icon"
-				onClick={() => onPageChange(currentPage + 1)}
-				disabled={currentPage === totalPages}
-			>
-				<ChevronRight className="h-4 w-4" />
-				<span className="sr-only">Next page</span>
-			</Button>
-		</div>
+		<Pagination>
+			<PaginationContent>
+				<PaginationItem>
+					<PaginationPrevious
+						href="#"
+						onClick={(e) => {
+							e.preventDefault();
+							if (currentPage > 1) onPageChange(currentPage - 1);
+						}}
+					/>
+				</PaginationItem>
+
+				{firstPage > 1 && (
+					<>
+						<PaginationItem>
+							<PaginationLink
+								href="#"
+								onClick={(e) => {
+									e.preventDefault();
+									onPageChange(1);
+								}}
+							>
+								1
+							</PaginationLink>
+						</PaginationItem>
+						{firstPage > 2 && <PaginationEllipsis />}
+					</>
+				)}
+
+				{pageNumbers.map((pageNumber) => (
+					<PaginationItem key={pageNumber}>
+						<PaginationLink
+							href="#"
+							isActive={pageNumber === currentPage}
+							onClick={(e) => {
+								e.preventDefault();
+								onPageChange(pageNumber);
+							}}
+						>
+							{pageNumber}
+						</PaginationLink>
+					</PaginationItem>
+				))}
+
+				{lastPage < totalPages && (
+					<>
+						{lastPage < totalPages - 1 && <PaginationEllipsis />}
+						<PaginationItem>
+							<PaginationLink
+								href="#"
+								onClick={(e) => {
+									e.preventDefault();
+									onPageChange(totalPages);
+								}}
+							>
+								{totalPages}
+							</PaginationLink>
+						</PaginationItem>
+					</>
+				)}
+
+				<PaginationItem>
+					<PaginationNext
+						href="#"
+						onClick={(e) => {
+							e.preventDefault();
+							if (currentPage < totalPages) onPageChange(currentPage + 1);
+						}}
+					/>
+				</PaginationItem>
+			</PaginationContent>
+		</Pagination>
 	);
 }
-
-export default Pagination;
