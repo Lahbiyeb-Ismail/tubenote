@@ -1,22 +1,17 @@
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
-import { CalendarIcon, ClockIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import type { INote } from "@/types/note.types";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 import { useNote } from "@/context/useNote";
 import { useLayout } from "@/context/useLayout";
 import { useModal } from "@/context/useModal";
+
+import { Card } from "@/components/ui/card";
+
+import CardSettingsButton from "@/components/global/CardSettingsButton";
+import CardImage from "@/components/global/CardImage";
+import CardContent from "@/components/global/CardContent";
+import CardFooterComponent from "@/components/global/CardFooterComponent";
 
 type NoteCardProps = {
 	note: INote;
@@ -39,6 +34,11 @@ function NoteCard({ note }: NoteCardProps) {
 		});
 	};
 
+	const handleExportClick = () => {
+		// Implement export functionality here
+		console.log("Exporting note:", note.id);
+	};
+
 	return (
 		<Card
 			className={`overflow-hidden bg-white shadow-md transition-all duration-300 hover:shadow-lg ${
@@ -46,72 +46,34 @@ function NoteCard({ note }: NoteCardProps) {
 			}`}
 		>
 			<div className={`${isGridLayout ? "" : "flex"}`}>
+				<CardImage
+					src={note.thumbnail ?? "/images/placeholder.jpg"}
+					alt={note.title}
+					isGridLayout={isGridLayout}
+				/>
 				<div
-					className={`relative ${
-						isGridLayout ? "h-48 w-full" : "w-40 flex-shrink-0"
+					className={`flex-grow ${
+						isGridLayout ? "" : "flex flex-col justify-between"
 					}`}
 				>
-					<Image
-						src={note.thumbnail || "/images/placeholder.jpg"}
-						alt={note.title}
-						fill
-						className="object-cover"
+					<div className="flex justify-end p-2">
+						<CardSettingsButton
+							onEdit={() => getNote(note.id)}
+							onDelete={handleDeleteClick}
+							onExport={handleExportClick}
+						/>
+					</div>
+					<CardContent
+						cardTitle={note.videoTitle ?? ""}
+						cardDescription={`Note Title: ${note.title}`}
+						isGridLayout={isGridLayout}
 					/>
-				</div>
-				<div
-					className={` flex-grow ${
-						isGridLayout ? "" : "flex flex-row justify-between"
-					}`}
-				>
-					<CardHeader className={`${isGridLayout ? "space-y-2" : "space-y-0"}`}>
-						<div className="flex justify-between items-start">
-							<CardTitle
-								className={`font-bold ${
-									isGridLayout ? "text-xl line-clamp-2" : "text-lg line-clamp-1"
-								}`}
-							>
-								{note.videoTitle}
-							</CardTitle>
-						</div>
-						<CardDescription className="text-sm text-muted-foreground line-clamp-1">
-							Note Title: {note.title}
-						</CardDescription>
-					</CardHeader>
-					<CardFooter
-						className={`flex justify-between ${
-							isGridLayout ? "flex-row p-4 pt-0" : "flex-col p-4 space-y-1"
-						}`}
-					>
-						<Button
-							variant="outline"
-							size={!isGridLayout ? "icon" : "sm"}
-							className={`text-blue-600 hover:text-blue-700 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed ${
-								!isGridLayout ? "w-10 h-10 p-0" : ""
-							}`}
-							onClick={() => getNote(note.id)}
-							disabled={isLoading}
-						>
-							<PencilIcon
-								className={`h-4 w-4 ${!isGridLayout ? "m-0" : "mr-2"}`}
-							/>
-							{isGridLayout && "Edit"}
-						</Button>
-						<Button
-							variant="outline"
-							size={!isGridLayout ? "icon" : "sm"}
-							className={`text-red-700 hover:text-red-800 hover:bg-red-50 disabled:opacity-50
-                  disabled:cursor-not-allowed ${
-										!isGridLayout ? "w-10 h-10 p-0" : ""
-									}`}
-							onClick={handleDeleteClick}
-							disabled={isLoading}
-						>
-							<Trash2Icon
-								className={`h-4 w-4 ${!isGridLayout ? "m-0" : "mr-2"}`}
-							/>
-							{isGridLayout && "Delete"}
-						</Button>
-					</CardFooter>
+					<CardFooterComponent
+						onEdit={() => getNote(note.id)}
+						onDelete={handleDeleteClick}
+						isGridLayout={isGridLayout}
+						isLoading={isLoading}
+					/>
 				</div>
 			</div>
 		</Card>
