@@ -8,6 +8,7 @@ import React, {
 } from "react";
 
 type ModalContent = {
+	noteId: string;
 	title: string;
 	description: string;
 	confirmText: string;
