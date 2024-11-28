@@ -6,7 +6,6 @@ import type { NoteContextType, NoteProviderProps } from "@/types/note.types";
 
 import useCreateNote from "@/hooks/note/useCreateNote";
 import useDeleteNote from "@/hooks/note/useDeleteNote";
-import useGetNoteById from "@/hooks/note/useGetNoteById";
 import useUpdateNote from "@/hooks/note/useUpdateNote";
 
 import noteReducer, { noteInitialState } from "@/reducers/note.reducer";
@@ -18,7 +17,6 @@ export function NoteProvider({ children }: NoteProviderProps) {
 
 	const createNoteMutation = useCreateNote(dispatch);
 	const deleteNoteMutation = useDeleteNote();
-	const getNoteMutation = useGetNoteById(dispatch);
 	const updateNoteMutation = useUpdateNote(dispatch);
 
 	const clearNoteState = () => {
@@ -28,12 +26,8 @@ export function NoteProvider({ children }: NoteProviderProps) {
 	const value = {
 		state,
 		createNote: createNoteMutation.mutate,
-		isLoading:
-			createNoteMutation.isPending ||
-			deleteNoteMutation.isPending ||
-			getNoteMutation.isPending,
+		isLoading: createNoteMutation.isPending || deleteNoteMutation.isPending,
 		deleteNote: deleteNoteMutation.mutate,
-		getNote: getNoteMutation.mutate,
 		updateNote: updateNoteMutation.mutate,
 		clearNoteState,
 	};
