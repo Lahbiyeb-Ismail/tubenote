@@ -20,7 +20,8 @@ function Editor({ params }: { params: { noteId: string } }) {
 			action="update"
 			initialNoteContent={data.content}
 			noteTitle={data.title}
-			videoId={data.youtubeId}
+			noteId={data.id}
+			videoId={data.youtubeId as string}
 		/>
 	);
 }
