@@ -1,20 +1,26 @@
 "use client";
 
-import { useNote } from "@/context/useNote";
-
 import EditorPage from "@/components/editor/EditorPage";
+import useGetNoteById from "@/hooks/note/useGetNoteById";
 
 function Editor({ params }: { params: { noteId: string } }) {
-	const {
-		state: { note },
-	} = useNote();
+	const { noteId } = params;
+	const { data, isLoading, isError } = useGetNoteById(noteId);
+
+	if (isLoading || !data) {
+		return <div>Loading...</div>;
+	}
+
+	if (isError) {
+		return <div>Error...</div>;
+	}
 
 	return (
 		<EditorPage
 			action="update"
-			initialNoteContent={note?.content}
-			noteTitle={note?.title}
-			videoId={note?.youtubeId}
+			initialNoteContent={data.content}
+			noteTitle={data.title}
+			videoId={data.youtubeId}
 		/>
 	);
 }
