@@ -12,6 +12,8 @@ import CardSettingsButton from "@/components/global/CardSettingsButton";
 import CardImage from "@/components/global/CardImage";
 import CardContent from "@/components/global/CardContent";
 import CardFooterComponent from "@/components/global/CardFooterComponent";
+import { exportNoteAsPDF } from "@/actions/note.actions";
+import axiosInstance from "@/lib/axios.lib";
 
 type NoteCardProps = {
 	note: INote;
@@ -34,9 +36,24 @@ function NoteCard({ note }: NoteCardProps) {
 		});
 	};
 
-	const handleExportClick = () => {
-		// Implement export functionality here
-		console.log("Exporting note:", note.id);
+	const handleExportClick = async () => {
+		const response = await axiosInstance.post(
+			`/notes/export-pdf/${note.id}`,
+			{},
+			{
+				responseType: "blob",
+			},
+		);
+		console.log("data ->", response.data);
+
+		const blob = new Blob([response.data], { type: "application/pdf" });
+		const url = window.URL.createObjectURL(blob);
+		const link = document.createElement("a");
+		link.href = url;
+		link.setAttribute("download", `note-${note.id}.pdf`);
+		document.body.appendChild(link);
+		link.click();
+		link.parentNode?.removeChild(link);
 	};
 
 	return (
