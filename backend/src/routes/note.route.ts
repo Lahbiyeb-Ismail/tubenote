@@ -25,7 +25,7 @@ router.route('/').get(isAuthenticated, getUserNotes);
 
 router.route('/:noteId').delete(isAuthenticated, deleteNote);
 
-router.route('/:noteId').post(isAuthenticated, getNoteById);
+router.route('/:noteId').get(isAuthenticated, getNoteById);
 
 router.route('/:noteId').patch(isAuthenticated, updateNote);
 
