@@ -4,7 +4,7 @@ import { useNote } from "@/context/useNote";
 
 import EditorPage from "@/components/editor/EditorPage";
 
-function Editor() {
+function Editor({ params }: { params: { noteId: string } }) {
 	const {
 		state: { note },
 	} = useNote();
