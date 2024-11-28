@@ -12,8 +12,6 @@ import CardSettingsButton from "@/components/global/CardSettingsButton";
 import CardImage from "@/components/global/CardImage";
 import CardContent from "@/components/global/CardContent";
 import CardFooterComponent from "@/components/global/CardFooterComponent";
-import { exportNoteAsPDF } from "@/actions/note.actions";
-import axiosInstance from "@/lib/axios.lib";
 
 type NoteCardProps = {
 	note: INote;
@@ -34,26 +32,6 @@ function NoteCard({ note }: NoteCardProps) {
 			action: "delete",
 			onConfirm: () => deleteNote(note.id),
 		});
-	};
-
-	const handleExportClick = async () => {
-		const response = await axiosInstance.post(
-			`/notes/export-pdf/${note.id}`,
-			{},
-			{
-				responseType: "blob",
-			},
-		);
-		console.log("data ->", response.data);
-
-		const blob = new Blob([response.data], { type: "application/pdf" });
-		const url = window.URL.createObjectURL(blob);
-		const link = document.createElement("a");
-		link.href = url;
-		link.setAttribute("download", `note-${note.id}.pdf`);
-		document.body.appendChild(link);
-		link.click();
-		link.parentNode?.removeChild(link);
 	};
 
 	return (
@@ -77,12 +55,15 @@ function NoteCard({ note }: NoteCardProps) {
 						<CardSettingsButton
 							onEdit={() => getNote(note.id)}
 							onDelete={handleDeleteClick}
-							onExport={handleExportClick}
+							onExport={() => {
+								console.log("Export as PDF");
+							}}
 						/>
 					</div>
 					<CardContent
 						cardTitle={note.videoTitle ?? ""}
 						cardDescription={`Note Title: ${note.title}`}
+						noteId={note.id}
 						isGridLayout={isGridLayout}
 					/>
 					<CardFooterComponent
