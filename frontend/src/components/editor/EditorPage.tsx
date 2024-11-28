@@ -16,13 +16,15 @@ import { useLayout } from "@/context/useLayout";
 const AppMDXEditor = dynamic(() => import("./AppMDXEditor"), { ssr: false });
 
 type EditorPageProps = {
-	videoId?: string;
-	initialNoteContent?: string;
-	noteTitle?: string;
+	videoId: string;
+	initialNoteContent: string;
+	noteTitle: string;
+	noteId: string;
 	action?: "create" | "update";
 };
 
 function EditorPage({
+	noteId,
 	initialNoteContent,
 	noteTitle,
 	videoId,
@@ -64,6 +66,7 @@ function EditorPage({
 								action={action}
 								initialNoteContent={initialNoteContent}
 								noteTitle={noteTitle}
+								noteId={noteId}
 							/>
 						</Suspense>
 					</ResizablePanel>

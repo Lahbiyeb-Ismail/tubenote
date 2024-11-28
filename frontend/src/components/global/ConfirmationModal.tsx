@@ -26,6 +26,7 @@ function ConfirmationModal() {
 		action,
 		noteContent,
 		noteTitle,
+		noteId,
 	} = modalContent;
 
 	const handleConfirm = () => {
@@ -54,7 +55,8 @@ function ConfirmationModal() {
 						<SaveNoteForm
 							action={action}
 							noteContent={noteContent || ""}
-							noteTitle={noteTitle}
+							noteTitle={noteTitle as string}
+							noteId={noteId}
 							cancelText={cancelText}
 							closeModal={closeModal}
 						/>

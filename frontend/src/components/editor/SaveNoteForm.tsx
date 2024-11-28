@@ -10,7 +10,8 @@ import { useNote } from "@/context/useNote";
 import { Button } from "../ui/button";
 
 type SaveNoteFormProps = {
-	noteTitle?: string;
+	noteId: string;
+	noteTitle: string;
 	noteContent: string;
 	cancelText: string;
 	action: "update" | "create";
@@ -18,6 +19,7 @@ type SaveNoteFormProps = {
 };
 
 function SaveNoteForm({
+	noteId,
 	noteTitle: title,
 	noteContent,
 	action,
@@ -40,12 +42,7 @@ function SaveNoteForm({
 		videoCurrentTime,
 	} = useVideo();
 
-	const {
-		createNote,
-		isLoading,
-		updateNote,
-		state: { note },
-	} = useNote();
+	const { createNote, isLoading, updateNote } = useNote();
 
 	const handleNoteSave: SubmitHandler<NoteTitle> = (data: NoteTitle) => {
 		if (action === "create") {
@@ -60,7 +57,7 @@ function SaveNoteForm({
 			});
 		} else {
 			updateNote({
-				noteId: note?.id,
+				noteId,
 				title: data.noteTitle,
 				content: noteContent,
 				timestamp: videoCurrentTime,

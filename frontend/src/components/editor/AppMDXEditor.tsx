@@ -41,8 +41,6 @@ import {
 import "@mdxeditor/editor/style.css";
 
 import { Button } from "../ui/button";
-import SaveNoteForm from "./SaveNoteForm";
-import ConfirmationModal from "../global/ConfirmationModal";
 import { useModal } from "@/context/useModal";
 
 function whenInAdmonition(editorInFocus: EditorInFocus | null) {
@@ -153,14 +151,16 @@ const myPlugins = [
 ];
 
 type AppMDXEditorProps = {
-	initialNoteContent?: string;
-	noteTitle?: string;
+	initialNoteContent: string;
+	noteTitle: string;
+	noteId: string;
 	action: "create" | "update";
 };
 
 const AppMDXEditor = ({
 	initialNoteContent,
 	noteTitle,
+	noteId,
 	action,
 }: AppMDXEditorProps) => {
 	const ref = useRef<MDXEditorMethods | null>(null);
@@ -178,9 +178,8 @@ const AppMDXEditor = ({
 			noteContent: ref.current?.getMarkdown() || "",
 			noteTitle,
 			action,
+			noteId,
 		});
-
-		// console.log(noteContent);
 	};
 
 	return (
