@@ -63,7 +63,7 @@ export async function deleteNote(noteId: string): Promise<{ message: string }> {
  * @returns {Promise<INote>} A promise that resolves to the note object.
  */
 export async function getNoteById(noteId: string): Promise<INote> {
-  const response = await axiosInstance.post(`/notes/${noteId}`);
+  const response = await axiosInstance.get(`/notes/${noteId}`);
 
   return response.data.note;
 }
