@@ -113,3 +113,15 @@ export async function getRecentlyUpdatedNotes(): Promise<INote[]> {
 
   return response.data.notes;
 }
+
+export async function exportNoteAsPDF(noteId: string) {
+  const response = await axiosInstance.post(
+    `/notes/export-pdf/${noteId}`,
+    {},
+    {
+      responseType: 'blob',
+    }
+  );
+
+  return response.data;
+}
