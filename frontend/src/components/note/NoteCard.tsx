@@ -18,7 +18,7 @@ type NoteCardProps = {
 };
 
 function NoteCard({ note }: NoteCardProps) {
-	const { deleteNote, isLoading, getNote } = useNote();
+	const { deleteNote, isLoading } = useNote();
 	const { isGridLayout } = useLayout();
 	const { openModal } = useModal();
 
@@ -53,7 +53,8 @@ function NoteCard({ note }: NoteCardProps) {
 				>
 					<div className="flex justify-end p-2">
 						<CardSettingsButton
-							onEdit={() => getNote(note.id)}
+							noteId={note.id}
+							onEdit={() => {}}
 							onDelete={handleDeleteClick}
 							onExport={() => {
 								console.log("Export as PDF");
@@ -67,7 +68,8 @@ function NoteCard({ note }: NoteCardProps) {
 						isGridLayout={isGridLayout}
 					/>
 					<CardFooterComponent
-						onEdit={() => getNote(note.id)}
+						noteId={note.id}
+						onEdit={() => {}}
 						onDelete={handleDeleteClick}
 						isGridLayout={isGridLayout}
 						isLoading={isLoading}

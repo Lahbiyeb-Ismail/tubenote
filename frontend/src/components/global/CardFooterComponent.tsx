@@ -4,8 +4,10 @@ import { PencilIcon, Trash2Icon } from "lucide-react";
 
 import { CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 type CardFooterProps = {
+	noteId: string;
 	onEdit: () => void;
 	onDelete: () => void;
 	isLoading: boolean;
@@ -13,6 +15,7 @@ type CardFooterProps = {
 };
 
 function CardFooterComponent({
+	noteId,
 	onEdit,
 	onDelete,
 	isLoading,
@@ -24,18 +27,20 @@ function CardFooterComponent({
 				isGridLayout ? "flex-row p-4 pt-4" : "flex-col p-4 space-y-1"
 			}`}
 		>
-			<Button
-				variant="outline"
-				size={!isGridLayout ? "icon" : "sm"}
-				className={`text-blue-600 hover:text-blue-700 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed ${
-					!isGridLayout ? "w-10 h-10 p-0" : ""
-				}`}
-				onClick={onEdit}
-				disabled={isLoading}
-			>
-				<PencilIcon className={`h-4 w-4 ${!isGridLayout ? "m-0" : "mr-2"}`} />
-				{isGridLayout && "Edit"}
-			</Button>
+			<Link href={`/editor/update/${noteId}`}>
+				<Button
+					variant="outline"
+					size={!isGridLayout ? "icon" : "sm"}
+					className={`text-blue-600 hover:text-blue-700 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed ${
+						!isGridLayout ? "w-10 h-10 p-0" : ""
+					}`}
+					// onClick={onEdit}
+					disabled={isLoading}
+				>
+					<PencilIcon className={`h-4 w-4 ${!isGridLayout ? "m-0" : "mr-2"}`} />
+					{isGridLayout && "Edit"}
+				</Button>
+			</Link>
 			<Button
 				variant="outline"
 				size={!isGridLayout ? "icon" : "sm"}

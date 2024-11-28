@@ -8,14 +8,17 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 type CardSettingsButtonProps = {
+	noteId: string;
 	onEdit: () => void;
 	onDelete: () => void;
 	onExport: () => void;
 };
 
 function CardSettingsButton({
+	noteId,
 	onDelete,
 	onEdit,
 	onExport,
@@ -30,15 +33,12 @@ function CardSettingsButton({
 			</PopoverTrigger>
 			<PopoverContent className="w-40">
 				<div className="flex flex-col space-y-1">
-					<Button
-						variant="ghost"
-						size="sm"
-						className="justify-start"
-						onClick={onEdit}
-					>
-						<PencilIcon className="mr-2 h-4 w-4" />
-						Edit
-					</Button>
+					<Link href={`/editor/update/${noteId}`}>
+						<Button variant="ghost" size="sm" className="justify-start">
+							<PencilIcon className="mr-2 h-4 w-4" />
+							Edit
+						</Button>
+					</Link>
 					<Button
 						variant="ghost"
 						size="sm"
