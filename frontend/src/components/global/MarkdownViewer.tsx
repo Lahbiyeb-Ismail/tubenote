@@ -13,7 +13,7 @@ interface MarkdownViewerProps {
 
 function MarkdownViewer({ content, className }: MarkdownViewerProps) {
 	return (
-		<Card className={cn("overflow-hidden", className)}>
+		<Card className={cn("h-full overflow-auto", className)}>
 			<Markdown
 				className={cn(
 					"prose dark:prose-invert max-w-none p-6",
