@@ -1,3 +1,7 @@
+"use client"
+
+import Link from "next/link";
+import { Edit, Youtube } from "lucide-react";
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -5,68 +9,76 @@ import {
 	BreadcrumbList,
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 type NotePageHeaderProps = {
 	noteId: string;
 	noteTitle: string;
+	onToggleVideo?: () => void;
+	isVideoVisible?: boolean;
 };
 
-function NotePageHeader({ noteId, noteTitle }: NotePageHeaderProps) {
+function NotePageHeader({
+	noteId,
+	noteTitle,
+	onToggleVideo,
+	isVideoVisible,
+}: NotePageHeaderProps) {
 	return (
-		<header className="border-b bg-muted/40">
-			<div className="container p-4">
-				<Breadcrumb>
-					<BreadcrumbList>
-						<BreadcrumbItem>
-							<BreadcrumbLink href="/notes">Notes</BreadcrumbLink>
-						</BreadcrumbItem>
-						<BreadcrumbSeparator />
-						<BreadcrumbItem>
-							<BreadcrumbLink href={`/notes/${noteId}`}>
-								{noteTitle}
-							</BreadcrumbLink>
-						</BreadcrumbItem>
-					</BreadcrumbList>
-				</Breadcrumb>
-
-				{/* <div className="space-y-4">
-						<h1 className="text-4xl font-bold tracking-tight">{data.title}</h1>
-
-						<div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-							<div className="flex items-center gap-1">
-								<User className="h-4 w-4" />
-								<span>{data.author}</span>
-							</div>
-							<div className="flex items-center gap-1">
-								<CalendarDays className="h-4 w-4" />
-								<time dateTime={data.createdAt}>
-									{format(new Date(data.createdAt), "MMMM d, yyyy")}
-								</time>
-							</div>
-							<div className="flex items-center gap-1">
-								<Clock className="h-4 w-4" />
-								<time dateTime={data.updatedAt}>
-									Updated {format(new Date(data.updatedAt), "MMMM d, yyyy")}
-								</time>
-							</div>
+		<header className="border-b bg-muted/40 dark:from-gray-800 dark:to-gray-900">
+			<div className="container py-4 px-6">
+				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+					<Breadcrumb>
+						<BreadcrumbList>
+							<BreadcrumbItem>
+								<BreadcrumbLink
+									href="/notes"
+									className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+								>
+									Notes
+								</BreadcrumbLink>
+							</BreadcrumbItem>
+							<BreadcrumbSeparator />
+							<BreadcrumbItem>
+								<BreadcrumbLink
+									href={`/notes/${noteId}`}
+									className="font-semibold text-gray-800 dark:text-gray-200"
+								>
+									{noteTitle}
+								</BreadcrumbLink>
+							</BreadcrumbItem>
+						</BreadcrumbList>
+					</Breadcrumb>
+					<div className="flex items-center space-x-4">
+						<Button
+							variant="outline"
+							size="sm"
+							asChild
+							className="bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-gray-500 transition-all duration-300 shadow-sm hover:shadow"
+						>
+							<Link href={`/editor/update/${noteId}`}>
+								<Edit className="mr-2 h-4 w-4" />
+								Edit Note
+							</Link>
+						</Button>
+						<div className="flex items-center space-x-2">
+							<Switch
+								id="video-toggle"
+								checked={isVideoVisible}
+								onCheckedChange={onToggleVideo}
+								className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200 dark:data-[state=unchecked]:bg-gray-700"
+							/>
+							<Label
+								htmlFor="video-toggle"
+								className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer select-none"
+							>
+								{isVideoVisible ? "Hide Video" : "Show Video"}
+							</Label>
 						</div>
-
-						{data.tags && data.tags.length > 0 && (
-							<div className="flex flex-wrap gap-2">
-								{data.tags.map((tag) => (
-									<Button
-										key={tag}
-										variant="secondary"
-										size="sm"
-										className="rounded-full"
-										asChild
-									>
-										<a href={`/notes/tags/${tag}`}>#{tag}</a>
-									</Button>
-								))}
-							</div>
-						)}
-					</div> */}
+					</div>
+				</div>
 			</div>
 		</header>
 	);
