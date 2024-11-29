@@ -1,7 +1,8 @@
 import * as React from "react";
 import Markdown from "markdown-to-jsx";
+
+import CodeBlock from "@/components/global/CodeBlock";
 import { cn } from "@/lib/utils";
-import CodeBlock from "./CodeBlock";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
@@ -25,7 +26,6 @@ function MarkdownViewer({ content, className }: MarkdownViewerProps) {
 					"prose-list:my-6 prose-list:ml-6 prose-li:mt-2",
 					"prose-blockquote:border-l-2 prose-blockquote:border-primary prose-blockquote:pl-6 prose-blockquote:italic",
 					"prose-img:rounded-md prose-img:border prose-img:border-muted",
-					"[&_:not(pre)>code]:rounded-md [&_:not(pre)>code]:bg-muted [&_:not(pre)>code]:px-1.5 [&_:not(pre)>code]:py-0.5 [&_:not(pre)>code]:font-mono [&_:not(pre)>code]:text-sm",
 					"prose-a:text-primary prose-a:underline-offset-4 hover:prose-a:text-primary/80",
 					"prose-hr:border-border",
 				)}
@@ -42,31 +42,6 @@ function MarkdownViewer({ content, className }: MarkdownViewerProps) {
 						code: {
 							component: CodeBlock,
 						},
-						pre: {
-							component: ({ children, className, ...props }) => {
-								// Extract language and metadata from className
-								const match = className?.match(/language-(\w+)(.*)/) || [];
-								const language = match[1] || "typescript";
-								const metadata = match[2]?.trim() || "";
-
-								// If children is a CodeBlock component, pass the language prop
-								if (children?.type === CodeBlock) {
-									return React.cloneElement(children, {
-										language,
-										metadata,
-										className: "mt-6",
-									});
-								}
-
-								// Otherwise, render as normal pre
-								return (
-									<pre className="mt-6" {...props}>
-										{children}
-									</pre>
-								);
-							},
-						},
-						// Table overrides for better styling
 						table: {
 							component: ({ children, ...props }) => (
 								<div className="my-6 w-full overflow-y-auto">
