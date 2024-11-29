@@ -14,8 +14,8 @@ type NotePageHeaderProps = {
 function NotePageHeader({ noteId, noteTitle }: NotePageHeaderProps) {
 	return (
 		<header className="border-b bg-muted/40">
-			<div className="container max-w-4xl mx-auto px-4 py-8">
-				<Breadcrumb className="mb-6">
+			<div className="container p-4">
+				<Breadcrumb>
 					<BreadcrumbList>
 						<BreadcrumbItem>
 							<BreadcrumbLink href="/notes">Notes</BreadcrumbLink>
