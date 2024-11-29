@@ -9,7 +9,7 @@ function Editor() {
 		state: { video },
 	} = useVideo();
 
-	return <EditorPage videoId={video?.youtubeId} />;
+	return <EditorPage videoId={video?.youtubeId as string} />;
 }
 
 export default Editor;
