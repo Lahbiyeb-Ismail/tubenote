@@ -12,27 +12,36 @@ import {
 
 import isAuthenticated from '../middlewares/isAuthenticated';
 import validateRequestBody from '../middlewares/validateRequestBody';
+import validateRequestParams from '../middlewares/validateRequestParams';
 
-import { noteSchema } from '../schemas/note.schema';
+import { noteIdParamSchema, noteSchema } from '../schemas/note.schema';
 
 const router = Router();
 
+// - isAuthenticated: Ensures the user is authenticated before accessing any note routes.
+router.use(isAuthenticated);
+
+// - GET /: Get all notes for the authenticated user.
+// - POST /: Create a new note (requires request body validation).
 router
   .route('/')
-  .post(isAuthenticated, validateRequestBody(noteSchema), createNote);
+  .get(getUserNotes)
+  .post(validateRequestBody(noteSchema), createNote);
 
-router.route('/').get(isAuthenticated, getUserNotes);
-
-router.route('/:noteId').delete(isAuthenticated, deleteNote);
-
-router.route('/:noteId').get(isAuthenticated, getNoteById);
-
-router.route('/:noteId').patch(isAuthenticated, updateNote);
-
-router.route('/recent').get(isAuthenticated, getUserRecentNotes);
-
+// - GET /:noteId: Get a specific note by its ID (requires request params validation).
+// - PATCH /:noteId: Update a specific note by its ID (requires request params validation).
+// - DELETE /:noteId: Delete a specific note by its ID (requires request params validation).
 router
-  .route('/recently-updated')
-  .get(isAuthenticated, getUserRecentlyUpdatedNotes);
+  .route('/:noteId')
+  .all(validateRequestParams(noteIdParamSchema))
+  .get(getNoteById)
+  .patch(updateNote)
+  .delete(deleteNote);
+
+// - GET /recent: Get the most recent notes for the authenticated user.
+router.route('/recent').get(getUserRecentNotes);
+
+// - GET /recently-updated: Get the recently updated notes for the authenticated user.
+router.route('/recently-updated').get(getUserRecentlyUpdatedNotes);
 
 export default router;
