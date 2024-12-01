@@ -1,7 +1,7 @@
-import type { z } from 'zod';
+import type { z } from "zod";
 
-import type { saveNoteFormSchema, videoFormSchema } from '@/lib/schemas';
-import type { ReactNode } from 'react';
+import type { saveNoteFormSchema, videoFormSchema } from "@/lib/schemas";
+import type { ReactNode } from "react";
 
 export type VideoUrl = z.infer<typeof videoFormSchema>;
 
@@ -38,21 +38,21 @@ export type NoteContextType = {
 
 export type NoteAction =
   | {
-      type: 'CREATE_NOTE_SUCCESS';
+      type: "CREATE_NOTE_SUCCESS";
       payload: { message: string; note: Note; success: true };
     }
-  | { type: 'CREATE_NOTE_FAIL'; payload: { message: string; success: false } }
+  | { type: "CREATE_NOTE_FAIL"; payload: { message: string; success: false } }
   | {
-      type: 'GET_NOTE_SUCCESS';
+      type: "GET_NOTE_SUCCESS";
       payload: { note: INote; success: true };
     }
-  | { type: 'GET_NOTE_FAIL'; payload: { message: string; success: false } }
+  | { type: "GET_NOTE_FAIL"; payload: { message: string; success: false } }
   | {
-      type: 'UPDATE_NOTE_SUCCESS';
+      type: "UPDATE_NOTE_SUCCESS";
       payload: { note: INote; success: true };
     }
-  | { type: 'UPDATE_NOTE_FAIL'; payload: { message: string; success: false } }
-  | { type: 'CLEAR_NOTE_STATE' };
+  | { type: "UPDATE_NOTE_FAIL"; payload: { message: string; success: false } }
+  | { type: "CLEAR_NOTE_STATE" };
 
 export interface INote extends Note {
   id: string;

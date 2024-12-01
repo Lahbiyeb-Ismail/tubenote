@@ -1,7 +1,7 @@
-import axiosInstance from '@/lib/axios.lib';
+import axiosInstance from "@/lib/axios.lib";
 
-import extractVideoId from '@/helpers/extractVideoId';
-import type { Video } from '@/types/video.types';
+import extractVideoId from "@/helpers/extractVideoId";
+import type { Video } from "@/types/video.types";
 
 /**
  * Saves video data by extracting the video ID from the provided URL
@@ -14,7 +14,7 @@ import type { Video } from '@/types/video.types';
 export async function saveVideoData(videoUrl: string): Promise<Video> {
   const videoId = extractVideoId(videoUrl);
 
-  const response = await axiosInstance.post('/videos', { videoId });
+  const response = await axiosInstance.post("/videos", { videoId });
 
   return response.data;
 }
@@ -25,7 +25,7 @@ export async function saveVideoData(videoUrl: string): Promise<Video> {
  * @returns {Promise<Video[]>} A promise that resolves to an array of Video objects.
  */
 export async function getUserVideos(): Promise<Video[]> {
-  const response = await axiosInstance.get('/videos');
+  const response = await axiosInstance.get("/videos");
 
   return response.data;
 }

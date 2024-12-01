@@ -1,4 +1,4 @@
-import type { User } from '.';
+import type { User } from ".";
 
 export type UpdateUserProps = {
   username: string;

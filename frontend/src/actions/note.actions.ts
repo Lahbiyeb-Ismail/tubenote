@@ -1,11 +1,11 @@
-import axiosInstance from '@/lib/axios.lib';
-import type { Pagination } from '@/types';
+import axiosInstance from "@/lib/axios.lib";
+import type { Pagination } from "@/types";
 import type {
   CreateNoteResponse,
   INote,
   Note,
   UpdateNoteProps,
-} from '@/types/note.types';
+} from "@/types/note.types";
 
 type UserNotes = {
   page: number;
@@ -19,7 +19,7 @@ type UserNotes = {
  * @returns {Promise<CreateNoteResponse>} - A promise that resolves to the response data.
  */
 export async function createNote(note: Note): Promise<CreateNoteResponse> {
-  const response = await axiosInstance.post('/notes', note);
+  const response = await axiosInstance.post("/notes", note);
 
   return response.data;
 }
@@ -98,7 +98,7 @@ export async function updateNote({
  * @returns {Promise<INote[]>} A promise that resolves to an array of recent notes.
  */
 export async function getRecentNotes(): Promise<INote[]> {
-  const response = await axiosInstance.get('/notes/recent');
+  const response = await axiosInstance.get("/notes/recent");
 
   return response.data.notes;
 }
@@ -109,7 +109,7 @@ export async function getRecentNotes(): Promise<INote[]> {
  * @returns {Promise<INote[]>} A promise that resolves to an array of recently updated notes.
  */
 export async function getRecentlyUpdatedNotes(): Promise<INote[]> {
-  const response = await axiosInstance.get('/notes/recently-updated');
+  const response = await axiosInstance.get("/notes/recently-updated");
 
   return response.data.notes;
 }
@@ -119,7 +119,7 @@ export async function exportNoteAsPDF(noteId: string) {
     `/notes/export-pdf/${noteId}`,
     {},
     {
-      responseType: 'blob',
+      responseType: "blob",
     }
   );
 

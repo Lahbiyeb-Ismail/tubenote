@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 
 export type Video = {
   id: string;
@@ -67,7 +67,7 @@ export type VideoContextType = {
 
 export type VideoAction =
   | {
-      type: 'SAVE_VIDEO_SUCCESS';
+      type: "SAVE_VIDEO_SUCCESS";
       payload: { message: string; video: Video; success: true };
     }
-  | { type: 'SAVE_VIDEO_FAIL'; payload: { message: string; success: false } };
+  | { type: "SAVE_VIDEO_FAIL"; payload: { message: string; success: false } };

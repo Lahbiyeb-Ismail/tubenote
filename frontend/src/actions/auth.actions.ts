@@ -1,15 +1,15 @@
-import axios from 'axios';
+import axios from "axios";
 
+import axiosInstance from "@/lib/axios.lib";
 import type {
-  RegisterFormData,
-  RegisterUserResponse,
   LoginFormData,
   LoginUserResponse,
-} from '@/types/auth.types';
-import axiosInstance from '@/lib/axios.lib';
+  RegisterFormData,
+  RegisterUserResponse,
+} from "@/types/auth.types";
 
-import { API_URL } from '@/utils/constants';
-import { setStorageValue } from '@/utils/localStorage';
+import { API_URL } from "@/utils/constants";
+import { setStorageValue } from "@/utils/localStorage";
 
 /**
  * Registers a new user with the provided registration credentials.
@@ -72,9 +72,9 @@ export async function refreshAccessToken(): Promise<void> {
       { withCredentials: true }
     );
     const newAccessToken = response.data.accessToken;
-    setStorageValue('accessToken', newAccessToken);
+    setStorageValue("accessToken", newAccessToken);
     return newAccessToken;
   } catch (error) {
-    console.error('Error refreshing token:', error);
+    console.error("Error refreshing token:", error);
   }
 }

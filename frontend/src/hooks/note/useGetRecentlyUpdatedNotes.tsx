@@ -6,13 +6,13 @@ import { getRecentlyUpdatedNotes } from "@/actions/note.actions";
 import { getStorageValue } from "@/utils/localStorage";
 
 function useGetRecentlyUpdatedNotes() {
-	const accessToken = getStorageValue<string>("accessToken");
+  const accessToken = getStorageValue<string>("accessToken");
 
-	return useQuery({
-		queryKey: ["notes", "recentlyUpdatedNotes"],
-		queryFn: () => getRecentlyUpdatedNotes(),
-		enabled: !!accessToken,
-	});
+  return useQuery({
+    queryKey: ["notes", "recentlyUpdatedNotes"],
+    queryFn: () => getRecentlyUpdatedNotes(),
+    enabled: !!accessToken,
+  });
 }
 
 export default useGetRecentlyUpdatedNotes;

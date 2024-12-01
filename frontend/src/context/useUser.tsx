@@ -3,41 +3,41 @@
 import { createContext, useContext, useReducer } from "react";
 
 import useUpdateCurrentUser from "@/hooks/user/useUpdateCurrentUser";
-import type {
-	UserContextType,
-	UserProviderProps,
-	UserState,
-} from "@/types/user.types";
 import userReducer from "@/reducers/user.reducer";
+import type {
+  UserContextType,
+  UserProviderProps,
+  UserState,
+} from "@/types/user.types";
 
 const userContext = createContext<UserContextType | undefined>(undefined);
 
 const userInitialState: UserState = {
-	message: "",
+  message: "",
 };
 
 function UserProvider({ children }: UserProviderProps) {
-	const [state, dispatch] = useReducer(userReducer, userInitialState);
+  const [state, dispatch] = useReducer(userReducer, userInitialState);
 
-	const updateUserMutation = useUpdateCurrentUser(dispatch);
+  const updateUserMutation = useUpdateCurrentUser(dispatch);
 
-	const value = {
-		state,
-		updateUser: updateUserMutation.mutate,
-		isLoading: updateUserMutation.isPending,
-	};
+  const value = {
+    state,
+    updateUser: updateUserMutation.mutate,
+    isLoading: updateUserMutation.isPending,
+  };
 
-	return <userContext.Provider value={value}>{children}</userContext.Provider>;
+  return <userContext.Provider value={value}>{children}</userContext.Provider>;
 }
 
 function useUser() {
-	const context = useContext(userContext);
+  const context = useContext(userContext);
 
-	if (context === undefined) {
-		throw new Error("useUser must be used within a UserProvider");
-	}
+  if (context === undefined) {
+    throw new Error("useUser must be used within a UserProvider");
+  }
 
-	return context;
+  return context;
 }
 
 export { useUser, UserProvider };

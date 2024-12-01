@@ -6,7 +6,7 @@
  */
 function extractVideoId(videoUrl: string) {
   const urlObject = new URL(videoUrl);
-  const videoId = urlObject.searchParams.get('v');
+  const videoId = urlObject.searchParams.get("v");
 
   return videoId;
 }

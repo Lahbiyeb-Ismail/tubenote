@@ -1,74 +1,74 @@
 "use client";
 
-import { useState } from "react";
 import useGetNoteById from "@/hooks/note/useGetNoteById";
+import { useState } from "react";
 
-import MarkdownViewer from "@/components/global/MarkdownViewer";
 import Loader from "@/components/global/Loader";
+import MarkdownViewer from "@/components/global/MarkdownViewer";
 import ResizablePanels from "@/components/global/ResizablePanels";
 
-import NotePageHeader from "@/components/note/NotePageHeader";
-import NotePageFooter from "@/components/note/NotePageFooter";
 import NoteError from "@/components/note/NoteError";
+import NotePageFooter from "@/components/note/NotePageFooter";
+import NotePageHeader from "@/components/note/NotePageHeader";
 
 import VideoPlayer from "@/components/video/VideoPlayer";
 
 type NotePageParams = {
-	noteId: string;
+  noteId: string;
 };
 
 function NotePage({ params }: { params: NotePageParams }) {
-	const { noteId } = params;
-	const { data, isLoading, isError, refetch } = useGetNoteById(noteId);
+  const { noteId } = params;
+  const { data, isLoading, isError, refetch } = useGetNoteById(noteId);
 
-	const [isVideoPlayerVisible, setIsVideoPlayerVisible] = useState(false);
+  const [isVideoPlayerVisible, setIsVideoPlayerVisible] = useState(false);
 
-	const toggleVideoPlayer = () => setIsVideoPlayerVisible((prev) => !prev);
+  const toggleVideoPlayer = () => setIsVideoPlayerVisible((prev) => !prev);
 
-	if (isLoading) {
-		return (
-			<div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
-				<Loader />
-			</div>
-		);
-	}
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
+        <Loader />
+      </div>
+    );
+  }
 
-	if (isError) {
-		return (
-			<div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
-				<NoteError onRetry={() => refetch()} />
-			</div>
-		);
-	}
+  if (isError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
+        <NoteError onRetry={() => refetch()} />
+      </div>
+    );
+  }
 
-	if (!data) return null;
+  if (!data) return null;
 
-	return (
-		<article className="min-h-screen bg-white">
-			{/* Header */}
-			<NotePageHeader
-				noteId={data.id}
-				noteTitle={data.title}
-				isVideoVisible={isVideoPlayerVisible}
-				onToggleVideo={toggleVideoPlayer}
-			/>
+  return (
+    <article className="min-h-screen bg-white">
+      {/* Header */}
+      <NotePageHeader
+        noteId={data.id}
+        noteTitle={data.title}
+        isVideoVisible={isVideoPlayerVisible}
+        onToggleVideo={toggleVideoPlayer}
+      />
 
-			{/* Content */}
-			<main className="container h-screen mx-auto px-2 py-6 overflow-auto">
-				{isVideoPlayerVisible ? (
-					<ResizablePanels
-						leftSideContent={<MarkdownViewer content={data.content} />}
-						rightSideContent={<VideoPlayer videoId={data.youtubeId} />}
-					/>
-				) : (
-					<MarkdownViewer content={data.content} />
-				)}
-			</main>
+      {/* Content */}
+      <main className="container h-screen mx-auto px-2 py-6 overflow-auto">
+        {isVideoPlayerVisible ? (
+          <ResizablePanels
+            leftSideContent={<MarkdownViewer content={data.content} />}
+            rightSideContent={<VideoPlayer videoId={data.youtubeId} />}
+          />
+        ) : (
+          <MarkdownViewer content={data.content} />
+        )}
+      </main>
 
-			{/* Footer */}
-			<NotePageFooter />
-		</article>
-	);
+      {/* Footer */}
+      <NotePageFooter />
+    </article>
+  );
 }
 
 export default NotePage;

@@ -1,204 +1,204 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { SaveIcon } from "lucide-react";
 import {
-	AdmonitionDirectiveDescriptor,
-	BlockTypeSelect,
-	BoldItalicUnderlineToggles,
-	ChangeAdmonitionType,
-	ChangeCodeMirrorLanguage,
-	CodeToggle,
-	ConditionalContents,
-	CreateLink,
-	DiffSourceToggleWrapper,
-	type DirectiveNode,
-	type EditorInFocus,
-	InsertAdmonition,
-	InsertCodeBlock,
-	InsertTable,
-	InsertThematicBreak,
-	ListsToggle,
-	MDXEditor,
-	type MDXEditorMethods,
-	Separator,
-	ShowSandpackInfo,
-	UndoRedo,
-	codeBlockPlugin,
-	codeMirrorPlugin,
-	diffSourcePlugin,
-	directivesPlugin,
-	headingsPlugin,
-	linkDialogPlugin,
-	linkPlugin,
-	listsPlugin,
-	markdownShortcutPlugin,
-	quotePlugin,
-	tablePlugin,
-	thematicBreakPlugin,
-	toolbarPlugin,
+  AdmonitionDirectiveDescriptor,
+  BlockTypeSelect,
+  BoldItalicUnderlineToggles,
+  ChangeAdmonitionType,
+  ChangeCodeMirrorLanguage,
+  CodeToggle,
+  ConditionalContents,
+  CreateLink,
+  DiffSourceToggleWrapper,
+  type DirectiveNode,
+  type EditorInFocus,
+  InsertAdmonition,
+  InsertCodeBlock,
+  InsertTable,
+  InsertThematicBreak,
+  ListsToggle,
+  MDXEditor,
+  type MDXEditorMethods,
+  Separator,
+  ShowSandpackInfo,
+  UndoRedo,
+  codeBlockPlugin,
+  codeMirrorPlugin,
+  diffSourcePlugin,
+  directivesPlugin,
+  headingsPlugin,
+  linkDialogPlugin,
+  linkPlugin,
+  listsPlugin,
+  markdownShortcutPlugin,
+  quotePlugin,
+  tablePlugin,
+  thematicBreakPlugin,
+  toolbarPlugin,
 } from "@mdxeditor/editor";
+import { SaveIcon } from "lucide-react";
+import { useRef, useState } from "react";
 import "@mdxeditor/editor/style.css";
 
-import { Button } from "../ui/button";
 import { useModal } from "@/context/useModal";
+import { Button } from "../ui/button";
 
 function whenInAdmonition(editorInFocus: EditorInFocus | null) {
-	const node = editorInFocus?.rootNode;
-	if (!node || node.getType() !== "directive") {
-		return false;
-	}
+  const node = editorInFocus?.rootNode;
+  if (!node || node.getType() !== "directive") {
+    return false;
+  }
 
-	return ["note", "tip", "danger", "info", "caution"].includes(
-		(node as DirectiveNode).getMdastNode().name,
-	);
+  return ["note", "tip", "danger", "info", "caution"].includes(
+    (node as DirectiveNode).getMdastNode().name
+  );
 }
 
 const MyToolbar = () => {
-	return (
-		<DiffSourceToggleWrapper>
-			<ConditionalContents
-				options={[
-					{
-						when: (editor) => editor?.editorType === "codeblock",
-						contents: () => <ChangeCodeMirrorLanguage />,
-					},
-					{
-						when: (editor) => editor?.editorType === "sandpack",
-						contents: () => <ShowSandpackInfo />,
-					},
-					{
-						fallback: () => (
-							<>
-								<UndoRedo />
-								<Separator />
-								<BoldItalicUnderlineToggles />
-								<CodeToggle />
-								<Separator />
-								<ListsToggle />
-								<Separator />
+  return (
+    <DiffSourceToggleWrapper>
+      <ConditionalContents
+        options={[
+          {
+            when: (editor) => editor?.editorType === "codeblock",
+            contents: () => <ChangeCodeMirrorLanguage />,
+          },
+          {
+            when: (editor) => editor?.editorType === "sandpack",
+            contents: () => <ShowSandpackInfo />,
+          },
+          {
+            fallback: () => (
+              <>
+                <UndoRedo />
+                <Separator />
+                <BoldItalicUnderlineToggles />
+                <CodeToggle />
+                <Separator />
+                <ListsToggle />
+                <Separator />
 
-								<ConditionalContents
-									options={[
-										{
-											when: whenInAdmonition,
-											contents: () => <ChangeAdmonitionType />,
-										},
-										{ fallback: () => <BlockTypeSelect /> },
-									]}
-								/>
+                <ConditionalContents
+                  options={[
+                    {
+                      when: whenInAdmonition,
+                      contents: () => <ChangeAdmonitionType />,
+                    },
+                    { fallback: () => <BlockTypeSelect /> },
+                  ]}
+                />
 
-								<Separator />
+                <Separator />
 
-								<CreateLink />
+                <CreateLink />
 
-								<Separator />
+                <Separator />
 
-								<InsertTable />
-								<InsertThematicBreak />
+                <InsertTable />
+                <InsertThematicBreak />
 
-								<Separator />
-								<InsertCodeBlock />
+                <Separator />
+                <InsertCodeBlock />
 
-								<ConditionalContents
-									options={[
-										{
-											when: (editorInFocus) => !whenInAdmonition(editorInFocus),
-											contents: () => (
-												<>
-													<Separator />
-													<InsertAdmonition />
-												</>
-											),
-										},
-									]}
-								/>
+                <ConditionalContents
+                  options={[
+                    {
+                      when: (editorInFocus) => !whenInAdmonition(editorInFocus),
+                      contents: () => (
+                        <>
+                          <Separator />
+                          <InsertAdmonition />
+                        </>
+                      ),
+                    },
+                  ]}
+                />
 
-								<Separator />
-							</>
-						),
-					},
-				]}
-			/>
-		</DiffSourceToggleWrapper>
-	);
+                <Separator />
+              </>
+            ),
+          },
+        ]}
+      />
+    </DiffSourceToggleWrapper>
+  );
 };
 
 const myPlugins = [
-	toolbarPlugin({ toolbarContents: () => <MyToolbar /> }),
-	listsPlugin(),
-	quotePlugin(),
-	headingsPlugin({ allowedHeadingLevels: [1, 2, 3] }),
-	linkPlugin(),
-	linkDialogPlugin(),
-	tablePlugin(),
-	thematicBreakPlugin(),
-	codeBlockPlugin({ defaultCodeBlockLanguage: "txt" }),
-	codeMirrorPlugin({
-		codeBlockLanguages: {
-			txt: "text",
-			js: "JavaScript",
-			py: "Python",
-			css: "CSS",
-			tsx: "TypeScript",
-		},
-	}),
-	directivesPlugin({
-		directiveDescriptors: [AdmonitionDirectiveDescriptor],
-	}),
-	diffSourcePlugin({ viewMode: "rich-text" }),
-	markdownShortcutPlugin(),
+  toolbarPlugin({ toolbarContents: () => <MyToolbar /> }),
+  listsPlugin(),
+  quotePlugin(),
+  headingsPlugin({ allowedHeadingLevels: [1, 2, 3] }),
+  linkPlugin(),
+  linkDialogPlugin(),
+  tablePlugin(),
+  thematicBreakPlugin(),
+  codeBlockPlugin({ defaultCodeBlockLanguage: "txt" }),
+  codeMirrorPlugin({
+    codeBlockLanguages: {
+      txt: "text",
+      js: "JavaScript",
+      py: "Python",
+      css: "CSS",
+      tsx: "TypeScript",
+    },
+  }),
+  directivesPlugin({
+    directiveDescriptors: [AdmonitionDirectiveDescriptor],
+  }),
+  diffSourcePlugin({ viewMode: "rich-text" }),
+  markdownShortcutPlugin(),
 ];
 
 type AppMDXEditorProps = {
-	initialNoteContent: string;
-	noteTitle: string;
-	noteId: string;
-	action: "create" | "update";
+  initialNoteContent: string;
+  noteTitle: string;
+  noteId: string;
+  action: "create" | "update";
 };
 
 const AppMDXEditor = ({
-	initialNoteContent,
-	noteTitle,
-	noteId,
-	action,
+  initialNoteContent,
+  noteTitle,
+  noteId,
+  action,
 }: AppMDXEditorProps) => {
-	const ref = useRef<MDXEditorMethods | null>(null);
-	// const [editorInFocus, setEditorInFocus] = useState<EditorInFocus | null>(null);
-	const noteContent = ref.current?.getMarkdown() || "";
+  const ref = useRef<MDXEditorMethods | null>(null);
+  // const [editorInFocus, setEditorInFocus] = useState<EditorInFocus | null>(null);
+  const noteContent = ref.current?.getMarkdown() || "";
 
-	const { openModal } = useModal();
+  const { openModal } = useModal();
 
-	const handleSaveClick = () => {
-		openModal({
-			title: "Confirm Save Note",
-			description: "Are you sure you want to save this note?",
-			cancelText: "Cancel",
-			confirmText: "Save",
-			noteContent: ref.current?.getMarkdown() || "",
-			noteTitle,
-			action,
-			noteId,
-		});
-	};
+  const handleSaveClick = () => {
+    openModal({
+      title: "Confirm Save Note",
+      description: "Are you sure you want to save this note?",
+      cancelText: "Cancel",
+      confirmText: "Save",
+      noteContent: ref.current?.getMarkdown() || "",
+      noteTitle,
+      action,
+      noteId,
+    });
+  };
 
-	return (
-		<>
-			<MDXEditor
-				ref={ref}
-				markdown={initialNoteContent || ""}
-				plugins={myPlugins}
-				className="mdxeditor"
-			/>
-			<Button
-				size="icon"
-				className="absolute bottom-3 right-9 bg-slate-900 hover:bg-slate-100 hover:text-slate-900 border-2 border-slate-100 hover:border-slate-900 hover:shadow-lg"
-				onClick={handleSaveClick}
-			>
-				<SaveIcon />
-			</Button>
-		</>
-	);
+  return (
+    <>
+      <MDXEditor
+        ref={ref}
+        markdown={initialNoteContent || ""}
+        plugins={myPlugins}
+        className="mdxeditor"
+      />
+      <Button
+        size="icon"
+        className="absolute bottom-3 right-9 bg-slate-900 hover:bg-slate-100 hover:text-slate-900 border-2 border-slate-100 hover:border-slate-900 hover:shadow-lg"
+        onClick={handleSaveClick}
+      >
+        <SaveIcon />
+      </Button>
+    </>
+  );
 };
 
 export default AppMDXEditor;

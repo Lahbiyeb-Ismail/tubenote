@@ -1,12 +1,12 @@
-import type { z } from 'zod';
+import type { z } from "zod";
 
 import type {
   loginFormSchema,
   registerFormSchema,
   updatePasswordSchema,
   updateProfileSchema,
-} from '@/lib/schemas';
-import type { ReactNode } from 'react';
+} from "@/lib/schemas";
+import type { ReactNode } from "react";
 
 export type LoginFormData = z.infer<typeof loginFormSchema>;
 export type RegisterFormData = z.infer<typeof registerFormSchema>;
@@ -33,12 +33,12 @@ export type AuthState = {
 
 export type AuthAction =
   | {
-      type: 'LOGIN_SUCCESS';
+      type: "LOGIN_SUCCESS";
       payload: { message: string; accessToken: string };
     }
-  | { type: 'REGISTER_SUCCESS'; payload: { successMessage: string } }
-  | { type: 'REQUEST_FAIL'; payload: { errorMessage: string } }
-  | { type: 'LOGOUT_SUCCESS' };
+  | { type: "REGISTER_SUCCESS"; payload: { successMessage: string } }
+  | { type: "REQUEST_FAIL"; payload: { errorMessage: string } }
+  | { type: "LOGOUT_SUCCESS" };
 
 export type AuthContextType = {
   state: AuthState;

@@ -2,16 +2,16 @@ import type {
   AxiosError,
   AxiosInstance,
   InternalAxiosRequestConfig,
-} from 'axios';
+} from "axios";
 
-import { refreshAccessToken } from '@/actions/auth.actions';
+import { refreshAccessToken } from "@/actions/auth.actions";
 import {
   getStorageValue,
   removeStorageValue,
   setStorageValue,
-} from '@/utils/localStorage';
-import { isTokenExpired } from '@/utils/tokenUtils';
-import { set } from 'zod';
+} from "@/utils/localStorage";
+import { isTokenExpired } from "@/utils/tokenUtils";
+import { set } from "zod";
 
 /**
  * Handles the refresh token process by attempting to refresh the access token.
@@ -27,12 +27,12 @@ async function handleRefreshToken(
 ): Promise<void> {
   try {
     const newAccessToken = await refreshAccessToken();
-    setStorageValue('accessToken', newAccessToken);
+    setStorageValue("accessToken", newAccessToken);
     config.headers.Authorization = `Bearer ${newAccessToken}`;
   } catch (error) {
     // If refresh fails, redirect to login
-    removeStorageValue('accessToken');
-    window.location.href = '/login';
+    removeStorageValue("accessToken");
+    window.location.href = "/login";
     throw error;
   }
 }
@@ -50,7 +50,7 @@ async function handleRefreshToken(
 export function setupRequestInterceptor(instance: AxiosInstance): void {
   instance.interceptors.request.use(
     async (config) => {
-      const accessToken = getStorageValue<string>('accessToken');
+      const accessToken = getStorageValue<string>("accessToken");
       if (!accessToken) {
         return config;
       }
@@ -88,7 +88,7 @@ export function setupResponseInterceptor(instance: AxiosInstance): void {
 
         try {
           const newAccessToken = await refreshAccessToken();
-          setStorageValue('accessToken', newAccessToken);
+          setStorageValue("accessToken", newAccessToken);
 
           instance.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
 
@@ -98,9 +98,9 @@ export function setupResponseInterceptor(instance: AxiosInstance): void {
 
           return instance(originalRequest);
         } catch (refreshError) {
-          removeStorageValue('accessToken');
+          removeStorageValue("accessToken");
 
-          window.location.href = '/login';
+          window.location.href = "/login";
           return Promise.reject(refreshError);
         }
       }
