@@ -59,7 +59,6 @@ export async function createVideoEntry(
             description: snippet.description,
             liveBroadcastContent: snippet.liveBroadcastContent,
             publishedAt: snippet.publishedAt,
-            defaultAudioLanguage: snippet.defaultAudioLanguage,
             tags: snippet.tags,
             thumbnails: snippet.thumbnails,
           },
