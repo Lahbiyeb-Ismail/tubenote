@@ -1,11 +1,24 @@
 import { Router } from 'express';
-import { getUserVideos, getVideoData } from '../controllers/video.controller';
+
+import {
+  getUserVideos,
+  handleCreateVideo,
+} from '../controllers/video.controller';
 import isAuthenticated from '../middlewares/isAuthenticated';
+import validateRequestBody from '../middlewares/validateRequestBody';
+
+import { createVideoBodySchema } from '../schemas/video.schema';
 
 const router = Router();
 
-router.route('/').post(isAuthenticated, getVideoData);
+// - isAuthenticated: Ensures the user is authenticated before accessing any video routes.
+router.use(isAuthenticated);
 
-router.route('/').get(isAuthenticated, getUserVideos);
+// - GET /: Get all videos for the authenticated user
+// - POST /: Create a new video (requires request body validation)
+router
+  .route('/')
+  .get(getUserVideos)
+  .post(validateRequestBody(createVideoBodySchema), handleCreateVideo);
 
 export default router;
