@@ -1,7 +1,7 @@
-import axiosInstance from "@/lib/axios.lib";
+import axiosInstance from '@/lib/axios.lib';
 
-import type { User } from "@/types";
-import type { UpdateUserProps } from "@/types/user.types";
+import type { User } from '@/types';
+import type { UpdateUserProps } from '@/types/user.types';
 
 /**
  * Fetches the current user's information from the server.
@@ -11,7 +11,7 @@ import type { UpdateUserProps } from "@/types/user.types";
  * @throws {Error} Throws an error if the request fails.
  */
 export async function getCurrentUser(): Promise<{ user: User }> {
-  const response = await axiosInstance.get("/users/me");
+  const response = await axiosInstance.get('/users/me');
 
   return response.data;
 }
@@ -26,7 +26,7 @@ export async function updateCurrentUser({
   username,
   email,
 }: UpdateUserProps): Promise<{ message: string }> {
-  const response = await axiosInstance.patch("/users/update-current", {
+  const response = await axiosInstance.patch('/users/me', {
     username,
     email,
   });
@@ -51,7 +51,7 @@ export async function updatePassword({
   currentPassword,
   newPassword,
 }: UpdatePassword): Promise<{ message: string }> {
-  const response = await axiosInstance.patch("/users/update-password", {
+  const response = await axiosInstance.patch('/users/update-password', {
     currentPassword,
     newPassword,
   });
