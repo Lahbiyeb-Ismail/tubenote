@@ -28,6 +28,12 @@ router
   .get(getUserNotes)
   .post(validateRequestBody(noteSchema), createNote);
 
+// - GET /recent: Get the most recent notes for the authenticated user.
+router.route('/recent').get(getUserRecentNotes);
+
+// - GET /recently-updated: Get the recently updated notes for the authenticated user.
+router.route('/recently-updated').get(getUserRecentlyUpdatedNotes);
+
 // - GET /:noteId: Get a specific note by its ID (requires request params validation).
 // - PATCH /:noteId: Update a specific note by its ID (requires request params validation).
 // - DELETE /:noteId: Delete a specific note by its ID (requires request params validation).
@@ -37,11 +43,5 @@ router
   .get(getNoteById)
   .patch(updateNote)
   .delete(deleteNote);
-
-// - GET /recent: Get the most recent notes for the authenticated user.
-router.route('/recent').get(getUserRecentNotes);
-
-// - GET /recently-updated: Get the recently updated notes for the authenticated user.
-router.route('/recently-updated').get(getUserRecentlyUpdatedNotes);
 
 export default router;
