@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import Link from "next/link";
 import { Edit, Youtube } from "lucide-react";
@@ -16,8 +16,8 @@ import { Label } from "@/components/ui/label";
 type NotePageHeaderProps = {
 	noteId: string;
 	noteTitle: string;
-	onToggleVideo?: () => void;
-	isVideoVisible?: boolean;
+	onToggleVideo: () => void;
+	isVideoVisible: boolean;
 };
 
 function NotePageHeader({
