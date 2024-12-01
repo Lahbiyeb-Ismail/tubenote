@@ -1,10 +1,11 @@
-import * as React from "react";
 import Markdown from "markdown-to-jsx";
 
-import CodeBlock from "@/components/global/CodeBlock";
 import { cn } from "@/lib/utils";
-import { Card } from "@/components/ui/card";
+
+import CodeBlock from "@/components/global/CodeBlock";
+
 import { Separator } from "@/components/ui/separator";
+import { Card } from "@/components/ui/card";
 
 interface MarkdownViewerProps {
 	content: string;
