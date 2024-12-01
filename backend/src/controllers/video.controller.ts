@@ -22,7 +22,10 @@ import {
  * @returns A JSON response containing the created video data or an error message.
  */
 
-export async function getVideoData(req: Request, res: Response): Promise<void> {
+export async function handleCreateVideo(
+  req: Request,
+  res: Response
+): Promise<void> {
   const userId = req.userId;
   const { videoId } = req.body;
 
