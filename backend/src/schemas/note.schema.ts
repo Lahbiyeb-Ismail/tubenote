@@ -15,3 +15,9 @@ export const noteSchema = {
     timestamp: z.number(),
   }),
 };
+
+export const noteIdParamSchema = {
+  params: z.object({
+    noteId: z.string(),
+  }),
+};
