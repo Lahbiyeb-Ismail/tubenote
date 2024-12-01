@@ -10,7 +10,6 @@ type VideoPlayerProps = {
 };
 
 function VideoPlayer({ videoId }: VideoPlayerProps) {
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const playerRef = useRef<any | null>(null);
   const { setVideoCurrentTime } = useVideo();
   const {

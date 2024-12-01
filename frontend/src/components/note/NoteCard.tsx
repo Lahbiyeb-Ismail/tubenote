@@ -31,6 +31,7 @@ function NoteCard({ note }: NoteCardProps) {
       cancelText: "Cancel",
       action: "delete",
       onConfirm: () => deleteNote(note.id),
+      noteId: note.id,
     });
   };
 
@@ -54,7 +55,6 @@ function NoteCard({ note }: NoteCardProps) {
           <div className="flex justify-end p-2">
             <CardSettingsButton
               noteId={note.id}
-              onEdit={() => {}}
               onDelete={handleDeleteClick}
               onExport={() => {
                 console.log("Export as PDF");
@@ -69,7 +69,6 @@ function NoteCard({ note }: NoteCardProps) {
           />
           <CardFooterComponent
             noteId={note.id}
-            onEdit={() => {}}
             onDelete={handleDeleteClick}
             isGridLayout={isGridLayout}
             isLoading={isLoading}

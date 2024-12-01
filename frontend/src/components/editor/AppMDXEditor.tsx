@@ -164,8 +164,6 @@ const AppMDXEditor = ({
   action,
 }: AppMDXEditorProps) => {
   const ref = useRef<MDXEditorMethods | null>(null);
-  // const [editorInFocus, setEditorInFocus] = useState<EditorInFocus | null>(null);
-  const noteContent = ref.current?.getMarkdown() || "";
 
   const { openModal } = useModal();
 

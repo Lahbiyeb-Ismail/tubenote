@@ -1,15 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import type React from "react";
+import toast from "react-hot-toast";
 
 import { logoutUser } from "@/actions/auth.actions";
 import type { TypedError } from "@/types";
 import type { AuthAction } from "@/types/auth.types";
-import toast from "react-hot-toast";
 
 function useLogout(dispatch: React.Dispatch<AuthAction>) {
   const queryClient = useQueryClient();
-  const router = useRouter();
 
   return useMutation({
     mutationFn: logoutUser,

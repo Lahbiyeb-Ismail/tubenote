@@ -12,7 +12,7 @@ function useUpdateCurrentUser(dispatch: React.Dispatch<UserAction>) {
     onMutate: () => {
       toast.loading("Updating user...", { id: "loadingToast" });
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.dismiss("loadingToast");
 
       toast.success("User updated successfully.");

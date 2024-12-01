@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, MoreVertical, PencilIcon, Trash2Icon } from "lucide-react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -8,11 +9,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import Link from "next/link";
 
 type CardSettingsButtonProps = {
   noteId: string;
-  onEdit: () => void;
   onDelete: () => void;
   onExport: () => void;
 };
@@ -20,7 +19,6 @@ type CardSettingsButtonProps = {
 function CardSettingsButton({
   noteId,
   onDelete,
-  onEdit,
   onExport,
 }: CardSettingsButtonProps) {
   return (
