@@ -1,12 +1,10 @@
-"use client";
-
-import { useEffect, useState } from "react";
-
 import {
 	ResizablePanelGroup,
 	ResizablePanel,
 	ResizableHandle,
 } from "@/components/ui/resizable";
+
+import useDirection from "@/hooks/global/useDirection";
 
 interface ResizablePanelsProps {
 	leftPanelSize?: number;
@@ -21,25 +19,7 @@ function ResizablePanels({
 	leftSideContent,
 	rightSideContent,
 }: ResizablePanelsProps) {
-	const [direction, setDirection] = useState<"horizontal" | "vertical">(
-		"horizontal",
-	);
-	// const { isSidebarOpen } = useLayout();
-
-	useEffect(() => {
-		function changeDirection() {
-			if (window.innerWidth < 768) {
-				setDirection("vertical");
-			} else {
-				setDirection("horizontal");
-			}
-		}
-
-		changeDirection();
-
-		window.addEventListener("resize", changeDirection);
-		return () => window.removeEventListener("resize", changeDirection);
-	}, []);
+	const direction = useDirection();
 
 	return (
 		<ResizablePanelGroup direction={direction} className="flex w-full">
