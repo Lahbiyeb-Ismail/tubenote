@@ -63,12 +63,15 @@ export async function getUserVideos(req: Request, res: Response) {
 
 /**
  * Handles the request to get a video by its ID.
- * 
- * @param req - The request object containing the video ID in the parameters and user ID in the user property.
- * @param res - The response object used to send back the appropriate HTTP response.
- * 
- * @returns A promise that resolves to sending a JSON response with the video data if found, 
- * or an error message if the video ID is missing or the video is not found.
+ *
+ * This function retrieves a video based on the provided video ID and user ID.
+ * If the video is found, it returns the video data. If the video is not found,
+ * it creates a new video entry and returns the newly created video data.
+ *
+ * @param req - The request object containing the video ID in the parameters and user ID.
+ * @param res - The response object used to send the response back to the client.
+ *
+ * @returns A JSON response with the video data or an error message if the video ID is not provided.
  */
 export async function handleGetVideoById(req: Request, res: Response) {
   const { videoId } = req.params;
@@ -81,10 +84,12 @@ export async function handleGetVideoById(req: Request, res: Response) {
 
   const video = await findVideo({ videoId, userId });
 
-  if (!video) {
-    res.status(httpStatus.NOT_FOUND).json({ message: 'Video not found' });
+  if (video) {
+    res.status(httpStatus.OK).json(video);
     return;
   }
 
-  res.status(httpStatus.OK).json(video);
+  const newVideo = await createVideoEntry(videoId, userId);
+
+  res.status(httpStatus.OK).json(newVideo);
 }
