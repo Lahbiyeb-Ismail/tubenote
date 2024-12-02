@@ -1,11 +1,10 @@
-import axiosInstance from "@/lib/axios.lib";
-import type { Pagination } from "@/types";
+import axiosInstance from '@/lib/axios.lib';
+import type { Pagination } from '@/types';
 import type {
   CreateNoteResponse,
-  INote,
   Note,
   UpdateNoteProps,
-} from "@/types/note.types";
+} from '@/types/note.types';
 
 type UserNotes = {
   page: number;
@@ -19,7 +18,7 @@ type UserNotes = {
  * @returns {Promise<CreateNoteResponse>} - A promise that resolves to the response data.
  */
 export async function createNote(note: Note): Promise<CreateNoteResponse> {
-  const response = await axiosInstance.post("/notes", note);
+  const response = await axiosInstance.post('/notes', note);
 
   return response.data;
 }
@@ -30,12 +29,12 @@ export async function createNote(note: Note): Promise<CreateNoteResponse> {
  * @param {Object} params - The parameters for fetching user notes.
  * @param {number} params.page - The page number to fetch.
  * @param {number} params.limit - The number of notes per page.
- * @returns {Promise<{ notes: INote[]; pagination: Pagination }>} A promise that resolves to an object containing the notes and pagination information.
+ * @returns {Promise<{ notes: Note[]; pagination: Pagination }>} A promise that resolves to an object containing the notes and pagination information.
  */
 export async function getUserNotes({
   page,
   limit,
-}: UserNotes): Promise<{ notes: INote[]; pagination: Pagination }> {
+}: UserNotes): Promise<{ notes: Note[]; pagination: Pagination }> {
   const response = await axiosInstance(`/notes?page=${page}&limit=${limit}`);
 
   const { notes, pagination } = response.data;
@@ -60,9 +59,9 @@ export async function deleteNote(noteId: string): Promise<{ message: string }> {
  * Fetches a note by its ID.
  *
  * @param {string} noteId - The unique identifier of the note to retrieve.
- * @returns {Promise<INote>} A promise that resolves to the note object.
+ * @returns {Promise<Note>} A promise that resolves to the note object.
  */
-export async function getNoteById(noteId: string): Promise<INote> {
+export async function getNoteById(noteId: string): Promise<Note> {
   const response = await axiosInstance.get(`/notes/${noteId}`);
 
   return response.data.note;
@@ -75,14 +74,14 @@ export async function getNoteById(noteId: string): Promise<INote> {
  * @param {string} params.noteId - The ID of the note to update.
  * @param {string} params.title - The new title for the note.
  * @param {string} params.content - The new content for the note.
- * @returns {Promise<INote>} A promise that resolves to the updated note.
+ * @returns {Promise<Note>} A promise that resolves to the updated note.
  */
 export async function updateNote({
   noteId,
   title,
   content,
   timestamp,
-}: UpdateNoteProps): Promise<INote> {
+}: UpdateNoteProps): Promise<Note> {
   const response = await axiosInstance.patch(`/notes/${noteId}`, {
     title,
     content,
@@ -95,10 +94,10 @@ export async function updateNote({
 /**
  * Fetches the recent notes of the user.
  *
- * @returns {Promise<INote[]>} A promise that resolves to an array of recent notes.
+ * @returns {Promise<Note[]>} A promise that resolves to an array of recent notes.
  */
-export async function getRecentNotes(): Promise<INote[]> {
-  const response = await axiosInstance.get("/notes/recent");
+export async function getRecentNotes(): Promise<Note[]> {
+  const response = await axiosInstance.get('/notes/recent');
 
   return response.data.notes;
 }
@@ -106,10 +105,10 @@ export async function getRecentNotes(): Promise<INote[]> {
 /**
  * Fetches the recently updated notes from the server.
  *
- * @returns {Promise<INote[]>} A promise that resolves to an array of recently updated notes.
+ * @returns {Promise<Note[]>} A promise that resolves to an array of recently updated notes.
  */
-export async function getRecentlyUpdatedNotes(): Promise<INote[]> {
-  const response = await axiosInstance.get("/notes/recently-updated");
+export async function getRecentlyUpdatedNotes(): Promise<Note[]> {
+  const response = await axiosInstance.get('/notes/recently-updated');
 
   return response.data.notes;
 }
@@ -119,7 +118,7 @@ export async function exportNoteAsPDF(noteId: string) {
     `/notes/export-pdf/${noteId}`,
     {},
     {
-      responseType: "blob",
+      responseType: 'blob',
     }
   );
 
