@@ -5,3 +5,9 @@ export const createVideoBodySchema = {
     videoId: z.string().min(4),
   }),
 };
+
+export const videoIdParamSchema = {
+  params: z.object({
+    videoId: z.string().min(4),
+  }),
+};
