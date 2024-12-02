@@ -2,6 +2,7 @@ import axiosInstance from "@/lib/axios.lib";
 
 import extractVideoId from "@/helpers/extractVideoId";
 import type { Video } from "@/types/video.types";
+import type { Pagination } from "@/types";
 
 /**
  * Saves video data by extracting the video ID from the provided URL
@@ -24,10 +25,21 @@ export async function saveVideoData(videoUrl: string): Promise<Video> {
  *
  * @returns {Promise<Video[]>} A promise that resolves to an array of Video objects.
  */
-export async function getUserVideos(): Promise<Video[]> {
-	const response = await axiosInstance.get("/videos");
+export async function getUserVideos({
+	page,
+	limit,
+}: { page: number; limit: number }): Promise<{
+	videos: Video[];
+	pagination: Pagination;
+}> {
+	const response = await axiosInstance.get<{
+		videos: Video[];
+		pagination: Pagination;
+	}>(`/videos?page=${page}&limit=${limit}`);
 
-	return response.data.videos;
+	const { videos, pagination } = response.data;
+
+	return { videos, pagination };
 }
 
 /**
