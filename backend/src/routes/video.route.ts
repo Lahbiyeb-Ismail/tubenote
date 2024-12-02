@@ -3,11 +3,17 @@ import { Router } from 'express';
 import {
   getUserVideos,
   handleCreateVideo,
+  handleGetVideoById,
 } from '../controllers/video.controller';
+
 import isAuthenticated from '../middlewares/isAuthenticated';
 import validateRequestBody from '../middlewares/validateRequestBody';
+import validateRequestParams from '../middlewares/validateRequestParams';
 
-import { createVideoBodySchema } from '../schemas/video.schema';
+import {
+  createVideoBodySchema,
+  videoIdParamSchema,
+} from '../schemas/video.schema';
 
 const router = Router();
 
@@ -20,5 +26,9 @@ router
   .route('/')
   .get(getUserVideos)
   .post(validateRequestBody(createVideoBodySchema), handleCreateVideo);
+
+router
+  .route('/:videoId')
+  .get(validateRequestParams(videoIdParamSchema), handleGetVideoById);
 
 export default router;
