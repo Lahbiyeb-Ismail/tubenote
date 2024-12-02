@@ -1,20 +1,23 @@
-import type { z } from "zod";
+import type { z } from 'zod';
 
-import type { saveNoteFormSchema, videoFormSchema } from "@/lib/schemas";
-import type { ReactNode } from "react";
+import type { saveNoteFormSchema, videoFormSchema } from '@/lib/schemas';
+import type { ReactNode } from 'react';
 
 export type VideoUrl = z.infer<typeof videoFormSchema>;
 
 export type NoteTitle = z.infer<typeof saveNoteFormSchema>;
 
 export type Note = {
+  id: string;
   title: string;
   content: string;
-  timestamp?: number;
-  videoId?: string;
-  thumbnail?: string;
-  videoTitle?: string;
-  youtubeId?: string;
+  timestamp: number;
+  videoId: string;
+  thumbnail: string;
+  videoTitle: string;
+  youtubeId: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type NoteProviderProps = {
@@ -22,7 +25,7 @@ export type NoteProviderProps = {
 };
 
 export type NoteState = {
-  note: INote | null;
+  note: Note | null;
   message: string | null;
   success: boolean;
 };
@@ -38,34 +41,29 @@ export type NoteContextType = {
 
 export type NoteAction =
   | {
-      type: "CREATE_NOTE_SUCCESS";
+      type: 'CREATE_NOTE_SUCCESS';
       payload: { message: string; note: Note; success: true };
     }
-  | { type: "CREATE_NOTE_FAIL"; payload: { message: string; success: false } }
+  | { type: 'CREATE_NOTE_FAIL'; payload: { message: string; success: false } }
   | {
-      type: "GET_NOTE_SUCCESS";
-      payload: { note: INote; success: true };
+      type: 'GET_NOTE_SUCCESS';
+      payload: { note: Note; success: true };
     }
-  | { type: "GET_NOTE_FAIL"; payload: { message: string; success: false } }
+  | { type: 'GET_NOTE_FAIL'; payload: { message: string; success: false } }
   | {
-      type: "UPDATE_NOTE_SUCCESS";
-      payload: { note: INote; success: true };
+      type: 'UPDATE_NOTE_SUCCESS';
+      payload: { note: Note; success: true };
     }
-  | { type: "UPDATE_NOTE_FAIL"; payload: { message: string; success: false } }
-  | { type: "CLEAR_NOTE_STATE" };
-
-export interface INote extends Note {
-  id: string;
-  createdAt: string;
-}
+  | { type: 'UPDATE_NOTE_FAIL'; payload: { message: string; success: false } }
+  | { type: 'CLEAR_NOTE_STATE' };
 
 export type CreateNoteResponse = {
   message: string;
-  note: INote;
+  note: Note;
 };
 
 export type UpdateNoteProps = {
-  noteId?: string;
+  noteId: string;
   title: string;
   content: string;
   timestamp: number;
