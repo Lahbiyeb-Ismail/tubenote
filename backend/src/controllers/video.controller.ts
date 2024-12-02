@@ -1,11 +1,12 @@
-import type { Response, Request } from 'express';
-import httpStatus from 'http-status';
+import type { Response, Request } from "express";
+import httpStatus from "http-status";
 
 import {
-  createVideoEntry,
-  findUserVideos,
-  findVideo,
-} from '../services/video.services';
+	createVideoEntry,
+	fetchUserVideos,
+	findVideo,
+	getUserVideosCount,
+} from "../services/video.services";
 
 /**
  * Retrieves video data from YouTube and stores it in the database.
@@ -23,27 +24,27 @@ import {
  */
 
 export async function handleCreateVideo(
-  req: Request,
-  res: Response
+	req: Request,
+	res: Response,
 ): Promise<void> {
-  const userId = req.userId;
-  const { videoId } = req.body;
+	const userId = req.userId;
+	const { videoId } = req.body;
 
-  if (!videoId) {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'VideoId is required' });
-    return;
-  }
+	if (!videoId) {
+		res.status(httpStatus.BAD_REQUEST).json({ message: "VideoId is required" });
+		return;
+	}
 
-  const videoExists = await findVideo({ videoId, userId });
+	const videoExists = await findVideo({ videoId, userId });
 
-  if (videoExists) {
-    res.status(httpStatus.OK).json(videoExists);
-    return;
-  }
+	if (videoExists) {
+		res.status(httpStatus.OK).json(videoExists);
+		return;
+	}
 
-  const video = await createVideoEntry(videoId, userId);
+	const video = await createVideoEntry(videoId, userId);
 
-  res.status(httpStatus.OK).json(video);
+	res.status(httpStatus.OK).json(video);
 }
 
 /**
@@ -54,11 +55,31 @@ export async function handleCreateVideo(
  * @returns A JSON response containing the user's videos.
  */
 export async function getUserVideos(req: Request, res: Response) {
-  const userId = req.userId;
+	const userId = req.userId;
+	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
+	const page = req.query["page"] ? Number(req.query["page"]) : 1;
+	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
+	const limit = req.query["limit"] ? Number(req.query["limit"]) : 8;
 
-  const videos = await findUserVideos(userId);
+	const skip = (page - 1) * limit;
 
-  res.status(httpStatus.OK).json({ videos });
+	const [videosCount, videos] = await Promise.all([
+		getUserVideosCount({ userId }),
+		fetchUserVideos({ userId, skip, limit }),
+	]);
+
+	const totalPages = Math.ceil(videosCount / limit);
+
+	res.status(httpStatus.OK).json({
+		videos,
+		pagination: {
+			totalPages,
+			currentPage: page,
+			totalVideos: videosCount,
+			hasNextPage: page < totalPages,
+			hasPrevPage: page > 1,
+		},
+	});
 }
 
 /**
@@ -74,22 +95,22 @@ export async function getUserVideos(req: Request, res: Response) {
  * @returns A JSON response with the video data or an error message if the video ID is not provided.
  */
 export async function handleGetVideoById(req: Request, res: Response) {
-  const { videoId } = req.params;
-  const userId = req.userId;
+	const { videoId } = req.params;
+	const userId = req.userId;
 
-  if (!videoId) {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'VideoId is required' });
-    return;
-  }
+	if (!videoId) {
+		res.status(httpStatus.BAD_REQUEST).json({ message: "VideoId is required" });
+		return;
+	}
 
-  const video = await findVideo({ videoId, userId });
+	const video = await findVideo({ videoId, userId });
 
-  if (video) {
-    res.status(httpStatus.OK).json(video);
-    return;
-  }
+	if (video) {
+		res.status(httpStatus.OK).json(video);
+		return;
+	}
 
-  const newVideo = await createVideoEntry(videoId, userId);
+	const newVideo = await createVideoEntry(videoId, userId);
 
-  res.status(httpStatus.OK).json(newVideo);
+	res.status(httpStatus.OK).json(newVideo);
 }
