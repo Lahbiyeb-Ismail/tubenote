@@ -1,20 +1,22 @@
-import { Router } from 'express';
+import { Router } from "express";
 
 import {
-  createNote,
-  getUserNotes,
-  deleteNote,
-  getNoteById,
-  updateNote,
-  getUserRecentNotes,
-  getUserRecentlyUpdatedNotes,
-} from '../controllers/note.controller';
+	createNote,
+	getUserNotes,
+	deleteNote,
+	getNoteById,
+	updateNote,
+	getUserRecentNotes,
+	getUserRecentlyUpdatedNotes,
+	getNotesByVideoId,
+} from "../controllers/note.controller";
 
-import isAuthenticated from '../middlewares/isAuthenticated';
-import validateRequestBody from '../middlewares/validateRequestBody';
-import validateRequestParams from '../middlewares/validateRequestParams';
+import isAuthenticated from "../middlewares/isAuthenticated";
+import validateRequestBody from "../middlewares/validateRequestBody";
+import validateRequestParams from "../middlewares/validateRequestParams";
 
-import { noteIdParamSchema, noteSchema } from '../schemas/note.schema';
+import { noteIdParamSchema, noteSchema } from "../schemas/note.schema";
+import { videoIdParamSchema } from "../schemas/video.schema";
 
 const router = Router();
 
@@ -24,24 +26,28 @@ router.use(isAuthenticated);
 // - GET /: Get all notes for the authenticated user.
 // - POST /: Create a new note (requires request body validation).
 router
-  .route('/')
-  .get(getUserNotes)
-  .post(validateRequestBody(noteSchema), createNote);
+	.route("/")
+	.get(getUserNotes)
+	.post(validateRequestBody(noteSchema), createNote);
 
 // - GET /recent: Get the most recent notes for the authenticated user.
-router.route('/recent').get(getUserRecentNotes);
+router.route("/recent").get(getUserRecentNotes);
 
 // - GET /recently-updated: Get the recently updated notes for the authenticated user.
-router.route('/recently-updated').get(getUserRecentlyUpdatedNotes);
+router.route("/recently-updated").get(getUserRecentlyUpdatedNotes);
 
 // - GET /:noteId: Get a specific note by its ID (requires request params validation).
 // - PATCH /:noteId: Update a specific note by its ID (requires request params validation).
 // - DELETE /:noteId: Delete a specific note by its ID (requires request params validation).
 router
-  .route('/:noteId')
-  .all(validateRequestParams(noteIdParamSchema))
-  .get(getNoteById)
-  .patch(updateNote)
-  .delete(deleteNote);
+	.route("/:noteId")
+	.all(validateRequestParams(noteIdParamSchema))
+	.get(getNoteById)
+	.patch(updateNote)
+	.delete(deleteNote);
+
+router
+	.route("/:videoId")
+	.get(validateRequestParams(videoIdParamSchema), getNotesByVideoId);
 
 export default router;
