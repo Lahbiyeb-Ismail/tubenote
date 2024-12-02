@@ -34,7 +34,7 @@ export async function handleCreateVideo(
     return;
   }
 
-  const videoExists = await findVideo(videoId);
+  const videoExists = await findVideo({ videoId, userId });
 
   if (videoExists) {
     res.status(httpStatus.OK).json(videoExists);
@@ -59,4 +59,32 @@ export async function getUserVideos(req: Request, res: Response) {
   const videos = await findUserVideos(userId);
 
   res.status(httpStatus.OK).json({ videos });
+}
+
+/**
+ * Handles the request to get a video by its ID.
+ * 
+ * @param req - The request object containing the video ID in the parameters and user ID in the user property.
+ * @param res - The response object used to send back the appropriate HTTP response.
+ * 
+ * @returns A promise that resolves to sending a JSON response with the video data if found, 
+ * or an error message if the video ID is missing or the video is not found.
+ */
+export async function handleGetVideoById(req: Request, res: Response) {
+  const { videoId } = req.params;
+  const userId = req.userId;
+
+  if (!videoId) {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'VideoId is required' });
+    return;
+  }
+
+  const video = await findVideo({ videoId, userId });
+
+  if (!video) {
+    res.status(httpStatus.NOT_FOUND).json({ message: 'Video not found' });
+    return;
+  }
+
+  res.status(httpStatus.OK).json(video);
 }
