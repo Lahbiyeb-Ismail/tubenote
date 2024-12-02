@@ -1,4 +1,4 @@
-import type { Prisma, Video } from "@prisma/client";
+import type { Video } from "@prisma/client";
 
 import prismaClient from "../lib/prisma";
 import handleAsyncOperation from "../utils/handleAsyncOperation";
@@ -12,17 +12,10 @@ type VideoId = {
 	videoId: string;
 };
 
-type OrderByParam = {
-	orderBy?:
-		| Prisma.NoteOrderByWithRelationInput
-		| Prisma.NoteOrderByWithRelationInput[];
+type FetchUserVideos = UserId & {
+	limit: number;
+	skip: number;
 };
-
-type FetchUserVideos = UserId &
-	OrderByParam & {
-		limit: number;
-		skip: number;
-	};
 
 /**
  * Finds a video based on the provided video ID and user ID.
@@ -102,8 +95,6 @@ export async function createVideoEntry(
  * @param {string} params.userId - The ID of the user whose videos are to be fetched.
  * @param {number} params.limit - The maximum number of videos to fetch.
  * @param {number} params.skip - The number of videos to skip before starting to fetch.
- * @param {Object} [params.orderBy={ createdAt: "desc" }] - The order in which to fetch the videos.
- * @param {string} params.orderBy.createdAt - The order direction for the creation date (e.g., "asc" or "desc").
  * @returns {Promise<Video[]>} A promise that resolves to an array of videos.
  * @throws Will throw an error if the operation fails.
  */
@@ -111,7 +102,6 @@ export async function fetchUserVideos({
 	userId,
 	limit,
 	skip,
-	orderBy = { createdAt: "desc" },
 }: FetchUserVideos): Promise<Video[]> {
 	return handleAsyncOperation(
 		() =>
@@ -119,7 +109,6 @@ export async function fetchUserVideos({
 				where: { userId },
 				take: limit,
 				skip,
-				orderBy,
 			}),
 		{ errorMessage: "Failed to find user videos" },
 	);
