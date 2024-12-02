@@ -1,21 +1,28 @@
 "use client";
 
-import useGetUserVideos from "@/hooks/note/useGetUserVideos";
+import { DEFAULT_PAGE } from "@/utils/constants";
+
+import usePagination from "@/hooks/global/usePagination";
+import useGetUserVideos from "@/hooks/video/useGetUserVideos";
+
+import PaginationComponent from "@/components/global/Pagination";
+import Loader from "@/components/global/Loader";
 
 import AddNoteForm from "@/components/dashboards/AddNoteForm";
 import Header from "@/components/dashboards/Header";
 import NoDataFound from "@/components/dashboards/NoDataFound";
-import Loader from "@/components/global/Loader";
+
 import VideosList from "@/components/video/VideosList";
 
 function VideosPage() {
-	const { data: videos, isLoading, isError } = useGetUserVideos();
+	const { currentPage, setPage } = usePagination({ defaultPage: DEFAULT_PAGE });
+	const { data, isLoading, isError } = useGetUserVideos({ page: currentPage });
 
 	if (isError) return <div>Something went wrong</div>;
 
 	if (isLoading) return <Loader />;
 
-	if (!videos || videos.length === 0) {
+	if (!data || data.videos.length === 0) {
 		return <NoDataFound title="You don't have any videos yet." />;
 	}
 
@@ -26,7 +33,12 @@ function VideosPage() {
 				<div className="flex justify-end">
 					<AddNoteForm />
 				</div>
-				<VideosList videos={videos} />
+				<VideosList videos={data.videos} />
+				<PaginationComponent
+					currentPage={currentPage}
+					totalPages={data.pagination.totalPages}
+					onPageChange={setPage}
+				/>
 			</main>
 		</div>
 	);
