@@ -1,18 +1,20 @@
-import type { Request, Response } from 'express';
-import httpStatus from 'http-status';
+import type { Request, Response } from "express";
+import httpStatus from "http-status";
 
-import type { TypedRequest } from '../types';
-import type { NoteBody } from '../types/note.type';
+import type { TypedRequest } from "../types";
+import type { NoteBody } from "../types/note.type";
 
 import {
-  deleteNoteById,
-  editNote,
-  fetchLatestUserNotes,
-  fetchNoteById,
-  fetchUserNotes,
-  saveNote,
-  userNotesCount,
-} from '../services/note.services';
+	deleteNoteById,
+	editNote,
+	fetchLatestUserNotes,
+	fetchNoteById,
+	fetchNotesByVideoId,
+	fetchUserNotes,
+	getVideoNotesCount,
+	saveNote,
+	userNotesCount,
+} from "../services/note.services";
 
 /**
  * Creates a new note for the authenticated user.
@@ -34,52 +36,52 @@ import {
  * @throws {Error} If there is an issue with the database operation.
  */
 export async function createNote(
-  req: TypedRequest<NoteBody>,
-  res: Response
+	req: TypedRequest<NoteBody>,
+	res: Response,
 ): Promise<void> {
-  const userId = req.userId;
+	const userId = req.userId;
 
-  const {
-    title,
-    content,
-    videoTitle,
-    thumbnail,
-    videoId,
-    youtubeId,
-    timestamp,
-  } = req.body;
+	const {
+		title,
+		content,
+		videoTitle,
+		thumbnail,
+		videoId,
+		youtubeId,
+		timestamp,
+	} = req.body;
 
-  if (
-    !title ||
-    !content ||
-    !videoTitle ||
-    !thumbnail ||
-    !videoId ||
-    !youtubeId ||
-    !timestamp
-  ) {
-    res
-      .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'Please provide all the required fields.' });
-    return;
-  }
+	if (
+		!title ||
+		!content ||
+		!videoTitle ||
+		!thumbnail ||
+		!videoId ||
+		!youtubeId ||
+		!timestamp
+	) {
+		res
+			.status(httpStatus.BAD_REQUEST)
+			.json({ message: "Please provide all the required fields." });
+		return;
+	}
 
-  const noteData = {
-    title,
-    content,
-    videoTitle,
-    thumbnail,
-    videoId,
-    youtubeId,
-    timestamp,
-    userId,
-  };
+	const noteData = {
+		title,
+		content,
+		videoTitle,
+		thumbnail,
+		videoId,
+		youtubeId,
+		timestamp,
+		userId,
+	};
 
-  const note = await saveNote(noteData);
+	const note = await saveNote(noteData);
 
-  res
-    .status(httpStatus.CREATED)
-    .json({ message: 'Note created successfully.', note });
+	res
+		.status(httpStatus.CREATED)
+		.json({ message: "Note created successfully.", note });
 }
 
 /**
@@ -96,32 +98,32 @@ export async function createNote(
  * along with pagination information in the response.
  */
 export async function getUserNotes(req: Request, res: Response): Promise<void> {
-  const userId = req.userId;
+	const userId = req.userId;
 
-  // biome-ignore lint/complexity/useLiteralKeys: <explanation>
-  const page = req.query['page'] ? Number(req.query['page']) : 1;
-  // biome-ignore lint/complexity/useLiteralKeys: <explanation>
-  const limit = req.query['limit'] ? Number(req.query['limit']) : 8;
+	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
+	const page = req.query["page"] ? Number(req.query["page"]) : 1;
+	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
+	const limit = req.query["limit"] ? Number(req.query["limit"]) : 8;
 
-  const skip = (page - 1) * limit;
+	const skip = (page - 1) * limit;
 
-  const [notesCount, notes] = await Promise.all([
-    userNotesCount({ userId }),
-    fetchUserNotes({ userId, limit, skip }),
-  ]);
+	const [notesCount, notes] = await Promise.all([
+		userNotesCount({ userId }),
+		fetchUserNotes({ userId, limit, skip }),
+	]);
 
-  const totalPages = Math.ceil(notesCount / limit);
+	const totalPages = Math.ceil(notesCount / limit);
 
-  res.status(httpStatus.OK).json({
-    notes,
-    pagination: {
-      totalPages,
-      currentPage: page,
-      totalNotes: notesCount,
-      hasNextPage: page < totalPages,
-      hasPrevPage: page > 1,
-    },
-  });
+	res.status(httpStatus.OK).json({
+		notes,
+		pagination: {
+			totalPages,
+			currentPage: page,
+			totalNotes: notesCount,
+			hasNextPage: page < totalPages,
+			hasPrevPage: page > 1,
+		},
+	});
 }
 
 /**
@@ -143,19 +145,19 @@ export async function getUserNotes(req: Request, res: Response): Promise<void> {
  * INTERNAL_SERVER_ERROR status and an error message.
  */
 export async function deleteNote(req: Request, res: Response): Promise<void> {
-  const userId = req.userId;
-  const { noteId } = req.params;
+	const userId = req.userId;
+	const { noteId } = req.params;
 
-  if (!noteId) {
-    res
-      .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'Please provide the note ID.' });
-    return;
-  }
+	if (!noteId) {
+		res
+			.status(httpStatus.BAD_REQUEST)
+			.json({ message: "Please provide the note ID." });
+		return;
+	}
 
-  await deleteNoteById({ userId, noteId });
+	await deleteNoteById({ userId, noteId });
 
-  res.status(httpStatus.OK).json({ message: 'Note deleted successfully.' });
+	res.status(httpStatus.OK).json({ message: "Note deleted successfully." });
 }
 
 /**
@@ -179,24 +181,24 @@ export async function deleteNote(req: Request, res: Response): Promise<void> {
  * message otherwise.
  */
 export async function getNoteById(req: Request, res: Response): Promise<void> {
-  const userId = req.userId;
-  const { noteId } = req.params;
+	const userId = req.userId;
+	const { noteId } = req.params;
 
-  if (!noteId) {
-    res
-      .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'Please provide the note ID.' });
-    return;
-  }
+	if (!noteId) {
+		res
+			.status(httpStatus.BAD_REQUEST)
+			.json({ message: "Please provide the note ID." });
+		return;
+	}
 
-  const note = await fetchNoteById({ noteId, userId });
+	const note = await fetchNoteById({ noteId, userId });
 
-  if (!note) {
-    res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
-    return;
-  }
+	if (!note) {
+		res.status(httpStatus.NOT_FOUND).json({ message: "Note not found." });
+		return;
+	}
 
-  res.status(httpStatus.OK).json({ note });
+	res.status(httpStatus.OK).json({ note });
 }
 
 /**
@@ -222,33 +224,33 @@ export async function getNoteById(req: Request, res: Response): Promise<void> {
  * @returns {Promise<void>} - A promise that resolves when the function completes.
  */
 export async function updateNote(req: Request, res: Response): Promise<void> {
-  const userId = req.userId;
-  const { noteId } = req.params;
-  const { title, content, timestamp } = req.body;
+	const userId = req.userId;
+	const { noteId } = req.params;
+	const { title, content, timestamp } = req.body;
 
-  if (!noteId) {
-    res
-      .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'Please provide the note ID.' });
-    return;
-  }
+	if (!noteId) {
+		res
+			.status(httpStatus.BAD_REQUEST)
+			.json({ message: "Please provide the note ID." });
+		return;
+	}
 
-  const note = await fetchNoteById({ noteId, userId });
+	const note = await fetchNoteById({ noteId, userId });
 
-  if (!note) {
-    res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
-    return;
-  }
+	if (!note) {
+		res.status(httpStatus.NOT_FOUND).json({ message: "Note not found." });
+		return;
+	}
 
-  const updatedNote = await editNote({
-    userId,
-    noteId,
-    data: { title, content, timestamp },
-  });
+	const updatedNote = await editNote({
+		userId,
+		noteId,
+		data: { title, content, timestamp },
+	});
 
-  res
-    .status(httpStatus.OK)
-    .json({ message: 'Note Updated successfully.', note: updatedNote });
+	res
+		.status(httpStatus.OK)
+		.json({ message: "Note Updated successfully.", note: updatedNote });
 }
 
 /**
@@ -270,14 +272,14 @@ export async function updateNote(req: Request, res: Response): Promise<void> {
  * @returns A JSON response containing the user's most recent notes or an error message.
  */
 export async function getUserRecentNotes(
-  req: Request,
-  res: Response
+	req: Request,
+	res: Response,
 ): Promise<void> {
-  const userId = req.userId;
+	const userId = req.userId;
 
-  const notes = await fetchLatestUserNotes({ userId, take: 2 });
+	const notes = await fetchLatestUserNotes({ userId, take: 2 });
 
-  res.status(httpStatus.OK).json({ notes });
+	res.status(httpStatus.OK).json({ notes });
 }
 
 /**
@@ -299,16 +301,67 @@ export async function getUserRecentNotes(
  * @returns A JSON response containing the most recently updated notes for the user or an error message.
  */
 export async function getUserRecentlyUpdatedNotes(
-  req: Request,
-  res: Response
+	req: Request,
+	res: Response,
 ): Promise<void> {
-  const userId = req.userId;
+	const userId = req.userId;
 
-  const notes = await fetchLatestUserNotes({
-    userId,
-    take: 2,
-    orderBy: { updatedAt: 'desc' },
-  });
+	const notes = await fetchLatestUserNotes({
+		userId,
+		take: 2,
+		orderBy: { updatedAt: "desc" },
+	});
 
-  res.status(httpStatus.OK).json({ notes });
+	res.status(httpStatus.OK).json({ notes });
+}
+
+/**
+ * Retrieves notes associated with a specific video ID for the authenticated user.
+ *
+ * @param req - The request object containing user ID, video ID, and pagination parameters.
+ * @param res - The response object used to send back the retrieved notes and pagination details.
+ *
+ * @remarks
+ * - The `videoId` must be provided in the request parameters.
+ * - Pagination is supported via `page` and `limit` query parameters.
+ * - If `page` or `limit` is not provided, defaults to 1.
+ *
+ * @returns A JSON response containing the notes and pagination information.
+ *
+ */
+export async function getNotesByVideoId(req: Request, res: Response) {
+	const userId = req.userId;
+	const { videoId } = req.params;
+
+	if (!videoId) {
+		res
+			.status(httpStatus.BAD_REQUEST)
+			.json({ message: "Please provide the video ID." });
+		return;
+	}
+
+	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
+	const page = req.query["page"] ? Number(req.query["page"]) : 1;
+	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
+	const limit = req.query["limit"] ? Number(req.query["limit"]) : 1;
+
+	const skip = (page - 1) * limit;
+
+	const [notesCount, notes] = await Promise.all([
+		getVideoNotesCount({ userId, videoId }),
+		fetchNotesByVideoId({ userId, videoId, limit, skip }),
+	]);
+
+	const totalPages = Math.ceil(notesCount / limit);
+
+	res.status(httpStatus.OK).json({
+		notes,
+		pagination: {
+			totalPages,
+			currentPage: page,
+			totalNotes: notesCount,
+			hasNextPage: page < totalPages,
+			hasPrevPage: page > 1,
+		},
+	});
 }
