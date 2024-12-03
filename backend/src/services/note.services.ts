@@ -218,7 +218,7 @@ export async function fetchNotesByVideoId({
 			prismaClient.note.findMany({
 				where: {
 					userId,
-					videoId,
+					youtubeId: videoId,
 				},
 				take: limit,
 				skip,
@@ -248,7 +248,7 @@ export async function getVideoNotesCount({
 			prismaClient.note.count({
 				where: {
 					userId,
-					videoId,
+					youtubeId: videoId,
 				},
 			}),
 		{ errorMessage: "Failed to count video notes." },
