@@ -12,6 +12,7 @@ import NotePageFooter from "@/components/note/NotePageFooter";
 import NotePageHeader from "@/components/note/NotePageHeader";
 
 import VideoPlayer from "@/components/video/VideoPlayer";
+import useToggleVideoPlayer from "@/hooks/global/useToggleVideoPlayer";
 
 type NotePageParams = {
 	noteId: string;
@@ -20,10 +21,7 @@ type NotePageParams = {
 function NotePage({ params }: { params: NotePageParams }) {
 	const { noteId } = params;
 	const { data, isLoading, isError, refetch } = useGetNoteById(noteId);
-
-	const [isVideoPlayerVisible, setIsVideoPlayerVisible] = useState(false);
-
-	const toggleVideoPlayer = () => setIsVideoPlayerVisible((prev) => !prev);
+	const { isVideoPlayerVisible, toggleVideoPlayer } = useToggleVideoPlayer();
 
 	if (isLoading) {
 		return (
