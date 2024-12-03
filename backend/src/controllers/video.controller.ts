@@ -8,6 +8,11 @@ import {
 	getUserVideosCount,
 } from "../services/video.services";
 
+import {
+	fetchNotesByVideoId,
+	getVideoNotesCount,
+} from "../services/note.services";
+
 /**
  * Retrieves video data from YouTube and stores it in the database.
  *
@@ -35,7 +40,7 @@ export async function handleCreateVideo(
 		return;
 	}
 
-	const videoExists = await findVideo({ videoId, userId });
+	const videoExists = await findVideo({ youtubeId: videoId, userId });
 
 	if (videoExists) {
 		res.status(httpStatus.OK).json(videoExists);
@@ -103,7 +108,7 @@ export async function handleGetVideoById(req: Request, res: Response) {
 		return;
 	}
 
-	const video = await findVideo({ videoId, userId });
+	const video = await findVideo({ youtubeId: videoId, userId });
 
 	if (video) {
 		res.status(httpStatus.OK).json(video);
@@ -113,4 +118,57 @@ export async function handleGetVideoById(req: Request, res: Response) {
 	const newVideo = await createVideoEntry(videoId, userId);
 
 	res.status(httpStatus.OK).json(newVideo);
+}
+
+/**
+ * Handles the request to get notes by video ID.
+ *
+ * @param req - The request object containing user ID and video ID.
+ * @param res - The response object to send the result.
+ *
+ * @remarks
+ * This function retrieves notes associated with a specific video ID for a user.
+ * It supports pagination through query parameters `page` and `limit`.
+ *
+ * @returns A JSON response containing the video details, notes, and pagination information.
+ *
+ * @throws If the video ID is not provided, it returns a 400 Bad Request status with an error message.
+ */
+export async function handleGetNotesByVideoId(req: Request, res: Response) {
+	const userId = req.userId;
+	const { videoId } = req.params;
+
+	if (!videoId) {
+		res
+			.status(httpStatus.BAD_REQUEST)
+			.json({ message: "Please provide the video ID." });
+		return;
+	}
+
+	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
+	const page = req.query["page"] ? Number(req.query["page"]) : 1;
+	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
+	const limit = req.query["limit"] ? Number(req.query["limit"]) : 1;
+
+	const skip = (page - 1) * limit;
+
+	const [notesCount, notes, video] = await Promise.all([
+		getVideoNotesCount({ userId, videoId }),
+		fetchNotesByVideoId({ userId, videoId, limit, skip }),
+		findVideo({ id: videoId, userId }),
+	]);
+
+	const totalPages = Math.ceil(notesCount / limit);
+
+	res.status(httpStatus.OK).json({
+		video,
+		notes,
+		pagination: {
+			totalPages,
+			currentPage: page,
+			totalNotes: notesCount,
+			hasNextPage: page < totalPages,
+			hasPrevPage: page > 1,
+		},
+	});
 }
