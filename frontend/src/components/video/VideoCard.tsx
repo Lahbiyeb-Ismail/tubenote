@@ -28,11 +28,11 @@ function VideoCard({ video }: VideoCardProps) {
 			>
 				<CardContent
 					cardTitle={video.snippet.title}
-					href={`/videos/${video.id}`}
+					href={`/videos/${video.youtubeId}`}
 					isGridLayout={isGridLayout}
 				/>
 				<CardFooterWrapper className="items-center justify-center">
-					<SeeAllButton href={`/videos/${video.id}`} />
+					<SeeAllButton href={`/videos/${video.youtubeId}`} />
 				</CardFooterWrapper>
 			</div>
 		</CardWrapper>
