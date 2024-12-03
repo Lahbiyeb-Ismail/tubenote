@@ -152,16 +152,14 @@ export async function handleGetNotesByVideoId(req: Request, res: Response) {
 
 	const skip = (page - 1) * limit;
 
-	const [notesCount, notes, video] = await Promise.all([
+	const [notesCount, notes] = await Promise.all([
 		getVideoNotesCount({ userId, videoId }),
 		fetchNotesByVideoId({ userId, videoId, limit, skip }),
-		findVideo({ id: videoId, userId }),
 	]);
 
 	const totalPages = Math.ceil(notesCount / limit);
 
 	res.status(httpStatus.OK).json({
-		video,
 		notes,
 		pagination: {
 			totalPages,
