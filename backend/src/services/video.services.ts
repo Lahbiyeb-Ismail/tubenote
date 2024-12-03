@@ -1,4 +1,4 @@
-import type { Video } from "@prisma/client";
+import type { Prisma, Video } from "@prisma/client";
 
 import prismaClient from "../lib/prisma";
 import handleAsyncOperation from "../utils/handleAsyncOperation";
@@ -8,32 +8,25 @@ type UserId = {
 	userId: string;
 };
 
-type VideoId = {
-	videoId: string;
-};
-
 type FetchUserVideos = UserId & {
 	limit: number;
 	skip: number;
 };
 
 /**
- * Finds a video based on the provided video ID and user ID.
+ * Finds the first video that matches the given parameters.
  *
- * @param {Object} params - The parameters for finding the video.
- * @param {string} params.videoId - The ID of the video to find.
- * @param {string} params.userId - The ID of the user who owns the video.
- * @returns {Promise<Video | null>} A promise that resolves to the found video or null if no video is found.
+ * @param params - The parameters to filter the videos.
+ * @returns A promise that resolves to the found video or null if no video matches the parameters.
  * @throws Will throw an error if the operation fails.
  */
-export async function findVideo({
-	videoId,
-	userId,
-}: VideoId & UserId): Promise<Video | null> {
+export async function findVideo(
+	params: Prisma.VideoWhereInput,
+): Promise<Video | null> {
 	return handleAsyncOperation(
 		() =>
 			prismaClient.video.findFirst({
-				where: { youtubeId: videoId, userId },
+				where: { ...params },
 			}),
 		{ errorMessage: "Faild to find video" },
 	);
