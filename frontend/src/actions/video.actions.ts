@@ -82,11 +82,11 @@ export async function getVideoNotes({
 	notes: Note[];
 	pagination: Pagination;
 }> {
-	const response = await axiosInstance.get<{
-		video: Video;
-		notes: Note[];
-		pagination: Pagination;
-	}>(`/videos/${videoId}/notes?page=${page}&limit=${limit}`);
+	const response = await axiosInstance.get(
+		`/videos/${videoId}/notes?page=${page}&limit=${limit}`,
+	);
+
+	console.log("data ->", response.data);
 
 	return response.data;
 }
