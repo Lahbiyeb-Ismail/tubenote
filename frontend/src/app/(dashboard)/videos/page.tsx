@@ -22,7 +22,7 @@ function VideosPage() {
 
 	if (isLoading) return <Loader />;
 
-	if (!data || data.videos.length === 0) {
+	if (!data || !data.videos) {
 		return <NoDataFound title="You don't have any videos yet." />;
 	}
 
