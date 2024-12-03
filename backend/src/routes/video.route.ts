@@ -1,19 +1,20 @@
-import { Router } from 'express';
+import { Router } from "express";
 
 import {
-  getUserVideos,
-  handleCreateVideo,
-  handleGetVideoById,
-} from '../controllers/video.controller';
+	getUserVideos,
+	handleCreateVideo,
+	handleGetNotesByVideoId,
+	handleGetVideoById,
+} from "../controllers/video.controller";
 
-import isAuthenticated from '../middlewares/isAuthenticated';
-import validateRequestBody from '../middlewares/validateRequestBody';
-import validateRequestParams from '../middlewares/validateRequestParams';
+import isAuthenticated from "../middlewares/isAuthenticated";
+import validateRequestBody from "../middlewares/validateRequestBody";
+import validateRequestParams from "../middlewares/validateRequestParams";
 
 import {
-  createVideoBodySchema,
-  videoIdParamSchema,
-} from '../schemas/video.schema';
+	createVideoBodySchema,
+	videoIdParamSchema,
+} from "../schemas/video.schema";
 
 const router = Router();
 
@@ -23,12 +24,16 @@ router.use(isAuthenticated);
 // - GET /: Get all videos for the authenticated user
 // - POST /: Create a new video (requires request body validation)
 router
-  .route('/')
-  .get(getUserVideos)
-  .post(validateRequestBody(createVideoBodySchema), handleCreateVideo);
+	.route("/")
+	.get(getUserVideos)
+	.post(validateRequestBody(createVideoBodySchema), handleCreateVideo);
 
 router
-  .route('/:videoId')
-  .get(validateRequestParams(videoIdParamSchema), handleGetVideoById);
+	.route("/:videoId/notes")
+	.get(validateRequestParams(videoIdParamSchema), handleGetNotesByVideoId);
+
+router
+	.route("/:videoId")
+	.get(validateRequestParams(videoIdParamSchema), handleGetVideoById);
 
 export default router;
