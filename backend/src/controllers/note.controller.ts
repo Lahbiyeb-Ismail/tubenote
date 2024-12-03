@@ -9,9 +9,7 @@ import {
 	editNote,
 	fetchLatestUserNotes,
 	fetchNoteById,
-	fetchNotesByVideoId,
 	fetchUserNotes,
-	getVideoNotesCount,
 	saveNote,
 	userNotesCount,
 } from "../services/note.services";
@@ -313,55 +311,4 @@ export async function getUserRecentlyUpdatedNotes(
 	});
 
 	res.status(httpStatus.OK).json({ notes });
-}
-
-/**
- * Retrieves notes associated with a specific video ID for the authenticated user.
- *
- * @param req - The request object containing user ID, video ID, and pagination parameters.
- * @param res - The response object used to send back the retrieved notes and pagination details.
- *
- * @remarks
- * - The `videoId` must be provided in the request parameters.
- * - Pagination is supported via `page` and `limit` query parameters.
- * - If `page` or `limit` is not provided, defaults to 1.
- *
- * @returns A JSON response containing the notes and pagination information.
- *
- */
-export async function getNotesByVideoId(req: Request, res: Response) {
-	const userId = req.userId;
-	const { videoId } = req.params;
-
-	if (!videoId) {
-		res
-			.status(httpStatus.BAD_REQUEST)
-			.json({ message: "Please provide the video ID." });
-		return;
-	}
-
-	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
-	const page = req.query["page"] ? Number(req.query["page"]) : 1;
-	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
-	const limit = req.query["limit"] ? Number(req.query["limit"]) : 1;
-
-	const skip = (page - 1) * limit;
-
-	const [notesCount, notes] = await Promise.all([
-		getVideoNotesCount({ userId, videoId }),
-		fetchNotesByVideoId({ userId, videoId, limit, skip }),
-	]);
-
-	const totalPages = Math.ceil(notesCount / limit);
-
-	res.status(httpStatus.OK).json({
-		notes,
-		pagination: {
-			totalPages,
-			currentPage: page,
-			totalNotes: notesCount,
-			hasNextPage: page < totalPages,
-			hasPrevPage: page > 1,
-		},
-	});
 }

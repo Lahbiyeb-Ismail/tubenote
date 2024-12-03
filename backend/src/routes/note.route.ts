@@ -8,7 +8,6 @@ import {
 	updateNote,
 	getUserRecentNotes,
 	getUserRecentlyUpdatedNotes,
-	getNotesByVideoId,
 } from "../controllers/note.controller";
 
 import isAuthenticated from "../middlewares/isAuthenticated";
@@ -16,7 +15,6 @@ import validateRequestBody from "../middlewares/validateRequestBody";
 import validateRequestParams from "../middlewares/validateRequestParams";
 
 import { noteIdParamSchema, noteSchema } from "../schemas/note.schema";
-import { videoIdParamSchema } from "../schemas/video.schema";
 
 const router = Router();
 
@@ -45,9 +43,5 @@ router
 	.get(getNoteById)
 	.patch(updateNote)
 	.delete(deleteNote);
-
-router
-	.route("/:videoId")
-	.get(validateRequestParams(videoIdParamSchema), getNotesByVideoId);
 
 export default router;
