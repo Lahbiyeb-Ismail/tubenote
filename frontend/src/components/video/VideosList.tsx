@@ -12,8 +12,6 @@ type VideosListProps = {
 function VideosList({ videos }: VideosListProps) {
 	const { isGridLayout } = useLayout();
 
-	console.log(videos);
-
 	return (
 		<div className="md:px-4 py-6">
 			<div
