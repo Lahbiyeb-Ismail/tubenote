@@ -4,6 +4,7 @@ import extractVideoId from "@/helpers/extractVideoId";
 import type { Video } from "@/types/video.types";
 import type { Pagination } from "@/types";
 import type { Note } from "@/types/note.types";
+import { setStorageValue } from "@/utils/localStorage";
 
 type VideoIdParam = { videoId: string };
 type LimitParam = { limit: number };
@@ -58,6 +59,8 @@ export async function getUserVideos({
 export async function getVideoById(videoId: string): Promise<Video> {
 	const response = await axiosInstance.get(`/videos/${videoId}`);
 
+	setStorageValue("video", response.data.video);
+
 	return response.data;
 }
 
@@ -87,6 +90,8 @@ export async function getVideoNotes({
 		notes: Note[];
 		pagination: Pagination;
 	}>(`/videos/${videoId}/notes?page=${page}&limit=${limit}`);
+
+	setStorageValue("video", response.data.video);
 
 	return response.data;
 }
