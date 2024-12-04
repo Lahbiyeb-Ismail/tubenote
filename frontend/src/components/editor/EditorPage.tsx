@@ -6,9 +6,6 @@ import dynamic from "next/dynamic";
 import VideoPlayer from "@/components/video/VideoPlayer";
 
 import ResizablePanels from "@/components/global/ResizablePanels";
-import Sidebar from "@/components/dashboards/Sidebar";
-
-import { useLayout } from "@/context/useLayout";
 
 const AppMDXEditor = dynamic(() => import("./AppMDXEditor"), { ssr: false });
 
@@ -27,28 +24,21 @@ function EditorPage({
 	videoId,
 	action = "create",
 }: EditorPageProps) {
-	const { isSidebarOpen } = useLayout();
-
 	return (
-		<div className="flex h-screen">
-			<Sidebar />
-			<div
-				className={`flex-grow transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-20"}`}
-			>
-				<ResizablePanels
-					leftSideContent={
-						<Suspense fallback={null}>
-							<AppMDXEditor
-								action={action}
-								initialNoteContent={initialNoteContent}
-								noteTitle={noteTitle}
-								noteId={noteId}
-							/>
-						</Suspense>
-					}
-					rightSideContent={<VideoPlayer videoId={videoId} />}
-				/>
-			</div>
+		<div className="flex h-screen bg-white">
+			<ResizablePanels
+				leftSideContent={
+					<Suspense fallback={null}>
+						<AppMDXEditor
+							action={action}
+							initialNoteContent={initialNoteContent}
+							noteTitle={noteTitle}
+							noteId={noteId}
+						/>
+					</Suspense>
+				}
+				rightSideContent={<VideoPlayer videoId={videoId} />}
+			/>
 		</div>
 	);
 }
