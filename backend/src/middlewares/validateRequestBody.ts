@@ -1,8 +1,8 @@
-import type { NextFunction, Request, Response } from 'express';
-import httpStatus from 'http-status';
-import type { ZodSchema } from 'zod';
+import type { NextFunction, Request, Response } from "express";
+import httpStatus from "http-status";
+import type { ZodSchema } from "zod";
 
-type RequestBodySchema = Record<'body', ZodSchema>;
+type RequestBodySchema = Record<"body", ZodSchema>;
 
 /**
  * Middleware to validate the request body against a given schema.
@@ -30,24 +30,25 @@ type RequestBodySchema = Record<'body', ZodSchema>;
  * @param next - The next middleware function.
  */
 function validateRequestBody(schema: RequestBodySchema) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const requestBodySchema = schema.body;
+	return (req: Request, res: Response, next: NextFunction) => {
+		const requestBodySchema = schema.body;
 
-    const parsedBody = requestBodySchema.safeParse(req.body);
+		const parsedBody = requestBodySchema.safeParse(req.body);
 
-    if (parsedBody.success) next();
-    else {
-      const errors = parsedBody.error.errors.map((err) => ({
-        field: err.path.join(', '),
-        message: err.message,
-      }));
+		if (parsedBody.success) {
+			next();
+		} else {
+			const errors = parsedBody.error.errors.map((err) => ({
+				field: err.path.join(", "),
+				message: err.message,
+			}));
 
-      res.status(httpStatus.BAD_REQUEST).json({
-        message: 'Validation error',
-        errors,
-      });
-    }
-  };
+			res.status(httpStatus.BAD_REQUEST).json({
+				message: "Validation error",
+				errors,
+			});
+		}
+	};
 }
 
 export default validateRequestBody;
