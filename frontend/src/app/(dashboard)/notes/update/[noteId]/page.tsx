@@ -3,7 +3,7 @@
 import EditorPage from "@/components/editor/EditorPage";
 import useGetNoteById from "@/hooks/note/useGetNoteById";
 
-function Editor({ params }: { params: { noteId: string } }) {
+function UpdateNotePage({ params }: { params: { noteId: string } }) {
 	const { noteId } = params;
 	const { data, isLoading, isError } = useGetNoteById(noteId);
 
@@ -26,4 +26,4 @@ function Editor({ params }: { params: { noteId: string } }) {
 	);
 }
 
-export default Editor;
+export default UpdateNotePage;

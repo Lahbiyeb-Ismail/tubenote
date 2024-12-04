@@ -5,7 +5,7 @@ import useGetVideoById from "@/hooks/video/useGetVideoById";
 import EditorPage from "@/components/editor/EditorPage";
 import Loader from "@/components/global/Loader";
 
-function Editor({ params }: { params: { videoId: string } }) {
+function AddNewNotePage({ params }: { params: { videoId: string } }) {
 	const { videoId } = params;
 
 	const { data: video, isLoading, isError } = useGetVideoById(videoId);
@@ -25,4 +25,4 @@ function Editor({ params }: { params: { videoId: string } }) {
 	return <EditorPage videoId={video.youtubeId} />;
 }
 
-export default Editor;
+export default AddNewNotePage;
