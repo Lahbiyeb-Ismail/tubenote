@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getUserVideos, getVideoNotes } from "@/actions/video.actions";
+import { getVideoNotes } from "@/actions/video.actions";
 import { getStorageValue } from "@/utils/localStorage";
 
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
@@ -15,7 +15,7 @@ function useGetVideoNotes({
 	const accessToken = getStorageValue<string>("accessToken");
 
 	return useQuery({
-		queryKey: ["videos", page, limit],
+		queryKey: ["videoNotes", page, limit],
 		queryFn: () => getVideoNotes({ videoId, page, limit }),
 		enabled: !!accessToken,
 	});
