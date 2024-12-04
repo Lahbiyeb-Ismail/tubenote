@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import httpStatus from "http-status";
 
 import type { TypedRequest } from "../types";
-import type { NoteBody } from "../types/note.type";
+import type { NoteBody, UpdateNoteBody } from "../types/note.type";
 
 import {
 	deleteNoteById,
@@ -47,22 +47,7 @@ export async function createNote(
 		videoId,
 		youtubeId,
 		timestamp,
-	} = req.body;
-
-	if (
-		!title ||
-		!content ||
-		!videoTitle ||
-		!thumbnail ||
-		!videoId ||
-		!youtubeId ||
-		!timestamp
-	) {
-		res
-			.status(httpStatus.BAD_REQUEST)
-			.json({ message: "Please provide all the required fields." });
-		return;
-	}
+	} = req.body as NoteBody;
 
 	const noteData = {
 		title,
@@ -144,14 +129,7 @@ export async function getUserNotes(req: Request, res: Response): Promise<void> {
  */
 export async function deleteNote(req: Request, res: Response): Promise<void> {
 	const userId = req.userId;
-	const { noteId } = req.params;
-
-	if (!noteId) {
-		res
-			.status(httpStatus.BAD_REQUEST)
-			.json({ message: "Please provide the note ID." });
-		return;
-	}
+	const { noteId } = req.params as { noteId: string };
 
 	await deleteNoteById({ userId, noteId });
 
@@ -180,14 +158,7 @@ export async function deleteNote(req: Request, res: Response): Promise<void> {
  */
 export async function getNoteById(req: Request, res: Response): Promise<void> {
 	const userId = req.userId;
-	const { noteId } = req.params;
-
-	if (!noteId) {
-		res
-			.status(httpStatus.BAD_REQUEST)
-			.json({ message: "Please provide the note ID." });
-		return;
-	}
+	const { noteId } = req.params as { noteId: string };
 
 	const note = await fetchNoteById({ noteId, userId });
 
@@ -223,15 +194,9 @@ export async function getNoteById(req: Request, res: Response): Promise<void> {
  */
 export async function updateNote(req: Request, res: Response): Promise<void> {
 	const userId = req.userId;
-	const { noteId } = req.params;
-	const { title, content, timestamp } = req.body;
+	const { noteId } = req.params as { noteId: string };
 
-	if (!noteId) {
-		res
-			.status(httpStatus.BAD_REQUEST)
-			.json({ message: "Please provide the note ID." });
-		return;
-	}
+	const { title, content, timestamp } = req.body as UpdateNoteBody;
 
 	const note = await fetchNoteById({ noteId, userId });
 
