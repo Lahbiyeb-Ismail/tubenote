@@ -30,7 +30,7 @@ function VideoPageHeader({
 	};
 
 	const actionButton = {
-		href: `/editor/create/${videoId}`,
+		href: `/notes/add/${videoId}`,
 		label: "Add Note",
 		icon: <Plus />,
 	};
