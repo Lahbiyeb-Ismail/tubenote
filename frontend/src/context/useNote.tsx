@@ -13,34 +13,34 @@ import noteReducer, { noteInitialState } from "@/reducers/note.reducer";
 const NoteContext = createContext<NoteContextType | undefined>(undefined);
 
 export function NoteProvider({ children }: NoteProviderProps) {
-  const [state, dispatch] = useReducer(noteReducer, noteInitialState);
+	const [state, dispatch] = useReducer(noteReducer, noteInitialState);
 
-  const createNoteMutation = useCreateNote(dispatch);
-  const deleteNoteMutation = useDeleteNote();
-  const updateNoteMutation = useUpdateNote(dispatch);
+	const createNoteMutation = useCreateNote(dispatch);
+	const deleteNoteMutation = useDeleteNote();
+	const updateNoteMutation = useUpdateNote(dispatch);
 
-  const clearNoteState = () => {
-    dispatch({ type: "CLEAR_NOTE_STATE" });
-  };
+	const clearNoteState = () => {
+		dispatch({ type: "CLEAR_NOTE_STATE" });
+	};
 
-  const value = {
-    state,
-    createNote: createNoteMutation.mutate,
-    isLoading: createNoteMutation.isPending || deleteNoteMutation.isPending,
-    deleteNote: deleteNoteMutation.mutate,
-    updateNote: updateNoteMutation.mutate,
-    clearNoteState,
-  };
+	const value = {
+		state,
+		createNote: createNoteMutation.mutate,
+		isLoading: createNoteMutation.isPending || deleteNoteMutation.isPending,
+		deleteNote: deleteNoteMutation.mutate,
+		updateNote: updateNoteMutation.mutate,
+		clearNoteState,
+	};
 
-  return <NoteContext.Provider value={value}>{children}</NoteContext.Provider>;
+	return <NoteContext.Provider value={value}>{children}</NoteContext.Provider>;
 }
 
 export function useNote() {
-  const context = useContext(NoteContext);
+	const context = useContext(NoteContext);
 
-  if (context === undefined) {
-    throw new Error("useNote must be used within an NoteProvider");
-  }
+	if (context === undefined) {
+		throw new Error("useNote must be used within an NoteProvider");
+	}
 
-  return context;
+	return context;
 }
