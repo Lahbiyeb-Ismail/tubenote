@@ -33,12 +33,7 @@ export async function handleCreateVideo(
 	res: Response,
 ): Promise<void> {
 	const userId = req.userId;
-	const { videoId } = req.body;
-
-	if (!videoId) {
-		res.status(httpStatus.BAD_REQUEST).json({ message: "VideoId is required" });
-		return;
-	}
+	const { videoId } = req.body as { videoId: string };
 
 	const videoExists = await findVideo({ youtubeId: videoId, userId });
 
@@ -100,13 +95,8 @@ export async function getUserVideos(req: Request, res: Response) {
  * @returns A JSON response with the video data or an error message if the video ID is not provided.
  */
 export async function handleGetVideoById(req: Request, res: Response) {
-	const { videoId } = req.params;
+	const { videoId } = req.params as { videoId: string };
 	const userId = req.userId;
-
-	if (!videoId) {
-		res.status(httpStatus.BAD_REQUEST).json({ message: "VideoId is required" });
-		return;
-	}
 
 	const video = await findVideo({ youtubeId: videoId, userId });
 
@@ -136,14 +126,7 @@ export async function handleGetVideoById(req: Request, res: Response) {
  */
 export async function handleGetNotesByVideoId(req: Request, res: Response) {
 	const userId = req.userId;
-	const { videoId } = req.params;
-
-	if (!videoId) {
-		res
-			.status(httpStatus.BAD_REQUEST)
-			.json({ message: "Please provide the video ID." });
-		return;
-	}
+	const { videoId } = req.params as { videoId: string };
 
 	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
 	const page = req.query["page"] ? Number(req.query["page"]) : 1;
