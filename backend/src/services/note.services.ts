@@ -223,7 +223,7 @@ export async function fetchNotesByVideoId({
 				take: limit,
 				skip,
 				orderBy: {
-					createdAt: "desc",
+					createdAt: "asc",
 				},
 			}),
 		{ errorMessage: "Failed to fetch notes by video ID." },
