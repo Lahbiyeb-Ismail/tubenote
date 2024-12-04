@@ -14,7 +14,7 @@ function EditNoteButton({ noteId, isLoading }: EditNoteButtonProps) {
 	const { isGridLayout } = useLayout();
 
 	return (
-		<Link href={`/editor/update/${noteId}`}>
+		<Link href={`/notes/update/${noteId}`}>
 			<Button
 				variant="outline"
 				size={!isGridLayout ? "icon" : "sm"}
