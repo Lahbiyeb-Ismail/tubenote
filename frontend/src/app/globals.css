@@ -84,6 +84,10 @@
   overflow: auto;
 }
 
+.mdxeditor .mdxeditor-toolbar{
+  background-color: white;
+}
+
 .mdxeditor .mdxeditor-diff-source-wrapper {
   height: 90%;
 }
