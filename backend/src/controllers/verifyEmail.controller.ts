@@ -1,23 +1,23 @@
-import httpStatus from 'http-status';
-import type { Request, Response } from 'express';
+import httpStatus from "http-status";
+import type { Request, Response } from "express";
 
-import type { TypedRequest } from '../types';
-import type { SendVerifyEmail } from '../types/verifyEmail.type';
+import type { TypedRequest } from "../types";
+import type { SendVerifyEmail } from "../types/verifyEmail.type";
 
-import { sendEmail } from '../utils/sendEmail';
-
-import {
-  createEmailVericationToken,
-  deleteEmailVericationToken,
-  findVerificationToken,
-  getEmailVericationToken,
-} from '../services/verifyEmail.services';
-import { findUser, verifyUserEmail } from '../services/user.services';
+import { sendEmail } from "../utils/sendEmail";
 
 import {
-  createVerificationEmail,
-  createVerifiedEmail,
-} from '../helpers/verifyEmail.helper';
+	createEmailVericationToken,
+	deleteEmailVericationToken,
+	findVerificationToken,
+	getEmailVericationToken,
+} from "../services/verifyEmail.services";
+import { findUser, verifyUserEmail } from "../services/user.services";
+
+import {
+	createVerificationEmail,
+	createVerifiedEmail,
+} from "../helpers/verifyEmail.helper";
 
 /**
  * Handles the request to send a verification email.
@@ -39,65 +39,59 @@ import {
  * 10. Responds with an OK status indicating that the verification email has been sent.
  */
 export async function sendVerificationEmailHandler(
-  req: TypedRequest<SendVerifyEmail>,
-  res: Response
+	req: TypedRequest<SendVerifyEmail>,
+	res: Response,
 ): Promise<void> {
-  const { email } = req.body;
+	const { email } = req.body as SendVerifyEmail;
 
-  // Checks if the email is provided; if not, responds with a BAD_REQUEST status.
-  if (!email) {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Email is required.' });
-    return;
-  }
+	// Retrieves the user associated with the provided email.
+	const user = await findUser({ email });
 
-  // Retrieves the user associated with the provided email.
-  const user = await findUser({ email });
+	// If no user is found, responds with an UNAUTHORIZED status.
+	if (!user) {
+		res
+			.status(httpStatus.UNAUTHORIZED)
+			.json({ message: "No user found with the provided email." });
+		return;
+	}
 
-  // If no user is found, responds with an UNAUTHORIZED status.
-  if (!user) {
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .json({ message: 'No user found with the provided email.' });
-    return;
-  }
+	// If the user's email is already verified, responds with a CONFLICT status.
+	if (user.emailVerified) {
+		res
+			.status(httpStatus.CONFLICT)
+			.json({ message: "Email is already verified." });
+		return;
+	}
 
-  // If the user's email is already verified, responds with a CONFLICT status.
-  if (user.emailVerified) {
-    res
-      .status(httpStatus.CONFLICT)
-      .json({ message: 'Email is already verified.' });
-    return;
-  }
+	// Checks if a verification token already exists for the user.
+	const existingVerificationToken = await getEmailVericationToken(user.id);
 
-  // Checks if a verification token already exists for the user.
-  const existingVerificationToken = await getEmailVericationToken(user.id);
+	// If a token exists, responds with a BAD_REQUEST status indicating that a verification email has already been sent.
+	if (existingVerificationToken) {
+		res.status(httpStatus.BAD_REQUEST).json({
+			message:
+				"A verification email has already been sent. Please check your email.",
+		});
+		return;
+	}
 
-  // If a token exists, responds with a BAD_REQUEST status indicating that a verification email has already been sent.
-  if (existingVerificationToken) {
-    res.status(httpStatus.BAD_REQUEST).json({
-      message:
-        'A verification email has already been sent. Please check your email.',
-    });
-    return;
-  }
+	// Creates a new email verification token for the user.
+	const token = await createEmailVericationToken(user.id);
 
-  // Creates a new email verification token for the user.
-  const token = await createEmailVericationToken(user.id);
+	const { htmlContent, textContent, logoPath } =
+		await createVerificationEmail(token);
 
-  const { htmlContent, textContent, logoPath } =
-    await createVerificationEmail(token);
+	// Sends the verification email to the provided email address.
+	await sendEmail({
+		emailRecipient: email,
+		emailSubject: "Verification Email",
+		htmlContent,
+		textContent,
+		logoPath,
+	});
 
-  // Sends the verification email to the provided email address.
-  await sendEmail({
-    emailRecipient: email,
-    emailSubject: 'Verification Email',
-    htmlContent,
-    textContent,
-    logoPath,
-  });
-
-  // Responds with an OK status indicating that the verification email has been sent.
-  res.status(httpStatus.OK).json({ message: 'Verification email sent.' });
+	// Responds with an OK status indicating that the verification email has been sent.
+	res.status(httpStatus.OK).json({ message: "Verification email sent." });
 }
 
 /**
@@ -117,32 +111,27 @@ export async function sendVerificationEmailHandler(
  * 7. Responds with a 200 OK status indicating that the email was verified successfully.
  */
 export async function verifyEmailHandler(
-  req: Request,
-  res: Response
+	req: Request,
+	res: Response,
 ): Promise<void> {
-  const { token } = req.params;
+	const { token } = req.params as { token: string };
 
-  if (!token) {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Token is required.' });
-    return;
-  }
+	const verificationToken = await findVerificationToken(token);
 
-  const verificationToken = await findVerificationToken(token);
+	if (!verificationToken || verificationToken.expiresAt < new Date()) {
+		res
+			.status(httpStatus.NOT_FOUND)
+			.json({ message: "Invalid or Expired token." });
+		return;
+	}
 
-  if (!verificationToken || verificationToken.expiresAt < new Date()) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Invalid or Expired token.' });
-    return;
-  }
+	// Updates the user's emailVerified status to true.
+	await verifyUserEmail(verificationToken.userId);
 
-  // Updates the user's emailVerified status to true.
-  await verifyUserEmail(verificationToken.userId);
+	await deleteEmailVericationToken(verificationToken.userId);
 
-  await deleteEmailVericationToken(verificationToken.userId);
+	const { htmlContent } = await createVerifiedEmail();
 
-  const { htmlContent } = await createVerifiedEmail();
-
-  // Send HTML response with success message and client-side redirect
-  res.status(httpStatus.OK).send(htmlContent);
+	// Send HTML response with success message and client-side redirect
+	res.status(httpStatus.OK).send(htmlContent);
 }
