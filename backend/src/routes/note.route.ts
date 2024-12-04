@@ -14,7 +14,11 @@ import isAuthenticated from "../middlewares/isAuthenticated";
 import validateRequestBody from "../middlewares/validateRequestBody";
 import validateRequestParams from "../middlewares/validateRequestParams";
 
-import { noteIdParamSchema, noteSchema } from "../schemas/note.schema";
+import {
+	noteIdParamSchema,
+	noteSchema,
+	updateNoteSchema,
+} from "../schemas/note.schema";
 
 const router = Router();
 
@@ -40,8 +44,8 @@ router.route("/recently-updated").get(getUserRecentlyUpdatedNotes);
 router
 	.route("/:noteId")
 	.all(validateRequestParams(noteIdParamSchema))
+	.patch(validateRequestBody(updateNoteSchema), updateNote)
 	.get(getNoteById)
-	.patch(updateNote)
 	.delete(deleteNote);
 
 export default router;
