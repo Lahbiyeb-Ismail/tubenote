@@ -1,14 +1,15 @@
-import axiosInstance from '@/lib/axios.lib';
-import type { Pagination } from '@/types';
+import axiosInstance from "@/lib/axios.lib";
+import type { Pagination } from "@/types";
 import type {
-  CreateNoteResponse,
-  Note,
-  UpdateNoteProps,
-} from '@/types/note.types';
+	CreateNoteResponse,
+	Note,
+	NewNote,
+	UpdateNoteProps,
+} from "@/types/note.types";
 
 type UserNotes = {
-  page: number;
-  limit: number;
+	page: number;
+	limit: number;
 };
 
 /**
@@ -17,10 +18,10 @@ type UserNotes = {
  * @param {Note} note - The note object to be created.
  * @returns {Promise<CreateNoteResponse>} - A promise that resolves to the response data.
  */
-export async function createNote(note: Note): Promise<CreateNoteResponse> {
-  const response = await axiosInstance.post('/notes', note);
+export async function createNote(note: NewNote): Promise<CreateNoteResponse> {
+	const response = await axiosInstance.post("/notes", note);
 
-  return response.data;
+	return response.data;
 }
 
 /**
@@ -32,14 +33,14 @@ export async function createNote(note: Note): Promise<CreateNoteResponse> {
  * @returns {Promise<{ notes: Note[]; pagination: Pagination }>} A promise that resolves to an object containing the notes and pagination information.
  */
 export async function getUserNotes({
-  page,
-  limit,
+	page,
+	limit,
 }: UserNotes): Promise<{ notes: Note[]; pagination: Pagination }> {
-  const response = await axiosInstance(`/notes?page=${page}&limit=${limit}`);
+	const response = await axiosInstance(`/notes?page=${page}&limit=${limit}`);
 
-  const { notes, pagination } = response.data;
+	const { notes, pagination } = response.data;
 
-  return { notes, pagination };
+	return { notes, pagination };
 }
 
 /**
@@ -50,9 +51,9 @@ export async function getUserNotes({
  * to an object containing a message.
  */
 export async function deleteNote(noteId: string): Promise<{ message: string }> {
-  const response = await axiosInstance.delete(`/notes/${noteId}`);
+	const response = await axiosInstance.delete(`/notes/${noteId}`);
 
-  return response.data;
+	return response.data;
 }
 
 /**
@@ -62,9 +63,9 @@ export async function deleteNote(noteId: string): Promise<{ message: string }> {
  * @returns {Promise<Note>} A promise that resolves to the note object.
  */
 export async function getNoteById(noteId: string): Promise<Note> {
-  const response = await axiosInstance.get(`/notes/${noteId}`);
+	const response = await axiosInstance.get(`/notes/${noteId}`);
 
-  return response.data.note;
+	return response.data.note;
 }
 
 /**
@@ -77,18 +78,18 @@ export async function getNoteById(noteId: string): Promise<Note> {
  * @returns {Promise<Note>} A promise that resolves to the updated note.
  */
 export async function updateNote({
-  noteId,
-  title,
-  content,
-  timestamp,
+	noteId,
+	title,
+	content,
+	timestamp,
 }: UpdateNoteProps): Promise<Note> {
-  const response = await axiosInstance.patch(`/notes/${noteId}`, {
-    title,
-    content,
-    timestamp,
-  });
+	const response = await axiosInstance.patch(`/notes/${noteId}`, {
+		title,
+		content,
+		timestamp,
+	});
 
-  return response.data.note;
+	return response.data.note;
 }
 
 /**
@@ -97,9 +98,9 @@ export async function updateNote({
  * @returns {Promise<Note[]>} A promise that resolves to an array of recent notes.
  */
 export async function getRecentNotes(): Promise<Note[]> {
-  const response = await axiosInstance.get('/notes/recent');
+	const response = await axiosInstance.get("/notes/recent");
 
-  return response.data.notes;
+	return response.data.notes;
 }
 
 /**
@@ -108,19 +109,19 @@ export async function getRecentNotes(): Promise<Note[]> {
  * @returns {Promise<Note[]>} A promise that resolves to an array of recently updated notes.
  */
 export async function getRecentlyUpdatedNotes(): Promise<Note[]> {
-  const response = await axiosInstance.get('/notes/recently-updated');
+	const response = await axiosInstance.get("/notes/recently-updated");
 
-  return response.data.notes;
+	return response.data.notes;
 }
 
 export async function exportNoteAsPDF(noteId: string) {
-  const response = await axiosInstance.post(
-    `/notes/export-pdf/${noteId}`,
-    {},
-    {
-      responseType: 'blob',
-    }
-  );
+	const response = await axiosInstance.post(
+		`/notes/export-pdf/${noteId}`,
+		{},
+		{
+			responseType: "blob",
+		},
+	);
 
-  return response.data;
+	return response.data;
 }
