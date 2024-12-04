@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit } from "lucide-react";
+import { Edit, Plus } from "lucide-react";
 import type { BreadcrumbItemType } from "../global/NavigationHeader";
 import NavigationHeader from "../global/NavigationHeader";
 
@@ -28,8 +28,18 @@ function VideoPageHeader({
 		checked: isVideoVisible,
 		onChange: onToggleVideo,
 	};
+
+	const actionButton = {
+		href: `/editor/create/${videoId}`,
+		label: "Add Note",
+		icon: <Plus />,
+	};
 	return (
-		<NavigationHeader breadcrumbs={breadcrumbs} toggleOption={toggleOption} />
+		<NavigationHeader
+			breadcrumbs={breadcrumbs}
+			toggleOption={toggleOption}
+			actionButton={actionButton}
+		/>
 	);
 }
 
