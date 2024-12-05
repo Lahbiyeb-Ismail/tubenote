@@ -2,6 +2,7 @@ import type { Request } from "express";
 import type { z } from "zod";
 
 import type { ResetPasswordToken } from "@prisma/client";
+import type { paginationQuerySchema } from "src/schemas";
 
 /**
  * Represents the payload of a JSON Web Token (JWT).
@@ -42,3 +43,7 @@ export type TypedRequest<
 	P extends z.ZodType = z.ZodTypeAny,
 	Q extends z.ZodType = z.ZodTypeAny,
 > = Request<z.infer<P>, Record<string, unknown>, z.infer<B>, z.infer<Q>>;
+
+export type PaginationQuery = typeof paginationQuerySchema;
+
+export type EmptyRecord = z.ZodType<Record<string, never>>;
