@@ -1,5 +1,4 @@
 import httpStatus from "http-status";
-// import jwt from 'jsonwebtoken';
 
 import type { Request, Response } from "express";
 import type { Profile } from "passport-google-oauth20";
@@ -10,7 +9,7 @@ import type { JwtPayload, TypedRequest } from "../types";
 import type {
 	GoogleUser,
 	LoginCredentials,
-	RegisterCredentiels,
+	RegisterCredentials,
 } from "../types/auth.type";
 
 import {
@@ -54,10 +53,10 @@ import {
  * @throws Will send a 500 status code if there is an internal server error.
  */
 export async function handleRegister(
-	req: TypedRequest<RegisterCredentiels>,
+	req: TypedRequest<RegisterCredentials>,
 	res: Response,
 ): Promise<void> {
-	const { username, email, password } = req.body as RegisterCredentiels;
+	const { username, email, password } = req.body;
 
 	const user = await findUser({ email });
 
@@ -117,7 +116,7 @@ export async function handleLogin(
 	req: TypedRequest<LoginCredentials>,
 	res: Response,
 ): Promise<void> {
-	const { email, password } = req.body as LoginCredentials;
+	const { email, password } = req.body;
 
 	const user = await findUser({ email });
 
