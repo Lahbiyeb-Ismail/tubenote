@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 import httpStatus from "http-status";
 
-import type { TypedRequest } from "../types";
-import type { NoteBody, UpdateNoteBody } from "../types/note.type";
+import type { EmptyRecord, PaginationQuery, TypedRequest } from "../types";
+import type { NoteBody, NoteIdParam, UpdateNoteBody } from "../types/note.type";
 
 import {
 	deleteNoteById,
@@ -39,24 +39,8 @@ export async function createNote(
 ): Promise<void> {
 	const userId = req.userId;
 
-	const {
-		title,
-		content,
-		videoTitle,
-		thumbnail,
-		videoId,
-		youtubeId,
-		timestamp,
-	} = req.body as NoteBody;
-
 	const noteData = {
-		title,
-		content,
-		videoTitle,
-		thumbnail,
-		videoId,
-		youtubeId,
-		timestamp,
+		...req.body,
 		userId,
 	};
 
@@ -80,13 +64,14 @@ export async function createNote(
  * user concurrently. Finally, it calculates the total number of pages and sends the notes
  * along with pagination information in the response.
  */
-export async function getUserNotes(req: Request, res: Response): Promise<void> {
+export async function getUserNotes(
+	req: TypedRequest<EmptyRecord, EmptyRecord, PaginationQuery>,
+	res: Response,
+): Promise<void> {
 	const userId = req.userId;
 
-	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
-	const page = req.query["page"] ? Number(req.query["page"]) : 1;
-	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
-	const limit = req.query["limit"] ? Number(req.query["limit"]) : 8;
+	const page = Number(req.query.page);
+	const limit = Number(req.query.limit);
 
 	const skip = (page - 1) * limit;
 
@@ -127,9 +112,12 @@ export async function getUserNotes(req: Request, res: Response): Promise<void> {
  * 9. If an error occurs during the process, responds with an
  * INTERNAL_SERVER_ERROR status and an error message.
  */
-export async function deleteNote(req: Request, res: Response): Promise<void> {
+export async function deleteNote(
+	req: TypedRequest<EmptyRecord, NoteIdParam>,
+	res: Response,
+): Promise<void> {
 	const userId = req.userId;
-	const { noteId } = req.params as { noteId: string };
+	const { noteId } = req.params;
 
 	await deleteNoteById({ userId, noteId });
 
@@ -156,9 +144,12 @@ export async function deleteNote(req: Request, res: Response): Promise<void> {
  * @returns A JSON response containing the note data if found, or an error
  * message otherwise.
  */
-export async function getNoteById(req: Request, res: Response): Promise<void> {
+export async function getNoteById(
+	req: TypedRequest<EmptyRecord, NoteIdParam>,
+	res: Response,
+): Promise<void> {
 	const userId = req.userId;
-	const { noteId } = req.params as { noteId: string };
+	const { noteId } = req.params;
 
 	const note = await fetchNoteById({ noteId, userId });
 
@@ -192,11 +183,14 @@ export async function getNoteById(req: Request, res: Response): Promise<void> {
  *
  * @returns {Promise<void>} - A promise that resolves when the function completes.
  */
-export async function updateNote(req: Request, res: Response): Promise<void> {
+export async function updateNote(
+	req: TypedRequest<UpdateNoteBody, NoteIdParam>,
+	res: Response,
+): Promise<void> {
 	const userId = req.userId;
-	const { noteId } = req.params as { noteId: string };
+	const { noteId } = req.params;
 
-	const { title, content, timestamp } = req.body as UpdateNoteBody;
+	const { title, content, timestamp } = req.body;
 
 	const note = await fetchNoteById({ noteId, userId });
 
