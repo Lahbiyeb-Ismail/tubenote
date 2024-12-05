@@ -1,10 +1,8 @@
-import type { z } from 'zod';
+import type { loginSchema, registrationSchema } from "../schemas/auth.schema";
 
-import type { loginSchema, registrationSchema } from '../schemas/auth.schema';
+export type RegisterCredentials = typeof registrationSchema;
 
-export type RegisterCredentiels = z.infer<typeof registrationSchema.body>;
-
-export type LoginCredentials = z.infer<typeof loginSchema.body>;
+export type LoginCredentials = typeof loginSchema;
 
 /**
  * Represents a Google user.
@@ -18,11 +16,11 @@ export type LoginCredentials = z.infer<typeof loginSchema.body>;
  * @property {string} picture - The URL of the user's profile picture.
  */
 export type GoogleUser = {
-  sub: string;
-  email: string;
-  email_verified: boolean;
-  name: string;
-  given_name: string;
-  family_name: string;
-  picture: string;
+	sub: string;
+	email: string;
+	email_verified: boolean;
+	name: string;
+	given_name: string;
+	family_name: string;
+	picture: string;
 };
