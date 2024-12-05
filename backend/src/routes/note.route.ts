@@ -11,14 +11,14 @@ import {
 } from "../controllers/note.controller";
 
 import isAuthenticated from "../middlewares/isAuthenticated";
-import validateRequestBody from "../middlewares/validateRequestBody";
-import validateRequestParams from "../middlewares/validateRequestParams";
+import validateRequest from "../middlewares/validateRequest";
 
 import {
 	noteIdParamSchema,
-	noteSchema,
-	updateNoteSchema,
+	noteBodySchema,
+	updateNoteBodySchema,
 } from "../schemas/note.schema";
+import { paginationQuerySchema } from "../schemas";
 
 const router = Router();
 
@@ -29,8 +29,8 @@ router.use(isAuthenticated);
 // - POST /: Create a new note (requires request body validation).
 router
 	.route("/")
-	.get(getUserNotes)
-	.post(validateRequestBody(noteSchema), createNote);
+	.get(validateRequest({ query: paginationQuerySchema }), getUserNotes)
+	.post(validateRequest({ body: noteBodySchema }), createNote);
 
 // - GET /recent: Get the most recent notes for the authenticated user.
 router.route("/recent").get(getUserRecentNotes);
@@ -43,8 +43,8 @@ router.route("/recently-updated").get(getUserRecentlyUpdatedNotes);
 // - DELETE /:noteId: Delete a specific note by its ID (requires request params validation).
 router
 	.route("/:noteId")
-	.all(validateRequestParams(noteIdParamSchema))
-	.patch(validateRequestBody(updateNoteSchema), updateNote)
+	.all(validateRequest({ params: noteIdParamSchema }))
+	.patch(validateRequest({ body: updateNoteBodySchema }), updateNote)
 	.get(getNoteById)
 	.delete(deleteNote);
 
