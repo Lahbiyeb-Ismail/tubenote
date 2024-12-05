@@ -1,5 +1,8 @@
-import type { Response, Request } from "express";
+import type { Response } from "express";
 import httpStatus from "http-status";
+
+import type { EmptyRecord, PaginationQuery, TypedRequest } from "../types";
+import type { CreateVideoBody, VideoIdParam } from "../types/video.type";
 
 import {
 	createVideoEntry,
@@ -29,11 +32,11 @@ import {
  */
 
 export async function handleCreateVideo(
-	req: Request,
+	req: TypedRequest<CreateVideoBody>,
 	res: Response,
 ): Promise<void> {
 	const userId = req.userId;
-	const { videoId } = req.body as { videoId: string };
+	const { videoId } = req.body;
 
 	const videoExists = await findVideo({ youtubeId: videoId, userId });
 
@@ -54,12 +57,14 @@ export async function handleCreateVideo(
  * @param res - The response object used to send back the videos.
  * @returns A JSON response containing the user's videos.
  */
-export async function getUserVideos(req: Request, res: Response) {
+export async function getUserVideos(
+	req: TypedRequest<EmptyRecord, EmptyRecord, PaginationQuery>,
+	res: Response,
+) {
 	const userId = req.userId;
-	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
-	const page = req.query["page"] ? Number(req.query["page"]) : 1;
-	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
-	const limit = req.query["limit"] ? Number(req.query["limit"]) : 8;
+
+	const page = Number(req.query.page);
+	const limit = Number(req.query.limit);
 
 	const skip = (page - 1) * limit;
 
@@ -94,8 +99,11 @@ export async function getUserVideos(req: Request, res: Response) {
  *
  * @returns A JSON response with the video data or an error message if the video ID is not provided.
  */
-export async function handleGetVideoById(req: Request, res: Response) {
-	const { videoId } = req.params as { videoId: string };
+export async function handleGetVideoById(
+	req: TypedRequest<EmptyRecord, VideoIdParam>,
+	res: Response,
+) {
+	const { videoId } = req.params;
 	const userId = req.userId;
 
 	const video = await findVideo({ youtubeId: videoId, userId });
@@ -124,14 +132,15 @@ export async function handleGetVideoById(req: Request, res: Response) {
  *
  * @throws If the video ID is not provided, it returns a 400 Bad Request status with an error message.
  */
-export async function handleGetNotesByVideoId(req: Request, res: Response) {
+export async function handleGetNotesByVideoId(
+	req: TypedRequest<EmptyRecord, VideoIdParam, PaginationQuery>,
+	res: Response,
+) {
 	const userId = req.userId;
-	const { videoId } = req.params as { videoId: string };
+	const { videoId } = req.params;
 
-	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
-	const page = req.query["page"] ? Number(req.query["page"]) : 1;
-	// biome-ignore lint/complexity/useLiteralKeys: <explanation>
-	const limit = req.query["limit"] ? Number(req.query["limit"]) : 1;
+	const page = Number(req.query.page);
+	const limit = Number(req.query.limit);
 
 	const skip = (page - 1) * limit;
 
