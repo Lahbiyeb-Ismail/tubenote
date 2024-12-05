@@ -1,6 +1,11 @@
-import type { z } from "zod";
-import type { noteSchema, updateNoteSchema } from "../schemas/note.schema";
+import type {
+	noteBodySchema,
+	noteIdParamSchema,
+	updateNoteBodySchema,
+} from "../schemas/note.schema";
 
-export type NoteBody = z.infer<typeof noteSchema.body>;
+export type NoteBody = typeof noteBodySchema;
 
-export type UpdateNoteBody = z.infer<typeof updateNoteSchema.body>;
+export type UpdateNoteBody = typeof updateNoteBodySchema;
+
+export type NoteIdParam = typeof noteIdParamSchema;
