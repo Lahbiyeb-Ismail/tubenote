@@ -35,7 +35,7 @@ export async function handleForgotPassword(
 	req: TypedRequest<ForgotPasswordBody>,
 	res: Response,
 ): Promise<void> {
-	const { email } = req.body as ForgotPasswordBody;
+	const { email } = req.body;
 
 	const user = await findUser({ email });
 
@@ -92,7 +92,7 @@ export async function handleResetPassword(
 	req: TypedRequest<ResetPasswordBody>,
 	res: Response,
 ): Promise<void> {
-	const { password } = req.body as ResetPasswordBody;
+	const { password } = req.body;
 	const resetToken = req.resetToken;
 
 	const hashedPassword = await hashPassword(password);
