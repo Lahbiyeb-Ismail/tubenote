@@ -8,9 +8,9 @@ import {
 } from "../controllers/video.controller";
 
 import isAuthenticated from "../middlewares/isAuthenticated";
-import validateRequestBody from "../middlewares/validateRequestBody";
-import validateRequestParams from "../middlewares/validateRequestParams";
+import validateRequest from "../middlewares/validateRequest";
 
+import { paginationQuerySchema } from "../schemas";
 import {
 	createVideoBodySchema,
 	videoIdParamSchema,
@@ -25,15 +25,21 @@ router.use(isAuthenticated);
 // - POST /: Create a new video (requires request body validation)
 router
 	.route("/")
-	.get(getUserVideos)
-	.post(validateRequestBody(createVideoBodySchema), handleCreateVideo);
+	.get(validateRequest({ query: paginationQuerySchema }), getUserVideos)
+	.post(validateRequest({ body: createVideoBodySchema }), handleCreateVideo);
 
 router
 	.route("/:videoId/notes")
-	.get(validateRequestParams(videoIdParamSchema), handleGetNotesByVideoId);
+	.get(
+		validateRequest({
+			params: videoIdParamSchema,
+			query: paginationQuerySchema,
+		}),
+		handleGetNotesByVideoId,
+	);
 
 router
 	.route("/:videoId")
-	.get(validateRequestParams(videoIdParamSchema), handleGetVideoById);
+	.get(validateRequest({ params: videoIdParamSchema }), handleGetVideoById);
 
 export default router;
