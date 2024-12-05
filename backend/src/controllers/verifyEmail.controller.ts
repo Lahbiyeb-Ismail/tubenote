@@ -1,8 +1,11 @@
 import httpStatus from "http-status";
-import type { Request, Response } from "express";
+import type { Response } from "express";
 
-import type { TypedRequest } from "../types";
-import type { SendVerifyEmail } from "../types/verifyEmail.type";
+import type { EmptyRecord, TypedRequest } from "../types";
+import type {
+	SendVerifyEmailBody,
+	VerifyEmailParam,
+} from "../types/verifyEmail.type";
 
 import { sendEmail } from "../utils/sendEmail";
 
@@ -39,10 +42,10 @@ import {
  * 10. Responds with an OK status indicating that the verification email has been sent.
  */
 export async function sendVerificationEmailHandler(
-	req: TypedRequest<SendVerifyEmail>,
+	req: TypedRequest<SendVerifyEmailBody>,
 	res: Response,
 ): Promise<void> {
-	const { email } = req.body as SendVerifyEmail;
+	const { email } = req.body;
 
 	// Retrieves the user associated with the provided email.
 	const user = await findUser({ email });
@@ -111,10 +114,10 @@ export async function sendVerificationEmailHandler(
  * 7. Responds with a 200 OK status indicating that the email was verified successfully.
  */
 export async function verifyEmailHandler(
-	req: Request,
+	req: TypedRequest<EmptyRecord, VerifyEmailParam>,
 	res: Response,
 ): Promise<void> {
-	const { token } = req.params as { token: string };
+	const { token } = req.params;
 
 	const verificationToken = await findVerificationToken(token);
 
