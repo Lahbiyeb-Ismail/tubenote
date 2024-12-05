@@ -73,7 +73,7 @@ export async function updateCurrentUser(
 	res: Response,
 ): Promise<void> {
 	const userId = req.userId;
-	const { username, email } = req.body as UpdateUserBody;
+	const { username, email } = req.body;
 
 	const user = await findUser({ id: userId });
 
@@ -128,7 +128,7 @@ export async function updateUserPassword(
 ): Promise<void> {
 	const userId = req.userId;
 
-	const { currentPassword, newPassword } = req.body as UpdatePasswordBody;
+	const { currentPassword, newPassword } = req.body;
 
 	const user = await findUser({ id: userId });
 
