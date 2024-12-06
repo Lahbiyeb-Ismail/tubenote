@@ -29,9 +29,7 @@ function errorHandler(
 
 	logger.error(`Error: ${err.message}. Error stack: ${err.stack}`);
 
-	res
-		.status(status)
-		.json({ message: "Internal server error. Please try again." });
+	res.status(status).json({ message: err.message });
 
 	next();
 }
