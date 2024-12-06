@@ -14,6 +14,8 @@ import {
 	userNotesCount,
 } from "../services/note.services";
 
+import { NotFoundError } from "../errors";
+
 /**
  * Creates a new note for the authenticated user.
  *
@@ -119,7 +121,13 @@ export async function deleteNote(
 	const userId = req.userId;
 	const { noteId } = req.params;
 
-	await deleteNoteById({ userId, noteId });
+	const note = await fetchNoteById({ noteId, userId });
+
+	if (!note) {
+		throw new NotFoundError("Note not found.");
+	}
+
+	await deleteNoteById({ userId, noteId: note.id });
 
 	res.status(httpStatus.OK).json({ message: "Note deleted successfully." });
 }
@@ -154,8 +162,7 @@ export async function getNoteById(
 	const note = await fetchNoteById({ noteId, userId });
 
 	if (!note) {
-		res.status(httpStatus.NOT_FOUND).json({ message: "Note not found." });
-		return;
+		throw new NotFoundError("Note not found.");
 	}
 
 	res.status(httpStatus.OK).json({ note });
@@ -195,8 +202,7 @@ export async function updateNote(
 	const note = await fetchNoteById({ noteId, userId });
 
 	if (!note) {
-		res.status(httpStatus.NOT_FOUND).json({ message: "Note not found." });
-		return;
+		throw new NotFoundError("Note not found.");
 	}
 
 	const updatedNote = await editNote({
