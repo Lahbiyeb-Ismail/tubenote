@@ -35,6 +35,12 @@ import {
 	deleteRefreshTokenByUserId,
 	findRefreshToken,
 } from "../services/refreshToken.services";
+import {
+	ConflictError,
+	ForbiddenError,
+	NotFoundError,
+	UnauthorizedError,
+} from "../errors";
 
 /**
  * Handles user registration.
@@ -61,10 +67,9 @@ export async function handleRegister(
 	const user = await findUser({ email });
 
 	if (user) {
-		res.status(httpStatus.CONFLICT).json({
-			message: "Email address already in use. Please select another one.",
-		});
-		return;
+		throw new ConflictError(
+			"Email address already in use. Please select another one.",
+		);
 	}
 
 	const newUser = await createNewUser({
@@ -121,27 +126,19 @@ export async function handleLogin(
 	const user = await findUser({ email });
 
 	if (!user) {
-		res.status(httpStatus.NOT_FOUND).json({
-			message:
-				"No User found with this email address. Please provide a valid email address.",
-		});
-		return;
+		throw new NotFoundError("No User found with this email address.");
 	}
 
 	if (!user.emailVerified) {
-		res.status(httpStatus.UNAUTHORIZED).json({
-			message: "Email not verified. Please verify your email address.",
-		});
-		return;
+		throw new UnauthorizedError(
+			"Email not verified. Please verify your email address.",
+		);
 	}
 
 	const isPasswordCorrect = await checkPassword(password, user.password);
 
 	if (!isPasswordCorrect) {
-		res.status(httpStatus.UNAUTHORIZED).json({
-			message: "Invalid password. Please try again.",
-		});
-		return;
+		throw new UnauthorizedError("Invalid password. Please try again.");
 	}
 
 	const { accessToken, refreshToken } = await createNewTokens(user.id);
@@ -172,10 +169,7 @@ export async function handleGoogleLogin(
 	const user = req.user as Profile;
 
 	if (!user) {
-		res.status(httpStatus.UNAUTHORIZED).json({
-			message: "Google login failed. Please try again.",
-		});
-		return;
+		throw new UnauthorizedError("Google login failed. Please try again.");
 	}
 
 	const {
@@ -187,10 +181,7 @@ export async function handleGoogleLogin(
 	} = user._json as GoogleUser;
 
 	if (!email_verified) {
-		res.status(httpStatus.UNAUTHORIZED).json({
-			message: "Email not verified. Please try again.",
-		});
-		return;
+		throw new UnauthorizedError("Email not verified. Please try again.");
 	}
 
 	let foundUser = await findUser({ email });
@@ -291,10 +282,7 @@ export async function handleRefreshToken(
 		cookies[REFRESH_TOKEN_NAME];
 
 	if (!refreshTokenFromCookies) {
-		res.status(httpStatus.UNAUTHORIZED).json({
-			message: "Unauthorized access. Please try again.",
-		});
-		return;
+		throw new UnauthorizedError("Unauthorized access. Please try again.");
 	}
 
 	res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
@@ -309,10 +297,8 @@ export async function handleRefreshToken(
 	// Check if the token is expired
 	if (exp && Date.now() >= exp * 1000) {
 		await deleteRefreshTokenByUserId(userId);
-		res
-			.status(httpStatus.UNAUTHORIZED)
-			.json({ message: "Refresh token expired. Please log in again." });
-		return;
+
+		throw new UnauthorizedError("Refresh token expired. Please log in again.");
 	}
 
 	const refreshTokenFromDB = await findRefreshToken(refreshTokenFromCookies);
@@ -321,10 +307,7 @@ export async function handleRefreshToken(
 	if (!refreshTokenFromDB) {
 		await deleteRefreshTokenByUserId(userId);
 
-		res.status(httpStatus.FORBIDDEN).json({
-			message: "Invalid refresh token. Please log in again.",
-		});
-		return;
+		throw new ForbiddenError("Invalid refresh token. Please log in again.");
 	}
 
 	await deleteRefreshToken(refreshTokenFromCookies);
