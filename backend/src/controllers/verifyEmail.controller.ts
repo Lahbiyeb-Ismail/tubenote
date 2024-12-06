@@ -21,6 +21,12 @@ import {
 	createVerificationEmail,
 	createVerifiedEmail,
 } from "../helpers/verifyEmail.helper";
+import {
+	BadRequestError,
+	ConflictError,
+	ForbiddenError,
+	UnauthorizedError,
+} from "../errors";
 
 /**
  * Handles the request to send a verification email.
@@ -52,18 +58,12 @@ export async function sendVerificationEmailHandler(
 
 	// If no user is found, responds with an UNAUTHORIZED status.
 	if (!user) {
-		res
-			.status(httpStatus.UNAUTHORIZED)
-			.json({ message: "No user found with the provided email." });
-		return;
+		throw new UnauthorizedError("No user found with the provided email.");
 	}
 
 	// If the user's email is already verified, responds with a CONFLICT status.
 	if (user.emailVerified) {
-		res
-			.status(httpStatus.CONFLICT)
-			.json({ message: "Email is already verified." });
-		return;
+		throw new ConflictError("Email is already verified.");
 	}
 
 	// Checks if a verification token already exists for the user.
@@ -71,11 +71,9 @@ export async function sendVerificationEmailHandler(
 
 	// If a token exists, responds with a BAD_REQUEST status indicating that a verification email has already been sent.
 	if (existingVerificationToken) {
-		res.status(httpStatus.BAD_REQUEST).json({
-			message:
-				"A verification email has already been sent. Please check your email.",
-		});
-		return;
+		throw new BadRequestError(
+			"A verification email has already been sent. Please check your email.",
+		);
 	}
 
 	// Creates a new email verification token for the user.
@@ -122,10 +120,7 @@ export async function verifyEmailHandler(
 	const verificationToken = await findVerificationToken(token);
 
 	if (!verificationToken || verificationToken.expiresAt < new Date()) {
-		res
-			.status(httpStatus.NOT_FOUND)
-			.json({ message: "Invalid or Expired token." });
-		return;
+		throw new ForbiddenError("Invalid or expired token.");
 	}
 
 	// Updates the user's emailVerified status to true.
