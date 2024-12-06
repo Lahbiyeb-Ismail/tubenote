@@ -18,6 +18,7 @@ import { createResetPasswordEmail } from "../helpers/resetPassword.helper";
 import { hashPassword } from "../helpers/auth.helper";
 
 import { sendEmail } from "../utils/sendEmail";
+import { BadRequestError } from "../errors";
 
 /**
  * Handles the password reset process for a user.
@@ -40,10 +41,7 @@ export async function handleForgotPassword(
 	const user = await findUser({ email });
 
 	if (!user || !user.emailVerified) {
-		res
-			.status(httpStatus.BAD_REQUEST)
-			.json({ message: "Invalid email or email not verified." });
-		return;
+		throw new BadRequestError("Invalid email or email not verified.");
 	}
 
 	const isResetTokenAlreadySent = await findResetPasswordToken({
@@ -51,10 +49,9 @@ export async function handleForgotPassword(
 	});
 
 	if (isResetTokenAlreadySent) {
-		res.status(httpStatus.BAD_REQUEST).json({
-			message: "A password reset link has already been sent to your email.",
-		});
-		return;
+		throw new BadRequestError(
+			"A password reset link has already been sent to your email.",
+		);
 	}
 
 	const newResetToken = await createResetPasswordToken(user.id);
