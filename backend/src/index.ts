@@ -1,7 +1,8 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
-import app from './app';
-import envConfig from './config/envConfig';
+import app from "./app";
+import envConfig from "./config/envConfig";
+import logger from "./utils/logger";
 
 /**
  * Event listener for uncaught exceptions.
@@ -10,10 +11,10 @@ import envConfig from './config/envConfig';
  *
  * @param {Error} err - The uncaught exception error.
  */
-process.on('uncaughtException', (err) => {
-  console.log('UNCAUGHT EXCEPTION! 💥 Shutting down...');
-  console.log(err.name, err.message);
-  process.exit(1);
+process.on("uncaughtException", (err) => {
+	console.log("UNCAUGHT EXCEPTION! 💥 Shutting down...");
+	console.log(err.name, err.message);
+	process.exit(1);
 });
 
 dotenv.config();
@@ -26,7 +27,7 @@ const PORT = envConfig.server.port || 8080;
  * Logs a message indicating that the server is running.
  */
 const server = app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+	logger.info(`Server is running on http://localhost:${PORT}`);
 });
 
 /**
@@ -36,12 +37,12 @@ const server = app.listen(PORT, () => {
  *
  * @param {Error} err - The unhandled rejection error.
  */
-process.on('unhandledRejection', (err: Error) => {
-  console.log('UNHANDLED REJECTION! 💥 Shutting down...');
-  console.log(err.name, err.message);
-  server.close(() => {
-    process.exit(1);
-  });
+process.on("unhandledRejection", (err: Error) => {
+	console.log("UNHANDLED REJECTION! 💥 Shutting down...");
+	console.log(err.name, err.message);
+	server.close(() => {
+		process.exit(1);
+	});
 });
 
 /**
@@ -49,9 +50,9 @@ process.on('unhandledRejection', (err: Error) => {
  *
  * Logs a message and shuts down the server gracefully.
  */
-process.on('SIGTERM', () => {
-  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
-  server.close(() => {
-    console.log('💥 Process terminated!');
-  });
+process.on("SIGTERM", () => {
+	console.log("👋 SIGTERM RECEIVED. Shutting down gracefully");
+	server.close(() => {
+		console.log("💥 Process terminated!");
+	});
 });
