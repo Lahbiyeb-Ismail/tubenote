@@ -3,6 +3,7 @@ import { type ZodSchema, ZodError } from "zod";
 import type { NextFunction, Response } from "express";
 
 import type { TypedRequest } from "../types";
+import logger from "../utils/logger";
 
 /**
  * Defines the schema for validating different parts of an HTTP request.
@@ -64,12 +65,16 @@ function validateRequest<
 					message: err.message,
 				}));
 
+				logger.error(
+					`Validation error in ${errors[0]?.field} field: ${errors[0]?.message}`,
+				);
+
 				res.status(httpStatus.BAD_REQUEST).json({
 					message: "Validation error",
 					errors,
 				});
 			} else {
-				console.error("Unexpected error during request validation:", error);
+				logger.error("Unexpected error during request validation:", error);
 				res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
 					message: "An unexpected error occurred",
 				});
