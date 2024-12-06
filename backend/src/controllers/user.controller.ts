@@ -8,6 +8,12 @@ import type { UpdatePasswordBody, UpdateUserBody } from "../types/user.type";
 import { checkPassword } from "../helpers/auth.helper";
 
 import { findUser, updateUser } from "../services/user.services";
+import {
+	BadRequestError,
+	ForbiddenError,
+	NotFoundError,
+	UnauthorizedError,
+} from "../errors";
 
 /**
  * Retrieves the current user based on the user ID present in the request payload.
@@ -31,10 +37,7 @@ export async function getCurrentUser(
 	const user = await findUser({ id: userId });
 
 	if (!user) {
-		res
-			.status(httpStatus.NOT_FOUND)
-			.json({ message: "User not found. Please try again." });
-		return;
+		throw new NotFoundError("User not found. Please try again.");
 	}
 
 	res.status(httpStatus.OK).json({
@@ -78,19 +81,15 @@ export async function updateCurrentUser(
 	const user = await findUser({ id: userId });
 
 	if (!user) {
-		res
-			.status(httpStatus.NOT_FOUND)
-			.json({ message: "Unauthorized access. Please try again." });
-		return;
+		throw new UnauthorizedError("Unauthorized access. Please try again.");
 	}
 
 	const isEmailTaken = await findUser({ email });
 
 	if (isEmailTaken && isEmailTaken.id !== user.id) {
-		res
-			.status(httpStatus.BAD_REQUEST)
-			.json({ message: "Email is already taken. Please try another one." });
-		return;
+		throw new BadRequestError(
+			"Email is already taken. Please try another one.",
+		);
 	}
 
 	if (username === user.username && email === user.email) {
@@ -133,26 +132,19 @@ export async function updateUserPassword(
 	const user = await findUser({ id: userId });
 
 	if (!user) {
-		res
-			.status(httpStatus.NOT_FOUND)
-			.json({ message: "Unauthorized access. Please try again." });
-		return;
+		throw new UnauthorizedError("Unauthorized access. Please try again.");
 	}
 
 	const isPasswordValid = await checkPassword(currentPassword, user.password);
 
 	if (!isPasswordValid) {
-		res
-			.status(httpStatus.BAD_REQUEST)
-			.json({ message: "Invalid current password. Please try again." });
-		return;
+		throw new ForbiddenError("Invalid current password. Please try again.");
 	}
 
 	if (currentPassword === newPassword) {
-		res.status(httpStatus.BAD_REQUEST).json({
-			message: "New password must be different from the current password.",
-		});
-		return;
+		throw new BadRequestError(
+			"New password must be different from the current password.",
+		);
 	}
 
 	const newHashedPassword = await bcrypt.hash(newPassword, 10);
