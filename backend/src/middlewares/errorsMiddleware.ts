@@ -27,7 +27,7 @@ function errorHandler(
 			? res.statusCode
 			: httpStatus.INTERNAL_SERVER_ERROR;
 
-	logger.error(`Error: ${err.message}. Error stack: ${err.stack}`);
+	logger.error(`${err.message}. Error stack: ${err.stack}`);
 
 	res.status(status).json({ message: err.message });
 
