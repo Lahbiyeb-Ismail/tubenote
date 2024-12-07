@@ -1,7 +1,8 @@
 "use client";
 
+import { usePDF } from "react-to-pdf";
+
 import useGetNoteById from "@/hooks/note/useGetNoteById";
-import { useState } from "react";
 
 import Loader from "@/components/global/Loader";
 import MarkdownViewer from "@/components/global/MarkdownViewer";
@@ -22,6 +23,9 @@ function NotePage({ params }: { params: NotePageParams }) {
 	const { noteId } = params;
 	const { data, isLoading, isError, refetch } = useGetNoteById(noteId);
 	const { isVideoPlayerVisible, toggleVideoPlayer } = useToggleVideoPlayer();
+	const { toPDF, targetRef } = usePDF({
+		filename: `${data?.title || "note"}.pdf`,
+	});
 
 	if (isLoading) {
 		return (
@@ -49,6 +53,7 @@ function NotePage({ params }: { params: NotePageParams }) {
 				noteTitle={data.title}
 				isVideoVisible={isVideoPlayerVisible}
 				onToggleVideo={toggleVideoPlayer}
+				onExportAsPDF={toPDF}
 			/>
 
 			{/* Content */}
@@ -59,7 +64,9 @@ function NotePage({ params }: { params: NotePageParams }) {
 						rightSideContent={<VideoPlayer videoId={data.youtubeId} />}
 					/>
 				) : (
-					<MarkdownViewer content={data.content} />
+					<div ref={targetRef}>
+						<MarkdownViewer content={data.content} />
+					</div>
 				)}
 			</article>
 
