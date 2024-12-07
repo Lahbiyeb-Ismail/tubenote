@@ -9,7 +9,6 @@ type NotePageHeaderProps = {
 	noteTitle: string;
 	isVideoVisible: boolean;
 	onToggleVideo: () => void;
-	onExportAsPDF: () => void;
 };
 
 function NotePageHeader({
@@ -17,7 +16,6 @@ function NotePageHeader({
 	noteTitle,
 	isVideoVisible,
 	onToggleVideo,
-	onExportAsPDF,
 }: NotePageHeaderProps) {
 	const breadcrumbs: BreadcrumbItemType[] = [
 		{ href: "/notes", label: "Notes" },
@@ -41,8 +39,6 @@ function NotePageHeader({
 			breadcrumbs={breadcrumbs}
 			actionButton={actionButton}
 			toggleOption={toggleOption}
-			onExportAsPDF={onExportAsPDF}
-			isExportButton={!isVideoVisible}
 		/>
 	);
 }
