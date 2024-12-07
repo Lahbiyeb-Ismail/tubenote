@@ -7,15 +7,17 @@ import NavigationHeader from "../global/NavigationHeader";
 type NotePageHeaderProps = {
 	noteId: string;
 	noteTitle: string;
-	onToggleVideo: () => void;
 	isVideoVisible: boolean;
+	onToggleVideo: () => void;
+	onExportAsPDF: () => void;
 };
 
 function NotePageHeader({
 	noteId,
 	noteTitle,
-	onToggleVideo,
 	isVideoVisible,
+	onToggleVideo,
+	onExportAsPDF,
 }: NotePageHeaderProps) {
 	const breadcrumbs: BreadcrumbItemType[] = [
 		{ href: "/notes", label: "Notes" },
@@ -39,6 +41,8 @@ function NotePageHeader({
 			breadcrumbs={breadcrumbs}
 			actionButton={actionButton}
 			toggleOption={toggleOption}
+			onExportAsPDF={onExportAsPDF}
+			isExportButton={!isVideoVisible}
 		/>
 	);
 }
