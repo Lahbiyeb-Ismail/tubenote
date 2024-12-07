@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Printer } from "lucide-react";
 
 export type BreadcrumbItemType = {
 	href: string;
@@ -37,12 +38,16 @@ type NavigationHeaderProps = {
 	breadcrumbs: BreadcrumbItemType[];
 	actionButton?: ActionButton;
 	toggleOption?: ToggleOption;
+	onExportAsPDF?: () => void;
+	isExportButton?: boolean;
 };
 
 function NavigationHeader({
 	breadcrumbs,
 	actionButton,
 	toggleOption,
+	onExportAsPDF,
+	isExportButton,
 }: NavigationHeaderProps) {
 	return (
 		<header className="border-b bg-muted/40 dark:from-gray-800 dark:to-gray-900">
@@ -85,6 +90,19 @@ function NavigationHeader({
 								</Link>
 							</Button>
 						)}
+
+						{isExportButton && (
+							<Button
+								variant="outline"
+								size="sm"
+								className="bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-gray-500 transition-all duration-300 shadow-sm hover:shadow"
+								onClick={onExportAsPDF}
+							>
+								<Printer className="h-4 w-4 mr-2" />
+								<span>Export as PDF</span>
+							</Button>
+						)}
+
 						{toggleOption && (
 							<div className="flex items-center space-x-2">
 								<Switch
