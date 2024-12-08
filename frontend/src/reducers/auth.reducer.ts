@@ -1,54 +1,53 @@
-import type { AuthAction, AuthState, User } from '@/types/auth.types';
+import type { AuthAction, AuthState } from "@/types/auth.types";
+import {
+  getStorageValue,
+  removeStorageValue,
+  setStorageValue,
+} from "@/utils/localStorage";
 
-let user: User | null = null;
-let accessToken: string | null = null;
+export function useAuthReducer() {
+  const accessToken = getStorageValue<string>("accessToken");
 
-if (typeof window !== 'undefined') {
-  // This code will only run in the browser
-  user = JSON.parse(localStorage.getItem('user') ?? 'null');
-  accessToken = localStorage.getItem('accessToken');
-}
+  const authInitialState: AuthState = {
+    errorMessage: "",
+    successMessage: "",
+    isAuthenticated: !!accessToken,
+    accessToken,
+  };
 
-export const authInitialState: AuthState = {
-  errorMessage: '',
-  successMessage: '',
-  isAuthenticated: false,
-  accessToken,
-  user,
-};
-
-function authReducer(state: AuthState, action: AuthAction): AuthState {
-  switch (action.type) {
-    case 'LOGIN_SUCCESS':
-      return {
-        ...state,
-        accessToken: action.payload.accessToken,
-        user: action.payload.user,
-        isAuthenticated: true,
-        errorMessage: '',
-      };
-    case 'REGISTER_SUCCESS':
-      return {
-        ...state,
-        successMessage: action.payload.successMessage,
-      };
-    case 'LOGOUT_SUCCESS':
-      return {
-        ...state,
-        accessToken: null,
-        user: null,
-        isAuthenticated: false,
-        errorMessage: '',
-        successMessage: '',
-      };
-    case 'REQUEST_FAIL':
-      return {
-        ...state,
-        errorMessage: action.payload.errorMessage,
-      };
-    default:
-      return state;
+  function authReducer(state: AuthState, action: AuthAction): AuthState {
+    switch (action.type) {
+      case "LOGIN_SUCCESS":
+        setStorageValue("accessToken", action.payload.accessToken);
+        return {
+          ...state,
+          accessToken: action.payload.accessToken,
+          isAuthenticated: true,
+          errorMessage: "",
+        };
+      case "REGISTER_SUCCESS":
+        return {
+          ...state,
+          successMessage: action.payload.successMessage,
+        };
+      case "LOGOUT_SUCCESS":
+        removeStorageValue("accessToken");
+        return {
+          ...state,
+          accessToken: null,
+          isAuthenticated: false,
+          errorMessage: "",
+          successMessage: "",
+        };
+      case "REQUEST_FAIL":
+        return {
+          ...state,
+          errorMessage: action.payload.errorMessage,
+        };
+      default:
+        return state;
+    }
   }
-}
 
-export default authReducer;
+  return { authInitialState, authReducer };
+}

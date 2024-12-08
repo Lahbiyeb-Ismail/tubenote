@@ -1,17 +1,20 @@
-import type { Request, Response } from 'express';
-import httpStatus from 'http-status';
+import type { Request, Response } from "express";
+import httpStatus from "http-status";
 
-import type { TypedRequest } from '../types';
-import type { NoteBody } from '../types/note.type';
+import type { EmptyRecord, PaginationQuery, TypedRequest } from "../types";
+import type { NoteBody, NoteIdParam, UpdateNoteBody } from "../types/note.type";
 
 import {
-  deleteNoteById,
-  editNote,
-  fetchLatestUserNotes,
-  fetchNoteById,
-  fetchUserNotes,
-  saveNote,
-} from '../services/note.services';
+	deleteNoteById,
+	editNote,
+	fetchLatestUserNotes,
+	fetchNoteById,
+	fetchUserNotes,
+	saveNote,
+	userNotesCount,
+} from "../services/note.services";
+
+import { NotFoundError } from "../errors";
 
 /**
  * Creates a new note for the authenticated user.
@@ -33,78 +36,64 @@ import {
  * @throws {Error} If there is an issue with the database operation.
  */
 export async function createNote(
-  req: TypedRequest<NoteBody>,
-  res: Response
+	req: TypedRequest<NoteBody>,
+	res: Response,
 ): Promise<void> {
-  const userId = req.userId;
+	const userId = req.userId;
 
-  const {
-    title,
-    content,
-    videoTitle,
-    thumbnail,
-    videoId,
-    youtubeId,
-    timestamp,
-  } = req.body;
+	const noteData = {
+		...req.body,
+		userId,
+	};
 
-  if (
-    !title ||
-    !content ||
-    !videoTitle ||
-    !thumbnail ||
-    !videoId ||
-    !youtubeId ||
-    !timestamp
-  ) {
-    res
-      .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'Please provide all the required fields.' });
-    return;
-  }
+	const note = await saveNote(noteData);
 
-  const noteData = {
-    title,
-    content,
-    videoTitle,
-    thumbnail,
-    videoId,
-    youtubeId,
-    timestamp,
-    userId,
-  };
-
-  const note = await saveNote(noteData);
-
-  res
-    .status(httpStatus.CREATED)
-    .json({ message: 'Note created successfully.', note });
+	res
+		.status(httpStatus.CREATED)
+		.json({ message: "Note created successfully.", note });
 }
 
 /**
- * Retrieves the notes for a specific user based on the user ID provided in the request payload.
+ * Retrieves the notes for a specific user with pagination.
  *
- * @param req - The request object containing the payload with the user ID.
- * @param res - The response object used to send back the appropriate HTTP response.
- *
- * @remarks
- * - If the user ID is not present in the request payload, the function responds
- * with a 401 Unauthorized status.
- * - If the user is not found in the database, the function responds with a
- * 404 Not Found status.
- * - If the notes are successfully retrieved, the function responds with a
- * 200 OK status and the notes data.
- * - If an error occurs during the process, the function responds with a
- * 500 Internal Server Error status.
- *
+ * @param req - The request object containing userId and query parameters for pagination.
+ * @param res - The response object used to send the notes and pagination information.
  * @returns A promise that resolves to void.
+ *
+ * The function extracts the userId from the request object and retrieves the page and limit
+ * query parameters for pagination. It calculates the number of notes to skip based on the
+ * current page and limit. Then, it fetches the total count of notes and the notes for the
+ * user concurrently. Finally, it calculates the total number of pages and sends the notes
+ * along with pagination information in the response.
  */
-export async function getUserNotes(req: Request, res: Response): Promise<void> {
-  const userId = req.userId;
+export async function getUserNotes(
+	req: TypedRequest<EmptyRecord, EmptyRecord, PaginationQuery>,
+	res: Response,
+): Promise<void> {
+	const userId = req.userId;
 
-  const notes = await fetchUserNotes({ userId });
+	const page = Number(req.query.page);
+	const limit = Number(req.query.limit);
 
-  res.status(httpStatus.OK).json({ notes });
+	const skip = (page - 1) * limit;
+
+	const [notesCount, notes] = await Promise.all([
+		userNotesCount({ userId }),
+		fetchUserNotes({ userId, limit, skip }),
+	]);
+
+	const totalPages = Math.ceil(notesCount / limit);
+
+	res.status(httpStatus.OK).json({
+		notes,
+		pagination: {
+			totalPages,
+			currentPage: page,
+			totalNotes: notesCount,
+			hasNextPage: page < totalPages,
+			hasPrevPage: page > 1,
+		},
+	});
 }
 
 /**
@@ -125,20 +114,22 @@ export async function getUserNotes(req: Request, res: Response): Promise<void> {
  * 9. If an error occurs during the process, responds with an
  * INTERNAL_SERVER_ERROR status and an error message.
  */
-export async function deleteNote(req: Request, res: Response): Promise<void> {
-  const userId = req.userId;
-  const { noteId } = req.params;
+export async function deleteNote(
+	req: TypedRequest<EmptyRecord, NoteIdParam>,
+	res: Response,
+): Promise<void> {
+	const userId = req.userId;
+	const { noteId } = req.params;
 
-  if (!noteId) {
-    res
-      .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'Please provide the note ID.' });
-    return;
-  }
+	const note = await fetchNoteById({ noteId, userId });
 
-  await deleteNoteById({ userId, noteId });
+	if (!note) {
+		throw new NotFoundError("Note not found.");
+	}
 
-  res.status(httpStatus.OK).json({ message: 'Note deleted successfully.' });
+	await deleteNoteById({ userId, noteId: note.id });
+
+	res.status(httpStatus.OK).json({ message: "Note deleted successfully." });
 }
 
 /**
@@ -161,25 +152,20 @@ export async function deleteNote(req: Request, res: Response): Promise<void> {
  * @returns A JSON response containing the note data if found, or an error
  * message otherwise.
  */
-export async function getNoteById(req: Request, res: Response): Promise<void> {
-  const userId = req.userId;
-  const { noteId } = req.params;
+export async function getNoteById(
+	req: TypedRequest<EmptyRecord, NoteIdParam>,
+	res: Response,
+): Promise<void> {
+	const userId = req.userId;
+	const { noteId } = req.params;
 
-  if (!noteId) {
-    res
-      .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'Please provide the note ID.' });
-    return;
-  }
+	const note = await fetchNoteById({ noteId, userId });
 
-  const note = await fetchNoteById({ noteId, userId });
+	if (!note) {
+		throw new NotFoundError("Note not found.");
+	}
 
-  if (!note) {
-    res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
-    return;
-  }
-
-  res.status(httpStatus.OK).json({ note });
+	res.status(httpStatus.OK).json({ note });
 }
 
 /**
@@ -204,34 +190,30 @@ export async function getNoteById(req: Request, res: Response): Promise<void> {
  *
  * @returns {Promise<void>} - A promise that resolves when the function completes.
  */
-export async function updateNote(req: Request, res: Response): Promise<void> {
-  const userId = req.userId;
-  const { noteId } = req.params;
-  const { title, content, timestamp } = req.body;
+export async function updateNote(
+	req: TypedRequest<UpdateNoteBody, NoteIdParam>,
+	res: Response,
+): Promise<void> {
+	const userId = req.userId;
+	const { noteId } = req.params;
 
-  if (!noteId) {
-    res
-      .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'Please provide the note ID.' });
-    return;
-  }
+	const { title, content, timestamp } = req.body;
 
-  const note = await fetchNoteById({ noteId, userId });
+	const note = await fetchNoteById({ noteId, userId });
 
-  if (!note) {
-    res.status(httpStatus.NOT_FOUND).json({ message: 'Note not found.' });
-    return;
-  }
+	if (!note) {
+		throw new NotFoundError("Note not found.");
+	}
 
-  const updatedNote = await editNote({
-    userId,
-    noteId,
-    data: { title, content, timestamp },
-  });
+	const updatedNote = await editNote({
+		userId,
+		noteId,
+		data: { title, content, timestamp },
+	});
 
-  res
-    .status(httpStatus.OK)
-    .json({ message: 'Note Updated successfully.', note: updatedNote });
+	res
+		.status(httpStatus.OK)
+		.json({ message: "Note Updated successfully.", note: updatedNote });
 }
 
 /**
@@ -253,14 +235,14 @@ export async function updateNote(req: Request, res: Response): Promise<void> {
  * @returns A JSON response containing the user's most recent notes or an error message.
  */
 export async function getUserRecentNotes(
-  req: Request,
-  res: Response
+	req: Request,
+	res: Response,
 ): Promise<void> {
-  const userId = req.userId;
+	const userId = req.userId;
 
-  const notes = await fetchLatestUserNotes({ userId, take: 2 });
+	const notes = await fetchLatestUserNotes({ userId, take: 2 });
 
-  res.status(httpStatus.OK).json({ notes });
+	res.status(httpStatus.OK).json({ notes });
 }
 
 /**
@@ -282,16 +264,16 @@ export async function getUserRecentNotes(
  * @returns A JSON response containing the most recently updated notes for the user or an error message.
  */
 export async function getUserRecentlyUpdatedNotes(
-  req: Request,
-  res: Response
+	req: Request,
+	res: Response,
 ): Promise<void> {
-  const userId = req.userId;
+	const userId = req.userId;
 
-  const notes = await fetchLatestUserNotes({
-    userId,
-    take: 2,
-    orderBy: { updatedAt: 'desc' },
-  });
+	const notes = await fetchLatestUserNotes({
+		userId,
+		take: 2,
+		orderBy: { updatedAt: "desc" },
+	});
 
-  res.status(httpStatus.OK).json({ notes });
+	res.status(httpStatus.OK).json({ notes });
 }

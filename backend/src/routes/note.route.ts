@@ -1,38 +1,51 @@
-import { Router } from 'express';
+import { Router } from "express";
 
 import {
-  createNote,
-  getUserNotes,
-  deleteNote,
-  getNoteById,
-  updateNote,
-  getUserRecentNotes,
-  getUserRecentlyUpdatedNotes,
-} from '../controllers/note.controller';
+	createNote,
+	getUserNotes,
+	deleteNote,
+	getNoteById,
+	updateNote,
+	getUserRecentNotes,
+	getUserRecentlyUpdatedNotes,
+} from "../controllers/note.controller";
 
-import isAuthenticated from '../middlewares/isAuthenticated';
-import validateRequestBody from '../middlewares/validateRequestBody';
+import isAuthenticated from "../middlewares/isAuthenticated";
+import validateRequest from "../middlewares/validateRequest";
 
-import { noteSchema } from '../schemas/note.schema';
+import {
+	noteIdParamSchema,
+	noteBodySchema,
+	updateNoteBodySchema,
+} from "../schemas/note.schema";
+import { paginationQuerySchema } from "../schemas";
 
 const router = Router();
 
+// - isAuthenticated: Ensures the user is authenticated before accessing any note routes.
+router.use(isAuthenticated);
+
+// - GET /: Get all notes for the authenticated user.
+// - POST /: Create a new note (requires request body validation).
 router
-  .route('/')
-  .post(isAuthenticated, validateRequestBody(noteSchema), createNote);
+	.route("/")
+	.get(validateRequest({ query: paginationQuerySchema }), getUserNotes)
+	.post(validateRequest({ body: noteBodySchema }), createNote);
 
-router.route('/').get(isAuthenticated, getUserNotes);
+// - GET /recent: Get the most recent notes for the authenticated user.
+router.route("/recent").get(getUserRecentNotes);
 
-router.route('/:noteId').delete(isAuthenticated, deleteNote);
+// - GET /recently-updated: Get the recently updated notes for the authenticated user.
+router.route("/recently-updated").get(getUserRecentlyUpdatedNotes);
 
-router.route('/:noteId').post(isAuthenticated, getNoteById);
-
-router.route('/:noteId').patch(isAuthenticated, updateNote);
-
-router.route('/recent').get(isAuthenticated, getUserRecentNotes);
-
+// - GET /:noteId: Get a specific note by its ID (requires request params validation).
+// - PATCH /:noteId: Update a specific note by its ID (requires request params validation).
+// - DELETE /:noteId: Delete a specific note by its ID (requires request params validation).
 router
-  .route('/recently-updated')
-  .get(isAuthenticated, getUserRecentlyUpdatedNotes);
+	.route("/:noteId")
+	.all(validateRequest({ params: noteIdParamSchema }))
+	.patch(validateRequest({ body: updateNoteBodySchema }), updateNote)
+	.get(getNoteById)
+	.delete(deleteNote);
 
 export default router;

@@ -1,4 +1,4 @@
-import axiosInstance from '@/lib/axios.lib';
+import axiosInstance from "@/lib/axios.lib";
 
 /**
  * Sends an email verification request to the server.
@@ -9,7 +9,7 @@ import axiosInstance from '@/lib/axios.lib';
 export async function sendEmailVerification(
   email: string
 ): Promise<{ message: string }> {
-  const res = await axiosInstance.post('/send-verification-email', { email });
+  const res = await axiosInstance.post("/send-verification-email", { email });
 
   return res.data;
 }

@@ -1,9 +1,11 @@
-import type { z } from 'zod';
 import type {
-  forgotPasswordBodySchema,
-  passwordResetBodySchema,
-} from '../schemas/resetPassword.schema';
+	forgotPasswordBodySchema,
+	resetPasswordBodySchema,
+	resetPasswordParamsSchema,
+} from "../schemas/resetPassword.schema";
 
-export type ForgotPasswordBody = z.infer<typeof forgotPasswordBodySchema.body>;
+export type ForgotPasswordBody = typeof forgotPasswordBodySchema;
 
-export type ResetPasswordBody = z.infer<typeof passwordResetBodySchema.body>;
+export type ResetPasswordBody = typeof resetPasswordBodySchema;
+
+export type ResetPasswordParams = typeof resetPasswordParamsSchema;

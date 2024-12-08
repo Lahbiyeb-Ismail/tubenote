@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
@@ -8,7 +9,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { useModal } from "@/context/useModal";
 import SaveNoteForm from "../editor/SaveNoteForm";
 
@@ -26,6 +26,7 @@ function ConfirmationModal() {
 		action,
 		noteContent,
 		noteTitle,
+		noteId,
 	} = modalContent;
 
 	const handleConfirm = () => {
@@ -54,7 +55,8 @@ function ConfirmationModal() {
 						<SaveNoteForm
 							action={action}
 							noteContent={noteContent || ""}
-							noteTitle={noteTitle}
+							noteTitle={noteTitle as string}
+							noteId={noteId as string}
 							cancelText={cancelText}
 							closeModal={closeModal}
 						/>

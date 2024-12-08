@@ -1,13 +1,9 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-export const sendVerifyEmailSchema = {
-  body: z.object({
-    email: z.string().email({ message: 'Invalid email address.' }),
-  }),
-};
+export const sendVerifyEmailBodySchema = z.object({
+	email: z.string().email({ message: "Invalid email address." }),
+});
 
-export const verifyEmailSchema = {
-  params: z.object({
-    token: z.string().min(1),
-  }),
-};
+export const verifyEmailParamSchema = z.object({
+	token: z.string().min(1),
+});

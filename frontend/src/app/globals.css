@@ -84,6 +84,10 @@
   overflow: auto;
 }
 
+.mdxeditor .mdxeditor-toolbar{
+  background-color: white;
+}
+
 .mdxeditor .mdxeditor-diff-source-wrapper {
   height: 90%;
 }
@@ -115,6 +119,11 @@
   font-weight: bold;
   margin-top: 1em;
   margin-bottom: 1em;
+}
+
+.code-font {
+  font-size: 1.1rem !important;
+  font-weight: bold !important;
 }
 
 @layer base {

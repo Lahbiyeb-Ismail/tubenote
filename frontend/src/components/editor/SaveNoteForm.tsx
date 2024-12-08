@@ -3,14 +3,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type SubmitHandler, useForm } from "react-hook-form";
 
+import { useNote } from "@/context/useNote";
+import { useVideo } from "@/context/useVideo";
 import { saveNoteFormSchema } from "@/lib/schemas";
 import type { NoteTitle } from "@/types/note.types";
-import { useVideo } from "@/context/useVideo";
-import { useNote } from "@/context/useNote";
 import { Button } from "../ui/button";
+import { getStorageValue } from "@/utils/localStorage";
+import type { Video } from "@/types/video.types";
 
 type SaveNoteFormProps = {
-	noteTitle?: string;
+	noteId: string;
+	noteTitle: string;
 	noteContent: string;
 	cancelText: string;
 	action: "update" | "create";
@@ -18,6 +21,7 @@ type SaveNoteFormProps = {
 };
 
 function SaveNoteForm({
+	noteId,
 	noteTitle: title,
 	noteContent,
 	action,
@@ -34,33 +38,26 @@ function SaveNoteForm({
 			noteTitle: title || "",
 		},
 	});
+	const video = getStorageValue<Video | null>("video");
 
-	const {
-		state: { video },
-		videoCurrentTime,
-	} = useVideo();
+	const { videoCurrentTime } = useVideo();
 
-	const {
-		createNote,
-		isLoading,
-		updateNote,
-		state: { note },
-	} = useNote();
+	const { createNote, isLoading, updateNote } = useNote();
 
 	const handleNoteSave: SubmitHandler<NoteTitle> = (data: NoteTitle) => {
 		if (action === "create") {
 			createNote({
 				title: data.noteTitle,
 				content: noteContent,
-				videoId: video?.id,
-				thumbnail: video?.snippet.thumbnails.medium.url,
-				videoTitle: video?.snippet.title,
-				youtubeId: video?.youtubeId,
+				videoId: video?.id as string,
+				thumbnail: video?.snippet.thumbnails.medium.url as string,
+				videoTitle: video?.snippet.title as string,
+				youtubeId: video?.youtubeId as string,
 				timestamp: videoCurrentTime,
 			});
 		} else {
 			updateNote({
-				noteId: note?.id,
+				noteId,
 				title: data.noteTitle,
 				content: noteContent,
 				timestamp: videoCurrentTime,

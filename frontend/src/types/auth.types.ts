@@ -1,12 +1,12 @@
-import type { z } from 'zod';
+import type { z } from "zod";
 
 import type {
   loginFormSchema,
   registerFormSchema,
   updatePasswordSchema,
   updateProfileSchema,
-} from '@/lib/schemas';
-import type { ReactNode } from 'react';
+} from "@/lib/schemas";
+import type { ReactNode } from "react";
 
 export type LoginFormData = z.infer<typeof loginFormSchema>;
 export type RegisterFormData = z.infer<typeof registerFormSchema>;
@@ -14,20 +14,14 @@ export type RegisterFormData = z.infer<typeof registerFormSchema>;
 export type UpdateProfileData = z.infer<typeof updateProfileSchema>;
 export type UpdatePasswordData = z.infer<typeof updatePasswordSchema>;
 
-export type User = {
-  username: string;
-  email: string;
-};
-
-export type RegisterResponse = {
+export type RegisterUserResponse = {
   message: string;
   email: string;
 };
 
-export type LoginResponse = {
+export type LoginUserResponse = {
   message: string;
   accessToken: string;
-  user: User;
 };
 
 export type AuthState = {
@@ -35,17 +29,16 @@ export type AuthState = {
   errorMessage?: string;
   successMessage?: string;
   isAuthenticated: boolean;
-  user: User | null;
 };
 
 export type AuthAction =
   | {
-      type: 'LOGIN_SUCCESS';
-      payload: { message: string; accessToken: string; user: User };
+      type: "LOGIN_SUCCESS";
+      payload: { message: string; accessToken: string };
     }
-  | { type: 'REGISTER_SUCCESS'; payload: { successMessage: string } }
-  | { type: 'REQUEST_FAIL'; payload: { errorMessage: string } }
-  | { type: 'LOGOUT_SUCCESS' };
+  | { type: "REGISTER_SUCCESS"; payload: { successMessage: string } }
+  | { type: "REQUEST_FAIL"; payload: { errorMessage: string } }
+  | { type: "LOGOUT_SUCCESS" };
 
 export type AuthContextType = {
   state: AuthState;

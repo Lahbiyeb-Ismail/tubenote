@@ -1,11 +1,20 @@
-import type { Response, Request } from 'express';
-import httpStatus from 'http-status';
+import type { Response } from "express";
+import httpStatus from "http-status";
+
+import type { EmptyRecord, PaginationQuery, TypedRequest } from "../types";
+import type { CreateVideoBody, VideoIdParam } from "../types/video.type";
 
 import {
-  createVideoEntry,
-  findUserVideos,
-  findVideo,
-} from '../services/video.services';
+	createVideoEntry,
+	fetchUserVideos,
+	findVideo,
+	getUserVideosCount,
+} from "../services/video.services";
+
+import {
+	fetchNotesByVideoId,
+	getVideoNotesCount,
+} from "../services/note.services";
 
 /**
  * Retrieves video data from YouTube and stores it in the database.
@@ -22,25 +31,23 @@ import {
  * @returns A JSON response containing the created video data or an error message.
  */
 
-export async function getVideoData(req: Request, res: Response): Promise<void> {
-  const userId = req.userId;
-  const { videoId } = req.body;
+export async function handleCreateVideo(
+	req: TypedRequest<CreateVideoBody>,
+	res: Response,
+): Promise<void> {
+	const userId = req.userId;
+	const { videoId } = req.body;
 
-  if (!videoId) {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'VideoId is required' });
-    return;
-  }
+	const videoExists = await findVideo({ youtubeId: videoId, userId });
 
-  const videoExists = await findVideo(videoId);
+	if (videoExists) {
+		res.status(httpStatus.OK).json(videoExists);
+		return;
+	}
 
-  if (videoExists) {
-    res.status(httpStatus.OK).json(videoExists);
-    return;
-  }
+	const video = await createVideoEntry(videoId, userId);
 
-  const video = await createVideoEntry(videoId, userId);
-
-  res.status(httpStatus.OK).json(video);
+	res.status(httpStatus.OK).json(video);
 }
 
 /**
@@ -50,10 +57,110 @@ export async function getVideoData(req: Request, res: Response): Promise<void> {
  * @param res - The response object used to send back the videos.
  * @returns A JSON response containing the user's videos.
  */
-export async function getUserVideos(req: Request, res: Response) {
-  const userId = req.userId;
+export async function getUserVideos(
+	req: TypedRequest<EmptyRecord, EmptyRecord, PaginationQuery>,
+	res: Response,
+) {
+	const userId = req.userId;
 
-  const videos = await findUserVideos(userId);
+	const page = Number(req.query.page);
+	const limit = Number(req.query.limit);
 
-  res.status(httpStatus.OK).json({ videos });
+	const skip = (page - 1) * limit;
+
+	const [videosCount, videos] = await Promise.all([
+		getUserVideosCount({ userId }),
+		fetchUserVideos({ userId, skip, limit }),
+	]);
+
+	const totalPages = Math.ceil(videosCount / limit);
+
+	res.status(httpStatus.OK).json({
+		videos,
+		pagination: {
+			totalPages,
+			currentPage: page,
+			totalVideos: videosCount,
+			hasNextPage: page < totalPages,
+			hasPrevPage: page > 1,
+		},
+	});
+}
+
+/**
+ * Handles the request to get a video by its ID.
+ *
+ * This function retrieves a video based on the provided video ID and user ID.
+ * If the video is found, it returns the video data. If the video is not found,
+ * it creates a new video entry and returns the newly created video data.
+ *
+ * @param req - The request object containing the video ID in the parameters and user ID.
+ * @param res - The response object used to send the response back to the client.
+ *
+ * @returns A JSON response with the video data or an error message if the video ID is not provided.
+ */
+export async function handleGetVideoById(
+	req: TypedRequest<EmptyRecord, VideoIdParam>,
+	res: Response,
+) {
+	const { videoId } = req.params;
+	const userId = req.userId;
+
+	const video = await findVideo({ youtubeId: videoId, userId });
+
+	if (video) {
+		res.status(httpStatus.OK).json(video);
+		return;
+	}
+
+	const newVideo = await createVideoEntry(videoId, userId);
+
+	res.status(httpStatus.OK).json(newVideo);
+}
+
+/**
+ * Handles the request to get notes by video ID.
+ *
+ * @param req - The request object containing user ID and video ID.
+ * @param res - The response object to send the result.
+ *
+ * @remarks
+ * This function retrieves notes associated with a specific video ID for a user.
+ * It supports pagination through query parameters `page` and `limit`.
+ *
+ * @returns A JSON response containing the video details, notes, and pagination information.
+ *
+ * @throws If the video ID is not provided, it returns a 400 Bad Request status with an error message.
+ */
+export async function handleGetNotesByVideoId(
+	req: TypedRequest<EmptyRecord, VideoIdParam, PaginationQuery>,
+	res: Response,
+) {
+	const userId = req.userId;
+	const { videoId } = req.params;
+
+	const page = Number(req.query.page);
+	const limit = Number(req.query.limit);
+
+	const skip = (page - 1) * limit;
+
+	const [video, notesCount, notes] = await Promise.all([
+		findVideo({ youtubeId: videoId, userId }),
+		getVideoNotesCount({ userId, videoId }),
+		fetchNotesByVideoId({ userId, videoId, limit, skip }),
+	]);
+
+	const totalPages = Math.ceil(notesCount / limit);
+
+	res.status(httpStatus.OK).json({
+		video,
+		notes,
+		pagination: {
+			totalPages,
+			currentPage: page,
+			totalNotes: notesCount,
+			hasNextPage: page < totalPages,
+			hasPrevPage: page > 1,
+		},
+	});
 }

@@ -1,4 +1,4 @@
-import axiosInstance from '@/lib/axios.lib';
+import axiosInstance from "@/lib/axios.lib";
 
 /**
  * Sends a password reset email to the specified email address.
@@ -9,7 +9,7 @@ import axiosInstance from '@/lib/axios.lib';
 export async function sendForgotPasswordEmail(
   email: string
 ): Promise<{ message: string }> {
-  const res = await axiosInstance.post('/forgot-password', { email });
+  const res = await axiosInstance.post("/forgot-password", { email });
 
   return res.data;
 }

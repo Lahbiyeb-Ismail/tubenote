@@ -1,12 +1,14 @@
 "use client";
-
 import React from "react";
+
+import type { Note } from "@/types/note.types";
+
 import NoteCard from "./NoteCard";
-import type { INote } from "@/types/note.types";
+
 import { useLayout } from "@/context/useLayout";
 
 type NotesListProps = {
-	notes?: INote[];
+	notes?: Note[];
 };
 
 function NotesList({ notes }: NotesListProps) {

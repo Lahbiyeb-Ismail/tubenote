@@ -6,13 +6,13 @@ import LoggedInButtons from "./LoggedInButtons";
 import LoggedOutButtons from "./LoggedOutButtons";
 
 function NavbarButtons() {
-	const { data: currentUser, isLoading } = useGetCurrentUser();
+  const { data: currentUser, isLoading } = useGetCurrentUser();
 
-	return (
-		<>
-			{currentUser && !isLoading ? <LoggedInButtons /> : <LoggedOutButtons />}
-		</>
-	);
+  return (
+    <>
+      {currentUser && !isLoading ? <LoggedInButtons /> : <LoggedOutButtons />}
+    </>
+  );
 }
 
 export default NavbarButtons;

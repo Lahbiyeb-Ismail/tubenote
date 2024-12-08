@@ -1,33 +1,46 @@
 "use client";
 
-import useGetUserVideos from "@/hooks/note/useGetUserVideos";
+import { DEFAULT_PAGE } from "@/utils/constants";
 
+import usePagination from "@/hooks/global/usePagination";
+import useGetUserVideos from "@/hooks/video/useGetUserVideos";
+
+import PaginationComponent from "@/components/global/Pagination";
 import Loader from "@/components/global/Loader";
+
 import AddNoteForm from "@/components/dashboards/AddNoteForm";
 import Header from "@/components/dashboards/Header";
 import NoDataFound from "@/components/dashboards/NoDataFound";
 
+import VideosList from "@/components/video/VideosList";
+
 function VideosPage() {
-	const { data, isLoading } = useGetUserVideos();
+	const { currentPage, setPage } = usePagination({ defaultPage: DEFAULT_PAGE });
+	const { data, isLoading, isError } = useGetUserVideos({ page: currentPage });
+
+	if (isError) return <div>Something went wrong</div>;
 
 	if (isLoading) return <Loader />;
 
+	if (!data || !data.videos) {
+		return <NoDataFound title="You don't have any videos yet." />;
+	}
+
 	return (
-		<>
-			{!data ? (
-				<NoDataFound title="You don't have any videos yet." />
-			) : (
-				<div className="min-h-screen flex-1 bg-gray-100">
-					<Header title="Your Video" />
-					<main className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
-						<div className="flex justify-end">
-							<AddNoteForm />
-						</div>
-						{/* <NotesList notes={data} /> */}
-					</main>
+		<div className="min-h-screen flex-1 bg-gray-100">
+			<Header title="Your Video" />
+			<main className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+				<div className="flex justify-end">
+					<AddNoteForm />
 				</div>
-			)}
-		</>
+				<VideosList videos={data.videos} />
+				<PaginationComponent
+					currentPage={currentPage}
+					totalPages={data.pagination.totalPages}
+					onPageChange={setPage}
+				/>
+			</main>
+		</div>
 	);
 }
 

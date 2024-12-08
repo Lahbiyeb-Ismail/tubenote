@@ -1,13 +1,19 @@
-import type { Response, Request } from 'express';
-import httpStatus from 'http-status';
-import bcrypt from 'bcryptjs';
+import type { Response, Request } from "express";
+import httpStatus from "http-status";
+import bcrypt from "bcryptjs";
 
-import type { TypedRequest } from '../types';
-import type { UpdatePasswordBody, UpdateUserBody } from '../types/user.type';
+import type { TypedRequest } from "../types";
+import type { UpdatePasswordBody, UpdateUserBody } from "../types/user.type";
 
-import { checkPassword } from '../helpers/auth.helper';
+import { checkPassword } from "../helpers/auth.helper";
 
-import { findUser, updateUser } from '../services/user.services';
+import { findUser, updateUser } from "../services/user.services";
+import {
+	BadRequestError,
+	ForbiddenError,
+	NotFoundError,
+	UnauthorizedError,
+} from "../errors";
 
 /**
  * Retrieves the current user based on the user ID present in the request payload.
@@ -23,21 +29,28 @@ import { findUser, updateUser } from '../services/user.services';
  * @returns A JSON response containing the user data if found, or an error message if not.
  */
 export async function getCurrentUser(
-  req: Request,
-  res: Response
+	req: Request,
+	res: Response,
 ): Promise<void> {
-  const userId = req.userId;
+	const userId = req.userId;
 
-  const user = await findUser({ id: userId });
+	const user = await findUser({ id: userId });
 
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'User not found. Please try again.' });
-    return;
-  }
+	if (!user) {
+		throw new NotFoundError("User not found. Please try again.");
+	}
 
-  res.status(httpStatus.OK).json({ user });
+	res.status(httpStatus.OK).json({
+		user: {
+			id: user.id,
+			username: user.username,
+			email: user.email,
+			profilePicture: user.profilePicture,
+			emailVeified: user.emailVerified,
+			createdAt: user.createdAt,
+			updatedAt: user.updatedAt,
+		},
+	});
 }
 
 /**
@@ -59,47 +72,36 @@ export async function getCurrentUser(
  * @throws Will throw an error if the database operation fails.
  */
 export async function updateCurrentUser(
-  req: TypedRequest<UpdateUserBody>,
-  res: Response
+	req: TypedRequest<UpdateUserBody>,
+	res: Response,
 ): Promise<void> {
-  const userId = req.userId;
-  const { username, email } = req.body;
+	const userId = req.userId;
+	const { username, email } = req.body;
 
-  if (!username || !email) {
-    res
-      .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'Please provide username or email to update.' });
-    return;
-  }
+	const user = await findUser({ id: userId });
 
-  const user = await findUser({ id: userId });
+	if (!user) {
+		throw new UnauthorizedError("Unauthorized access. Please try again.");
+	}
 
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
+	const isEmailTaken = await findUser({ email });
 
-  const isEmailTaken = await findUser({ email });
+	if (isEmailTaken && isEmailTaken.id !== user.id) {
+		throw new BadRequestError(
+			"Email is already taken. Please try another one.",
+		);
+	}
 
-  if (isEmailTaken && isEmailTaken.id !== user.id) {
-    res
-      .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'Email is already taken. Please try another one.' });
-    return;
-  }
+	if (username === user.username && email === user.email) {
+		res.status(httpStatus.OK).json({
+			message: "No changes detected. User information remains the same.",
+		});
+		return;
+	}
 
-  if (username === user.username && email === user.email) {
-    res.status(httpStatus.OK).json({
-      message: 'No changes detected. User information remains the same.',
-    });
-    return;
-  }
+	await updateUser({ userId, data: { username, email } });
 
-  await updateUser({ userId, data: { username, email } });
-
-  res.status(httpStatus.OK).json({ message: 'User updated successfully.' });
+	res.status(httpStatus.OK).json({ message: "User updated successfully." });
 }
 
 /**
@@ -120,48 +122,34 @@ export async function updateCurrentUser(
  * @throws {Error} If there is an issue updating the password in the database.
  */
 export async function updateUserPassword(
-  req: TypedRequest<UpdatePasswordBody>,
-  res: Response
+	req: TypedRequest<UpdatePasswordBody>,
+	res: Response,
 ): Promise<void> {
-  const userId = req.userId;
+	const userId = req.userId;
 
-  const { currentPassword, newPassword } = req.body;
+	const { currentPassword, newPassword } = req.body;
 
-  if (!currentPassword || !newPassword) {
-    res
-      .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'All fields are required.' });
-    return;
-  }
+	const user = await findUser({ id: userId });
 
-  const user = await findUser({ id: userId });
+	if (!user) {
+		throw new UnauthorizedError("Unauthorized access. Please try again.");
+	}
 
-  if (!user) {
-    res
-      .status(httpStatus.NOT_FOUND)
-      .json({ message: 'Unauthorized access. Please try again.' });
-    return;
-  }
+	const isPasswordValid = await checkPassword(currentPassword, user.password);
 
-  const isPasswordValid = await checkPassword(currentPassword, user.password);
+	if (!isPasswordValid) {
+		throw new ForbiddenError("Invalid current password. Please try again.");
+	}
 
-  if (!isPasswordValid) {
-    res
-      .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'Invalid current password. Please try again.' });
-    return;
-  }
+	if (currentPassword === newPassword) {
+		throw new BadRequestError(
+			"New password must be different from the current password.",
+		);
+	}
 
-  if (currentPassword === newPassword) {
-    res.status(httpStatus.BAD_REQUEST).json({
-      message: 'New password must be different from the current password.',
-    });
-    return;
-  }
+	const newHashedPassword = await bcrypt.hash(newPassword, 10);
 
-  const newHashedPassword = await bcrypt.hash(newPassword, 10);
+	await updateUser({ userId, data: { password: newHashedPassword } });
 
-  await updateUser({ userId, data: { password: newHashedPassword } });
-
-  res.status(httpStatus.OK).json({ message: 'Password updated successfully.' });
+	res.status(httpStatus.OK).json({ message: "Password updated successfully." });
 }

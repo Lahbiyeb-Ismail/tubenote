@@ -1,19 +1,18 @@
 "use client";
 
-import { getRecentlyUpdatedNotes } from "@/actions/note.actions";
-import { useAuth } from "@/context/useAuth";
 import { useQuery } from "@tanstack/react-query";
 
-function useGetRecentlyUpdatedNotes() {
-	const {
-		state: { accessToken },
-	} = useAuth();
+import { getRecentlyUpdatedNotes } from "@/actions/note.actions";
+import { getStorageValue } from "@/utils/localStorage";
 
-	return useQuery({
-		queryKey: ["notes", "recentlyUpdatedNotes"],
-		queryFn: () => getRecentlyUpdatedNotes(),
-		enabled: !!accessToken,
-	});
+function useGetRecentlyUpdatedNotes() {
+  const accessToken = getStorageValue<string>("accessToken");
+
+  return useQuery({
+    queryKey: ["notes", "recentlyUpdatedNotes"],
+    queryFn: () => getRecentlyUpdatedNotes(),
+    enabled: !!accessToken,
+  });
 }
 
 export default useGetRecentlyUpdatedNotes;

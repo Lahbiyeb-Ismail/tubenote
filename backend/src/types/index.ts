@@ -1,7 +1,8 @@
-import type { Request } from 'express';
-import type { DeepPartial } from 'utility-types';
+import type { Request } from "express";
+import type { z } from "zod";
 
-import type { ResetPasswordToken } from '@prisma/client';
+import type { ResetPasswordToken } from "@prisma/client";
+import type { paginationQuerySchema } from "src/schemas";
 
 /**
  * Represents the payload of a JSON Web Token (JWT).
@@ -11,9 +12,9 @@ import type { ResetPasswordToken } from '@prisma/client';
  * @property {number} exp - The expiration timestamp, indicating when the token will expire.
  */
 export type JwtPayload = {
-  userId: string;
-  iat: number;
-  exp: number;
+	userId: string;
+	iat: number;
+	exp: number;
 };
 
 /**
@@ -22,22 +23,27 @@ export type JwtPayload = {
  * @property {ResetPasswordToken} resetToken - The token used for resetting the password.
  */
 declare global {
-  namespace Express {
-    interface Request {
-      resetToken: ResetPasswordToken;
-      userId: string;
-    }
-  }
+	namespace Express {
+		interface Request {
+			resetToken: ResetPasswordToken;
+			userId: string;
+		}
+	}
 }
 
-// More strictly typed Express.Request type
-// https://stackoverflow.com/questions/34508081/how-to-add-typescript-definitions-to-express-req-res
+/**
+ * A type representing a typed request with body, params, and query types inferred from Zod schemas.
+ *
+ * @template B - The Zod schema type for the request body. Defaults to `z.ZodTypeAny`.
+ * @template P - The Zod schema type for the request params. Defaults to `z.ZodTypeAny`.
+ * @template Q - The Zod schema type for the request query. Defaults to `z.ZodTypeAny`.
+ */
 export type TypedRequest<
-  ReqBody = Record<string, unknown>,
-  QueryString = Record<string, unknown>,
-> = Request<
-  Record<string, unknown>,
-  Record<string, unknown>,
-  DeepPartial<ReqBody>,
-  DeepPartial<QueryString>
->;
+	B extends z.ZodType = z.ZodTypeAny,
+	P extends z.ZodType = z.ZodTypeAny,
+	Q extends z.ZodType = z.ZodTypeAny,
+> = Request<z.infer<P>, Record<string, unknown>, z.infer<B>, z.infer<Q>>;
+
+export type PaginationQuery = typeof paginationQuerySchema;
+
+export type EmptyRecord = z.ZodType<Record<string, never>>;

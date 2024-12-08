@@ -25,9 +25,10 @@
 		"jsonwebtoken": "^9.0.2",
 		"nodemailer": "^6.9.16",
 		"passport": "^0.7.0",
-		"passport-google-oauth2": "^0.2.0",
+		"passport-google-oauth20": "^2.0.0",
 		"prisma": "^5.20.0",
 		"utility-types": "^3.11.0",
+		"winston": "^3.17.0",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
@@ -38,7 +39,7 @@
 		"@types/jsonwebtoken": "^9.0.7",
 		"@types/nodemailer": "^6.4.16",
 		"@types/passport": "^1.0.17",
-		"@types/passport-google-oauth2": "^0.1.10",
+		"@types/passport-google-oauth20": "^2.0.16",
 		"nodemon": "^3.1.7",
 		"typescript": "^5.6.2"
 	}

@@ -1,23 +1,24 @@
-import type { Response } from 'express';
-import httpStatus from 'http-status';
+import type { Response } from "express";
+import httpStatus from "http-status";
 
-import type { TypedRequest } from '../types';
+import type { TypedRequest } from "../types";
 import type {
-  ForgotPasswordBody,
-  ResetPasswordBody,
-} from '../types/resetPassword.type';
+	ForgotPasswordBody,
+	ResetPasswordBody,
+} from "../types/resetPassword.type";
 
 import {
-  createResetPasswordToken,
-  deleteResetPasswordToken,
-  findResetPasswordToken,
-} from '../services/resetPassword.services';
-import { findUser, updateUser } from '../services/user.services';
+	createResetPasswordToken,
+	deleteResetPasswordToken,
+	findResetPasswordToken,
+} from "../services/resetPassword.services";
+import { findUser, updateUser } from "../services/user.services";
 
-import { createResetPasswordEmail } from '../helpers/resetPassword.helper';
-import { hashPassword } from '../helpers/auth.helper';
+import { createResetPasswordEmail } from "../helpers/resetPassword.helper";
+import { hashPassword } from "../helpers/auth.helper";
 
-import { sendEmail } from '../utils/sendEmail';
+import { sendEmail } from "../utils/sendEmail";
+import { BadRequestError } from "../errors";
 
 /**
  * Handles the password reset process for a user.
@@ -32,52 +33,43 @@ import { sendEmail } from '../utils/sendEmail';
  * @returns Sends an HTTP response with the status and message indicating the result of the operation.
  */
 export async function handleForgotPassword(
-  req: TypedRequest<ForgotPasswordBody>,
-  res: Response
+	req: TypedRequest<ForgotPasswordBody>,
+	res: Response,
 ): Promise<void> {
-  const { email } = req.body;
+	const { email } = req.body;
 
-  if (!email) {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Email is required.' });
-    return;
-  }
+	const user = await findUser({ email });
 
-  const user = await findUser({ email });
+	if (!user || !user.emailVerified) {
+		throw new BadRequestError("Invalid email or email not verified.");
+	}
 
-  if (!user || !user.emailVerified) {
-    res
-      .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'Invalid email or email not verified.' });
-    return;
-  }
+	const isResetTokenAlreadySent = await findResetPasswordToken({
+		userId: user.id,
+	});
 
-  const isResetTokenAlreadySent = await findResetPasswordToken({
-    userId: user.id,
-  });
+	if (isResetTokenAlreadySent) {
+		throw new BadRequestError(
+			"A password reset link has already been sent to your email.",
+		);
+	}
 
-  if (isResetTokenAlreadySent) {
-    res.status(httpStatus.BAD_REQUEST).json({
-      message: 'A password reset link has already been sent to your email.',
-    });
-    return;
-  }
+	const newResetToken = await createResetPasswordToken(user.id);
 
-  const newResetToken = await createResetPasswordToken(user.id);
+	const { htmlContent, textContent, logoPath } =
+		await createResetPasswordEmail(newResetToken);
 
-  const { htmlContent, textContent, logoPath } =
-    await createResetPasswordEmail(newResetToken);
+	await sendEmail({
+		emailSubject: "Reset Password",
+		emailRecipient: user.email,
+		htmlContent,
+		textContent,
+		logoPath,
+	});
 
-  await sendEmail({
-    emailSubject: 'Reset Password',
-    emailRecipient: user.email,
-    htmlContent,
-    textContent,
-    logoPath,
-  });
-
-  res
-    .status(httpStatus.OK)
-    .json({ message: 'Password reset link sent to your email.' });
+	res
+		.status(httpStatus.OK)
+		.json({ message: "Password reset link sent to your email." });
 }
 
 /**
@@ -94,29 +86,22 @@ export async function handleForgotPassword(
  * @returns A promise that resolves when the password reset process is complete.
  */
 export async function handleResetPassword(
-  req: TypedRequest<ResetPasswordBody>,
-  res: Response
+	req: TypedRequest<ResetPasswordBody>,
+	res: Response,
 ): Promise<void> {
-  const { password } = req.body;
-  const resetToken = req.resetToken;
+	const { password } = req.body;
+	const resetToken = req.resetToken;
 
-  if (!password) {
-    res
-      .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'Password is required.' });
-    return;
-  }
+	const hashedPassword = await hashPassword(password);
 
-  const hashedPassword = await hashPassword(password);
+	await updateUser({
+		userId: resetToken.userId,
+		data: { password: hashedPassword },
+	});
 
-  await updateUser({
-    userId: resetToken.userId,
-    data: { password: hashedPassword },
-  });
+	await deleteResetPasswordToken(resetToken.userId);
 
-  await deleteResetPasswordToken(resetToken.userId);
-
-  res.status(httpStatus.OK).json({ message: 'Password reset successful.' });
+	res.status(httpStatus.OK).json({ message: "Password reset successful." });
 }
 
 /**
@@ -128,8 +113,8 @@ export async function handleResetPassword(
  * @returns A JSON response indicating that the token is valid.
  */
 export async function handleResetPasswordTokenVerification(
-  _req: TypedRequest,
-  res: Response
+	_req: TypedRequest,
+	res: Response,
 ): Promise<void> {
-  res.status(httpStatus.OK).json({ message: 'Token is valid.' });
+	res.status(httpStatus.OK).json({ message: "Token is valid." });
 }

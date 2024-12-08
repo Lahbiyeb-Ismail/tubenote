@@ -1,7 +1,5 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { SaveIcon } from "lucide-react";
 import {
 	AdmonitionDirectiveDescriptor,
 	BlockTypeSelect,
@@ -38,12 +36,12 @@ import {
 	thematicBreakPlugin,
 	toolbarPlugin,
 } from "@mdxeditor/editor";
+import { SaveIcon } from "lucide-react";
+import { useRef, useState } from "react";
 import "@mdxeditor/editor/style.css";
 
-import { Button } from "../ui/button";
-import SaveNoteForm from "./SaveNoteForm";
-import ConfirmationModal from "../global/ConfirmationModal";
 import { useModal } from "@/context/useModal";
+import { Button } from "../ui/button";
 
 function whenInAdmonition(editorInFocus: EditorInFocus | null) {
 	const node = editorInFocus?.rootNode;
@@ -155,17 +153,17 @@ const myPlugins = [
 type AppMDXEditorProps = {
 	initialNoteContent?: string;
 	noteTitle?: string;
+	noteId?: string;
 	action: "create" | "update";
 };
 
 const AppMDXEditor = ({
 	initialNoteContent,
 	noteTitle,
+	noteId,
 	action,
 }: AppMDXEditorProps) => {
 	const ref = useRef<MDXEditorMethods | null>(null);
-	// const [editorInFocus, setEditorInFocus] = useState<EditorInFocus | null>(null);
-	const noteContent = ref.current?.getMarkdown() || "";
 
 	const { openModal } = useModal();
 
@@ -178,9 +176,8 @@ const AppMDXEditor = ({
 			noteContent: ref.current?.getMarkdown() || "",
 			noteTitle,
 			action,
+			noteId,
 		});
-
-		// console.log(noteContent);
 	};
 
 	return (

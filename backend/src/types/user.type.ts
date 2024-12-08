@@ -1,10 +1,8 @@
-import type { z } from 'zod';
-
 import type {
-  updatePasswordSchema,
-  updateUserSchema,
-} from '../schemas/user.schema';
+	updateUserBodySchema,
+	updatePasswordBodySchema,
+} from "../schemas/user.schema";
 
-export type UpdateUserBody = z.infer<typeof updateUserSchema.body>;
+export type UpdateUserBody = typeof updateUserBodySchema;
 
-export type UpdatePasswordBody = z.infer<typeof updatePasswordSchema.body>;
+export type UpdatePasswordBody = typeof updatePasswordBodySchema;

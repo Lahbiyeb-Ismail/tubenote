@@ -1,13 +1,15 @@
-import axios from 'axios';
+import axios from "axios";
 
+import axiosInstance from "@/lib/axios.lib";
 import type {
-  RegisterFormData,
-  RegisterResponse,
   LoginFormData,
-  LoginResponse,
-} from '@/types/auth.types';
-import { API_URL } from '@/utils/constants';
-import axiosInstance from '@/lib/axios.lib';
+  LoginUserResponse,
+  RegisterFormData,
+  RegisterUserResponse,
+} from "@/types/auth.types";
+
+import { API_URL } from "@/utils/constants";
+import { setStorageValue } from "@/utils/localStorage";
 
 /**
  * Registers a new user with the provided registration credentials.
@@ -17,7 +19,7 @@ import axiosInstance from '@/lib/axios.lib';
  */
 export async function registerUser(
   registerCredentials: RegisterFormData
-): Promise<RegisterResponse> {
+): Promise<RegisterUserResponse> {
   const response = await axios.post(
     `${API_URL}/auth/register`,
     registerCredentials
@@ -34,7 +36,7 @@ export async function registerUser(
  */
 export async function loginUser(
   loginCredentials: LoginFormData
-): Promise<LoginResponse> {
+): Promise<LoginUserResponse> {
   const response = await axios.post(`${API_URL}/auth/login`, loginCredentials, {
     withCredentials: true,
   });
@@ -51,6 +53,28 @@ export async function loginUser(
  * @returns {Promise<void>} A promise that resolves when the logout request
  * is complete.
  */
-export async function logoutUser() {
+export async function logoutUser(): Promise<void> {
   await axiosInstance.post(`${API_URL}/auth/logout`);
+}
+
+/**
+ * Refreshes the access token by making a POST request to the refresh endpoint.
+ *
+ * @returns {Promise<void>} A promise that resolves when the access token is refreshed.
+ *
+ * @throws Will log an error message if the token refresh fails.
+ */
+export async function refreshAccessToken(): Promise<void> {
+  try {
+    const response = await axios.post(
+      `${API_URL}/auth/refresh`,
+      {},
+      { withCredentials: true }
+    );
+    const newAccessToken = response.data.accessToken;
+    setStorageValue("accessToken", newAccessToken);
+    return newAccessToken;
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+  }
 }

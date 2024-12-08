@@ -1,29 +1,17 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-const getAccessToken = (): string | null => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('accessToken');
-  }
-  return null;
-};
+import {
+  setupRequestInterceptor,
+  setupResponseInterceptor,
+} from "@/interceptors/auth.interceptors";
+import { API_URL } from "@/utils/constants";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
   withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
-// Add an interceptor to dynamically set the Authorization header
-axiosInstance.interceptors.request.use((config) => {
-  const token = getAccessToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+setupRequestInterceptor(axiosInstance);
+setupResponseInterceptor(axiosInstance);
 
 export default axiosInstance;

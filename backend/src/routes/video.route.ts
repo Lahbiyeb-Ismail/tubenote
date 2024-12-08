@@ -1,11 +1,45 @@
-import { Router } from 'express';
-import { getUserVideos, getVideoData } from '../controllers/video.controller';
-import isAuthenticated from '../middlewares/isAuthenticated';
+import { Router } from "express";
+
+import {
+	getUserVideos,
+	handleCreateVideo,
+	handleGetNotesByVideoId,
+	handleGetVideoById,
+} from "../controllers/video.controller";
+
+import isAuthenticated from "../middlewares/isAuthenticated";
+import validateRequest from "../middlewares/validateRequest";
+
+import { paginationQuerySchema } from "../schemas";
+import {
+	createVideoBodySchema,
+	videoIdParamSchema,
+} from "../schemas/video.schema";
 
 const router = Router();
 
-router.route('/').post(isAuthenticated, getVideoData);
+// - isAuthenticated: Ensures the user is authenticated before accessing any video routes.
+router.use(isAuthenticated);
 
-router.route('/').get(isAuthenticated, getUserVideos);
+// - GET /: Get all videos for the authenticated user
+// - POST /: Create a new video (requires request body validation)
+router
+	.route("/")
+	.get(validateRequest({ query: paginationQuerySchema }), getUserVideos)
+	.post(validateRequest({ body: createVideoBodySchema }), handleCreateVideo);
+
+router
+	.route("/:videoId/notes")
+	.get(
+		validateRequest({
+			params: videoIdParamSchema,
+			query: paginationQuerySchema,
+		}),
+		handleGetNotesByVideoId,
+	);
+
+router
+	.route("/:videoId")
+	.get(validateRequest({ params: videoIdParamSchema }), handleGetVideoById);
 
 export default router;
