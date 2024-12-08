@@ -1,7 +1,6 @@
 "use client";
 
 import useGetNoteById from "@/hooks/note/useGetNoteById";
-import { useState } from "react";
 
 import Loader from "@/components/global/Loader";
 import MarkdownViewer from "@/components/global/MarkdownViewer";
@@ -55,11 +54,13 @@ function NotePage({ params }: { params: NotePageParams }) {
 			<article className="container h-screen mx-auto px-2 py-6 overflow-auto">
 				{isVideoPlayerVisible ? (
 					<ResizablePanels
-						leftSideContent={<MarkdownViewer content={data.content} />}
+						leftSideContent={
+							<MarkdownViewer content={data.content} noteTitle={data.title} />
+						}
 						rightSideContent={<VideoPlayer videoId={data.youtubeId} />}
 					/>
 				) : (
-					<MarkdownViewer content={data.content} />
+					<MarkdownViewer content={data.content} noteTitle={data.title} />
 				)}
 			</article>
 

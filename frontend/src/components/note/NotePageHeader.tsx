@@ -7,15 +7,15 @@ import NavigationHeader from "../global/NavigationHeader";
 type NotePageHeaderProps = {
 	noteId: string;
 	noteTitle: string;
-	onToggleVideo: () => void;
 	isVideoVisible: boolean;
+	onToggleVideo: () => void;
 };
 
 function NotePageHeader({
 	noteId,
 	noteTitle,
-	onToggleVideo,
 	isVideoVisible,
+	onToggleVideo,
 }: NotePageHeaderProps) {
 	const breadcrumbs: BreadcrumbItemType[] = [
 		{ href: "/notes", label: "Notes" },

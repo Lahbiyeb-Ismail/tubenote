@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Printer } from "lucide-react";
 
 export type BreadcrumbItemType = {
 	href: string;
@@ -85,6 +86,7 @@ function NavigationHeader({
 								</Link>
 							</Button>
 						)}
+
 						{toggleOption && (
 							<div className="flex items-center space-x-2">
 								<Switch
