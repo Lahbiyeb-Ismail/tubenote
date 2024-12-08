@@ -1,5 +1,5 @@
 {
-	"name": "tubenote_v2",
+	"name": "tubenote",
 	"version": "2.0.0",
 	"description": "TubeNote is a web application that enhances the video-watching experience by enabling users to take intuitive and efficient notes while watching videos.",
 	"main": "index.js",
@@ -7,18 +7,11 @@
 	"author": "Lahbiyeb Ismail <ismaillhbibe@gmail.com>",
 	"license": "MIT",
 	"private": true,
-	"workspaces": ["frontend", "backend"],
 	"scripts": {
-		"lint": "eslint '**/*.{js,jsx,ts,tsx}'",
-		"format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,md}'",
-		"dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
-		"dev:frontend": "npm run dev --workspace=frontend",
-		"dev:backend": "npm run dev --workspace=backend",
-		"build": "npm run build --workspaces",
-		"start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
-		"start:frontend": "npm run start --workspace=frontend",
-		"start:backend": "npm run start --workspace=backend",
-		"prepare": "husky"
+		"dev": "pnpm run --parallel -r dev",
+		"build": "pnpm run --parallel -r build",
+		"lint": "pnpm run --parallel -r lint",
+		"format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
 	},
 	"lint-staged": {
 		"**/*.{js,jsx,ts,tsx,json,css,md}": ["prettier --write", "git add"]
@@ -32,10 +25,7 @@
 		"husky": "^9.0.11",
 		"lint-staged": "^15.2.7",
 		"prettier": "^3.3.2",
-		"pretty-quick": "^4.0.0"
-	},
-	"engines": {
-		"node": ">=14.0.0",
-		"npm": ">=6.14.0"
+		"pretty-quick": "^4.0.0",
+		"typescript": "^5.6.2"
 	}
 }
