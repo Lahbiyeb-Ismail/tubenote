@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@tubenote/shared':
+        specifier: link:packages/shared
+        version: link:packages/shared
     devDependencies:
       '@commitlint/cli':
         specifier: ^19.3.0
@@ -262,6 +266,12 @@ importers:
       ts-node-dev:
         specifier: ^2.0.0
         version: 2.0.0(@types/node@20.17.9)(typescript@5.7.2)
+
+  packages/shared:
+    dependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.7.2
 
 packages:
 
