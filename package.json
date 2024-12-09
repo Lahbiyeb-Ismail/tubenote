@@ -8,10 +8,13 @@
 	"license": "MIT",
 	"private": true,
 	"scripts": {
+		"dev:server": "pnpm run --filter server dev",
+		"dev:client": "pnpm run --filter client dev",
 		"dev": "pnpm run --parallel -r dev",
 		"build": "pnpm run --parallel -r build",
 		"lint": "pnpm run --parallel -r lint",
-		"format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
+		"format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+		"prepare": "husky install"
 	},
 	"lint-staged": {
 		"**/*.{js,jsx,ts,tsx,json,css,md}": ["prettier --write", "git add"]
@@ -27,5 +30,8 @@
 		"prettier": "^3.3.2",
 		"pretty-quick": "^4.0.0",
 		"typescript": "^5.6.2"
+	},
+	"dependencies": {
+		"@tubenote/shared": "link:packages/shared"
 	}
 }
