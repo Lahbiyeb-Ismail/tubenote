@@ -1,6 +1,6 @@
-import type { EmailContent } from 'src/types/email.type';
-import envConfig from '../config/envConfig';
-import compileTemplate from '../utils/compileTemplate';
+import type { EmailContent } from "src/types/email.type";
+import envConfig from "../config/envConfig";
+import compileTemplate from "../utils/compileTemplate";
 
 /**
  * Creates the content for a verification email.
@@ -12,7 +12,7 @@ export async function createVerificationEmail(
   token: string
 ): Promise<EmailContent> {
   const verificationLink = `${envConfig.server.url}/api/v1/verify-email/${token}`;
-  return compileTemplate('verification-email', { verificationLink });
+  return compileTemplate("verification-email", { verificationLink });
 }
 
 /**
@@ -25,5 +25,5 @@ export async function createVerificationEmail(
  */
 export async function createVerifiedEmail(): Promise<EmailContent> {
   const loginLink = `${envConfig.client.url}/login`;
-  return compileTemplate('email-verified', { loginLink });
+  return compileTemplate("email-verified", { loginLink });
 }

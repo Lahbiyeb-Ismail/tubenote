@@ -8,7 +8,7 @@ import { BaseError } from "./BaseError";
  * @extends {BaseError}
  */
 export class BadRequestError extends BaseError {
-	constructor(description: string) {
-		super("BAD_REQUEST", httpStatus.BAD_REQUEST, description, true);
-	}
+  constructor(description: string) {
+    super("BAD_REQUEST", httpStatus.BAD_REQUEST, description, true);
+  }
 }

@@ -1,16 +1,16 @@
 import type { Prisma, Video } from "@prisma/client";
 
+import { fetchYoutubeVideoDetails } from "../helpers/video.helper";
 import prismaClient from "../lib/prisma";
 import handleAsyncOperation from "../utils/handleAsyncOperation";
-import { fetchYoutubeVideoDetails } from "../helpers/video.helper";
 
 type UserId = {
-	userId: string;
+  userId: string;
 };
 
 type FetchUserVideos = UserId & {
-	limit: number;
-	skip: number;
+  limit: number;
+  skip: number;
 };
 
 /**
@@ -21,15 +21,15 @@ type FetchUserVideos = UserId & {
  * @throws Will throw an error if the operation fails.
  */
 export async function findVideo(
-	params: Prisma.VideoWhereInput,
+  params: Prisma.VideoWhereInput
 ): Promise<Video | null> {
-	return handleAsyncOperation(
-		() =>
-			prismaClient.video.findFirst({
-				where: { ...params },
-			}),
-		{ errorMessage: "Faild to find video" },
-	);
+  return handleAsyncOperation(
+    () =>
+      prismaClient.video.findFirst({
+        where: { ...params },
+      }),
+    { errorMessage: "Faild to find video" }
+  );
 }
 
 /**
@@ -45,40 +45,40 @@ export async function findVideo(
  * If the video data is not found, it throws an error.
  */
 export async function createVideoEntry(
-	videoId: string,
-	userId: string,
+  videoId: string,
+  userId: string
 ): Promise<Video> {
-	const videoData = await fetchYoutubeVideoDetails(videoId);
+  const videoData = await fetchYoutubeVideoDetails(videoId);
 
-	if (!videoData.length) {
-		throw new Error("No video data found");
-	}
+  if (!videoData.length) {
+    throw new Error("No video data found");
+  }
 
-	const { snippet, statistics, player } = videoData[0];
+  const { snippet, statistics, player } = videoData[0];
 
-	return handleAsyncOperation(
-		() =>
-			prismaClient.video.create({
-				data: {
-					userId,
-					youtubeId: videoId,
-					snippet: {
-						title: snippet.title,
-						categoryId: snippet.categoryId,
-						channelId: snippet.channelId,
-						channelTitle: snippet.channelTitle,
-						description: snippet.description,
-						liveBroadcastContent: snippet.liveBroadcastContent,
-						publishedAt: snippet.publishedAt,
-						tags: snippet.tags,
-						thumbnails: snippet.thumbnails,
-					},
-					statistics,
-					player,
-				},
-			}),
-		{ errorMessage: "Failed to create video entry" },
-	);
+  return handleAsyncOperation(
+    () =>
+      prismaClient.video.create({
+        data: {
+          userId,
+          youtubeId: videoId,
+          snippet: {
+            title: snippet.title,
+            categoryId: snippet.categoryId,
+            channelId: snippet.channelId,
+            channelTitle: snippet.channelTitle,
+            description: snippet.description,
+            liveBroadcastContent: snippet.liveBroadcastContent,
+            publishedAt: snippet.publishedAt,
+            tags: snippet.tags,
+            thumbnails: snippet.thumbnails,
+          },
+          statistics,
+          player,
+        },
+      }),
+    { errorMessage: "Failed to create video entry" }
+  );
 }
 
 /**
@@ -92,19 +92,19 @@ export async function createVideoEntry(
  * @throws Will throw an error if the operation fails.
  */
 export async function fetchUserVideos({
-	userId,
-	limit,
-	skip,
+  userId,
+  limit,
+  skip,
 }: FetchUserVideos): Promise<Video[]> {
-	return handleAsyncOperation(
-		() =>
-			prismaClient.video.findMany({
-				where: { userId },
-				take: limit,
-				skip,
-			}),
-		{ errorMessage: "Failed to find user videos" },
-	);
+  return handleAsyncOperation(
+    () =>
+      prismaClient.video.findMany({
+        where: { userId },
+        take: limit,
+        skip,
+      }),
+    { errorMessage: "Failed to find user videos" }
+  );
 }
 
 /**
@@ -115,13 +115,13 @@ export async function fetchUserVideos({
  * @throws Will throw an error if the operation fails.
  */
 export async function getUserVideosCount({ userId }: UserId): Promise<number> {
-	return handleAsyncOperation(
-		() =>
-			prismaClient.video.count({
-				where: {
-					userId,
-				},
-			}),
-		{ errorMessage: "Failed to count user videos." },
-	);
+  return handleAsyncOperation(
+    () =>
+      prismaClient.video.count({
+        where: {
+          userId,
+        },
+      }),
+    { errorMessage: "Failed to count user videos." }
+  );
 }

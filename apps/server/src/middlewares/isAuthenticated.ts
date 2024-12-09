@@ -2,8 +2,8 @@ import type { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 import jwt from "jsonwebtoken";
 
-import type { JwtPayload } from "../types";
 import { ACCESS_TOKEN_SECRET } from "../constants/auth";
+import type { JwtPayload } from "../types";
 import logger from "../utils/logger";
 
 const { verify } = jwt;
@@ -26,49 +26,49 @@ const { verify } = jwt;
  * @throws {Error} If the token is invalid or missing.
  */
 async function isAuthenticated(
-	req: Request,
-	res: Response,
-	next: NextFunction,
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) {
-	const authHeader = req.headers?.authorization;
+  const authHeader = req.headers?.authorization;
 
-	if (!authHeader || !authHeader?.startsWith("Bearer ")) {
-		logger.error("Authorization header is missing or invalid.");
+  if (!authHeader || !authHeader?.startsWith("Bearer ")) {
+    logger.error("Authorization header is missing or invalid.");
 
-		res.status(httpStatus.UNAUTHORIZED).json({
-			message: "You need to be authenticated to access this route.",
-		});
+    res.status(httpStatus.UNAUTHORIZED).json({
+      message: "You need to be authenticated to access this route.",
+    });
 
-		return;
-	}
+    return;
+  }
 
-	const token: string | undefined = authHeader.split("Bearer ")[1];
+  const token: string | undefined = authHeader.split("Bearer ")[1];
 
-	if (!token) {
-		logger.error("Token not found in Authorization header.");
+  if (!token) {
+    logger.error("Token not found in Authorization header.");
 
-		res.status(httpStatus.UNAUTHORIZED).json({
-			message: "You need to be authenticated to access this route.",
-		});
-		return;
-	}
+    res.status(httpStatus.UNAUTHORIZED).json({
+      message: "You need to be authenticated to access this route.",
+    });
+    return;
+  }
 
-	verify(token, ACCESS_TOKEN_SECRET, (err, payload) => {
-		if (err) {
-			logger.error(`Error verifying token: ${err.message}`);
+  verify(token, ACCESS_TOKEN_SECRET, (err, payload) => {
+    if (err) {
+      logger.error(`Error verifying token: ${err.message}`);
 
-			res.status(httpStatus.UNAUTHORIZED).json({
-				message: "Unauthorized access. Please try again.",
-			});
-			return;
-		}
+      res.status(httpStatus.UNAUTHORIZED).json({
+        message: "Unauthorized access. Please try again.",
+      });
+      return;
+    }
 
-		const userId = (payload as JwtPayload).userId;
+    const userId = (payload as JwtPayload).userId;
 
-		req.userId = userId;
+    req.userId = userId;
 
-		next();
-	});
+    next();
+  });
 }
 
 export default isAuthenticated;

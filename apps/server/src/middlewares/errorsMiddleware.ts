@@ -17,21 +17,21 @@ import logger from "../utils/logger";
  *
  */
 function errorHandler(
-	err: Error,
-	_req: Request,
-	res: Response,
-	next: NextFunction,
+  err: Error,
+  _req: Request,
+  res: Response,
+  next: NextFunction
 ) {
-	const status =
-		res.statusCode !== httpStatus.OK
-			? res.statusCode
-			: httpStatus.INTERNAL_SERVER_ERROR;
+  const status =
+    res.statusCode !== httpStatus.OK
+      ? res.statusCode
+      : httpStatus.INTERNAL_SERVER_ERROR;
 
-	logger.error(`${err.message}. Error stack: ${err.stack}`);
+  logger.error(`${err.message}. Error stack: ${err.stack}`);
 
-	res.status(status).json({ message: err.message });
+  res.status(status).json({ message: err.message });
 
-	next();
+  next();
 }
 
 /**
@@ -47,11 +47,11 @@ function errorHandler(
  * @param next - The next middleware function in the stack.
  */
 function notFoundRoute(req: Request, res: Response, next: NextFunction) {
-	const error = new Error(`404 - Route Not Found - ${req.originalUrl}`);
+  const error = new Error(`404 - Route Not Found - ${req.originalUrl}`);
 
-	res.status(404);
+  res.status(404);
 
-	next(error);
+  next(error);
 }
 
 export { errorHandler, notFoundRoute };

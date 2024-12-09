@@ -1,22 +1,22 @@
 import "express-async-errors";
 
+import cookieParser from "cookie-parser";
+import cors from "cors";
 import express, {
-	type Express,
-	type NextFunction,
-	type Request,
-	type Response,
+  type Express,
+  type NextFunction,
+  type Request,
+  type Response,
 } from "express";
 import helmet from "helmet";
-import cors from "cors";
-import cookieParser from "cookie-parser";
 import passport from "./lib/passportAuth";
 
 import authRoutes from "./routes/auth.route";
-import videoRoutes from "./routes/video.route";
 import noteRoutes from "./routes/note.route";
+import resetPasswordRoutes from "./routes/resetPassword.route";
 import userRoutes from "./routes/user.route";
 import verifyEmailRoutes from "./routes/verifyEmail.route";
-import resetPasswordRoutes from "./routes/resetPassword.route";
+import videoRoutes from "./routes/video.route";
 
 import { errorHandler, notFoundRoute } from "./middlewares/errorsMiddleware";
 import logger from "./utils/logger";
@@ -36,16 +36,16 @@ app.use(express.urlencoded({ extended: true }));
 
 // Configure CORS middleware
 app.use(
-	cors({
-		origin: ["http://localhost:3000"], // Specify the allowed origin(s) for requests
-		credentials: true, // Allow sending cookies along with the requests
-	}),
+  cors({
+    origin: ["http://localhost:3000"], // Specify the allowed origin(s) for requests
+    credentials: true, // Allow sending cookies along with the requests
+  })
 );
 
 // Middleware to log HTTP requests
 app.use((req: Request, _res: Response, next: NextFunction) => {
-	logger.http(`${req.method} ${req.url}`);
-	next();
+  logger.http(`${req.method} ${req.url}`);
+  next();
 });
 
 app.use("/api/v1/auth", authRoutes);

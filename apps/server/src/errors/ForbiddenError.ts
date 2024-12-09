@@ -8,7 +8,7 @@ import { BaseError } from "./BaseError";
  * @extends {BaseError}
  */
 export class ForbiddenError extends BaseError {
-	constructor(description: string) {
-		super("FORBIDDEN", httpStatus.FORBIDDEN, description, true);
-	}
+  constructor(description: string) {
+    super("FORBIDDEN", httpStatus.FORBIDDEN, description, true);
+  }
 }

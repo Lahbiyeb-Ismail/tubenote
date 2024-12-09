@@ -5,15 +5,15 @@ import type { EmptyRecord, PaginationQuery, TypedRequest } from "../types";
 import type { CreateVideoBody, VideoIdParam } from "../types/video.type";
 
 import {
-	createVideoEntry,
-	fetchUserVideos,
-	findVideo,
-	getUserVideosCount,
+  createVideoEntry,
+  fetchUserVideos,
+  findVideo,
+  getUserVideosCount,
 } from "../services/video.services";
 
 import {
-	fetchNotesByVideoId,
-	getVideoNotesCount,
+  fetchNotesByVideoId,
+  getVideoNotesCount,
 } from "../services/note.services";
 
 /**
@@ -32,22 +32,22 @@ import {
  */
 
 export async function handleCreateVideo(
-	req: TypedRequest<CreateVideoBody>,
-	res: Response,
+  req: TypedRequest<CreateVideoBody>,
+  res: Response
 ): Promise<void> {
-	const userId = req.userId;
-	const { videoId } = req.body;
+  const userId = req.userId;
+  const { videoId } = req.body;
 
-	const videoExists = await findVideo({ youtubeId: videoId, userId });
+  const videoExists = await findVideo({ youtubeId: videoId, userId });
 
-	if (videoExists) {
-		res.status(httpStatus.OK).json(videoExists);
-		return;
-	}
+  if (videoExists) {
+    res.status(httpStatus.OK).json(videoExists);
+    return;
+  }
 
-	const video = await createVideoEntry(videoId, userId);
+  const video = await createVideoEntry(videoId, userId);
 
-	res.status(httpStatus.OK).json(video);
+  res.status(httpStatus.OK).json(video);
 }
 
 /**
@@ -58,33 +58,33 @@ export async function handleCreateVideo(
  * @returns A JSON response containing the user's videos.
  */
 export async function getUserVideos(
-	req: TypedRequest<EmptyRecord, EmptyRecord, PaginationQuery>,
-	res: Response,
+  req: TypedRequest<EmptyRecord, EmptyRecord, PaginationQuery>,
+  res: Response
 ) {
-	const userId = req.userId;
+  const userId = req.userId;
 
-	const page = Number(req.query.page);
-	const limit = Number(req.query.limit);
+  const page = Number(req.query.page);
+  const limit = Number(req.query.limit);
 
-	const skip = (page - 1) * limit;
+  const skip = (page - 1) * limit;
 
-	const [videosCount, videos] = await Promise.all([
-		getUserVideosCount({ userId }),
-		fetchUserVideos({ userId, skip, limit }),
-	]);
+  const [videosCount, videos] = await Promise.all([
+    getUserVideosCount({ userId }),
+    fetchUserVideos({ userId, skip, limit }),
+  ]);
 
-	const totalPages = Math.ceil(videosCount / limit);
+  const totalPages = Math.ceil(videosCount / limit);
 
-	res.status(httpStatus.OK).json({
-		videos,
-		pagination: {
-			totalPages,
-			currentPage: page,
-			totalVideos: videosCount,
-			hasNextPage: page < totalPages,
-			hasPrevPage: page > 1,
-		},
-	});
+  res.status(httpStatus.OK).json({
+    videos,
+    pagination: {
+      totalPages,
+      currentPage: page,
+      totalVideos: videosCount,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+    },
+  });
 }
 
 /**
@@ -100,22 +100,22 @@ export async function getUserVideos(
  * @returns A JSON response with the video data or an error message if the video ID is not provided.
  */
 export async function handleGetVideoById(
-	req: TypedRequest<EmptyRecord, VideoIdParam>,
-	res: Response,
+  req: TypedRequest<EmptyRecord, VideoIdParam>,
+  res: Response
 ) {
-	const { videoId } = req.params;
-	const userId = req.userId;
+  const { videoId } = req.params;
+  const userId = req.userId;
 
-	const video = await findVideo({ youtubeId: videoId, userId });
+  const video = await findVideo({ youtubeId: videoId, userId });
 
-	if (video) {
-		res.status(httpStatus.OK).json(video);
-		return;
-	}
+  if (video) {
+    res.status(httpStatus.OK).json(video);
+    return;
+  }
 
-	const newVideo = await createVideoEntry(videoId, userId);
+  const newVideo = await createVideoEntry(videoId, userId);
 
-	res.status(httpStatus.OK).json(newVideo);
+  res.status(httpStatus.OK).json(newVideo);
 }
 
 /**
@@ -133,34 +133,34 @@ export async function handleGetVideoById(
  * @throws If the video ID is not provided, it returns a 400 Bad Request status with an error message.
  */
 export async function handleGetNotesByVideoId(
-	req: TypedRequest<EmptyRecord, VideoIdParam, PaginationQuery>,
-	res: Response,
+  req: TypedRequest<EmptyRecord, VideoIdParam, PaginationQuery>,
+  res: Response
 ) {
-	const userId = req.userId;
-	const { videoId } = req.params;
+  const userId = req.userId;
+  const { videoId } = req.params;
 
-	const page = Number(req.query.page);
-	const limit = Number(req.query.limit);
+  const page = Number(req.query.page);
+  const limit = Number(req.query.limit);
 
-	const skip = (page - 1) * limit;
+  const skip = (page - 1) * limit;
 
-	const [video, notesCount, notes] = await Promise.all([
-		findVideo({ youtubeId: videoId, userId }),
-		getVideoNotesCount({ userId, videoId }),
-		fetchNotesByVideoId({ userId, videoId, limit, skip }),
-	]);
+  const [video, notesCount, notes] = await Promise.all([
+    findVideo({ youtubeId: videoId, userId }),
+    getVideoNotesCount({ userId, videoId }),
+    fetchNotesByVideoId({ userId, videoId, limit, skip }),
+  ]);
 
-	const totalPages = Math.ceil(notesCount / limit);
+  const totalPages = Math.ceil(notesCount / limit);
 
-	res.status(httpStatus.OK).json({
-		video,
-		notes,
-		pagination: {
-			totalPages,
-			currentPage: page,
-			totalNotes: notesCount,
-			hasNextPage: page < totalPages,
-			hasPrevPage: page > 1,
-		},
-	});
+  res.status(httpStatus.OK).json({
+    video,
+    notes,
+    pagination: {
+      totalPages,
+      currentPage: page,
+      totalNotes: notesCount,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+    },
+  });
 }

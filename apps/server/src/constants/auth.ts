@@ -1,4 +1,4 @@
-import envConfig from '../config/envConfig';
+import envConfig from "../config/envConfig";
 
 /**
  * The name of the refresh token cookie.

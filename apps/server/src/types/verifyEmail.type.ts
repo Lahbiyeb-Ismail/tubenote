@@ -1,6 +1,6 @@
 import type {
-	sendVerifyEmailBodySchema,
-	verifyEmailParamSchema,
+  sendVerifyEmailBodySchema,
+  verifyEmailParamSchema,
 } from "../schemas/verifyEmail.schema";
 
 export type SendVerifyEmailBody = typeof sendVerifyEmailBodySchema;

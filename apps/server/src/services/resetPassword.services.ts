@@ -1,8 +1,8 @@
-import { randomUUID } from 'node:crypto';
-import type { ResetPasswordToken, Prisma } from '@prisma/client';
+import { randomUUID } from "node:crypto";
+import type { Prisma, ResetPasswordToken } from "@prisma/client";
 
-import prismaClient from '../lib/prisma';
-import handleAsyncOperation from '../utils/handleAsyncOperation';
+import prismaClient from "../lib/prisma";
+import handleAsyncOperation from "../utils/handleAsyncOperation";
 
 /**
  * Finds a reset password token that matches the given parameters and is not expired.
@@ -21,7 +21,7 @@ export async function findResetPasswordToken(
           expiresAt: { gt: new Date() },
         },
       }),
-    { errorMessage: 'Failed to find reset password token.' }
+    { errorMessage: "Failed to find reset password token." }
   );
 }
 
@@ -49,7 +49,7 @@ export async function createResetPasswordToken(
           expiresAt,
         },
       }),
-    { errorMessage: 'Failed to create reset password token.' }
+    { errorMessage: "Failed to create reset password token." }
   );
 
   return token;
@@ -69,6 +69,6 @@ export async function deleteResetPasswordToken(userId: string): Promise<void> {
           userId,
         },
       }),
-    { errorMessage: 'Failed to delete reset password tokens.' }
+    { errorMessage: "Failed to delete reset password tokens." }
   );
 }

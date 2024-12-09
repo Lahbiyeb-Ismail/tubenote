@@ -16,11 +16,11 @@ export type LoginCredentials = typeof loginSchema;
  * @property {string} picture - The URL of the user's profile picture.
  */
 export type GoogleUser = {
-	sub: string;
-	email: string;
-	email_verified: boolean;
-	name: string;
-	given_name: string;
-	family_name: string;
-	picture: string;
+  sub: string;
+  email: string;
+  email_verified: boolean;
+  name: string;
+  given_name: string;
+  family_name: string;
+  picture: string;
 };

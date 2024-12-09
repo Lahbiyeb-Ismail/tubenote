@@ -1,6 +1,6 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { TEMPLATES_DIR } from '../constants';
+import fs from "node:fs/promises";
+import path from "node:path";
+import { TEMPLATES_DIR } from "../constants";
 
 /**
  * Reads a template file from the specified directory and returns its content as a string.
@@ -12,7 +12,7 @@ import { TEMPLATES_DIR } from '../constants';
  */
 async function readTemplate(
   templateName: string,
-  format: 'html' | 'txt'
+  format: "html" | "txt"
 ): Promise<string> {
   const filePath = path.join(
     TEMPLATES_DIR,
@@ -20,7 +20,7 @@ async function readTemplate(
     `${templateName}-template.${format}`
   );
   try {
-    return await fs.readFile(filePath, 'utf-8');
+    return await fs.readFile(filePath, "utf-8");
   } catch (error) {
     console.error(`Error reading ${format} template:`, error);
     throw new Error(`Failed to read ${format} template for ${templateName}`);

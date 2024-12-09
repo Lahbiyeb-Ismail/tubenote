@@ -8,12 +8,12 @@ import { BaseError } from "./BaseError";
  * @extends {BaseError}
  */
 export class InternalServerError extends BaseError {
-	constructor(description: string) {
-		super(
-			"INTERNAL_SERVER_ERROR",
-			httpStatus.INTERNAL_SERVER_ERROR,
-			description,
-			false,
-		);
-	}
+  constructor(description: string) {
+    super(
+      "INTERNAL_SERVER_ERROR",
+      httpStatus.INTERNAL_SERVER_ERROR,
+      description,
+      false
+    );
+  }
 }

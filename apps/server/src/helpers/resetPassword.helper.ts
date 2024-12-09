@@ -1,6 +1,6 @@
-import envConfig from '../config/envConfig';
-import type { EmailContent } from '../types/email.type';
-import compileTemplate from '../utils/compileTemplate';
+import envConfig from "../config/envConfig";
+import type { EmailContent } from "../types/email.type";
+import compileTemplate from "../utils/compileTemplate";
 
 /**
  * Creates the content for a reset password email.
@@ -11,5 +11,5 @@ import compileTemplate from '../utils/compileTemplate';
 export function createResetPasswordEmail(token: string): Promise<EmailContent> {
   const resetLink = `${envConfig.client.url}/password-reset/${token}/`;
 
-  return compileTemplate('reset-password', { resetLink });
+  return compileTemplate("reset-password", { resetLink });
 }

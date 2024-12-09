@@ -1,8 +1,8 @@
-import Handlebars from 'handlebars';
+import Handlebars from "handlebars";
 
-import type { EmailContent } from '../types/email.type';
-import { LOGO_PATH } from '../constants';
-import readTemplate from './readTemplate';
+import { LOGO_PATH } from "../constants";
+import type { EmailContent } from "../types/email.type";
+import readTemplate from "./readTemplate";
 
 type TemplateData = {
   [key: string]: string;
@@ -22,8 +22,8 @@ async function compileTemplate(
 ): Promise<EmailContent> {
   try {
     const [htmlTemplate, textTemplate] = await Promise.all([
-      readTemplate(templateName, 'html'),
-      readTemplate(templateName, 'txt'),
+      readTemplate(templateName, "html"),
+      readTemplate(templateName, "txt"),
     ]);
 
     const compiledHtmlTemplate = Handlebars.compile(htmlTemplate);

@@ -1,7 +1,7 @@
-import type { NextFunction, Response } from 'express';
-import type { TypedRequest } from '../types';
-import httpStatus from 'http-status';
-import { findResetPasswordToken } from '../services/resetPassword.services';
+import type { NextFunction, Response } from "express";
+import httpStatus from "http-status";
+import { findResetPasswordToken } from "../services/resetPassword.services";
+import type { TypedRequest } from "../types";
 
 /**
  * Middleware to verify the password reset token.
@@ -25,7 +25,7 @@ export async function verifyPasswordResetToken(
   const { token } = req.params;
 
   if (!token) {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Token is required.' });
+    res.status(httpStatus.BAD_REQUEST).json({ message: "Token is required." });
     return;
   }
 
@@ -34,7 +34,7 @@ export async function verifyPasswordResetToken(
   if (!resetToken) {
     res
       .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'Invalid or expired token.' });
+      .json({ message: "Invalid or expired token." });
     return;
   }
 

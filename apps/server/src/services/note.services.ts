@@ -8,22 +8,22 @@ type NoteIdParam = { noteId: string };
 type VideoIdParam = { videoId: string };
 
 type OrderByParam = {
-	orderBy?:
-		| Prisma.NoteOrderByWithRelationInput
-		| Prisma.NoteOrderByWithRelationInput[];
+  orderBy?:
+    | Prisma.NoteOrderByWithRelationInput
+    | Prisma.NoteOrderByWithRelationInput[];
 };
 
 type Pagination = {
-	limit: number;
-	skip: number;
+  limit: number;
+  skip: number;
 };
 
 type FetchLatestUserNotesProps = UserIdParam & OrderByParam & { take: number };
 
 type EditNoteProps = UserIdParam &
-	NoteIdParam & {
-		data: Prisma.NoteUpdateInput;
-	};
+  NoteIdParam & {
+    data: Prisma.NoteUpdateInput;
+  };
 
 type FetchUserNotesProps = UserIdParam & OrderByParam & Pagination;
 
@@ -41,35 +41,35 @@ type FetchNotesByVideoIdProps = UserIdParam & VideoIdParam & Pagination;
  * @throws Will throw an error if the notes could not be fetched.
  */
 export async function fetchUserNotes({
-	userId,
-	limit,
-	skip,
-	orderBy = { createdAt: "desc" },
+  userId,
+  limit,
+  skip,
+  orderBy = { createdAt: "desc" },
 }: FetchUserNotesProps): Promise<Note[]> {
-	return handleAsyncOperation(
-		() =>
-			prismaClient.note.findMany({
-				where: {
-					userId,
-				},
-				take: limit,
-				skip,
-				orderBy,
-			}),
-		{ errorMessage: "Failed to fetch user notes." },
-	);
+  return handleAsyncOperation(
+    () =>
+      prismaClient.note.findMany({
+        where: {
+          userId,
+        },
+        take: limit,
+        skip,
+        orderBy,
+      }),
+    { errorMessage: "Failed to fetch user notes." }
+  );
 }
 
 export async function userNotesCount({ userId }: UserIdParam): Promise<number> {
-	return handleAsyncOperation(
-		() =>
-			prismaClient.note.count({
-				where: {
-					userId,
-				},
-			}),
-		{ errorMessage: "Failed to count user notes." },
-	);
+  return handleAsyncOperation(
+    () =>
+      prismaClient.note.count({
+        where: {
+          userId,
+        },
+      }),
+    { errorMessage: "Failed to count user notes." }
+  );
 }
 
 /**
@@ -79,17 +79,17 @@ export async function userNotesCount({ userId }: UserIdParam): Promise<number> {
  * @returns A promise that resolves to the created note.
  */
 export async function saveNote(
-	noteData: Prisma.NoteCreateInput,
+  noteData: Prisma.NoteCreateInput
 ): Promise<Note> {
-	return handleAsyncOperation(
-		() =>
-			prismaClient.note.create({
-				data: {
-					...noteData,
-				},
-			}),
-		{ errorMessage: "Failed to create note." },
-	);
+  return handleAsyncOperation(
+    () =>
+      prismaClient.note.create({
+        data: {
+          ...noteData,
+        },
+      }),
+    { errorMessage: "Failed to create note." }
+  );
 }
 
 /**
@@ -101,19 +101,19 @@ export async function saveNote(
  * @returns {Promise<Note>} A promise that resolves to the deleted note.
  */
 export async function deleteNoteById({
-	userId,
-	noteId,
+  userId,
+  noteId,
 }: UserIdParam & NoteIdParam): Promise<Note> {
-	return handleAsyncOperation(
-		() =>
-			prismaClient.note.delete({
-				where: {
-					id: noteId,
-					userId,
-				},
-			}),
-		{ errorMessage: "Failed to delete note." },
-	);
+  return handleAsyncOperation(
+    () =>
+      prismaClient.note.delete({
+        where: {
+          id: noteId,
+          userId,
+        },
+      }),
+    { errorMessage: "Failed to delete note." }
+  );
 }
 
 /**
@@ -125,19 +125,19 @@ export async function deleteNoteById({
  * @returns {Promise<Note | null>} A promise that resolves to the note if found, otherwise null.
  */
 export async function fetchNoteById({
-	noteId,
-	userId,
+  noteId,
+  userId,
 }: UserIdParam & NoteIdParam): Promise<Note | null> {
-	return handleAsyncOperation(
-		() =>
-			prismaClient.note.findFirst({
-				where: {
-					id: noteId,
-					userId,
-				},
-			}),
-		{ errorMessage: "Failed to find note." },
-	);
+  return handleAsyncOperation(
+    () =>
+      prismaClient.note.findFirst({
+        where: {
+          id: noteId,
+          userId,
+        },
+      }),
+    { errorMessage: "Failed to find note." }
+  );
 }
 
 /**
@@ -150,21 +150,21 @@ export async function fetchNoteById({
  * @returns {Promise<Note>} The updated note.
  */
 export async function editNote({
-	userId,
-	noteId,
-	data,
+  userId,
+  noteId,
+  data,
 }: EditNoteProps): Promise<Note> {
-	return handleAsyncOperation(
-		() =>
-			prismaClient.note.update({
-				where: {
-					id: noteId,
-					userId,
-				},
-				data,
-			}),
-		{ errorMessage: "Failed to update note." },
-	);
+  return handleAsyncOperation(
+    () =>
+      prismaClient.note.update({
+        where: {
+          id: noteId,
+          userId,
+        },
+        data,
+      }),
+    { errorMessage: "Failed to update note." }
+  );
 }
 
 /**
@@ -178,21 +178,21 @@ export async function editNote({
  * @returns {Promise<Note[]>} A promise that resolves to an array of notes.
  */
 export async function fetchLatestUserNotes({
-	userId,
-	take,
-	orderBy = { createdAt: "desc" },
+  userId,
+  take,
+  orderBy = { createdAt: "desc" },
 }: FetchLatestUserNotesProps): Promise<Note[]> {
-	return handleAsyncOperation(
-		() =>
-			prismaClient.note.findMany({
-				where: {
-					userId,
-				},
-				orderBy,
-				take,
-			}),
-		{ errorMessage: "Failed to find latest user notes." },
-	);
+  return handleAsyncOperation(
+    () =>
+      prismaClient.note.findMany({
+        where: {
+          userId,
+        },
+        orderBy,
+        take,
+      }),
+    { errorMessage: "Failed to find latest user notes." }
+  );
 }
 
 /**
@@ -208,26 +208,26 @@ export async function fetchLatestUserNotes({
  * @throws Will throw an error if the notes cannot be fetched.
  */
 export async function fetchNotesByVideoId({
-	userId,
-	videoId,
-	limit,
-	skip,
+  userId,
+  videoId,
+  limit,
+  skip,
 }: FetchNotesByVideoIdProps): Promise<Note[]> {
-	return handleAsyncOperation(
-		() =>
-			prismaClient.note.findMany({
-				where: {
-					userId,
-					youtubeId: videoId,
-				},
-				take: limit,
-				skip,
-				orderBy: {
-					createdAt: "asc",
-				},
-			}),
-		{ errorMessage: "Failed to fetch notes by video ID." },
-	);
+  return handleAsyncOperation(
+    () =>
+      prismaClient.note.findMany({
+        where: {
+          userId,
+          youtubeId: videoId,
+        },
+        take: limit,
+        skip,
+        orderBy: {
+          createdAt: "asc",
+        },
+      }),
+    { errorMessage: "Failed to fetch notes by video ID." }
+  );
 }
 
 /**
@@ -240,17 +240,17 @@ export async function fetchNotesByVideoId({
  * @throws {Error} - Throws an error if the operation fails.
  */
 export async function getVideoNotesCount({
-	userId,
-	videoId,
+  userId,
+  videoId,
 }: UserIdParam & VideoIdParam): Promise<number> {
-	return handleAsyncOperation(
-		() =>
-			prismaClient.note.count({
-				where: {
-					userId,
-					youtubeId: videoId,
-				},
-			}),
-		{ errorMessage: "Failed to count video notes." },
-	);
+  return handleAsyncOperation(
+    () =>
+      prismaClient.note.count({
+        where: {
+          userId,
+          youtubeId: videoId,
+        },
+      }),
+    { errorMessage: "Failed to count video notes." }
+  );
 }

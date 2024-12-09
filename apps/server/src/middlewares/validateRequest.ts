@@ -1,6 +1,6 @@
-import httpStatus from "http-status";
-import { type ZodSchema, ZodError } from "zod";
 import type { NextFunction, Response } from "express";
+import httpStatus from "http-status";
+import { ZodError, type ZodSchema } from "zod";
 
 import type { TypedRequest } from "../types";
 import logger from "../utils/logger";
@@ -17,13 +17,13 @@ import logger from "../utils/logger";
  * @property {Q} [query] - Optional schema for the request query.
  */
 type RequestSchema<
-	B extends ZodSchema,
-	P extends ZodSchema,
-	Q extends ZodSchema,
+  B extends ZodSchema,
+  P extends ZodSchema,
+  Q extends ZodSchema,
 > = {
-	body?: B;
-	params?: P;
-	query?: Q;
+  body?: B;
+  params?: P;
+  query?: Q;
 };
 
 /**
@@ -40,47 +40,47 @@ type RequestSchema<
  * @throws {Error} If an unexpected error occurs, responds with a 500 status and an error message.
  */
 function validateRequest<
-	B extends ZodSchema,
-	P extends ZodSchema,
-	Q extends ZodSchema,
+  B extends ZodSchema,
+  P extends ZodSchema,
+  Q extends ZodSchema,
 >(
-	schema: RequestSchema<B, P, Q>,
+  schema: RequestSchema<B, P, Q>
 ): (req: TypedRequest<B, P, Q>, res: Response, next: NextFunction) => void {
-	return (req: TypedRequest<B, P, Q>, res: Response, next: NextFunction) => {
-		try {
-			if (schema.body) {
-				req.body = schema.body.parse(req.body);
-			}
-			if (schema.params) {
-				req.params = schema.params.parse(req.params);
-			}
-			if (schema.query) {
-				req.query = schema.query.parse(req.query);
-			}
-			next();
-		} catch (error) {
-			if (error instanceof ZodError) {
-				const errors = error.errors.map((err) => ({
-					field: err.path.join(", "),
-					message: err.message,
-				}));
+  return (req: TypedRequest<B, P, Q>, res: Response, next: NextFunction) => {
+    try {
+      if (schema.body) {
+        req.body = schema.body.parse(req.body);
+      }
+      if (schema.params) {
+        req.params = schema.params.parse(req.params);
+      }
+      if (schema.query) {
+        req.query = schema.query.parse(req.query);
+      }
+      next();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const errors = error.errors.map((err) => ({
+          field: err.path.join(", "),
+          message: err.message,
+        }));
 
-				logger.error(
-					`Validation error in ${errors[0]?.field} field: ${errors[0]?.message}`,
-				);
+        logger.error(
+          `Validation error in ${errors[0]?.field} field: ${errors[0]?.message}`
+        );
 
-				res.status(httpStatus.BAD_REQUEST).json({
-					message: "Validation error",
-					errors,
-				});
-			} else {
-				logger.error("Unexpected error during request validation:", error);
-				res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
-					message: "An unexpected error occurred",
-				});
-			}
-		}
-	};
+        res.status(httpStatus.BAD_REQUEST).json({
+          message: "Validation error",
+          errors,
+        });
+      } else {
+        logger.error("Unexpected error during request validation:", error);
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+          message: "An unexpected error occurred",
+        });
+      }
+    }
+  };
 }
 
 export default validateRequest;

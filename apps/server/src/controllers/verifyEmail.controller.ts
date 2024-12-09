@@ -1,32 +1,32 @@
-import httpStatus from "http-status";
 import type { Response } from "express";
+import httpStatus from "http-status";
 
 import type { EmptyRecord, TypedRequest } from "../types";
 import type {
-	SendVerifyEmailBody,
-	VerifyEmailParam,
+  SendVerifyEmailBody,
+  VerifyEmailParam,
 } from "../types/verifyEmail.type";
 
 import { sendEmail } from "../utils/sendEmail";
 
-import {
-	createEmailVericationToken,
-	deleteEmailVericationToken,
-	findVerificationToken,
-	getEmailVericationToken,
-} from "../services/verifyEmail.services";
 import { findUser, verifyUserEmail } from "../services/user.services";
+import {
+  createEmailVericationToken,
+  deleteEmailVericationToken,
+  findVerificationToken,
+  getEmailVericationToken,
+} from "../services/verifyEmail.services";
 
 import {
-	createVerificationEmail,
-	createVerifiedEmail,
-} from "../helpers/verifyEmail.helper";
-import {
-	BadRequestError,
-	ConflictError,
-	ForbiddenError,
-	UnauthorizedError,
+  BadRequestError,
+  ConflictError,
+  ForbiddenError,
+  UnauthorizedError,
 } from "../errors";
+import {
+  createVerificationEmail,
+  createVerifiedEmail,
+} from "../helpers/verifyEmail.helper";
 
 /**
  * Handles the request to send a verification email.
@@ -48,51 +48,51 @@ import {
  * 10. Responds with an OK status indicating that the verification email has been sent.
  */
 export async function sendVerificationEmailHandler(
-	req: TypedRequest<SendVerifyEmailBody>,
-	res: Response,
+  req: TypedRequest<SendVerifyEmailBody>,
+  res: Response
 ): Promise<void> {
-	const { email } = req.body;
+  const { email } = req.body;
 
-	// Retrieves the user associated with the provided email.
-	const user = await findUser({ email });
+  // Retrieves the user associated with the provided email.
+  const user = await findUser({ email });
 
-	// If no user is found, responds with an UNAUTHORIZED status.
-	if (!user) {
-		throw new UnauthorizedError("No user found with the provided email.");
-	}
+  // If no user is found, responds with an UNAUTHORIZED status.
+  if (!user) {
+    throw new UnauthorizedError("No user found with the provided email.");
+  }
 
-	// If the user's email is already verified, responds with a CONFLICT status.
-	if (user.emailVerified) {
-		throw new ConflictError("Email is already verified.");
-	}
+  // If the user's email is already verified, responds with a CONFLICT status.
+  if (user.emailVerified) {
+    throw new ConflictError("Email is already verified.");
+  }
 
-	// Checks if a verification token already exists for the user.
-	const existingVerificationToken = await getEmailVericationToken(user.id);
+  // Checks if a verification token already exists for the user.
+  const existingVerificationToken = await getEmailVericationToken(user.id);
 
-	// If a token exists, responds with a BAD_REQUEST status indicating that a verification email has already been sent.
-	if (existingVerificationToken) {
-		throw new BadRequestError(
-			"A verification email has already been sent. Please check your email.",
-		);
-	}
+  // If a token exists, responds with a BAD_REQUEST status indicating that a verification email has already been sent.
+  if (existingVerificationToken) {
+    throw new BadRequestError(
+      "A verification email has already been sent. Please check your email."
+    );
+  }
 
-	// Creates a new email verification token for the user.
-	const token = await createEmailVericationToken(user.id);
+  // Creates a new email verification token for the user.
+  const token = await createEmailVericationToken(user.id);
 
-	const { htmlContent, textContent, logoPath } =
-		await createVerificationEmail(token);
+  const { htmlContent, textContent, logoPath } =
+    await createVerificationEmail(token);
 
-	// Sends the verification email to the provided email address.
-	await sendEmail({
-		emailRecipient: email,
-		emailSubject: "Verification Email",
-		htmlContent,
-		textContent,
-		logoPath,
-	});
+  // Sends the verification email to the provided email address.
+  await sendEmail({
+    emailRecipient: email,
+    emailSubject: "Verification Email",
+    htmlContent,
+    textContent,
+    logoPath,
+  });
 
-	// Responds with an OK status indicating that the verification email has been sent.
-	res.status(httpStatus.OK).json({ message: "Verification email sent." });
+  // Responds with an OK status indicating that the verification email has been sent.
+  res.status(httpStatus.OK).json({ message: "Verification email sent." });
 }
 
 /**
@@ -112,24 +112,24 @@ export async function sendVerificationEmailHandler(
  * 7. Responds with a 200 OK status indicating that the email was verified successfully.
  */
 export async function verifyEmailHandler(
-	req: TypedRequest<EmptyRecord, VerifyEmailParam>,
-	res: Response,
+  req: TypedRequest<EmptyRecord, VerifyEmailParam>,
+  res: Response
 ): Promise<void> {
-	const { token } = req.params;
+  const { token } = req.params;
 
-	const verificationToken = await findVerificationToken(token);
+  const verificationToken = await findVerificationToken(token);
 
-	if (!verificationToken || verificationToken.expiresAt < new Date()) {
-		throw new ForbiddenError("Invalid or expired token.");
-	}
+  if (!verificationToken || verificationToken.expiresAt < new Date()) {
+    throw new ForbiddenError("Invalid or expired token.");
+  }
 
-	// Updates the user's emailVerified status to true.
-	await verifyUserEmail(verificationToken.userId);
+  // Updates the user's emailVerified status to true.
+  await verifyUserEmail(verificationToken.userId);
 
-	await deleteEmailVericationToken(verificationToken.userId);
+  await deleteEmailVericationToken(verificationToken.userId);
 
-	const { htmlContent } = await createVerifiedEmail();
+  const { htmlContent } = await createVerifiedEmail();
 
-	// Send HTML response with success message and client-side redirect
-	res.status(httpStatus.OK).send(htmlContent);
+  // Send HTML response with success message and client-side redirect
+  res.status(httpStatus.OK).send(htmlContent);
 }

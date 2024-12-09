@@ -14,60 +14,60 @@ import VideoPlayer from "@/components/video/VideoPlayer";
 import useToggleVideoPlayer from "@/hooks/global/useToggleVideoPlayer";
 
 type NotePageParams = {
-	noteId: string;
+  noteId: string;
 };
 
 function NotePage({ params }: { params: NotePageParams }) {
-	const { noteId } = params;
-	const { data, isLoading, isError, refetch } = useGetNoteById(noteId);
-	const { isVideoPlayerVisible, toggleVideoPlayer } = useToggleVideoPlayer();
+  const { noteId } = params;
+  const { data, isLoading, isError, refetch } = useGetNoteById(noteId);
+  const { isVideoPlayerVisible, toggleVideoPlayer } = useToggleVideoPlayer();
 
-	if (isLoading) {
-		return (
-			<div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
-				<Loader />
-			</div>
-		);
-	}
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
+        <Loader />
+      </div>
+    );
+  }
 
-	if (isError) {
-		return (
-			<div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
-				<NoteError onRetry={() => refetch()} />
-			</div>
-		);
-	}
+  if (isError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
+        <NoteError onRetry={() => refetch()} />
+      </div>
+    );
+  }
 
-	if (!data) return null;
+  if (!data) return null;
 
-	return (
-		<main className="min-h-screen bg-white">
-			{/* Header */}
-			<NotePageHeader
-				noteId={data.id}
-				noteTitle={data.title}
-				isVideoVisible={isVideoPlayerVisible}
-				onToggleVideo={toggleVideoPlayer}
-			/>
+  return (
+    <main className="min-h-screen bg-white">
+      {/* Header */}
+      <NotePageHeader
+        noteId={data.id}
+        noteTitle={data.title}
+        isVideoVisible={isVideoPlayerVisible}
+        onToggleVideo={toggleVideoPlayer}
+      />
 
-			{/* Content */}
-			<article className="container h-screen mx-auto px-2 py-6 overflow-auto">
-				{isVideoPlayerVisible ? (
-					<ResizablePanels
-						leftSideContent={
-							<MarkdownViewer content={data.content} noteTitle={data.title} />
-						}
-						rightSideContent={<VideoPlayer videoId={data.youtubeId} />}
-					/>
-				) : (
-					<MarkdownViewer content={data.content} noteTitle={data.title} />
-				)}
-			</article>
+      {/* Content */}
+      <article className="container h-screen mx-auto px-2 py-6 overflow-auto">
+        {isVideoPlayerVisible ? (
+          <ResizablePanels
+            leftSideContent={
+              <MarkdownViewer content={data.content} noteTitle={data.title} />
+            }
+            rightSideContent={<VideoPlayer videoId={data.youtubeId} />}
+          />
+        ) : (
+          <MarkdownViewer content={data.content} noteTitle={data.title} />
+        )}
+      </article>
 
-			{/* Footer */}
-			<NotePageFooter />
-		</main>
-	);
+      {/* Footer */}
+      <NotePageFooter />
+    </main>
+  );
 }
 
 export default NotePage;

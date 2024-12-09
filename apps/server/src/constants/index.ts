@@ -1,6 +1,6 @@
-import path from 'node:path';
+import path from "node:path";
 
-import envConfig from '../config/envConfig';
+import envConfig from "../config/envConfig";
 
 /**
  * The directory path where the template files are stored.
@@ -8,7 +8,7 @@ import envConfig from '../config/envConfig';
  *
  * @constant {string} TEMPLATES_DIR - The path to the templates directory.
  */
-export const TEMPLATES_DIR = path.join(__dirname, '../templates');
+export const TEMPLATES_DIR = path.join(__dirname, "../templates");
 
 /**
  * The path to the Tubenote logo image.
@@ -20,7 +20,7 @@ export const TEMPLATES_DIR = path.join(__dirname, '../templates');
  */
 export const LOGO_PATH = path.join(
   process.cwd(),
-  'public/images/tubenote-logo.png'
+  "public/images/tubenote-logo.png"
 );
 
 /**

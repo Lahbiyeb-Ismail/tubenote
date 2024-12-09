@@ -1,4 +1,4 @@
-import { YOUTUBE_API_KEY, YOUTUBE_API_URL } from '../constants';
+import { YOUTUBE_API_KEY, YOUTUBE_API_URL } from "../constants";
 
 /**
  * Fetches data for a YouTube video using the YouTube Data API.
@@ -20,7 +20,7 @@ export async function fetchYoutubeVideoDetails(videoId: string) {
     const data = await response.json();
     return data.items;
   } catch (error) {
-    console.error('Error fetching video data:', error);
-    throw new Error('Error fetching video data');
+    console.error("Error fetching video data:", error);
+    throw new Error("Error fetching video data");
   }
 }

@@ -1,6 +1,6 @@
 import type {
-	updateUserBodySchema,
-	updatePasswordBodySchema,
+  updatePasswordBodySchema,
+  updateUserBodySchema,
 } from "../schemas/user.schema";
 
 export type UpdateUserBody = typeof updateUserBodySchema;

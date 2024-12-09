@@ -7,40 +7,40 @@ import { REFRESH_TOKEN_NAME, REFRESH_TOKEN_SECRET } from "../constants/auth";
 
 import type { JwtPayload, TypedRequest } from "../types";
 import type {
-	GoogleUser,
-	LoginCredentials,
-	RegisterCredentials,
+  GoogleUser,
+  LoginCredentials,
+  RegisterCredentials,
 } from "../types/auth.type";
 
 import {
-	clearRefreshTokenCookieConfig,
-	refreshTokenCookieConfig,
+  clearRefreshTokenCookieConfig,
+  refreshTokenCookieConfig,
 } from "../config/cookie.config";
 import envConfig from "../config/envConfig";
 
 import { sendEmail } from "../utils/sendEmail";
 
 import {
-	checkPassword,
-	createNewTokens,
-	verifyToken,
+  checkPassword,
+  createNewTokens,
+  verifyToken,
 } from "../helpers/auth.helper";
 import { createVerificationEmail } from "../helpers/verifyEmail.helper";
 
-import { createEmailVericationToken } from "../services/verifyEmail.services";
-import { findUser, updateUser } from "../services/user.services";
+import {
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+} from "../errors";
 import { createNewUser } from "../services/auth.services";
 import {
-	deleteRefreshToken,
-	deleteRefreshTokenByUserId,
-	findRefreshToken,
+  deleteRefreshToken,
+  deleteRefreshTokenByUserId,
+  findRefreshToken,
 } from "../services/refreshToken.services";
-import {
-	ConflictError,
-	ForbiddenError,
-	NotFoundError,
-	UnauthorizedError,
-} from "../errors";
+import { findUser, updateUser } from "../services/user.services";
+import { createEmailVericationToken } from "../services/verifyEmail.services";
 
 /**
  * Handles user registration.
@@ -59,44 +59,44 @@ import {
  * @throws Will send a 500 status code if there is an internal server error.
  */
 export async function handleRegister(
-	req: TypedRequest<RegisterCredentials>,
-	res: Response,
+  req: TypedRequest<RegisterCredentials>,
+  res: Response
 ): Promise<void> {
-	const { username, email, password } = req.body;
+  const { username, email, password } = req.body;
 
-	const user = await findUser({ email });
+  const user = await findUser({ email });
 
-	if (user) {
-		throw new ConflictError(
-			"Email address already in use. Please select another one.",
-		);
-	}
+  if (user) {
+    throw new ConflictError(
+      "Email address already in use. Please select another one."
+    );
+  }
 
-	const newUser = await createNewUser({
-		username,
-		email,
-		password,
-		emailVerified: false,
-	});
+  const newUser = await createNewUser({
+    username,
+    email,
+    password,
+    emailVerified: false,
+  });
 
-	// Creates a new email verification token for the user.
-	const token = await createEmailVericationToken(newUser.id);
+  // Creates a new email verification token for the user.
+  const token = await createEmailVericationToken(newUser.id);
 
-	const { htmlContent, textContent, logoPath } =
-		await createVerificationEmail(token);
+  const { htmlContent, textContent, logoPath } =
+    await createVerificationEmail(token);
 
-	await sendEmail({
-		emailRecipient: newUser.email,
-		emailSubject: "Email Verification",
-		htmlContent,
-		textContent,
-		logoPath,
-	});
+  await sendEmail({
+    emailRecipient: newUser.email,
+    emailSubject: "Email Verification",
+    htmlContent,
+    textContent,
+    logoPath,
+  });
 
-	res.status(httpStatus.CREATED).json({
-		message: "A verification email has been sent to your email.",
-		email: newUser.email,
-	});
+  res.status(httpStatus.CREATED).json({
+    message: "A verification email has been sent to your email.",
+    email: newUser.email,
+  });
 }
 
 /**
@@ -118,37 +118,37 @@ export async function handleRegister(
  * @throws Will respond with a 500 status and an "Internal Server Error" message if an error occurs during the process.
  */
 export async function handleLogin(
-	req: TypedRequest<LoginCredentials>,
-	res: Response,
+  req: TypedRequest<LoginCredentials>,
+  res: Response
 ): Promise<void> {
-	const { email, password } = req.body;
+  const { email, password } = req.body;
 
-	const user = await findUser({ email });
+  const user = await findUser({ email });
 
-	if (!user) {
-		throw new NotFoundError("No User found with this email address.");
-	}
+  if (!user) {
+    throw new NotFoundError("No User found with this email address.");
+  }
 
-	if (!user.emailVerified) {
-		throw new UnauthorizedError(
-			"Email not verified. Please verify your email address.",
-		);
-	}
+  if (!user.emailVerified) {
+    throw new UnauthorizedError(
+      "Email not verified. Please verify your email address."
+    );
+  }
 
-	const isPasswordCorrect = await checkPassword(password, user.password);
+  const isPasswordCorrect = await checkPassword(password, user.password);
 
-	if (!isPasswordCorrect) {
-		throw new UnauthorizedError("Invalid password. Please try again.");
-	}
+  if (!isPasswordCorrect) {
+    throw new UnauthorizedError("Invalid password. Please try again.");
+  }
 
-	const { accessToken, refreshToken } = await createNewTokens(user.id);
+  const { accessToken, refreshToken } = await createNewTokens(user.id);
 
-	res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+  res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
-	res.status(httpStatus.OK).json({
-		message: "Login successful",
-		accessToken,
-	});
+  res.status(httpStatus.OK).json({
+    message: "Login successful",
+    accessToken,
+  });
 }
 
 /**
@@ -163,49 +163,49 @@ export async function handleLogin(
  * @returns {Promise<void>} - A promise that resolves when the login process is complete.
  */
 export async function handleGoogleLogin(
-	req: TypedRequest,
-	res: Response,
+  req: TypedRequest,
+  res: Response
 ): Promise<void> {
-	const user = req.user as Profile;
+  const user = req.user as Profile;
 
-	if (!user) {
-		throw new UnauthorizedError("Google login failed. Please try again.");
-	}
+  if (!user) {
+    throw new UnauthorizedError("Google login failed. Please try again.");
+  }
 
-	const {
-		sub: googleId,
-		email,
-		email_verified,
-		name,
-		picture,
-	} = user._json as GoogleUser;
+  const {
+    sub: googleId,
+    email,
+    email_verified,
+    name,
+    picture,
+  } = user._json as GoogleUser;
 
-	if (!email_verified) {
-		throw new UnauthorizedError("Email not verified. Please try again.");
-	}
+  if (!email_verified) {
+    throw new UnauthorizedError("Email not verified. Please try again.");
+  }
 
-	let foundUser = await findUser({ email });
+  let foundUser = await findUser({ email });
 
-	if (!foundUser) {
-		foundUser = await createNewUser({
-			username: name,
-			emailVerified: email_verified,
-			password: googleId,
-			profilePicture: picture,
-			email,
-			googleId,
-		});
-	} else if (!foundUser.googleId) {
-		foundUser = await updateUser({ userId: foundUser.id, data: { googleId } });
-	}
+  if (!foundUser) {
+    foundUser = await createNewUser({
+      username: name,
+      emailVerified: email_verified,
+      password: googleId,
+      profilePicture: picture,
+      email,
+      googleId,
+    });
+  } else if (!foundUser.googleId) {
+    foundUser = await updateUser({ userId: foundUser.id, data: { googleId } });
+  }
 
-	const { accessToken, refreshToken } = await createNewTokens(foundUser.id);
+  const { accessToken, refreshToken } = await createNewTokens(foundUser.id);
 
-	res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+  res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
-	res.redirect(
-		`${envConfig.client.url}/auth/callback?access_token=${encodeURIComponent(JSON.stringify(accessToken))}`,
-	);
+  res.redirect(
+    `${envConfig.client.url}/auth/callback?access_token=${encodeURIComponent(JSON.stringify(accessToken))}`
+  );
 }
 
 /**
@@ -229,30 +229,30 @@ export async function handleGoogleLogin(
  * status with an error message.
  */
 export async function handleLogout(req: Request, res: Response): Promise<void> {
-	const cookies = req.cookies;
+  const cookies = req.cookies;
 
-	const refreshTokenFromCookies = cookies[REFRESH_TOKEN_NAME];
+  const refreshTokenFromCookies = cookies[REFRESH_TOKEN_NAME];
 
-	if (!refreshTokenFromCookies) {
-		res.sendStatus(httpStatus.NO_CONTENT);
-		return;
-	}
+  if (!refreshTokenFromCookies) {
+    res.sendStatus(httpStatus.NO_CONTENT);
+    return;
+  }
 
-	// Is refreshToken in db?
-	const refreshTokenFromDB = await findRefreshToken(refreshTokenFromCookies);
+  // Is refreshToken in db?
+  const refreshTokenFromDB = await findRefreshToken(refreshTokenFromCookies);
 
-	if (!refreshTokenFromDB) {
-		res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
-		res.sendStatus(httpStatus.NO_CONTENT);
-		return;
-	}
+  if (!refreshTokenFromDB) {
+    res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
+    res.sendStatus(httpStatus.NO_CONTENT);
+    return;
+  }
 
-	// Delete refreshToken in db
-	await deleteRefreshToken(refreshTokenFromCookies);
+  // Delete refreshToken in db
+  await deleteRefreshToken(refreshTokenFromCookies);
 
-	res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
+  res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
-	res.sendStatus(httpStatus.NO_CONTENT);
+  res.sendStatus(httpStatus.NO_CONTENT);
 }
 
 /**
@@ -273,53 +273,53 @@ export async function handleLogout(req: Request, res: Response): Promise<void> {
  * @returns A promise that resolves to void.
  */
 export async function handleRefreshToken(
-	req: Request,
-	res: Response,
+  req: Request,
+  res: Response
 ): Promise<void> {
-	const cookies = req.cookies;
+  const cookies = req.cookies;
 
-	const refreshTokenFromCookies: string | undefined =
-		cookies[REFRESH_TOKEN_NAME];
+  const refreshTokenFromCookies: string | undefined =
+    cookies[REFRESH_TOKEN_NAME];
 
-	if (!refreshTokenFromCookies) {
-		throw new UnauthorizedError("Unauthorized access. Please try again.");
-	}
+  if (!refreshTokenFromCookies) {
+    throw new UnauthorizedError("Unauthorized access. Please try again.");
+  }
 
-	res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
+  res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
-	const payload = await verifyToken(
-		refreshTokenFromCookies,
-		REFRESH_TOKEN_SECRET,
-	);
+  const payload = await verifyToken(
+    refreshTokenFromCookies,
+    REFRESH_TOKEN_SECRET
+  );
 
-	const { userId, exp } = payload as JwtPayload;
+  const { userId, exp } = payload as JwtPayload;
 
-	// Check if the token is expired
-	if (exp && Date.now() >= exp * 1000) {
-		await deleteRefreshTokenByUserId(userId);
+  // Check if the token is expired
+  if (exp && Date.now() >= exp * 1000) {
+    await deleteRefreshTokenByUserId(userId);
 
-		throw new UnauthorizedError("Refresh token expired. Please log in again.");
-	}
+    throw new UnauthorizedError("Refresh token expired. Please log in again.");
+  }
 
-	const refreshTokenFromDB = await findRefreshToken(refreshTokenFromCookies);
+  const refreshTokenFromDB = await findRefreshToken(refreshTokenFromCookies);
 
-	// Detected refresh token reuse!
-	if (!refreshTokenFromDB) {
-		await deleteRefreshTokenByUserId(userId);
+  // Detected refresh token reuse!
+  if (!refreshTokenFromDB) {
+    await deleteRefreshTokenByUserId(userId);
 
-		throw new ForbiddenError("Invalid refresh token. Please log in again.");
-	}
+    throw new ForbiddenError("Invalid refresh token. Please log in again.");
+  }
 
-	await deleteRefreshToken(refreshTokenFromCookies);
+  await deleteRefreshToken(refreshTokenFromCookies);
 
-	if (refreshTokenFromDB.userId !== userId) {
-		res.sendStatus(httpStatus.FORBIDDEN);
-		return;
-	}
+  if (refreshTokenFromDB.userId !== userId) {
+    res.sendStatus(httpStatus.FORBIDDEN);
+    return;
+  }
 
-	const { accessToken, refreshToken } = await createNewTokens(userId);
+  const { accessToken, refreshToken } = await createNewTokens(userId);
 
-	res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+  res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
-	res.json({ accessToken });
+  res.json({ accessToken });
 }

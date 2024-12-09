@@ -1,7 +1,7 @@
-import type { Prisma, User } from '@prisma/client';
+import type { Prisma, User } from "@prisma/client";
 
-import prismaClient from '../lib/prisma';
-import handleAsyncOperation from '../utils/handleAsyncOperation';
+import prismaClient from "../lib/prisma";
+import handleAsyncOperation from "../utils/handleAsyncOperation";
 
 /**
  * Finds a user based on the provided parameters.
@@ -19,7 +19,7 @@ export async function findUser(
           ...params,
         },
       }),
-    { errorMessage: 'Failed to find user.' }
+    { errorMessage: "Failed to find user." }
   );
 
   return user;
@@ -38,7 +38,7 @@ export async function verifyUserEmail(userId: string): Promise<void> {
         where: { id: userId },
         data: { emailVerified: true },
       }),
-    { errorMessage: 'Failed to verify user email.' }
+    { errorMessage: "Failed to verify user email." }
   );
 }
 
@@ -65,6 +65,6 @@ export async function updateUser({
         where: { id: userId },
         data,
       }),
-    { errorMessage: 'Failed to update user.' }
+    { errorMessage: "Failed to update user." }
   );
 }

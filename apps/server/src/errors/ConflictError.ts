@@ -7,7 +7,7 @@ import { BaseError } from "./BaseError";
  * @extends {BaseError}
  */
 export class ConflictError extends BaseError {
-	constructor(description: string) {
-		super("CONFLICT", httpStatus.CONFLICT, description, true);
-	}
+  constructor(description: string) {
+    super("CONFLICT", httpStatus.CONFLICT, description, true);
+  }
 }

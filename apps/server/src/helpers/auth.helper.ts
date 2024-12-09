@@ -1,16 +1,16 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-import generateAuthToken from './generateAuthToken';
+import generateAuthToken from "./generateAuthToken";
 
-import { createRefreshToken } from '../services/refreshToken.services';
+import type { JwtPayload } from "src/types";
 import {
   ACCESS_TOKEN_EXPIRE,
   ACCESS_TOKEN_SECRET,
   REFRESH_TOKEN_EXPIRE,
   REFRESH_TOKEN_SECRET,
-} from '../constants/auth';
-import type { JwtPayload } from 'src/types';
+} from "../constants/auth";
+import { createRefreshToken } from "../services/refreshToken.services";
 
 /**
  * Hashes a given password using bcrypt.

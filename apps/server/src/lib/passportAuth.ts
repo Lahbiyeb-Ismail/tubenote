@@ -1,10 +1,10 @@
-import envConfig from '../config/envConfig';
+import envConfig from "../config/envConfig";
 
-import passport from 'passport';
+import passport from "passport";
 import {
   Strategy as GoogleStrategy,
   type Profile,
-} from 'passport-google-oauth20';
+} from "passport-google-oauth20";
 
 //initialize
 passport.use(
@@ -13,7 +13,7 @@ passport.use(
       clientID: envConfig.google.client_id, // google client id
       clientSecret: envConfig.google.client_secret, // google client secret
       // the callback url added while creating the Google auth app on the console
-      callbackURL: '/api/v1/auth/google/callback',
+      callbackURL: "/api/v1/auth/google/callback",
       passReqToCallback: true,
     },
 

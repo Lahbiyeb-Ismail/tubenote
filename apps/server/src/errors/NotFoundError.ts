@@ -8,7 +8,7 @@ import { BaseError } from "./BaseError";
  * @extends {BaseError}
  */
 export class NotFoundError extends BaseError {
-	constructor(description: string) {
-		super("NOT_FOUND", httpStatus.NOT_FOUND, description, true);
-	}
+  constructor(description: string) {
+    super("NOT_FOUND", httpStatus.NOT_FOUND, description, true);
+  }
 }

@@ -1,7 +1,7 @@
 import type {
-	noteBodySchema,
-	noteIdParamSchema,
-	updateNoteBodySchema,
+  noteBodySchema,
+  noteIdParamSchema,
+  updateNoteBodySchema,
 } from "../schemas/note.schema";
 
 export type NoteBody = typeof noteBodySchema;

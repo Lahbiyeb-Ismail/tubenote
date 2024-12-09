@@ -1,9 +1,9 @@
 import axiosInstance from "@/lib/axios.lib";
 
 import extractVideoId from "@/helpers/extractVideoId";
-import type { Video } from "@/types/video.types";
 import type { Pagination } from "@/types";
 import type { Note } from "@/types/note.types";
+import type { Video } from "@/types/video.types";
 import { setStorageValue } from "@/utils/localStorage";
 
 type VideoIdParam = { videoId: string };
@@ -21,11 +21,11 @@ type GetVideoNotesProps = VideoIdParam & PageParam & LimitParam;
  * video data or null if the video ID could not be extracted.
  */
 export async function saveVideoData(videoUrl: string): Promise<Video> {
-	const videoId = extractVideoId(videoUrl);
+  const videoId = extractVideoId(videoUrl);
 
-	const response = await axiosInstance.post("/videos", { videoId });
+  const response = await axiosInstance.post("/videos", { videoId });
 
-	return response.data;
+  return response.data;
 }
 
 /**
@@ -34,20 +34,20 @@ export async function saveVideoData(videoUrl: string): Promise<Video> {
  * @returns {Promise<Video[]>} A promise that resolves to an array of Video objects.
  */
 export async function getUserVideos({
-	page,
-	limit,
+  page,
+  limit,
 }: { page: number; limit: number }): Promise<{
-	videos: Video[];
-	pagination: Pagination;
+  videos: Video[];
+  pagination: Pagination;
 }> {
-	const response = await axiosInstance.get<{
-		videos: Video[];
-		pagination: Pagination;
-	}>(`/videos?page=${page}&limit=${limit}`);
+  const response = await axiosInstance.get<{
+    videos: Video[];
+    pagination: Pagination;
+  }>(`/videos?page=${page}&limit=${limit}`);
 
-	const { videos, pagination } = response.data;
+  const { videos, pagination } = response.data;
 
-	return { videos, pagination };
+  return { videos, pagination };
 }
 
 /**
@@ -57,11 +57,11 @@ export async function getUserVideos({
  * @returns {Promise<Video>} A promise that resolves to the video data.
  */
 export async function getVideoById(videoId: string): Promise<Video> {
-	const response = await axiosInstance.get(`/videos/${videoId}`);
+  const response = await axiosInstance.get(`/videos/${videoId}`);
 
-	setStorageValue("video", response.data.video);
+  setStorageValue("video", response.data.video);
 
-	return response.data;
+  return response.data;
 }
 
 /**
@@ -77,21 +77,21 @@ export async function getVideoById(videoId: string): Promise<Video> {
  * @returns {Promise<Pagination>} pagination - The pagination information.
  */
 export async function getVideoNotes({
-	videoId,
-	page,
-	limit,
+  videoId,
+  page,
+  limit,
 }: GetVideoNotesProps): Promise<{
-	video: Video;
-	notes: Note[];
-	pagination: Pagination;
+  video: Video;
+  notes: Note[];
+  pagination: Pagination;
 }> {
-	const response = await axiosInstance.get<{
-		video: Video;
-		notes: Note[];
-		pagination: Pagination;
-	}>(`/videos/${videoId}/notes?page=${page}&limit=${limit}`);
+  const response = await axiosInstance.get<{
+    video: Video;
+    notes: Note[];
+    pagination: Pagination;
+  }>(`/videos/${videoId}/notes?page=${page}&limit=${limit}`);
 
-	setStorageValue("video", response.data.video);
+  setStorageValue("video", response.data.video);
 
-	return response.data;
+  return response.data;
 }

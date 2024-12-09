@@ -12,9 +12,9 @@ import logger from "./utils/logger";
  * @param {Error} err - The uncaught exception error.
  */
 process.on("uncaughtException", (err) => {
-	console.log("UNCAUGHT EXCEPTION! 💥 Shutting down...");
-	console.log(err.name, err.message);
-	process.exit(1);
+  console.log("UNCAUGHT EXCEPTION! 💥 Shutting down...");
+  console.log(err.name, err.message);
+  process.exit(1);
 });
 
 dotenv.config();
@@ -27,7 +27,7 @@ const PORT = envConfig.server.port || 8080;
  * Logs a message indicating that the server is running.
  */
 const server = app.listen(PORT, () => {
-	logger.info(`Server is running on http://localhost:${PORT}`);
+  logger.info(`Server is running on http://localhost:${PORT}`);
 });
 
 /**
@@ -38,11 +38,11 @@ const server = app.listen(PORT, () => {
  * @param {Error} err - The unhandled rejection error.
  */
 process.on("unhandledRejection", (err: Error) => {
-	console.log("UNHANDLED REJECTION! 💥 Shutting down...");
-	console.log(err.name, err.message);
-	server.close(() => {
-		process.exit(1);
-	});
+  console.log("UNHANDLED REJECTION! 💥 Shutting down...");
+  console.log(err.name, err.message);
+  server.close(() => {
+    process.exit(1);
+  });
 });
 
 /**
@@ -51,8 +51,8 @@ process.on("unhandledRejection", (err: Error) => {
  * Logs a message and shuts down the server gracefully.
  */
 process.on("SIGTERM", () => {
-	console.log("👋 SIGTERM RECEIVED. Shutting down gracefully");
-	server.close(() => {
-		console.log("💥 Process terminated!");
-	});
+  console.log("👋 SIGTERM RECEIVED. Shutting down gracefully");
+  server.close(() => {
+    console.log("💥 Process terminated!");
+  });
 });

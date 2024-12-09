@@ -10,7 +10,7 @@ import { BaseError } from "./BaseError";
  * @extends {BaseError}
  */
 export class UnauthorizedError extends BaseError {
-	constructor(description: string) {
-		super("UNAUTHORIZED", httpStatus.UNAUTHORIZED, description, true);
-	}
+  constructor(description: string) {
+    super("UNAUTHORIZED", httpStatus.UNAUTHORIZED, description, true);
+  }
 }

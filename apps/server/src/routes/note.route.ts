@@ -1,24 +1,24 @@
 import { Router } from "express";
 
 import {
-	createNote,
-	getUserNotes,
-	deleteNote,
-	getNoteById,
-	updateNote,
-	getUserRecentNotes,
-	getUserRecentlyUpdatedNotes,
+  createNote,
+  deleteNote,
+  getNoteById,
+  getUserNotes,
+  getUserRecentNotes,
+  getUserRecentlyUpdatedNotes,
+  updateNote,
 } from "../controllers/note.controller";
 
 import isAuthenticated from "../middlewares/isAuthenticated";
 import validateRequest from "../middlewares/validateRequest";
 
-import {
-	noteIdParamSchema,
-	noteBodySchema,
-	updateNoteBodySchema,
-} from "../schemas/note.schema";
 import { paginationQuerySchema } from "../schemas";
+import {
+  noteBodySchema,
+  noteIdParamSchema,
+  updateNoteBodySchema,
+} from "../schemas/note.schema";
 
 const router = Router();
 
@@ -28,9 +28,9 @@ router.use(isAuthenticated);
 // - GET /: Get all notes for the authenticated user.
 // - POST /: Create a new note (requires request body validation).
 router
-	.route("/")
-	.get(validateRequest({ query: paginationQuerySchema }), getUserNotes)
-	.post(validateRequest({ body: noteBodySchema }), createNote);
+  .route("/")
+  .get(validateRequest({ query: paginationQuerySchema }), getUserNotes)
+  .post(validateRequest({ body: noteBodySchema }), createNote);
 
 // - GET /recent: Get the most recent notes for the authenticated user.
 router.route("/recent").get(getUserRecentNotes);
@@ -42,10 +42,10 @@ router.route("/recently-updated").get(getUserRecentlyUpdatedNotes);
 // - PATCH /:noteId: Update a specific note by its ID (requires request params validation).
 // - DELETE /:noteId: Delete a specific note by its ID (requires request params validation).
 router
-	.route("/:noteId")
-	.all(validateRequest({ params: noteIdParamSchema }))
-	.patch(validateRequest({ body: updateNoteBodySchema }), updateNote)
-	.get(getNoteById)
-	.delete(deleteNote);
+  .route("/:noteId")
+  .all(validateRequest({ params: noteIdParamSchema }))
+  .patch(validateRequest({ body: updateNoteBodySchema }), updateNote)
+  .get(getNoteById)
+  .delete(deleteNote);
 
 export default router;

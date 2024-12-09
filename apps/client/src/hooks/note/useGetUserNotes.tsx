@@ -11,20 +11,20 @@ import type { Note } from "@/types/note.types";
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
 
 function useGetUserNotes({
-	page = DEFAULT_PAGE,
-	limit = PAGE_LIMIT,
+  page = DEFAULT_PAGE,
+  limit = PAGE_LIMIT,
 }: { page?: number; limit?: number }): UseQueryResult<{
-	notes: Note[];
-	pagination: Pagination;
+  notes: Note[];
+  pagination: Pagination;
 }> {
-	const accessToken = getStorageValue<string>("accessToken");
+  const accessToken = getStorageValue<string>("accessToken");
 
-	return useQuery({
-		queryKey: ["notes", page, limit],
-		queryFn: () => getUserNotes({ page, limit }),
-		enabled: !!accessToken,
-		staleTime: 5 * 60 * 1000, // 5 minutes
-	});
+  return useQuery({
+    queryKey: ["notes", page, limit],
+    queryFn: () => getUserNotes({ page, limit }),
+    enabled: !!accessToken,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 }
 
 export default useGetUserNotes;

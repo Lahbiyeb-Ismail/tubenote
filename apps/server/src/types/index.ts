@@ -12,9 +12,9 @@ import type { paginationQuerySchema } from "src/schemas";
  * @property {number} exp - The expiration timestamp, indicating when the token will expire.
  */
 export type JwtPayload = {
-	userId: string;
-	iat: number;
-	exp: number;
+  userId: string;
+  iat: number;
+  exp: number;
 };
 
 /**
@@ -23,12 +23,12 @@ export type JwtPayload = {
  * @property {ResetPasswordToken} resetToken - The token used for resetting the password.
  */
 declare global {
-	namespace Express {
-		interface Request {
-			resetToken: ResetPasswordToken;
-			userId: string;
-		}
-	}
+  namespace Express {
+    interface Request {
+      resetToken: ResetPasswordToken;
+      userId: string;
+    }
+  }
 }
 
 /**
@@ -39,9 +39,9 @@ declare global {
  * @template Q - The Zod schema type for the request query. Defaults to `z.ZodTypeAny`.
  */
 export type TypedRequest<
-	B extends z.ZodType = z.ZodTypeAny,
-	P extends z.ZodType = z.ZodTypeAny,
-	Q extends z.ZodType = z.ZodTypeAny,
+  B extends z.ZodType = z.ZodTypeAny,
+  P extends z.ZodType = z.ZodTypeAny,
+  Q extends z.ZodType = z.ZodTypeAny,
 > = Request<z.infer<P>, Record<string, unknown>, z.infer<B>, z.infer<Q>>;
 
 export type PaginationQuery = typeof paginationQuerySchema;

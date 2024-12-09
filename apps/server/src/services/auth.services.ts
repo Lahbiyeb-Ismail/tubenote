@@ -1,8 +1,8 @@
-import type { Prisma, User } from '@prisma/client';
+import type { Prisma, User } from "@prisma/client";
 
-import prismaClient from '../lib/prisma';
-import handleAsyncOperation from '../utils/handleAsyncOperation';
-import { hashPassword } from '../helpers/auth.helper';
+import { hashPassword } from "../helpers/auth.helper";
+import prismaClient from "../lib/prisma";
+import handleAsyncOperation from "../utils/handleAsyncOperation";
 
 /**
  * Creates a new user in the database with the provided user data.
@@ -24,6 +24,6 @@ export async function createNewUser(
           password: hashedpassword,
         },
       }),
-    { errorMessage: 'Failed to create new user.' }
+    { errorMessage: "Failed to create new user." }
   );
 }

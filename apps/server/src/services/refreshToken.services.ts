@@ -1,6 +1,6 @@
-import { Prisma, type RefreshToken } from '@prisma/client';
-import prismaClient from '../lib/prisma';
-import handleAsyncOperation from '../utils/handleAsyncOperation';
+import { Prisma, type RefreshToken } from "@prisma/client";
+import prismaClient from "../lib/prisma";
+import handleAsyncOperation from "../utils/handleAsyncOperation";
 
 interface CreateRefreshTokenProps {
   userId: string;
@@ -22,7 +22,7 @@ export async function createRefreshToken({
       prismaClient.refreshToken.create({
         data: { userId, token },
       }),
-    { errorMessage: 'Failed to create refresh token' }
+    { errorMessage: "Failed to create refresh token" }
   );
 }
 
@@ -40,7 +40,7 @@ export async function findRefreshToken(
       prismaClient.refreshToken.findUnique({
         where: { token },
       }),
-    { errorMessage: 'Failed to find refresh token' }
+    { errorMessage: "Failed to find refresh token" }
   );
 }
 
@@ -57,13 +57,13 @@ export async function deleteRefreshToken(token: string): Promise<boolean> {
         prismaClient.refreshToken.delete({
           where: { token },
         }),
-      { errorMessage: 'Failed to delete refresh token' }
+      { errorMessage: "Failed to delete refresh token" }
     );
     return true;
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2025'
+      error.code === "P2025"
     ) {
       // Record not found, which is fine in this case
       console.log(`Attempted to delete non-existent refresh token: ${token}`);
@@ -88,6 +88,6 @@ export async function deleteRefreshTokenByUserId(
       prismaClient.refreshToken.deleteMany({
         where: { userId },
       }),
-    { errorMessage: 'Failed to delete refresh tokens for user' }
+    { errorMessage: "Failed to delete refresh tokens for user" }
   );
 }

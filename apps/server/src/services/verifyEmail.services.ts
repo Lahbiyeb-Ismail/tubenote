@@ -1,8 +1,8 @@
-import { randomUUID } from 'node:crypto';
-import type { EmailVerificationToken } from '@prisma/client';
+import { randomUUID } from "node:crypto";
+import type { EmailVerificationToken } from "@prisma/client";
 
-import prismaClient from '../lib/prisma';
-import handleAsyncOperation from '../utils/handleAsyncOperation';
+import prismaClient from "../lib/prisma";
+import handleAsyncOperation from "../utils/handleAsyncOperation";
 
 /**
  * Retrieves the email verification token for a given user if it exists and is not expired.
@@ -22,7 +22,7 @@ export async function getEmailVericationToken(
           expiresAt: { gt: new Date() },
         },
       }),
-    { errorMessage: 'Failed to get email verification token.' }
+    { errorMessage: "Failed to get email verification token." }
   );
 }
 
@@ -50,7 +50,7 @@ export async function createEmailVericationToken(
           userId,
         },
       }),
-    { errorMessage: 'Failed to create email verification token.' }
+    { errorMessage: "Failed to create email verification token." }
   );
 
   return token;
@@ -71,7 +71,7 @@ export async function deleteEmailVericationToken(
       prismaClient.emailVerificationToken.deleteMany({
         where: { userId },
       }),
-    { errorMessage: 'Failed to delete email verification token.' }
+    { errorMessage: "Failed to delete email verification token." }
   );
 }
 
@@ -90,6 +90,6 @@ export async function findVerificationToken(
       prismaClient.emailVerificationToken.findUnique({
         where: { token },
       }),
-    { errorMessage: 'Failed to find verification token.' }
+    { errorMessage: "Failed to find verification token." }
   );
 }

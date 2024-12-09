@@ -1,7 +1,7 @@
 import type {
-	forgotPasswordBodySchema,
-	resetPasswordBodySchema,
-	resetPasswordParamsSchema,
+  forgotPasswordBodySchema,
+  resetPasswordBodySchema,
+  resetPasswordParamsSchema,
 } from "../schemas/resetPassword.schema";
 
 export type ForgotPasswordBody = typeof forgotPasswordBodySchema;

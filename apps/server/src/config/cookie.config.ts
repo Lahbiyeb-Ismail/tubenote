@@ -1,6 +1,6 @@
-import type { CookieOptions } from 'express';
+import type { CookieOptions } from "express";
 
-import envConfig from './envConfig';
+import envConfig from "./envConfig";
 
 /**
  * Configuration options for the refresh token cookie.
@@ -14,8 +14,8 @@ import envConfig from './envConfig';
  */
 export const refreshTokenCookieConfig: CookieOptions = {
   httpOnly: true,
-  sameSite: 'lax',
-  secure: envConfig.node_env === 'production',
+  sameSite: "lax",
+  secure: envConfig.node_env === "production",
   maxAge: 24 * 60 * 60 * 1000,
 };
 
@@ -32,5 +32,5 @@ export const refreshTokenCookieConfig: CookieOptions = {
 export const clearRefreshTokenCookieConfig: CookieOptions = {
   httpOnly: true,
   sameSite: false,
-  secure: envConfig.node_env === 'production',
+  secure: envConfig.node_env === "production",
 };

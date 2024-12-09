@@ -1,5 +1,5 @@
-import transporter from '../config/nodemailer.config';
-import envConfig from '../config/envConfig';
+import envConfig from "../config/envConfig";
+import transporter from "../config/nodemailer.config";
 
 /**
  * This function sends an email to the given email with the email verification link
@@ -31,9 +31,9 @@ export const sendEmail = async ({
     text: textContent,
     attachments: [
       {
-        filename: 'logo.png',
+        filename: "logo.png",
         path: logoPath,
-        cid: 'logo',
+        cid: "logo",
       },
     ],
   };
