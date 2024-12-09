@@ -43,7 +43,7 @@ importers:
         specifier: ^5.6.2
         version: 5.7.2
 
-  packages/client:
+  apps/client:
     dependencies:
       '@blocknote/core':
         specifier: ^0.16.0
@@ -176,7 +176,7 @@ importers:
         specifier: ^5
         version: 5.7.2
 
-  packages/server:
+  apps/server:
     dependencies:
       '@prisma/client':
         specifier: ^5.20.0
