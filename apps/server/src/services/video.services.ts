@@ -7,6 +7,11 @@ import handleAsyncOperation from "../utils/handleAsyncOperation";
 type UserId = {
   userId: string;
 };
+type VideoId = {
+  videoId: string;
+};
+
+type CreateVideoEntry = UserId & VideoId;
 
 type FetchUserVideos = UserId & {
   limit: number;
@@ -44,10 +49,10 @@ export async function findVideo(
  * and then creates a new video entry in the database with the fetched details.
  * If the video data is not found, it throws an error.
  */
-export async function createVideoEntry(
-  videoId: string,
-  userId: string
-): Promise<Video> {
+export async function createVideoEntry({
+  videoId,
+  userId,
+}: CreateVideoEntry): Promise<Video> {
   const videoData = await fetchYoutubeVideoDetails(videoId);
 
   if (!videoData.length) {

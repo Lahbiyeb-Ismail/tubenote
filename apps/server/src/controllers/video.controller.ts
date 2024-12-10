@@ -45,7 +45,7 @@ export async function handleCreateVideo(
     return;
   }
 
-  const video = await createVideoEntry(videoId, userId);
+  const video = await createVideoEntry({ videoId, userId });
 
   res.status(httpStatus.OK).json(video);
 }
@@ -113,7 +113,7 @@ export async function handleGetVideoById(
     return;
   }
 
-  const newVideo = await createVideoEntry(videoId, userId);
+  const newVideo = await createVideoEntry({ videoId, userId });
 
   res.status(httpStatus.OK).json(newVideo);
 }

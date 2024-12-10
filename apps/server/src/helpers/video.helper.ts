@@ -10,7 +10,7 @@ import { YOUTUBE_API_KEY, YOUTUBE_API_URL } from "../constants";
 export async function fetchYoutubeVideoDetails(videoId: string) {
   try {
     const response = await fetch(
-      `${YOUTUBE_API_URL}${videoId}&key=${YOUTUBE_API_KEY}&part=snippet, statistics, player`
+      `${YOUTUBE_API_URL}/videos?id=${videoId}&key=${YOUTUBE_API_KEY}&part=snippet,statistics,player`
     );
 
     if (!response.ok) {
@@ -18,6 +18,7 @@ export async function fetchYoutubeVideoDetails(videoId: string) {
     }
 
     const data = await response.json();
+
     return data.items;
   } catch (error) {
     console.error("Error fetching video data:", error);
