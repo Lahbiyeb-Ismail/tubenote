@@ -1,4 +1,4 @@
-import type { Prisma, Video } from "@prisma/client";
+import type { Prisma, User, Video } from "@prisma/client";
 
 import { fetchYoutubeVideoDetails } from "../helpers/video.helper";
 import prismaClient from "../lib/prisma";
@@ -37,52 +37,113 @@ export async function findVideo(
   );
 }
 
-/**
- * Creates a new video entry in the database.
- *
- * @param videoId - The ID of the YouTube video.
- * @param userId - The ID of the user creating the video entry.
- * @returns A promise that resolves to the created Video object.
- * @throws Will throw an error if no video data is found.
- *
- * This function fetches video details from YouTube using the provided video ID,
- * and then creates a new video entry in the database with the fetched details.
- * If the video data is not found, it throws an error.
- */
-export async function createVideoEntry({
-  videoId,
-  userId,
-}: CreateVideoEntry): Promise<Video> {
-  const videoData = await fetchYoutubeVideoDetails(videoId);
+async function findOrCreateVideo(
+  prisma: Prisma.TransactionClient,
+  videoId: string,
+  userId: string
+): Promise<Video> {
+  const existingVideo = await prisma.video.findUnique({
+    where: { youtubeId: videoId },
+  });
 
+  if (existingVideo) {
+    return linkUserToVideo(prisma, existingVideo, userId);
+  }
+
+  const videoData = await fetchYoutubeVideoDetails(videoId);
   if (!videoData.length) {
     throw new Error("No video data found");
   }
 
-  const { snippet, statistics, player } = videoData[0];
+  return createNewVideo(prisma, videoData[0], userId);
+}
 
+async function linkUserToVideo(
+  prisma: Prisma.TransactionClient,
+  video: Video,
+  userId: string
+): Promise<Video> {
+  if (video.userIds.includes(userId)) {
+    return video;
+  }
+
+  return prisma.video.update({
+    where: { id: video.id },
+    data: {
+      userIds: {
+        push: userId,
+      },
+    },
+  });
+}
+
+async function createNewVideo(
+  prisma: Prisma.TransactionClient,
+  videoData: any,
+  userId: string
+): Promise<Video> {
+  const { snippet, statistics, player } = videoData;
+  return prisma.video.create({
+    data: {
+      youtubeId: videoData.id,
+      userIds: [userId],
+      snippet: {
+        title: snippet.title,
+        categoryId: snippet.categoryId,
+        channelId: snippet.channelId,
+        channelTitle: snippet.channelTitle,
+        description: snippet.description,
+        liveBroadcastContent: snippet.liveBroadcastContent,
+        publishedAt: snippet.publishedAt,
+        tags: snippet.tags || [],
+        thumbnails: snippet.thumbnails,
+      },
+      statistics,
+      player,
+    },
+  });
+}
+
+async function linkVideoToUser(
+  prisma: Prisma.TransactionClient,
+  userId: string,
+  videoId: string
+): Promise<User> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  if (user.videoIds.includes(videoId)) {
+    return user;
+  }
+
+  return prisma.user.update({
+    where: { id: userId },
+    data: {
+      videoIds: {
+        push: videoId,
+      },
+    },
+  });
+}
+
+export async function createVideoEntry({
+  videoId,
+  userId,
+}: CreateVideoEntry): Promise<{ video: Video; user: User }> {
   return handleAsyncOperation(
-    () =>
-      prismaClient.video.create({
-        data: {
-          userId,
-          youtubeId: videoId,
-          snippet: {
-            title: snippet.title,
-            categoryId: snippet.categoryId,
-            channelId: snippet.channelId,
-            channelTitle: snippet.channelTitle,
-            description: snippet.description,
-            liveBroadcastContent: snippet.liveBroadcastContent,
-            publishedAt: snippet.publishedAt,
-            tags: snippet.tags,
-            thumbnails: snippet.thumbnails,
-          },
-          statistics,
-          player,
-        },
-      }),
-    { errorMessage: "Failed to create video entry" }
+    async () => {
+      return prismaClient.$transaction(async (prisma) => {
+        const video = await findOrCreateVideo(prisma, videoId, userId);
+        const user = await linkVideoToUser(prisma, userId, video.id);
+        return { video, user };
+      });
+    },
+    { errorMessage: "Failed to create or link video entry to user" }
   );
 }
 
@@ -100,13 +161,12 @@ export async function fetchUserVideos({
   userId,
   limit,
   skip,
-}: FetchUserVideos): Promise<Video[]> {
+}: FetchUserVideos) {
   return handleAsyncOperation(
     () =>
-      prismaClient.video.findMany({
-        where: { userId },
-        take: limit,
-        skip,
+      prismaClient.user.findMany({
+        where: { id: userId },
+        include: { videos: { include: { notes: true }, take: limit, skip } },
       }),
     { errorMessage: "Failed to find user videos" }
   );
@@ -124,9 +184,28 @@ export async function getUserVideosCount({ userId }: UserId): Promise<number> {
     () =>
       prismaClient.video.count({
         where: {
-          userId,
+          userIds: { equals: [userId] },
         },
       }),
     { errorMessage: "Failed to count user videos." }
+  );
+}
+
+type UpdateVideo = {
+  videoId: string;
+  data: Prisma.VideoUpdateuserIdsInput;
+};
+
+export async function updateVideo({
+  videoId,
+  data,
+}: UpdateVideo): Promise<Video> {
+  return handleAsyncOperation(
+    () =>
+      prismaClient.video.update({
+        where: { youtubeId: videoId },
+        data,
+      }),
+    { errorMessage: "Failed to update video" }
   );
 }
