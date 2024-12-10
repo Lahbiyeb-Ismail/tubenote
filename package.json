@@ -15,7 +15,9 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "lint:fix": "biome check . --apply",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "db:generate": "pnpm run --filter server prisma:generate",
+    "db:push": "pnpm run --filter server prisma:push"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.3",
