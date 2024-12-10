@@ -2,7 +2,6 @@ import { Router } from "express";
 
 import {
   getUserVideos,
-  handleCreateVideo,
   handleGetNotesByVideoId,
   handleGetVideoById,
 } from "../controllers/video.controller";
@@ -11,10 +10,7 @@ import isAuthenticated from "../middlewares/isAuthenticated";
 import validateRequest from "../middlewares/validateRequest";
 
 import { paginationQuerySchema } from "../schemas";
-import {
-  createVideoBodySchema,
-  videoIdParamSchema,
-} from "../schemas/video.schema";
+import { videoIdParamSchema } from "../schemas/video.schema";
 
 const router = Router();
 
@@ -25,8 +21,7 @@ router.use(isAuthenticated);
 // - POST /: Create a new video (requires request body validation)
 router
   .route("/")
-  .get(validateRequest({ query: paginationQuerySchema }), getUserVideos)
-  .post(validateRequest({ body: createVideoBodySchema }), handleCreateVideo);
+  .get(validateRequest({ query: paginationQuerySchema }), getUserVideos);
 
 router.route("/:videoId/notes").get(
   validateRequest({
