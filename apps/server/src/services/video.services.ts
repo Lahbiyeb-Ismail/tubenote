@@ -163,13 +163,18 @@ export async function fetchUserVideos({
   userId,
   limit,
   skip,
-}: FetchUserVideos) {
+}: FetchUserVideos): Promise<Video[]> {
   return handleAsyncOperation(
-    () =>
-      prismaClient.user.findMany({
+    async () => {
+      const user = await prismaClient.user.findFirst({
         where: { id: userId },
-        include: { videos: { include: { notes: true }, take: limit, skip } },
-      }),
+        include: { videos: { take: limit, skip } },
+      });
+
+      if (!user) throw new NotFoundError("User not found");
+
+      return user.videos;
+    },
     { errorMessage: "Failed to find user videos" }
   );
 }
@@ -186,7 +191,7 @@ export async function getUserVideosCount({ userId }: UserId): Promise<number> {
     () =>
       prismaClient.video.count({
         where: {
-          userIds: { equals: [userId] },
+          userIds: { has: userId },
         },
       }),
     { errorMessage: "Failed to count user videos." }
