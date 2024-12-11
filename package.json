@@ -17,7 +17,7 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "lint:fix": "biome check . --apply",
-    "prepare": "husky install",
+    "prepare": "is-ci || husky install",
     "db:generate": "pnpm run --filter server prisma:generate",
     "db:push": "pnpm run --filter server prisma:push"
   },
@@ -31,7 +31,8 @@
     "typescript": "^5.6.2"
   },
   "dependencies": {
-    "@tubenote/shared": "link:packages/shared"
+    "@tubenote/shared": "link:packages/shared",
+    "is-ci": "^4.1.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,md}": [
