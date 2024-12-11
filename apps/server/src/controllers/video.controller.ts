@@ -15,7 +15,6 @@ import {
   fetchNotesByVideoId,
   getVideoNotesCount,
 } from "../services/note.services";
-import logger from "../utils/logger";
 
 /**
  * Retrieves the videos associated with a specific user.
