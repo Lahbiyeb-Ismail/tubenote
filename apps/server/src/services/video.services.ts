@@ -1,8 +1,12 @@
-import type { Prisma, User, Video } from "@prisma/client";
+import type { Prisma, Video } from "@prisma/client";
 
 import { fetchYoutubeVideoDetails } from "../helpers/video.helper";
 import prismaClient from "../lib/prisma";
 import handleAsyncOperation from "../utils/handleAsyncOperation";
+
+import { NotFoundError } from "../errors";
+
+import { findUser } from "./user.services";
 
 type UserId = {
   userId: string;
@@ -108,20 +112,18 @@ async function linkVideoToUser(
   prisma: Prisma.TransactionClient,
   userId: string,
   videoId: string
-): Promise<User> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-  });
+): Promise<void> {
+  const user = await findUser({ id: userId });
 
   if (!user) {
-    throw new Error("User not found");
+    throw new NotFoundError("User not found");
   }
 
   if (user.videoIds.includes(videoId)) {
-    return user;
+    return;
   }
 
-  return prisma.user.update({
+  await prisma.user.update({
     where: { id: userId },
     data: {
       videoIds: {
@@ -134,13 +136,13 @@ async function linkVideoToUser(
 export async function createVideoEntry({
   videoId,
   userId,
-}: CreateVideoEntry): Promise<{ video: Video; user: User }> {
+}: CreateVideoEntry): Promise<Video> {
   return handleAsyncOperation(
     async () => {
       return prismaClient.$transaction(async (prisma) => {
         const video = await findOrCreateVideo(prisma, videoId, userId);
-        const user = await linkVideoToUser(prisma, userId, video.id);
-        return { video, user };
+        await linkVideoToUser(prisma, userId, video.id);
+        return video;
       });
     },
     { errorMessage: "Failed to create or link video entry to user" }
