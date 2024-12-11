@@ -53,16 +53,15 @@ export async function findVideo(
  * @throws An error if no video data is found from YouTube.
  */
 async function findOrCreateVideo(
-  prisma: Prisma.TransactionClient,
   videoId: string,
   userId: string
 ): Promise<Video> {
-  const existingVideo = await prisma.video.findUnique({
+  const existingVideo = await prismaClient.video.findUnique({
     where: { youtubeId: videoId },
   });
 
   if (existingVideo) {
-    return linkUserToVideo(prisma, existingVideo, userId);
+    return linkUserToVideo(existingVideo, userId);
   }
 
   const videoData = await fetchYoutubeVideoDetails(videoId);
@@ -70,7 +69,7 @@ async function findOrCreateVideo(
     throw new Error("No video data found");
   }
 
-  return createNewVideo(prisma, videoData[0], userId);
+  return createNewVideo(videoData[0], userId);
 }
 
 /**
@@ -81,16 +80,12 @@ async function findOrCreateVideo(
  * @param userId - The ID of the user to be linked to the video.
  * @returns A promise that resolves to the updated video object.
  */
-async function linkUserToVideo(
-  prisma: Prisma.TransactionClient,
-  video: Video,
-  userId: string
-): Promise<Video> {
+async function linkUserToVideo(video: Video, userId: string): Promise<Video> {
   if (video.userIds.includes(userId)) {
     return video;
   }
 
-  return prisma.video.update({
+  return prismaClient.video.update({
     where: { id: video.id },
     data: {
       userIds: {
@@ -108,13 +103,9 @@ async function linkUserToVideo(
  * @param userId - The ID of the user creating the video.
  * @returns A promise that resolves to the created Video object.
  */
-async function createNewVideo(
-  prisma: Prisma.TransactionClient,
-  videoData: any,
-  userId: string
-): Promise<Video> {
+async function createNewVideo(videoData: any, userId: string): Promise<Video> {
   const { snippet, statistics, player } = videoData;
-  return prisma.video.create({
+  return prismaClient.video.create({
     data: {
       youtubeId: videoData.id,
       userIds: [userId],
@@ -146,11 +137,7 @@ async function createNewVideo(
  * @returns A promise that resolves when the video has been successfully linked to the user.
  * @throws NotFoundError - If the user with the specified ID is not found.
  */
-async function linkVideoToUser(
-  prisma: Prisma.TransactionClient,
-  userId: string,
-  videoId: string
-): Promise<void> {
+async function linkVideoToUser(userId: string, videoId: string): Promise<void> {
   const user = await findUser({ id: userId });
 
   if (!user) {
@@ -161,7 +148,7 @@ async function linkVideoToUser(
     return;
   }
 
-  await prisma.user.update({
+  await prismaClient.user.update({
     where: { id: userId },
     data: {
       videoIds: {
@@ -190,11 +177,11 @@ export async function createVideoEntry({
 }: CreateVideoEntry): Promise<Video> {
   return handleAsyncOperation(
     async () => {
-      return prismaClient.$transaction(async (prisma) => {
-        const video = await findOrCreateVideo(prisma, videoId, userId);
-        await linkVideoToUser(prisma, userId, video.id);
-        return video;
-      });
+      const video = await findOrCreateVideo(videoId, userId);
+
+      await linkVideoToUser(userId, video.id);
+
+      return video;
     },
     { errorMessage: "Failed to create or link video entry to user" }
   );
