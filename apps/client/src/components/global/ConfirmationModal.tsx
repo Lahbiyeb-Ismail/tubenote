@@ -27,6 +27,7 @@ function ConfirmationModal() {
     noteContent,
     noteTitle,
     noteId,
+    video,
   } = modalContent;
 
   const handleConfirm = () => {
@@ -59,6 +60,7 @@ function ConfirmationModal() {
               noteId={noteId as string}
               cancelText={cancelText}
               closeModal={closeModal}
+              video={video}
             />
           </DialogDescription>
         )}

@@ -6,11 +6,12 @@ import { Suspense } from "react";
 import VideoPlayer from "@/components/video/VideoPlayer";
 
 import ResizablePanels from "@/components/global/ResizablePanels";
+import type { Video } from "@/types/video.types";
 
 const AppMDXEditor = dynamic(() => import("./AppMDXEditor"), { ssr: false });
 
 type EditorPageProps = {
-  videoId: string;
+  video: Video;
   initialNoteContent?: string;
   noteTitle?: string;
   noteId?: string;
@@ -19,9 +20,9 @@ type EditorPageProps = {
 
 function EditorPage({
   noteId,
+  video,
   initialNoteContent,
   noteTitle,
-  videoId,
   action = "create",
 }: EditorPageProps) {
   return (
@@ -34,10 +35,11 @@ function EditorPage({
               initialNoteContent={initialNoteContent}
               noteTitle={noteTitle}
               noteId={noteId}
+              video={video}
             />
           </Suspense>
         }
-        rightSideContent={<VideoPlayer videoId={videoId} />}
+        rightSideContent={<VideoPlayer videoId={video.youtubeId} />}
       />
     </div>
   );

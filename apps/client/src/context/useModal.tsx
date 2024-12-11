@@ -1,5 +1,6 @@
 "use client";
 
+import type { Video } from "@/types/video.types";
 import React, {
   createContext,
   useState,
@@ -17,6 +18,7 @@ type ModalContent = {
   noteContent?: string;
   action: "delete" | "create" | "update";
   onConfirm?: () => void;
+  video: Video;
 };
 
 type OpenModalContent = ModalContent;

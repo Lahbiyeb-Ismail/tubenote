@@ -18,6 +18,7 @@ type SaveNoteFormProps = {
   cancelText: string;
   action: "update" | "create";
   closeModal: () => void;
+  video: Video;
 };
 
 function SaveNoteForm({
@@ -27,6 +28,7 @@ function SaveNoteForm({
   action,
   cancelText,
   closeModal,
+  video,
 }: SaveNoteFormProps) {
   const {
     register,
@@ -38,7 +40,6 @@ function SaveNoteForm({
       noteTitle: title || "",
     },
   });
-  const video = getStorageValue<Video | null>("video");
 
   const { videoCurrentTime } = useVideo();
 
@@ -49,10 +50,10 @@ function SaveNoteForm({
       createNote({
         title: data.noteTitle,
         content: noteContent,
-        videoId: video?.id as string,
-        thumbnail: video?.snippet.thumbnails.medium.url as string,
-        videoTitle: video?.snippet.title as string,
-        youtubeId: video?.youtubeId as string,
+        videoId: video.id,
+        thumbnail: video.snippet.thumbnails.medium.url,
+        videoTitle: video.snippet.title,
+        youtubeId: video.youtubeId,
         timestamp: videoCurrentTime,
       });
     } else {

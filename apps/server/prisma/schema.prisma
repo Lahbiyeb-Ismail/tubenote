@@ -25,11 +25,13 @@ model User {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  refreshTokens          RefreshToken[]
-  videos                 Video[]
-  Note                   Note[]
-  EmailVerificationToken EmailVerificationToken[]
-  ResetPasswordToken     ResetPasswordToken[]
+  notes                   Note[]
+  refreshTokens           RefreshToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  resetPasswordTokens     ResetPasswordToken[]
+
+  videoIds String[] @db.ObjectId
+  videos   Video[]  @relation(fields: [videoIds], references: [id])
 }
 
 model RefreshToken {
@@ -74,21 +76,21 @@ model Note {
   userId     String   @db.ObjectId
   videoId    String   @db.ObjectId
 
-  User  User?  @relation(fields: [userId], references: [id])
-  Video Video? @relation(fields: [videoId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+  video Video @relation(fields: [videoId], references: [id])
 }
 
 model Video {
   id        String @id @default(auto()) @map("_id") @db.ObjectId
   youtubeId String @unique
-  userId    String @db.ObjectId
 
   snippet    Snippet
   statistics Statistics
   player     Player
-  Note       Note[]
+  notes      Note[]
 
-  User User @relation(fields: [userId], references: [id])
+  userIds String[] @db.ObjectId
+  users   User[]   @relation(fields: [userIds], references: [id])
 }
 
 type Snippet {

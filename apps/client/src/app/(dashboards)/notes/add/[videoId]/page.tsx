@@ -22,7 +22,7 @@ function AddNewNotePage({ params }: { params: { videoId: string } }) {
     );
   }
 
-  return <EditorPage videoId={video.youtubeId} />;
+  return <EditorPage video={video} />;
 }
 
 export default AddNewNotePage;
