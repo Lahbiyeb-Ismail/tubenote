@@ -41,6 +41,7 @@ import { useRef, useState } from "react";
 import "@mdxeditor/editor/style.css";
 
 import { useModal } from "@/context/useModal";
+import type { Video } from "@/types/video.types";
 import { Button } from "../ui/button";
 
 function whenInAdmonition(editorInFocus: EditorInFocus | null) {
@@ -151,6 +152,7 @@ const myPlugins = [
 ];
 
 type AppMDXEditorProps = {
+  video: Video;
   initialNoteContent?: string;
   noteTitle?: string;
   noteId?: string;
@@ -158,6 +160,7 @@ type AppMDXEditorProps = {
 };
 
 const AppMDXEditor = ({
+  video,
   initialNoteContent,
   noteTitle,
   noteId,
@@ -177,6 +180,7 @@ const AppMDXEditor = ({
       noteTitle,
       action,
       noteId,
+      video,
     });
   };
 
