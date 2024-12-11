@@ -41,6 +41,17 @@ export async function findVideo(
   );
 }
 
+/**
+ * Finds an existing video by its YouTube ID or creates a new one if it doesn't exist.
+ * If the video exists, it links the user to the video.
+ * If the video does not exist, it fetches the video details from YouTube and creates a new video.
+ *
+ * @param prisma - The Prisma TransactionClient instance for database operations.
+ * @param videoId - The YouTube ID of the video to find or create.
+ * @param userId - The ID of the user to link to the video.
+ * @returns A promise that resolves to the found or newly created Video object.
+ * @throws An error if no video data is found from YouTube.
+ */
 async function findOrCreateVideo(
   prisma: Prisma.TransactionClient,
   videoId: string,
@@ -62,6 +73,14 @@ async function findOrCreateVideo(
   return createNewVideo(prisma, videoData[0], userId);
 }
 
+/**
+ * Links a user to a video by adding the user's ID to the video's userIds array if it is not already present.
+ *
+ * @param prisma - The Prisma TransactionClient instance used to interact with the database.
+ * @param video - The video object to which the user will be linked.
+ * @param userId - The ID of the user to be linked to the video.
+ * @returns A promise that resolves to the updated video object.
+ */
 async function linkUserToVideo(
   prisma: Prisma.TransactionClient,
   video: Video,
@@ -81,6 +100,14 @@ async function linkUserToVideo(
   });
 }
 
+/**
+ * Creates a new video record in the database.
+ *
+ * @param prisma - The Prisma TransactionClient instance used to interact with the database.
+ * @param videoData - The data of the video to be created, including snippet, statistics, and player information.
+ * @param userId - The ID of the user creating the video.
+ * @returns A promise that resolves to the created Video object.
+ */
 async function createNewVideo(
   prisma: Prisma.TransactionClient,
   videoData: any,
@@ -108,6 +135,17 @@ async function createNewVideo(
   });
 }
 
+/**
+ * Links a video to a user by updating the user's videoIds array in the database.
+ * If the user is not found, it throws a NotFoundError.
+ * If the video is already linked to the user, it returns without making any changes.
+ *
+ * @param prisma - The Prisma TransactionClient instance used to interact with the database.
+ * @param userId - The ID of the user to whom the video will be linked.
+ * @param videoId - The ID of the video to be linked to the user.
+ * @returns A promise that resolves when the video has been successfully linked to the user.
+ * @throws NotFoundError - If the user with the specified ID is not found.
+ */
 async function linkVideoToUser(
   prisma: Prisma.TransactionClient,
   userId: string,
@@ -133,6 +171,19 @@ async function linkVideoToUser(
   });
 }
 
+/**
+ * Creates a video entry and links it to a user.
+ *
+ * This function performs the following steps:
+ * 1. Finds or creates a video entry using the provided `videoId` and `userId`.
+ * 2. Links the created or found video entry to the user.
+ *
+ * @param {Object} params - The parameters for creating a video entry.
+ * @param {string} params.videoId - The ID of the video to be created or found.
+ * @param {string} params.userId - The ID of the user to link the video to.
+ * @returns {Promise<Video>} A promise that resolves to the created or found video entry.
+ * @throws Will throw an error if the video entry cannot be created or linked to the user.
+ */
 export async function createVideoEntry({
   videoId,
   userId,
@@ -157,7 +208,8 @@ export async function createVideoEntry({
  * @param {number} params.limit - The maximum number of videos to fetch.
  * @param {number} params.skip - The number of videos to skip before starting to fetch.
  * @returns {Promise<Video[]>} A promise that resolves to an array of videos.
- * @throws Will throw an error if the operation fails.
+ * @throws {NotFoundError} If the user is not found.
+ * @throws {Error} If there is an error during the operation.
  */
 export async function fetchUserVideos({
   userId,
@@ -183,7 +235,8 @@ export async function fetchUserVideos({
  * Retrieves the count of videos associated with a specific user.
  *
  * @param {UserId} param0 - An object containing the user ID.
- * @returns {Promise<number>} - A promise that resolves to the count of videos.
+ * @param {string} param0.userId - The ID of the user whose videos are to be counted.
+ * @returns {Promise<number>} A promise that resolves to the count of videos associated with the user.
  * @throws Will throw an error if the operation fails.
  */
 export async function getUserVideosCount({ userId }: UserId): Promise<number> {
@@ -195,24 +248,5 @@ export async function getUserVideosCount({ userId }: UserId): Promise<number> {
         },
       }),
     { errorMessage: "Failed to count user videos." }
-  );
-}
-
-type UpdateVideo = {
-  videoId: string;
-  data: Prisma.VideoUpdateuserIdsInput;
-};
-
-export async function updateVideo({
-  videoId,
-  data,
-}: UpdateVideo): Promise<Video> {
-  return handleAsyncOperation(
-    () =>
-      prismaClient.video.update({
-        where: { youtubeId: videoId },
-        data,
-      }),
-    { errorMessage: "Failed to update video" }
   );
 }
