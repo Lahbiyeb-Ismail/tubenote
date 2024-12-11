@@ -2,7 +2,7 @@ import type { Request } from "express";
 import type { z } from "zod";
 
 import type { ResetPasswordToken } from "@prisma/client";
-import type { paginationQuerySchema } from "src/schemas";
+import type { paginationQuerySchema } from "../schemas";
 
 /**
  * Represents the payload of a JSON Web Token (JWT).

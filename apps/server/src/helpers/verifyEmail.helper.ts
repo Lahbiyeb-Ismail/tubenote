@@ -1,5 +1,5 @@
-import type { EmailContent } from "src/types/email.type";
 import envConfig from "../config/envConfig";
+import type { EmailContent } from "../types/email.type";
 import compileTemplate from "../utils/compileTemplate";
 
 /**

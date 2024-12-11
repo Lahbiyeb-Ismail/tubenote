@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 
 import generateAuthToken from "./generateAuthToken";
 
-import type { JwtPayload } from "src/types";
 import {
   ACCESS_TOKEN_EXPIRE,
   ACCESS_TOKEN_SECRET,
@@ -11,6 +10,7 @@ import {
   REFRESH_TOKEN_SECRET,
 } from "../constants/auth";
 import { createRefreshToken } from "../services/refreshToken.services";
+import type { JwtPayload } from "../types";
 
 /**
  * Hashes a given password using bcrypt.
