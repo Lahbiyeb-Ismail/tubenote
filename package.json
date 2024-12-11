@@ -10,6 +10,8 @@
   "scripts": {
     "dev:server": "pnpm run --filter server dev",
     "dev:client": "pnpm run --filter client dev",
+    "build:server": "pnpm run --filter server build",
+    "build:client": "pnpm run --filter client build",
     "dev": "pnpm run --parallel -r dev",
     "build": "pnpm run --parallel -r build",
     "lint": "biome check .",
