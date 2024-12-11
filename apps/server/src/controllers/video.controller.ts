@@ -15,6 +15,7 @@ import {
   fetchNotesByVideoId,
   getVideoNotesCount,
 } from "../services/note.services";
+import logger from "../utils/logger";
 
 /**
  * Retrieves the videos associated with a specific user.
@@ -42,7 +43,7 @@ export async function getUserVideos(
   const totalPages = Math.ceil(videosCount / limit);
 
   res.status(httpStatus.OK).json({
-    videos: videos[0].videos,
+    videos,
     pagination: {
       totalPages,
       currentPage: page,
