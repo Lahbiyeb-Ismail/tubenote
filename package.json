@@ -1,41 +1,40 @@
 {
-	"name": "tubenote_v2",
-	"version": "2.0.0",
-	"description": "TubeNote is a web application that enhances the video-watching experience by enabling users to take intuitive and efficient notes while watching videos.",
-	"main": "index.js",
-	"repository": "https://github.com/Lahbiyeb-Ismail/tubenote_v2.git",
-	"author": "Lahbiyeb Ismail <ismaillhbibe@gmail.com>",
-	"license": "MIT",
-	"private": true,
-	"workspaces": ["frontend", "backend"],
-	"scripts": {
-		"lint": "eslint '**/*.{js,jsx,ts,tsx}'",
-		"format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,md}'",
-		"dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
-		"dev:frontend": "npm run dev --workspace=frontend",
-		"dev:backend": "npm run dev --workspace=backend",
-		"build": "npm run build --workspaces",
-		"start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
-		"start:frontend": "npm run start --workspace=frontend",
-		"start:backend": "npm run start --workspace=backend",
-		"prepare": "husky"
-	},
-	"lint-staged": {
-		"**/*.{js,jsx,ts,tsx,json,css,md}": ["prettier --write", "git add"]
-	},
-	"devDependencies": {
-		"@commitlint/cli": "^19.3.0",
-		"@commitlint/config-conventional": "^19.2.2",
-		"@ianvs/prettier-plugin-sort-imports": "^4.2.1",
-		"concurrently": "^8.2.2",
-		"eslint": "^9.5.0",
-		"husky": "^9.0.11",
-		"lint-staged": "^15.2.7",
-		"prettier": "^3.3.2",
-		"pretty-quick": "^4.0.0"
-	},
-	"engines": {
-		"node": ">=14.0.0",
-		"npm": ">=6.14.0"
-	}
+  "name": "tubenote",
+  "version": "2.0.0",
+  "description": "TubeNote is a web application that enhances the video-watching experience by enabling users to take intuitive and efficient notes while watching videos.",
+  "main": "index.js",
+  "repository": "https://github.com/Lahbiyeb-Ismail/tubenote_v2.git",
+  "author": "Lahbiyeb Ismail <ismaillhbibe@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev:server": "pnpm run --filter server dev",
+    "dev:client": "pnpm run --filter client dev",
+    "dev": "pnpm run --parallel -r dev",
+    "build": "pnpm run --parallel -r build",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "lint:fix": "biome check . --apply",
+    "prepare": "husky install",
+    "db:generate": "pnpm run --filter server prisma:generate",
+    "db:push": "pnpm run --filter server prisma:push"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.3",
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "concurrently": "^8.2.2",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.10",
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {
+    "@tubenote/shared": "link:packages/shared"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,md}": [
+      "biome check --apply-unsafe",
+      "biome format --write"
+    ]
+  }
 }
