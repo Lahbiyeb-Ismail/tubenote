@@ -6,7 +6,8 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "typeRoots": ["./node_modules/@types", "./node_modules/.prisma/client"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
