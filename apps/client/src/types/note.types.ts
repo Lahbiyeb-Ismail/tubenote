@@ -11,13 +11,13 @@ export type Note = {
   id: string;
   title: string;
   content: string;
-  timestamp: number;
   videoId: string;
   thumbnail: string;
   videoTitle: string;
   youtubeId: string;
   createdAt: string;
   updatedAt: string;
+  timestamp: Timestamp;
 };
 
 export type NoteProviderProps = {
@@ -59,6 +59,11 @@ export type NoteAction =
   | { type: "UPDATE_NOTE_FAIL"; payload: { message: string; success: false } }
   | { type: "CLEAR_NOTE_STATE" };
 
+export type Timestamp = {
+  start: number;
+  end: number;
+};
+
 export type CreateNoteResponse = {
   message: string;
   note: Note;
@@ -68,5 +73,5 @@ export type UpdateNoteProps = {
   noteId: string;
   title: string;
   content: string;
-  timestamp: number;
+  timestamp: Timestamp;
 };

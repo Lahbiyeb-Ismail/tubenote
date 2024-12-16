@@ -47,6 +47,11 @@ type Player = {
   embedHtml: string;
 };
 
+type Timestamp = {
+  start: number;
+  end: number;
+};
+
 export type VideoProviderProps = {
   children: ReactNode;
 };
@@ -61,8 +66,8 @@ export type VideoContextType = {
   state: VideoState;
   saveVideo: (videoUrl: string) => void;
   isLoading: boolean;
-  videoCurrentTime: number;
-  setVideoCurrentTime: (time: number) => void;
+  noteTimestamp: Timestamp;
+  setNoteTimestamp: (timestamp: Timestamp) => void;
 };
 
 export type VideoAction =
