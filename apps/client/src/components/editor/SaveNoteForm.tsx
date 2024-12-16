@@ -41,7 +41,7 @@ function SaveNoteForm({
     },
   });
 
-  const { videoCurrentTime } = useVideo();
+  const { noteTimestamp } = useVideo();
 
   const { createNote, isLoading, updateNote } = useNote();
 
@@ -54,14 +54,14 @@ function SaveNoteForm({
         thumbnail: video.snippet.thumbnails.medium.url,
         videoTitle: video.snippet.title,
         youtubeId: video.youtubeId,
-        timestamp: videoCurrentTime,
+        timestamp: noteTimestamp,
       });
     } else {
       updateNote({
         noteId,
         title: data.noteTitle,
         content: noteContent,
-        timestamp: videoCurrentTime,
+        timestamp: noteTimestamp,
       });
     }
   };
