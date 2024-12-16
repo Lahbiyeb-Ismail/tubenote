@@ -77,7 +77,9 @@ function VideoPage({ params }: { params: { videoId: string } }) {
                 />
               )
             }
-            rightSideContent={<VideoPlayer videoId={videoId} />}
+            rightSideContent={
+              <VideoPlayer videoId={videoId} timestamp={note?.timestamp} />
+            }
           />
         )}
       </div>
