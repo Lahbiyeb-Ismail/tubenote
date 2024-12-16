@@ -64,17 +64,17 @@ model ResetPasswordToken {
 }
 
 model Note {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
   title      String
   content    String
-  timestamp  Float
   videoTitle String
   thumbnail  String
   youtubeId  String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  userId     String   @db.ObjectId
-  videoId    String   @db.ObjectId
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  userId     String    @db.ObjectId
+  videoId    String    @db.ObjectId
+  timestamp  Timestamp
 
   user  User?  @relation(fields: [userId], references: [id])
   video Video? @relation(fields: [videoId], references: [id])
@@ -128,4 +128,9 @@ type Statistics {
 
 type Player {
   embedHtml String
+}
+
+type Timestamp {
+  start Int
+  end   Int
 }
