@@ -11,7 +11,7 @@ const VideoContext = createContext<VideoContextType | undefined>(undefined);
 
 export function VideoProvider({ children }: VideoProviderProps) {
   const [state, dispatch] = useReducer(videoReducer, videoInitialState);
-  const [videoCurrentTime, setVideoCurrentTime] = useState(0);
+  const [noteTimestamp, setNoteTimestamp] = useState({ start: 0, end: 0 });
 
   const saveVideoMutation = useSaveVideoData(dispatch);
 
@@ -19,8 +19,8 @@ export function VideoProvider({ children }: VideoProviderProps) {
     state,
     saveVideo: saveVideoMutation.mutate,
     isLoading: saveVideoMutation.isPending,
-    setVideoCurrentTime,
-    videoCurrentTime,
+    setNoteTimestamp,
+    noteTimestamp,
   };
 
   return (
