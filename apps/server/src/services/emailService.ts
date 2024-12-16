@@ -1,0 +1,88 @@
+import nodemailer, { type Transporter } from "nodemailer";
+import envConfig from "../config/envConfig";
+import { createVerificationEmail } from "../helpers/verifyEmail.helper";
+
+/**
+ * This function sends an email to the given email with the email verification link
+ *
+ * @param {string} email - The email of the user
+ * @param {string} token - The email verification token
+ */
+
+interface ISendEmailProps {
+  emailRecipient: string;
+  emailSubject: string;
+  htmlContent: string;
+  textContent: string;
+  logoPath: string;
+}
+
+interface ISendVerificationEmail {
+  email: string;
+  token: string;
+}
+
+class EmailService {
+  private transporter: Transporter;
+
+  constructor() {
+    this.transporter = nodemailer.createTransport({
+      host: envConfig.email.smtp.host,
+      port: +envConfig.email.smtp.port,
+      secure: true, // use TLS
+      auth: {
+        user: envConfig.email.smtp.auth.user,
+        pass: envConfig.email.smtp.auth.password,
+      },
+    });
+  }
+
+  async sendEmail({
+    emailRecipient,
+    emailSubject,
+    htmlContent,
+    textContent,
+    logoPath,
+  }: ISendEmailProps) {
+    const mailOptions = {
+      from: envConfig.email.from,
+      to: emailRecipient,
+      subject: emailSubject,
+      html: htmlContent,
+      text: textContent,
+      attachments: [
+        {
+          filename: "logo.png",
+          path: logoPath,
+          cid: "logo",
+        },
+      ],
+    };
+
+    await this.transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error(error);
+      } else {
+        console.info(`Verify email sent: ${info.response}`);
+      }
+    });
+  }
+
+  async sendVerificationEmail({
+    email,
+    token,
+  }: ISendVerificationEmail): Promise<void> {
+    const { htmlContent, logoPath, textContent } =
+      await createVerificationEmail(token);
+
+    await this.sendEmail({
+      emailRecipient: email,
+      emailSubject: "Verify your email",
+      htmlContent,
+      textContent,
+      logoPath,
+    });
+  }
+}
+
+export default new EmailService();
