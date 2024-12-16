@@ -11,6 +11,7 @@ import {
 
 import { loginSchema, registrationSchema } from "../schemas/auth.schema";
 
+import authController from "../controllers/authController";
 import validateRequest from "../middlewares/validateRequest";
 
 const router = Router();
@@ -18,7 +19,7 @@ const router = Router();
 // - POST /register: Register a new user (requires request body validation).
 router
   .route("/register")
-  .post(validateRequest({ body: registrationSchema }), handleRegister);
+  .post(validateRequest({ body: registrationSchema }), authController.register);
 
 // - POST /login: Authenticate a user (requires request body validation).
 router
