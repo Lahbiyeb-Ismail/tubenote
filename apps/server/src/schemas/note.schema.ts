@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+const timestampSchema = z.object({
+  start: z.number(),
+  end: z.number(),
+});
+
 export const noteBodySchema = z.object({
   title: z
     .string()
@@ -11,7 +16,7 @@ export const noteBodySchema = z.object({
   thumbnail: z.string(),
   videoId: z.string(),
   youtubeId: z.string(),
-  timestamp: z.number(),
+  timestamp: timestampSchema,
 });
 
 export const noteIdParamSchema = z.object({
@@ -25,5 +30,5 @@ export const updateNoteBodySchema = z.object({
   content: z
     .string()
     .min(10, { message: "Content must be at least 10 characters long." }),
-  timestamp: z.number(),
+  timestamp: timestampSchema,
 });
