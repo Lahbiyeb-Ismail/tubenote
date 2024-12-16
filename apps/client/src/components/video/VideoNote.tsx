@@ -61,7 +61,11 @@ function VideoNote({ note, setOpenMarkdownViewer, setNote }: VideoNoteProps) {
         </div>
         <div className="flex items-center space-x-2 text-sm text-muted-foreground mt-2">
           <Clock className="h-4 w-4" />
-          <span>{note.timestamp}</span>
+          <span>{note.timestamp.start}</span>
+        </div>
+        <div className="flex items-center space-x-2 text-sm text-muted-foreground mt-2">
+          <Clock className="h-4 w-4" />
+          <span>{note.timestamp.end}</span>
         </div>
       </CardHeader>
     </Card>
