@@ -1,10 +1,21 @@
 import type { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { REFRESH_TOKEN_SECRET } from "../constants/auth";
 import userDatabase from "../databases/userDatabase";
-import { ConflictError, NotFoundError, UnauthorizedError } from "../errors";
-import { createNewTokens } from "../helpers/auth.helper";
+import {
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+} from "../errors";
+import { createNewTokens, verifyToken } from "../helpers/auth.helper";
+import type { JwtPayload } from "../types";
 import emailService from "./emailService";
-import { deleteRefreshToken, findRefreshToken } from "./refreshToken.services";
+import {
+  deleteRefreshToken,
+  deleteRefreshTokenByUserId,
+  findRefreshToken,
+} from "./refreshToken.services";
 import verificationTokenService from "./verificationTokenService";
 
 interface IRegisterUser {
@@ -86,6 +97,42 @@ class AuthService {
     if (isTokenExist) {
       await deleteRefreshToken(token);
     }
+  }
+
+  async refreshToken(
+    token: string
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const payload = await verifyToken(token, REFRESH_TOKEN_SECRET);
+
+    const { userId, exp } = payload as JwtPayload;
+
+    // Check if the token is expired
+    if (exp && Date.now() >= exp * 1000) {
+      await deleteRefreshTokenByUserId(userId);
+
+      throw new UnauthorizedError(
+        "Refresh token expired. Please log in again."
+      );
+    }
+
+    const refreshTokenFromDB = await findRefreshToken(token);
+
+    // Detected refresh token reuse!
+    if (!refreshTokenFromDB) {
+      await deleteRefreshTokenByUserId(userId);
+
+      throw new ForbiddenError("Invalid refresh token. Please log in again.");
+    }
+
+    await deleteRefreshToken(token);
+
+    if (refreshTokenFromDB.userId !== userId) {
+      throw new ForbiddenError("Invalid refresh token. Please log in again.");
+    }
+
+    const { accessToken, refreshToken } = await createNewTokens(userId);
+
+    return { accessToken, refreshToken };
   }
 
   async hashPassword(password: string): Promise<string> {
