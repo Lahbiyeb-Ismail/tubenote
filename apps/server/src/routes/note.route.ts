@@ -30,7 +30,10 @@ router.use(isAuthenticated);
 // - POST /: Create a new note (requires request body validation).
 router
   .route("/")
-  .get(validateRequest({ query: paginationQuerySchema }), getUserNotes)
+  .get(
+    validateRequest({ query: paginationQuerySchema }),
+    noteController.getUserNotes
+  )
   .post(validateRequest({ body: noteBodySchema }), noteController.addNewNote);
 
 // - GET /recent: Get the most recent notes for the authenticated user.
