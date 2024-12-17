@@ -1,17 +1,10 @@
 import { Router } from "express";
 import passport from "../lib/passportAuth";
 
-import {
-  handleGoogleLogin,
-  handleLogin,
-  handleLogout,
-  handleRefreshToken,
-  handleRegister,
-} from "../controllers/auth.controller";
-
 import { loginSchema, registrationSchema } from "../schemas/auth.schema";
 
 import authController from "../controllers/authController";
+
 import validateRequest from "../middlewares/validateRequest";
 
 const router = Router();
@@ -40,6 +33,9 @@ router
 // - GET /google/callback: Handle the Google OAuth callback.
 router
   .route("/google/callback")
-  .get(passport.authenticate("google", { session: false }), handleGoogleLogin);
+  .get(
+    passport.authenticate("google", { session: false }),
+    authController.loginWithGoogle
+  );
 
 export default router;
