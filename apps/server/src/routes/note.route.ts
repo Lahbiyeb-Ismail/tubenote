@@ -40,7 +40,7 @@ router
 router.route("/recent").get(noteController.getUserRecentNotes);
 
 // - GET /recently-updated: Get the recently updated notes for the authenticated user.
-router.route("/recently-updated").get(getUserRecentlyUpdatedNotes);
+router.route("/recently-updated").get(noteController.getRecentlyUpatedNotes);
 
 // - GET /:noteId: Get a specific note by its ID (requires request params validation).
 // - PATCH /:noteId: Update a specific note by its ID (requires request params validation).
