@@ -9,6 +9,7 @@ interface IUserId {
 interface INoteId {
   noteId: string;
 }
+export interface IFindNote extends IUserId, INoteId {}
 
 export interface IUpdateNote extends IUserId, INoteId {
   data: Prisma.NoteUpdateInput;
@@ -17,7 +18,7 @@ export interface IUpdateNote extends IUserId, INoteId {
 export interface IDeleteNote extends IUserId, INoteId {}
 
 class NoteDatabase {
-  async find({ noteId, userId }: IUserId & INoteId): Promise<Note | null> {
+  async find({ noteId, userId }: IFindNote): Promise<Note | null> {
     return handleAsyncOperation(
       () =>
         prismaClient.note.findFirst({
