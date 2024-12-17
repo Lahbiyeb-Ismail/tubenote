@@ -1,6 +1,9 @@
 import type { Note, Prisma } from "@prisma/client";
 
-import noteDatabase, { type IUpdateNote } from "../databases/noteDatabase";
+import noteDatabase, {
+  type IDeleteNote,
+  type IUpdateNote,
+} from "../databases/noteDatabase";
 import { NotFoundError } from "../errors";
 
 class NoteService {
@@ -24,6 +27,16 @@ class NoteService {
     });
 
     return updatedNote;
+  }
+
+  async deleteNote({ noteId, userId }: IDeleteNote): Promise<void> {
+    const note = await noteDatabase.find({ noteId, userId });
+
+    if (!note) {
+      throw new NotFoundError("Note not found.");
+    }
+
+    await noteDatabase.delete({ noteId, userId });
   }
 }
 
