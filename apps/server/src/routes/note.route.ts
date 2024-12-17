@@ -1,15 +1,5 @@
 import { Router } from "express";
 
-import {
-  createNote,
-  deleteNote,
-  getNoteById,
-  getUserNotes,
-  getUserRecentNotes,
-  getUserRecentlyUpdatedNotes,
-  updateNote,
-} from "../controllers/note.controller";
-
 import isAuthenticated from "../middlewares/isAuthenticated";
 import validateRequest from "../middlewares/validateRequest";
 
