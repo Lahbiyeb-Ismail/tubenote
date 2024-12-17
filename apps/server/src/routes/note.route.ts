@@ -45,7 +45,10 @@ router.route("/recently-updated").get(getUserRecentlyUpdatedNotes);
 router
   .route("/:noteId")
   .all(validateRequest({ params: noteIdParamSchema }))
-  .patch(validateRequest({ body: updateNoteBodySchema }), updateNote)
+  .patch(
+    validateRequest({ body: updateNoteBodySchema }),
+    noteController.updateNote
+  )
   .get(getNoteById)
   .delete(deleteNote);
 
