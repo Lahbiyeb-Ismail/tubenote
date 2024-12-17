@@ -24,7 +24,7 @@ router
 // - POST /login: Authenticate a user (requires request body validation).
 router
   .route("/login")
-  .post(validateRequest({ body: loginSchema }), handleLogin);
+  .post(validateRequest({ body: loginSchema }), authController.login);
 
 // - POST /logout: Log out the current user.
 router.route("/logout").post(handleLogout);
