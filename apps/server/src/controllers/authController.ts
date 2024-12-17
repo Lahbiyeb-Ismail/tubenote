@@ -1,8 +1,10 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
+import { refreshTokenCookieConfig } from "../config/cookie.config";
+import { REFRESH_TOKEN_NAME } from "../constants/auth";
 import authService from "../services/authService";
 import type { TypedRequest } from "../types";
-import type { RegisterCredentials } from "../types/auth.type";
+import type { LoginCredentials, RegisterCredentials } from "../types/auth.type";
 
 class AuthController {
   async register(req: TypedRequest<RegisterCredentials>, res: Response) {
@@ -13,6 +15,22 @@ class AuthController {
     res.status(httpStatus.CREATED).json({
       message: "A verification email has been sent to your email.",
       email: user.email,
+    });
+  }
+
+  async login(req: TypedRequest<LoginCredentials>, res: Response) {
+    const { email, password } = req.body;
+
+    const { accessToken, refreshToken } = await authService.loginUser(
+      email,
+      password
+    );
+
+    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+
+    res.status(httpStatus.OK).json({
+      message: "Login successful",
+      accessToken,
     });
   }
 }
