@@ -52,6 +52,18 @@ class NoteController {
 
     res.status(httpStatus.OK).json({ message: "Note deleted successfully." });
   }
+
+  async getNoteById(
+    req: TypedRequest<EmptyRecord, NoteIdParam>,
+    res: Response
+  ): Promise<void> {
+    const userId = req.userId;
+    const { noteId } = req.params;
+
+    const note = await noteService.findNote({ userId, noteId });
+
+    res.status(httpStatus.OK).json({ note });
+  }
 }
 
 export default new NoteController();
