@@ -4,6 +4,7 @@ import userDatabase from "../databases/userDatabase";
 import { ConflictError, NotFoundError, UnauthorizedError } from "../errors";
 import { createNewTokens } from "../helpers/auth.helper";
 import emailService from "./emailService";
+import { deleteRefreshToken, findRefreshToken } from "./refreshToken.services";
 import verificationTokenService from "./verificationTokenService";
 
 interface IRegisterUser {
@@ -75,9 +76,17 @@ class AuthService {
     return { accessToken, refreshToken };
   }
 
-  // async logoutUser() {}
+  async logoutUser(token: string) {
+    if (!token) {
+      throw new UnauthorizedError("You are not logged in.");
+    }
 
-  // async generateAccessToken(user: User) {}
+    const isTokenExist = await findRefreshToken(token);
+
+    if (isTokenExist) {
+      await deleteRefreshToken(token);
+    }
+  }
 
   async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt(10);
