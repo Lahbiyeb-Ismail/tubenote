@@ -13,6 +13,7 @@ import {
 import isAuthenticated from "../middlewares/isAuthenticated";
 import validateRequest from "../middlewares/validateRequest";
 
+import noteController from "../controllers/noteController";
 import { paginationQuerySchema } from "../schemas";
 import {
   noteBodySchema,
@@ -30,7 +31,7 @@ router.use(isAuthenticated);
 router
   .route("/")
   .get(validateRequest({ query: paginationQuerySchema }), getUserNotes)
-  .post(validateRequest({ body: noteBodySchema }), createNote);
+  .post(validateRequest({ body: noteBodySchema }), noteController.addNewNote);
 
 // - GET /recent: Get the most recent notes for the authenticated user.
 router.route("/recent").get(getUserRecentNotes);
