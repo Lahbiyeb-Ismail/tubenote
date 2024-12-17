@@ -30,7 +30,7 @@ router
 router.route("/logout").post(authController.logout);
 
 // - POST /refresh: Refresh the user's access token.
-router.route("/refresh").post(handleRefreshToken);
+router.route("/refresh").post(authController.refresh);
 
 // - GET /google: Initiate Google OAuth authentication.
 router
