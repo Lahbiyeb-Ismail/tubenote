@@ -27,7 +27,7 @@ router
   .post(validateRequest({ body: loginSchema }), authController.login);
 
 // - POST /logout: Log out the current user.
-router.route("/logout").post(handleLogout);
+router.route("/logout").post(authController.logout);
 
 // - POST /refresh: Refresh the user's access token.
 router.route("/refresh").post(handleRefreshToken);
