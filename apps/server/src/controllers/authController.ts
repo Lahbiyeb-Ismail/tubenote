@@ -1,6 +1,9 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
-import { refreshTokenCookieConfig } from "../config/cookie.config";
+import {
+  clearRefreshTokenCookieConfig,
+  refreshTokenCookieConfig,
+} from "../config/cookie.config";
 import { REFRESH_TOKEN_NAME } from "../constants/auth";
 import authService from "../services/authService";
 import type { TypedRequest } from "../types";
@@ -32,6 +35,18 @@ class AuthController {
       message: "Login successful",
       accessToken,
     });
+  }
+
+  async logout(req: TypedRequest, res: Response) {
+    const cookies = req.cookies;
+
+    const refreshToken = cookies[REFRESH_TOKEN_NAME];
+
+    await authService.logoutUser(refreshToken);
+
+    res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
+
+    res.sendStatus(httpStatus.NO_CONTENT);
   }
 }
 
