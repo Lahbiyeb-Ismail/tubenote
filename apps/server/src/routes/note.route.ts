@@ -37,7 +37,7 @@ router
   .post(validateRequest({ body: noteBodySchema }), noteController.addNewNote);
 
 // - GET /recent: Get the most recent notes for the authenticated user.
-router.route("/recent").get(getUserRecentNotes);
+router.route("/recent").get(noteController.getUserRecentNotes);
 
 // - GET /recently-updated: Get the recently updated notes for the authenticated user.
 router.route("/recently-updated").get(getUserRecentlyUpdatedNotes);
