@@ -63,6 +63,20 @@ class NoteService {
 
     return recentNotes;
   }
+
+  async fetchRecentlyUpdatedNotes({
+    userId,
+    limit,
+    orderBy,
+  }: IFindMany): Promise<Note[]> {
+    const recentlyUpdatedNotes = await noteDatabase.findMany({
+      userId,
+      limit,
+      orderBy,
+    });
+
+    return recentlyUpdatedNotes;
+  }
 }
 
 export default new NoteService();
