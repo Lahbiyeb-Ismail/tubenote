@@ -9,6 +9,17 @@ interface IUserId {
 interface INoteId {
   noteId: string;
 }
+
+interface Pagination {
+  limit: number;
+  skip: number;
+}
+
+interface OrderByParam {
+  orderBy?:
+    | Prisma.NoteOrderByWithRelationInput
+    | Prisma.NoteOrderByWithRelationInput[];
+}
 export interface IFindNote extends IUserId, INoteId {}
 
 export interface IUpdateNote extends IUserId, INoteId {
@@ -16,6 +27,8 @@ export interface IUpdateNote extends IUserId, INoteId {
 }
 
 export interface IDeleteNote extends IUserId, INoteId {}
+
+export interface IFindMany extends IUserId, Pagination, OrderByParam {}
 
 class NoteDatabase {
   async find({ noteId, userId }: IFindNote): Promise<Note | null> {
@@ -67,6 +80,38 @@ class NoteDatabase {
           },
         }),
       { errorMessage: "Failed to delete note." }
+    );
+  }
+
+  async findMany({
+    userId,
+    limit,
+    skip,
+    orderBy = { createdAt: "desc" },
+  }: IFindMany): Promise<Note[]> {
+    return handleAsyncOperation(
+      () =>
+        prismaClient.note.findMany({
+          where: {
+            userId,
+          },
+          take: limit,
+          skip,
+          orderBy,
+        }),
+      { errorMessage: "Failed to fetch user notes." }
+    );
+  }
+
+  async count({ userId }: IUserId): Promise<number> {
+    return handleAsyncOperation(
+      () =>
+        prismaClient.note.count({
+          where: {
+            userId,
+          },
+        }),
+      { errorMessage: "Failed to count notes." }
     );
   }
 }
