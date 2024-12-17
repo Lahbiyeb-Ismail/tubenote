@@ -49,7 +49,7 @@ router
     validateRequest({ body: updateNoteBodySchema }),
     noteController.updateNote
   )
-  .get(getNoteById)
+  .get(noteController.getNoteById)
   .delete(noteController.deleteNote);
 
 export default router;
