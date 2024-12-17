@@ -1,9 +1,11 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
+import type { Profile } from "passport-google-oauth20";
 import {
   clearRefreshTokenCookieConfig,
   refreshTokenCookieConfig,
 } from "../config/cookie.config";
+import envConfig from "../config/envConfig";
 import { REFRESH_TOKEN_NAME } from "../constants/auth";
 import { UnauthorizedError } from "../errors";
 import authService from "../services/authService";
@@ -68,6 +70,18 @@ class AuthController {
     res.status(httpStatus.OK).json({
       accessToken,
     });
+  }
+
+  async loginWithGoogle(req: TypedRequest, res: Response) {
+    const user = req.user as Profile;
+
+    const { accessToken, refreshToken } = await authService.googleLogin(user);
+
+    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+
+    res.redirect(
+      `${envConfig.client.url}/auth/callback?access_token=${encodeURIComponent(JSON.stringify(accessToken))}`
+    );
   }
 }
 
