@@ -130,12 +130,13 @@ Below is a checklist of features that has been implemented:
 - [x] Forgot password funtionality
 - [x] Refresh token funtionality
 - [x] Pagination functionality
+- [x] Export notes to PDF
 
 ## Features in progress:
 
 Below is a checklist of features planned for this application:
 
-- [ ] Export notes to PDF
+- [ ] Improve email verification process (provide users with a method to verify their email address)
 - [ ] Search functionality for notes
 - [ ] Share notes with other users
 - [ ] Cashing functionality using Redis
