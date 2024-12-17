@@ -50,6 +50,6 @@ router
     noteController.updateNote
   )
   .get(getNoteById)
-  .delete(deleteNote);
+  .delete(noteController.deleteNote);
 
 export default router;
