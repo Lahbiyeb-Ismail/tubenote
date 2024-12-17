@@ -1,6 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 
+import envConfig from "../config/envConfig";
+import { type BaseError, NotFoundError } from "../errors";
 import logger from "../utils/logger";
 
 /**
@@ -17,19 +19,23 @@ import logger from "../utils/logger";
  *
  */
 function errorHandler(
-  err: Error,
+  err: BaseError,
   _req: Request,
   res: Response,
   next: NextFunction
 ) {
-  const status =
-    res.statusCode !== httpStatus.OK
-      ? res.statusCode
-      : httpStatus.INTERNAL_SERVER_ERROR;
+  const statusCode = err.httpCode
+    ? err.httpCode
+    : httpStatus.INTERNAL_SERVER_ERROR;
 
-  logger.error(`${err.message}. Error stack: ${err.stack}`);
+  if (envConfig.node_env === "development") {
+    logger.error(`${err.name} - ${statusCode}: ${err.message}.`);
+    logger.error(`Error Stack: ${err.stack}`);
+  } else {
+    logger.error(`${err.name} - ${statusCode}: ${err.message}.`);
+  }
 
-  res.status(status).json({ message: err.message });
+  res.status(statusCode).json({ message: err.message });
 
   next();
 }
@@ -46,10 +52,8 @@ function errorHandler(
  * @param res - The Express response object.
  * @param next - The next middleware function in the stack.
  */
-function notFoundRoute(req: Request, res: Response, next: NextFunction) {
-  const error = new Error(`404 - Route Not Found - ${req.originalUrl}`);
-
-  res.status(404);
+function notFoundRoute(req: Request, _res: Response, next: NextFunction) {
+  const error = new NotFoundError(`404 - Route Not Found - ${req.originalUrl}`);
 
   next(error);
 }
