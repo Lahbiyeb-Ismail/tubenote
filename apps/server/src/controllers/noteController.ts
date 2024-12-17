@@ -1,7 +1,7 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { TypedRequest } from "../types";
+import type { EmptyRecord, TypedRequest } from "../types";
 import type { NoteBody, NoteIdParam } from "../types/note.type";
 
 import noteService from "../services/noteService";
@@ -39,6 +39,18 @@ class NoteController {
     res
       .status(httpStatus.OK)
       .json({ message: "Note updated successfully.", note: updatedNote });
+  }
+
+  async deleteNote(
+    req: TypedRequest<EmptyRecord, NoteIdParam>,
+    res: Response
+  ): Promise<void> {
+    const userId = req.userId;
+    const { noteId } = req.params;
+
+    await noteService.deleteNote({ userId, noteId });
+
+    res.status(httpStatus.OK).json({ message: "Note deleted successfully." });
   }
 }
 
