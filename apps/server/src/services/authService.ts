@@ -1,5 +1,6 @@
 import type { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import type { Profile } from "passport-google-oauth20";
 import { REFRESH_TOKEN_SECRET } from "../constants/auth";
 import userDatabase from "../databases/userDatabase";
 import {
@@ -10,6 +11,7 @@ import {
 } from "../errors";
 import { createNewTokens, verifyToken } from "../helpers/auth.helper";
 import type { JwtPayload } from "../types";
+import type { GoogleUser } from "../types/auth.type";
 import emailService from "./emailService";
 import {
   deleteRefreshToken,
@@ -131,6 +133,48 @@ class AuthService {
     }
 
     const { accessToken, refreshToken } = await createNewTokens(userId);
+
+    return { accessToken, refreshToken };
+  }
+
+  async googleLogin(
+    profile: Profile
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    if (!profile) {
+      throw new UnauthorizedError("Google login failed. Please try again.");
+    }
+
+    const {
+      sub: googleId,
+      email,
+      email_verified,
+      name,
+      picture,
+    } = profile._json as GoogleUser;
+
+    if (!email_verified) {
+      throw new UnauthorizedError("Email not verified. Please try again.");
+    }
+
+    let foundUser = await userDatabase.findUser({ email });
+
+    if (!foundUser) {
+      foundUser = await userDatabase.createNewUser({
+        username: name,
+        emailVerified: email_verified,
+        password: googleId,
+        profilePicture: picture,
+        email,
+        googleId,
+      });
+    } else if (!foundUser.googleId) {
+      foundUser = await userDatabase.updateUser({
+        userId: foundUser.id,
+        data: { googleId },
+      });
+    }
+
+    const { accessToken, refreshToken } = await createNewTokens(foundUser.id);
 
     return { accessToken, refreshToken };
   }
