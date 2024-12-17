@@ -101,6 +101,21 @@ class NoteController {
 
     res.status(httpStatus.OK).json({ notes });
   }
+
+  async getRecentlyUpatedNotes(
+    req: TypedRequest,
+    res: Response
+  ): Promise<void> {
+    const userId = req.userId;
+
+    const notes = await noteService.fetchRecentNotes({
+      userId,
+      limit: 2,
+      orderBy: { updatedAt: "desc" },
+    });
+
+    res.status(httpStatus.OK).json({ notes });
+  }
 }
 
 export default new NoteController();
