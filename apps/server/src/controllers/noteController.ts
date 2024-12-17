@@ -93,6 +93,14 @@ class NoteController {
       },
     });
   }
+
+  async getUserRecentNotes(req: TypedRequest, res: Response): Promise<void> {
+    const userId = req.userId;
+
+    const notes = await noteService.fetchRecentNotes({ userId, limit: 2 });
+
+    res.status(httpStatus.OK).json({ notes });
+  }
 }
 
 export default new NoteController();
