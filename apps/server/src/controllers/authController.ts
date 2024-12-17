@@ -5,6 +5,7 @@ import {
   refreshTokenCookieConfig,
 } from "../config/cookie.config";
 import { REFRESH_TOKEN_NAME } from "../constants/auth";
+import { UnauthorizedError } from "../errors";
 import authService from "../services/authService";
 import type { TypedRequest } from "../types";
 import type { LoginCredentials, RegisterCredentials } from "../types/auth.type";
@@ -47,6 +48,26 @@ class AuthController {
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
     res.sendStatus(httpStatus.NO_CONTENT);
+  }
+
+  async refresh(req: TypedRequest, res: Response) {
+    const cookies = req.cookies;
+
+    const token = cookies[REFRESH_TOKEN_NAME];
+
+    if (!token) {
+      throw new UnauthorizedError("Unauthorized access. Please try again.");
+    }
+
+    res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
+
+    const { accessToken, refreshToken } = await authService.refreshToken(token);
+
+    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+
+    res.status(httpStatus.OK).json({
+      accessToken,
+    });
   }
 }
 
