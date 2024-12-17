@@ -2,11 +2,22 @@ import type { Note, Prisma } from "@prisma/client";
 
 import noteDatabase, {
   type IDeleteNote,
+  type IFindNote,
   type IUpdateNote,
 } from "../databases/noteDatabase";
 import { NotFoundError } from "../errors";
 
 class NoteService {
+  async findNote({ noteId, userId }: IFindNote): Promise<Note> {
+    const note = await noteDatabase.find({ noteId, userId });
+
+    if (!note) {
+      throw new NotFoundError("Note not found.");
+    }
+
+    return note;
+  }
+
   async addNewNote(noteData: Prisma.NoteCreateInput): Promise<Note> {
     const note = await noteDatabase.create(noteData);
 
@@ -14,11 +25,7 @@ class NoteService {
   }
 
   async updateNote({ noteId, userId, data }: IUpdateNote): Promise<Note> {
-    const note = await noteDatabase.find({ noteId, userId });
-
-    if (!note) {
-      throw new NotFoundError("Note not found.");
-    }
+    await this.findNote({ userId, noteId });
 
     const updatedNote = await noteDatabase.update({
       noteId,
@@ -30,11 +37,7 @@ class NoteService {
   }
 
   async deleteNote({ noteId, userId }: IDeleteNote): Promise<void> {
-    const note = await noteDatabase.find({ noteId, userId });
-
-    if (!note) {
-      throw new NotFoundError("Note not found.");
-    }
+    await this.findNote({ userId, noteId });
 
     await noteDatabase.delete({ noteId, userId });
   }
