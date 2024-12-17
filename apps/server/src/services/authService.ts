@@ -2,6 +2,7 @@ import type { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import userDatabase from "../databases/userDatabase";
 import { ConflictError, NotFoundError, UnauthorizedError } from "../errors";
+import { createNewTokens } from "../helpers/auth.helper";
 import emailService from "./emailService";
 import verificationTokenService from "./verificationTokenService";
 
@@ -42,7 +43,10 @@ class AuthService {
     return newUser;
   }
 
-  async loginUser(email: string, password: string) {
+  async loginUser(
+    email: string,
+    password: string
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const user = await userDatabase.findUser({ email });
 
     if (!user) {
@@ -66,7 +70,9 @@ class AuthService {
       );
     }
 
-    return user;
+    const { accessToken, refreshToken } = await createNewTokens(user.id);
+
+    return { accessToken, refreshToken };
   }
 
   // async logoutUser() {}
