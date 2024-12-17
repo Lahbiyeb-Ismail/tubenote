@@ -12,7 +12,7 @@ interface INoteId {
 
 interface Pagination {
   limit: number;
-  skip: number;
+  skip?: number;
 }
 
 interface OrderByParam {
