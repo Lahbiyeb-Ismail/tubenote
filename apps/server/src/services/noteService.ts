@@ -2,6 +2,7 @@ import type { Note, Prisma } from "@prisma/client";
 
 import noteDatabase, {
   type IDeleteNote,
+  type IFindMany,
   type IFindNote,
   type IUpdateNote,
 } from "../databases/noteDatabase";
@@ -40,6 +41,21 @@ class NoteService {
     await this.findNote({ userId, noteId });
 
     await noteDatabase.delete({ noteId, userId });
+  }
+
+  async fetchUserNotes({ userId, skip, limit }: IFindMany): Promise<{
+    notes: Note[];
+    notesCount: number;
+    totalPages: number;
+  }> {
+    const [notes, notesCount] = await Promise.all([
+      noteDatabase.findMany({ userId, skip, limit }),
+      noteDatabase.count({ userId }),
+    ]);
+
+    const totalPages = Math.ceil(notesCount / limit);
+
+    return { notes, notesCount, totalPages };
   }
 }
 
