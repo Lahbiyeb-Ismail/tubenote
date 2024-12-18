@@ -37,6 +37,18 @@ class ResetPasswordTokenDatabase {
 
     return token;
   }
+
+  async deleteMany(userId: string): Promise<void> {
+    handleAsyncOperation(
+      () =>
+        prismaClient.resetPasswordToken.deleteMany({
+          where: {
+            userId,
+          },
+        }),
+      { errorMessage: "Failed to delete reset password tokens." }
+    );
+  }
 }
 
 export default new ResetPasswordTokenDatabase();
