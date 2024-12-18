@@ -1,7 +1,10 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
-import videoService from "../services/videoService";
+
 import type { EmptyRecord, PaginationQuery, TypedRequest } from "../types";
+
+import videoService from "../services/videoService";
+import type { VideoIdParam } from "../types/video.type";
 
 class VideoController {
   async getUserVideos(
@@ -28,6 +31,18 @@ class VideoController {
         hasPrevPage: page > 1,
       },
     });
+  }
+
+  async getVideoById(
+    req: TypedRequest<EmptyRecord, VideoIdParam>,
+    res: Response
+  ) {
+    const { videoId } = req.params;
+    const userId = req.userId;
+
+    const video = await videoService.find({ videoId, userId });
+
+    res.status(httpStatus.OK).json(video);
   }
 }
 
