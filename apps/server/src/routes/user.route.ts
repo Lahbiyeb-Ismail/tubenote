@@ -35,7 +35,7 @@ router
   .route("/update-password")
   .patch(
     validateRequest({ body: updatePasswordBodySchema }),
-    updateUserPassword
+    userController.updateUserPassword
   );
 
 export default router;

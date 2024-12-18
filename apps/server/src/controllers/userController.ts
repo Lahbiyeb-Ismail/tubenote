@@ -2,7 +2,7 @@ import type { Response } from "express";
 import httpStatus from "http-status";
 import userService from "../services/userService";
 import type { TypedRequest } from "../types";
-import type { UpdateUserBody } from "../types/user.type";
+import type { UpdatePasswordBody, UpdateUserBody } from "../types/user.type";
 
 class UserController {
   async getCurrentUser(req: TypedRequest, res: Response): Promise<void> {
@@ -33,6 +33,21 @@ class UserController {
     await userService.updateUser({ userId, username, email });
 
     res.status(httpStatus.OK).json({ message: "User updated successfully." });
+  }
+
+  async updateUserPassword(
+    req: TypedRequest<UpdatePasswordBody>,
+    res: Response
+  ): Promise<void> {
+    const userId = req.userId;
+
+    const { currentPassword, newPassword } = req.body;
+
+    await userService.updatePassword({ userId, currentPassword, newPassword });
+
+    res
+      .status(httpStatus.OK)
+      .json({ message: "Password updated successfully." });
   }
 }
 
