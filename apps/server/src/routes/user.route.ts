@@ -25,7 +25,10 @@ router.use(isAuthenticated);
 router
   .route("/me")
   .get(userController.getCurrentUser)
-  .patch(validateRequest({ body: updateUserBodySchema }), updateCurrentUser);
+  .patch(
+    validateRequest({ body: updateUserBodySchema }),
+    userController.updateCurrentUser
+  );
 
 // - PATCH /update-password: Update the current user's password (requires request body validation)
 router
