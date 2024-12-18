@@ -9,6 +9,7 @@ import {
 import isAuthenticated from "../middlewares/isAuthenticated";
 import validateRequest from "../middlewares/validateRequest";
 
+import userController from "../controllers/userController";
 import {
   updatePasswordBodySchema,
   updateUserBodySchema,
@@ -23,7 +24,7 @@ router.use(isAuthenticated);
 // - PATCH /me: Update the current user's information (requires request body validation)
 router
   .route("/me")
-  .get(getCurrentUser)
+  .get(userController.getCurrentUser)
   .patch(validateRequest({ body: updateUserBodySchema }), updateCurrentUser);
 
 // - PATCH /update-password: Update the current user's password (requires request body validation)
