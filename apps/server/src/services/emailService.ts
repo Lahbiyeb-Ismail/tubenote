@@ -1,5 +1,6 @@
 import nodemailer, { type Transporter } from "nodemailer";
 import envConfig from "../config/envConfig";
+import { createResetPasswordEmail } from "../helpers/resetPassword.helper";
 import { createVerificationEmail } from "../helpers/verifyEmail.helper";
 
 /**
@@ -17,7 +18,7 @@ interface ISendEmailProps {
   logoPath: string;
 }
 
-interface ISendVerificationEmail {
+interface ISendEmail {
   email: string;
   token: string;
 }
@@ -68,16 +69,26 @@ class EmailService {
     });
   }
 
-  async sendVerificationEmail({
-    email,
-    token,
-  }: ISendVerificationEmail): Promise<void> {
+  async sendVerificationEmail({ email, token }: ISendEmail): Promise<void> {
     const { htmlContent, logoPath, textContent } =
       await createVerificationEmail(token);
 
     await this.sendEmail({
       emailRecipient: email,
       emailSubject: "Verify your email",
+      htmlContent,
+      textContent,
+      logoPath,
+    });
+  }
+
+  async sendResetPasswordEmail({ email, token }: ISendEmail): Promise<void> {
+    const { htmlContent, logoPath, textContent } =
+      await createResetPasswordEmail(token);
+
+    await this.sendEmail({
+      emailRecipient: email,
+      emailSubject: "Reset Password",
       htmlContent,
       textContent,
       logoPath,
