@@ -8,7 +8,7 @@ class UserController {
   async getCurrentUser(req: TypedRequest, res: Response): Promise<void> {
     const userId = req.userId;
 
-    const user = await userService.getUser(userId);
+    const user = await userService.getUserById(userId);
 
     res.status(httpStatus.OK).json({
       user: {
