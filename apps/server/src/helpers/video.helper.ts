@@ -1,5 +1,4 @@
 import { YOUTUBE_API_KEY, YOUTUBE_API_URL } from "../constants";
-
 /**
  * Fetches data for a YouTube video using the YouTube Data API.
  *
@@ -7,7 +6,7 @@ import { YOUTUBE_API_KEY, YOUTUBE_API_URL } from "../constants";
  * @returns A promise that resolves to the video data, or undefined if an error occurs.
  * @throws Will throw an error if the HTTP request fails.
  */
-export async function fetchYoutubeVideoDetails(videoId: string) {
+export async function fetchYoutubeVideoData(videoId: string) {
   try {
     const response = await fetch(
       `${YOUTUBE_API_URL}/videos?id=${videoId}&key=${YOUTUBE_API_KEY}&part=snippet,statistics,player`
