@@ -4,10 +4,10 @@ import prismaClient from "../lib/prisma";
 import authService from "../services/authService";
 import handleAsyncOperation from "../utils/handleAsyncOperation";
 
-type UpdateUserProps = {
+export interface IUpdateUser {
   userId: string;
   data: Prisma.UserUpdateInput;
-};
+}
 
 class UserDatabase {
   async createNewUser(userData: Prisma.UserCreateInput): Promise<User> {
@@ -39,7 +39,7 @@ class UserDatabase {
     return user;
   }
 
-  async updateUser({ userId, data }: UpdateUserProps): Promise<User> {
+  async updateUser({ userId, data }: IUpdateUser): Promise<User> {
     return handleAsyncOperation(
       () =>
         prismaClient.user.update({
