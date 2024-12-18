@@ -9,6 +9,7 @@ import {
 import isAuthenticated from "../middlewares/isAuthenticated";
 import validateRequest from "../middlewares/validateRequest";
 
+import videoController from "../controllers/videoController";
 import { paginationQuerySchema } from "../schemas";
 import { videoIdParamSchema } from "../schemas/video.schema";
 
@@ -21,7 +22,10 @@ router.use(isAuthenticated);
 // - POST /: Create a new video (requires request body validation)
 router
   .route("/")
-  .get(validateRequest({ query: paginationQuerySchema }), getUserVideos);
+  .get(
+    validateRequest({ query: paginationQuerySchema }),
+    videoController.getUserVideos
+  );
 
 router.route("/:videoId/notes").get(
   validateRequest({
