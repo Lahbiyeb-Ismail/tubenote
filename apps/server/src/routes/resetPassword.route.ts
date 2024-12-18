@@ -9,6 +9,7 @@ import {
 import validateRequest from "../middlewares/validateRequest";
 import { verifyPasswordResetToken } from "../middlewares/verifyPasswordResetToken";
 
+import resetPasswordController from "../controllers/resetPasswordController";
 import {
   forgotPasswordBodySchema,
   resetPasswordBodySchema,
@@ -22,7 +23,7 @@ router
   .route("/forgot-password")
   .post(
     validateRequest({ body: forgotPasswordBodySchema }),
-    handleForgotPassword
+    resetPasswordController.forgotPassword
   );
 
 // Apply verifyPasswordResetToken middleware to all routes below
