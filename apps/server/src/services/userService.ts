@@ -4,7 +4,17 @@ import { BadRequestError, NotFoundError } from "../errors";
 import authService from "./authService";
 
 class UserService {
-  async getUser(userId: string): Promise<User> {
+  async getUserByEmail(email: string): Promise<User> {
+    const user = await userDatabase.findUser({ email });
+
+    if (!user) {
+      throw new NotFoundError("User not found. Please try again.");
+    }
+
+    return user;
+  }
+
+  async getUserById(userId: string): Promise<User> {
     const user = await userDatabase.findUser({ id: userId });
 
     if (!user) {
@@ -23,9 +33,9 @@ class UserService {
     username: string;
     email: string;
   }): Promise<void> {
-    await this.getUser(userId);
+    await this.getUserById(userId);
 
-    const existingUser = await userDatabase.findUser({ email });
+    const existingUser = await this.getUserByEmail(email);
 
     if (existingUser && existingUser.id !== userId) {
       throw new BadRequestError(
@@ -41,7 +51,7 @@ class UserService {
     currentPassword,
     newPassword,
   }: { userId: string; currentPassword: string; newPassword: string }) {
-    const user = await this.getUser(userId);
+    const user = await this.getUserById(userId);
 
     const isPasswordValid = await authService.comparePasswords(
       currentPassword,
