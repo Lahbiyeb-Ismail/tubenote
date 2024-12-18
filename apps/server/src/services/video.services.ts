@@ -1,6 +1,6 @@
 import type { Prisma, Video } from "@prisma/client";
 
-import { fetchYoutubeVideoDetails } from "../helpers/video.helper";
+import { fetchYoutubeVideoData } from "../helpers/video.helper";
 import prismaClient from "../lib/prisma";
 import handleAsyncOperation from "../utils/handleAsyncOperation";
 
@@ -64,7 +64,7 @@ async function findOrCreateVideo(
     return linkUserToVideo(existingVideo, userId);
   }
 
-  const videoData = await fetchYoutubeVideoDetails(videoId);
+  const videoData = await fetchYoutubeVideoData(videoId);
   if (!videoData.length) {
     throw new Error("No video data found");
   }
