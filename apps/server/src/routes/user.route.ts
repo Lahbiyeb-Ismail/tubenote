@@ -1,15 +1,10 @@
 import { Router } from "express";
 
-import {
-  getCurrentUser,
-  updateCurrentUser,
-  updateUserPassword,
-} from "../controllers/user.controller";
-
 import isAuthenticated from "../middlewares/isAuthenticated";
 import validateRequest from "../middlewares/validateRequest";
 
 import userController from "../controllers/userController";
+
 import {
   updatePasswordBodySchema,
   updateUserBodySchema,
