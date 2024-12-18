@@ -37,6 +37,9 @@ router.route("/:videoId/notes").get(
 
 router
   .route("/:videoId")
-  .get(validateRequest({ params: videoIdParamSchema }), handleGetVideoById);
+  .get(
+    validateRequest({ params: videoIdParamSchema }),
+    videoController.getVideoById
+  );
 
 export default router;
