@@ -15,7 +15,7 @@ interface Pagination {
   skip?: number;
 }
 
-interface OrderByParam {
+export interface OrderByParam {
   orderBy?:
     | Prisma.NoteOrderByWithRelationInput
     | Prisma.NoteOrderByWithRelationInput[];
@@ -28,7 +28,9 @@ export interface IUpdateNote extends IUserId, INoteId {
 
 export interface IDeleteNote extends IUserId, INoteId {}
 
-export interface IFindMany extends IUserId, Pagination, OrderByParam {}
+export interface IFindMany extends Pagination, OrderByParam {
+  params: Prisma.NoteWhereInput;
+}
 
 class NoteDatabase {
   async find({ noteId, userId }: IFindNote): Promise<Note | null> {
@@ -84,7 +86,7 @@ class NoteDatabase {
   }
 
   async findMany({
-    userId,
+    params,
     limit,
     skip,
     orderBy = { createdAt: "desc" },
@@ -93,7 +95,7 @@ class NoteDatabase {
       () =>
         prismaClient.note.findMany({
           where: {
-            userId,
+            ...params,
           },
           take: limit,
           skip,
@@ -103,12 +105,12 @@ class NoteDatabase {
     );
   }
 
-  async count({ userId }: IUserId): Promise<number> {
+  async count(param: Prisma.NoteWhereInput): Promise<number> {
     return handleAsyncOperation(
       () =>
         prismaClient.note.count({
           where: {
-            userId,
+            ...param,
           },
         }),
       { errorMessage: "Failed to count notes." }
