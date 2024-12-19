@@ -4,12 +4,16 @@ import isAuthenticated from "../middlewares/isAuthenticated";
 import validateRequest from "../middlewares/validateRequest";
 
 import noteController from "../controllers/noteController";
+
 import { paginationQuerySchema } from "../schemas";
+
 import {
   noteBodySchema,
   noteIdParamSchema,
   updateNoteBodySchema,
 } from "../schemas/note.schema";
+
+import { videoIdParamSchema } from "../schemas/video.schema";
 
 const router = Router();
 
@@ -31,6 +35,15 @@ router.route("/recent").get(noteController.getUserRecentNotes);
 
 // - GET /recently-updated: Get the recently updated notes for the authenticated user.
 router.route("/recently-updated").get(noteController.getRecentlyUpatedNotes);
+
+// - GET /video/:videoId: Get all notes for a specific video (requires request params validation).
+router.route("/video/:videoId").get(
+  validateRequest({
+    params: videoIdParamSchema,
+    query: paginationQuerySchema,
+  }),
+  noteController.getNotesByVideoId
+);
 
 // - GET /:noteId: Get a specific note by its ID (requires request params validation).
 // - PATCH /:noteId: Update a specific note by its ID (requires request params validation).
