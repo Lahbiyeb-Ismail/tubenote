@@ -1,24 +1,30 @@
 import type { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import type { Profile } from "passport-google-oauth20";
+
 import { REFRESH_TOKEN_SECRET } from "../constants/auth";
+
 import userDatabase from "../databases/userDatabase";
+
 import {
   ConflictError,
   ForbiddenError,
   NotFoundError,
   UnauthorizedError,
 } from "../errors";
+
 import { createNewTokens, verifyToken } from "../helpers/auth.helper";
+
 import type { JwtPayload } from "../types";
 import type { GoogleUser } from "../types/auth.type";
+
 import emailService from "./emailService";
+
 import {
   deleteRefreshToken,
   deleteRefreshTokenByUserId,
   findRefreshToken,
 } from "./refreshToken.services";
-import verificationTokenService from "./verificationTokenService";
 
 interface IRegisterUser {
   username: string;
@@ -46,12 +52,9 @@ class AuthService {
       password,
     });
 
-    const emailVerificationToken =
-      await verificationTokenService.createEmailVericationToken(newUser.id);
-
     await emailService.sendVerificationEmail({
       email: newUser.email,
-      token: emailVerificationToken,
+      userId: newUser.id,
     });
 
     return newUser;
