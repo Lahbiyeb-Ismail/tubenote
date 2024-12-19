@@ -1,7 +1,9 @@
 import nodemailer, { type Transporter } from "nodemailer";
 import envConfig from "../config/envConfig";
+import resetPasswordDatabase from "../databases/resetPasswordDatabase";
 import { createResetPasswordEmail } from "../helpers/resetPassword.helper";
 import { createVerificationEmail } from "../helpers/verifyEmail.helper";
+import verificationTokenService from "./verificationTokenService";
 
 /**
  * This function sends an email to the given email with the email verification link
@@ -20,7 +22,7 @@ interface ISendEmailProps {
 
 interface ISendEmail {
   email: string;
-  token: string;
+  userId: string;
 }
 
 class EmailService {
@@ -69,7 +71,10 @@ class EmailService {
     });
   }
 
-  async sendVerificationEmail({ email, token }: ISendEmail): Promise<void> {
+  async sendVerificationEmail({ email, userId }: ISendEmail): Promise<void> {
+    const token =
+      await verificationTokenService.createEmailVericationToken(userId);
+
     const { htmlContent, logoPath, textContent } =
       await createVerificationEmail(token);
 
@@ -82,7 +87,9 @@ class EmailService {
     });
   }
 
-  async sendResetPasswordEmail({ email, token }: ISendEmail): Promise<void> {
+  async sendResetPasswordEmail({ email, userId }: ISendEmail): Promise<void> {
+    const token = await resetPasswordDatabase.create(userId);
+
     const { htmlContent, logoPath, textContent } =
       await createResetPasswordEmail(token);
 
