@@ -16,7 +16,7 @@ class NoteController {
       userId,
     };
 
-    const note = await noteService.addNewNote(noteData);
+    const note = await noteService.addNewNote({ data: noteData });
 
     res
       .status(httpStatus.CREATED)
@@ -32,8 +32,7 @@ class NoteController {
     const noteData = req.body;
 
     const updatedNote = await noteService.updateNote({
-      userId,
-      noteId,
+      where: { id: noteId, userId },
       data: noteData,
     });
 
@@ -49,7 +48,7 @@ class NoteController {
     const userId = req.userId;
     const { noteId } = req.params;
 
-    await noteService.deleteNote({ userId, noteId });
+    await noteService.deleteNote({ where: { id: noteId, userId } });
 
     res.status(httpStatus.OK).json({ message: "Note deleted successfully." });
   }
@@ -61,7 +60,7 @@ class NoteController {
     const userId = req.userId;
     const { noteId } = req.params;
 
-    const note = await noteService.findNote({ userId, noteId });
+    const note = await noteService.findNote({ where: { id: noteId, userId } });
 
     res.status(httpStatus.OK).json({ note });
   }
@@ -78,7 +77,7 @@ class NoteController {
     const skip = (page - 1) * limit;
 
     const { notes, notesCount, totalPages } = await noteService.fetchUserNotes({
-      userId,
+      where: { userId },
       skip,
       limit,
     });
@@ -98,7 +97,10 @@ class NoteController {
   async getUserRecentNotes(req: TypedRequest, res: Response): Promise<void> {
     const userId = req.userId;
 
-    const notes = await noteService.fetchRecentNotes({ userId, limit: 2 });
+    const notes = await noteService.fetchRecentNotes({
+      where: { userId },
+      limit: 2,
+    });
 
     res.status(httpStatus.OK).json({ notes });
   }
@@ -110,7 +112,7 @@ class NoteController {
     const userId = req.userId;
 
     const notes = await noteService.fetchRecentNotes({
-      userId,
+      where: { userId },
       limit: 2,
       orderBy: { updatedAt: "desc" },
     });
@@ -132,8 +134,7 @@ class NoteController {
 
     const { notes, notesCount, totalPages } =
       await noteService.fetchNotesByVideoId({
-        userId,
-        videoId,
+        where: { userId, youtubeId: videoId },
         limit,
         skip,
       });
