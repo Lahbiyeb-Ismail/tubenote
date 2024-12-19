@@ -5,6 +5,7 @@ import type { EmptyRecord, PaginationQuery, TypedRequest } from "../types";
 import type { NoteBody, NoteIdParam } from "../types/note.type";
 
 import noteService from "../services/noteService";
+import type { VideoIdParam } from "../types/video.type";
 
 class NoteController {
   async addNewNote(req: TypedRequest<NoteBody>, res: Response): Promise<void> {
@@ -115,6 +116,38 @@ class NoteController {
     });
 
     res.status(httpStatus.OK).json({ notes });
+  }
+
+  async getNotesByVideoId(
+    req: TypedRequest<EmptyRecord, VideoIdParam, PaginationQuery>,
+    res: Response
+  ) {
+    const userId = req.userId;
+    const { videoId } = req.params;
+
+    const page = Number(req.query.page);
+    const limit = Number(req.query.limit);
+
+    const skip = (page - 1) * limit;
+
+    const { notes, notesCount, totalPages } =
+      await noteService.fetchNotesByVideoId({
+        userId,
+        videoId,
+        limit,
+        skip,
+      });
+
+    res.status(httpStatus.OK).json({
+      notes,
+      pagination: {
+        totalPages,
+        currentPage: page,
+        totalNotes: notesCount,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+    });
   }
 }
 
