@@ -22,7 +22,7 @@ interface ISendEmailProps {
 
 interface ISendEmail {
   email: string;
-  userId: string;
+  token: string;
 }
 
 class EmailService {
@@ -71,10 +71,7 @@ class EmailService {
     });
   }
 
-  async sendVerificationEmail({ email, userId }: ISendEmail): Promise<void> {
-    const token =
-      await verificationTokenService.createEmailVericationToken(userId);
-
+  async sendVerificationEmail({ email, token }: ISendEmail): Promise<void> {
     const { htmlContent, logoPath, textContent } =
       await createVerificationEmail(token);
 
@@ -87,9 +84,7 @@ class EmailService {
     });
   }
 
-  async sendResetPasswordEmail({ email, userId }: ISendEmail): Promise<void> {
-    const token = await resetPasswordDatabase.create(userId);
-
+  async sendResetPasswordEmail({ email, token }: ISendEmail): Promise<void> {
     const { htmlContent, logoPath, textContent } =
       await createResetPasswordEmail(token);
 
