@@ -5,6 +5,7 @@ import noteDatabase, {
   type IFindMany,
   type IFindNote,
   type IUpdateNote,
+  type OrderByParam,
 } from "../databases/noteDatabase";
 import { NotFoundError } from "../errors";
 
@@ -43,13 +44,17 @@ class NoteService {
     await noteDatabase.delete({ noteId, userId });
   }
 
-  async fetchUserNotes({ userId, skip, limit }: IFindMany): Promise<{
+  async fetchUserNotes({
+    userId,
+    skip,
+    limit,
+  }: { userId: string; skip: number; limit: number }): Promise<{
     notes: Note[];
     notesCount: number;
     totalPages: number;
   }> {
     const [notes, notesCount] = await Promise.all([
-      noteDatabase.findMany({ userId, skip, limit }),
+      noteDatabase.findMany({ params: { userId }, skip, limit }),
       noteDatabase.count({ userId }),
     ]);
 
@@ -58,8 +63,16 @@ class NoteService {
     return { notes, notesCount, totalPages };
   }
 
-  async fetchRecentNotes({ userId, limit }: IFindMany): Promise<Note[]> {
-    const recentNotes = await noteDatabase.findMany({ userId, limit });
+  async fetchRecentNotes({
+    userId,
+    limit,
+    orderBy,
+  }: { userId: string; limit: number } & OrderByParam): Promise<Note[]> {
+    const recentNotes = await noteDatabase.findMany({
+      params: { userId },
+      limit,
+      orderBy,
+    });
 
     return recentNotes;
   }
@@ -68,14 +81,43 @@ class NoteService {
     userId,
     limit,
     orderBy,
-  }: IFindMany): Promise<Note[]> {
+  }: { userId: string; limit: number } & OrderByParam): Promise<Note[]> {
     const recentlyUpdatedNotes = await noteDatabase.findMany({
-      userId,
+      params: { userId },
       limit,
       orderBy,
     });
 
     return recentlyUpdatedNotes;
+  }
+
+  async fetchNotesByVideoId({
+    userId,
+    videoId,
+    skip,
+    limit,
+  }: {
+    userId: string;
+    videoId: string;
+    skip: number;
+    limit: number;
+  }): Promise<{
+    notes: Note[];
+    notesCount: number;
+    totalPages: number;
+  }> {
+    const [notes, notesCount] = await Promise.all([
+      noteDatabase.findMany({
+        params: { userId, youtubeId: videoId },
+        skip,
+        limit,
+      }),
+      noteDatabase.count({ userId, youtubeId: videoId }),
+    ]);
+
+    const totalPages = Math.ceil(notesCount / limit);
+
+    return { notes, notesCount, totalPages };
   }
 }
 
