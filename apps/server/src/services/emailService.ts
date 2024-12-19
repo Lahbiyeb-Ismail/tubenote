@@ -1,9 +1,9 @@
 import nodemailer, { type Transporter } from "nodemailer";
+
+import type { EmailContent } from "../types/email.type";
+
 import envConfig from "../config/envConfig";
-import resetPasswordDatabase from "../databases/resetPasswordDatabase";
-import { createResetPasswordEmail } from "../helpers/resetPassword.helper";
-import { createVerificationEmail } from "../helpers/verifyEmail.helper";
-import verificationTokenService from "./verificationTokenService";
+import compileTemplate from "../utils/compileTemplate";
 
 /**
  * This function sends an email to the given email with the email verification link
@@ -73,7 +73,7 @@ class EmailService {
 
   async sendVerificationEmail({ email, token }: ISendEmail): Promise<void> {
     const { htmlContent, logoPath, textContent } =
-      await createVerificationEmail(token);
+      await this.buildVerificationEmail(token);
 
     await this.sendEmail({
       emailRecipient: email,
@@ -86,7 +86,7 @@ class EmailService {
 
   async sendResetPasswordEmail({ email, token }: ISendEmail): Promise<void> {
     const { htmlContent, logoPath, textContent } =
-      await createResetPasswordEmail(token);
+      await this.buildResetPasswordEmail(token);
 
     await this.sendEmail({
       emailRecipient: email,
@@ -95,6 +95,17 @@ class EmailService {
       textContent,
       logoPath,
     });
+  }
+
+  private async buildVerificationEmail(token: string): Promise<EmailContent> {
+    const verificationLink = `${envConfig.server.url}/api/v1/verify-email/${token}`;
+    return compileTemplate("verification-email", { verificationLink });
+  }
+
+  private async buildResetPasswordEmail(token: string): Promise<EmailContent> {
+    const resetLink = `${envConfig.client.url}/password-reset/${token}`;
+
+    return compileTemplate("reset-password", { resetLink });
   }
 }
 
