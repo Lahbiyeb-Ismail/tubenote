@@ -3,7 +3,7 @@ import prismaClient from "../lib/prisma";
 import handleAsyncOperation from "../utils/handleAsyncOperation";
 
 class VerificationTokenDatabase {
-  async createVerificationToken(userId: string) {
+  async create(userId: string) {
     const token = randomUUID();
     const expiresAt = new Date(Date.now() + 3600000); // Token expires in 1 hour
 
