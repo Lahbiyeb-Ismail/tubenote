@@ -1,9 +1,8 @@
 import verificationTokenDatabase from "../databases/verificationTokenDatabase";
 
 class VerificationTokenService {
-  async createEmailVericationToken(userId: string): Promise<string> {
-    const token =
-      await verificationTokenDatabase.createVerificationToken(userId);
+  async createToken(userId: string): Promise<string> {
+    const token = await verificationTokenDatabase.create(userId);
 
     return token;
   }
