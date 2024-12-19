@@ -23,10 +23,18 @@ class ResetPasswordService {
       );
     }
 
+    const token = await this.createToken(user.id);
+
     await emailService.sendResetPasswordEmail({
       email: user.email,
-      userId: user.id,
+      token,
     });
+  }
+
+  async createToken(userId: string): Promise<string> {
+    const token = await resetPasswordDatabase.create(userId);
+
+    return token;
   }
 
   async reset(token: string, password: string): Promise<void> {
