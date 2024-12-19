@@ -23,11 +23,9 @@ class ResetPasswordService {
       );
     }
 
-    const newResetToken = await resetPasswordDatabase.create(user.id);
-
     await emailService.sendResetPasswordEmail({
       email: user.email,
-      token: newResetToken,
+      userId: user.id,
     });
   }
 
