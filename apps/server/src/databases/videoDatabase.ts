@@ -36,7 +36,7 @@ class VideoDatabase {
     return handleAsyncOperation(
       async () => {
         const videos = await prismaClient.video.findMany({
-          where: { users: { some: { id: userId } } },
+          where: { users: { every: { id: userId } } },
           omit: { userIds: true },
           take: limit,
           skip,
