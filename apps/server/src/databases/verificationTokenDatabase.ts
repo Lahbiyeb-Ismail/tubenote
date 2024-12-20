@@ -8,6 +8,10 @@ export interface IFindToken {
   where: Prisma.EmailVerificationTokenWhereInput;
 }
 
+export interface IDeleteTokens {
+  where: Prisma.EmailVerificationTokenWhereInput;
+}
+
 class VerificationTokenDatabase {
   async find({ where }: IFindToken): Promise<EmailVerificationToken | null> {
     return handleAsyncOperation(
@@ -36,6 +40,16 @@ class VerificationTokenDatabase {
     );
 
     return token;
+  }
+
+  async deleteMany({ where }: IDeleteTokens): Promise<void> {
+    handleAsyncOperation(
+      () =>
+        prismaClient.emailVerificationToken.deleteMany({
+          where,
+        }),
+      { errorMessage: "Failed to delete email verification tokens." }
+    );
   }
 }
 
