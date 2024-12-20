@@ -1,10 +1,21 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
-import userService from "../services/userService";
+
 import type { TypedRequest } from "../types";
 import type { UpdatePasswordBody, UpdateUserBody } from "../types/user.type";
 
+import userService from "../services/userService";
+
+/**
+ * Controller for handling user-related operations.
+ */
 class UserController {
+  /**
+   * Get the current user's information.
+   *
+   * @param req - The request object containing the user ID.
+   * @param res - The response object to send the user data.
+   */
   async getCurrentUser(req: TypedRequest, res: Response): Promise<void> {
     const userId = req.userId;
 
@@ -23,6 +34,12 @@ class UserController {
     });
   }
 
+  /**
+   * Update the current user's information.
+   *
+   * @param req - The request object containing the user ID and updated user data.
+   * @param res - The response object to confirm the update.
+   */
   async updateCurrentUser(
     req: TypedRequest<UpdateUserBody>,
     res: Response
@@ -35,6 +52,12 @@ class UserController {
     res.status(httpStatus.OK).json({ message: "User updated successfully." });
   }
 
+  /**
+   * Update the current user's password.
+   *
+   * @param req - The request object containing the user ID and password data.
+   * @param res - The response object to confirm the password update.
+   */
   async updateUserPassword(
     req: TypedRequest<UpdatePasswordBody>,
     res: Response
