@@ -1,8 +1,14 @@
 import type { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import type { Profile } from "passport-google-oauth20";
 
-import { REFRESH_TOKEN_SECRET } from "../constants/auth";
+import {
+  ACCESS_TOKEN_EXPIRE,
+  ACCESS_TOKEN_SECRET,
+  REFRESH_TOKEN_EXPIRE,
+  REFRESH_TOKEN_SECRET,
+} from "../constants/auth";
 
 import userDatabase from "../databases/userDatabase";
 
@@ -14,19 +20,10 @@ import {
   UnauthorizedError,
 } from "../errors";
 
-import { createNewTokens, verifyToken } from "../helpers/auth.helper";
-
 import type { JwtPayload } from "../types";
 import type { GoogleUser } from "../types/auth.type";
 
-import emailService from "./emailService";
-
-import {
-  deleteRefreshToken,
-  deleteRefreshTokenByUserId,
-  findRefreshToken,
-} from "./refreshToken.services";
-
+import refreshTokenService from "./refreshTokenService";
 import userService from "./userService";
 import emailVerificationService from "./verifyEmailService";
 
@@ -37,6 +34,51 @@ interface IRegisterUser {
 }
 
 class AuthService {
+  private async verifyToken(
+    token: string,
+    secret: string
+  ): Promise<JwtPayload> {
+    return new Promise((resolve, reject) => {
+      jwt.verify(token, secret, (err, payload) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        resolve(payload as JwtPayload);
+      });
+    });
+  }
+
+  private generateJwtToken(
+    userId: string,
+    secret: string,
+    expire: string
+  ): string {
+    return jwt.sign({ userId }, secret, {
+      expiresIn: expire,
+    });
+  }
+
+  private createJwtTokens(userId: string): {
+    accessToken: string;
+    refreshToken: string;
+  } {
+    const accessToken = this.generateJwtToken(
+      userId,
+      ACCESS_TOKEN_SECRET,
+      ACCESS_TOKEN_EXPIRE
+    );
+
+    const refreshToken = this.generateJwtToken(
+      userId,
+      REFRESH_TOKEN_SECRET,
+      REFRESH_TOKEN_EXPIRE
+    );
+
+    return { accessToken, refreshToken };
+  }
+
   async registerUser({
     username,
     email,
@@ -88,55 +130,55 @@ class AuthService {
       );
     }
 
-    const { accessToken, refreshToken } = await createNewTokens(user.id);
+    const { accessToken, refreshToken } = this.createJwtTokens(user.id);
+
+    await refreshTokenService.createToken(user.id, refreshToken);
 
     return { accessToken, refreshToken };
   }
 
-  async logoutUser(token: string) {
+  async logoutUser(token: string, userId: string): Promise<void> {
     if (!token) {
       throw new UnauthorizedError("You are not logged in.");
     }
 
-    const isTokenExist = await findRefreshToken(token);
-
-    if (isTokenExist) {
-      await deleteRefreshToken(token);
-    }
+    await refreshTokenService.deleteAllTokens(userId);
   }
 
   async refreshToken(
     token: string
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const payload = await verifyToken(token, REFRESH_TOKEN_SECRET);
+    const payload = await this.verifyToken(token, REFRESH_TOKEN_SECRET);
 
     const { userId, exp } = payload as JwtPayload;
 
-    // Check if the token is expired
     if (exp && Date.now() >= exp * 1000) {
-      await deleteRefreshTokenByUserId(userId);
+      // Check if the token is expired
+      await refreshTokenService.deleteAllTokens(userId);
 
       throw new UnauthorizedError(
         "Refresh token expired. Please log in again."
       );
     }
 
-    const refreshTokenFromDB = await findRefreshToken(token);
+    const refreshTokenFromDB = await refreshTokenService.findToken(token);
 
-    // Detected refresh token reuse!
     if (!refreshTokenFromDB) {
-      await deleteRefreshTokenByUserId(userId);
+      // Detected refresh token reuse!
+      await refreshTokenService.deleteAllTokens(userId);
 
       throw new ForbiddenError("Invalid refresh token. Please log in again.");
     }
 
-    await deleteRefreshToken(token);
+    await refreshTokenService.deleteToken(token);
 
     if (refreshTokenFromDB.userId !== userId) {
       throw new ForbiddenError("Invalid refresh token. Please log in again.");
     }
 
-    const { accessToken, refreshToken } = await createNewTokens(userId);
+    const { accessToken, refreshToken } = this.createJwtTokens(userId);
+
+    await refreshTokenService.createToken(userId, refreshToken);
 
     return { accessToken, refreshToken };
   }
@@ -178,7 +220,9 @@ class AuthService {
       });
     }
 
-    const { accessToken, refreshToken } = await createNewTokens(foundUser.id);
+    const { accessToken, refreshToken } = this.createJwtTokens(foundUser.id);
+
+    await refreshTokenService.createToken(foundUser.id, refreshToken);
 
     return { accessToken, refreshToken };
   }
