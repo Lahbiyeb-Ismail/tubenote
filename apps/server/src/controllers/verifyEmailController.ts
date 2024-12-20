@@ -3,6 +3,7 @@ import httpStatus from "http-status";
 
 import emailVerificationService from "../services/verifyEmailService";
 
+import { EMAIL_VERIFICATION_REDIRECT_URL } from "../constants";
 import type { EmptyRecord, TypedRequest } from "../types";
 import type {
   SendVerifyEmailBody,
@@ -16,7 +17,7 @@ class VerifyEmailController {
   ): Promise<void> {
     const { email } = req.body;
 
-    await emailVerificationService.sendToken(email);
+    await emailVerificationService.generateAndSendToken(email);
 
     // Responds with an OK status indicating that the verification email has been sent.
     res.status(httpStatus.OK).json({ message: "Verification email sent." });
@@ -28,9 +29,9 @@ class VerifyEmailController {
   ): Promise<void> {
     const { token } = req.params;
 
-    await emailVerificationService.verifyToken(token);
+    await emailVerificationService.verifyUserEmail(token);
 
-    res.status(httpStatus.OK);
+    res.status(httpStatus.OK).redirect(EMAIL_VERIFICATION_REDIRECT_URL);
   }
 }
 
