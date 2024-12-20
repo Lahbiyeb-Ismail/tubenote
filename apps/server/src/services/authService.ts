@@ -7,6 +7,7 @@ import { REFRESH_TOKEN_SECRET } from "../constants/auth";
 import userDatabase from "../databases/userDatabase";
 
 import {
+  BadRequestError,
   ConflictError,
   ForbiddenError,
   NotFoundError,
@@ -26,6 +27,7 @@ import {
   findRefreshToken,
 } from "./refreshToken.services";
 
+import userService from "./userService";
 import emailVerificationService from "./verifyEmailService";
 
 interface IRegisterUser {
@@ -179,6 +181,16 @@ class AuthService {
     const { accessToken, refreshToken } = await createNewTokens(foundUser.id);
 
     return { accessToken, refreshToken };
+  }
+
+  async verifyEmail(userId: string): Promise<void> {
+    const user = await userService.getUserById(userId);
+
+    if (user.isEmailVerified) {
+      throw new BadRequestError("Email is already verified.");
+    }
+
+    await userService.verifyUserEmail(userId);
   }
 
   async hashPassword(password: string): Promise<string> {
