@@ -1,5 +1,5 @@
 import type { User } from "@prisma/client";
-import userDatabase from "../databases/userDatabase";
+import userDatabase from "../databases/userDB";
 import { BadRequestError, NotFoundError } from "../errors";
 import authService from "./authService";
 

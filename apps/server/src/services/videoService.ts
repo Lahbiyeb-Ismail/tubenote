@@ -1,10 +1,10 @@
 import type { Video } from "@prisma/client";
-import videoDatabase, {
-  type IFindMany,
-  type IVideo,
-} from "../databases/videoDatabase";
-import { NotFoundError } from "../errors";
+
+import videoDB, { type IFindMany, type IVideo } from "../databases/videoDB";
+
 import { fetchYoutubeVideoData } from "../helpers/video.helper";
+
+import { NotFoundError } from "../errors";
 
 class VideoService {
   async fetchUserVideos({ userId, limit, skip }: IFindMany): Promise<{
@@ -13,8 +13,8 @@ class VideoService {
     totalPages: number;
   }> {
     const [videos, videosCount] = await Promise.all([
-      videoDatabase.findMany({ userId, limit, skip }),
-      videoDatabase.count(userId),
+      videoDB.findMany({ userId, limit, skip }),
+      videoDB.count(userId),
     ]);
 
     const totalPages = Math.ceil(videosCount / limit);
@@ -26,7 +26,7 @@ class VideoService {
     videoId,
     userId,
   }: { videoId: string; userId: string }): Promise<IVideo> {
-    const video = await videoDatabase.findUnique(videoId);
+    const video = await videoDB.findUnique(videoId);
 
     if (video) {
       return await this.linkVideoToUser(video, userId);
@@ -39,7 +39,7 @@ class VideoService {
         throw new NotFoundError("No video found.");
       }
 
-      const newVideo = await videoDatabase.create(youtubeVideoData[0], userId);
+      const newVideo = await videoDB.create(youtubeVideoData[0], userId);
 
       return await this.linkVideoToUser(newVideo, userId);
     }
@@ -52,10 +52,7 @@ class VideoService {
       return video;
     }
 
-    const updatedVideo = await videoDatabase.connectVideoToUser(
-      video.id,
-      userId
-    );
+    const updatedVideo = await videoDB.connectVideoToUser(video.id, userId);
 
     return updatedVideo;
   }

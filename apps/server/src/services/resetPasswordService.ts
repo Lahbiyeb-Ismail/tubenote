@@ -1,19 +1,21 @@
-import resetPasswordDatabase from "../databases/resetPasswordDatabase";
-import userDatabase from "../databases/userDatabase";
-import { BadRequestError } from "../errors";
+import resetPasswordDB from "../databases/resetPasswordDB";
+import userDatabase from "../databases/userDB";
+
 import authService from "./authService";
 import emailService from "./emailService";
 import userService from "./userService";
+
+import { BadRequestError } from "../errors";
 
 class ResetPasswordService {
   async sendResetToken(email: string): Promise<void> {
     const user = await userService.getUserByEmail(email);
 
-    if (!user.emailVerified) {
+    if (!user.isEmailVerified) {
       throw new BadRequestError("Invalid email or email not verified.");
     }
 
-    const isResetTokenAlreadySent = await resetPasswordDatabase.find({
+    const isResetTokenAlreadySent = await resetPasswordDB.find({
       id: user.id,
     });
 
@@ -32,7 +34,7 @@ class ResetPasswordService {
   }
 
   async createToken(userId: string): Promise<string> {
-    const token = await resetPasswordDatabase.create(userId);
+    const token = await resetPasswordDB.create(userId);
 
     return token;
   }
@@ -47,18 +49,18 @@ class ResetPasswordService {
       data: { password: hashedPassword },
     });
 
-    await resetPasswordDatabase.deleteMany(userId);
+    await resetPasswordDB.deleteMany(userId);
   }
 
   async verfiyResetToken(token: string): Promise<string> {
-    const resetToken = await resetPasswordDatabase.find({ token });
+    const resetToken = await resetPasswordDB.find({ token });
 
     if (!resetToken) {
       throw new BadRequestError("Invalid reset token.");
     }
 
     if (resetToken.expiresAt < new Date()) {
-      await resetPasswordDatabase.deleteMany(resetToken.userId);
+      await resetPasswordDB.deleteMany(resetToken.userId);
       throw new BadRequestError("Reset token has expired.");
     }
 

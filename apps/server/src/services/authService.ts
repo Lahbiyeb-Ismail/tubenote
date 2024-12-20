@@ -10,7 +10,7 @@ import {
   REFRESH_TOKEN_SECRET,
 } from "../constants/auth";
 
-import userDatabase from "../databases/userDatabase";
+import userDatabase from "../databases/userDB";
 
 import {
   BadRequestError,

@@ -1,8 +1,8 @@
 import type { EmailVerificationToken } from "@prisma/client";
 
-import verificationTokenDatabase, {
+import verificationTokenDB, {
   type IFindToken,
-} from "../databases/verificationTokenDatabase";
+} from "../databases/verificationTokenDB";
 
 import { ConflictError, ForbiddenError } from "../errors";
 
@@ -12,7 +12,7 @@ import userService from "./userService";
 
 class EmailVerificationService {
   private async createToken(userId: string): Promise<string> {
-    const token = await verificationTokenDatabase.create(userId);
+    const token = await verificationTokenDB.create(userId);
 
     return token;
   }
@@ -20,7 +20,7 @@ class EmailVerificationService {
   private async findVerificationToken({
     where,
   }: IFindToken): Promise<EmailVerificationToken | null> {
-    const token = await verificationTokenDatabase.find({ where });
+    const token = await verificationTokenDB.find({ where });
 
     return token;
   }
@@ -57,7 +57,7 @@ class EmailVerificationService {
     // Updates the user's isEmailVerified status to true.
     await authService.verifyEmail(foundToken.userId);
     // Deletes the email verification token from the database.
-    await verificationTokenDatabase.deleteMany({
+    await verificationTokenDB.deleteMany({
       where: { userId: foundToken.userId },
     });
   }

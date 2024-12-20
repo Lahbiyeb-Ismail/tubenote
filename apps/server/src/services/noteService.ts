@@ -1,13 +1,12 @@
 import type { Note } from "@prisma/client";
 
-import noteDatabase from "../databases/noteDatabase";
+import noteDB from "../databases/noteDB";
 
 import { NotFoundError } from "../errors";
 
 import type {
   ICreateNote,
   IFindNotes,
-  INoteFilter,
   INoteFilterUnique,
   IUpdateNote,
   IUserNotes,
@@ -15,7 +14,7 @@ import type {
 
 class NoteService {
   async findNote({ where }: INoteFilterUnique): Promise<Note> {
-    const note = await noteDatabase.find({ where });
+    const note = await noteDB.find({ where });
 
     if (!note) {
       throw new NotFoundError("Note not found.");
@@ -25,7 +24,7 @@ class NoteService {
   }
 
   async addNewNote({ data }: ICreateNote): Promise<Note> {
-    const note = await noteDatabase.create({ data });
+    const note = await noteDB.create({ data });
 
     return note;
   }
@@ -33,7 +32,7 @@ class NoteService {
   async updateNote({ where, data }: IUpdateNote): Promise<Note> {
     await this.findNote({ where });
 
-    const updatedNote = await noteDatabase.update({
+    const updatedNote = await noteDB.update({
       where,
       data,
     });
@@ -44,7 +43,7 @@ class NoteService {
   async deleteNote({ where }: INoteFilterUnique): Promise<void> {
     await this.findNote({ where });
 
-    await noteDatabase.delete({ where });
+    await noteDB.delete({ where });
   }
 
   async fetchUserNotes({
@@ -53,8 +52,8 @@ class NoteService {
     limit,
   }: IFindNotes): Promise<IUserNotes> {
     const [notes, notesCount] = await Promise.all([
-      noteDatabase.findMany({ where, skip, limit }),
-      noteDatabase.count({ where }),
+      noteDB.findMany({ where, skip, limit }),
+      noteDB.count({ where }),
     ]);
 
     const totalPages = Math.ceil(notesCount / limit);
@@ -67,7 +66,7 @@ class NoteService {
     limit,
     orderBy,
   }: IFindNotes): Promise<Note[]> {
-    const recentNotes = await noteDatabase.findMany({
+    const recentNotes = await noteDB.findMany({
       where,
       limit,
       orderBy,
@@ -81,7 +80,7 @@ class NoteService {
     limit,
     orderBy,
   }: IFindNotes): Promise<Note[]> {
-    const recentlyUpdatedNotes = await noteDatabase.findMany({
+    const recentlyUpdatedNotes = await noteDB.findMany({
       where,
       limit,
       orderBy,
@@ -96,12 +95,12 @@ class NoteService {
     limit,
   }: IFindNotes): Promise<IUserNotes> {
     const [notes, notesCount] = await Promise.all([
-      noteDatabase.findMany({
+      noteDB.findMany({
         where,
         skip,
         limit,
       }),
-      noteDatabase.count({ where }),
+      noteDB.count({ where }),
     ]);
 
     const totalPages = Math.ceil(notesCount / limit);
