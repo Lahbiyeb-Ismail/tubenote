@@ -54,12 +54,7 @@ class AuthService {
       password,
     });
 
-    const token = await emailVerificationService.createToken(newUser.id);
-
-    await emailService.sendVerificationEmail({
-      email: newUser.email,
-      token,
-    });
+    await emailVerificationService.generateAndSendToken(newUser.email);
 
     return newUser;
   }
