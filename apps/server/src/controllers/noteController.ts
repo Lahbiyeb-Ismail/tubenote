@@ -3,11 +3,21 @@ import httpStatus from "http-status";
 
 import type { EmptyRecord, PaginationQuery, TypedRequest } from "../types";
 import type { NoteBody, NoteIdParam } from "../types/note.type";
-
-import noteService from "../services/noteService";
 import type { VideoIdParam } from "../types/video.type";
 
+import noteService from "../services/noteService";
+
+/**
+ * Controller for handling note-related operations.
+ */
 class NoteController {
+  /**
+   * Adds a new note for the authenticated user.
+   *
+   * @param req - The request object containing the note data and user ID.
+   * @param res - The response object used to send the status and result.
+   * @returns A promise that resolves to void.
+   */
   async addNewNote(req: TypedRequest<NoteBody>, res: Response): Promise<void> {
     const userId = req.userId;
 
@@ -23,6 +33,13 @@ class NoteController {
       .json({ message: "Note created successfully.", note });
   }
 
+  /**
+   * Updates an existing note for the authenticated user.
+   *
+   * @param req - The request object containing the note ID in the parameters and the updated note data in the body.
+   * @param res - The response object used to send the status and updated note data.
+   * @returns A promise that resolves to void.
+   */
   async updateNote(
     req: TypedRequest<NoteBody, NoteIdParam>,
     res: Response
@@ -41,6 +58,13 @@ class NoteController {
       .json({ message: "Note updated successfully.", note: updatedNote });
   }
 
+  /**
+   * Deletes a note based on the provided note ID and user ID.
+   *
+   * @param req - The request object containing the user ID and note ID.
+   * @param res - The response object used to send the status and message.
+   * @returns A promise that resolves to void.
+   */
   async deleteNote(
     req: TypedRequest<EmptyRecord, NoteIdParam>,
     res: Response
@@ -53,6 +77,13 @@ class NoteController {
     res.status(httpStatus.OK).json({ message: "Note deleted successfully." });
   }
 
+  /**
+   * Retrieves a note by its ID for the authenticated user.
+   *
+   * @param req - The request object containing the user ID and note ID parameters.
+   * @param res - The response object used to send the note data.
+   * @returns A promise that resolves to void.
+   */
   async getNoteById(
     req: TypedRequest<EmptyRecord, NoteIdParam>,
     res: Response
@@ -65,6 +96,13 @@ class NoteController {
     res.status(httpStatus.OK).json({ note });
   }
 
+  /**
+   * Retrieves the notes of a user with pagination.
+   *
+   * @param req - The request object containing user ID and pagination query parameters.
+   * @param res - The response object used to send the notes and pagination details.
+   * @returns A promise that resolves to void.
+   */
   async getUserNotes(
     req: TypedRequest<EmptyRecord, EmptyRecord, PaginationQuery>,
     res: Response
@@ -94,6 +132,13 @@ class NoteController {
     });
   }
 
+  /**
+   * Retrieves the most recent notes for a specific user.
+   *
+   * @param req - The request object containing user information.
+   * @param res - The response object used to send back the notes.
+   * @returns A promise that resolves to void.
+   */
   async getUserRecentNotes(req: TypedRequest, res: Response): Promise<void> {
     const userId = req.userId;
 
@@ -105,6 +150,13 @@ class NoteController {
     res.status(httpStatus.OK).json({ notes });
   }
 
+  /**
+   * Retrieves the most recently updated notes for the authenticated user.
+   *
+   * @param req - The request object, containing the authenticated user's ID.
+   * @param res - The response object used to send the JSON response.
+   * @returns A promise that resolves to void.
+   */
   async getRecentlyUpatedNotes(
     req: TypedRequest,
     res: Response
@@ -120,6 +172,15 @@ class NoteController {
     res.status(httpStatus.OK).json({ notes });
   }
 
+  /**
+   * Retrieves notes associated with a specific video ID, with pagination support.
+   *
+   * @param req - The request object containing user ID, video ID parameter, and pagination query.
+   * @param res - The response object used to send back the notes and pagination details.
+   *
+   * @returns A JSON response containing the notes and pagination information.
+   *
+   */
   async getNotesByVideoId(
     req: TypedRequest<EmptyRecord, VideoIdParam, PaginationQuery>,
     res: Response
