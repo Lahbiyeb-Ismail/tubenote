@@ -76,13 +76,7 @@ class UserService {
     });
   }
 
-  async verifyEmail(userId: string): Promise<void> {
-    const user = await this.getUserById(userId);
-
-    if (user.isEmailVerified) {
-      throw new BadRequestError("Email is already verified.");
-    }
-
+  async verifyUserEmail(userId: string): Promise<void> {
     await userDatabase.updateUser({ userId, data: { isEmailVerified: true } });
   }
 }
