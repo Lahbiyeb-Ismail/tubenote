@@ -1,12 +1,14 @@
 import type { EmailVerificationToken } from "@prisma/client";
+
 import verificationTokenDatabase, {
   type IFindToken,
 } from "../databases/verificationTokenDatabase";
+
 import { ConflictError, ForbiddenError, NotFoundError } from "../errors";
 import emailService from "./emailService";
 import userService from "./userService";
 
-class VerificationTokenService {
+class EmailVerificationService {
   async createToken(userId: string): Promise<string> {
     const token = await verificationTokenDatabase.create(userId);
 
@@ -62,4 +64,4 @@ class VerificationTokenService {
   }
 }
 
-export default new VerificationTokenService();
+export default new EmailVerificationService();

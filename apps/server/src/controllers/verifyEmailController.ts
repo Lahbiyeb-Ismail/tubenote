@@ -1,6 +1,8 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
-import verificationTokenService from "../services/verificationTokenService";
+
+import emailVerificationService from "../services/verifyEmailService";
+
 import type { EmptyRecord, TypedRequest } from "../types";
 import type {
   SendVerifyEmailBody,
@@ -14,7 +16,7 @@ class VerifyEmailController {
   ): Promise<void> {
     const { email } = req.body;
 
-    await verificationTokenService.sendToken(email);
+    await emailVerificationService.sendToken(email);
 
     // Responds with an OK status indicating that the verification email has been sent.
     res.status(httpStatus.OK).json({ message: "Verification email sent." });
@@ -26,7 +28,7 @@ class VerifyEmailController {
   ): Promise<void> {
     const { token } = req.params;
 
-    await verificationTokenService.verifyToken(token);
+    await emailVerificationService.verifyToken(token);
 
     res.status(httpStatus.OK);
   }

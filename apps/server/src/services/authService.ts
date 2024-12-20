@@ -26,7 +26,7 @@ import {
   findRefreshToken,
 } from "./refreshToken.services";
 
-import verificationTokenService from "./verificationTokenService";
+import emailVerificationService from "./verifyEmailService";
 
 interface IRegisterUser {
   username: string;
@@ -54,7 +54,7 @@ class AuthService {
       password,
     });
 
-    const token = await verificationTokenService.createToken(newUser.id);
+    const token = await emailVerificationService.createToken(newUser.id);
 
     await emailService.sendVerificationEmail({
       email: newUser.email,
