@@ -65,10 +65,11 @@ class AuthController {
    */
   async logout(req: TypedRequest, res: Response) {
     const cookies = req.cookies;
+    const userId = req.userId;
 
     const refreshToken = cookies[REFRESH_TOKEN_NAME];
 
-    await authService.logoutUser(refreshToken);
+    await authService.logoutUser(refreshToken, userId);
 
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
