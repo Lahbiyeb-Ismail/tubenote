@@ -4,30 +4,27 @@ import verificationTokenDatabase, {
   type IFindToken,
 } from "../databases/verificationTokenDatabase";
 
-import { ConflictError, ForbiddenError, NotFoundError } from "../errors";
+import { ConflictError, ForbiddenError } from "../errors";
+
 import emailService from "./emailService";
 import userService from "./userService";
 
 class EmailVerificationService {
-  async createToken(userId: string): Promise<string> {
+  private async createToken(userId: string): Promise<string> {
     const token = await verificationTokenDatabase.create(userId);
 
     return token;
   }
 
-  async findVerificationToken({
+  private async findVerificationToken({
     where,
-  }: IFindToken): Promise<EmailVerificationToken> {
+  }: IFindToken): Promise<EmailVerificationToken | null> {
     const token = await verificationTokenDatabase.find({ where });
-
-    if (!token) {
-      throw new NotFoundError("No verification token found.");
-    }
 
     return token;
   }
 
-  async sendToken(email: string): Promise<void> {
+  async generateAndSendToken(email: string): Promise<void> {
     const user = await userService.getUserByEmail(email);
 
     if (user.isEmailVerified) {
@@ -49,18 +46,19 @@ class EmailVerificationService {
     await emailService.sendVerificationEmail({ email, token: newToken });
   }
 
-  async verifyToken(token: string): Promise<void> {
-    const validToken = await this.findVerificationToken({ where: { token } });
+  async verifyUserEmail(token: string): Promise<void> {
+    const foundToken = await this.findVerificationToken({ where: { token } });
 
-    if (!validToken || validToken.expiresAt < new Date()) {
+    if (!foundToken || foundToken.expiresAt < new Date()) {
       throw new ForbiddenError("Invalid or expired token.");
     }
 
-    // Updates the user's emailVerified status to true.
-
+    // Updates the user's isEmailVerified status to true.
+    await userService.verifyEmail(foundToken.userId);
     // Deletes the email verification token from the database.
-
-    // Responds with a 200 OK status indicating that the email was verified successfully.
+    await verificationTokenDatabase.deleteMany({
+      where: { userId: foundToken.userId },
+    });
   }
 }
 
