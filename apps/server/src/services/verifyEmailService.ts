@@ -6,6 +6,7 @@ import verificationTokenDatabase, {
 
 import { ConflictError, ForbiddenError } from "../errors";
 
+import authService from "./authService";
 import emailService from "./emailService";
 import userService from "./userService";
 
@@ -54,7 +55,7 @@ class EmailVerificationService {
     }
 
     // Updates the user's isEmailVerified status to true.
-    await userService.verifyEmail(foundToken.userId);
+    await authService.verifyEmail(foundToken.userId);
     // Deletes the email verification token from the database.
     await verificationTokenDatabase.deleteMany({
       where: { userId: foundToken.userId },
