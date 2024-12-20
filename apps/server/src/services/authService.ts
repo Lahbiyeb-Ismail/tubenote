@@ -74,7 +74,7 @@ class AuthService {
       throw new NotFoundError("No User found with this email address.");
     }
 
-    if (!user.emailVerified) {
+    if (!user.isEmailVerified) {
       throw new UnauthorizedError(
         "Email not verified. Please verify your email address."
       );
@@ -168,7 +168,7 @@ class AuthService {
     if (!foundUser) {
       foundUser = await userDatabase.createNewUser({
         username: name,
-        emailVerified: email_verified,
+        isEmailVerified: email_verified,
         password: googleId,
         profilePicture: picture,
         email,

@@ -30,7 +30,7 @@ class EmailVerificationService {
   async sendToken(email: string): Promise<void> {
     const user = await userService.getUserByEmail(email);
 
-    if (user.emailVerified) {
+    if (user.isEmailVerified) {
       throw new ConflictError("Email is already verified.");
     }
 
