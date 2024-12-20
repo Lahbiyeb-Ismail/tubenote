@@ -1,11 +1,5 @@
 import { Router } from "express";
 
-import {
-  getUserVideos,
-  handleGetNotesByVideoId,
-  handleGetVideoById,
-} from "../controllers/video.controller";
-
 import isAuthenticated from "../middlewares/isAuthenticated";
 import validateRequest from "../middlewares/validateRequest";
 
@@ -26,14 +20,6 @@ router
     validateRequest({ query: paginationQuerySchema }),
     videoController.getUserVideos
   );
-
-router.route("/:videoId/notes").get(
-  validateRequest({
-    params: videoIdParamSchema,
-    query: paginationQuerySchema,
-  }),
-  handleGetNotesByVideoId
-);
 
 router
   .route("/:videoId")
