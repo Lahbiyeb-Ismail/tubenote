@@ -18,7 +18,7 @@ class NoteService {
     const note = await noteDB.find({ where });
 
     if (!note) {
-      throw new NotFoundError(ERROR_MESSAGES.NOT_FOUND);
+      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
     return note;

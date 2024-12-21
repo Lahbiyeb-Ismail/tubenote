@@ -20,7 +20,7 @@ class RefreshTokenService {
     const refreshToken = await refreshTokenDB.find({ token });
 
     if (!refreshToken) {
-      throw new NotFoundError(ERROR_MESSAGES.NOT_FOUND);
+      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
     await refreshTokenDB.delete({ token });
