@@ -1,21 +1,21 @@
-import type { Note } from "@prisma/client";
-
 import noteDB from "../databases/noteDB";
 
 import { ERROR_MESSAGES } from "../constants/errorMessages";
 import { NotFoundError } from "../errors";
 
 import type {
-  ICreateNote,
-  IFindNotes,
-  INoteFilterUnique,
-  IUpdateNote,
-  IUserNotes,
+  CreateNoteParams,
+  DeleteNoteParams,
+  FindNoteParams,
+  NoteEntry,
+  UpdateNoteParams,
+  UserNotes,
 } from "../types/note.type";
+import type { FindManyParams } from "../types/shared.types";
 
 class NoteService {
-  async findNote({ where }: INoteFilterUnique): Promise<Note> {
-    const note = await noteDB.find({ where });
+  async findNote({ userId, noteId }: FindNoteParams): Promise<NoteEntry> {
+    const note = await noteDB.find({ userId, noteId });
 
     if (!note) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -24,37 +24,48 @@ class NoteService {
     return note;
   }
 
-  async addNewNote({ data }: ICreateNote): Promise<Note> {
+  async addNewNote({ data }: CreateNoteParams): Promise<NoteEntry> {
     const note = await noteDB.create({ data });
 
     return note;
   }
 
-  async updateNote({ where, data }: IUpdateNote): Promise<Note> {
-    await this.findNote({ where });
+  async updateNote({
+    userId,
+    noteId,
+    data,
+  }: UpdateNoteParams): Promise<NoteEntry> {
+    const note = await this.findNote({ userId, noteId });
 
     const updatedNote = await noteDB.update({
-      where,
+      noteId: note.id,
+      userId: note.userId,
       data,
     });
 
     return updatedNote;
   }
 
-  async deleteNote({ where }: INoteFilterUnique): Promise<void> {
-    await this.findNote({ where });
+  async deleteNote({ userId, noteId }: DeleteNoteParams): Promise<void> {
+    const note = await this.findNote({ userId, noteId });
 
-    await noteDB.delete({ where });
+    await noteDB.delete({ userId: note.userId, noteId: note.id });
   }
 
   async fetchUserNotes({
-    where,
+    userId,
     skip,
     limit,
-  }: IFindNotes): Promise<IUserNotes> {
+    sort,
+  }: FindManyParams): Promise<UserNotes> {
     const [notes, notesCount] = await Promise.all([
-      noteDB.findMany({ where, skip, limit }),
-      noteDB.count({ where }),
+      noteDB.findMany({
+        userId,
+        skip,
+        limit,
+        sort,
+      }),
+      noteDB.count(userId),
     ]);
 
     const totalPages = Math.ceil(notesCount / limit);
@@ -63,45 +74,49 @@ class NoteService {
   }
 
   async fetchRecentNotes({
-    where,
+    userId,
     limit,
-    orderBy,
-  }: IFindNotes): Promise<Note[]> {
+    sort,
+  }: FindManyParams): Promise<NoteEntry[]> {
     const recentNotes = await noteDB.findMany({
-      where,
+      userId,
       limit,
-      orderBy,
+      sort,
     });
 
     return recentNotes;
   }
 
   async fetchRecentlyUpdatedNotes({
-    where,
+    userId,
     limit,
-    orderBy,
-  }: IFindNotes): Promise<Note[]> {
+    sort,
+  }: FindManyParams): Promise<NoteEntry[]> {
     const recentlyUpdatedNotes = await noteDB.findMany({
-      where,
+      userId,
       limit,
-      orderBy,
+      sort,
     });
 
     return recentlyUpdatedNotes;
   }
 
   async fetchNotesByVideoId({
-    where,
+    userId,
+    videoId,
     skip,
     limit,
-  }: IFindNotes): Promise<IUserNotes> {
+    sort,
+  }: FindManyParams & { videoId: string }): Promise<UserNotes> {
     const [notes, notesCount] = await Promise.all([
-      noteDB.findMany({
-        where,
+      noteDB.findManyByVideoId({
+        userId,
+        videoId,
         skip,
         limit,
+        sort,
       }),
-      noteDB.count({ where }),
+      noteDB.count(userId),
     ]);
 
     const totalPages = Math.ceil(notesCount / limit);
