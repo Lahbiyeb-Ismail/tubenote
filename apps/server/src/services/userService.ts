@@ -1,4 +1,5 @@
 import type { User } from "@prisma/client";
+import { ERROR_MESSAGES } from "../constants/errorMessages";
 import userDatabase from "../databases/userDB";
 import { BadRequestError, NotFoundError } from "../errors";
 import authService from "./authService";
@@ -8,7 +9,7 @@ class UserService {
     const user = await userDatabase.findUser({ email });
 
     if (!user) {
-      throw new NotFoundError("User not found. Please try again.");
+      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
     return user;
@@ -18,7 +19,7 @@ class UserService {
     const user = await userDatabase.findUser({ id: userId });
 
     if (!user) {
-      throw new NotFoundError("User not found. Please try again.");
+      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
     return user;
@@ -38,9 +39,7 @@ class UserService {
     const existingUser = await this.getUserByEmail(email);
 
     if (existingUser && existingUser.id !== userId) {
-      throw new BadRequestError(
-        "Email is already taken. Please try another one."
-      );
+      throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
     await userDatabase.updateUser({ userId, data: { email, username } });
@@ -59,13 +58,11 @@ class UserService {
     );
 
     if (!isPasswordValid) {
-      throw new BadRequestError("Invalid current password. Please try again.");
+      throw new BadRequestError(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
     if (currentPassword === newPassword) {
-      throw new BadRequestError(
-        "New password must be different from the current password."
-      );
+      throw new BadRequestError(ERROR_MESSAGES.PASSWORD_SAME_AS_CURRENT);
     }
 
     const hashedPassword = await authService.hashPassword(newPassword);
