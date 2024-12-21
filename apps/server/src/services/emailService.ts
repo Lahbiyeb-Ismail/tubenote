@@ -4,6 +4,7 @@ import type { EmailContent } from "../types/email.type";
 
 import envConfig from "../config/envConfig";
 import compileTemplate from "../utils/compileTemplate";
+import logger from "../utils/logger";
 
 /**
  * This function sends an email to the given email with the email verification link
@@ -62,11 +63,11 @@ class EmailService {
       ],
     };
 
-    await this.transporter.sendMail(mailOptions, (error, info) => {
+    this.transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
-        console.error(error);
+        logger.error(`Error sending email - ${error.name}: ${error.message}`);
       } else {
-        console.info(`Verify email sent: ${info.response}`);
+        logger.info(`Verify email sent: ${info.response}`);
       }
     });
   }
