@@ -109,7 +109,7 @@ class AuthService {
     const user = await userDatabase.findUser({ email });
 
     if (!user) {
-      throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
+      throw new NotFoundError(ERROR_MESSAGES.NOT_FOUND);
     }
 
     if (!user.isEmailVerified) {
@@ -180,7 +180,7 @@ class AuthService {
     user: Profile
   ): Promise<{ accessToken: string; refreshToken: string }> {
     if (!user) {
-      throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
+      throw new NotFoundError(ERROR_MESSAGES.NOT_FOUND);
     }
 
     const {
