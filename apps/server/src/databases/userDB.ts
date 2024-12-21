@@ -38,6 +38,20 @@ class UserDatabase {
     return user;
   }
 
+  async findUserById(id: string): Promise<UserEntry | null> {
+    const user = handleAsyncOperation(
+      () =>
+        prismaClient.user.findUnique({
+          where: {
+            id,
+          },
+        }),
+      { errorMessage: "Failed to find user." }
+    );
+
+    return user;
+  }
+
   async updateUser({ userId, data }: UpdateUserParams): Promise<UserEntry> {
     return handleAsyncOperation(
       () =>
