@@ -1,6 +1,8 @@
 import type { RefreshToken } from "@prisma/client";
 
 import refreshTokenDB from "../databases/refreshTokenDB";
+
+import { ERROR_MESSAGES } from "../constants/errorMessages";
 import { NotFoundError } from "../errors";
 
 class RefreshTokenService {
@@ -18,7 +20,7 @@ class RefreshTokenService {
     const refreshToken = await refreshTokenDB.find({ token });
 
     if (!refreshToken) {
-      throw new NotFoundError("Refresh token not found.");
+      throw new NotFoundError(ERROR_MESSAGES.NOT_FOUND);
     }
 
     await refreshTokenDB.delete({ token });
