@@ -45,10 +45,10 @@ class AuthController {
   async login(req: TypedRequest<LoginCredentials>, res: Response) {
     const { email, password } = req.body;
 
-    const { accessToken, refreshToken } = await authService.loginUser(
+    const { accessToken, refreshToken } = await authService.loginUser({
       email,
-      password
-    );
+      password,
+    });
 
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
@@ -69,7 +69,7 @@ class AuthController {
 
     const refreshToken = cookies[REFRESH_TOKEN_NAME];
 
-    await authService.logoutUser(refreshToken, userId);
+    await authService.logoutUser({ refreshToken, userId });
 
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
