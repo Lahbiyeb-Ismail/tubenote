@@ -49,7 +49,8 @@ class NoteController {
     const noteData = req.body;
 
     const updatedNote = await noteService.updateNote({
-      where: { id: noteId, userId },
+      userId,
+      noteId,
       data: noteData,
     });
 
@@ -72,7 +73,7 @@ class NoteController {
     const userId = req.userId;
     const { noteId } = req.params;
 
-    await noteService.deleteNote({ where: { id: noteId, userId } });
+    await noteService.deleteNote({ userId, noteId });
 
     res.status(httpStatus.OK).json({ message: "Note deleted successfully." });
   }
@@ -91,7 +92,7 @@ class NoteController {
     const userId = req.userId;
     const { noteId } = req.params;
 
-    const note = await noteService.findNote({ where: { id: noteId, userId } });
+    const note = await noteService.findNote({ userId, noteId });
 
     res.status(httpStatus.OK).json({ note });
   }
@@ -115,9 +116,10 @@ class NoteController {
     const skip = (page - 1) * limit;
 
     const { notes, notesCount, totalPages } = await noteService.fetchUserNotes({
-      where: { userId },
+      userId,
       skip,
       limit,
+      sort: { by: "createdAt", order: "desc" },
     });
 
     res.status(httpStatus.OK).json({
@@ -143,8 +145,9 @@ class NoteController {
     const userId = req.userId;
 
     const notes = await noteService.fetchRecentNotes({
-      where: { userId },
+      userId,
       limit: 2,
+      sort: { by: "createdAt", order: "desc" },
     });
 
     res.status(httpStatus.OK).json({ notes });
@@ -164,9 +167,9 @@ class NoteController {
     const userId = req.userId;
 
     const notes = await noteService.fetchRecentNotes({
-      where: { userId },
+      userId,
       limit: 2,
-      orderBy: { updatedAt: "desc" },
+      sort: { by: "updatedAt", order: "desc" },
     });
 
     res.status(httpStatus.OK).json({ notes });
@@ -195,9 +198,11 @@ class NoteController {
 
     const { notes, notesCount, totalPages } =
       await noteService.fetchNotesByVideoId({
-        where: { userId, youtubeId: videoId },
+        userId,
+        videoId,
         limit,
         skip,
+        sort: { by: "createdAt", order: "desc" },
       });
 
     res.status(httpStatus.OK).json({
