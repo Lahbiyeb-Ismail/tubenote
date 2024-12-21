@@ -27,7 +27,7 @@ class UserController {
         username: user.username,
         email: user.email,
         profilePicture: user.profilePicture,
-        isEmailVeified: user.isEmailVerified,
+        isEmailVerified: user.isEmailVerified,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
