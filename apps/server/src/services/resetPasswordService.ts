@@ -60,7 +60,7 @@ class ResetPasswordService {
 
     if (resetToken.expiresAt < new Date()) {
       await resetPasswordDB.deleteMany(resetToken.userId);
-      throw new ForbiddenError(ERROR_MESSAGES.RESET_TOKEN_EXPIRED);
+      throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
     }
 
     return resetToken.userId;
