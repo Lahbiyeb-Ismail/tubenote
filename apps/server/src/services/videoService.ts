@@ -4,6 +4,7 @@ import videoDB, { type IFindMany, type IVideo } from "../databases/videoDB";
 
 import { fetchYoutubeVideoData } from "../helpers/video.helper";
 
+import { ERROR_MESSAGES } from "../constants/errorMessages";
 import { NotFoundError } from "../errors";
 
 class VideoService {
@@ -36,7 +37,7 @@ class VideoService {
       const youtubeVideoData = await fetchYoutubeVideoData(videoId);
 
       if (!youtubeVideoData.length) {
-        throw new NotFoundError("No video found.");
+        throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
       }
 
       const newVideo = await videoDB.create(youtubeVideoData[0], userId);
