@@ -12,8 +12,9 @@ import {
 
 import userDatabase from "../databases/userDB";
 
+import { ERROR_MESSAGES } from "../constants/errorMessages";
+
 import {
-  BadRequestError,
   ConflictError,
   ForbiddenError,
   NotFoundError,
@@ -87,9 +88,7 @@ class AuthService {
     const isUserExist = await userDatabase.findUser({ email });
 
     if (isUserExist) {
-      throw new ConflictError(
-        "Email address already in use. Please select another one."
-      );
+      throw new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
     const newUser = await userDatabase.createNewUser({
@@ -110,13 +109,11 @@ class AuthService {
     const user = await userDatabase.findUser({ email });
 
     if (!user) {
-      throw new NotFoundError("No User found with this email address.");
+      throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
     }
 
     if (!user.isEmailVerified) {
-      throw new UnauthorizedError(
-        "Email not verified. Please verify your email address."
-      );
+      throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
     const isPasswordMatch = await this.comparePasswords(
@@ -125,9 +122,7 @@ class AuthService {
     );
 
     if (!isPasswordMatch) {
-      throw new UnauthorizedError(
-        "Invalid email or password. Please try again."
-      );
+      throw new UnauthorizedError(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
     const { accessToken, refreshToken } = this.createJwtTokens(user.id);
@@ -139,7 +134,7 @@ class AuthService {
 
   async logoutUser(token: string, userId: string): Promise<void> {
     if (!token) {
-      throw new UnauthorizedError("You are not logged in.");
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
     await refreshTokenService.deleteAllTokens(userId);
@@ -156,9 +151,7 @@ class AuthService {
       // Check if the token is expired
       await refreshTokenService.deleteAllTokens(userId);
 
-      throw new UnauthorizedError(
-        "Refresh token expired. Please log in again."
-      );
+      throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
     }
 
     const refreshTokenFromDB = await refreshTokenService.findToken(token);
@@ -167,13 +160,13 @@ class AuthService {
       // Detected refresh token reuse!
       await refreshTokenService.deleteAllTokens(userId);
 
-      throw new ForbiddenError("Invalid refresh token. Please log in again.");
+      throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
     }
 
     await refreshTokenService.deleteToken(token);
 
     if (refreshTokenFromDB.userId !== userId) {
-      throw new ForbiddenError("Invalid refresh token. Please log in again.");
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
     const { accessToken, refreshToken } = this.createJwtTokens(userId);
@@ -184,10 +177,10 @@ class AuthService {
   }
 
   async googleLogin(
-    profile: Profile
+    user: Profile
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    if (!profile) {
-      throw new UnauthorizedError("Google login failed. Please try again.");
+    if (!user) {
+      throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
     }
 
     const {
@@ -196,10 +189,10 @@ class AuthService {
       email_verified,
       name,
       picture,
-    } = profile._json as GoogleUser;
+    } = user._json as GoogleUser;
 
     if (!email_verified) {
-      throw new UnauthorizedError("Email not verified. Please try again.");
+      throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
     let foundUser = await userDatabase.findUser({ email });
@@ -231,7 +224,7 @@ class AuthService {
     const user = await userService.getUserById(userId);
 
     if (user.isEmailVerified) {
-      throw new BadRequestError("Email is already verified.");
+      throw new ForbiddenError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
     }
 
     await userService.verifyUserEmail(userId);
