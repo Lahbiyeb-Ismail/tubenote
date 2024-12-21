@@ -1,4 +1,3 @@
-import type { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import type { Profile } from "passport-google-oauth20";
@@ -22,17 +21,18 @@ import {
 } from "../errors";
 
 import type { JwtPayload } from "../types";
-import type { GoogleUser } from "../types/auth.type";
+import type {
+  GoogleUser,
+  LoginParams,
+  LoginResponse,
+  LogoutParams,
+  RegisterParams,
+} from "../types/auth.type";
 
+import type { UserEntry } from "../types/user.type";
 import refreshTokenService from "./refreshTokenService";
 import userService from "./userService";
 import emailVerificationService from "./verifyEmailService";
-
-interface IRegisterUser {
-  username: string;
-  email: string;
-  password: string;
-}
 
 class AuthService {
   private async verifyToken(
@@ -84,17 +84,15 @@ class AuthService {
     username,
     email,
     password,
-  }: IRegisterUser): Promise<User> {
-    const isUserExist = await userDatabase.findUser({ email });
+  }: RegisterParams): Promise<UserEntry> {
+    const isUserExist = await userDatabase.findUserByEmail(email);
 
     if (isUserExist) {
       throw new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
-    const newUser = await userDatabase.createNewUser({
-      username,
-      email,
-      password,
+    const newUser = await userDatabase.create({
+      data: { username, email, password },
     });
 
     await emailVerificationService.generateAndSendToken(newUser.email);
@@ -102,11 +100,8 @@ class AuthService {
     return newUser;
   }
 
-  async loginUser(
-    email: string,
-    password: string
-  ): Promise<{ accessToken: string; refreshToken: string }> {
-    const user = await userDatabase.findUser({ email });
+  async loginUser({ email, password }: LoginParams): Promise<LoginResponse> {
+    const user = await userDatabase.findUserByEmail(email);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -132,17 +127,15 @@ class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async logoutUser(token: string, userId: string): Promise<void> {
-    if (!token) {
+  async logoutUser({ refreshToken, userId }: LogoutParams): Promise<void> {
+    if (!refreshToken) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
     await refreshTokenService.deleteAllTokens(userId);
   }
 
-  async refreshToken(
-    token: string
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  async refreshToken(token: string): Promise<LoginResponse> {
     const payload = await this.verifyToken(token, REFRESH_TOKEN_SECRET);
 
     const { userId, exp } = payload as JwtPayload;
@@ -176,9 +169,7 @@ class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async googleLogin(
-    user: Profile
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  async googleLogin(user: Profile): Promise<LoginResponse> {
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
@@ -195,16 +186,18 @@ class AuthService {
       throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
-    let foundUser = await userDatabase.findUser({ email });
+    let foundUser = await userDatabase.findUserByEmail(email);
 
     if (!foundUser) {
-      foundUser = await userDatabase.createNewUser({
-        username: name,
-        isEmailVerified: email_verified,
-        password: googleId,
-        profilePicture: picture,
-        email,
-        googleId,
+      foundUser = await userDatabase.create({
+        data: {
+          username: name,
+          isEmailVerified: email_verified,
+          password: googleId,
+          profilePicture: picture,
+          email,
+          googleId,
+        },
       });
     } else if (!foundUser.googleId) {
       foundUser = await userDatabase.updateUser({
