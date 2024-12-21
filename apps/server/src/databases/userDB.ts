@@ -1,23 +1,22 @@
-import type { Prisma, User } from "@prisma/client";
-
 import prismaClient from "../lib/prisma";
 import authService from "../services/authService";
 import handleAsyncOperation from "../utils/handleAsyncOperation";
 
-export interface IUpdateUser {
-  userId: string;
-  data: Prisma.UserUpdateInput;
-}
+import type {
+  CreateUserParams,
+  UpdateUserParams,
+  UserEntry,
+} from "../types/user.type";
 
 class UserDatabase {
-  async createNewUser(userData: Prisma.UserCreateInput): Promise<User> {
-    const hashedpassword = await authService.hashPassword(userData.password);
+  async create({ data }: CreateUserParams): Promise<UserEntry> {
+    const hashedpassword = await authService.hashPassword(data.password);
 
     return handleAsyncOperation(
       () =>
         prismaClient.user.create({
           data: {
-            ...userData,
+            ...data,
             password: hashedpassword,
           },
         }),
@@ -25,12 +24,12 @@ class UserDatabase {
     );
   }
 
-  async findUser(params: Prisma.UserWhereInput): Promise<User | null> {
+  async findUserByEmail(email: string): Promise<UserEntry | null> {
     const user = handleAsyncOperation(
       () =>
-        prismaClient.user.findFirst({
+        prismaClient.user.findUnique({
           where: {
-            ...params,
+            email,
           },
         }),
       { errorMessage: "Failed to find user." }
@@ -39,7 +38,7 @@ class UserDatabase {
     return user;
   }
 
-  async updateUser({ userId, data }: IUpdateUser): Promise<User> {
+  async updateUser({ userId, data }: UpdateUserParams): Promise<UserEntry> {
     return handleAsyncOperation(
       () =>
         prismaClient.user.update({
