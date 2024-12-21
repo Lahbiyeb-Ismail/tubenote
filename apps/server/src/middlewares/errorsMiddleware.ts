@@ -28,11 +28,10 @@ function errorHandler(
     ? err.httpCode
     : httpStatus.INTERNAL_SERVER_ERROR;
 
+  logger.error(`${err.name} - ${statusCode}: ${err.message}.`);
+
   if (envConfig.node_env === "development") {
-    logger.error(`${err.name} - ${statusCode}: ${err.message}.`);
-    logger.error(`Error Stack: ${err.stack}`);
-  } else {
-    logger.error(`${err.name} - ${statusCode}: ${err.message}.`);
+    logger.debug(`Error Stack: ${err.stack}`);
   }
 
   res.status(statusCode).json({ message: err.message });
