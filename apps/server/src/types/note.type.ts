@@ -1,12 +1,10 @@
-import type { Note, Prisma } from "@prisma/client";
-
 import type {
   noteBodySchema,
   noteIdParamSchema,
   updateNoteBodySchema,
 } from "../schemas/note.schema";
 
-import type { INoteId, IPagination, IUserId } from "./shared.types";
+import type { NoteId, UserId } from "./shared.types";
 
 export type NoteBody = typeof noteBodySchema;
 
@@ -14,37 +12,31 @@ export type UpdateNoteBody = typeof updateNoteBodySchema;
 
 export type NoteIdParam = typeof noteIdParamSchema;
 
-export interface NoteSortingOptions {
-  orderBy?:
-    | Prisma.NoteOrderByWithRelationInput
-    | Prisma.NoteOrderByWithRelationInput[];
+export interface NoteEntry {
+  id: string;
+  userId: string;
+  videoId: string;
+  youtubeId: string;
+  title: string;
+  content: string;
+  videoTitle: string;
+  thumbnail: string;
+  timestamp: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+export interface FindNoteParams extends UserId, NoteId {}
+export interface CreateNoteParams {
+  data: Omit<NoteEntry, "id" | "createdAt" | "updatedAt">;
+}
+export interface DeleteNoteParams extends UserId, NoteId {}
+
+export interface UpdateNoteParams extends UserId, NoteId {
+  data: Omit<NoteEntry, "id" | "userId" | "createdAt" | "updatedAt">;
 }
 
-export interface ICreateNote {
-  data: Prisma.NoteCreateInput;
-}
-export interface INoteFilter {
-  where: Prisma.NoteWhereInput;
-}
-
-export interface INoteFilterUnique {
-  where: Prisma.NoteWhereUniqueInput;
-}
-export interface IFindNote extends IUserId, INoteId {}
-
-export interface IUpdateNote extends INoteFilterUnique {
-  data: Prisma.NoteUpdateInput;
-}
-
-export interface IDeleteNote extends IUserId, INoteId {}
-
-export interface IFindNotes
-  extends IPagination,
-    NoteSortingOptions,
-    INoteFilter {}
-
-export interface IUserNotes {
-  notes: Note[];
+export interface UserNotes {
+  notes: NoteEntry[];
   notesCount: number;
   totalPages: number;
 }
