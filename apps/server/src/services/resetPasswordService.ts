@@ -5,14 +5,15 @@ import authService from "./authService";
 import emailService from "./emailService";
 import userService from "./userService";
 
-import { BadRequestError } from "../errors";
+import { ERROR_MESSAGES } from "../constants/errorMessages";
+import { ForbiddenError, NotFoundError } from "../errors";
 
 class ResetPasswordService {
   async sendResetToken(email: string): Promise<void> {
     const user = await userService.getUserByEmail(email);
 
     if (!user.isEmailVerified) {
-      throw new BadRequestError("Invalid email or email not verified.");
+      throw new ForbiddenError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
     const isResetTokenAlreadySent = await resetPasswordDB.find({
@@ -20,9 +21,7 @@ class ResetPasswordService {
     });
 
     if (isResetTokenAlreadySent) {
-      throw new BadRequestError(
-        "A password reset link has already been sent to your email."
-      );
+      throw new ForbiddenError(ERROR_MESSAGES.RESET_LINK_SENT);
     }
 
     const token = await this.createToken(user.id);
@@ -56,12 +55,12 @@ class ResetPasswordService {
     const resetToken = await resetPasswordDB.find({ token });
 
     if (!resetToken) {
-      throw new BadRequestError("Invalid reset token.");
+      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
     if (resetToken.expiresAt < new Date()) {
       await resetPasswordDB.deleteMany(resetToken.userId);
-      throw new BadRequestError("Reset token has expired.");
+      throw new ForbiddenError(ERROR_MESSAGES.RESET_TOKEN_EXPIRED);
     }
 
     return resetToken.userId;
