@@ -2,6 +2,7 @@ import type { Note } from "@prisma/client";
 
 import noteDB from "../databases/noteDB";
 
+import { ERROR_MESSAGES } from "../constants/errorMessages";
 import { NotFoundError } from "../errors";
 
 import type {
@@ -17,7 +18,7 @@ class NoteService {
     const note = await noteDB.find({ where });
 
     if (!note) {
-      throw new NotFoundError("Note not found.");
+      throw new NotFoundError(ERROR_MESSAGES.NOT_FOUND);
     }
 
     return note;
