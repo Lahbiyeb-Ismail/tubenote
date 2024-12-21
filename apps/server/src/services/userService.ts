@@ -1,12 +1,12 @@
-import type { User } from "@prisma/client";
 import { ERROR_MESSAGES } from "../constants/errorMessages";
 import userDatabase from "../databases/userDB";
 import { BadRequestError, NotFoundError } from "../errors";
+import type { UserEntry } from "../types/user.type";
 import authService from "./authService";
 
 class UserService {
-  async getUserByEmail(email: string): Promise<User> {
-    const user = await userDatabase.findUser({ email });
+  async getUserByEmail(email: string): Promise<UserEntry> {
+    const user = await userDatabase.findUserByEmail(email);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -15,8 +15,8 @@ class UserService {
     return user;
   }
 
-  async getUserById(userId: string): Promise<User> {
-    const user = await userDatabase.findUser({ id: userId });
+  async getUserById(userId: string): Promise<UserEntry> {
+    const user = await userDatabase.findUserById(userId);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
