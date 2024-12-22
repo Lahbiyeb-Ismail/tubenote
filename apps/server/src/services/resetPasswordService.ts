@@ -16,9 +16,7 @@ class ResetPasswordService {
       throw new ForbiddenError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
-    const isResetTokenAlreadySent = await resetPasswordDB.find({
-      id: user.id,
-    });
+    const isResetTokenAlreadySent = await resetPasswordDB.findByUserId(user.id);
 
     if (isResetTokenAlreadySent) {
       throw new ForbiddenError(ERROR_MESSAGES.RESET_LINK_SENT);
@@ -43,7 +41,7 @@ class ResetPasswordService {
 
     const hashedPassword = await authService.hashPassword(password);
 
-    await userDatabase.updateUser({
+    await userDatabase.update({
       userId,
       data: { password: hashedPassword },
     });
@@ -52,7 +50,7 @@ class ResetPasswordService {
   }
 
   async verfiyResetToken(token: string): Promise<string> {
-    const resetToken = await resetPasswordDB.find({ token });
+    const resetToken = await resetPasswordDB.findByToken(token);
 
     if (!resetToken) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
