@@ -1,11 +1,15 @@
-import type { Video } from "@prisma/client";
-
-import videoDB, { type IFindMany, type IVideo } from "../databases/videoDB";
+import videoDB from "../databases/videoDB";
 
 import { YOUTUBE_API_KEY, YOUTUBE_API_URL } from "../constants";
 
 import { ERROR_MESSAGES } from "../constants/errorMessages";
 import { BadRequestError, NotFoundError } from "../errors";
+import type {
+  FindUserVideosParams,
+  FindVideoParams,
+  UserVideos,
+  VideoEntry,
+} from "../types/video.type";
 
 class VideoService {
   private async fetchYoutubeVideoData(videoId: string): Promise<any> {
@@ -22,11 +26,11 @@ class VideoService {
     return data.items;
   }
 
-  async fetchUserVideos({ userId, limit, skip }: IFindMany): Promise<{
-    videos: IVideo[];
-    videosCount: number;
-    totalPages: number;
-  }> {
+  async findUserVideos({
+    userId,
+    limit,
+    skip,
+  }: FindUserVideosParams): Promise<UserVideos> {
     const [videos, videosCount] = await Promise.all([
       videoDB.findMany({ userId, limit, skip }),
       videoDB.count(userId),
@@ -37,11 +41,11 @@ class VideoService {
     return { videos, videosCount, totalPages };
   }
 
-  async find({
+  async findVideoById({
     videoId,
     userId,
-  }: { videoId: string; userId: string }): Promise<IVideo> {
-    const video = await videoDB.findUnique(videoId);
+  }: FindVideoParams): Promise<VideoEntry> {
+    const video = await videoDB.findById(videoId);
 
     if (video) {
       return await this.linkVideoToUser(video, userId);
@@ -54,7 +58,10 @@ class VideoService {
         throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
       }
 
-      const newVideo = await videoDB.create(youtubeVideoData[0], userId);
+      const newVideo = await videoDB.create({
+        videoData: youtubeVideoData[0],
+        userId,
+      });
 
       return await this.linkVideoToUser(newVideo, userId);
     }
@@ -62,8 +69,11 @@ class VideoService {
     return video;
   }
 
-  async linkVideoToUser(video: Video, userId: string): Promise<Video> {
-    if (video.userIds.includes(userId)) {
+  async linkVideoToUser(
+    video: VideoEntry,
+    userId: string
+  ): Promise<VideoEntry> {
+    if (video.userIds && video.userIds.includes(userId)) {
       return video;
     }
 
