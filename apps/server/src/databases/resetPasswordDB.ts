@@ -1,17 +1,29 @@
 import { randomUUID } from "node:crypto";
-import type { Prisma, ResetPasswordToken } from "@prisma/client";
 import prismaClient from "../lib/prisma";
+
+import type { ResetTokenEntry } from "../types/resetPassword.type";
 import handleAsyncOperation from "../utils/handleAsyncOperation";
 
 class ResetPasswordTokenDatabase {
-  async find(
-    params: Prisma.ResetPasswordTokenWhereInput
-  ): Promise<ResetPasswordToken | null> {
+  async findByUserId(userId: string): Promise<ResetTokenEntry | null> {
     return handleAsyncOperation(
       () =>
         prismaClient.resetPasswordToken.findFirst({
           where: {
-            ...params,
+            userId,
+            expiresAt: { gt: new Date() },
+          },
+        }),
+      { errorMessage: "Failed to find reset password token." }
+    );
+  }
+
+  async findByToken(token: string): Promise<ResetTokenEntry | null> {
+    return handleAsyncOperation(
+      () =>
+        prismaClient.resetPasswordToken.findFirst({
+          where: {
+            token,
             expiresAt: { gt: new Date() },
           },
         }),
