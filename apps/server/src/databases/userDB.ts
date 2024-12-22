@@ -24,7 +24,7 @@ class UserDatabase {
     );
   }
 
-  async findUserByEmail(email: string): Promise<UserEntry | null> {
+  async findByEmail(email: string): Promise<UserEntry | null> {
     const user = handleAsyncOperation(
       () =>
         prismaClient.user.findUnique({
@@ -38,7 +38,7 @@ class UserDatabase {
     return user;
   }
 
-  async findUserById(id: string): Promise<UserEntry | null> {
+  async findById(id: string): Promise<UserEntry | null> {
     const user = handleAsyncOperation(
       () =>
         prismaClient.user.findUnique({
@@ -52,7 +52,7 @@ class UserDatabase {
     return user;
   }
 
-  async updateUser({ userId, data }: UpdateUserParams): Promise<UserEntry> {
+  async update({ userId, data }: UpdateUserParams): Promise<UserEntry> {
     return handleAsyncOperation(
       () =>
         prismaClient.user.update({
