@@ -1,29 +1,35 @@
 import { randomUUID } from "node:crypto";
-import type { EmailVerificationToken, Prisma } from "@prisma/client";
-
 import prismaClient from "../lib/prisma";
+
+import type { VerificationTokenEntry } from "../types/verifyEmail.type";
 import handleAsyncOperation from "../utils/handleAsyncOperation";
 
-export interface IFindToken {
-  where: Prisma.EmailVerificationTokenWhereInput;
-}
-
-export interface IDeleteTokens {
-  where: Prisma.EmailVerificationTokenWhereInput;
-}
-
 class VerificationTokenDatabase {
-  async find({ where }: IFindToken): Promise<EmailVerificationToken | null> {
+  async findByUserId(userId: string): Promise<VerificationTokenEntry | null> {
     return handleAsyncOperation(
       () =>
         prismaClient.emailVerificationToken.findFirst({
-          where,
+          where: {
+            userId,
+          },
         }),
       { errorMessage: "Failed to get email verification token." }
     );
   }
 
-  async create(userId: string) {
+  async findByToken(token: string): Promise<VerificationTokenEntry | null> {
+    return handleAsyncOperation(
+      () =>
+        prismaClient.emailVerificationToken.findFirst({
+          where: {
+            token,
+          },
+        }),
+      { errorMessage: "Failed to get email verification token." }
+    );
+  }
+
+  async create(userId: string): Promise<string> {
     const token = randomUUID();
     const expiresAt = new Date(Date.now() + 3600000); // Token expires in 1 hour
 
@@ -42,11 +48,11 @@ class VerificationTokenDatabase {
     return token;
   }
 
-  async deleteMany({ where }: IDeleteTokens): Promise<void> {
+  async deleteMany(userId: string): Promise<void> {
     handleAsyncOperation(
       () =>
         prismaClient.emailVerificationToken.deleteMany({
-          where,
+          where: { userId },
         }),
       { errorMessage: "Failed to delete email verification tokens." }
     );
