@@ -30,7 +30,7 @@ class VideoController {
     const skip = (page - 1) * limit;
 
     const { totalPages, videos, videosCount } =
-      await videoService.fetchUserVideos({ userId, skip, limit });
+      await videoService.findUserVideos({ userId, skip, limit });
 
     res.status(httpStatus.OK).json({
       videos,
@@ -59,7 +59,7 @@ class VideoController {
     const { videoId } = req.params;
     const userId = req.userId;
 
-    const video = await videoService.find({ videoId, userId });
+    const video = await videoService.findVideoById({ videoId, userId });
 
     res.status(httpStatus.OK).json(video);
   }
