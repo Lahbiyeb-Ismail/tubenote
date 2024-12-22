@@ -1,12 +1,14 @@
 import { ERROR_MESSAGES } from "../constants/errorMessages";
 import userDatabase from "../databases/userDB";
+
 import { BadRequestError, NotFoundError } from "../errors";
-import type { UserEntry } from "../types/user.type";
+import type { UpdatePasswordParams, UserEntry } from "../types/user.type";
+
 import authService from "./authService";
 
 class UserService {
   async getUserByEmail(email: string): Promise<UserEntry> {
-    const user = await userDatabase.findUserByEmail(email);
+    const user = await userDatabase.findByEmail(email);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -16,7 +18,7 @@ class UserService {
   }
 
   async getUserById(userId: string): Promise<UserEntry> {
-    const user = await userDatabase.findUserById(userId);
+    const user = await userDatabase.findById(userId);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -42,14 +44,14 @@ class UserService {
       throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
-    await userDatabase.updateUser({ userId, data: { email, username } });
+    await userDatabase.update({ userId, data: { email, username } });
   }
 
   async updatePassword({
     userId,
     currentPassword,
     newPassword,
-  }: { userId: string; currentPassword: string; newPassword: string }) {
+  }: UpdatePasswordParams): Promise<void> {
     const user = await this.getUserById(userId);
 
     const isPasswordValid = await authService.comparePasswords(
@@ -67,14 +69,14 @@ class UserService {
 
     const hashedPassword = await authService.hashPassword(newPassword);
 
-    await userDatabase.updateUser({
+    await userDatabase.update({
       userId,
       data: { password: hashedPassword },
     });
   }
 
   async verifyUserEmail(userId: string): Promise<void> {
-    await userDatabase.updateUser({ userId, data: { isEmailVerified: true } });
+    await userDatabase.update({ userId, data: { isEmailVerified: true } });
   }
 }
 
