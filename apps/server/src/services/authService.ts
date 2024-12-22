@@ -85,7 +85,7 @@ class AuthService {
     email,
     password,
   }: RegisterParams): Promise<UserEntry> {
-    const isUserExist = await userDatabase.findUserByEmail(email);
+    const isUserExist = await userDatabase.findByEmail(email);
 
     if (isUserExist) {
       throw new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
@@ -101,7 +101,7 @@ class AuthService {
   }
 
   async loginUser({ email, password }: LoginParams): Promise<LoginResponse> {
-    const user = await userDatabase.findUserByEmail(email);
+    const user = await userDatabase.findByEmail(email);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -186,7 +186,7 @@ class AuthService {
       throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
-    let foundUser = await userDatabase.findUserByEmail(email);
+    let foundUser = await userDatabase.findByEmail(email);
 
     if (!foundUser) {
       foundUser = await userDatabase.create({
@@ -200,7 +200,7 @@ class AuthService {
         },
       });
     } else if (!foundUser.googleId) {
-      foundUser = await userDatabase.updateUser({
+      foundUser = await userDatabase.update({
         userId: foundUser.id,
         data: { googleId },
       });
