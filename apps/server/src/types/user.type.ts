@@ -28,3 +28,9 @@ export interface UpdateUserParams {
   userId: string;
   data: Partial<Omit<UserEntry, "id" | "createdAt" | "updatedAt" | "videoIds">>;
 }
+
+export interface UpdatePasswordParams {
+  userId: string;
+  currentPassword: string;
+  newPassword: string;
+}
