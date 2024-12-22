@@ -1,9 +1,10 @@
-import type { Prisma, RefreshToken } from "@prisma/client";
 import prismaClient from "../lib/prisma";
 import handleAsyncOperation from "../utils/handleAsyncOperation";
 
+import type { RefreshTokenEntry } from "../types/refreshToken.type";
+
 class RefreshTokenDB {
-  async create(token: string, userId: string): Promise<RefreshToken> {
+  async create(token: string, userId: string): Promise<RefreshTokenEntry> {
     return handleAsyncOperation(
       () =>
         prismaClient.refreshToken.create({
@@ -13,31 +14,35 @@ class RefreshTokenDB {
     );
   }
 
-  async find(
-    where: Prisma.RefreshTokenWhereUniqueInput
-  ): Promise<RefreshToken | null> {
+  async find(token: string): Promise<RefreshTokenEntry | null> {
     return handleAsyncOperation(
       () =>
         prismaClient.refreshToken.findUnique({
-          where,
+          where: {
+            token,
+          },
         }),
       { errorMessage: "Failed to find refresh token" }
     );
   }
-  async delete(where: Prisma.RefreshTokenWhereUniqueInput): Promise<void> {
+  async delete(token: string): Promise<void> {
     await handleAsyncOperation(
       () =>
         prismaClient.refreshToken.delete({
-          where,
+          where: {
+            token,
+          },
         }),
       { errorMessage: "Failed to delete refresh token" }
     );
   }
-  async deleteAll(where: Prisma.RefreshTokenWhereInput): Promise<void> {
+  async deleteAll(userId: string): Promise<void> {
     await handleAsyncOperation(
       () =>
         prismaClient.refreshToken.deleteMany({
-          where,
+          where: {
+            userId,
+          },
         }),
       { errorMessage: "Failed to delete refresh tokens for user" }
     );
