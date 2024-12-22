@@ -1,28 +1,15 @@
-import type { Prisma, Video } from "@prisma/client";
 import prismaClient from "../lib/prisma";
+
 import handleAsyncOperation from "../utils/handleAsyncOperation";
 
-export interface IFindMany {
-  userId: string;
-  limit: number;
-  skip: number;
-}
-
-export interface IVideo extends Omit<Video, "userIds"> {}
+import type {
+  CreateVideoParams,
+  FindUserVideosParams,
+  VideoEntry,
+} from "../types/video.type";
 
 class VideoDatabase {
-  async find(params: Prisma.VideoWhereInput): Promise<IVideo | null> {
-    return handleAsyncOperation(
-      () =>
-        prismaClient.video.findFirst({
-          where: { ...params },
-          omit: { userIds: true },
-        }),
-      { errorMessage: "Faild to find video" }
-    );
-  }
-
-  async findUnique(videoId: string): Promise<Video | null> {
+  async findById(videoId: string): Promise<VideoEntry | null> {
     return handleAsyncOperation(
       () =>
         prismaClient.video.findUnique({
@@ -32,7 +19,11 @@ class VideoDatabase {
     );
   }
 
-  async findMany({ userId, limit, skip }: IFindMany): Promise<IVideo[]> {
+  async findMany({
+    userId,
+    limit,
+    skip,
+  }: FindUserVideosParams): Promise<VideoEntry[]> {
     return handleAsyncOperation(
       async () => {
         const videos = await prismaClient.video.findMany({
@@ -60,7 +51,7 @@ class VideoDatabase {
     );
   }
 
-  async create(videoData: any, userId: string): Promise<Video> {
+  async create({ videoData, userId }: CreateVideoParams): Promise<VideoEntry> {
     return handleAsyncOperation(
       async () => {
         const { snippet, statistics, player } = videoData;
@@ -88,7 +79,10 @@ class VideoDatabase {
     );
   }
 
-  async connectVideoToUser(videoId: string, userId: string): Promise<Video> {
+  async connectVideoToUser(
+    videoId: string,
+    userId: string
+  ): Promise<VideoEntry> {
     return handleAsyncOperation(
       () =>
         prismaClient.video.update({
