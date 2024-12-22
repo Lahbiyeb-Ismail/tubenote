@@ -11,23 +11,23 @@ class RefreshTokenService {
   }
 
   async findToken(token: string): Promise<RefreshToken | null> {
-    const refreshToken = await refreshTokenDB.find({ token });
+    const refreshToken = await refreshTokenDB.find(token);
 
     return refreshToken;
   }
 
   async deleteToken(token: string): Promise<void> {
-    const refreshToken = await refreshTokenDB.find({ token });
+    const refreshToken = await refreshTokenDB.find(token);
 
     if (!refreshToken) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
-    await refreshTokenDB.delete({ token });
+    await refreshTokenDB.delete(token);
   }
 
   async deleteAllTokens(userId: string): Promise<void> {
-    await refreshTokenDB.deleteAll({ userId });
+    await refreshTokenDB.deleteAll(userId);
   }
 }
 
