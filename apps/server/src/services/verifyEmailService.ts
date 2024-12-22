@@ -1,8 +1,4 @@
-import type { EmailVerificationToken } from "@prisma/client";
-
-import verificationTokenDB, {
-  type IFindToken,
-} from "../databases/verificationTokenDB";
+import verificationTokenDB, {} from "../databases/verificationTokenDB";
 
 import { ERROR_MESSAGES } from "../constants/errorMessages";
 import { ForbiddenError } from "../errors";
@@ -18,14 +14,6 @@ class EmailVerificationService {
     return token;
   }
 
-  private async findVerificationToken({
-    where,
-  }: IFindToken): Promise<EmailVerificationToken | null> {
-    const token = await verificationTokenDB.find({ where });
-
-    return token;
-  }
-
   async generateAndSendToken(email: string): Promise<void> {
     const user = await userService.getUserByEmail(email);
 
@@ -33,9 +21,9 @@ class EmailVerificationService {
       throw new ForbiddenError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
     }
 
-    const existingVerificationToken = await this.findVerificationToken({
-      where: { userId: user.id },
-    });
+    const existingVerificationToken = await verificationTokenDB.findByUserId(
+      user.id
+    );
 
     if (existingVerificationToken) {
       throw new ForbiddenError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
@@ -47,7 +35,7 @@ class EmailVerificationService {
   }
 
   async verifyUserEmail(token: string): Promise<void> {
-    const foundToken = await this.findVerificationToken({ where: { token } });
+    const foundToken = await verificationTokenDB.findByToken(token);
 
     if (!foundToken || foundToken.expiresAt < new Date()) {
       throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
@@ -56,9 +44,7 @@ class EmailVerificationService {
     // Updates the user's isEmailVerified status to true.
     await authService.verifyEmail(foundToken.userId);
     // Deletes the email verification token from the database.
-    await verificationTokenDB.deleteMany({
-      where: { userId: foundToken.userId },
-    });
+    await verificationTokenDB.deleteMany(foundToken.userId);
   }
 }
 
