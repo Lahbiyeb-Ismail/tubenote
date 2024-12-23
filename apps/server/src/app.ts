@@ -11,12 +11,12 @@ import express, {
 import helmet from "helmet";
 import passport from "./lib/passportAuth";
 
-import authRoutes from "./routes/auth.route";
-import noteRoutes from "./routes/note.route";
-import resetPasswordRoutes from "./routes/resetPassword.route";
-import userRoutes from "./routes/user.route";
-import verifyEmailRoutes from "./routes/verifyEmail.route";
-import videoRoutes from "./routes/video.route";
+import authRoutes from "./modules/auth/authRoute";
+import noteRoutes from "./modules/note/noteRoute";
+import resetPasswordRoutes from "./modules/resetPasswordToken/resetPasswordRoute";
+import userRoutes from "./modules/user/userRoute";
+import verifyEmailRoutes from "./modules/verifyEmailToken/verifyEmailRoute";
+import videoRoutes from "./modules/video/videoRoute";
 
 import { errorHandler, notFoundRoute } from "./middlewares/errorsMiddleware";
 import logger from "./utils/logger";
