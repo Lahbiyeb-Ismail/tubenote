@@ -14,8 +14,11 @@ describe("Server", () => {
     const response = await request(app).get("/random-route");
     expect(response.status).toBe(404);
     expect(response.body).toEqual({
-      message: `404 - Route Not Found - /random-route`,
-      name: "NOT_FOUND",
+      error: {
+        name: "NOT_FOUND",
+        statusCode: 404,
+        message: `404 - Route Not Found - /random-route`,
+      },
     });
   });
 });
