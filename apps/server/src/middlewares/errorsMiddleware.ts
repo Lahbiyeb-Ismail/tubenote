@@ -34,7 +34,9 @@ function errorHandler(
     logger.debug(`Error Stack: ${err.stack}`);
   }
 
-  res.status(statusCode).json({ name: err.name, message: err.message });
+  res.status(statusCode).json({
+    error: { name: err.name, statusCode: err.httpCode, message: err.message },
+  });
 
   next();
 }
