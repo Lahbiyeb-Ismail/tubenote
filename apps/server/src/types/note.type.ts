@@ -32,7 +32,7 @@ export interface CreateNoteParams {
 export interface DeleteNoteParams extends UserId, NoteId {}
 
 export interface UpdateNoteParams extends UserId, NoteId {
-  data: Omit<NoteEntry, "id" | "userId" | "createdAt" | "updatedAt">;
+  data: Partial<Omit<NoteEntry, "id" | "userId" | "createdAt" | "updatedAt">>;
 }
 
 export interface UserNotes {
