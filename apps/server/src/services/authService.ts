@@ -91,8 +91,10 @@ class AuthService {
       throw new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
+    const hashedpassword = await this.hashPassword(password);
+
     const newUser = await userDatabase.create({
-      data: { username, email, password },
+      data: { username, email, password: hashedpassword },
     });
 
     await emailVerificationService.generateAndSendToken(newUser.email);
