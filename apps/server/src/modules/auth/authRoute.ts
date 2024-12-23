@@ -5,6 +5,7 @@ import { loginSchema, registrationSchema } from "./authValidationSchemas";
 
 import AuthController from "./authController";
 
+import isAuthenticated from "../../middlewares/isAuthenticated";
 import validateRequest from "../../middlewares/validateRequest";
 
 const router = Router();
@@ -20,7 +21,7 @@ router
   .post(validateRequest({ body: loginSchema }), AuthController.login);
 
 // - POST /logout: Log out the current user.
-router.route("/logout").post(AuthController.logout);
+router.route("/logout").post(isAuthenticated, AuthController.logout);
 
 // - POST /refresh: Refresh the user's access token.
 router.route("/refresh").post(AuthController.refresh);
