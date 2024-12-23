@@ -38,3 +38,13 @@ export const YOUTUBE_API_URL = envConfig.youtube.api.url;
  * @constant {string}
  */
 export const YOUTUBE_API_KEY = envConfig.youtube.api.key;
+
+/**
+ * The URL to which users are redirected after verifying their email.
+ *
+ * This URL is constructed using the client URL from the environment configuration
+ * and appending the `/login` path.
+ *
+ * @constant {string}
+ */
+export const EMAIL_VERIFICATION_REDIRECT_URL = `${envConfig.client.url}/login`;

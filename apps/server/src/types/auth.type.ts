@@ -24,3 +24,24 @@ export type GoogleUser = {
   family_name: string;
   picture: string;
 };
+
+export interface RegisterParams {
+  username: string;
+  email: string;
+  password: string;
+}
+
+export interface LoginParams {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface LogoutParams {
+  refreshToken: string;
+  userId: string;
+}

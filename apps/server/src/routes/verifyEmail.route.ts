@@ -1,9 +1,6 @@
 import { Router } from "express";
 
-import {
-  sendVerificationEmailHandler,
-  verifyEmailHandler,
-} from "../controllers/verifyEmail.controller";
+import verifyEmailController from "../controllers/verifyEmailController";
 
 import validateRequest from "../middlewares/validateRequest";
 
@@ -19,12 +16,15 @@ router
   .route("/send-verification-email")
   .post(
     validateRequest({ body: sendVerifyEmailBodySchema }),
-    sendVerificationEmailHandler
+    verifyEmailController.sendEmail
   );
 
 // - GET /verify-email/:token: Verify the user's email using the provided token (requires request params validation)
 router
   .route("/verify-email/:token")
-  .get(validateRequest({ params: verifyEmailParamSchema }), verifyEmailHandler);
+  .get(
+    validateRequest({ params: verifyEmailParamSchema }),
+    verifyEmailController.verifyEmail
+  );
 
 export default router;

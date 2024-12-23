@@ -1,13 +1,9 @@
 import { Router } from "express";
 
-import {
-  getCurrentUser,
-  updateCurrentUser,
-  updateUserPassword,
-} from "../controllers/user.controller";
-
 import isAuthenticated from "../middlewares/isAuthenticated";
 import validateRequest from "../middlewares/validateRequest";
+
+import userController from "../controllers/userController";
 
 import {
   updatePasswordBodySchema,
@@ -23,15 +19,18 @@ router.use(isAuthenticated);
 // - PATCH /me: Update the current user's information (requires request body validation)
 router
   .route("/me")
-  .get(getCurrentUser)
-  .patch(validateRequest({ body: updateUserBodySchema }), updateCurrentUser);
+  .get(userController.getCurrentUser)
+  .patch(
+    validateRequest({ body: updateUserBodySchema }),
+    userController.updateCurrentUser
+  );
 
 // - PATCH /update-password: Update the current user's password (requires request body validation)
 router
   .route("/update-password")
   .patch(
     validateRequest({ body: updatePasswordBodySchema }),
-    updateUserPassword
+    userController.updateUserPassword
   );
 
 export default router;

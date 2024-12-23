@@ -16,13 +16,13 @@ type SendEmailProps = {
   logoPath: string;
 };
 
-export const sendEmail = async ({
+export async function sendEmail({
   emailRecipient,
   emailSubject,
   htmlContent,
   textContent,
   logoPath,
-}: SendEmailProps) => {
+}: SendEmailProps) {
   const mailOptions = {
     from: envConfig.email.from,
     to: emailRecipient,
@@ -45,4 +45,4 @@ export const sendEmail = async ({
       console.info(`Verify email sent: ${info.response}`);
     }
   });
-};
+}
