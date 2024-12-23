@@ -1,5 +1,4 @@
 import prismaClient from "../lib/prisma";
-import authService from "../services/authService";
 import handleAsyncOperation from "../utils/handleAsyncOperation";
 
 import type {
@@ -10,15 +9,10 @@ import type {
 
 class UserDatabase {
   async create({ data }: CreateUserParams): Promise<UserEntry> {
-    const hashedpassword = await authService.hashPassword(data.password);
-
     return handleAsyncOperation(
       () =>
         prismaClient.user.create({
-          data: {
-            ...data,
-            password: hashedpassword,
-          },
+          data,
         }),
       { errorMessage: "Failed to create new user." }
     );
