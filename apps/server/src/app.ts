@@ -48,6 +48,10 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
+app.get("/", (_req, res) => {
+  res.json({ message: "Hello from the server!" });
+});
+
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/videos", videoRoutes);
 app.use("/api/v1/notes", noteRoutes);
