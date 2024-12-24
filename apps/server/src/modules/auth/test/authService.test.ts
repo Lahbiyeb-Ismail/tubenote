@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 
+import { REFRESH_TOKEN_SECRET } from "../../../constants/auth";
 import { ERROR_MESSAGES } from "../../../constants/errorMessages";
 import {
   ConflictError,
@@ -7,6 +8,8 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from "../../../errors";
+import type { JwtPayload } from "../../../types";
+import type { RefreshTokenEntry } from "../../refreshToken/refreshToken.type";
 import RefreshTokenService from "../../refreshToken/refreshTokenService";
 import UserDB from "../../user/userDB";
 import EmailVerificationService from "../../verifyEmailToken/verifyEmailService";
@@ -18,6 +21,10 @@ jest.mock("../../verifyEmailToken/verifyEmailService");
 jest.mock("../../refreshToken/refreshTokenService");
 
 describe("Test AuthService methods", () => {
+  beforeAll(() => {
+    jest.clearAllMocks();
+  });
+
   describe("Register service tests", () => {
     const mockUser = {
       id: "1",
@@ -215,6 +222,63 @@ describe("Test AuthService methods", () => {
       ).rejects.toThrow(new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED));
 
       expect(RefreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("RefreshToken method test", () => {
+    const mockPayload: JwtPayload = {
+      userId: "1",
+      exp: Date.now() + 1000,
+      iat: Date.now(),
+    };
+
+    const mockToken = "mockToken";
+
+    const mockRefreshTokenFromDB: RefreshTokenEntry = {
+      id: "12",
+      userId: "1",
+      token: "mockToken",
+      createdAt: new Date(),
+    };
+
+    const mockReturnedTokens = {
+      accessToken: "mockAccessToken",
+      refreshToken: "mockRefreshToken",
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.spyOn(AuthService, "verifyToken").mockResolvedValue(mockPayload);
+      jest
+        .spyOn(AuthService, "createJwtTokens")
+        .mockReturnValue(mockReturnedTokens);
+    });
+
+    it("should successfully refresh the token", async () => {
+      (RefreshTokenService.findToken as jest.Mock).mockResolvedValue(
+        mockRefreshTokenFromDB
+      );
+
+      (RefreshTokenService.deleteToken as jest.Mock).mockResolvedValue(
+        undefined
+      );
+
+      const result = await AuthService.refreshToken(mockToken);
+
+      expect(result).toEqual(mockReturnedTokens);
+
+      expect(AuthService.verifyToken).toHaveBeenCalledWith(
+        mockToken,
+        REFRESH_TOKEN_SECRET
+      );
+
+      expect(RefreshTokenService.findToken).toHaveBeenCalledWith(mockToken);
+
+      expect(RefreshTokenService.deleteToken).toHaveBeenCalledWith(mockToken);
+
+      expect(AuthService.createJwtTokens).toHaveBeenCalledWith(
+        mockPayload.userId
+      );
     });
   });
 });
