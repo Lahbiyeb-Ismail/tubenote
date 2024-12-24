@@ -55,10 +55,10 @@ class UserService {
   }: UpdatePasswordParams): Promise<void> {
     const user = await this.getUserById(userId);
 
-    const isPasswordValid = await AuthService.comparePasswords(
-      currentPassword,
-      user.password
-    );
+    const isPasswordValid = await AuthService.comparePasswords({
+      rawPassword: currentPassword,
+      hashedPassword: user.password,
+    });
 
     if (!isPasswordValid) {
       throw new BadRequestError(ERROR_MESSAGES.INVALID_CREDENTIALS);
