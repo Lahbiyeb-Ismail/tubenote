@@ -127,7 +127,7 @@ class AuthService {
   }
 
   async logoutUser({ refreshToken, userId }: LogoutParams): Promise<void> {
-    if (!refreshToken) {
+    if (!refreshToken || !userId) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
