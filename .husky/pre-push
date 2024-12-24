@@ -1,5 +1,5 @@
 echo "Running tests before push..."
-npm test
+pnpm run test
 
 # Check the exit status of the npm test command
 if [ $? -ne 0 ]; then
