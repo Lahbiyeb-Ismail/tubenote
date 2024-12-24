@@ -7,7 +7,7 @@
  * @extends {Error}
  */
 export class BaseError extends Error {
-  public override readonly name: string;
+  public readonly name: string;
   public readonly httpCode: number;
   public readonly isOperational: boolean;
 
