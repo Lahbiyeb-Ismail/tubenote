@@ -9,7 +9,7 @@ import {
   REFRESH_TOKEN_SECRET,
 } from "../../constants/auth";
 
-import UserDatabase from "../user/userDB";
+import UserDB from "../user/userDB";
 
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 
@@ -86,16 +86,16 @@ class AuthService {
     email,
     password,
   }: RegisterParams): Promise<UserEntry> {
-    const isUserExist = await UserDatabase.findByEmail(email);
+    const userExists = await UserDB.findByEmail(email);
 
-    if (isUserExist) {
+    if (userExists) {
       throw new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
-    const hashedpassword = await this.hashPassword(password);
+    const hashedPassword = await this.hashPassword(password);
 
-    const newUser = await UserDatabase.create({
-      data: { username, email, password: hashedpassword },
+    const newUser = await UserDB.create({
+      data: { username, email, password: hashedPassword },
     });
 
     await EmailVerificationService.generateAndSendToken(newUser.email);
@@ -104,7 +104,7 @@ class AuthService {
   }
 
   async loginUser({ email, password }: LoginParams): Promise<LoginResponse> {
-    const user = await UserDatabase.findByEmail(email);
+    const user = await UserDB.findByEmail(email);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -189,10 +189,10 @@ class AuthService {
       throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
-    let foundUser = await UserDatabase.findByEmail(email);
+    let foundUser = await UserDB.findByEmail(email);
 
     if (!foundUser) {
-      foundUser = await UserDatabase.create({
+      foundUser = await UserDB.create({
         data: {
           username: name,
           isEmailVerified: email_verified,
@@ -203,7 +203,7 @@ class AuthService {
         },
       });
     } else if (!foundUser.googleId) {
-      foundUser = await UserDatabase.update({
+      foundUser = await UserDB.update({
         userId: foundUser.id,
         data: { googleId },
       });
