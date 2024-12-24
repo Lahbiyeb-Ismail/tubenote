@@ -174,4 +174,47 @@ describe("Test AuthService methods", () => {
       expect(RefreshTokenService.createToken).not.toHaveBeenCalled();
     });
   });
+
+  describe("Logout method test", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should successfully logout a user", async () => {
+      const userId = "1";
+      const refreshToken = "mockRefreshToken";
+
+      (RefreshTokenService.deleteAllTokens as jest.Mock).mockResolvedValue(
+        undefined
+      );
+
+      await expect(
+        AuthService.logoutUser({ refreshToken, userId })
+      ).resolves.toBeUndefined();
+
+      expect(RefreshTokenService.deleteAllTokens).toHaveBeenCalledWith(userId);
+    });
+
+    it("should throw a UnauthorizedError when the refreshToken is null or undefined", async () => {
+      const userId = "1";
+      const refreshToken = "";
+
+      await expect(
+        AuthService.logoutUser({ refreshToken, userId })
+      ).rejects.toThrow(new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED));
+
+      expect(RefreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
+    });
+
+    it("should throw a UnauthorizedError when the userId is not exists", async () => {
+      const userId = "";
+      const refreshToken = "mockRefreshToken";
+
+      await expect(
+        AuthService.logoutUser({ refreshToken, userId })
+      ).rejects.toThrow(new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED));
+
+      expect(RefreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
+    });
+  });
 });
