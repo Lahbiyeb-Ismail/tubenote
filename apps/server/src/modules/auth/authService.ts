@@ -36,10 +36,7 @@ import UserService from "../user/userService";
 import EmailVerificationService from "../verifyEmailToken/verifyEmailService";
 
 class AuthService {
-  private async verifyToken(
-    token: string,
-    secret: string
-  ): Promise<JwtPayload> {
+  async verifyToken(token: string, secret: string): Promise<JwtPayload> {
     return new Promise((resolve, reject) => {
       jwt.verify(token, secret, (err, payload) => {
         if (err) {
