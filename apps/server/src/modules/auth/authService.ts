@@ -52,17 +52,13 @@ class AuthService {
     });
   }
 
-  private generateJwtToken(
-    userId: string,
-    secret: string,
-    expire: string
-  ): string {
+  generateJwtToken(userId: string, secret: string, expire: string): string {
     return jwt.sign({ userId }, secret, {
       expiresIn: expire,
     });
   }
 
-  private createJwtTokens(userId: string): {
+  createJwtTokens(userId: string): {
     accessToken: string;
     refreshToken: string;
   } {
@@ -114,13 +110,13 @@ class AuthService {
       throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
-    const isPasswordMatch = await this.comparePasswords(
-      password,
-      user.password
-    );
+    const isPasswordMatch = await this.comparePasswords({
+      rawPassword: password,
+      hashedPassword: user.password,
+    });
 
     if (!isPasswordMatch) {
-      throw new UnauthorizedError(ERROR_MESSAGES.INVALID_CREDENTIALS);
+      throw new ForbiddenError(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
     const { accessToken, refreshToken } = this.createJwtTokens(user.id);
@@ -232,11 +228,11 @@ class AuthService {
     return await bcrypt.hash(password, salt);
   }
 
-  async comparePasswords(
-    password: string,
-    userPassword: string
-  ): Promise<boolean> {
-    return await bcrypt.compare(password, userPassword);
+  async comparePasswords({
+    rawPassword,
+    hashedPassword,
+  }: { rawPassword: string; hashedPassword: string }): Promise<boolean> {
+    return await bcrypt.compare(rawPassword, hashedPassword);
   }
 }
 
