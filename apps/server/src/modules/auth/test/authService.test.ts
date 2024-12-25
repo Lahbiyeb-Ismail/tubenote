@@ -13,6 +13,7 @@ import type { JwtPayload } from "../../../types";
 import type { RefreshTokenEntry } from "../../refreshToken/refreshToken.type";
 import RefreshTokenService from "../../refreshToken/refreshTokenService";
 import UserDB from "../../user/userDB";
+import UserService from "../../user/userService";
 import EmailVerificationService from "../../verifyEmailToken/verifyEmailService";
 import AuthService from "../authService";
 
@@ -20,6 +21,7 @@ jest.mock("bcryptjs");
 jest.mock("../../user/userDB");
 jest.mock("../../verifyEmailToken/verifyEmailService");
 jest.mock("../../refreshToken/refreshTokenService");
+jest.mock("../../user/userService");
 
 describe("Test AuthService methods", () => {
   beforeAll(() => {
@@ -352,6 +354,44 @@ describe("Test AuthService methods", () => {
 
       expect(RefreshTokenService.deleteToken).not.toHaveBeenCalled();
       expect(AuthService.createJwtTokens).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("VerifyEmail method tests", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    const mockUserId = "1";
+
+    const mockUser = {
+      id: "1",
+      email: "test@example.com",
+      password: "hashedPassword",
+      isEmailVerified: false,
+    };
+
+    it("should successfully verify the email", async () => {
+      (UserService.getUserById as jest.Mock).mockResolvedValue(mockUser);
+
+      await expect(
+        AuthService.verifyEmail(mockUserId)
+      ).resolves.toBeUndefined();
+
+      expect(UserService.verifyUserEmail).toHaveBeenCalledWith(mockUserId);
+    });
+
+    it("should throw a ForbiddenError if the email is already verified", async () => {
+      (UserService.getUserById as jest.Mock).mockResolvedValue({
+        ...mockUser,
+        isEmailVerified: true,
+      });
+
+      await expect(AuthService.verifyEmail(mockUserId)).rejects.toThrow(
+        new ForbiddenError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED)
+      );
+
+      expect(UserService.verifyUserEmail).not.toHaveBeenCalled();
     });
   });
 });
