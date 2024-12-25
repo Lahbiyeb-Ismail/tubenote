@@ -166,18 +166,12 @@ class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async googleLogin(user: Profile): Promise<LoginResponse> {
+  async googleLogin(user: GoogleUser): Promise<LoginResponse> {
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
-    const {
-      sub: googleId,
-      email,
-      email_verified,
-      name,
-      picture,
-    } = user._json as GoogleUser;
+    const { sub: googleId, email, email_verified, name, picture } = user;
 
     if (!email_verified) {
       throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
