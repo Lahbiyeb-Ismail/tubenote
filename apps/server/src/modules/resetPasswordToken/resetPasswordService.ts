@@ -12,6 +12,10 @@ class ResetPasswordService {
   async sendResetToken(email: string): Promise<void> {
     const user = await UserService.getUserByEmail(email);
 
+    if (!user) {
+      throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
+    }
+
     if (!user.isEmailVerified) {
       throw new ForbiddenError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
