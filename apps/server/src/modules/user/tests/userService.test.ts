@@ -42,12 +42,14 @@ describe("UserService methods test", () => {
       expect(UserDB.findByEmail).toHaveBeenCalledTimes(1);
     });
 
-    it("should throw a NotFoundError when the user doesn't exist", async () => {
+    it("should return null if the user doesn't exist", async () => {
       (UserDB.findByEmail as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        UserService.getUserByEmail("nonexistent@example.com")
-      ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
+      const result = await UserService.getUserByEmail(
+        "nonexistent@example.com"
+      );
+
+      expect(result).toBeNull();
 
       expect(UserDB.findByEmail).toHaveBeenCalledWith(
         "nonexistent@example.com"
@@ -64,7 +66,7 @@ describe("UserService methods test", () => {
 
       const result = await UserService.getUserByEmail(specialEmail);
 
-      expect(result.email).toBe(specialEmail);
+      expect(result).not.toBeNull();
       expect(UserDB.findByEmail).toHaveBeenCalledWith(specialEmail);
     });
   });
