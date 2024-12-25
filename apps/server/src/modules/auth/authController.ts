@@ -15,7 +15,11 @@ import { UnauthorizedError } from "../../errors";
 import AuthService from "./authService";
 
 import type { TypedRequest } from "../../types";
-import type { LoginCredentials, RegisterCredentials } from "./auth.type";
+import type {
+  GoogleUser,
+  LoginCredentials,
+  RegisterCredentials,
+} from "./auth.type";
 
 /**
  * Controller for handling authentication-related operations.
@@ -114,7 +118,10 @@ class AuthController {
   async loginWithGoogle(req: TypedRequest, res: Response) {
     const user = req.user as Profile;
 
-    const { accessToken, refreshToken } = await AuthService.googleLogin(user);
+    const googleUser = user._json as GoogleUser;
+
+    const { accessToken, refreshToken } =
+      await AuthService.googleLogin(googleUser);
 
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
