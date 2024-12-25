@@ -5,8 +5,8 @@ import type { RefreshTokenEntry } from "./refreshToken.type";
 import RefreshTokenDB from "./refreshTokenDB";
 
 class RefreshTokenService {
-  async createToken(userId: string, token: string): Promise<void> {
-    await RefreshTokenDB.create(token, userId);
+  async createToken(userId: string, token: string): Promise<RefreshTokenEntry> {
+    return await RefreshTokenDB.create(token, userId);
   }
 
   async findToken(token: string): Promise<RefreshTokenEntry | null> {
