@@ -1,4 +1,3 @@
-import { mock } from "node:test";
 import { ERROR_MESSAGES } from "../../../constants/errorMessages";
 import { BadRequestError, NotFoundError } from "../../../errors";
 import AuthService from "../../auth/authService";
