@@ -84,6 +84,7 @@ class AuthController {
    */
   async refresh(req: TypedRequest, res: Response) {
     const cookies = req.cookies;
+    const userId = req.userId;
 
     const token = cookies[REFRESH_TOKEN_NAME];
 
@@ -93,7 +94,10 @@ class AuthController {
 
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
-    const { accessToken, refreshToken } = await AuthService.refreshToken(token);
+    const { accessToken, refreshToken } = await AuthService.refreshToken({
+      token,
+      userId,
+    });
 
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
