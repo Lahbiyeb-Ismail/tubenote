@@ -79,8 +79,6 @@ describe("Test AuthService methods", () => {
       // Mock the UserDB.findByEmail to return an existing user
       (UserDB.findByEmail as jest.Mock).mockResolvedValue(mockUser);
 
-      expect(UserDB.findByEmail).toHaveBeenCalledWith("test@example.com");
-
       await expect(
         AuthService.registerUser({
           username: "testuser",
@@ -88,6 +86,8 @@ describe("Test AuthService methods", () => {
           password: "password123",
         })
       ).rejects.toThrow(new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS));
+
+      expect(UserDB.findByEmail).toHaveBeenCalledWith("test@example.com");
     });
   });
 
