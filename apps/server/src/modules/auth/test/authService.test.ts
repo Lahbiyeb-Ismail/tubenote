@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 
+import exp from "constants";
 import { REFRESH_TOKEN_SECRET } from "../../../constants/auth";
 import { ERROR_MESSAGES } from "../../../constants/errorMessages";
 import {
@@ -233,6 +234,7 @@ describe("Test AuthService methods", () => {
     };
 
     const mockToken = "mockToken";
+    const mockUserId = "1";
 
     const mockRefreshTokenFromDB: RefreshTokenEntry = {
       id: "12",
@@ -248,13 +250,11 @@ describe("Test AuthService methods", () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      jest.spyOn(AuthService, "verifyToken").mockResolvedValue(mockPayload);
-      jest
-        .spyOn(AuthService, "createJwtTokens")
-        .mockReturnValue(mockReturnedTokens);
     });
 
     it("should successfully refresh the token", async () => {
+      jest.spyOn(AuthService, "verifyToken").mockResolvedValue(mockPayload);
+
       (RefreshTokenService.findToken as jest.Mock).mockResolvedValue(
         mockRefreshTokenFromDB
       );
@@ -263,7 +263,14 @@ describe("Test AuthService methods", () => {
         undefined
       );
 
-      const result = await AuthService.refreshToken(mockToken);
+      jest
+        .spyOn(AuthService, "createJwtTokens")
+        .mockReturnValue(mockReturnedTokens);
+
+      const result = await AuthService.refreshToken({
+        token: mockToken,
+        userId: mockUserId,
+      });
 
       expect(result).toEqual(mockReturnedTokens);
 
@@ -279,6 +286,72 @@ describe("Test AuthService methods", () => {
       expect(AuthService.createJwtTokens).toHaveBeenCalledWith(
         mockPayload.userId
       );
+    });
+
+    it("should throw a ForbiddenError if the token is invalid or expired", async () => {
+      jest.spyOn(AuthService, "verifyToken").mockResolvedValue(null);
+
+      await expect(
+        AuthService.refreshToken({ token: mockToken, userId: mockUserId })
+      ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.FORBIDDEN));
+
+      expect(AuthService.verifyToken).toHaveBeenCalledWith(
+        mockToken,
+        REFRESH_TOKEN_SECRET
+      );
+
+      expect(RefreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
+        mockUserId
+      );
+
+      expect(RefreshTokenService.findToken).not.toHaveBeenCalled();
+      expect(RefreshTokenService.deleteToken).not.toHaveBeenCalled();
+      expect(AuthService.createJwtTokens).not.toHaveBeenCalled();
+    });
+
+    it("should throw a UnauthorizedError if the userId in the token is not the same as the userId in the request", async () => {
+      jest.spyOn(AuthService, "verifyToken").mockResolvedValue({
+        ...mockPayload,
+        userId: "2",
+      });
+
+      await expect(
+        AuthService.refreshToken({ token: mockToken, userId: mockUserId })
+      ).rejects.toThrow(new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED));
+
+      expect(AuthService.verifyToken).toHaveBeenCalledWith(
+        mockToken,
+        REFRESH_TOKEN_SECRET
+      );
+
+      expect(RefreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
+      expect(RefreshTokenService.findToken).not.toHaveBeenCalled();
+      expect(RefreshTokenService.deleteToken).not.toHaveBeenCalled();
+      expect(AuthService.createJwtTokens).not.toHaveBeenCalled();
+    });
+
+    it("should throw a ForbiddenError if the token is not found in the database (token reuses)", async () => {
+      jest.spyOn(AuthService, "verifyToken").mockResolvedValue(mockPayload);
+
+      (RefreshTokenService.findToken as jest.Mock).mockResolvedValue(null);
+
+      await expect(
+        AuthService.refreshToken({ token: mockToken, userId: mockUserId })
+      ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.FORBIDDEN));
+
+      expect(AuthService.verifyToken).toHaveBeenCalledWith(
+        mockToken,
+        REFRESH_TOKEN_SECRET
+      );
+
+      expect(RefreshTokenService.findToken).toHaveBeenCalledWith(mockToken);
+
+      expect(RefreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
+        mockUserId
+      );
+
+      expect(RefreshTokenService.deleteToken).not.toHaveBeenCalled();
+      expect(AuthService.createJwtTokens).not.toHaveBeenCalled();
     });
   });
 });
