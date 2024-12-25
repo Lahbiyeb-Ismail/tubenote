@@ -1,6 +1,3 @@
-import bcrypt from "bcryptjs";
-
-import exp from "constants";
 import { REFRESH_TOKEN_SECRET } from "../../../constants/auth";
 import { ERROR_MESSAGES } from "../../../constants/errorMessages";
 import {
@@ -19,7 +16,6 @@ import EmailVerificationService from "../../verifyEmailToken/verifyEmailService"
 import type { GoogleUser } from "../auth.type";
 import AuthService from "../authService";
 
-jest.mock("bcryptjs");
 jest.mock("../../user/userDB");
 jest.mock("../../verifyEmailToken/verifyEmailService");
 jest.mock("../../refreshToken/refreshTokenService");
