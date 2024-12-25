@@ -144,6 +144,10 @@ class AuthService {
       throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
     }
 
+    if (payload.userId !== userId) {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
+    }
+
     const refreshTokenFromDB = await RefreshTokenService.findToken(token);
 
     if (!refreshTokenFromDB) {
@@ -154,10 +158,6 @@ class AuthService {
     }
 
     await RefreshTokenService.deleteToken(token);
-
-    if (refreshTokenFromDB.userId !== userId) {
-      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
-    }
 
     const { accessToken, refreshToken } = this.createJwtTokens(userId);
 
