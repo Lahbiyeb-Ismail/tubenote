@@ -8,11 +8,11 @@ import AuthService from "../auth/authService";
 import UserDB from "./userDB";
 
 class UserService {
-  async getUserByEmail(email: string): Promise<UserEntry> {
+  async getUserByEmail(email: string): Promise<UserEntry | null> {
     const user = await UserDB.findByEmail(email);
 
     if (!user) {
-      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
+      return null;
     }
 
     return user;
@@ -39,9 +39,9 @@ class UserService {
   }): Promise<void> {
     await this.getUserById(userId);
 
-    const existingUser = await this.getUserByEmail(email);
+    const user = await this.getUserByEmail(email);
 
-    if (existingUser && existingUser.id !== userId) {
+    if (user && user.id !== userId) {
       throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
