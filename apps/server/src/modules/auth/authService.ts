@@ -31,17 +31,18 @@ import type {
 
 import type { UserEntry } from "../user/user.type";
 
+import logger from "../../utils/logger";
 import RefreshTokenService from "../refreshToken/refreshTokenService";
 import UserService from "../user/userService";
 import EmailVerificationService from "../verifyEmailToken/verifyEmailService";
 
 class AuthService {
-  async verifyToken(token: string, secret: string): Promise<JwtPayload> {
-    return new Promise((resolve, reject) => {
+  async verifyToken(token: string, secret: string): Promise<JwtPayload | null> {
+    return new Promise((resolve, _reject) => {
       jwt.verify(token, secret, (err, payload) => {
         if (err) {
-          reject(err);
-          return;
+          logger.error(`Error verifying token: ${err}`);
+          resolve(null);
         }
 
         resolve(payload as JwtPayload);
@@ -131,13 +132,13 @@ class AuthService {
     await RefreshTokenService.deleteAllTokens(userId);
   }
 
-  async refreshToken(token: string): Promise<LoginResponse> {
+  async refreshToken({
+    token,
+    userId,
+  }: { token: string; userId: string }): Promise<LoginResponse> {
     const payload = await this.verifyToken(token, REFRESH_TOKEN_SECRET);
 
-    const { userId, exp } = payload as JwtPayload;
-
-    if (exp && Date.now() >= exp * 1000) {
-      // Check if the token is expired
+    if (!payload) {
       await RefreshTokenService.deleteAllTokens(userId);
 
       throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
