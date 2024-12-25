@@ -1,11 +1,13 @@
 import { mock } from "node:test";
 import { ERROR_MESSAGES } from "../../../constants/errorMessages";
 import { BadRequestError, NotFoundError } from "../../../errors";
+import AuthService from "../../auth/authService";
 import type { UserEntry } from "../user.type";
 import UserDB from "../userDB";
 import UserService from "../userService";
 
 jest.mock("../userDB");
+jest.mock("../../auth/authService");
 
 describe("UserService methods test", () => {
   beforeAll(() => {
@@ -249,6 +251,111 @@ describe("UserService methods test", () => {
         updateParams.email
       );
       expect(UserDB.update).toHaveBeenCalled();
+    });
+  });
+
+  describe("updatePassword method tests", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    const updatePasswordParams = {
+      userId: "1",
+      currentPassword: "oldpassword",
+      newPassword: "newpassword",
+    };
+
+    it("should successfully update the user's password", async () => {
+      jest.spyOn(UserService, "getUserById").mockResolvedValue(mockUser);
+
+      (AuthService.comparePasswords as jest.Mock).mockResolvedValue(true);
+
+      (AuthService.hashPassword as jest.Mock).mockResolvedValue(
+        "newhashedpassword"
+      );
+
+      await UserService.updatePassword(updatePasswordParams);
+
+      expect(UserService.getUserById).toHaveBeenCalledWith(
+        updatePasswordParams.userId
+      );
+
+      expect(AuthService.comparePasswords).toHaveBeenCalledWith({
+        rawPassword: updatePasswordParams.currentPassword,
+        hashedPassword: mockUser.password,
+      });
+
+      expect(AuthService.hashPassword).toHaveBeenCalledWith(
+        updatePasswordParams.newPassword
+      );
+
+      expect(UserDB.update).toHaveBeenCalledWith({
+        userId: updatePasswordParams.userId,
+        data: { password: "newhashedpassword" },
+      });
+    });
+
+    it("should throw a BadRequestError if the current password is invalid", async () => {
+      jest.spyOn(UserService, "getUserById").mockResolvedValue(mockUser);
+
+      (AuthService.comparePasswords as jest.Mock).mockResolvedValue(false);
+
+      await expect(
+        UserService.updatePassword({
+          ...updatePasswordParams,
+          currentPassword: "invalidpassword",
+        })
+      ).rejects.toThrow(
+        new BadRequestError(ERROR_MESSAGES.INVALID_CREDENTIALS)
+      );
+
+      expect(UserService.getUserById).toHaveBeenCalledWith(
+        updatePasswordParams.userId
+      );
+
+      expect(AuthService.comparePasswords).toHaveBeenCalledWith({
+        rawPassword: "invalidpassword",
+        hashedPassword: mockUser.password,
+      });
+    });
+
+    it("should throw a BadRequestError if the new password is the same as the current password", async () => {
+      jest.spyOn(UserService, "getUserById").mockResolvedValue(mockUser);
+      (AuthService.comparePasswords as jest.Mock).mockResolvedValue(true);
+
+      await expect(
+        UserService.updatePassword({
+          ...updatePasswordParams,
+          newPassword: updatePasswordParams.currentPassword,
+        })
+      ).rejects.toThrow(
+        new BadRequestError(ERROR_MESSAGES.PASSWORD_SAME_AS_CURRENT)
+      );
+
+      expect(UserService.getUserById).toHaveBeenCalledWith(
+        updatePasswordParams.userId
+      );
+
+      expect(AuthService.comparePasswords).toHaveBeenCalledWith({
+        rawPassword: updatePasswordParams.currentPassword,
+        hashedPassword: mockUser.password,
+      });
+    });
+
+    it("should throw a NotFoundError if the user doesn't exist", async () => {
+      jest
+        .spyOn(UserService, "getUserById")
+        .mockRejectedValue(
+          new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
+        );
+
+      await expect(
+        UserService.updatePassword(updatePasswordParams)
+      ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
+
+      expect(UserService.getUserById).toHaveBeenCalledWith(
+        updatePasswordParams.userId
+      );
     });
   });
 });
