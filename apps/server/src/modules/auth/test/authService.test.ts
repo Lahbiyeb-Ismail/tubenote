@@ -12,9 +12,11 @@ import {
 import type { JwtPayload } from "../../../types";
 import type { RefreshTokenEntry } from "../../refreshToken/refreshToken.type";
 import RefreshTokenService from "../../refreshToken/refreshTokenService";
+import type { UserEntry } from "../../user/user.type";
 import UserDB from "../../user/userDB";
 import UserService from "../../user/userService";
 import EmailVerificationService from "../../verifyEmailToken/verifyEmailService";
+import type { GoogleUser } from "../auth.type";
 import AuthService from "../authService";
 
 jest.mock("bcryptjs");
@@ -354,6 +356,114 @@ describe("Test AuthService methods", () => {
 
       expect(RefreshTokenService.deleteToken).not.toHaveBeenCalled();
       expect(AuthService.createJwtTokens).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("GoogleLogin method tests", () => {
+    const mockGoogleUser: GoogleUser = {
+      sub: "1",
+      email: "",
+      email_verified: true,
+      name: "testuser",
+      picture: "testuser.jpg",
+      given_name: "test",
+      family_name: "user",
+    };
+
+    const mockCreatedUser: UserEntry = {
+      id: "1",
+      email: mockGoogleUser.email,
+      username: mockGoogleUser.name,
+      password: mockGoogleUser.sub,
+      isEmailVerified: mockGoogleUser.email_verified,
+      googleId: mockGoogleUser.sub,
+      profilePicture: mockGoogleUser.picture,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      videoIds: [],
+    };
+
+    const mockTokens = {
+      accessToken: "mockAccessToken",
+      refreshToken: "mockRefreshToken",
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should successfully login a user with google", async () => {
+      (UserDB.findByEmail as jest.Mock).mockResolvedValue(null);
+      (UserDB.create as jest.Mock).mockResolvedValue(mockCreatedUser);
+
+      jest.spyOn(AuthService, "createJwtTokens").mockReturnValue(mockTokens);
+
+      const result = await AuthService.googleLogin(mockGoogleUser);
+
+      expect(result).toEqual(mockTokens);
+
+      expect(UserDB.findByEmail).toHaveBeenCalledWith(mockGoogleUser.email);
+      expect(UserDB.create).toHaveBeenCalledWith({
+        data: {
+          email: mockGoogleUser.email,
+          username: mockGoogleUser.name,
+          password: mockGoogleUser.sub,
+          isEmailVerified: mockGoogleUser.email_verified,
+          googleId: mockGoogleUser.sub,
+          profilePicture: mockGoogleUser.picture,
+        },
+      });
+      expect(AuthService.createJwtTokens).toHaveBeenCalledWith(
+        mockCreatedUser.id
+      );
+      expect(RefreshTokenService.createToken).toHaveBeenCalledWith(
+        mockCreatedUser.id,
+        mockTokens.refreshToken
+      );
+    });
+
+    it("should successfully login a user with google and update the googleId", async () => {
+      (UserDB.findByEmail as jest.Mock).mockResolvedValue({
+        ...mockCreatedUser,
+        googleId: null,
+      });
+
+      (UserDB.update as jest.Mock).mockResolvedValue(mockCreatedUser);
+
+      jest.spyOn(AuthService, "createJwtTokens").mockReturnValue(mockTokens);
+
+      const result = await AuthService.googleLogin(mockGoogleUser);
+
+      expect(result).toEqual(mockTokens);
+
+      expect(UserDB.findByEmail).toHaveBeenCalledWith(mockGoogleUser.email);
+      expect(UserDB.update).toHaveBeenCalledWith({
+        userId: mockCreatedUser.id,
+        data: { googleId: mockGoogleUser.sub },
+      });
+      expect(AuthService.createJwtTokens).toHaveBeenCalledWith(
+        mockCreatedUser.id
+      );
+      expect(RefreshTokenService.createToken).toHaveBeenCalledWith(
+        mockCreatedUser.id,
+        mockTokens.refreshToken
+      );
+    });
+
+    it("should throw a UnauthorizedError if the email is not verified", async () => {
+      const unverifiedGoogleUser = { ...mockGoogleUser, email_verified: false };
+
+      await expect(
+        AuthService.googleLogin(unverifiedGoogleUser)
+      ).rejects.toThrow(
+        new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED)
+      );
+
+      expect(UserDB.findByEmail).not.toHaveBeenCalled();
+      expect(UserDB.create).not.toHaveBeenCalled();
+      expect(UserDB.update).not.toHaveBeenCalled();
+      expect(AuthService.createJwtTokens).not.toHaveBeenCalled();
+      expect(RefreshTokenService.createToken).not.toHaveBeenCalled();
     });
   });
 
