@@ -21,7 +21,7 @@ class ResetPasswordTokenDatabase {
   async findByToken(token: string): Promise<ResetTokenEntry | null> {
     return handleAsyncOperation(
       () =>
-        prismaClient.resetPasswordToken.findFirst({
+        prismaClient.resetPasswordToken.findUnique({
           where: {
             token,
           },
