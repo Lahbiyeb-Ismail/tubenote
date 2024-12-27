@@ -7,6 +7,7 @@ import UserService from "../user/userService";
 
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 import { ForbiddenError, NotFoundError } from "../../errors";
+import type { ResetTokenEntry } from "./resetPassword.type";
 
 class ResetPasswordService {
   async sendResetToken(email: string): Promise<void> {
@@ -41,23 +42,27 @@ class ResetPasswordService {
   }
 
   async reset(token: string, password: string): Promise<void> {
-    const userId = await this.verfiyResetToken(token);
+    const resetToken = await this.verfiyResetToken(token);
+
+    if (!resetToken) {
+      throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
+    }
 
     const hashedPassword = await AuthService.hashPassword(password);
 
     await UserDB.update({
-      userId,
+      userId: resetToken.userId,
       data: { password: hashedPassword },
     });
 
-    await ResetPasswordDB.deleteMany(userId);
+    await ResetPasswordDB.deleteMany(resetToken.userId);
   }
 
-  async verfiyResetToken(token: string): Promise<string> {
+  async verfiyResetToken(token: string): Promise<ResetTokenEntry | null> {
     const resetToken = await ResetPasswordDB.findByToken(token);
 
     if (!resetToken) {
-      throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
+      return null;
     }
 
     if (resetToken.expiresAt < new Date()) {
@@ -65,7 +70,7 @@ class ResetPasswordService {
       throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
     }
 
-    return resetToken.userId;
+    return resetToken;
   }
 }
 
