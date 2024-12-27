@@ -24,7 +24,6 @@ class ResetPasswordTokenDatabase {
         prismaClient.resetPasswordToken.findFirst({
           where: {
             token,
-            expiresAt: { gt: new Date() },
           },
         }),
       { errorMessage: "Failed to find reset password token." }
