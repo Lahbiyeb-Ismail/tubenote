@@ -42,10 +42,15 @@ class ResetPasswordService {
   }
 
   async reset(token: string, password: string): Promise<void> {
-    const resetToken = await this.verifyResetToken(token);
+    const resetToken = await this.findResetToken(token);
 
-    if (!resetToken) {
-      throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
+    if (!resetToken) throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
+
+    const isTokenExpired = await this.isResetTokenExpired(resetToken);
+
+    if (isTokenExpired) {
+      await ResetPasswordDB.deleteMany(resetToken.userId);
+      throw new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN);
     }
 
     const hashedPassword = await AuthService.hashPassword(password);
@@ -58,16 +63,36 @@ class ResetPasswordService {
     await ResetPasswordDB.deleteMany(resetToken.userId);
   }
 
-  async verifyResetToken(token: string): Promise<ResetTokenEntry | null> {
+  async findResetToken(token: string): Promise<ResetTokenEntry | null> {
     const resetToken = await ResetPasswordDB.findByToken(token);
 
     if (!resetToken) {
       return null;
     }
 
+    return resetToken;
+  }
+
+  async isResetTokenExpired(resetToken: ResetTokenEntry): Promise<boolean> {
     if (resetToken.expiresAt < new Date()) {
+      return true;
+    }
+
+    return false;
+  }
+
+  async verifyResetToken(token: string): Promise<ResetTokenEntry> {
+    const resetToken = await this.findResetToken(token);
+
+    if (!resetToken) {
+      throw new NotFoundError(ERROR_MESSAGES.INVALID_TOKEN);
+    }
+
+    const isTokenExpired = await this.isResetTokenExpired(resetToken);
+
+    if (isTokenExpired) {
       await ResetPasswordDB.deleteMany(resetToken.userId);
-      throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
+      throw new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN);
     }
 
     return resetToken;
