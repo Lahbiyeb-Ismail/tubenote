@@ -109,4 +109,21 @@ describe("ResetPasswordService tests", () => {
       expect(ResetPasswordDB.findByUserId).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe("createToken method tests", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should create a reset token", async () => {
+      (ResetPasswordDB.create as jest.Mock).mockResolvedValue(
+        mockResetTokenEntry.token
+      );
+
+      const result = await ResetPasswordService.createToken(mockUser.id);
+
+      expect(result).toBe(mockResetTokenEntry.token);
+      expect(typeof result).toBe("string");
+    });
+  });
 });
