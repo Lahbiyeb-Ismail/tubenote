@@ -57,7 +57,7 @@ class ResetPasswordService {
     const resetToken = await ResetPasswordDB.findByToken(token);
 
     if (!resetToken) {
-      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
+      throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
     }
 
     if (resetToken.expiresAt < new Date()) {
