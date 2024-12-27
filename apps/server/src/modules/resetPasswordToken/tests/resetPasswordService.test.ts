@@ -8,10 +8,10 @@ import type { ResetTokenEntry } from "../resetPassword.type";
 import ResetPasswordDB from "../resetPasswordDB";
 import ResetPasswordService from "../resetPasswordService";
 
-jest.mock("../resetPasswordDB");
-jest.mock("../../user/userDB");
 jest.mock("../../user/userService");
 jest.mock("../../auth/authService");
+jest.mock("../../user/userDB");
+jest.mock("../resetPasswordDB");
 
 describe("ResetPasswordService tests", () => {
   beforeAll(() => {
@@ -145,51 +145,80 @@ describe("ResetPasswordService tests", () => {
     });
 
     it("should throw a ForbiddenError if the reset token is invalid", async () => {
-      (ResetPasswordDB.findByToken as jest.Mock).mockResolvedValue(null);
+      jest
+        .spyOn(ResetPasswordService, "findResetToken")
+        .mockResolvedValue(null);
 
       await expect(
         ResetPasswordService.reset(mockNonExistentToken, "password123")
       ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN));
 
-      expect(ResetPasswordDB.findByToken).toHaveBeenCalledWith(
+      expect(ResetPasswordService.findResetToken).toHaveBeenCalledWith(
         mockNonExistentToken
       );
+
+      expect(AuthService.hashPassword).not.toHaveBeenCalled();
+
+      expect(UserDB.update).not.toHaveBeenCalled();
+
+      expect(ResetPasswordDB.deleteMany).not.toHaveBeenCalled();
     });
 
     it("should throw a ForbiddenError if the reset token is expired", async () => {
-      (ResetPasswordDB.findByToken as jest.Mock).mockResolvedValue(
-        mockExpiredResetToken
-      );
+      jest
+        .spyOn(ResetPasswordService, "findResetToken")
+        .mockResolvedValue(mockExpiredResetToken);
+
+      jest
+        .spyOn(ResetPasswordService, "isResetTokenExpired")
+        .mockResolvedValue(true);
 
       await expect(
         ResetPasswordService.reset(mockExpiredToken, "password123")
-      ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN));
+      ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN));
 
-      expect(ResetPasswordDB.findByToken).toHaveBeenCalledWith(
+      expect(ResetPasswordService.findResetToken).toHaveBeenCalledWith(
         mockExpiredToken
       );
+
+      expect(ResetPasswordService.isResetTokenExpired).toHaveBeenCalledWith(
+        mockExpiredResetToken
+      );
+
       expect(ResetPasswordDB.deleteMany).toHaveBeenCalledWith(
         mockExpiredResetToken.userId
       );
+
+      expect(AuthService.hashPassword).not.toHaveBeenCalled();
+
+      expect(UserDB.update).not.toHaveBeenCalled();
     });
 
     it("should reset the user's password", async () => {
       const newPassword = "newpassword123";
 
       jest
-        .spyOn(ResetPasswordService, "verifyResetToken")
+        .spyOn(ResetPasswordService, "findResetToken")
         .mockResolvedValue(mockValidResetToken);
 
       jest
-        .spyOn(AuthService, "hashPassword")
-        .mockResolvedValue("hashedPassword");
+        .spyOn(ResetPasswordService, "isResetTokenExpired")
+        .mockResolvedValue(false);
+
+      (AuthService.hashPassword as jest.Mock).mockResolvedValue(
+        "hashedPassword"
+      );
 
       (UserDB.update as jest.Mock).mockResolvedValue(null);
 
       await ResetPasswordService.reset(mockValidToken, newPassword);
 
-      expect(ResetPasswordService.verifyResetToken).toHaveBeenCalledWith(
+      expect(ResetPasswordService.findResetToken).toHaveBeenCalledWith(
         mockValidToken
+      );
+
+      expect(ResetPasswordService.isResetTokenExpired).toHaveBeenCalledWith(
+        mockValidResetToken
       );
 
       expect(AuthService.hashPassword).toHaveBeenCalledWith(newPassword);
