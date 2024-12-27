@@ -66,7 +66,7 @@ class ResetPasswordController {
   ): Promise<void> {
     const { token } = req.params;
 
-    await ResetPasswordService.verfiyResetToken(token);
+    await ResetPasswordService.verifyResetToken(token);
 
     res.status(httpStatus.OK).json({ message: "Reset token verified." });
   }

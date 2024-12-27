@@ -42,7 +42,7 @@ class ResetPasswordService {
   }
 
   async reset(token: string, password: string): Promise<void> {
-    const resetToken = await this.verfiyResetToken(token);
+    const resetToken = await this.verifyResetToken(token);
 
     if (!resetToken) {
       throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
@@ -58,7 +58,7 @@ class ResetPasswordService {
     await ResetPasswordDB.deleteMany(resetToken.userId);
   }
 
-  async verfiyResetToken(token: string): Promise<ResetTokenEntry | null> {
+  async verifyResetToken(token: string): Promise<ResetTokenEntry | null> {
     const resetToken = await ResetPasswordDB.findByToken(token);
 
     if (!resetToken) {
