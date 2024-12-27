@@ -33,12 +33,22 @@ describe("ResetPasswordService tests", () => {
     videoIds: [],
   };
 
-  const mockResetTokenEntry: ResetTokenEntry = {
-    id: "token123",
+  const mockValidToken = "valid-token";
+  const mockExpiredToken = "expired-token";
+  const mockNonExistentToken = "non-existent-token";
+
+  const mockValidResetToken: ResetTokenEntry = {
+    id: "1",
+    token: mockValidToken,
     userId: "user123",
+    expiresAt: new Date(Date.now() + 3600000), // 1 hour from now
     createdAt: new Date(),
-    expiresAt: new Date(),
-    token: "mockResetTokenValue",
+  };
+
+  const mockExpiredResetToken: ResetTokenEntry = {
+    ...mockValidResetToken,
+    token: mockExpiredToken,
+    expiresAt: new Date(Date.now() - 3600000), // 1 hour ago
   };
 
   describe("sendResetToken email method tests", () => {
@@ -77,7 +87,7 @@ describe("ResetPasswordService tests", () => {
       (UserService.getUserByEmail as jest.Mock).mockResolvedValue(mockUser);
 
       (ResetPasswordDB.findByUserId as jest.Mock).mockResolvedValue(
-        mockResetTokenEntry
+        mockValidResetToken
       );
 
       await expect(
@@ -90,7 +100,7 @@ describe("ResetPasswordService tests", () => {
 
       expect(ResetPasswordDB.findByUserId).toHaveBeenCalledWith(mockUser.id);
 
-      expect(mockResetTokenEntry.userId).toBe(mockUser.id);
+      expect(mockValidResetToken.userId).toBe(mockUser.id);
     });
 
     it("should send a reset token email", async () => {
@@ -100,7 +110,7 @@ describe("ResetPasswordService tests", () => {
 
       jest
         .spyOn(ResetPasswordService, "createToken")
-        .mockResolvedValue(mockResetTokenEntry.token);
+        .mockResolvedValue(mockValidResetToken.token);
 
       await ResetPasswordService.sendResetToken(mockEmail);
 
@@ -120,13 +130,11 @@ describe("ResetPasswordService tests", () => {
     });
 
     it("should create a reset token", async () => {
-      (ResetPasswordDB.create as jest.Mock).mockResolvedValue(
-        mockResetTokenEntry.token
-      );
+      (ResetPasswordDB.create as jest.Mock).mockResolvedValue(mockValidToken);
 
       const result = await ResetPasswordService.createToken(mockUser.id);
 
-      expect(result).toBe(mockResetTokenEntry.token);
+      expect(result).toBe(mockValidToken);
       expect(typeof result).toBe("string");
     });
   });
@@ -137,34 +145,31 @@ describe("ResetPasswordService tests", () => {
     });
 
     it("should throw a ForbiddenError if the reset token is invalid", async () => {
-      const inValidResetToken = "invalidToken";
-
       (ResetPasswordDB.findByToken as jest.Mock).mockResolvedValue(null);
 
       await expect(
-        ResetPasswordService.reset(inValidResetToken, "password123")
+        ResetPasswordService.reset(mockNonExistentToken, "password123")
       ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN));
 
       expect(ResetPasswordDB.findByToken).toHaveBeenCalledWith(
-        inValidResetToken
+        mockNonExistentToken
       );
     });
 
     it("should throw a ForbiddenError if the reset token is expired", async () => {
-      (ResetPasswordDB.findByToken as jest.Mock).mockResolvedValue({
-        ...mockResetTokenEntry,
-        expiresAt: new Date(Date.now() - 1000),
-      });
+      (ResetPasswordDB.findByToken as jest.Mock).mockResolvedValue(
+        mockExpiredResetToken
+      );
 
       await expect(
-        ResetPasswordService.reset(mockResetTokenEntry.token, "password123")
+        ResetPasswordService.reset(mockExpiredToken, "password123")
       ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN));
 
       expect(ResetPasswordDB.findByToken).toHaveBeenCalledWith(
-        mockResetTokenEntry.token
+        mockExpiredToken
       );
       expect(ResetPasswordDB.deleteMany).toHaveBeenCalledWith(
-        mockResetTokenEntry.userId
+        mockExpiredResetToken.userId
       );
     });
 
@@ -172,8 +177,8 @@ describe("ResetPasswordService tests", () => {
       const newPassword = "newpassword123";
 
       jest
-        .spyOn(ResetPasswordService, "verfiyResetToken")
-        .mockResolvedValue(mockResetTokenEntry);
+        .spyOn(ResetPasswordService, "verifyResetToken")
+        .mockResolvedValue(mockValidResetToken);
 
       jest
         .spyOn(AuthService, "hashPassword")
@@ -181,10 +186,10 @@ describe("ResetPasswordService tests", () => {
 
       (UserDB.update as jest.Mock).mockResolvedValue(null);
 
-      await ResetPasswordService.reset(mockResetTokenEntry.token, newPassword);
+      await ResetPasswordService.reset(mockValidToken, newPassword);
 
-      expect(ResetPasswordService.verfiyResetToken).toHaveBeenCalledWith(
-        mockResetTokenEntry.token
+      expect(ResetPasswordService.verifyResetToken).toHaveBeenCalledWith(
+        mockValidToken
       );
 
       expect(AuthService.hashPassword).toHaveBeenCalledWith(newPassword);
@@ -192,12 +197,12 @@ describe("ResetPasswordService tests", () => {
       expect(AuthService.hashPassword).toHaveBeenCalledTimes(1);
 
       expect(UserDB.update).toHaveBeenCalledWith({
-        userId: mockResetTokenEntry.userId,
+        userId: mockValidResetToken.userId,
         data: { password: "hashedPassword" },
       });
 
       expect(ResetPasswordDB.deleteMany).toHaveBeenCalledWith(
-        mockResetTokenEntry.userId
+        mockValidResetToken.userId
       );
     });
   });
