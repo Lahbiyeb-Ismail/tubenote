@@ -44,8 +44,12 @@ class EmailVerificationService {
   async verifyUserEmail(token: string): Promise<void> {
     const foundToken = await VerificationTokenDB.findByToken(token);
 
-    if (!foundToken || foundToken.expiresAt < new Date()) {
+    if (!foundToken) {
       throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
+    }
+
+    if (foundToken.expiresAt < new Date()) {
+      throw new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN);
     }
 
     // Updates the user's isEmailVerified status to true.
