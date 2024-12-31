@@ -1,18 +1,17 @@
-import { mock } from "node:test";
-import { ERROR_MESSAGES } from "../../../constants/errorMessages";
-import { ForbiddenError } from "../../../errors";
-import EmailService from "../../../services/emailService";
-import AuthService from "../../auth/authService";
-import type { UserEntry } from "../../user/user.type";
-import UserDB from "../../user/userDB";
-import VerificationTokenDB from "../verificationTokenDB";
-import type { VerificationTokenEntry } from "../verifyEmail.type";
-import VerifyEmailService from "../verifyEmailService";
+import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
+import { ForbiddenError } from "../../src/errors";
+import AuthService from "../../src/modules/auth/authService";
+import type { UserEntry } from "../../src/modules/user/user.type";
+import UserDB from "../../src/modules/user/userDB";
+import VerificationTokenDB from "../../src/modules/verifyEmailToken/verificationTokenDB";
+import type { VerificationTokenEntry } from "../../src/modules/verifyEmailToken/verifyEmail.type";
+import VerifyEmailService from "../../src/modules/verifyEmailToken/verifyEmailService";
+import EmailService from "../../src/services/emailService";
 
-jest.mock("../verificationTokenDB");
-jest.mock("../../user/userDB");
-jest.mock("../../../services/emailService");
-jest.mock("../../auth/authService");
+jest.mock("../../src/modules/verifyEmailToken/verificationTokenDB");
+jest.mock("../../src/services/emailService");
+jest.mock("../../src/modules/user/userDB");
+jest.mock("../../src/modules/auth/authService");
 
 describe("VerifyEmailService methods test", () => {
   const mockEmail = "test@example.com";

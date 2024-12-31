@@ -1,16 +1,17 @@
-import { ERROR_MESSAGES } from "../../../constants/errorMessages";
-import { NotFoundError } from "../../../errors";
-import type { FindManyParams } from "../../../types/shared.types";
+import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
+import { NotFoundError } from "../../src/errors";
 import type {
   CreateNoteParams,
   DeleteNoteParams,
   NoteEntry,
   UpdateNoteParams,
-} from "../note.type";
-import NoteDB from "../noteDB";
-import NoteService from "../noteService";
+} from "../../src/modules/note/note.type";
+import NoteDB from "../../src/modules/note/noteDB";
+import NoteService from "../../src/modules/note/noteService";
+import type { FindManyParams } from "../../src/types/shared.types";
 
-jest.mock("../noteDB");
+jest.mock("../../src/modules/note/noteDB");
+
 describe("NoteService tests", () => {
   const mockUserId = "user123";
   const mockNoteId = "note123";

@@ -1,25 +1,25 @@
-import { REFRESH_TOKEN_SECRET } from "../../../constants/auth";
-import { ERROR_MESSAGES } from "../../../constants/errorMessages";
+import { REFRESH_TOKEN_SECRET } from "../../src/constants/auth";
+import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
 import {
   ConflictError,
   ForbiddenError,
   NotFoundError,
   UnauthorizedError,
-} from "../../../errors";
-import type { JwtPayload } from "../../../types";
-import type { RefreshTokenEntry } from "../../refreshToken/refreshToken.type";
-import RefreshTokenService from "../../refreshToken/refreshTokenService";
-import type { UserEntry } from "../../user/user.type";
-import UserDB from "../../user/userDB";
-import UserService from "../../user/userService";
-import EmailVerificationService from "../../verifyEmailToken/verifyEmailService";
-import type { GoogleUser } from "../auth.type";
-import AuthService from "../authService";
+} from "../../src/errors";
+import type { GoogleUser } from "../../src/modules/auth/auth.type";
+import AuthService from "../../src/modules/auth/authService";
+import type { RefreshTokenEntry } from "../../src/modules/refreshToken/refreshToken.type";
+import RefreshTokenService from "../../src/modules/refreshToken/refreshTokenService";
+import type { UserEntry } from "../../src/modules/user/user.type";
+import UserDB from "../../src/modules/user/userDB";
+import UserService from "../../src/modules/user/userService";
+import EmailVerificationService from "../../src/modules/verifyEmailToken/verifyEmailService";
+import type { JwtPayload } from "../../src/types";
 
-jest.mock("../../user/userDB");
-jest.mock("../../verifyEmailToken/verifyEmailService");
-jest.mock("../../refreshToken/refreshTokenService");
-jest.mock("../../user/userService");
+jest.mock("../../src/modules/user/userDB");
+jest.mock("../../src/modules/verifyEmailToken/verifyEmailService");
+jest.mock("../../src/modules/refreshToken/refreshTokenService");
+jest.mock("../../src/modules/user/userService");
 
 describe("Test AuthService methods", () => {
   beforeAll(() => {

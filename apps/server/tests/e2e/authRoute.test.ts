@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 import request from "supertest";
 
-import app from "../../../app";
+import app from "../../src/app";
 
 describe("Auth Route Tests", () => {
   describe("Tests for the Register route", () => {

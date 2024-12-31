@@ -1,10 +1,10 @@
-import { ERROR_MESSAGES } from "../../../constants/errorMessages";
-import { NotFoundError } from "../../../errors";
-import type { RefreshTokenEntry } from "../refreshToken.type";
-import RefreshTokenDB from "../refreshTokenDB";
-import RefreshTokenService from "../refreshTokenService";
+import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
+import { NotFoundError } from "../../src/errors";
+import type { RefreshTokenEntry } from "../../src/modules/refreshToken/refreshToken.type";
+import RefreshTokenDB from "../../src/modules/refreshToken/refreshTokenDB";
+import RefreshTokenService from "../../src/modules/refreshToken/refreshTokenService";
 
-jest.mock("../refreshTokenDB");
+jest.mock("../../src/modules/refreshToken/refreshTokenDB");
 
 describe("RefreshTokenService methods test", () => {
   beforeAll(() => {

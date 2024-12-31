@@ -1,12 +1,12 @@
-import { ERROR_MESSAGES } from "../../../constants/errorMessages";
-import { BadRequestError, NotFoundError } from "../../../errors";
-import AuthService from "../../auth/authService";
-import type { UserEntry } from "../user.type";
-import UserDB from "../userDB";
-import UserService from "../userService";
+import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
+import { BadRequestError, NotFoundError } from "../../src/errors";
+import AuthService from "../../src/modules/auth/authService";
+import type { UserEntry } from "../../src/modules/user/user.type";
+import UserDB from "../../src/modules/user/userDB";
+import UserService from "../../src/modules/user/userService";
 
-jest.mock("../userDB");
-jest.mock("../../auth/authService");
+jest.mock("../../src/modules/user/userDB");
+jest.mock("../../src/modules/auth/authService");
 
 describe("UserService methods test", () => {
   beforeAll(() => {

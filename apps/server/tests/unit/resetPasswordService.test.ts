@@ -1,17 +1,17 @@
-import { ERROR_MESSAGES } from "../../../constants/errorMessages";
-import { ForbiddenError, NotFoundError } from "../../../errors";
-import AuthService from "../../auth/authService";
-import type { UserEntry } from "../../user/user.type";
-import UserDB from "../../user/userDB";
-import UserService from "../../user/userService";
-import type { ResetTokenEntry } from "../resetPassword.type";
-import ResetPasswordDB from "../resetPasswordDB";
-import ResetPasswordService from "../resetPasswordService";
+import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
+import { ForbiddenError, NotFoundError } from "../../src/errors";
+import AuthService from "../../src/modules/auth/authService";
+import type { ResetTokenEntry } from "../../src/modules/resetPasswordToken/resetPassword.type";
+import ResetPasswordDB from "../../src/modules/resetPasswordToken/resetPasswordDB";
+import ResetPasswordService from "../../src/modules/resetPasswordToken/resetPasswordService";
+import type { UserEntry } from "../../src/modules/user/user.type";
+import UserDB from "../../src/modules/user/userDB";
+import UserService from "../../src/modules/user/userService";
 
-jest.mock("../../user/userService");
-jest.mock("../../auth/authService");
-jest.mock("../../user/userDB");
-jest.mock("../resetPasswordDB");
+jest.mock("../../src/modules/user/userService");
+jest.mock("../../src/modules/auth/authService");
+jest.mock("../../src/modules/user/userDB");
+jest.mock("../../src/modules/resetPasswordToken/resetPasswordDB");
 
 describe("ResetPasswordService tests", () => {
   const mockEmail = "test@example.com";
