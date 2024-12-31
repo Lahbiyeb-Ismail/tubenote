@@ -92,7 +92,7 @@ class AuthService {
       data: { username, email, password: hashedPassword },
     });
 
-    await EmailVerificationService.generateAndSendToken(newUser.email);
+    await EmailVerificationService.sendVerificationToken(newUser.email);
 
     return newUser;
   }

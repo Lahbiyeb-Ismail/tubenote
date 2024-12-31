@@ -21,7 +21,7 @@ class VerifyEmailController {
   ): Promise<void> {
     const { email } = req.body;
 
-    await VerifyEmailService.generateAndSendToken(email);
+    await VerifyEmailService.sendVerificationToken(email);
 
     res
       .status(httpStatus.OK)

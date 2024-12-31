@@ -47,7 +47,7 @@ describe("Test AuthService methods", () => {
 
       // Mock the EmailVerificationService.generateAndSendToken
       (
-        EmailVerificationService.generateAndSendToken as jest.Mock
+        EmailVerificationService.sendVerificationToken as jest.Mock
       ).mockResolvedValue(undefined);
 
       // Mock the AuthService.hashPassword method
@@ -71,7 +71,7 @@ describe("Test AuthService methods", () => {
         },
       });
       expect(
-        EmailVerificationService.generateAndSendToken
+        EmailVerificationService.sendVerificationToken
       ).toHaveBeenCalledWith("test@example.com");
     });
 
