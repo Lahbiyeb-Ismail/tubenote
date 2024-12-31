@@ -29,6 +29,35 @@ describe("NoteService tests", () => {
     updatedAt: new Date(),
   };
 
+  const mockNotes = [
+    {
+      id: "note1",
+      userId: mockUserId,
+      title: "Note 1",
+      content: "Content 1",
+      videoId: "video123",
+      thumbnail: "thumbnail1",
+      videoTitle: "Video 1",
+      timestamp: 123,
+      youtubeId: "youtube1",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    {
+      id: "note2",
+      userId: mockUserId,
+      title: "Note 2",
+      content: "Content 2",
+      videoId: "video123",
+      thumbnail: "thumbnail1",
+      videoTitle: "Video 1",
+      timestamp: 456,
+      youtubeId: "youtube1",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  ];
+
   beforeAll(() => {
     jest.clearAllMocks();
   });
@@ -197,36 +226,6 @@ describe("NoteService tests", () => {
   });
 
   describe("fetchUserNotes method tests", () => {
-    const mockUserId = "user123";
-    const mockNotes = [
-      {
-        id: "note1",
-        userId: mockUserId,
-        title: "Note 1",
-        content: "Content 1",
-        videoId: "video1",
-        thumbnail: "thumbnail1",
-        videoTitle: "Video 1",
-        timestamp: 123,
-        youtubeId: "youtube1",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: "note2",
-        userId: mockUserId,
-        title: "Note 2",
-        content: "Content 2",
-        videoId: "video2",
-        thumbnail: "thumbnail2",
-        videoTitle: "Video 2",
-        timestamp: 456,
-        youtubeId: "youtube2",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ];
-
     const mockNotesCount = mockNotes.length;
     const mockParams: FindManyParams = {
       userId: mockUserId,
@@ -239,7 +238,7 @@ describe("NoteService tests", () => {
       jest.clearAllMocks();
     });
 
-    it("should return user notes and total pages", async () => {
+    it("should return user notes, notes count and total pages", async () => {
       (NoteDB.findMany as jest.Mock).mockResolvedValue(mockNotes);
       (NoteDB.count as jest.Mock).mockResolvedValue(mockNotesCount);
 
@@ -264,6 +263,112 @@ describe("NoteService tests", () => {
       expect(result.notesCount).toBe(0);
       expect(result.totalPages).toBe(0);
       expect(NoteDB.findMany).toHaveBeenCalledWith(mockParams);
+      expect(NoteDB.count).toHaveBeenCalledWith(mockUserId);
+    });
+  });
+
+  describe("fetchRecentNotes method tests", () => {
+    const mockParams: FindManyParams = {
+      userId: mockUserId,
+      limit: 2,
+      sort: { by: "createdAt", order: "desc" },
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should return recent notes", async () => {
+      (NoteDB.findMany as jest.Mock).mockResolvedValue(mockNotes);
+
+      const result = await NoteService.fetchRecentNotes(mockParams);
+
+      expect(result).toEqual(mockNotes);
+      expect(NoteDB.findMany).toHaveBeenCalledWith(mockParams);
+      expect(result.length).toBe(mockParams.limit);
+    });
+
+    it("should return empty array when no recent notes are found", async () => {
+      (NoteDB.findMany as jest.Mock).mockResolvedValue([]);
+
+      const result = await NoteService.fetchRecentNotes(mockParams);
+
+      expect(result).toEqual([]);
+      expect(NoteDB.findMany).toHaveBeenCalledWith(mockParams);
+    });
+  });
+
+  describe("fetchRecentlyUpdatedNotes method tests", () => {
+    const mockParams: FindManyParams = {
+      userId: mockUserId,
+      limit: 2,
+      sort: { by: "updatedAt", order: "desc" },
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should return recently updated notes", async () => {
+      (NoteDB.findMany as jest.Mock).mockResolvedValue(mockNotes);
+
+      const result = await NoteService.fetchRecentlyUpdatedNotes(mockParams);
+
+      expect(result).toEqual(mockNotes);
+      expect(NoteDB.findMany).toHaveBeenCalledWith(mockParams);
+      expect(result.length).toBe(mockParams.limit);
+    });
+
+    it("should return empty array when no recently updated notes are found", async () => {
+      (NoteDB.findMany as jest.Mock).mockResolvedValue([]);
+
+      const result = await NoteService.fetchRecentlyUpdatedNotes(mockParams);
+
+      expect(result).toEqual([]);
+      expect(NoteDB.findMany).toHaveBeenCalledWith(mockParams);
+    });
+  });
+
+  describe("fetchNotesByVideoId method tests", () => {
+    const mockVideoId = "video123";
+    const mockNotesCount = mockNotes.length;
+    const mockParams: FindManyParams & { videoId: string } = {
+      userId: mockUserId,
+      videoId: mockVideoId,
+      skip: 0,
+      limit: 8,
+      sort: { by: "createdAt", order: "desc" },
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should return notes by video ID, notes count and total pages", async () => {
+      (NoteDB.findManyByVideoId as jest.Mock).mockResolvedValue(mockNotes);
+      (NoteDB.count as jest.Mock).mockResolvedValue(mockNotesCount);
+
+      const result = await NoteService.fetchNotesByVideoId(mockParams);
+
+      expect(result.notes).toEqual(mockNotes);
+      expect(result.notesCount).toBe(mockNotesCount);
+      expect(result.totalPages).toBe(
+        Math.ceil(mockNotesCount / mockParams.limit)
+      );
+      expect(NoteDB.findManyByVideoId).toHaveBeenCalledWith(mockParams);
+      expect(NoteDB.count).toHaveBeenCalledWith(mockUserId);
+    });
+
+    it("should return empty notes and total pages as 0 when no notes are found", async () => {
+      (NoteDB.findManyByVideoId as jest.Mock).mockResolvedValue([]);
+      (NoteDB.count as jest.Mock).mockResolvedValue(0);
+
+      const result = await NoteService.fetchNotesByVideoId(mockParams);
+
+      expect(result.notes).toEqual([]);
+      expect(result.notesCount).toBe(0);
+      expect(result.totalPages).toBe(0);
+      expect(NoteDB.findManyByVideoId).toHaveBeenCalledWith(mockParams);
       expect(NoteDB.count).toHaveBeenCalledWith(mockUserId);
     });
   });
