@@ -19,6 +19,6 @@ export const ERROR_MESSAGES = {
   RESET_LINK_SENT: "A password reset link has already been sent to your email.",
   VERIFICATION_LINK_SENT:
     "A verification link has already been sent to your email.",
-  INVALID_TOKEN: "Invalid or expired token.",
-  EXPIRED_TOKEN: "The token provided has expired.",
+  INVALID_TOKEN: "The provided token is invalid.",
+  EXPIRED_TOKEN: "The provided token has expired.",
 } as const;
