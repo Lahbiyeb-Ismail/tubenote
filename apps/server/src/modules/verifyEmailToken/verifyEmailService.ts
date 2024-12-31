@@ -5,7 +5,7 @@ import VerificationTokenDB from "./verificationTokenDB";
 
 import EmailService from "../../services/emailService";
 import AuthService from "../auth/authService";
-import UserService from "../user/userService";
+import UserDB from "../user/userDB";
 
 class EmailVerificationService {
   private async createToken(userId: string): Promise<string> {
@@ -15,7 +15,7 @@ class EmailVerificationService {
   }
 
   async generateToken(email: string): Promise<string> {
-    const user = await UserService.getUserByEmail(email);
+    const user = await UserDB.findByEmail(email);
 
     if (!user) {
       throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
