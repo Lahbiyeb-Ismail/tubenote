@@ -1,13 +1,15 @@
 import { ERROR_MESSAGES } from "../../../constants/errorMessages";
 import { ForbiddenError } from "../../../errors";
+import EmailService from "../../../services/emailService";
 import type { UserEntry } from "../../user/user.type";
 import UserDB from "../../user/userDB";
 import VerificationTokenDB from "../verificationTokenDB";
 import type { VerificationTokenEntry } from "../verifyEmail.type";
-import verifyEmailService from "../verifyEmailService";
+import VerifyEmailService from "../verifyEmailService";
 
 jest.mock("../verificationTokenDB");
 jest.mock("../../user/userDB");
+jest.mock("../../../services/emailService");
 
 describe("VerifyEmailService methods test", () => {
   const mockEmail = "test@example.com";
@@ -46,7 +48,7 @@ describe("VerifyEmailService methods test", () => {
     it("should throw a ForbiddenError if the user does not exist", async () => {
       (UserDB.findByEmail as jest.Mock).mockResolvedValue(null);
 
-      await expect(verifyEmailService.generateToken(mockEmail)).rejects.toThrow(
+      await expect(VerifyEmailService.generateToken(mockEmail)).rejects.toThrow(
         new ForbiddenError(ERROR_MESSAGES.FORBIDDEN)
       );
 
@@ -57,7 +59,7 @@ describe("VerifyEmailService methods test", () => {
     it("should throw a ForbiddenError if the user email is already verified", async () => {
       (UserDB.findByEmail as jest.Mock).mockResolvedValue(mockUser);
 
-      await expect(verifyEmailService.generateToken(mockEmail)).rejects.toThrow(
+      await expect(VerifyEmailService.generateToken(mockEmail)).rejects.toThrow(
         new ForbiddenError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED)
       );
 
@@ -74,7 +76,7 @@ describe("VerifyEmailService methods test", () => {
         mockVerificationToken
       );
 
-      await expect(verifyEmailService.generateToken(mockEmail)).rejects.toThrow(
+      await expect(VerifyEmailService.generateToken(mockEmail)).rejects.toThrow(
         new ForbiddenError(ERROR_MESSAGES.VERIFICATION_LINK_SENT)
       );
 
@@ -97,7 +99,7 @@ describe("VerifyEmailService methods test", () => {
 
       (VerificationTokenDB.create as jest.Mock).mockResolvedValue(mockToken);
 
-      const result = await verifyEmailService.generateToken(mockEmail);
+      const result = await VerifyEmailService.generateToken(mockEmail);
 
       expect(result).toBe(mockToken);
 
@@ -111,6 +113,48 @@ describe("VerifyEmailService methods test", () => {
 
       expect(VerificationTokenDB.create).toHaveBeenCalledWith(mockUser.id);
       expect(VerificationTokenDB.create).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("sendVerificationToken method test cases", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should call generateToken and sendVerificationEmail methods", async () => {
+      jest
+        .spyOn(VerifyEmailService, "generateToken")
+        .mockResolvedValue(mockToken);
+
+      (EmailService.sendVerificationEmail as jest.Mock).mockResolvedValue(
+        undefined
+      );
+
+      await VerifyEmailService.sendVerificationToken(mockEmail);
+
+      expect(VerifyEmailService.generateToken).toHaveBeenCalledWith(mockEmail);
+      expect(VerifyEmailService.generateToken).toHaveBeenCalledTimes(1);
+
+      expect(EmailService.sendVerificationEmail).toHaveBeenCalledWith({
+        email: mockEmail,
+        token: mockToken,
+      });
+      expect(EmailService.sendVerificationEmail).toHaveBeenCalledTimes(1);
+    });
+
+    it("should throw an error if generateToken method throws an error", async () => {
+      jest
+        .spyOn(VerifyEmailService, "generateToken")
+        .mockRejectedValue(new ForbiddenError(ERROR_MESSAGES.FORBIDDEN));
+
+      await expect(
+        VerifyEmailService.sendVerificationToken(mockEmail)
+      ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.FORBIDDEN));
+
+      expect(VerifyEmailService.generateToken).toHaveBeenCalledWith(mockEmail);
+      expect(VerifyEmailService.generateToken).toHaveBeenCalledTimes(1);
+
+      expect(EmailService.sendVerificationEmail).not.toHaveBeenCalled();
     });
   });
 });
