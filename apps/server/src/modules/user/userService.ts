@@ -11,10 +11,6 @@ class UserService {
   async getUserByEmail(email: string): Promise<UserEntry | null> {
     const user = await UserDB.findByEmail(email);
 
-    if (!user) {
-      return null;
-    }
-
     return user;
   }
 
