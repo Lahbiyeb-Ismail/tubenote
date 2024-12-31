@@ -14,7 +14,7 @@ class EmailVerificationService {
     return token;
   }
 
-  async generateAndSendToken(email: string): Promise<void> {
+  async generateToken(email: string): Promise<string> {
     const user = await UserService.getUserByEmail(email);
 
     if (!user) {
@@ -33,9 +33,18 @@ class EmailVerificationService {
       throw new ForbiddenError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
     }
 
-    const newToken = await this.createToken(user.id);
+    const verificationToken = await this.createToken(user.id);
 
-    await EmailService.sendVerificationEmail({ email, token: newToken });
+    return verificationToken;
+  }
+
+  async sendVerificationToken(email: string) {
+    const verificationToken = await this.generateToken(email);
+
+    await EmailService.sendVerificationEmail({
+      email,
+      token: verificationToken,
+    });
   }
 
   async verifyUserEmail(token: string): Promise<void> {
