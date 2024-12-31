@@ -8,12 +8,6 @@ import AuthService from "../auth/authService";
 import UserDB from "../user/userDB";
 
 class EmailVerificationService {
-  private async createToken(userId: string): Promise<string> {
-    const token = await VerificationTokenDB.create(userId);
-
-    return token;
-  }
-
   async generateToken(email: string): Promise<string> {
     const user = await UserDB.findByEmail(email);
 
@@ -33,7 +27,7 @@ class EmailVerificationService {
       throw new ForbiddenError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
     }
 
-    const verificationToken = await this.createToken(user.id);
+    const verificationToken = await VerificationTokenDB.create(user.id);
 
     return verificationToken;
   }
