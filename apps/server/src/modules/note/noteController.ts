@@ -189,7 +189,7 @@ class NoteController {
     res: Response
   ) {
     const userId = req.userId;
-    const { videoId } = req.params;
+    const { youtubeId } = req.params;
 
     const page = Number(req.query.page);
     const limit = Number(req.query.limit);
@@ -199,7 +199,7 @@ class NoteController {
     const { notes, notesCount, totalPages } =
       await NoteService.fetchNotesByVideoId({
         userId,
-        videoId,
+        videoId: youtubeId,
         limit,
         skip,
         sort: { by: "createdAt", order: "desc" },
