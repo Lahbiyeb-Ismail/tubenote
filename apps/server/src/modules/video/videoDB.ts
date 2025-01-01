@@ -9,11 +9,11 @@ import type {
 } from "./video.type";
 
 class VideoDatabase {
-  async findById(videoId: string): Promise<VideoEntry | null> {
+  async findByYoutubeId(youtubeId: string): Promise<VideoEntry | null> {
     return handleAsyncOperation(
       () =>
         prismaClient.video.findUnique({
-          where: { youtubeId: videoId },
+          where: { youtubeId },
         }),
       { errorMessage: "Faild to find video" }
     );
@@ -51,13 +51,17 @@ class VideoDatabase {
     );
   }
 
-  async create({ videoData, userId }: CreateVideoParams): Promise<VideoEntry> {
+  async create({
+    videoData,
+    userId,
+    youtubeId,
+  }: CreateVideoParams): Promise<VideoEntry> {
     return handleAsyncOperation(
       async () => {
         const { snippet, statistics, player } = videoData;
         return await prismaClient.video.create({
           data: {
-            youtubeId: videoData.id,
+            youtubeId,
             userIds: [userId],
             snippet: {
               title: snippet.title,
