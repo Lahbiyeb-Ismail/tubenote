@@ -56,10 +56,10 @@ class VideoController {
     req: TypedRequest<EmptyRecord, VideoIdParam>,
     res: Response
   ) {
-    const { videoId } = req.params;
+    const { youtubeId } = req.params;
     const userId = req.userId;
 
-    const video = await VideoService.findVideoById({ videoId, userId });
+    const video = await VideoService.getVideoData({ youtubeId, userId });
 
     res.status(httpStatus.OK).json(video);
   }
