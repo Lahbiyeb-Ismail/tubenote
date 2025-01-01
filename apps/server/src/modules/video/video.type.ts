@@ -46,12 +46,15 @@ interface Player {
   embedHtml: string;
 }
 
-export interface VideoEntry {
-  id: string;
-  youtubeId: string;
+export interface YoutubeVideoData {
   snippet: Snippet;
   statistics: Statistics;
   player: Player;
+}
+
+export interface VideoEntry extends YoutubeVideoData {
+  id: string;
+  youtubeId: string;
   notes?: NoteEntry[];
   userIds?: string[];
 }
@@ -69,7 +72,8 @@ export interface FindUserVideosParams {
 
 export interface CreateVideoParams {
   userId: string;
-  videoData: VideoEntry;
+  videoData: YoutubeVideoData;
+  youtubeId: string;
 }
 
 export interface UserVideos {
