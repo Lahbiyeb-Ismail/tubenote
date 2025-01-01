@@ -5,5 +5,5 @@ export const createVideoBodySchema = z.object({
 });
 
 export const videoIdParamSchema = z.object({
-  videoId: z.string().min(4),
+  youtubeId: z.string().min(4),
 });
