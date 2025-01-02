@@ -2,6 +2,7 @@ import type { Response } from "express";
 import type {
   UpdatePasswordBody,
   UpdatePasswordParams,
+  UpdateUserBody,
   UserEntry,
 } from "../../src/modules/user/user.type";
 import type { TypedRequest } from "../../src/types";
@@ -95,7 +96,7 @@ describe("UserController integration tests", () => {
   });
 
   describe("AuthController - updateCurrentUser", () => {
-    let mockRequest: Partial<TypedRequest>;
+    let mockRequest: Partial<TypedRequest<UpdateUserBody>>;
     let mockResponse: Partial<Response>;
     let mockStatus: jest.Mock;
     let mockJson: jest.Mock;
@@ -128,7 +129,7 @@ describe("UserController integration tests", () => {
       (UserService.updateUser as jest.Mock).mockResolvedValue(undefined);
 
       await UserController.updateCurrentUser(
-        mockRequest as TypedRequest,
+        mockRequest as TypedRequest<UpdateUserBody>,
         mockResponse as Response
       );
 
@@ -152,7 +153,7 @@ describe("UserController integration tests", () => {
 
       await expect(
         UserController.updateCurrentUser(
-          mockRequest as TypedRequest,
+          mockRequest as TypedRequest<UpdateUserBody>,
           mockResponse as Response
         )
       ).rejects.toThrow(errorMessage);
