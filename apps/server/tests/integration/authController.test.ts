@@ -56,6 +56,7 @@ describe("AuthController integration tests", () => {
       mockStatus = jest.fn().mockReturnValue({ json: mockJson });
       mockResponse = {
         status: mockStatus,
+        json: mockJson,
       };
       mockRequest = {
         body: mockRegisterCredentials,
@@ -75,8 +76,8 @@ describe("AuthController integration tests", () => {
         mockRegisterCredentials
       );
 
-      expect(mockStatus).toHaveBeenCalledWith(httpStatus.CREATED);
-      expect(mockJson).toHaveBeenCalledWith({
+      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.CREATED);
+      expect(mockResponse.json).toHaveBeenCalledWith({
         message: "A verification email has been sent to your email.",
         email: mockUser.email,
       });
@@ -117,6 +118,7 @@ describe("AuthController integration tests", () => {
       mockResponse = {
         status: mockStatus,
         cookie: mockCookie,
+        json: mockJson,
       };
       mockRequest = {
         body: mockLoginCredentials,
@@ -142,14 +144,14 @@ describe("AuthController integration tests", () => {
 
       expect(AuthService.loginUser).toHaveBeenCalledWith(mockLoginCredentials);
 
-      expect(mockCookie).toHaveBeenCalledWith(
+      expect(mockResponse.cookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
         "mock-refresh-token",
         refreshTokenCookieConfig
       );
 
-      expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
-      expect(mockJson).toHaveBeenCalledWith({
+      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockResponse.json).toHaveBeenCalledWith({
         message: "Login successful",
         accessToken: "mock-access-token",
       });
@@ -207,11 +209,13 @@ describe("AuthController integration tests", () => {
         refreshToken: "mock-refresh-token",
         userId: "mock-user-id",
       });
-      expect(mockClearCookie).toHaveBeenCalledWith(
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
         clearRefreshTokenCookieConfig
       );
-      expect(mockSendStatus).toHaveBeenCalledWith(httpStatus.NO_CONTENT);
+      expect(mockResponse.sendStatus).toHaveBeenCalledWith(
+        httpStatus.NO_CONTENT
+      );
     });
 
     it("should handle missing refresh token", async () => {
@@ -226,11 +230,13 @@ describe("AuthController integration tests", () => {
         refreshToken: undefined,
         userId: "mock-user-id",
       });
-      expect(mockClearCookie).toHaveBeenCalledWith(
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
         clearRefreshTokenCookieConfig
       );
-      expect(mockSendStatus).toHaveBeenCalledWith(httpStatus.NO_CONTENT);
+      expect(mockResponse.sendStatus).toHaveBeenCalledWith(
+        httpStatus.NO_CONTENT
+      );
     });
 
     it("should handle AuthService errors", async () => {
