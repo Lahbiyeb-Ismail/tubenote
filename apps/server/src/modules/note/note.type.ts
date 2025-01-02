@@ -26,8 +26,15 @@ export interface NoteEntry {
   updatedAt: Date;
 }
 export interface FindNoteParams extends UserId, NoteId {}
-export interface CreateNoteParams {
-  data: Omit<NoteEntry, "id" | "createdAt" | "updatedAt">;
+export interface CreateNoteData {
+  userId: string;
+  videoId: string;
+  youtubeId: string;
+  title: string;
+  content: string;
+  videoTitle: string;
+  thumbnail: string;
+  timestamp: number;
 }
 export interface DeleteNoteParams extends UserId, NoteId {}
 
