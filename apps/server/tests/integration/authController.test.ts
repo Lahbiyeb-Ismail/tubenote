@@ -7,10 +7,12 @@ import {
   clearRefreshTokenCookieConfig,
   refreshTokenCookieConfig,
 } from "../../src/config/cookie.config";
+import envConfig from "../../src/config/envConfig";
 import { REFRESH_TOKEN_NAME } from "../../src/constants/auth";
 import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
 import { UnauthorizedError } from "../../src/errors";
 import type {
+  GoogleUser,
   LoginCredentials,
   LoginParams,
   RegisterCredentials,
@@ -345,6 +347,85 @@ describe("AuthController integration tests", () => {
         REFRESH_TOKEN_NAME,
         clearRefreshTokenCookieConfig
       );
+    });
+  });
+
+  describe("AuthController - loginWithGoogle", () => {
+    let mockRequest: Partial<TypedRequest>;
+    let mockResponse: Partial<Response>;
+    let mockCookie: jest.Mock;
+    let mockRedirect: jest.Mock;
+
+    const mockTokens = {
+      accessToken: "mock-access-token",
+      refreshToken: "mock-refresh-token",
+    };
+
+    const mockGoogleUser: GoogleUser = {
+      sub: "google_user_id",
+      email: "testuser@example.com",
+      name: "Test User",
+      picture: "http://example.com/picture.jpg",
+      email_verified: true,
+      given_name: "Test",
+      family_name: "User",
+    };
+
+    const mockProfile = {
+      _json: mockGoogleUser,
+    };
+
+    beforeEach(() => {
+      mockCookie = jest.fn();
+      mockRedirect = jest.fn();
+      mockResponse = {
+        cookie: mockCookie,
+        redirect: mockRedirect,
+      };
+      mockRequest = {
+        user: mockProfile,
+      };
+      jest.clearAllMocks();
+    });
+
+    it("should successfully log in a user with Google", async () => {
+      (AuthService.googleLogin as jest.Mock).mockResolvedValue(mockTokens);
+
+      await AuthController.loginWithGoogle(
+        mockRequest as TypedRequest,
+        mockResponse as Response
+      );
+
+      expect(AuthService.googleLogin).toHaveBeenCalledWith(mockProfile._json);
+
+      expect(mockCookie).toHaveBeenCalledWith(
+        REFRESH_TOKEN_NAME,
+        "mock-refresh-token",
+        refreshTokenCookieConfig
+      );
+
+      expect(mockRedirect).toHaveBeenCalledWith(
+        `${envConfig.client.url}/auth/callback?access_token=${encodeURIComponent(
+          JSON.stringify(mockTokens.accessToken)
+        )}`
+      );
+    });
+
+    it("should handle AuthService errors", async () => {
+      const errorMessage = "Google login failed";
+      (AuthService.googleLogin as jest.Mock).mockRejectedValue(
+        new Error(errorMessage)
+      );
+
+      await expect(
+        AuthController.loginWithGoogle(
+          mockRequest as TypedRequest,
+          mockResponse as Response
+        )
+      ).rejects.toThrow(errorMessage);
+
+      expect(mockCookie).not.toHaveBeenCalled();
+      expect(mockRedirect).not.toHaveBeenCalled();
     });
   });
 });
