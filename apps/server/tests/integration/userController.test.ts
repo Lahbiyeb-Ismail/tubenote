@@ -89,4 +89,69 @@ describe("UserController integration tests", () => {
       ).rejects.toThrow(errorMessage);
     });
   });
+
+  describe("AuthController - updateCurrentUser", () => {
+    let mockRequest: Partial<TypedRequest>;
+    let mockResponse: Partial<Response>;
+    let mockStatus: jest.Mock;
+    let mockJson: jest.Mock;
+
+    const mockUserId = "user_id_001";
+
+    const mockUpdateUserBody = {
+      username: "test_user_updated",
+      email: "testuser@example.com",
+    };
+
+    beforeEach(() => {
+      mockJson = jest.fn();
+      mockStatus = jest.fn().mockReturnValue({ json: mockJson });
+      mockResponse = {
+        status: mockStatus,
+        json: mockJson,
+      };
+      mockRequest = {
+        body: mockUpdateUserBody,
+        userId: mockUserId,
+      };
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should update the current user's information", async () => {
+      (UserService.updateUser as jest.Mock).mockResolvedValue(undefined);
+
+      await UserController.updateCurrentUser(
+        mockRequest as TypedRequest,
+        mockResponse as Response
+      );
+
+      expect(UserService.updateUser).toHaveBeenCalledWith({
+        userId: mockUserId,
+        ...mockUpdateUserBody,
+      });
+
+      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        message: "User updated successfully.",
+      });
+    });
+
+    it("should handle Userservice errors", async () => {
+      const errorMessage = "Error updating user data";
+      (UserService.updateUser as jest.Mock).mockRejectedValue(
+        new Error(errorMessage)
+      );
+
+      await expect(
+        UserController.updateCurrentUser(
+          mockRequest as TypedRequest,
+          mockResponse as Response
+        )
+      ).rejects.toThrow(errorMessage);
+    });
+  });
 });
