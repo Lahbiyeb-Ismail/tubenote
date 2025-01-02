@@ -1,5 +1,9 @@
 import type { Response } from "express";
-import type { UserEntry } from "../../src/modules/user/user.type";
+import type {
+  UpdatePasswordBody,
+  UpdatePasswordParams,
+  UserEntry,
+} from "../../src/modules/user/user.type";
 import type { TypedRequest } from "../../src/types";
 
 import UserService from "../../src/modules/user/userService";
@@ -149,6 +153,75 @@ describe("UserController integration tests", () => {
       await expect(
         UserController.updateCurrentUser(
           mockRequest as TypedRequest,
+          mockResponse as Response
+        )
+      ).rejects.toThrow(errorMessage);
+    });
+  });
+
+  describe("AuthController - updateUserPassword", () => {
+    let mockRequest: Partial<TypedRequest<UpdatePasswordBody>>;
+    let mockResponse: Partial<Response>;
+    let mockStatus: jest.Mock;
+    let mockJson: jest.Mock;
+
+    const mockUserId = "user_id_001";
+
+    const mockUpdateUserBody = {
+      currentPassword: "current_user_password",
+      newPassword: "new_user_password",
+    };
+
+    const mockUpdatePasswordParams: UpdatePasswordParams = {
+      userId: mockUserId,
+      ...mockUpdateUserBody,
+    };
+
+    beforeEach(() => {
+      mockJson = jest.fn();
+      mockStatus = jest.fn().mockReturnValue({ json: mockJson });
+      mockResponse = {
+        status: mockStatus,
+        json: mockJson,
+      };
+      mockRequest = {
+        body: mockUpdateUserBody,
+        userId: mockUserId,
+      };
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should update the current user's password", async () => {
+      (UserService.updatePassword as jest.Mock).mockResolvedValue(undefined);
+
+      await UserController.updateUserPassword(
+        mockRequest as TypedRequest<UpdatePasswordBody>,
+        mockResponse as Response
+      );
+
+      expect(UserService.updatePassword).toHaveBeenCalledWith(
+        mockUpdatePasswordParams
+      );
+
+      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        message: "Password updated successfully.",
+      });
+    });
+
+    it("should handle Userservice errors", async () => {
+      const errorMessage = "Error updating user data";
+      (UserService.updatePassword as jest.Mock).mockRejectedValue(
+        new Error(errorMessage)
+      );
+
+      await expect(
+        UserController.updateUserPassword(
+          mockRequest as TypedRequest<UpdatePasswordBody>,
           mockResponse as Response
         )
       ).rejects.toThrow(errorMessage);
