@@ -5,7 +5,7 @@ import { NotFoundError } from "../../errors";
 
 import type { FindManyParams } from "../../types/shared.types";
 import type {
-  CreateNoteParams,
+  CreateNoteData,
   DeleteNoteParams,
   FindNoteParams,
   NoteEntry,
@@ -24,8 +24,8 @@ class NoteService {
     return note;
   }
 
-  async addNewNote({ data }: CreateNoteParams): Promise<NoteEntry> {
-    const note = await NoteDB.create({ data });
+  async addNewNote(data: CreateNoteData): Promise<NoteEntry> {
+    const note = await NoteDB.create(data);
 
     return note;
   }
