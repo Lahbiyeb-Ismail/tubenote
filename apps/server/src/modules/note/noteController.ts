@@ -3,7 +3,7 @@ import httpStatus from "http-status";
 
 import type { EmptyRecord, PaginationQuery, TypedRequest } from "../../types";
 import type { VideoIdParam } from "../video/video.type";
-import type { NoteBody, NoteIdParam } from "./note.type";
+import type { CreateNoteData, NoteBody, NoteIdParam } from "./note.type";
 
 import NoteService from "./noteService";
 
@@ -21,12 +21,12 @@ class NoteController {
   async addNewNote(req: TypedRequest<NoteBody>, res: Response): Promise<void> {
     const userId = req.userId;
 
-    const noteData = {
+    const newNoteData: CreateNoteData = {
       ...req.body,
       userId,
     };
 
-    const note = await NoteService.addNewNote({ data: noteData });
+    const note = await NoteService.addNewNote(newNoteData);
 
     res
       .status(httpStatus.CREATED)
