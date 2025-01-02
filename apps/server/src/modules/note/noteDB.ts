@@ -4,7 +4,7 @@ import handleAsyncOperation from "../../utils/handleAsyncOperation";
 
 import type { FindManyParams } from "../../types/shared.types";
 import type {
-  CreateNoteParams,
+  CreateNoteData,
   DeleteNoteParams,
   FindNoteParams,
   NoteEntry,
@@ -25,7 +25,7 @@ class NoteDatabase {
     );
   }
 
-  async create({ data }: CreateNoteParams): Promise<NoteEntry> {
+  async create(data: CreateNoteData): Promise<NoteEntry> {
     return handleAsyncOperation(
       () =>
         prismaClient.note.create({
