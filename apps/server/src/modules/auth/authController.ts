@@ -14,6 +14,7 @@ import { UnauthorizedError } from "../../errors";
 
 import AuthService from "./authService";
 
+import { ERROR_MESSAGES } from "../../constants/errorMessages";
 import type { TypedRequest } from "../../types";
 import type {
   GoogleUser,
@@ -90,10 +91,10 @@ class AuthController {
     const cookies = req.cookies;
     const userId = req.userId;
 
-    const token = cookies[REFRESH_TOKEN_NAME];
+    const token: string | null = cookies[REFRESH_TOKEN_NAME];
 
     if (!token) {
-      throw new UnauthorizedError("Unauthorized access. Please try again.");
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
