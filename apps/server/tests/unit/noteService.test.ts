@@ -1,7 +1,7 @@
 import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
 import { NotFoundError } from "../../src/errors";
 import type {
-  CreateNoteParams,
+  CreateNoteData,
   DeleteNoteParams,
   NoteEntry,
   UpdateNoteParams,
@@ -98,21 +98,19 @@ describe("NoteService tests", () => {
   });
 
   describe("addNewNote method tests", () => {
-    const mockCreateNoteParams: CreateNoteParams = {
-      data: {
-        userId: mockUserId,
-        title: "New Note",
-        content: "This is a new note.",
-        videoId: "video123",
-        thumbnail: "thumbnail123",
-        videoTitle: "New Video",
-        timestamp: 123,
-        youtubeId: "youtube123",
-      },
+    const mockNewNoteData: CreateNoteData = {
+      userId: mockUserId,
+      title: "New Note",
+      content: "This is a new note.",
+      videoId: "video123",
+      thumbnail: "thumbnail123",
+      videoTitle: "New Video",
+      timestamp: 123,
+      youtubeId: "youtube123",
     };
 
     const mockNewNote: NoteEntry = {
-      ...mockCreateNoteParams.data,
+      ...mockNewNoteData,
       id: "newNote123",
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -125,10 +123,10 @@ describe("NoteService tests", () => {
     it("should create and return the new note", async () => {
       (NoteDB.create as jest.Mock).mockResolvedValue(mockNewNote);
 
-      const result = await NoteService.addNewNote(mockCreateNoteParams);
+      const result = await NoteService.addNewNote(mockNewNoteData);
 
       expect(result).toBe(mockNewNote);
-      expect(NoteDB.create).toHaveBeenCalledWith(mockCreateNoteParams);
+      expect(NoteDB.create).toHaveBeenCalledWith(mockNewNoteData);
     });
   });
 
