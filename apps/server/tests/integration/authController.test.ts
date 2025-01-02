@@ -1,6 +1,5 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
-import request from "supertest";
 
 import type { UserEntry } from "../../src/modules/user/user.type";
 
@@ -9,6 +8,8 @@ import {
   refreshTokenCookieConfig,
 } from "../../src/config/cookie.config";
 import { REFRESH_TOKEN_NAME } from "../../src/constants/auth";
+import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
+import { UnauthorizedError } from "../../src/errors";
 import type {
   LoginCredentials,
   LoginParams,
@@ -242,6 +243,108 @@ describe("AuthController integration tests", () => {
           mockResponse as Response
         )
       ).rejects.toThrow(errorMessage);
+    });
+  });
+
+  describe("AuthController - refresh", () => {
+    let mockRequest: Partial<TypedRequest>;
+    let mockResponse: Partial<Response>;
+    let mockClearCookie: jest.Mock;
+    let mockCookie: jest.Mock;
+    let mockJson: jest.Mock;
+    let mockStatus: jest.Mock;
+
+    const mockTokens = {
+      accessToken: "mock-access-token",
+      refreshToken: "mock-refresh-token",
+    };
+
+    beforeEach(() => {
+      mockClearCookie = jest.fn();
+      mockCookie = jest.fn();
+      mockJson = jest.fn();
+      mockStatus = jest.fn().mockReturnValue({ json: mockJson });
+      mockResponse = {
+        clearCookie: mockClearCookie,
+        cookie: mockCookie,
+        status: mockStatus,
+        json: mockJson,
+      };
+      mockRequest = {
+        cookies: {
+          [REFRESH_TOKEN_NAME]: "mock-refresh-token",
+        },
+        userId: "mock-user-id",
+      };
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should successfully refresh the access token", async () => {
+      (AuthService.refreshToken as jest.Mock).mockResolvedValue(mockTokens);
+
+      await AuthController.refresh(
+        mockRequest as TypedRequest,
+        mockResponse as Response
+      );
+
+      expect(AuthService.refreshToken).toHaveBeenCalledWith({
+        token: "mock-refresh-token",
+        userId: "mock-user-id",
+      });
+
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith(
+        REFRESH_TOKEN_NAME,
+        clearRefreshTokenCookieConfig
+      );
+
+      expect(mockResponse.cookie).toHaveBeenCalledWith(
+        REFRESH_TOKEN_NAME,
+        "mock-refresh-token",
+        refreshTokenCookieConfig
+      );
+
+      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        accessToken: "mock-access-token",
+      });
+    });
+
+    it("should handle missing refresh token", async () => {
+      mockRequest.cookies = {};
+
+      await expect(
+        AuthController.refresh(
+          mockRequest as TypedRequest,
+          mockResponse as Response
+        )
+      ).rejects.toThrow(new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED));
+
+      expect(mockResponse.clearCookie).not.toHaveBeenCalled();
+      expect(mockResponse.cookie).not.toHaveBeenCalled();
+      expect(mockResponse.status).not.toHaveBeenCalled();
+      expect(mockResponse.json).not.toHaveBeenCalled();
+    });
+
+    it("should handle AuthService errors", async () => {
+      const errorMessage = "Refresh token failed";
+      (AuthService.refreshToken as jest.Mock).mockRejectedValue(
+        new Error(errorMessage)
+      );
+
+      await expect(
+        AuthController.refresh(
+          mockRequest as TypedRequest,
+          mockResponse as Response
+        )
+      ).rejects.toThrow(errorMessage);
+
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith(
+        REFRESH_TOKEN_NAME,
+        clearRefreshTokenCookieConfig
+      );
     });
   });
 });
