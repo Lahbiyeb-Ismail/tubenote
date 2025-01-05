@@ -1,6 +1,5 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import type { Profile } from "passport-google-oauth20";
 
 import {
   ACCESS_TOKEN_EXPIRE,
@@ -21,23 +20,30 @@ import {
 } from "../../errors";
 
 import type { JwtPayload } from "../../types";
-import type {
-  GoogleUser,
-  LoginParams,
-  LoginResponse,
-  LogoutParams,
-  RegisterParams,
-} from "./auth.type";
+import type { GoogleUser } from "./auth.type";
 
 import type { UserEntry } from "../user/user.type";
 
 import logger from "../../utils/logger";
 import RefreshTokenService from "../refreshToken/refreshTokenService";
-import UserService from "../user/userService";
+import UserService from "../user/user.service";
 import EmailVerificationService from "../verifyEmailToken/verifyEmailService";
 
+import type { ComparePasswordsDto } from "./dtos/compare-passwords.dto";
+import type { GenerateTokenDto } from "./dtos/generate-token.dto";
+import type { LoginResponseDto } from "./dtos/login-response.dto";
+import type { LoginUserDto } from "./dtos/login-user.dto";
+import type { LogoutUserDto } from "./dtos/logout-user.dto";
+import type { RefreshTokenDto } from "./dtos/refresh-token.dto";
+import type { RegisterUserDto } from "./dtos/register-user.dto";
+import type { VerifyJwtTokenDto } from "./dtos/verfiy-jwt-token.dto";
+
 class AuthService {
-  async verifyToken(token: string, secret: string): Promise<JwtPayload | null> {
+  async verifyToken(
+    verifyTokenDto: VerifyJwtTokenDto
+  ): Promise<JwtPayload | null> {
+    const { token, secret } = verifyTokenDto;
+
     return new Promise((resolve, _reject) => {
       jwt.verify(token, secret, (err, payload) => {
         if (err) {
@@ -50,9 +56,11 @@ class AuthService {
     });
   }
 
-  generateJwtToken(userId: string, secret: string, expire: string): string {
+  generateJwtToken(generateTokenDto: GenerateTokenDto): string {
+    const { userId, secret, expiresIn } = generateTokenDto;
+
     return jwt.sign({ userId }, secret, {
-      expiresIn: expire,
+      expiresIn,
     });
   }
 
@@ -60,26 +68,24 @@ class AuthService {
     accessToken: string;
     refreshToken: string;
   } {
-    const accessToken = this.generateJwtToken(
+    const accessToken = this.generateJwtToken({
       userId,
-      ACCESS_TOKEN_SECRET,
-      ACCESS_TOKEN_EXPIRE
-    );
+      secret: ACCESS_TOKEN_SECRET,
+      expiresIn: ACCESS_TOKEN_EXPIRE,
+    });
 
-    const refreshToken = this.generateJwtToken(
+    const refreshToken = this.generateJwtToken({
       userId,
-      REFRESH_TOKEN_SECRET,
-      REFRESH_TOKEN_EXPIRE
-    );
+      secret: REFRESH_TOKEN_SECRET,
+      expiresIn: REFRESH_TOKEN_EXPIRE,
+    });
 
     return { accessToken, refreshToken };
   }
 
-  async registerUser({
-    username,
-    email,
-    password,
-  }: RegisterParams): Promise<UserEntry> {
+  async registerUser(registerUserDto: RegisterUserDto): Promise<UserEntry> {
+    const { email, username, password } = registerUserDto;
+
     const userExists = await UserDB.findByEmail(email);
 
     if (userExists) {
@@ -89,7 +95,9 @@ class AuthService {
     const hashedPassword = await this.hashPassword(password);
 
     const newUser = await UserDB.create({
-      data: { username, email, password: hashedPassword },
+      username,
+      email,
+      password: hashedPassword,
     });
 
     await EmailVerificationService.sendVerificationToken(newUser.email);
@@ -97,7 +105,9 @@ class AuthService {
     return newUser;
   }
 
-  async loginUser({ email, password }: LoginParams): Promise<LoginResponse> {
+  async loginUser(loginUserDto: LoginUserDto): Promise<LoginResponseDto> {
+    const { email, password } = loginUserDto;
+
     const user = await UserDB.findByEmail(email);
 
     if (!user) {
@@ -109,7 +119,7 @@ class AuthService {
     }
 
     const isPasswordMatch = await this.comparePasswords({
-      rawPassword: password,
+      password,
       hashedPassword: user.password,
     });
 
@@ -124,7 +134,9 @@ class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async logoutUser({ refreshToken, userId }: LogoutParams): Promise<void> {
+  async logoutUser(logoutUserDto: LogoutUserDto): Promise<void> {
+    const { userId, refreshToken } = logoutUserDto;
+
     if (!refreshToken || !userId) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
@@ -132,11 +144,15 @@ class AuthService {
     await RefreshTokenService.deleteAllTokens(userId);
   }
 
-  async refreshToken({
-    token,
-    userId,
-  }: { token: string; userId: string }): Promise<LoginResponse> {
-    const payload = await this.verifyToken(token, REFRESH_TOKEN_SECRET);
+  async refreshToken(
+    refreshTokenDto: RefreshTokenDto
+  ): Promise<LoginResponseDto> {
+    const { userId, token } = refreshTokenDto;
+
+    const payload = await this.verifyToken({
+      token,
+      secret: REFRESH_TOKEN_SECRET,
+    });
 
     if (!payload) {
       await RefreshTokenService.deleteAllTokens(userId);
@@ -166,7 +182,7 @@ class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async googleLogin(user: GoogleUser): Promise<LoginResponse> {
+  async googleLogin(user: GoogleUser): Promise<LoginResponseDto> {
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
@@ -181,19 +197,17 @@ class AuthService {
 
     if (!foundUser) {
       foundUser = await UserDB.create({
-        data: {
-          username: name,
-          isEmailVerified: email_verified,
-          password: googleId,
-          profilePicture: picture,
-          email,
-          googleId,
-        },
+        username: name,
+        isEmailVerified: email_verified,
+        password: googleId,
+        profilePicture: picture,
+        email,
+        googleId,
       });
     } else if (!foundUser.googleId) {
-      foundUser = await UserDB.update({
+      foundUser = await UserDB.updateUser({
         userId: foundUser.id,
-        data: { googleId },
+        googleId,
       });
     }
 
@@ -220,11 +234,11 @@ class AuthService {
     return await bcrypt.hash(password, salt);
   }
 
-  async comparePasswords({
-    rawPassword,
-    hashedPassword,
-  }: { rawPassword: string; hashedPassword: string }): Promise<boolean> {
-    return await bcrypt.compare(rawPassword, hashedPassword);
+  async comparePasswords(
+    comparePasswordsDto: ComparePasswordsDto
+  ): Promise<boolean> {
+    const { password, hashedPassword } = comparePasswordsDto;
+    return await bcrypt.compare(password, hashedPassword);
   }
 }
 

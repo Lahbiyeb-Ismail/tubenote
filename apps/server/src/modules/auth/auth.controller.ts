@@ -12,15 +12,13 @@ import { REFRESH_TOKEN_NAME } from "../../constants/auth";
 
 import { UnauthorizedError } from "../../errors";
 
-import AuthService from "./authService";
+import AuthService from "./auth.service";
 
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 import type { TypedRequest } from "../../types";
-import type {
-  GoogleUser,
-  LoginCredentials,
-  RegisterCredentials,
-} from "./auth.type";
+import type { GoogleUser } from "./auth.type";
+import type { LoginUserDto } from "./dtos/login-user.dto";
+import type { RegisterUserDto } from "./dtos/register-user.dto";
 
 /**
  * Controller for handling authentication-related operations.
@@ -31,10 +29,8 @@ class AuthController {
    * @param req - The request object containing user registration credentials.
    * @param res - The response object.
    */
-  async register(req: TypedRequest<RegisterCredentials>, res: Response) {
-    const { username, email, password } = req.body;
-
-    const user = await AuthService.registerUser({ username, email, password });
+  async register(req: TypedRequest<RegisterUserDto>, res: Response) {
+    const user = await AuthService.registerUser(req.body);
 
     res.status(httpStatus.CREATED).json({
       message: "A verification email has been sent to your email.",
@@ -47,13 +43,8 @@ class AuthController {
    * @param req - The request object containing user login credentials.
    * @param res - The response object.
    */
-  async login(req: TypedRequest<LoginCredentials>, res: Response) {
-    const { email, password } = req.body;
-
-    const { accessToken, refreshToken } = await AuthService.loginUser({
-      email,
-      password,
-    });
+  async login(req: TypedRequest<LoginUserDto>, res: Response) {
+    const { accessToken, refreshToken } = await AuthService.loginUser(req.body);
 
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 

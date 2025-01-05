@@ -1,24 +1,24 @@
 import { Router } from "express";
 import passport from "../../lib/passportAuth";
 
-import { loginSchema, registrationSchema } from "./authValidationSchemas";
-
-import AuthController from "./authController";
+import AuthController from "./auth.controller";
 
 import isAuthenticated from "../../middlewares/isAuthenticated";
 import validateRequest from "../../middlewares/validateRequest";
+import { loginUserSchema } from "./schemas/login-user.schema";
+import { registerUserSchema } from "./schemas/register-user.schema";
 
 const router = Router();
 
 // - POST /register: Register a new user (requires request body validation).
 router
   .route("/register")
-  .post(validateRequest({ body: registrationSchema }), AuthController.register);
+  .post(validateRequest({ body: registerUserSchema }), AuthController.register);
 
 // - POST /login: Authenticate a user (requires request body validation).
 router
   .route("/login")
-  .post(validateRequest({ body: loginSchema }), AuthController.login);
+  .post(validateRequest({ body: loginUserSchema }), AuthController.login);
 
 // - POST /logout: Log out the current user.
 router.route("/logout").post(isAuthenticated, AuthController.logout);
