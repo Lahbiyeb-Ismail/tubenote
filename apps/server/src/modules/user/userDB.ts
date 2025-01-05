@@ -1,18 +1,17 @@
 import prismaClient from "../../lib/prisma";
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
+import type { CreateUserDto } from "./dtos/create-user.dto";
+import type { UpdatePasswordDbDto } from "./dtos/update-password.dto";
+import type { UpdateUserDto } from "./dtos/update-user.dto";
 
-import type {
-  CreateUserParams,
-  UpdateUserParams,
-  UserEntry,
-} from "./user.type";
+import type { UserEntry } from "./user.type";
 
 class UserDatabase {
-  async create({ data }: CreateUserParams): Promise<UserEntry> {
+  async create(createUserDto: CreateUserDto): Promise<UserEntry> {
     return handleAsyncOperation(
       () =>
         prismaClient.user.create({
-          data,
+          data: { ...createUserDto },
         }),
       { errorMessage: "Failed to create new user." }
     );
@@ -46,14 +45,33 @@ class UserDatabase {
     return user;
   }
 
-  async update({ userId, data }: UpdateUserParams): Promise<UserEntry> {
+  async updateUser(updateUserDto: UpdateUserDto): Promise<UserEntry> {
+    const { userId } = updateUserDto;
+
     return handleAsyncOperation(
       () =>
         prismaClient.user.update({
           where: { id: userId },
-          data,
+          data: { ...updateUserDto },
         }),
       { errorMessage: "Failed to update user." }
+    );
+  }
+
+  async updatePassword(
+    updatePasswordDto: UpdatePasswordDbDto
+  ): Promise<UserEntry> {
+    const { userId, hashedPassword } = updatePasswordDto;
+
+    return handleAsyncOperation(
+      () =>
+        prismaClient.user.update({
+          where: { id: userId },
+          data: {
+            password: hashedPassword,
+          },
+        }),
+      { errorMessage: "Failed to update user's password." }
     );
   }
 }

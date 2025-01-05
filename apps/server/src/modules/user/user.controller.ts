@@ -2,9 +2,10 @@ import type { Response } from "express";
 import httpStatus from "http-status";
 
 import type { TypedRequest } from "../../types";
-import type { UpdatePasswordBody, UpdateUserBody } from "./user.type";
 
-import UserService from "./userService";
+import type { UpdatePasswordDto } from "./dtos/update-password.dto";
+import type { UpdateUserDto } from "./dtos/update-user.dto";
+import UserService from "./user.service";
 
 /**
  * Controller for handling user-related operations.
@@ -41,7 +42,7 @@ class UserController {
    * @param res - The response object to confirm the update.
    */
   async updateCurrentUser(
-    req: TypedRequest<UpdateUserBody>,
+    req: TypedRequest<UpdateUserDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
@@ -59,7 +60,7 @@ class UserController {
    * @param res - The response object to confirm the password update.
    */
   async updateUserPassword(
-    req: TypedRequest<UpdatePasswordBody>,
+    req: TypedRequest<UpdatePasswordDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;

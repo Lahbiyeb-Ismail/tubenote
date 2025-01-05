@@ -2,9 +2,11 @@ import { ERROR_MESSAGES } from "../../constants/errorMessages";
 
 import { BadRequestError, NotFoundError } from "../../errors";
 
-import type { UpdatePasswordParams, UserEntry } from "./user.type";
+import type { UserEntry } from "./user.type";
 
-import AuthService from "../auth/authService";
+import AuthService from "../auth/auth.service";
+import type { UpdatePasswordDto } from "./dtos/update-password.dto";
+import type { UpdateUserDto } from "./dtos/update-user.dto";
 import UserDB from "./userDB";
 
 class UserService {
@@ -24,35 +26,33 @@ class UserService {
     return user;
   }
 
-  async updateUser({
-    username,
-    email,
-    userId,
-  }: {
-    userId: string;
-    username: string;
-    email: string;
-  }): Promise<void> {
+  async updateUser(updateUserDto: UpdateUserDto): Promise<UserEntry> {
+    const { userId, email } = updateUserDto;
+
     await this.getUserById(userId);
 
-    const user = await this.getUserByEmail(email);
+    let user: UserEntry | null = null;
+
+    if (email) {
+      user = await this.getUserByEmail(email);
+    }
 
     if (user && user.id !== userId) {
       throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
-    await UserDB.update({ userId, data: { email, username } });
+    return await UserDB.updateUser(updateUserDto);
   }
 
-  async updatePassword({
-    userId,
-    currentPassword,
-    newPassword,
-  }: UpdatePasswordParams): Promise<void> {
+  async updatePassword(
+    updatePasswordDto: UpdatePasswordDto
+  ): Promise<UserEntry> {
+    const { userId, currentPassword, newPassword } = updatePasswordDto;
+
     const user = await this.getUserById(userId);
 
     const isPasswordValid = await AuthService.comparePasswords({
-      rawPassword: currentPassword,
+      password: currentPassword,
       hashedPassword: user.password,
     });
 
@@ -66,14 +66,14 @@ class UserService {
 
     const hashedPassword = await AuthService.hashPassword(newPassword);
 
-    await UserDB.update({
+    return await UserDB.updatePassword({
       userId,
-      data: { password: hashedPassword },
+      hashedPassword,
     });
   }
 
-  async verifyUserEmail(userId: string): Promise<void> {
-    await UserDB.update({ userId, data: { isEmailVerified: true } });
+  async verifyUserEmail(userId: string): Promise<UserEntry> {
+    return await UserDB.updateUser({ userId, isEmailVerified: true });
   }
 }
 

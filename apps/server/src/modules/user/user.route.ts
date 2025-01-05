@@ -3,12 +3,9 @@ import { Router } from "express";
 import isAuthenticated from "../../middlewares/isAuthenticated";
 import validateRequest from "../../middlewares/validateRequest";
 
-import UserController from "./userController";
-
-import {
-  updatePasswordBodySchema,
-  updateUserBodySchema,
-} from "./userValidationSchemas";
+import { updatePasswordSchema } from "./schema/update-password.schema";
+import { updateUserSchema } from "./schema/update-user.schema";
+import UserController from "./user.controller";
 
 const router = Router();
 
@@ -21,7 +18,7 @@ router
   .route("/me")
   .get(UserController.getCurrentUser)
   .patch(
-    validateRequest({ body: updateUserBodySchema }),
+    validateRequest({ body: updateUserSchema }),
     UserController.updateCurrentUser
   );
 
@@ -29,7 +26,7 @@ router
 router
   .route("/update-password")
   .patch(
-    validateRequest({ body: updatePasswordBodySchema }),
+    validateRequest({ body: updatePasswordSchema }),
     UserController.updateUserPassword
   );
 
