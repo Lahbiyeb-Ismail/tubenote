@@ -39,11 +39,11 @@ declare global {
  * @template Q - The Zod schema type for the request query. Defaults to `z.ZodTypeAny`.
  */
 export type TypedRequest<
-  B extends z.ZodType = z.ZodTypeAny,
-  P extends z.ZodType = z.ZodTypeAny,
-  Q extends z.ZodType = z.ZodTypeAny,
-> = Request<z.infer<P>, Record<string, unknown>, z.infer<B>, z.infer<Q>>;
+  B = EmptyRecord,
+  P = EmptyRecord,
+  Q = EmptyRecord,
+> = Request<P, EmptyRecord, B, Q>;
 
 export type PaginationQuery = typeof paginationQuerySchema;
 
-export type EmptyRecord = z.ZodType<Record<string, never>>;
+export type EmptyRecord = Record<string, unknown>;
