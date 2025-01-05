@@ -6,20 +6,20 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from "../../src/errors";
+import AuthService from "../../src/modules/auth/auth.service";
 import type { GoogleUser } from "../../src/modules/auth/auth.type";
-import AuthService from "../../src/modules/auth/authService";
 import type { RefreshTokenEntry } from "../../src/modules/refreshToken/refreshToken.type";
 import RefreshTokenService from "../../src/modules/refreshToken/refreshTokenService";
+import UserService from "../../src/modules/user/user.service";
 import type { UserEntry } from "../../src/modules/user/user.type";
 import UserDB from "../../src/modules/user/userDB";
-import UserService from "../../src/modules/user/userService";
 import EmailVerificationService from "../../src/modules/verifyEmailToken/verifyEmailService";
 import type { JwtPayload } from "../../src/types";
 
 jest.mock("../../src/modules/user/userDB");
 jest.mock("../../src/modules/verifyEmailToken/verifyEmailService");
 jest.mock("../../src/modules/refreshToken/refreshTokenService");
-jest.mock("../../src/modules/user/userService");
+jest.mock("../../src/modules/user/user.service");
 
 describe("Test AuthService methods", () => {
   beforeAll(() => {
@@ -64,11 +64,9 @@ describe("Test AuthService methods", () => {
       expect(result).toEqual(mockUser);
       expect(UserDB.findByEmail).toHaveBeenCalledWith("test@example.com");
       expect(UserDB.create).toHaveBeenCalledWith({
-        data: {
-          username: "testuser",
-          email: "test@example.com",
-          password: "hashedpassword",
-        },
+        username: "testuser",
+        email: "test@example.com",
+        password: "hashedpassword",
       });
       expect(
         EmailVerificationService.sendVerificationToken
@@ -126,7 +124,7 @@ describe("Test AuthService methods", () => {
       expect(result).toEqual(mockTokens);
       expect(UserDB.findByEmail).toHaveBeenCalledWith(mockLoginParams.email);
       expect(AuthService.comparePasswords).toHaveBeenCalledWith({
-        rawPassword: mockLoginParams.password,
+        password: mockLoginParams.password,
         hashedPassword: mockUser.password,
       });
       expect(AuthService.createJwtTokens).toHaveBeenCalledWith(mockUser.id);
@@ -174,7 +172,7 @@ describe("Test AuthService methods", () => {
       expect(UserDB.findByEmail).toHaveBeenCalledWith(mockLoginParams.email);
 
       expect(AuthService.comparePasswords).toHaveBeenCalledWith({
-        rawPassword: mockLoginParams.password,
+        password: mockLoginParams.password,
         hashedPassword: mockUser.password,
       });
 
@@ -274,10 +272,10 @@ describe("Test AuthService methods", () => {
 
       expect(result).toEqual(mockReturnedTokens);
 
-      expect(AuthService.verifyToken).toHaveBeenCalledWith(
-        mockToken,
-        REFRESH_TOKEN_SECRET
-      );
+      expect(AuthService.verifyToken).toHaveBeenCalledWith({
+        token: mockToken,
+        secret: REFRESH_TOKEN_SECRET,
+      });
 
       expect(RefreshTokenService.findToken).toHaveBeenCalledWith(mockToken);
 
@@ -295,10 +293,10 @@ describe("Test AuthService methods", () => {
         AuthService.refreshToken({ token: mockToken, userId: mockUserId })
       ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.FORBIDDEN));
 
-      expect(AuthService.verifyToken).toHaveBeenCalledWith(
-        mockToken,
-        REFRESH_TOKEN_SECRET
-      );
+      expect(AuthService.verifyToken).toHaveBeenCalledWith({
+        token: mockToken,
+        secret: REFRESH_TOKEN_SECRET,
+      });
 
       expect(RefreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
         mockUserId
@@ -319,10 +317,10 @@ describe("Test AuthService methods", () => {
         AuthService.refreshToken({ token: mockToken, userId: mockUserId })
       ).rejects.toThrow(new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED));
 
-      expect(AuthService.verifyToken).toHaveBeenCalledWith(
-        mockToken,
-        REFRESH_TOKEN_SECRET
-      );
+      expect(AuthService.verifyToken).toHaveBeenCalledWith({
+        token: mockToken,
+        secret: REFRESH_TOKEN_SECRET,
+      });
 
       expect(RefreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
       expect(RefreshTokenService.findToken).not.toHaveBeenCalled();
@@ -339,10 +337,10 @@ describe("Test AuthService methods", () => {
         AuthService.refreshToken({ token: mockToken, userId: mockUserId })
       ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.FORBIDDEN));
 
-      expect(AuthService.verifyToken).toHaveBeenCalledWith(
-        mockToken,
-        REFRESH_TOKEN_SECRET
-      );
+      expect(AuthService.verifyToken).toHaveBeenCalledWith({
+        token: mockToken,
+        secret: REFRESH_TOKEN_SECRET,
+      });
 
       expect(RefreshTokenService.findToken).toHaveBeenCalledWith(mockToken);
 
@@ -400,14 +398,12 @@ describe("Test AuthService methods", () => {
 
       expect(UserDB.findByEmail).toHaveBeenCalledWith(mockGoogleUser.email);
       expect(UserDB.create).toHaveBeenCalledWith({
-        data: {
-          email: mockGoogleUser.email,
-          username: mockGoogleUser.name,
-          password: mockGoogleUser.sub,
-          isEmailVerified: mockGoogleUser.email_verified,
-          googleId: mockGoogleUser.sub,
-          profilePicture: mockGoogleUser.picture,
-        },
+        email: mockGoogleUser.email,
+        username: mockGoogleUser.name,
+        password: mockGoogleUser.sub,
+        isEmailVerified: mockGoogleUser.email_verified,
+        googleId: mockGoogleUser.sub,
+        profilePicture: mockGoogleUser.picture,
       });
       expect(AuthService.createJwtTokens).toHaveBeenCalledWith(
         mockCreatedUser.id
@@ -424,7 +420,7 @@ describe("Test AuthService methods", () => {
         googleId: null,
       });
 
-      (UserDB.update as jest.Mock).mockResolvedValue(mockCreatedUser);
+      (UserDB.updateUser as jest.Mock).mockResolvedValue(mockCreatedUser);
 
       jest.spyOn(AuthService, "createJwtTokens").mockReturnValue(mockTokens);
 
@@ -433,9 +429,9 @@ describe("Test AuthService methods", () => {
       expect(result).toEqual(mockTokens);
 
       expect(UserDB.findByEmail).toHaveBeenCalledWith(mockGoogleUser.email);
-      expect(UserDB.update).toHaveBeenCalledWith({
+      expect(UserDB.updateUser).toHaveBeenCalledWith({
         userId: mockCreatedUser.id,
-        data: { googleId: mockGoogleUser.sub },
+        googleId: mockGoogleUser.sub,
       });
       expect(AuthService.createJwtTokens).toHaveBeenCalledWith(
         mockCreatedUser.id
@@ -457,7 +453,7 @@ describe("Test AuthService methods", () => {
 
       expect(UserDB.findByEmail).not.toHaveBeenCalled();
       expect(UserDB.create).not.toHaveBeenCalled();
-      expect(UserDB.update).not.toHaveBeenCalled();
+      expect(UserDB.updateUser).not.toHaveBeenCalled();
       expect(AuthService.createJwtTokens).not.toHaveBeenCalled();
       expect(RefreshTokenService.createToken).not.toHaveBeenCalled();
     });
