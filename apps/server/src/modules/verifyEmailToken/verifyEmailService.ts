@@ -4,8 +4,8 @@ import { ForbiddenError } from "../../errors";
 import VerificationTokenDB from "./verificationTokenDB";
 
 import EmailService from "../../services/emailService";
-import AuthService from "../auth/authService";
-import UserDB from "../user/userDB";
+import AuthService from "../auth/auth.service";
+import UserDB from "../user/user.db";
 
 class EmailVerificationService {
   async generateToken(email: string): Promise<string> {

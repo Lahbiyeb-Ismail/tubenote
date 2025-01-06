@@ -1,9 +1,9 @@
-import UserDB from "../user/userDB";
+import UserDB from "../user/user.db";
 import ResetPasswordDB from "./resetPasswordDB";
 
 import EmailService from "../../services/emailService";
-import AuthService from "../auth/authService";
-import UserService from "../user/userService";
+import AuthService from "../auth/auth.service";
+import UserService from "../user/user.service";
 
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 import { ForbiddenError, NotFoundError } from "../../errors";
