@@ -8,7 +8,7 @@ import {
   REFRESH_TOKEN_SECRET,
 } from "../../constants/auth";
 
-import UserDB from "../user/userDB";
+import UserDB from "../user/user.db";
 
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 
@@ -205,8 +205,7 @@ class AuthService {
         googleId,
       });
     } else if (!foundUser.googleId) {
-      foundUser = await UserDB.updateUser({
-        userId: foundUser.id,
+      foundUser = await UserDB.updateUser(foundUser.id, {
         googleId,
       });
     }
