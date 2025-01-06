@@ -7,7 +7,7 @@ import type { UserEntry } from "./user.type";
 import AuthService from "../auth/auth.service";
 import type { UpdatePasswordDto } from "./dtos/update-password.dto";
 import type { UpdateUserDto } from "./dtos/update-user.dto";
-import UserDB from "./userDB";
+import UserDB from "./user.db";
 
 class UserService {
   async getUserByEmail(email: string): Promise<UserEntry | null> {
@@ -26,30 +26,30 @@ class UserService {
     return user;
   }
 
-  async updateUser(updateUserDto: UpdateUserDto): Promise<UserEntry> {
-    const { userId, email } = updateUserDto;
+  async updateUser(
+    id: string,
+    updateUserDto: UpdateUserDto
+  ): Promise<UserEntry> {
+    const user = await this.getUserById(id);
 
-    await this.getUserById(userId);
+    if (updateUserDto.email && updateUserDto.email !== user.email) {
+      const existingUser = await this.getUserByEmail(updateUserDto.email);
 
-    let user: UserEntry | null = null;
-
-    if (email) {
-      user = await this.getUserByEmail(email);
+      if (existingUser && existingUser.id !== id) {
+        throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
+      }
     }
 
-    if (user && user.id !== userId) {
-      throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
-    }
-
-    return await UserDB.updateUser(updateUserDto);
+    return await UserDB.updateUser(id, updateUserDto);
   }
 
   async updatePassword(
+    id: string,
     updatePasswordDto: UpdatePasswordDto
   ): Promise<UserEntry> {
-    const { userId, currentPassword, newPassword } = updatePasswordDto;
+    const { currentPassword, newPassword } = updatePasswordDto;
 
-    const user = await this.getUserById(userId);
+    const user = await this.getUserById(id);
 
     const isPasswordValid = await AuthService.comparePasswords({
       password: currentPassword,
@@ -66,14 +66,11 @@ class UserService {
 
     const hashedPassword = await AuthService.hashPassword(newPassword);
 
-    return await UserDB.updatePassword({
-      userId,
-      hashedPassword,
-    });
+    return await UserDB.updatePassword({ id, password: hashedPassword });
   }
 
-  async verifyUserEmail(userId: string): Promise<UserEntry> {
-    return await UserDB.updateUser({ userId, isEmailVerified: true });
+  async verifyUserEmail(id: string): Promise<UserEntry> {
+    return await UserDB.updateUser(id, { isEmailVerified: true });
   }
 }
 

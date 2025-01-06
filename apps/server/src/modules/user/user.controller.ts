@@ -46,9 +46,8 @@ class UserController {
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-    const { username, email } = req.body;
 
-    await UserService.updateUser({ userId, username, email });
+    await UserService.updateUser(userId, req.body);
 
     res.status(httpStatus.OK).json({ message: "User updated successfully." });
   }
@@ -65,9 +64,7 @@ class UserController {
   ): Promise<void> {
     const userId = req.userId;
 
-    const { currentPassword, newPassword } = req.body;
-
-    await UserService.updatePassword({ userId, currentPassword, newPassword });
+    await UserService.updatePassword(userId, req.body);
 
     res
       .status(httpStatus.OK)

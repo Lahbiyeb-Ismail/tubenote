@@ -45,13 +45,14 @@ class UserDatabase {
     return user;
   }
 
-  async updateUser(updateUserDto: UpdateUserDto): Promise<UserEntry> {
-    const { userId } = updateUserDto;
-
+  async updateUser(
+    id: string,
+    updateUserDto: UpdateUserDto
+  ): Promise<UserEntry> {
     return handleAsyncOperation(
       () =>
         prismaClient.user.update({
-          where: { id: userId },
+          where: { id },
           data: { ...updateUserDto },
         }),
       { errorMessage: "Failed to update user." }
@@ -61,14 +62,14 @@ class UserDatabase {
   async updatePassword(
     updatePasswordDto: UpdatePasswordDbDto
   ): Promise<UserEntry> {
-    const { userId, hashedPassword } = updatePasswordDto;
+    const { id, password } = updatePasswordDto;
 
     return handleAsyncOperation(
       () =>
         prismaClient.user.update({
-          where: { id: userId },
+          where: { id },
           data: {
-            password: hashedPassword,
+            password,
           },
         }),
       { errorMessage: "Failed to update user's password." }
