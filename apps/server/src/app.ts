@@ -12,7 +12,7 @@ import helmet from "helmet";
 import passport from "./lib/passportAuth";
 
 import authRoutes from "./modules/auth/auth.route";
-import noteRoutes from "./modules/note/noteRoute";
+import noteRoutes from "./modules/note/note.route";
 import resetPasswordRoutes from "./modules/resetPasswordToken/resetPasswordRoute";
 import userRoutes from "./modules/user/user.route";
 import verifyEmailRoutes from "./modules/verifyEmailToken/verifyEmailRoute";
