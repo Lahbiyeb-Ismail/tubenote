@@ -2,72 +2,68 @@ import prismaClient from "../../lib/prisma";
 
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
 
-import type { FindManyParams } from "../../types/shared.types";
-import type {
-  CreateNoteData,
-  DeleteNoteParams,
-  FindNoteParams,
-  NoteEntry,
-  UpdateNoteParams,
-} from "./note.type";
+import type { FindManyDto } from "../../common/dtos/find-many.dto";
+import type { CreateNoteDto } from "./dtos/create-note.dto";
+import type { DeleteNoteDto } from "./dtos/delete-note.dto";
+import type { FindNoteDto } from "./dtos/find-note.dto";
+import type { UpdateNoteDto } from "./dtos/update-note.dto";
+import type { NoteEntry } from "./note.type";
 
 class NoteDatabase {
-  async find({ userId, noteId }: FindNoteParams): Promise<NoteEntry | null> {
+  async find(findNoteDto: FindNoteDto): Promise<NoteEntry | null> {
     return handleAsyncOperation(
       () =>
         prismaClient.note.findUnique({
           where: {
-            id: noteId,
-            userId,
+            ...findNoteDto,
           },
         }),
       { errorMessage: "Failed to find note." }
     );
   }
 
-  async create(data: CreateNoteData): Promise<NoteEntry> {
+  async create(
+    userId: string,
+    createNoteDto: CreateNoteDto
+  ): Promise<NoteEntry> {
     return handleAsyncOperation(
       () =>
         prismaClient.note.create({
-          data,
+          data: { userId, ...createNoteDto },
         }),
       { errorMessage: "Failed to create note." }
     );
   }
 
-  async update({ userId, noteId, data }: UpdateNoteParams): Promise<NoteEntry> {
+  async update(
+    findNoteDto: FindNoteDto,
+    updateNoteDto: UpdateNoteDto
+  ): Promise<NoteEntry> {
     return handleAsyncOperation(
       () =>
         prismaClient.note.update({
           where: {
-            id: noteId,
-            userId,
+            ...findNoteDto,
           },
-          data,
+          data: { ...updateNoteDto },
         }),
       { errorMessage: "Failed to update note." }
     );
   }
 
-  async delete({ userId, noteId }: DeleteNoteParams): Promise<void> {
+  async delete(deleteNoteDto: DeleteNoteDto): Promise<void> {
     handleAsyncOperation(
       () =>
         prismaClient.note.delete({
-          where: {
-            id: noteId,
-            userId,
-          },
+          where: { ...deleteNoteDto },
         }),
       { errorMessage: "Failed to delete note." }
     );
   }
 
-  async findMany({
-    userId,
-    limit,
-    skip,
-    sort,
-  }: FindManyParams): Promise<NoteEntry[]> {
+  async findMany(findManyDto: FindManyDto): Promise<NoteEntry[]> {
+    const { userId, limit, sort, skip = 0 } = findManyDto;
+
     return handleAsyncOperation(
       () =>
         prismaClient.note.findMany({
@@ -84,19 +80,18 @@ class NoteDatabase {
     );
   }
 
-  async findManyByVideoId({
-    userId,
-    videoId,
-    limit,
-    skip,
-    sort,
-  }: FindManyParams & { videoId: string }): Promise<NoteEntry[]> {
+  async findManyByVideoId(
+    id: string,
+    findManyDto: FindManyDto
+  ): Promise<NoteEntry[]> {
+    const { userId, limit, sort, skip = 0 } = findManyDto;
+
     return handleAsyncOperation(
       () =>
         prismaClient.note.findMany({
           where: {
             userId,
-            youtubeId: videoId,
+            youtubeId: id,
           },
           take: limit,
           skip,

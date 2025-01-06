@@ -1,11 +1,17 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { EmptyRecord, PaginationQuery, TypedRequest } from "../../types";
-import type { VideoIdParam } from "../video/video.type";
-import type { CreateNoteData, NoteBody, NoteIdParam } from "./note.type";
+import type { EmptyRecord, TypedRequest } from "../../types";
 
-import NoteService from "./noteService";
+import type { FindManyDto } from "../../common/dtos/find-many.dto";
+import type { IdParamDto } from "../../common/dtos/id-param.dto";
+import type { QueryPaginationDto } from "../../common/dtos/query-pagination.dto";
+import type { CreateNoteDto } from "./dtos/create-note.dto";
+import type { DeleteNoteDto } from "./dtos/delete-note.dto";
+import type { FindNoteDto } from "./dtos/find-note.dto";
+import type { NoteIdDto } from "./dtos/note-id.dto";
+import type { UpdateNoteDto } from "./dtos/update-note.dto";
+import NoteService from "./note.service";
 
 /**
  * Controller for handling note-related operations.
@@ -18,15 +24,13 @@ class NoteController {
    * @param res - The response object used to send the status and result.
    * @returns A promise that resolves to void.
    */
-  async addNewNote(req: TypedRequest<NoteBody>, res: Response): Promise<void> {
+  async createNote(
+    req: TypedRequest<CreateNoteDto>,
+    res: Response
+  ): Promise<void> {
     const userId = req.userId;
 
-    const newNoteData: CreateNoteData = {
-      ...req.body,
-      userId,
-    };
-
-    const note = await NoteService.addNewNote(newNoteData);
+    const note = await NoteService.createNote(userId, req.body);
 
     res
       .status(httpStatus.CREATED)
@@ -41,18 +45,19 @@ class NoteController {
    * @returns A promise that resolves to void.
    */
   async updateNote(
-    req: TypedRequest<NoteBody, NoteIdParam>,
+    req: TypedRequest<UpdateNoteDto, IdParamDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-    const { noteId } = req.params;
-    const noteData = req.body;
+    const { id } = req.params;
 
-    const updatedNote = await NoteService.updateNote({
-      userId,
-      noteId,
-      data: noteData,
-    });
+    const updateNoteDto = req.body;
+    const findNoteDto: FindNoteDto = { id, userId };
+
+    const updatedNote = await NoteService.updateNote(
+      findNoteDto,
+      updateNoteDto
+    );
 
     res
       .status(httpStatus.OK)
@@ -67,13 +72,15 @@ class NoteController {
    * @returns A promise that resolves to void.
    */
   async deleteNote(
-    req: TypedRequest<EmptyRecord, NoteIdParam>,
+    req: TypedRequest<EmptyRecord, IdParamDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-    const { noteId } = req.params;
+    const { id } = req.params;
 
-    await NoteService.deleteNote({ userId, noteId });
+    const deleteNoteDto: DeleteNoteDto = { id, userId };
+
+    await NoteService.deleteNote(deleteNoteDto);
 
     res.status(httpStatus.OK).json({ message: "Note deleted successfully." });
   }
@@ -86,13 +93,15 @@ class NoteController {
    * @returns A promise that resolves to void.
    */
   async getNoteById(
-    req: TypedRequest<EmptyRecord, NoteIdParam>,
+    req: TypedRequest<EmptyRecord, IdParamDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-    const { noteId } = req.params;
+    const { id } = req.params;
 
-    const note = await NoteService.findNote({ userId, noteId });
+    const findNoteDto: FindNoteDto = { id, userId };
+
+    const note = await NoteService.findNote(findNoteDto);
 
     res.status(httpStatus.OK).json({ note });
   }
@@ -105,7 +114,7 @@ class NoteController {
    * @returns A promise that resolves to void.
    */
   async getUserNotes(
-    req: TypedRequest<EmptyRecord, EmptyRecord, PaginationQuery>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
@@ -115,12 +124,15 @@ class NoteController {
 
     const skip = (page - 1) * limit;
 
-    const { notes, notesCount, totalPages } = await NoteService.fetchUserNotes({
+    const findManyDto: FindManyDto = {
       userId,
       skip,
       limit,
       sort: { by: "createdAt", order: "desc" },
-    });
+    };
+
+    const { notes, notesCount, totalPages } =
+      await NoteService.fetchUserNotes(findManyDto);
 
     res.status(httpStatus.OK).json({
       notes,
@@ -144,11 +156,13 @@ class NoteController {
   async getUserRecentNotes(req: TypedRequest, res: Response): Promise<void> {
     const userId = req.userId;
 
-    const notes = await NoteService.fetchRecentNotes({
+    const findManyDto: FindManyDto = {
       userId,
       limit: 2,
       sort: { by: "createdAt", order: "desc" },
-    });
+    };
+
+    const notes = await NoteService.fetchRecentNotes(findManyDto);
 
     res.status(httpStatus.OK).json({ notes });
   }
@@ -166,11 +180,13 @@ class NoteController {
   ): Promise<void> {
     const userId = req.userId;
 
-    const notes = await NoteService.fetchRecentNotes({
+    const findManyDto: FindManyDto = {
       userId,
       limit: 2,
       sort: { by: "updatedAt", order: "desc" },
-    });
+    };
+
+    const notes = await NoteService.fetchRecentNotes(findManyDto);
 
     res.status(httpStatus.OK).json({ notes });
   }
@@ -185,25 +201,26 @@ class NoteController {
    *
    */
   async getNotesByVideoId(
-    req: TypedRequest<EmptyRecord, VideoIdParam, PaginationQuery>,
+    req: TypedRequest<EmptyRecord, IdParamDto, QueryPaginationDto>,
     res: Response
   ) {
     const userId = req.userId;
-    const { youtubeId } = req.params;
+    const { id } = req.params;
 
     const page = Number(req.query.page);
     const limit = Number(req.query.limit);
 
     const skip = (page - 1) * limit;
 
+    const findManyDto: FindManyDto = {
+      userId,
+      skip,
+      limit,
+      sort: { by: "createdAt", order: "desc" },
+    };
+
     const { notes, notesCount, totalPages } =
-      await NoteService.fetchNotesByVideoId({
-        userId,
-        videoId: youtubeId,
-        limit,
-        skip,
-        sort: { by: "createdAt", order: "desc" },
-      });
+      await NoteService.fetchNotesByVideoId(id, findManyDto);
 
     res.status(httpStatus.OK).json({
       notes,
