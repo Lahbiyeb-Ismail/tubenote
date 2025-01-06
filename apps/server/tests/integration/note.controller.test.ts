@@ -1,32 +1,27 @@
 import { Response } from "express";
 import httpStatus from "http-status";
-import {
-  type CreateNoteData,
-  NoteBody,
-  type NoteEntry,
-  NoteIdParam,
-} from "../../src/modules/note/note.type";
-import NoteController from "../../src/modules/note/noteController";
-import NoteService from "../../src/modules/note/noteService";
-import { VideoIdParam } from "../../src/modules/video/video.type";
+import type { CreateNoteDto } from "../../src/modules/note/dtos/create-note.dto";
+import NoteController from "../../src/modules/note/note.controller";
+import NoteService from "../../src/modules/note/note.service";
+import { type NoteEntry } from "../../src/modules/note/note.type";
 import { TypedRequest } from "../../src/types";
 
-jest.mock("../../src/modules/note/noteService");
+jest.mock("../../src/modules/note/note.service");
 
 describe("NoteController integration tests", () => {
   beforeAll(() => {
     jest.clearAllMocks();
   });
 
-  describe("NoteController - addNewNote", () => {
-    let mockRequest: Partial<TypedRequest<NoteBody>>;
+  describe("NoteController - createNote", () => {
+    let mockRequest: Partial<TypedRequest<CreateNoteDto>>;
     let mockResponse: Partial<Response>;
     let mockJson: jest.Mock;
     let mockStatus: jest.Mock;
 
     const mockUserId = "user_id_001";
 
-    const mockNoteData = {
+    const createNoteDto: CreateNoteDto = {
       title: "Test Note",
       content: "Test Content",
       videoId: "video_id_001",
@@ -45,7 +40,7 @@ describe("NoteController integration tests", () => {
       };
       mockRequest = {
         userId: mockUserId,
-        body: mockNoteData,
+        body: createNoteDto,
       };
     });
 
@@ -68,17 +63,17 @@ describe("NoteController integration tests", () => {
         youtubeId: "youtube_id_001",
       };
 
-      (NoteService.addNewNote as jest.Mock).mockResolvedValue(mockCreatedNote);
+      (NoteService.createNote as jest.Mock).mockResolvedValue(mockCreatedNote);
 
-      await NoteController.addNewNote(
-        mockRequest as TypedRequest<NoteBody>,
+      await NoteController.createNote(
+        mockRequest as TypedRequest<CreateNoteDto>,
         mockResponse as Response
       );
 
-      expect(NoteService.addNewNote).toHaveBeenCalledWith({
-        ...mockRequest.body,
-        userId: mockUserId,
-      });
+      expect(NoteService.createNote).toHaveBeenCalledWith(
+        mockUserId,
+        createNoteDto
+      );
 
       expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.CREATED);
 
@@ -91,11 +86,11 @@ describe("NoteController integration tests", () => {
     it("should handle errors when adding a new note", async () => {
       const error = new Error("Failed to add note");
 
-      (NoteService.addNewNote as jest.Mock).mockRejectedValue(error);
+      (NoteService.createNote as jest.Mock).mockRejectedValue(error);
 
       await expect(
-        NoteController.addNewNote(
-          mockRequest as TypedRequest<NoteBody>,
+        NoteController.createNote(
+          mockRequest as TypedRequest<CreateNoteDto>,
           mockResponse as Response
         )
       ).rejects.toThrow(error);

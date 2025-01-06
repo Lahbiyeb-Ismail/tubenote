@@ -11,18 +11,14 @@ import envConfig from "../../src/config/envConfig";
 import { REFRESH_TOKEN_NAME } from "../../src/constants/auth";
 import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
 import { UnauthorizedError } from "../../src/errors";
-import type {
-  GoogleUser,
-  LoginCredentials,
-  LoginParams,
-  RegisterCredentials,
-  RegisterParams,
-} from "../../src/modules/auth/auth.type";
-import AuthController from "../../src/modules/auth/authController";
-import AuthService from "../../src/modules/auth/authService";
+import AuthController from "../../src/modules/auth/auth.controller";
+import AuthService from "../../src/modules/auth/auth.service";
+import type { GoogleUser } from "../../src/modules/auth/auth.type";
+import type { LoginUserDto } from "../../src/modules/auth/dtos/login-user.dto";
+import type { RegisterUserDto } from "../../src/modules/auth/dtos/register-user.dto";
 import type { TypedRequest } from "../../src/types";
 
-jest.mock("../../src/modules/auth/authService");
+jest.mock("../../src/modules/auth/auth.service");
 
 describe("AuthController integration tests", () => {
   beforeAll(() => {
@@ -30,7 +26,7 @@ describe("AuthController integration tests", () => {
   });
 
   describe("AuthController - register", () => {
-    let mockRequest: Partial<TypedRequest<RegisterCredentials>>;
+    let mockRequest: Partial<TypedRequest<RegisterUserDto>>;
     let mockResponse: Partial<Response>;
     let mockJson: jest.Mock;
     let mockStatus: jest.Mock;
@@ -45,7 +41,7 @@ describe("AuthController integration tests", () => {
       videoIds: [],
     };
 
-    const mockRegisterCredentials: RegisterParams = {
+    const mockRegisterCredentials: RegisterUserDto = {
       username: "testuser",
       email: "testuser@example.com",
       password: "password123",
@@ -68,7 +64,7 @@ describe("AuthController integration tests", () => {
       (AuthService.registerUser as jest.Mock).mockResolvedValue(mockUser);
 
       await AuthController.register(
-        mockRequest as TypedRequest<RegisterCredentials>,
+        mockRequest as TypedRequest<RegisterUserDto>,
         mockResponse as Response
       );
 
@@ -92,7 +88,7 @@ describe("AuthController integration tests", () => {
 
       await expect(
         AuthController.register(
-          mockRequest as TypedRequest<RegisterCredentials>,
+          mockRequest as TypedRequest<RegisterUserDto>,
           mockResponse as Response
         )
       ).rejects.toThrow(errorMessage);
@@ -100,13 +96,13 @@ describe("AuthController integration tests", () => {
   });
 
   describe("AuthController - login", () => {
-    let mockRequest: Partial<TypedRequest<LoginCredentials>>;
+    let mockRequest: Partial<TypedRequest<LoginUserDto>>;
     let mockResponse: Partial<Response>;
     let mockJson: jest.Mock;
     let mockStatus: jest.Mock;
     let mockCookie: jest.Mock;
 
-    const mockLoginCredentials: LoginParams = {
+    const mockLoginCredentials: LoginUserDto = {
       email: "testuser@example.com",
       password: "password123",
     };
@@ -138,7 +134,7 @@ describe("AuthController integration tests", () => {
       (AuthService.loginUser as jest.Mock).mockResolvedValue(mockTokens);
 
       await AuthController.login(
-        mockRequest as TypedRequest<LoginCredentials>,
+        mockRequest as TypedRequest<LoginUserDto>,
         mockResponse as Response
       );
 
@@ -165,7 +161,7 @@ describe("AuthController integration tests", () => {
 
       await expect(
         AuthController.login(
-          mockRequest as TypedRequest<LoginCredentials>,
+          mockRequest as TypedRequest<LoginUserDto>,
           mockResponse as Response
         )
       ).rejects.toThrow(errorMessage);

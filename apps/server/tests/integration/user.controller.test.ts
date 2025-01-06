@@ -1,18 +1,16 @@
 import type { Response } from "express";
-import type {
-  UpdatePasswordBody,
-  UpdatePasswordParams,
-  UpdateUserBody,
-  UserEntry,
-} from "../../src/modules/user/user.type";
+import httpStatus from "http-status";
+
+import type { UserEntry } from "../../src/modules/user/user.type";
 import type { TypedRequest } from "../../src/types";
 
-import UserService from "../../src/modules/user/userService";
+import UserService from "../../src/modules/user/user.service";
 
-import httpStatus from "http-status";
-import UserController from "../../src/modules/user/userController";
+import type { UpdatePasswordDto } from "../../src/modules/user/dtos/update-password.dto";
+import type { UpdateUserDto } from "../../src/modules/user/dtos/update-user.dto";
+import UserController from "../../src/modules/user/user.controller";
 
-jest.mock("../../src/modules/user/userService");
+jest.mock("../../src/modules/user/user.service");
 
 describe("UserController integration tests", () => {
   beforeAll(() => {
@@ -96,14 +94,14 @@ describe("UserController integration tests", () => {
   });
 
   describe("AuthController - updateCurrentUser", () => {
-    let mockRequest: Partial<TypedRequest<UpdateUserBody>>;
+    let mockRequest: Partial<TypedRequest<UpdateUserDto>>;
     let mockResponse: Partial<Response>;
     let mockStatus: jest.Mock;
     let mockJson: jest.Mock;
 
     const mockUserId = "user_id_001";
 
-    const mockUpdateUserBody = {
+    const updateUserDto: UpdateUserDto = {
       username: "test_user_updated",
       email: "testuser@example.com",
     };
@@ -116,7 +114,7 @@ describe("UserController integration tests", () => {
         json: mockJson,
       };
       mockRequest = {
-        body: mockUpdateUserBody,
+        body: updateUserDto,
         userId: mockUserId,
       };
     });
@@ -129,14 +127,14 @@ describe("UserController integration tests", () => {
       (UserService.updateUser as jest.Mock).mockResolvedValue(undefined);
 
       await UserController.updateCurrentUser(
-        mockRequest as TypedRequest<UpdateUserBody>,
+        mockRequest as TypedRequest<UpdateUserDto>,
         mockResponse as Response
       );
 
-      expect(UserService.updateUser).toHaveBeenCalledWith({
-        userId: mockUserId,
-        ...mockUpdateUserBody,
-      });
+      expect(UserService.updateUser).toHaveBeenCalledWith(
+        mockUserId,
+        mockRequest.body
+      );
 
       expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
 
@@ -153,7 +151,7 @@ describe("UserController integration tests", () => {
 
       await expect(
         UserController.updateCurrentUser(
-          mockRequest as TypedRequest<UpdateUserBody>,
+          mockRequest as TypedRequest<UpdateUserDto>,
           mockResponse as Response
         )
       ).rejects.toThrow(errorMessage);
@@ -161,21 +159,16 @@ describe("UserController integration tests", () => {
   });
 
   describe("AuthController - updateUserPassword", () => {
-    let mockRequest: Partial<TypedRequest<UpdatePasswordBody>>;
+    let mockRequest: Partial<TypedRequest<UpdatePasswordDto>>;
     let mockResponse: Partial<Response>;
     let mockStatus: jest.Mock;
     let mockJson: jest.Mock;
 
     const mockUserId = "user_id_001";
 
-    const mockUpdateUserBody = {
+    const updatePasswordDto: UpdatePasswordDto = {
       currentPassword: "current_user_password",
       newPassword: "new_user_password",
-    };
-
-    const mockUpdatePasswordParams: UpdatePasswordParams = {
-      userId: mockUserId,
-      ...mockUpdateUserBody,
     };
 
     beforeEach(() => {
@@ -186,7 +179,7 @@ describe("UserController integration tests", () => {
         json: mockJson,
       };
       mockRequest = {
-        body: mockUpdateUserBody,
+        body: updatePasswordDto,
         userId: mockUserId,
       };
     });
@@ -199,12 +192,13 @@ describe("UserController integration tests", () => {
       (UserService.updatePassword as jest.Mock).mockResolvedValue(undefined);
 
       await UserController.updateUserPassword(
-        mockRequest as TypedRequest<UpdatePasswordBody>,
+        mockRequest as TypedRequest<UpdatePasswordDto>,
         mockResponse as Response
       );
 
       expect(UserService.updatePassword).toHaveBeenCalledWith(
-        mockUpdatePasswordParams
+        mockUserId,
+        mockRequest.body
       );
 
       expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
@@ -222,7 +216,7 @@ describe("UserController integration tests", () => {
 
       await expect(
         UserController.updateUserPassword(
-          mockRequest as TypedRequest<UpdatePasswordBody>,
+          mockRequest as TypedRequest<UpdatePasswordDto>,
           mockResponse as Response
         )
       ).rejects.toThrow(errorMessage);
