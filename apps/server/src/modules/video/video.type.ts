@@ -1,13 +1,4 @@
-import type {
-  createVideoBodySchema,
-  videoIdParamSchema,
-} from "./videoValidationSchemas";
-
 import type { NoteEntry } from "../note/note.type";
-
-export type CreateVideoBody = typeof createVideoBodySchema;
-
-export type VideoIdParam = typeof videoIdParamSchema;
 
 interface Snippet {
   publishedAt: string;
@@ -57,23 +48,6 @@ export interface VideoEntry extends YoutubeVideoData {
   youtubeId: string;
   notes?: NoteEntry[];
   userIds?: string[];
-}
-
-export interface FindVideoParams {
-  videoId: string;
-  userId: string;
-}
-
-export interface FindUserVideosParams {
-  userId: string;
-  limit: number;
-  skip: number;
-}
-
-export interface CreateVideoParams {
-  userId: string;
-  videoData: YoutubeVideoData;
-  youtubeId: string;
 }
 
 export interface UserVideos {

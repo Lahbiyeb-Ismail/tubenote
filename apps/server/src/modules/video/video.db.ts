@@ -1,12 +1,10 @@
+import type { FindManyDto } from "../../common/dtos/find-many.dto";
 import prismaClient from "../../lib/prisma";
 
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
+import type { CreateVideoDto } from "./dtos/create-video.dto";
 
-import type {
-  CreateVideoParams,
-  FindUserVideosParams,
-  VideoEntry,
-} from "./video.type";
+import type { VideoEntry } from "./video.type";
 
 class VideoDatabase {
   async findByYoutubeId(youtubeId: string): Promise<VideoEntry | null> {
@@ -19,11 +17,9 @@ class VideoDatabase {
     );
   }
 
-  async findMany({
-    userId,
-    limit,
-    skip,
-  }: FindUserVideosParams): Promise<VideoEntry[]> {
+  async findMany(findManyDto: FindManyDto): Promise<VideoEntry[]> {
+    const { userId, limit, skip, sort } = findManyDto;
+
     return handleAsyncOperation(
       async () => {
         const videos = await prismaClient.video.findMany({
@@ -31,6 +27,9 @@ class VideoDatabase {
           omit: { userIds: true },
           take: limit,
           skip,
+          orderBy: {
+            [sort.by]: sort.order,
+          },
         });
 
         return videos;
@@ -51,17 +50,15 @@ class VideoDatabase {
     );
   }
 
-  async create({
-    videoData,
-    userId,
-    youtubeId,
-  }: CreateVideoParams): Promise<VideoEntry> {
+  async create(createVideoDto: CreateVideoDto): Promise<VideoEntry> {
     return handleAsyncOperation(
       async () => {
+        const { userId, youtubeVideoId, videoData } = createVideoDto;
         const { snippet, statistics, player } = videoData;
+
         return await prismaClient.video.create({
           data: {
-            youtubeId,
+            youtubeId: youtubeVideoId,
             userIds: [userId],
             snippet: {
               title: snippet.title,

@@ -23,7 +23,7 @@ router
   );
 
 router
-  .route("/:youtubeId")
+  .route("/:id")
   .get(
     validateRequest({ params: idParamSchema }),
     VideoController.getVideoById

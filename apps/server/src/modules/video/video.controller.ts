@@ -1,10 +1,12 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { EmptyRecord, PaginationQuery, TypedRequest } from "../../types";
-import type { VideoIdParam } from "./video.type";
+import type { EmptyRecord, TypedRequest } from "../../types";
 
-import VideoService from "./videoService";
+import type { FindManyDto } from "../../common/dtos/find-many.dto";
+import type { IdParamDto } from "../../common/dtos/id-param.dto";
+import type { QueryPaginationDto } from "../../common/dtos/query-pagination.dto";
+import VideoService from "./video.service";
 
 /**
  * Controller for handling video-related operations.
@@ -19,7 +21,7 @@ class VideoController {
    * @returns A JSON response with the list of videos and pagination details.
    */
   async getUserVideos(
-    req: TypedRequest<EmptyRecord, EmptyRecord, PaginationQuery>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
     res: Response
   ) {
     const userId = req.userId;
@@ -29,8 +31,15 @@ class VideoController {
 
     const skip = (page - 1) * limit;
 
+    const findManyDto: FindManyDto = {
+      userId,
+      limit,
+      skip,
+      sort: { by: "createdAt", order: "desc" },
+    };
+
     const { totalPages, videos, videosCount } =
-      await VideoService.findUserVideos({ userId, skip, limit });
+      await VideoService.getUserVideos(findManyDto);
 
     res.status(httpStatus.OK).json({
       videos,
@@ -53,13 +62,13 @@ class VideoController {
    * @returns A JSON response with the video details.
    */
   async getVideoById(
-    req: TypedRequest<EmptyRecord, VideoIdParam>,
+    req: TypedRequest<EmptyRecord, IdParamDto>,
     res: Response
   ) {
-    const { youtubeId } = req.params;
+    const { id } = req.params;
     const userId = req.userId;
 
-    const video = await VideoService.getVideoData({ youtubeId, userId });
+    const video = await VideoService.findVideo({ userId, youtubeVideoId: id });
 
     res.status(httpStatus.OK).json(video);
   }
