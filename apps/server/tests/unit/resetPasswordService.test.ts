@@ -1,6 +1,6 @@
 import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
 import { ForbiddenError, NotFoundError } from "../../src/errors";
-import AuthService from "../../src/modules/auth/authService";
+import AuthService from "../../src/modules/auth/auth.service";
 import type { ResetTokenEntry } from "../../src/modules/resetPasswordToken/resetPassword.type";
 import ResetPasswordDB from "../../src/modules/resetPasswordToken/resetPasswordDB";
 import ResetPasswordService from "../../src/modules/resetPasswordToken/resetPasswordService";
@@ -9,7 +9,7 @@ import UserDB from "../../src/modules/user/userDB";
 import UserService from "../../src/modules/user/userService";
 
 jest.mock("../../src/modules/user/userService");
-jest.mock("../../src/modules/auth/authService");
+jest.mock("../../src/modules/auth/auth.service");
 jest.mock("../../src/modules/user/userDB");
 jest.mock("../../src/modules/resetPasswordToken/resetPasswordDB");
 

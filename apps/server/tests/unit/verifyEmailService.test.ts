@@ -1,6 +1,6 @@
 import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
 import { ForbiddenError } from "../../src/errors";
-import AuthService from "../../src/modules/auth/authService";
+import AuthService from "../../src/modules/auth/auth.service";
 import type { UserEntry } from "../../src/modules/user/user.type";
 import UserDB from "../../src/modules/user/userDB";
 import VerificationTokenDB from "../../src/modules/verifyEmailToken/verificationTokenDB";
@@ -11,7 +11,7 @@ import EmailService from "../../src/services/emailService";
 jest.mock("../../src/modules/verifyEmailToken/verificationTokenDB");
 jest.mock("../../src/services/emailService");
 jest.mock("../../src/modules/user/userDB");
-jest.mock("../../src/modules/auth/authService");
+jest.mock("../../src/modules/auth/auth.service");
 
 describe("VerifyEmailService methods test", () => {
   const mockEmail = "test@example.com";

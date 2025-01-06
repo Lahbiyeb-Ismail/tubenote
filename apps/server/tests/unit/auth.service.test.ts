@@ -10,13 +10,13 @@ import AuthService from "../../src/modules/auth/auth.service";
 import type { GoogleUser } from "../../src/modules/auth/auth.type";
 import type { RefreshTokenEntry } from "../../src/modules/refreshToken/refreshToken.type";
 import RefreshTokenService from "../../src/modules/refreshToken/refreshTokenService";
+import UserDB from "../../src/modules/user/user.db";
 import UserService from "../../src/modules/user/user.service";
 import type { UserEntry } from "../../src/modules/user/user.type";
-import UserDB from "../../src/modules/user/userDB";
 import EmailVerificationService from "../../src/modules/verifyEmailToken/verifyEmailService";
 import type { JwtPayload } from "../../src/types";
 
-jest.mock("../../src/modules/user/userDB");
+jest.mock("../../src/modules/user/user.db");
 jest.mock("../../src/modules/verifyEmailToken/verifyEmailService");
 jest.mock("../../src/modules/refreshToken/refreshTokenService");
 jest.mock("../../src/modules/user/user.service");
@@ -417,7 +417,7 @@ describe("Test AuthService methods", () => {
     it("should successfully login a user with google and update the googleId", async () => {
       (UserDB.findByEmail as jest.Mock).mockResolvedValue({
         ...mockCreatedUser,
-        googleId: null,
+        googleId: "",
       });
 
       (UserDB.updateUser as jest.Mock).mockResolvedValue(mockCreatedUser);
@@ -429,8 +429,7 @@ describe("Test AuthService methods", () => {
       expect(result).toEqual(mockTokens);
 
       expect(UserDB.findByEmail).toHaveBeenCalledWith(mockGoogleUser.email);
-      expect(UserDB.updateUser).toHaveBeenCalledWith({
-        userId: mockCreatedUser.id,
+      expect(UserDB.updateUser).toHaveBeenCalledWith(mockCreatedUser.id, {
         googleId: mockGoogleUser.sub,
       });
       expect(AuthService.createJwtTokens).toHaveBeenCalledWith(

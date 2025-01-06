@@ -1,16 +1,16 @@
 import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
 import { NotFoundError } from "../../src/errors";
-import type {
-  CreateNoteData,
-  DeleteNoteParams,
-  NoteEntry,
-  UpdateNoteParams,
-} from "../../src/modules/note/note.type";
-import NoteDB from "../../src/modules/note/noteDB";
-import NoteService from "../../src/modules/note/noteService";
-import type { FindManyParams } from "../../src/types/shared.types";
+import NoteDB from "../../src/modules/note/note.db";
+import NoteService from "../../src/modules/note/note.service";
 
-jest.mock("../../src/modules/note/noteDB");
+import type { FindManyDto } from "../../src/common/dtos/find-many.dto";
+import type { CreateNoteDto } from "../../src/modules/note/dtos/create-note.dto";
+import type { DeleteNoteDto } from "../../src/modules/note/dtos/delete-note.dto";
+import type { FindNoteDto } from "../../src/modules/note/dtos/find-note.dto";
+import type { UpdateNoteDto } from "../../src/modules/note/dtos/update-note.dto";
+import type { NoteEntry } from "../../src/modules/note/note.type";
+
+jest.mock("../../src/modules/note/note.db");
 
 describe("NoteService tests", () => {
   const mockUserId = "user123";
@@ -59,6 +59,11 @@ describe("NoteService tests", () => {
     },
   ];
 
+  const findNoteDto: FindNoteDto = {
+    id: mockNoteId,
+    userId: mockUserId,
+  };
+
   beforeAll(() => {
     jest.clearAllMocks();
   });
@@ -71,35 +76,25 @@ describe("NoteService tests", () => {
     it("should return the note if found", async () => {
       (NoteDB.find as jest.Mock).mockResolvedValue(mockNote);
 
-      const result = await NoteService.findNote({
-        userId: mockUserId,
-        noteId: mockNoteId,
-      });
+      const result = await NoteService.findNote(findNoteDto);
 
       expect(result).toBe(mockNote);
-      expect(NoteDB.find).toHaveBeenCalledWith({
-        userId: mockUserId,
-        noteId: mockNoteId,
-      });
+      expect(NoteDB.find).toHaveBeenCalledWith(findNoteDto);
     });
 
     it("should throw NotFoundError if the note is not found", async () => {
       (NoteDB.find as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        NoteService.findNote({ userId: mockUserId, noteId: mockNoteId })
-      ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
+      await expect(NoteService.findNote(findNoteDto)).rejects.toThrow(
+        new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
+      );
 
-      expect(NoteDB.find).toHaveBeenCalledWith({
-        userId: mockUserId,
-        noteId: mockNoteId,
-      });
+      expect(NoteDB.find).toHaveBeenCalledWith(findNoteDto);
     });
   });
 
-  describe("addNewNote method tests", () => {
-    const mockNewNoteData: CreateNoteData = {
-      userId: mockUserId,
+  describe("createNote method tests", () => {
+    const createNoteDto: CreateNoteDto = {
       title: "New Note",
       content: "This is a new note.",
       videoId: "video123",
@@ -110,8 +105,9 @@ describe("NoteService tests", () => {
     };
 
     const mockNewNote: NoteEntry = {
-      ...mockNewNoteData,
+      ...createNoteDto,
       id: "newNote123",
+      userId: mockUserId,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -123,26 +119,22 @@ describe("NoteService tests", () => {
     it("should create and return the new note", async () => {
       (NoteDB.create as jest.Mock).mockResolvedValue(mockNewNote);
 
-      const result = await NoteService.addNewNote(mockNewNoteData);
+      const result = await NoteService.createNote(mockUserId, createNoteDto);
 
       expect(result).toBe(mockNewNote);
-      expect(NoteDB.create).toHaveBeenCalledWith(mockNewNoteData);
+      expect(NoteDB.create).toHaveBeenCalledWith(mockUserId, createNoteDto);
     });
   });
 
   describe("updateNote method tests", () => {
-    const mockUpdateNoteParams: UpdateNoteParams = {
-      userId: mockUserId,
-      noteId: mockNoteId,
-      data: {
-        title: "Updated Note",
-        content: "This is an updated note.",
-      },
+    const updateNoteDto: UpdateNoteDto = {
+      title: "Updated Note",
+      content: "This is an updated note.",
     };
 
     const mockUpdatedNote: NoteEntry = {
       ...mockNote,
-      ...mockUpdateNoteParams.data,
+      ...updateNoteDto,
       updatedAt: new Date(),
     };
 
@@ -154,39 +146,29 @@ describe("NoteService tests", () => {
       (NoteDB.find as jest.Mock).mockResolvedValue(mockNote);
       (NoteDB.update as jest.Mock).mockResolvedValue(mockUpdatedNote);
 
-      const result = await NoteService.updateNote(mockUpdateNoteParams);
+      const result = await NoteService.updateNote(findNoteDto, updateNoteDto);
 
       expect(result).toBe(mockUpdatedNote);
-      expect(NoteDB.find).toHaveBeenCalledWith({
-        userId: mockUserId,
-        noteId: mockNoteId,
-      });
-      expect(NoteDB.update).toHaveBeenCalledWith({
-        noteId: mockNoteId,
-        userId: mockUserId,
-        data: mockUpdateNoteParams.data,
-      });
+      expect(NoteDB.find).toHaveBeenCalledWith(findNoteDto);
+      expect(NoteDB.update).toHaveBeenCalledWith(findNoteDto, updateNoteDto);
     });
 
     it("should throw NotFoundError if the note is not found", async () => {
       (NoteDB.find as jest.Mock).mockResolvedValue(null);
 
       await expect(
-        NoteService.updateNote(mockUpdateNoteParams)
+        NoteService.updateNote(findNoteDto, updateNoteDto)
       ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
 
-      expect(NoteDB.find).toHaveBeenCalledWith({
-        userId: mockUserId,
-        noteId: mockNoteId,
-      });
+      expect(NoteDB.find).toHaveBeenCalledWith(findNoteDto);
       expect(NoteDB.update).not.toHaveBeenCalled();
     });
   });
 
   describe("deleteNote method tests", () => {
-    const mockDeleteNoteParams: DeleteNoteParams = {
+    const deleteNoteDto: DeleteNoteDto = {
+      id: mockNoteId,
       userId: mockUserId,
-      noteId: mockNoteId,
     };
 
     beforeEach(() => {
@@ -197,36 +179,27 @@ describe("NoteService tests", () => {
       (NoteDB.find as jest.Mock).mockResolvedValue(mockNote);
       (NoteDB.delete as jest.Mock).mockResolvedValue(undefined);
 
-      await NoteService.deleteNote(mockDeleteNoteParams);
+      await NoteService.deleteNote(deleteNoteDto);
 
-      expect(NoteDB.find).toHaveBeenCalledWith({
-        userId: mockUserId,
-        noteId: mockNoteId,
-      });
-      expect(NoteDB.delete).toHaveBeenCalledWith({
-        userId: mockUserId,
-        noteId: mockNoteId,
-      });
+      expect(NoteDB.find).toHaveBeenCalledWith(deleteNoteDto);
+      expect(NoteDB.delete).toHaveBeenCalledWith(deleteNoteDto);
     });
 
     it("should throw NotFoundError if the note is not found", async () => {
       (NoteDB.find as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        NoteService.deleteNote(mockDeleteNoteParams)
-      ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
+      await expect(NoteService.deleteNote(deleteNoteDto)).rejects.toThrow(
+        new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
+      );
 
-      expect(NoteDB.find).toHaveBeenCalledWith({
-        userId: mockUserId,
-        noteId: mockNoteId,
-      });
+      expect(NoteDB.find).toHaveBeenCalledWith(deleteNoteDto);
       expect(NoteDB.delete).not.toHaveBeenCalled();
     });
   });
 
   describe("fetchUserNotes method tests", () => {
     const mockNotesCount = mockNotes.length;
-    const mockParams: FindManyParams = {
+    const findManyDto: FindManyDto = {
       userId: mockUserId,
       skip: 0,
       limit: 8,
@@ -241,14 +214,14 @@ describe("NoteService tests", () => {
       (NoteDB.findMany as jest.Mock).mockResolvedValue(mockNotes);
       (NoteDB.count as jest.Mock).mockResolvedValue(mockNotesCount);
 
-      const result = await NoteService.fetchUserNotes(mockParams);
+      const result = await NoteService.fetchUserNotes(findManyDto);
 
       expect(result.notes).toEqual(mockNotes);
       expect(result.notesCount).toBe(mockNotesCount);
       expect(result.totalPages).toBe(
-        Math.ceil(mockNotesCount / mockParams.limit)
+        Math.ceil(mockNotesCount / findManyDto.limit)
       );
-      expect(NoteDB.findMany).toHaveBeenCalledWith(mockParams);
+      expect(NoteDB.findMany).toHaveBeenCalledWith(findManyDto);
       expect(NoteDB.count).toHaveBeenCalledWith(mockUserId);
     });
 
@@ -256,18 +229,18 @@ describe("NoteService tests", () => {
       (NoteDB.findMany as jest.Mock).mockResolvedValue([]);
       (NoteDB.count as jest.Mock).mockResolvedValue(0);
 
-      const result = await NoteService.fetchUserNotes(mockParams);
+      const result = await NoteService.fetchUserNotes(findManyDto);
 
       expect(result.notes).toEqual([]);
       expect(result.notesCount).toBe(0);
       expect(result.totalPages).toBe(0);
-      expect(NoteDB.findMany).toHaveBeenCalledWith(mockParams);
+      expect(NoteDB.findMany).toHaveBeenCalledWith(findManyDto);
       expect(NoteDB.count).toHaveBeenCalledWith(mockUserId);
     });
   });
 
   describe("fetchRecentNotes method tests", () => {
-    const mockParams: FindManyParams = {
+    const findManyDto: FindManyDto = {
       userId: mockUserId,
       limit: 2,
       sort: { by: "createdAt", order: "desc" },
@@ -280,25 +253,25 @@ describe("NoteService tests", () => {
     it("should return recent notes", async () => {
       (NoteDB.findMany as jest.Mock).mockResolvedValue(mockNotes);
 
-      const result = await NoteService.fetchRecentNotes(mockParams);
+      const result = await NoteService.fetchRecentNotes(findManyDto);
 
       expect(result).toEqual(mockNotes);
-      expect(NoteDB.findMany).toHaveBeenCalledWith(mockParams);
-      expect(result.length).toBe(mockParams.limit);
+      expect(NoteDB.findMany).toHaveBeenCalledWith(findManyDto);
+      expect(result.length).toBe(findManyDto.limit);
     });
 
     it("should return empty array when no recent notes are found", async () => {
       (NoteDB.findMany as jest.Mock).mockResolvedValue([]);
 
-      const result = await NoteService.fetchRecentNotes(mockParams);
+      const result = await NoteService.fetchRecentNotes(findManyDto);
 
       expect(result).toEqual([]);
-      expect(NoteDB.findMany).toHaveBeenCalledWith(mockParams);
+      expect(NoteDB.findMany).toHaveBeenCalledWith(findManyDto);
     });
   });
 
   describe("fetchRecentlyUpdatedNotes method tests", () => {
-    const mockParams: FindManyParams = {
+    const findManyDto: FindManyDto = {
       userId: mockUserId,
       limit: 2,
       sort: { by: "updatedAt", order: "desc" },
@@ -311,29 +284,29 @@ describe("NoteService tests", () => {
     it("should return recently updated notes", async () => {
       (NoteDB.findMany as jest.Mock).mockResolvedValue(mockNotes);
 
-      const result = await NoteService.fetchRecentlyUpdatedNotes(mockParams);
+      const result = await NoteService.fetchRecentlyUpdatedNotes(findManyDto);
 
       expect(result).toEqual(mockNotes);
-      expect(NoteDB.findMany).toHaveBeenCalledWith(mockParams);
-      expect(result.length).toBe(mockParams.limit);
+      expect(NoteDB.findMany).toHaveBeenCalledWith(findManyDto);
+      expect(result.length).toBe(findManyDto.limit);
     });
 
     it("should return empty array when no recently updated notes are found", async () => {
       (NoteDB.findMany as jest.Mock).mockResolvedValue([]);
 
-      const result = await NoteService.fetchRecentlyUpdatedNotes(mockParams);
+      const result = await NoteService.fetchRecentlyUpdatedNotes(findManyDto);
 
       expect(result).toEqual([]);
-      expect(NoteDB.findMany).toHaveBeenCalledWith(mockParams);
+      expect(NoteDB.findMany).toHaveBeenCalledWith(findManyDto);
     });
   });
 
   describe("fetchNotesByVideoId method tests", () => {
-    const mockVideoId = "video123";
     const mockNotesCount = mockNotes.length;
-    const mockParams: FindManyParams & { videoId: string } = {
+    const mockVideoId = "video123";
+
+    const findManyDto: FindManyDto = {
       userId: mockUserId,
-      videoId: mockVideoId,
       skip: 0,
       limit: 8,
       sort: { by: "createdAt", order: "desc" },
@@ -347,14 +320,20 @@ describe("NoteService tests", () => {
       (NoteDB.findManyByVideoId as jest.Mock).mockResolvedValue(mockNotes);
       (NoteDB.count as jest.Mock).mockResolvedValue(mockNotesCount);
 
-      const result = await NoteService.fetchNotesByVideoId(mockParams);
+      const result = await NoteService.fetchNotesByVideoId(
+        mockVideoId,
+        findManyDto
+      );
 
       expect(result.notes).toEqual(mockNotes);
       expect(result.notesCount).toBe(mockNotesCount);
       expect(result.totalPages).toBe(
-        Math.ceil(mockNotesCount / mockParams.limit)
+        Math.ceil(mockNotesCount / findManyDto.limit)
       );
-      expect(NoteDB.findManyByVideoId).toHaveBeenCalledWith(mockParams);
+      expect(NoteDB.findManyByVideoId).toHaveBeenCalledWith(
+        mockVideoId,
+        findManyDto
+      );
       expect(NoteDB.count).toHaveBeenCalledWith(mockUserId);
     });
 
@@ -362,12 +341,15 @@ describe("NoteService tests", () => {
       (NoteDB.findManyByVideoId as jest.Mock).mockResolvedValue([]);
       (NoteDB.count as jest.Mock).mockResolvedValue(0);
 
-      const result = await NoteService.fetchNotesByVideoId(mockParams);
+      const result = await NoteService.fetchNotesByVideoId(
+        mockVideoId,
+        findManyDto
+      );
 
       expect(result.notes).toEqual([]);
       expect(result.notesCount).toBe(0);
       expect(result.totalPages).toBe(0);
-      expect(NoteDB.findManyByVideoId).toHaveBeenCalledWith(mockParams);
+
       expect(NoteDB.count).toHaveBeenCalledWith(mockUserId);
     });
   });
