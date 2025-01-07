@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 import {
@@ -7,8 +6,6 @@ import {
   REFRESH_TOKEN_EXPIRE,
   REFRESH_TOKEN_SECRET,
 } from "../../constants/auth";
-
-import UserDB from "../user/user.db";
 
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 
@@ -25,11 +22,14 @@ import type { GoogleUser } from "./auth.type";
 import type { UserEntry } from "../user/user.type";
 
 import logger from "../../utils/logger";
+
+import { IPasswordService } from "../password/password.service";
+import { IUserDatabase } from "../user/user.db";
+import { IUserService } from "../user/user.service";
+
 import RefreshTokenService from "../refreshToken/refreshTokenService";
-import UserService from "../user/user.service";
 import EmailVerificationService from "../verifyEmailToken/verifyEmailService";
 
-import type { ComparePasswordsDto } from "./dtos/compare-passwords.dto";
 import type { GenerateTokenDto } from "./dtos/generate-token.dto";
 import type { LoginResponseDto } from "./dtos/login-response.dto";
 import type { LoginUserDto } from "./dtos/login-user.dto";
@@ -38,7 +38,36 @@ import type { RefreshTokenDto } from "./dtos/refresh-token.dto";
 import type { RegisterUserDto } from "./dtos/register-user.dto";
 import type { VerifyJwtTokenDto } from "./dtos/verfiy-jwt-token.dto";
 
-class AuthService {
+export interface IAuthService {
+  verifyToken(verifyTokenDto: VerifyJwtTokenDto): Promise<JwtPayload | null>;
+  generateJwtToken(generateTokenDto: GenerateTokenDto): string;
+  createJwtTokens(userId: string): {
+    accessToken: string;
+    refreshToken: string;
+  };
+  registerUser(registerUserDto: RegisterUserDto): Promise<UserEntry>;
+  loginUser(loginUserDto: LoginUserDto): Promise<LoginResponseDto>;
+  logoutUser(logoutUserDto: LogoutUserDto): Promise<void>;
+  refreshToken(refreshTokenDto: RefreshTokenDto): Promise<LoginResponseDto>;
+  googleLogin(user: GoogleUser): Promise<LoginResponseDto>;
+  verifyEmail(userId: string): Promise<void>;
+}
+
+export class AuthService implements IAuthService {
+  private userDB: IUserDatabase;
+  private userService: IUserService;
+  private passwordService: IPasswordService;
+
+  constructor(
+    userDB: IUserDatabase,
+    userService: IUserService,
+    passwordService: IPasswordService
+  ) {
+    this.userDB = userDB;
+    this.userService = userService;
+    this.passwordService = passwordService;
+  }
+
   async verifyToken(
     verifyTokenDto: VerifyJwtTokenDto
   ): Promise<JwtPayload | null> {
@@ -86,15 +115,15 @@ class AuthService {
   async registerUser(registerUserDto: RegisterUserDto): Promise<UserEntry> {
     const { email, username, password } = registerUserDto;
 
-    const userExists = await UserDB.findByEmail(email);
+    const userExists = await this.userDB.findByEmail(email);
 
     if (userExists) {
       throw new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
-    const hashedPassword = await this.hashPassword(password);
+    const hashedPassword = await this.passwordService.hashPassword(password);
 
-    const newUser = await UserDB.create({
+    const newUser = await this.userDB.create({
       username,
       email,
       password: hashedPassword,
@@ -108,7 +137,7 @@ class AuthService {
   async loginUser(loginUserDto: LoginUserDto): Promise<LoginResponseDto> {
     const { email, password } = loginUserDto;
 
-    const user = await UserDB.findByEmail(email);
+    const user = await this.userDB.findByEmail(email);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -118,7 +147,7 @@ class AuthService {
       throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
-    const isPasswordMatch = await this.comparePasswords({
+    const isPasswordMatch = await this.passwordService.comparePasswords({
       password,
       hashedPassword: user.password,
     });
@@ -193,10 +222,10 @@ class AuthService {
       throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
-    let foundUser = await UserDB.findByEmail(email);
+    let foundUser = await this.userDB.findByEmail(email);
 
     if (!foundUser) {
-      foundUser = await UserDB.create({
+      foundUser = await this.userDB.create({
         username: name,
         isEmailVerified: email_verified,
         password: googleId,
@@ -205,7 +234,7 @@ class AuthService {
         googleId,
       });
     } else if (!foundUser.googleId) {
-      foundUser = await UserDB.updateUser(foundUser.id, {
+      foundUser = await this.userDB.updateUser(foundUser.id, {
         googleId,
       });
     }
@@ -218,27 +247,12 @@ class AuthService {
   }
 
   async verifyEmail(userId: string): Promise<void> {
-    const user = await UserService.getUserById(userId);
+    const user = await this.userService.getUserById(userId);
 
     if (user.isEmailVerified) {
       throw new ForbiddenError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
     }
 
-    await UserService.verifyUserEmail(userId);
-  }
-
-  async hashPassword(password: string): Promise<string> {
-    const salt = await bcrypt.genSalt(10);
-
-    return await bcrypt.hash(password, salt);
-  }
-
-  async comparePasswords(
-    comparePasswordsDto: ComparePasswordsDto
-  ): Promise<boolean> {
-    const { password, hashedPassword } = comparePasswordsDto;
-    return await bcrypt.compare(password, hashedPassword);
+    await this.userService.verifyUserEmail(userId);
   }
 }
-
-export default new AuthService();
