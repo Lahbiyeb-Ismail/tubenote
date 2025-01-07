@@ -12,7 +12,7 @@ import { REFRESH_TOKEN_NAME } from "../../constants/auth";
 
 import { UnauthorizedError } from "../../errors";
 
-import AuthService from "./auth.service";
+import { IAuthService } from "./auth.service";
 
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 import type { TypedRequest } from "../../types";
@@ -20,17 +20,31 @@ import type { GoogleUser } from "./auth.type";
 import type { LoginUserDto } from "./dtos/login-user.dto";
 import type { RegisterUserDto } from "./dtos/register-user.dto";
 
+export interface IAuthController {
+  register(req: TypedRequest<RegisterUserDto>, res: Response): Promise<void>;
+  login(req: TypedRequest<LoginUserDto>, res: Response): Promise<void>;
+  logout(req: TypedRequest, res: Response): Promise<void>;
+  refresh(req: TypedRequest, res: Response): Promise<void>;
+  loginWithGoogle(req: TypedRequest, res: Response): Promise<void>;
+}
+
 /**
  * Controller for handling authentication-related operations.
  */
-class AuthController {
+export class AuthController implements IAuthController {
+  private authService: IAuthService;
+
+  constructor(authService: IAuthService) {
+    this.authService = authService;
+  }
+
   /**
    * Registers a new user.
    * @param req - The request object containing user registration credentials.
    * @param res - The response object.
    */
   async register(req: TypedRequest<RegisterUserDto>, res: Response) {
-    const user = await AuthService.registerUser(req.body);
+    const user = await this.authService.registerUser(req.body);
 
     res.status(httpStatus.CREATED).json({
       message: "A verification email has been sent to your email.",
@@ -44,7 +58,9 @@ class AuthController {
    * @param res - The response object.
    */
   async login(req: TypedRequest<LoginUserDto>, res: Response) {
-    const { accessToken, refreshToken } = await AuthService.loginUser(req.body);
+    const { accessToken, refreshToken } = await this.authService.loginUser(
+      req.body
+    );
 
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
@@ -65,7 +81,7 @@ class AuthController {
 
     const refreshToken = cookies[REFRESH_TOKEN_NAME];
 
-    await AuthService.logoutUser({ refreshToken, userId });
+    await this.authService.logoutUser({ refreshToken, userId });
 
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
@@ -90,7 +106,7 @@ class AuthController {
 
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
-    const { accessToken, refreshToken } = await AuthService.refreshToken({
+    const { accessToken, refreshToken } = await this.authService.refreshToken({
       token,
       userId,
     });
@@ -113,7 +129,7 @@ class AuthController {
     const googleUser = user._json as GoogleUser;
 
     const { accessToken, refreshToken } =
-      await AuthService.googleLogin(googleUser);
+      await this.authService.googleLogin(googleUser);
 
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
@@ -122,5 +138,3 @@ class AuthController {
     );
   }
 }
-
-export default new AuthController();
