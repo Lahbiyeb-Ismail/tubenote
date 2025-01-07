@@ -1,4 +1,4 @@
-import prismaClient from "../../lib/prisma";
+import type { PrismaClient } from "@prisma/client";
 
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
 
@@ -9,11 +9,30 @@ import type { FindNoteDto } from "./dtos/find-note.dto";
 import type { UpdateNoteDto } from "./dtos/update-note.dto";
 import type { NoteEntry } from "./note.type";
 
-class NoteDatabase {
+export interface INoteDatabase {
+  find(findNoteDto: FindNoteDto): Promise<NoteEntry | null>;
+  create(userId: string, createNoteDto: CreateNoteDto): Promise<NoteEntry>;
+  update(
+    findNoteDto: FindNoteDto,
+    updateNoteDto: UpdateNoteDto
+  ): Promise<NoteEntry>;
+  delete(deleteNoteDto: DeleteNoteDto): Promise<void>;
+  findMany(findManyDto: FindManyDto): Promise<NoteEntry[]>;
+  findManyByVideoId(id: string, findManyDto: FindManyDto): Promise<NoteEntry[]>;
+  count(userId: string): Promise<number>;
+}
+
+export class NoteDatabase implements INoteDatabase {
+  private database: PrismaClient;
+
+  constructor(database: PrismaClient) {
+    this.database = database;
+  }
+
   async find(findNoteDto: FindNoteDto): Promise<NoteEntry | null> {
     return handleAsyncOperation(
       () =>
-        prismaClient.note.findUnique({
+        this.database.note.findUnique({
           where: {
             ...findNoteDto,
           },
@@ -28,7 +47,7 @@ class NoteDatabase {
   ): Promise<NoteEntry> {
     return handleAsyncOperation(
       () =>
-        prismaClient.note.create({
+        this.database.note.create({
           data: { userId, ...createNoteDto },
         }),
       { errorMessage: "Failed to create note." }
@@ -41,7 +60,7 @@ class NoteDatabase {
   ): Promise<NoteEntry> {
     return handleAsyncOperation(
       () =>
-        prismaClient.note.update({
+        this.database.note.update({
           where: {
             ...findNoteDto,
           },
@@ -54,7 +73,7 @@ class NoteDatabase {
   async delete(deleteNoteDto: DeleteNoteDto): Promise<void> {
     handleAsyncOperation(
       () =>
-        prismaClient.note.delete({
+        this.database.note.delete({
           where: { ...deleteNoteDto },
         }),
       { errorMessage: "Failed to delete note." }
@@ -66,7 +85,7 @@ class NoteDatabase {
 
     return handleAsyncOperation(
       () =>
-        prismaClient.note.findMany({
+        this.database.note.findMany({
           where: {
             userId,
           },
@@ -88,7 +107,7 @@ class NoteDatabase {
 
     return handleAsyncOperation(
       () =>
-        prismaClient.note.findMany({
+        this.database.note.findMany({
           where: {
             userId,
             youtubeId: id,
@@ -106,7 +125,7 @@ class NoteDatabase {
   async count(userId: string): Promise<number> {
     return handleAsyncOperation(
       () =>
-        prismaClient.note.count({
+        this.database.note.count({
           where: {
             userId,
           },
@@ -115,5 +134,3 @@ class NoteDatabase {
     );
   }
 }
-
-export default new NoteDatabase();
