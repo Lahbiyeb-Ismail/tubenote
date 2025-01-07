@@ -23,13 +23,12 @@ import type { UserEntry } from "../user/user.type";
 
 import logger from "../../utils/logger";
 
+import { IEmailService } from "../../services/emailService";
 import { IPasswordService } from "../password/password.service";
+import { IRefreshTokenService } from "../refreshToken/refresh-token.service";
 import { IUserDatabase } from "../user/user.db";
 import { IUserService } from "../user/user.service";
 
-import RefreshTokenService from "../refreshToken/refreshTokenService";
-
-import type { IEmailService } from "../../services/emailService";
 import type { GenerateTokenDto } from "./dtos/generate-token.dto";
 import type { LoginResponseDto } from "./dtos/login-response.dto";
 import type { LoginUserDto } from "./dtos/login-user.dto";
@@ -57,17 +56,20 @@ export class AuthService implements IAuthService {
   private userDB: IUserDatabase;
   private userService: IUserService;
   private passwordService: IPasswordService;
+  private refreshTokenService: IRefreshTokenService;
   private emailService: IEmailService;
 
   constructor(
     userDB: IUserDatabase,
     userService: IUserService,
     passwordService: IPasswordService,
+    refreshTokenService: IRefreshTokenService,
     emailService: IEmailService
   ) {
     this.userDB = userDB;
     this.userService = userService;
     this.passwordService = passwordService;
+    this.refreshTokenService = refreshTokenService;
     this.emailService = emailService;
   }
 
@@ -161,7 +163,7 @@ export class AuthService implements IAuthService {
 
     const { accessToken, refreshToken } = this.createJwtTokens(user.id);
 
-    await RefreshTokenService.createToken(user.id, refreshToken);
+    await this.refreshTokenService.createToken(user.id, refreshToken);
 
     return { accessToken, refreshToken };
   }
@@ -173,7 +175,7 @@ export class AuthService implements IAuthService {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    await RefreshTokenService.deleteAllTokens(userId);
+    await this.refreshTokenService.deleteAllTokens(userId);
   }
 
   async refreshToken(
@@ -187,7 +189,7 @@ export class AuthService implements IAuthService {
     });
 
     if (!payload) {
-      await RefreshTokenService.deleteAllTokens(userId);
+      await this.refreshTokenService.deleteAllTokens(userId);
 
       throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
     }
@@ -196,20 +198,20 @@ export class AuthService implements IAuthService {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    const refreshTokenFromDB = await RefreshTokenService.findToken(token);
+    const refreshTokenFromDB = await this.refreshTokenService.findToken(token);
 
     if (!refreshTokenFromDB) {
       // Detected refresh token reuse!
-      await RefreshTokenService.deleteAllTokens(userId);
+      await this.refreshTokenService.deleteAllTokens(userId);
 
       throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
     }
 
-    await RefreshTokenService.deleteToken(token);
+    await this.refreshTokenService.deleteToken(token);
 
     const { accessToken, refreshToken } = this.createJwtTokens(userId);
 
-    await RefreshTokenService.createToken(userId, refreshToken);
+    await this.refreshTokenService.createToken(userId, refreshToken);
 
     return { accessToken, refreshToken };
   }
@@ -244,7 +246,7 @@ export class AuthService implements IAuthService {
 
     const { accessToken, refreshToken } = this.createJwtTokens(foundUser.id);
 
-    await RefreshTokenService.createToken(foundUser.id, refreshToken);
+    await this.refreshTokenService.createToken(foundUser.id, refreshToken);
 
     return { accessToken, refreshToken };
   }
