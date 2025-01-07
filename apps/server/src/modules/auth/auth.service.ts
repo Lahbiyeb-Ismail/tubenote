@@ -28,8 +28,8 @@ import { IUserDatabase } from "../user/user.db";
 import { IUserService } from "../user/user.service";
 
 import RefreshTokenService from "../refreshToken/refreshTokenService";
-import EmailVerificationService from "../verifyEmailToken/verifyEmailService";
 
+import type { IEmailService } from "../../services/emailService";
 import type { GenerateTokenDto } from "./dtos/generate-token.dto";
 import type { LoginResponseDto } from "./dtos/login-response.dto";
 import type { LoginUserDto } from "./dtos/login-user.dto";
@@ -57,15 +57,18 @@ export class AuthService implements IAuthService {
   private userDB: IUserDatabase;
   private userService: IUserService;
   private passwordService: IPasswordService;
+  private emailService: IEmailService;
 
   constructor(
     userDB: IUserDatabase,
     userService: IUserService,
-    passwordService: IPasswordService
+    passwordService: IPasswordService,
+    emailService: IEmailService
   ) {
     this.userDB = userDB;
     this.userService = userService;
     this.passwordService = passwordService;
+    this.emailService = emailService;
   }
 
   async verifyToken(
@@ -129,7 +132,7 @@ export class AuthService implements IAuthService {
       password: hashedPassword,
     });
 
-    await EmailVerificationService.sendVerificationToken(newUser.email);
+    await this.emailService.sendVerificationEmail(newUser.email);
 
     return newUser;
   }
