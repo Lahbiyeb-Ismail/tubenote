@@ -1,16 +1,31 @@
-import type { FindManyDto } from "../../common/dtos/find-many.dto";
-import prismaClient from "../../lib/prisma";
+import type { PrismaClient } from "@prisma/client";
 
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
+
+import type { FindManyDto } from "../../common/dtos/find-many.dto";
 import type { CreateVideoDto } from "./dtos/create-video.dto";
 
 import type { VideoEntry } from "./video.type";
 
-class VideoDatabase {
+export interface IVideoDatabase {
+  findByYoutubeId(youtubeId: string): Promise<VideoEntry | null>;
+  findMany(findManyDto: FindManyDto): Promise<VideoEntry[]>;
+  count(userId: string): Promise<number>;
+  create(createVideoDto: CreateVideoDto): Promise<VideoEntry>;
+  connectVideoToUser(videoId: string, userId: string): Promise<VideoEntry>;
+}
+
+export class VideoDatabase implements IVideoDatabase {
+  private database: PrismaClient;
+
+  constructor(database: PrismaClient) {
+    this.database = database;
+  }
+
   async findByYoutubeId(youtubeId: string): Promise<VideoEntry | null> {
     return handleAsyncOperation(
       () =>
-        prismaClient.video.findUnique({
+        this.database.video.findUnique({
           where: { youtubeId },
         }),
       { errorMessage: "Faild to find video" }
@@ -22,7 +37,7 @@ class VideoDatabase {
 
     return handleAsyncOperation(
       async () => {
-        const videos = await prismaClient.video.findMany({
+        const videos = await this.database.video.findMany({
           where: { users: { every: { id: userId } } },
           omit: { userIds: true },
           take: limit,
@@ -41,7 +56,7 @@ class VideoDatabase {
   async count(userId: string): Promise<number> {
     return handleAsyncOperation(
       () =>
-        prismaClient.video.count({
+        this.database.video.count({
           where: {
             userIds: { has: userId },
           },
@@ -56,7 +71,7 @@ class VideoDatabase {
         const { userId, youtubeVideoId, videoData } = createVideoDto;
         const { snippet, statistics, player } = videoData;
 
-        return await prismaClient.video.create({
+        return await this.database.video.create({
           data: {
             youtubeId: youtubeVideoId,
             userIds: [userId],
@@ -86,7 +101,7 @@ class VideoDatabase {
   ): Promise<VideoEntry> {
     return handleAsyncOperation(
       () =>
-        prismaClient.video.update({
+        this.database.video.update({
           where: { id: videoId },
           data: {
             userIds: {
@@ -100,5 +115,3 @@ class VideoDatabase {
     );
   }
 }
-
-export default new VideoDatabase();
