@@ -13,7 +13,7 @@ import passport from "./lib/passportAuth";
 
 import authRoutes from "./modules/auth/auth.route";
 import noteRoutes from "./modules/note/note.route";
-import resetPasswordRoutes from "./modules/resetPasswordToken/resetPasswordRoute";
+import resetPasswordRoutes from "./modules/resetPasswordToken/reset-password.route";
 import userRoutes from "./modules/user/user.route";
 import verifyEmailRoutes from "./modules/verifyEmailToken/verify-email.route";
 import videoRoutes from "./modules/video/video.route";
