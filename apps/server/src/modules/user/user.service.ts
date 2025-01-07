@@ -2,22 +2,43 @@ import { ERROR_MESSAGES } from "../../constants/errorMessages";
 
 import { BadRequestError, NotFoundError } from "../../errors";
 
+import { IAuthService } from "../auth/auth.service";
+import { IUserDatabase } from "./user.db";
+
 import type { UserEntry } from "./user.type";
 
-import AuthService from "../auth/auth.service";
+import type { IPasswordService } from "../password/password.service";
 import type { UpdatePasswordDto } from "./dtos/update-password.dto";
 import type { UpdateUserDto } from "./dtos/update-user.dto";
-import UserDB from "./user.db";
 
-class UserService {
+export interface IUserService {
+  getUserByEmail(email: string): Promise<UserEntry | null>;
+  getUserById(userId: string): Promise<UserEntry>;
+  updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserEntry>;
+  updatePassword(
+    id: string,
+    updatePasswordDto: UpdatePasswordDto
+  ): Promise<UserEntry>;
+  verifyUserEmail(id: string): Promise<UserEntry>;
+}
+
+export class UserService implements IUserService {
+  private userDB: IUserDatabase;
+  private passwordService: IPasswordService;
+
+  constructor(userDB: IUserDatabase, passwordService: IPasswordService) {
+    this.userDB = userDB;
+    this.passwordService = passwordService;
+  }
+
   async getUserByEmail(email: string): Promise<UserEntry | null> {
-    const user = await UserDB.findByEmail(email);
+    const user = await this.userDB.findByEmail(email);
 
     return user;
   }
 
   async getUserById(userId: string): Promise<UserEntry> {
-    const user = await UserDB.findById(userId);
+    const user = await this.userDB.findById(userId);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -40,7 +61,7 @@ class UserService {
       }
     }
 
-    return await UserDB.updateUser(id, updateUserDto);
+    return await this.userDB.updateUser(id, updateUserDto);
   }
 
   async updatePassword(
@@ -51,7 +72,7 @@ class UserService {
 
     const user = await this.getUserById(id);
 
-    const isPasswordValid = await AuthService.comparePasswords({
+    const isPasswordValid = await this.passwordService.comparePasswords({
       password: currentPassword,
       hashedPassword: user.password,
     });
@@ -64,14 +85,12 @@ class UserService {
       throw new BadRequestError(ERROR_MESSAGES.PASSWORD_SAME_AS_CURRENT);
     }
 
-    const hashedPassword = await AuthService.hashPassword(newPassword);
+    const hashedPassword = await this.passwordService.hashPassword(newPassword);
 
-    return await UserDB.updatePassword({ id, password: hashedPassword });
+    return await this.userDB.updatePassword({ id, password: hashedPassword });
   }
 
   async verifyUserEmail(id: string): Promise<UserEntry> {
-    return await UserDB.updateUser(id, { isEmailVerified: true });
+    return await this.userDB.updateUser(id, { isEmailVerified: true });
   }
 }
-
-export default new UserService();
