@@ -1,8 +1,6 @@
 import type { Request } from "express";
-import type { z } from "zod";
 
 import type { ResetPasswordToken } from "@prisma/client";
-import type { paginationQuerySchema } from "../schemas";
 
 /**
  * Represents the payload of a JSON Web Token (JWT).
@@ -43,7 +41,5 @@ export type TypedRequest<
   P = EmptyRecord,
   Q = EmptyRecord,
 > = Request<P, EmptyRecord, B, Q>;
-
-export type PaginationQuery = typeof paginationQuerySchema;
 
 export type EmptyRecord = Record<string, unknown>;
