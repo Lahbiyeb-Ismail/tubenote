@@ -2,7 +2,7 @@ import type { PrismaClient } from "@prisma/client";
 
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
 
-import type { RefreshTokenEntry } from "./refreshToken.type";
+import type { RefreshTokenEntry } from "./refresh-token.type";
 
 export interface IRefreshTokenDatabase {
   create(token: string, userId: string): Promise<RefreshTokenEntry>;

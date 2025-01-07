@@ -1,6 +1,6 @@
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 import { NotFoundError } from "../../errors";
-import type { RefreshTokenEntry } from "./refreshToken.type";
+import type { RefreshTokenEntry } from "./refresh-token.type";
 
 import { IRefreshTokenDatabase } from "./refresh-token.db";
 
