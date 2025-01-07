@@ -9,15 +9,31 @@ import { AuthService } from "./auth.service";
 import isAuthenticated from "../../middlewares/isAuthenticated";
 import validateRequest from "../../middlewares/validateRequest";
 
+import { EmailService } from "../../services/emailService";
 import { PasswordService } from "../password/password.service";
+import { RefreshTokenDatabase } from "../refreshToken/refresh-token.db";
+import { RefreshTokenService } from "../refreshToken/refresh-token.service";
 import { UserService } from "../user/user.service";
+import { VerificationTokenDatabase } from "../verifyEmailToken/verification-token.db";
 import { loginUserSchema } from "./schemas/login-user.schema";
 import { registerUserSchema } from "./schemas/register-user.schema";
 
-const userDB = new UserDatabase(prismaClient);
 const passwordService = new PasswordService();
+
+const userDB = new UserDatabase(prismaClient);
+const refreshTokenDB = new RefreshTokenDatabase(prismaClient);
+const verificationTokenDB = new VerificationTokenDatabase(prismaClient);
+
 const userService = new UserService(userDB, passwordService);
-const authService = new AuthService(userDB, userService, passwordService);
+const refreshTokenService = new RefreshTokenService(refreshTokenDB);
+const emailService = new EmailService(userDB, verificationTokenDB);
+const authService = new AuthService(
+  userDB,
+  userService,
+  passwordService,
+  refreshTokenService,
+  emailService
+);
 const authController = new AuthController(authService);
 
 const router = Router();
