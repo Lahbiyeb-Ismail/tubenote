@@ -1,5 +1,3 @@
-import NoteDB from "./note.db";
-
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 import { NotFoundError } from "../../errors";
 
@@ -8,11 +6,32 @@ import type { CreateNoteDto } from "./dtos/create-note.dto";
 import type { DeleteNoteDto } from "./dtos/delete-note.dto";
 import type { FindNoteDto } from "./dtos/find-note.dto";
 import type { UpdateNoteDto } from "./dtos/update-note.dto";
+import type { INoteDatabase } from "./note.db";
 import type { NoteEntry, UserNotes } from "./note.type";
 
-class NoteService {
+export interface INoteService {
+  findNote(findNoteDto: FindNoteDto): Promise<NoteEntry>;
+  createNote(userId: string, createNoteDto: CreateNoteDto): Promise<NoteEntry>;
+  updateNote(
+    findNoteDto: FindNoteDto,
+    updateNoteDto: UpdateNoteDto
+  ): Promise<NoteEntry>;
+  deleteNote(deleteNoteDto: DeleteNoteDto): Promise<void>;
+  fetchUserNotes(findManyDto: FindManyDto): Promise<UserNotes>;
+  fetchRecentNotes(findManyDto: FindManyDto): Promise<NoteEntry[]>;
+  fetchRecentlyUpdatedNotes(findManyDto: FindManyDto): Promise<NoteEntry[]>;
+  fetchNotesByVideoId(id: string, findManyDto: FindManyDto): Promise<UserNotes>;
+}
+
+export class NoteService implements INoteService {
+  private noteDB: INoteDatabase;
+
+  constructor(noteDB: INoteDatabase) {
+    this.noteDB = noteDB;
+  }
+
   async findNote(findNoteDto: FindNoteDto): Promise<NoteEntry> {
-    const note = await NoteDB.find(findNoteDto);
+    const note = await this.noteDB.find(findNoteDto);
 
     if (!note) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -25,7 +44,7 @@ class NoteService {
     userId: string,
     createNoteDto: CreateNoteDto
   ): Promise<NoteEntry> {
-    const note = await NoteDB.create(userId, createNoteDto);
+    const note = await this.noteDB.create(userId, createNoteDto);
 
     return note;
   }
@@ -36,7 +55,7 @@ class NoteService {
   ): Promise<NoteEntry> {
     await this.findNote(findNoteDto);
 
-    const updatedNote = await NoteDB.update(findNoteDto, updateNoteDto);
+    const updatedNote = await this.noteDB.update(findNoteDto, updateNoteDto);
 
     return updatedNote;
   }
@@ -44,13 +63,13 @@ class NoteService {
   async deleteNote(deleteNoteDto: DeleteNoteDto): Promise<void> {
     await this.findNote(deleteNoteDto);
 
-    await NoteDB.delete(deleteNoteDto);
+    await this.noteDB.delete(deleteNoteDto);
   }
 
   async fetchUserNotes(findManyDto: FindManyDto): Promise<UserNotes> {
     const [notes, notesCount] = await Promise.all([
-      NoteDB.findMany(findManyDto),
-      NoteDB.count(findManyDto.userId),
+      this.noteDB.findMany(findManyDto),
+      this.noteDB.count(findManyDto.userId),
     ]);
 
     const totalPages = Math.ceil(notesCount / findManyDto.limit);
@@ -59,7 +78,7 @@ class NoteService {
   }
 
   async fetchRecentNotes(findManyDto: FindManyDto): Promise<NoteEntry[]> {
-    const recentNotes = await NoteDB.findMany(findManyDto);
+    const recentNotes = await this.noteDB.findMany(findManyDto);
 
     return recentNotes;
   }
@@ -67,7 +86,7 @@ class NoteService {
   async fetchRecentlyUpdatedNotes(
     findManyDto: FindManyDto
   ): Promise<NoteEntry[]> {
-    const recentlyUpdatedNotes = await NoteDB.findMany(findManyDto);
+    const recentlyUpdatedNotes = await this.noteDB.findMany(findManyDto);
 
     return recentlyUpdatedNotes;
   }
@@ -77,8 +96,8 @@ class NoteService {
     findManyDto: FindManyDto
   ): Promise<UserNotes> {
     const [notes, notesCount] = await Promise.all([
-      NoteDB.findManyByVideoId(id, findManyDto),
-      NoteDB.count(findManyDto.userId),
+      this.noteDB.findManyByVideoId(id, findManyDto),
+      this.noteDB.count(findManyDto.userId),
     ]);
 
     const totalPages = Math.ceil(notesCount / findManyDto.limit);
@@ -86,5 +105,3 @@ class NoteService {
     return { notes, notesCount, totalPages };
   }
 }
-
-export default new NoteService();
