@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
-import type { VerificationTokenEntry } from "./verifyEmail.type";
+import type { VerificationTokenEntry } from "./verify-email.type";
 
 export interface IVerificationTokenDB {
   findByUserId(userId: string): Promise<VerificationTokenEntry | null>;
