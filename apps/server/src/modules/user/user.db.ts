@@ -1,4 +1,4 @@
-import prismaClient from "../../lib/prisma";
+import type { PrismaClient } from "@prisma/client";
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
 import type { CreateUserDto } from "./dtos/create-user.dto";
 import type { UpdatePasswordDbDto } from "./dtos/update-password.dto";
@@ -6,11 +6,25 @@ import type { UpdateUserDto } from "./dtos/update-user.dto";
 
 import type { UserEntry } from "./user.type";
 
-class UserDatabase {
+export interface IUserDatabase {
+  create(createUserDto: CreateUserDto): Promise<UserEntry>;
+  findByEmail(email: string): Promise<UserEntry | null>;
+  findById(id: string): Promise<UserEntry | null>;
+  updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserEntry>;
+  updatePassword(updatePasswordDto: UpdatePasswordDbDto): Promise<UserEntry>;
+}
+
+export class UserDatabase implements IUserDatabase {
+  private database: PrismaClient;
+
+  constructor(database: PrismaClient) {
+    this.database = database;
+  }
+
   async create(createUserDto: CreateUserDto): Promise<UserEntry> {
     return handleAsyncOperation(
       () =>
-        prismaClient.user.create({
+        this.database.user.create({
           data: { ...createUserDto },
         }),
       { errorMessage: "Failed to create new user." }
@@ -20,7 +34,7 @@ class UserDatabase {
   async findByEmail(email: string): Promise<UserEntry | null> {
     const user = handleAsyncOperation(
       () =>
-        prismaClient.user.findUnique({
+        this.database.user.findUnique({
           where: {
             email,
           },
@@ -34,7 +48,7 @@ class UserDatabase {
   async findById(id: string): Promise<UserEntry | null> {
     const user = handleAsyncOperation(
       () =>
-        prismaClient.user.findUnique({
+        this.database.user.findUnique({
           where: {
             id,
           },
@@ -51,7 +65,7 @@ class UserDatabase {
   ): Promise<UserEntry> {
     return handleAsyncOperation(
       () =>
-        prismaClient.user.update({
+        this.database.user.update({
           where: { id },
           data: { ...updateUserDto },
         }),
@@ -66,7 +80,7 @@ class UserDatabase {
 
     return handleAsyncOperation(
       () =>
-        prismaClient.user.update({
+        this.database.user.update({
           where: { id },
           data: {
             password,
@@ -76,5 +90,3 @@ class UserDatabase {
     );
   }
 }
-
-export default new UserDatabase();
