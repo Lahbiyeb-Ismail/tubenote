@@ -2,14 +2,12 @@ import { ERROR_MESSAGES } from "../../constants/errorMessages";
 
 import { BadRequestError, NotFoundError } from "../../errors";
 
-import { IAuthService } from "../auth/auth.service";
+import { IPasswordService } from "../password/password.service";
 import { IUserDatabase } from "./user.db";
 
-import type { UserDto } from "./user.model";
-
-import type { IPasswordService } from "../password/password.service";
 import type { UpdatePasswordDto } from "./dtos/update-password.dto";
 import type { UpdateUserDto } from "./dtos/update-user.dto";
+import type { UserDto } from "./dtos/user.dto";
 
 export interface IUserService {
   getUserByEmail(email: string): Promise<UserDto | null>;
