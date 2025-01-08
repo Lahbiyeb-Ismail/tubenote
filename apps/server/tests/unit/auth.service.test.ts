@@ -6,17 +6,23 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from "../../src/errors";
+
 import { AuthService, IAuthService } from "../../src/modules/auth/auth.service";
-import type { GoogleUser } from "../../src/modules/auth/auth.type";
+
+import type { GoogleLoginDto } from "../../src/modules/auth/dtos/google-login.dto";
 import type { LoginResponseDto } from "../../src/modules/auth/dtos/login-response.dto";
 import type { LoginUserDto } from "../../src/modules/auth/dtos/login-user.dto";
+import type { LogoutUserDto } from "../../src/modules/auth/dtos/logout-user.dto";
+import type { RefreshTokenDto } from "../../src/modules/auth/dtos/refresh-token.dto";
 import type { RegisterUserDto } from "../../src/modules/auth/dtos/register-user.dto";
 import { IPasswordService } from "../../src/modules/password/password.service";
 import type { IRefreshTokenService } from "../../src/modules/refreshToken/refresh-token.service";
+import type { RefreshTokenEntry } from "../../src/modules/refreshToken/refresh-token.type";
+import type { CreateUserDto } from "../../src/modules/user/dtos/create-user.dto";
+import type { UserDto } from "../../src/modules/user/dtos/user.dto";
 
 import { IUserDatabase } from "../../src/modules/user/user.db";
 import { IUserService } from "../../src/modules/user/user.service";
-import type { UserEntry } from "../../src/modules/user/user.type";
 import type { IEmailService } from "../../src/services/emailService";
 
 import type { JwtPayload } from "../../src/types";
@@ -72,15 +78,21 @@ describe("Test AuthService methods", () => {
     );
   });
 
-  const mockUser: UserEntry = {
-    id: "1",
+  const mockUserId = "user_id_001";
+
+  const mockUser: UserDto = {
+    id: mockUserId,
+    username: "testuser",
     email: "test@example.com",
-    username: "password123",
     password: "hashedPassword",
     isEmailVerified: false,
     createdAt: new Date(),
     updatedAt: new Date(),
-    videoIds: [],
+  };
+
+  const loginResponseDto: LoginResponseDto = {
+    accessToken: "mock_access_token",
+    refreshToken: "mock_refresh_oken",
   };
 
   beforeAll(() => {
@@ -158,11 +170,6 @@ describe("Test AuthService methods", () => {
     const loginUserDto: LoginUserDto = {
       email: "test@example.com",
       password: "password123",
-    };
-
-    const loginResponseDto: LoginResponseDto = {
-      accessToken: "mockAccessToken",
-      refreshToken: "mockRefreshToken",
     };
 
     beforeEach(() => {
@@ -264,321 +271,310 @@ describe("Test AuthService methods", () => {
     });
   });
 
-  // describe("Logout method test", () => {
-  //   beforeEach(() => {
-  //     jest.clearAllMocks();
-  //   });
-
-  //   it("should successfully logout a user", async () => {
-  //     const userId = "1";
-  //     const refreshToken = "mockRefreshToken";
-
-  //     (RefreshTokenService.deleteAllTokens as jest.Mock).mockResolvedValue(
-  //       undefined
-  //     );
-
-  //     await expect(
-  //       AuthService.logoutUser({ refreshToken, userId })
-  //     ).resolves.toBeUndefined();
-
-  //     expect(RefreshTokenService.deleteAllTokens).toHaveBeenCalledWith(userId);
-  //   });
-
-  //   it("should throw a UnauthorizedError when the refreshToken is null or undefined", async () => {
-  //     const userId = "1";
-  //     const refreshToken = "";
-
-  //     await expect(
-  //       AuthService.logoutUser({ refreshToken, userId })
-  //     ).rejects.toThrow(new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED));
-
-  //     expect(RefreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
-  //   });
-
-  //   it("should throw a UnauthorizedError when the userId is not exists", async () => {
-  //     const userId = "";
-  //     const refreshToken = "mockRefreshToken";
-
-  //     await expect(
-  //       AuthService.logoutUser({ refreshToken, userId })
-  //     ).rejects.toThrow(new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED));
-
-  //     expect(RefreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
-  //   });
-  // });
-
-  // describe("RefreshToken method test", () => {
-  //   const mockPayload: JwtPayload = {
-  //     userId: "1",
-  //     exp: Date.now() + 1000,
-  //     iat: Date.now(),
-  //   };
-
-  //   const mockToken = "mockToken";
-  //   const mockUserId = "1";
-
-  //   const mockRefreshTokenFromDB: RefreshTokenEntry = {
-  //     id: "12",
-  //     userId: "1",
-  //     token: "mockToken",
-  //     createdAt: new Date(),
-  //   };
-
-  //   const mockReturnedTokens = {
-  //     accessToken: "mockAccessToken",
-  //     refreshToken: "mockRefreshToken",
-  //   };
-
-  //   beforeEach(() => {
-  //     jest.clearAllMocks();
-  //   });
-
-  //   it("should successfully refresh the token", async () => {
-  //     jest.spyOn(AuthService, "verifyToken").mockResolvedValue(mockPayload);
-
-  //     (RefreshTokenService.findToken as jest.Mock).mockResolvedValue(
-  //       mockRefreshTokenFromDB
-  //     );
-
-  //     (RefreshTokenService.deleteToken as jest.Mock).mockResolvedValue(
-  //       undefined
-  //     );
-
-  //     jest
-  //       .spyOn(AuthService, "createJwtTokens")
-  //       .mockReturnValue(mockReturnedTokens);
-
-  //     const result = await AuthService.refreshToken({
-  //       token: mockToken,
-  //       userId: mockUserId,
-  //     });
-
-  //     expect(result).toEqual(mockReturnedTokens);
-
-  //     expect(AuthService.verifyToken).toHaveBeenCalledWith({
-  //       token: mockToken,
-  //       secret: REFRESH_TOKEN_SECRET,
-  //     });
-
-  //     expect(RefreshTokenService.findToken).toHaveBeenCalledWith(mockToken);
-
-  //     expect(RefreshTokenService.deleteToken).toHaveBeenCalledWith(mockToken);
-
-  //     expect(AuthService.createJwtTokens).toHaveBeenCalledWith(
-  //       mockPayload.userId
-  //     );
-  //   });
-
-  //   it("should throw a ForbiddenError if the token is invalid or expired", async () => {
-  //     jest.spyOn(AuthService, "verifyToken").mockResolvedValue(null);
-
-  //     await expect(
-  //       AuthService.refreshToken({ token: mockToken, userId: mockUserId })
-  //     ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.FORBIDDEN));
-
-  //     expect(AuthService.verifyToken).toHaveBeenCalledWith({
-  //       token: mockToken,
-  //       secret: REFRESH_TOKEN_SECRET,
-  //     });
-
-  //     expect(RefreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
-  //       mockUserId
-  //     );
-
-  //     expect(RefreshTokenService.findToken).not.toHaveBeenCalled();
-  //     expect(RefreshTokenService.deleteToken).not.toHaveBeenCalled();
-  //     expect(AuthService.createJwtTokens).not.toHaveBeenCalled();
-  //   });
-
-  //   it("should throw a UnauthorizedError if the userId in the token is not the same as the userId in the request", async () => {
-  //     jest.spyOn(AuthService, "verifyToken").mockResolvedValue({
-  //       ...mockPayload,
-  //       userId: "2",
-  //     });
-
-  //     await expect(
-  //       AuthService.refreshToken({ token: mockToken, userId: mockUserId })
-  //     ).rejects.toThrow(new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED));
-
-  //     expect(AuthService.verifyToken).toHaveBeenCalledWith({
-  //       token: mockToken,
-  //       secret: REFRESH_TOKEN_SECRET,
-  //     });
-
-  //     expect(RefreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
-  //     expect(RefreshTokenService.findToken).not.toHaveBeenCalled();
-  //     expect(RefreshTokenService.deleteToken).not.toHaveBeenCalled();
-  //     expect(AuthService.createJwtTokens).not.toHaveBeenCalled();
-  //   });
-
-  //   it("should throw a ForbiddenError if the token is not found in the database (token reuses)", async () => {
-  //     jest.spyOn(AuthService, "verifyToken").mockResolvedValue(mockPayload);
-
-  //     (RefreshTokenService.findToken as jest.Mock).mockResolvedValue(null);
-
-  //     await expect(
-  //       AuthService.refreshToken({ token: mockToken, userId: mockUserId })
-  //     ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.FORBIDDEN));
-
-  //     expect(AuthService.verifyToken).toHaveBeenCalledWith({
-  //       token: mockToken,
-  //       secret: REFRESH_TOKEN_SECRET,
-  //     });
-
-  //     expect(RefreshTokenService.findToken).toHaveBeenCalledWith(mockToken);
-
-  //     expect(RefreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
-  //       mockUserId
-  //     );
-
-  //     expect(RefreshTokenService.deleteToken).not.toHaveBeenCalled();
-  //     expect(AuthService.createJwtTokens).not.toHaveBeenCalled();
-  //   });
-  // });
-
-  // describe("GoogleLogin method tests", () => {
-  //   const mockGoogleUser: GoogleUser = {
-  //     sub: "1",
-  //     email: "",
-  //     email_verified: true,
-  //     name: "testuser",
-  //     picture: "testuser.jpg",
-  //     given_name: "test",
-  //     family_name: "user",
-  //   };
-
-  //   const mockCreatedUser: UserEntry = {
-  //     id: "1",
-  //     email: mockGoogleUser.email,
-  //     username: mockGoogleUser.name,
-  //     password: mockGoogleUser.sub,
-  //     isEmailVerified: mockGoogleUser.email_verified,
-  //     googleId: mockGoogleUser.sub,
-  //     profilePicture: mockGoogleUser.picture,
-  //     createdAt: new Date(),
-  //     updatedAt: new Date(),
-  //     videoIds: [],
-  //   };
-
-  //   const mockTokens = {
-  //     accessToken: "mockAccessToken",
-  //     refreshToken: "mockRefreshToken",
-  //   };
-
-  //   beforeEach(() => {
-  //     jest.clearAllMocks();
-  //   });
-
-  //   it("should successfully login a user with google", async () => {
-  //     (mockUserDB.findByEmail as jest.Mock).mockResolvedValue(null);
-  //     (mockUserDB.create as jest.Mock).mockResolvedValue(mockCreatedUser);
-
-  //     jest.spyOn(AuthService, "createJwtTokens").mockReturnValue(mockTokens);
-
-  //     const result = await AuthService.googleLogin(mockGoogleUser);
-
-  //     expect(result).toEqual(mockTokens);
-
-  //     expect(mockUserDB.findByEmail).toHaveBeenCalledWith(mockGoogleUser.email);
-  //     expect(mockUserDB.create).toHaveBeenCalledWith({
-  //       email: mockGoogleUser.email,
-  //       username: mockGoogleUser.name,
-  //       password: mockGoogleUser.sub,
-  //       isEmailVerified: mockGoogleUser.email_verified,
-  //       googleId: mockGoogleUser.sub,
-  //       profilePicture: mockGoogleUser.picture,
-  //     });
-  //     expect(AuthService.createJwtTokens).toHaveBeenCalledWith(
-  //       mockCreatedUser.id
-  //     );
-  //     expect(RefreshTokenService.createToken).toHaveBeenCalledWith(
-  //       mockCreatedUser.id,
-  //       mockTokens.refreshToken
-  //     );
-  //   });
-
-  //   it("should successfully login a user with google and update the googleId", async () => {
-  //     (mockUserDB.findByEmail as jest.Mock).mockResolvedValue({
-  //       ...mockCreatedUser,
-  //       googleId: "",
-  //     });
-
-  //     (mockUserDB.updateUser as jest.Mock).mockResolvedValue(mockCreatedUser);
-
-  //     jest.spyOn(AuthService, "createJwtTokens").mockReturnValue(mockTokens);
-
-  //     const result = await AuthService.googleLogin(mockGoogleUser);
-
-  //     expect(result).toEqual(mockTokens);
-
-  //     expect(mockUserDB.findByEmail).toHaveBeenCalledWith(mockGoogleUser.email);
-  //     expect(mockUserDB.updateUser).toHaveBeenCalledWith(mockCreatedUser.id, {
-  //       googleId: mockGoogleUser.sub,
-  //     });
-  //     expect(AuthService.createJwtTokens).toHaveBeenCalledWith(
-  //       mockCreatedUser.id
-  //     );
-  //     expect(RefreshTokenService.createToken).toHaveBeenCalledWith(
-  //       mockCreatedUser.id,
-  //       mockTokens.refreshToken
-  //     );
-  //   });
-
-  //   it("should throw a UnauthorizedError if the email is not verified", async () => {
-  //     const unverifiedGoogleUser = {
-  //       ...mockGoogleUser,
-  //       email_verified: false,
-  //     };
-
-  //     await expect(
-  //       AuthService.googleLogin(unverifiedGoogleUser)
-  //     ).rejects.toThrow(
-  //       new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED)
-  //     );
-
-  //     expect(mockUserDB.findByEmail).not.toHaveBeenCalled();
-  //     expect(mockUserDB.create).not.toHaveBeenCalled();
-  //     expect(mockUserDB.updateUser).not.toHaveBeenCalled();
-  //     expect(AuthService.createJwtTokens).not.toHaveBeenCalled();
-  //     expect(RefreshTokenService.createToken).not.toHaveBeenCalled();
-  //   });
-  // });
-
-  // describe("VerifyEmail method tests", () => {
-  //   beforeEach(() => {
-  //     jest.clearAllMocks();
-  //   });
-
-  //   const mockUserId = "1";
-
-  //   const mockUser = {
-  //     id: "1",
-  //     email: "test@example.com",
-  //     password: "hashedPassword",
-  //     isEmailVerified: false,
-  //   };
-
-  //   it("should successfully verify the email", async () => {
-  //     (UserService.getUserById as jest.Mock).mockResolvedValue(mockUser);
-
-  //     await expect(
-  //       AuthService.verifyEmail(mockUserId)
-  //     ).resolves.toBeUndefined();
-
-  //     expect(UserService.verifyUserEmail).toHaveBeenCalledWith(mockUserId);
-  //   });
-
-  //   it("should throw a ForbiddenError if the email is already verified", async () => {
-  //     (UserService.getUserById as jest.Mock).mockResolvedValue({
-  //       ...mockUser,
-  //       isEmailVerified: true,
-  //     });
-
-  //     await expect(AuthService.verifyEmail(mockUserId)).rejects.toThrow(
-  //       new ForbiddenError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED)
-  //     );
-
-  //     expect(UserService.verifyUserEmail).not.toHaveBeenCalled();
-  //   });
-  // });
+  describe("AuthService - logoutUser service", () => {
+    const logoutUserDto: LogoutUserDto = {
+      userId: "user_id_001",
+      refreshToken: "mock_refresh_token",
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should successfully logout a user", async () => {
+      (mockRefreshTokenService.deleteAllTokens as jest.Mock).mockResolvedValue(
+        undefined
+      );
+
+      await expect(
+        authService.logoutUser(logoutUserDto)
+      ).resolves.toBeUndefined();
+
+      expect(mockRefreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
+        logoutUserDto.userId
+      );
+    });
+
+    it("should throw a UnauthorizedError when the refreshToken is null or undefined", async () => {
+      await expect(
+        authService.logoutUser({ ...logoutUserDto, refreshToken: "" })
+      ).rejects.toThrow(new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED));
+
+      expect(mockRefreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
+    });
+
+    it("should throw a UnauthorizedError when the userId is not exists", async () => {
+      await expect(
+        authService.logoutUser({ ...logoutUserDto, userId: "" })
+      ).rejects.toThrow(new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED));
+
+      expect(mockRefreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("AuthService - refreshToken service", () => {
+    const mockJwtPayload: JwtPayload = {
+      userId: "user_id_001",
+      exp: Date.now() + 1000_000,
+      iat: Date.now(),
+    };
+
+    const refreshTokenDto: RefreshTokenDto = {
+      token: "mockToken",
+      userId: "user_id_001",
+    };
+
+    const mockRefreshToken: RefreshTokenEntry = {
+      id: "token_id_001",
+      userId: "user_id_001",
+      token: "mockToken",
+      createdAt: new Date(),
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should successfully refresh the token", async () => {
+      jest.spyOn(authService, "verifyToken").mockResolvedValue(mockJwtPayload);
+
+      (mockRefreshTokenService.findToken as jest.Mock).mockResolvedValue(
+        mockRefreshToken
+      );
+
+      (mockRefreshTokenService.deleteToken as jest.Mock).mockResolvedValue(
+        undefined
+      );
+
+      jest
+        .spyOn(authService, "createJwtTokens")
+        .mockReturnValue(loginResponseDto);
+
+      const result = await authService.refreshToken(refreshTokenDto);
+
+      expect(result).toEqual(loginResponseDto);
+
+      expect(authService.verifyToken).toHaveBeenCalledWith({
+        token: refreshTokenDto.token,
+        secret: REFRESH_TOKEN_SECRET,
+      });
+
+      expect(mockRefreshTokenService.findToken).toHaveBeenCalledWith(
+        refreshTokenDto.token
+      );
+
+      expect(mockRefreshTokenService.deleteToken).toHaveBeenCalledWith(
+        refreshTokenDto.token
+      );
+
+      expect(authService.createJwtTokens).toHaveBeenCalledWith(
+        refreshTokenDto.userId
+      );
+    });
+
+    it("should throw a ForbiddenError if the token is invalid or expired", async () => {
+      jest.spyOn(authService, "verifyToken").mockResolvedValue(null);
+
+      await expect(authService.refreshToken(refreshTokenDto)).rejects.toThrow(
+        new ForbiddenError(ERROR_MESSAGES.FORBIDDEN)
+      );
+
+      expect(authService.verifyToken).toHaveBeenCalledWith({
+        token: refreshTokenDto.token,
+        secret: REFRESH_TOKEN_SECRET,
+      });
+
+      expect(mockRefreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
+        refreshTokenDto.userId
+      );
+
+      expect(mockRefreshTokenService.findToken).not.toHaveBeenCalled();
+      expect(mockRefreshTokenService.deleteToken).not.toHaveBeenCalled();
+    });
+
+    it("should throw a UnauthorizedError if the userId in the token is not the same as the userId in the request", async () => {
+      jest.spyOn(authService, "verifyToken").mockResolvedValue({
+        ...mockJwtPayload,
+        userId: "user_id_002",
+      });
+
+      await expect(authService.refreshToken(refreshTokenDto)).rejects.toThrow(
+        new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+      );
+
+      expect(authService.verifyToken).toHaveBeenCalledWith({
+        token: refreshTokenDto.token,
+        secret: REFRESH_TOKEN_SECRET,
+      });
+
+      expect(mockRefreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
+      expect(mockRefreshTokenService.findToken).not.toHaveBeenCalled();
+      expect(mockRefreshTokenService.deleteToken).not.toHaveBeenCalled();
+    });
+
+    it("should throw a ForbiddenError if the token is not found in the database (token reuses)", async () => {
+      jest.spyOn(authService, "verifyToken").mockResolvedValue(mockJwtPayload);
+
+      (mockRefreshTokenService.findToken as jest.Mock).mockResolvedValue(null);
+
+      await expect(authService.refreshToken(refreshTokenDto)).rejects.toThrow(
+        new ForbiddenError(ERROR_MESSAGES.FORBIDDEN)
+      );
+
+      expect(authService.verifyToken).toHaveBeenCalledWith({
+        token: refreshTokenDto.token,
+        secret: REFRESH_TOKEN_SECRET,
+      });
+
+      expect(mockRefreshTokenService.findToken).toHaveBeenCalledWith(
+        refreshTokenDto.token
+      );
+
+      expect(mockRefreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
+        refreshTokenDto.userId
+      );
+
+      expect(mockRefreshTokenService.deleteToken).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("AuthService - googleLogin service", () => {
+    const googleLoginDto: GoogleLoginDto = {
+      sub: "google_id_001",
+      email: "",
+      email_verified: true,
+      name: "testuser",
+      picture: "testuser.jpg",
+      given_name: "test",
+      family_name: "user",
+    };
+
+    const createUserDto: CreateUserDto = {
+      email: googleLoginDto.email,
+      username: googleLoginDto.name,
+      password: googleLoginDto.sub,
+      isEmailVerified: googleLoginDto.email_verified,
+      googleId: googleLoginDto.sub,
+      profilePicture: googleLoginDto.picture,
+    };
+
+    const mockCreatedUser: UserDto = {
+      id: "user_id_001",
+      email: googleLoginDto.email,
+      username: googleLoginDto.name,
+      password: googleLoginDto.sub,
+      isEmailVerified: googleLoginDto.email_verified,
+      googleId: googleLoginDto.sub,
+      profilePicture: googleLoginDto.picture,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should successfully login a user with google", async () => {
+      (mockUserDB.findByEmail as jest.Mock).mockResolvedValue(null);
+      (mockUserDB.create as jest.Mock).mockResolvedValue(mockCreatedUser);
+
+      jest
+        .spyOn(authService, "createJwtTokens")
+        .mockReturnValue(loginResponseDto);
+
+      const result = await authService.googleLogin(googleLoginDto);
+
+      expect(result).toEqual(loginResponseDto);
+
+      expect(mockUserDB.findByEmail).toHaveBeenCalledWith(googleLoginDto.email);
+
+      expect(mockUserDB.create).toHaveBeenCalledWith(createUserDto);
+
+      expect(authService.createJwtTokens).toHaveBeenCalledWith(
+        mockCreatedUser.id
+      );
+
+      expect(mockRefreshTokenService.createToken).toHaveBeenCalledWith(
+        mockCreatedUser.id,
+        loginResponseDto.refreshToken
+      );
+    });
+
+    it("should successfully login a user with google and update the googleId", async () => {
+      (mockUserDB.findByEmail as jest.Mock).mockResolvedValue({
+        ...mockCreatedUser,
+        googleId: "",
+      });
+
+      (mockUserDB.updateUser as jest.Mock).mockResolvedValue(mockCreatedUser);
+
+      jest
+        .spyOn(authService, "createJwtTokens")
+        .mockReturnValue(loginResponseDto);
+
+      const result = await authService.googleLogin(googleLoginDto);
+
+      expect(result).toEqual(loginResponseDto);
+
+      expect(mockUserDB.findByEmail).toHaveBeenCalledWith(googleLoginDto.email);
+
+      expect(mockUserDB.updateUser).toHaveBeenCalledWith(mockCreatedUser.id, {
+        googleId: googleLoginDto.sub,
+      });
+      expect(authService.createJwtTokens).toHaveBeenCalledWith(
+        mockCreatedUser.id
+      );
+      expect(mockRefreshTokenService.createToken).toHaveBeenCalledWith(
+        mockCreatedUser.id,
+        loginResponseDto.refreshToken
+      );
+    });
+
+    it("should throw a UnauthorizedError if the email is not verified", async () => {
+      const unverifiedGoogleUser: GoogleLoginDto = {
+        ...googleLoginDto,
+        email_verified: false,
+      };
+
+      await expect(
+        authService.googleLogin(unverifiedGoogleUser)
+      ).rejects.toThrow(
+        new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED)
+      );
+
+      expect(mockUserDB.findByEmail).not.toHaveBeenCalled();
+      expect(mockUserDB.create).not.toHaveBeenCalled();
+      expect(mockUserDB.updateUser).not.toHaveBeenCalled();
+      expect(mockRefreshTokenService.createToken).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("AuthService - verifyEmail service", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should successfully verify the email", async () => {
+      (mockUserService.getUserById as jest.Mock).mockResolvedValue(mockUser);
+
+      await expect(
+        authService.verifyEmail(mockUserId)
+      ).resolves.toBeUndefined();
+
+      expect(mockUserService.verifyUserEmail).toHaveBeenCalledWith(mockUserId);
+    });
+
+    it("should throw a ForbiddenError if the email is already verified", async () => {
+      (mockUserService.getUserById as jest.Mock).mockResolvedValue({
+        ...mockUser,
+        isEmailVerified: true,
+      });
+
+      await expect(authService.verifyEmail(mockUserId)).rejects.toThrow(
+        new ForbiddenError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED)
+      );
+
+      expect(mockUserService.verifyUserEmail).not.toHaveBeenCalled();
+    });
+  });
 });
