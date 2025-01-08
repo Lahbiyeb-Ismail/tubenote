@@ -1,4 +1,4 @@
-import type { YoutubeVideoData } from "../video.type";
+import type { YoutubeVideoData } from "../dtos/video.dto";
 
 export interface CreateVideoDto {
   userId: string;

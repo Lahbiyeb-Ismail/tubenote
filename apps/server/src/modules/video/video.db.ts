@@ -4,15 +4,14 @@ import handleAsyncOperation from "../../utils/handleAsyncOperation";
 
 import type { FindManyDto } from "../../common/dtos/find-many.dto";
 import type { CreateVideoDto } from "./dtos/create-video.dto";
-
-import type { VideoEntry } from "./video.type";
+import type { VideoDto } from "./dtos/video.dto";
 
 export interface IVideoDatabase {
-  findByYoutubeId(youtubeId: string): Promise<VideoEntry | null>;
-  findMany(findManyDto: FindManyDto): Promise<VideoEntry[]>;
+  findByYoutubeId(youtubeId: string): Promise<VideoDto | null>;
+  findMany(findManyDto: FindManyDto): Promise<VideoDto[]>;
   count(userId: string): Promise<number>;
-  create(createVideoDto: CreateVideoDto): Promise<VideoEntry>;
-  connectVideoToUser(videoId: string, userId: string): Promise<VideoEntry>;
+  create(createVideoDto: CreateVideoDto): Promise<VideoDto>;
+  connectVideoToUser(videoId: string, userId: string): Promise<VideoDto>;
 }
 
 export class VideoDatabase implements IVideoDatabase {
@@ -22,7 +21,7 @@ export class VideoDatabase implements IVideoDatabase {
     this.database = database;
   }
 
-  async findByYoutubeId(youtubeId: string): Promise<VideoEntry | null> {
+  async findByYoutubeId(youtubeId: string): Promise<VideoDto | null> {
     return handleAsyncOperation(
       () =>
         this.database.video.findUnique({
@@ -32,7 +31,7 @@ export class VideoDatabase implements IVideoDatabase {
     );
   }
 
-  async findMany(findManyDto: FindManyDto): Promise<VideoEntry[]> {
+  async findMany(findManyDto: FindManyDto): Promise<VideoDto[]> {
     const { userId, limit, skip, sort } = findManyDto;
 
     return handleAsyncOperation(
@@ -65,7 +64,7 @@ export class VideoDatabase implements IVideoDatabase {
     );
   }
 
-  async create(createVideoDto: CreateVideoDto): Promise<VideoEntry> {
+  async create(createVideoDto: CreateVideoDto): Promise<VideoDto> {
     return handleAsyncOperation(
       async () => {
         const { userId, youtubeVideoId, videoData } = createVideoDto;
@@ -95,10 +94,7 @@ export class VideoDatabase implements IVideoDatabase {
     );
   }
 
-  async connectVideoToUser(
-    videoId: string,
-    userId: string
-  ): Promise<VideoEntry> {
+  async connectVideoToUser(videoId: string, userId: string): Promise<VideoDto> {
     return handleAsyncOperation(
       () =>
         this.database.video.update({
