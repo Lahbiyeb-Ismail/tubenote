@@ -1,4 +1,4 @@
-import type { NoteEntry } from "../note/note.type";
+import type { NoteDto } from "../note/dtos/note.dto";
 
 interface Snippet {
   publishedAt: string;
@@ -46,7 +46,7 @@ export interface YoutubeVideoData {
 export interface VideoEntry extends YoutubeVideoData {
   id: string;
   youtubeId: string;
-  notes?: NoteEntry[];
+  notes?: NoteDto[];
   userIds?: string[];
 }
 
