@@ -17,9 +17,6 @@ import {
 } from "../../errors";
 
 import type { JwtPayload } from "../../types";
-import type { GoogleUser } from "./auth.type";
-
-import type { UserEntry } from "../user/user.type";
 
 import logger from "../../utils/logger";
 
@@ -29,7 +26,9 @@ import { IRefreshTokenService } from "../refreshToken/refresh-token.service";
 import { IUserDatabase } from "../user/user.db";
 import { IUserService } from "../user/user.service";
 
+import type { UserDto } from "../user/dtos/user.dto";
 import type { GenerateTokenDto } from "./dtos/generate-token.dto";
+import type { GoogleLoginDto } from "./dtos/google-login.dto";
 import type { LoginResponseDto } from "./dtos/login-response.dto";
 import type { LoginUserDto } from "./dtos/login-user.dto";
 import type { LogoutUserDto } from "./dtos/logout-user.dto";
@@ -44,11 +43,11 @@ export interface IAuthService {
     accessToken: string;
     refreshToken: string;
   };
-  registerUser(registerUserDto: RegisterUserDto): Promise<UserEntry>;
+  registerUser(registerUserDto: RegisterUserDto): Promise<UserDto>;
   loginUser(loginUserDto: LoginUserDto): Promise<LoginResponseDto>;
   logoutUser(logoutUserDto: LogoutUserDto): Promise<void>;
   refreshToken(refreshTokenDto: RefreshTokenDto): Promise<LoginResponseDto>;
-  googleLogin(user: GoogleUser): Promise<LoginResponseDto>;
+  googleLogin(googleLoginDto: GoogleLoginDto): Promise<LoginResponseDto>;
   verifyEmail(userId: string): Promise<void>;
 }
 
@@ -117,7 +116,7 @@ export class AuthService implements IAuthService {
     return { accessToken, refreshToken };
   }
 
-  async registerUser(registerUserDto: RegisterUserDto): Promise<UserEntry> {
+  async registerUser(registerUserDto: RegisterUserDto): Promise<UserDto> {
     const { email, username, password } = registerUserDto;
 
     const userExists = await this.userDB.findByEmail(email);
@@ -216,12 +215,18 @@ export class AuthService implements IAuthService {
     return { accessToken, refreshToken };
   }
 
-  async googleLogin(user: GoogleUser): Promise<LoginResponseDto> {
-    if (!user) {
+  async googleLogin(googleLoginDto: GoogleLoginDto): Promise<LoginResponseDto> {
+    if (!googleLoginDto) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
-    const { sub: googleId, email, email_verified, name, picture } = user;
+    const {
+      sub: googleId,
+      email,
+      email_verified,
+      name,
+      picture,
+    } = googleLoginDto;
 
     if (!email_verified) {
       throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
