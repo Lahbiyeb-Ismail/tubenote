@@ -32,7 +32,7 @@ import type { GoogleLoginDto } from "./dtos/google-login.dto";
 import type { LoginResponseDto } from "./dtos/login-response.dto";
 import type { LoginUserDto } from "./dtos/login-user.dto";
 import type { LogoutUserDto } from "./dtos/logout-user.dto";
-import type { RefreshTokenDto } from "./dtos/refresh-token.dto";
+import type { RefreshDto } from "./dtos/refresh.dto";
 import type { RegisterUserDto } from "./dtos/register-user.dto";
 import type { VerifyJwtTokenDto } from "./dtos/verfiy-jwt-token.dto";
 
@@ -46,7 +46,7 @@ export interface IAuthService {
   registerUser(registerUserDto: RegisterUserDto): Promise<UserDto>;
   loginUser(loginUserDto: LoginUserDto): Promise<LoginResponseDto>;
   logoutUser(logoutUserDto: LogoutUserDto): Promise<void>;
-  refreshToken(refreshTokenDto: RefreshTokenDto): Promise<LoginResponseDto>;
+  refreshToken(refreshDto: RefreshDto): Promise<LoginResponseDto>;
   googleLogin(googleLoginDto: GoogleLoginDto): Promise<LoginResponseDto>;
   verifyEmail(userId: string): Promise<void>;
 }
@@ -177,10 +177,8 @@ export class AuthService implements IAuthService {
     await this.refreshTokenService.deleteAllTokens(userId);
   }
 
-  async refreshToken(
-    refreshTokenDto: RefreshTokenDto
-  ): Promise<LoginResponseDto> {
-    const { userId, token } = refreshTokenDto;
+  async refreshToken(refreshDto: RefreshDto): Promise<LoginResponseDto> {
+    const { userId, token } = refreshDto;
 
     const payload = await this.verifyToken({
       token,

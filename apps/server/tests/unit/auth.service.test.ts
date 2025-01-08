@@ -13,11 +13,11 @@ import type { GoogleLoginDto } from "../../src/modules/auth/dtos/google-login.dt
 import type { LoginResponseDto } from "../../src/modules/auth/dtos/login-response.dto";
 import type { LoginUserDto } from "../../src/modules/auth/dtos/login-user.dto";
 import type { LogoutUserDto } from "../../src/modules/auth/dtos/logout-user.dto";
-import type { RefreshTokenDto } from "../../src/modules/auth/dtos/refresh-token.dto";
+import type { RefreshDto } from "../../src/modules/auth/dtos/refresh.dto";
 import type { RegisterUserDto } from "../../src/modules/auth/dtos/register-user.dto";
 import { IPasswordService } from "../../src/modules/password/password.service";
+import type { RefreshTokenDto } from "../../src/modules/refreshToken/dtos/refresh-token.dto";
 import type { IRefreshTokenService } from "../../src/modules/refreshToken/refresh-token.service";
-import type { RefreshTokenEntry } from "../../src/modules/refreshToken/refresh-token.type";
 import type { CreateUserDto } from "../../src/modules/user/dtos/create-user.dto";
 import type { UserDto } from "../../src/modules/user/dtos/user.dto";
 
@@ -319,12 +319,12 @@ describe("Test AuthService methods", () => {
       iat: Date.now(),
     };
 
-    const refreshTokenDto: RefreshTokenDto = {
+    const refreshDto: RefreshDto = {
       token: "mockToken",
       userId: "user_id_001",
     };
 
-    const mockRefreshToken: RefreshTokenEntry = {
+    const mockRefreshToken: RefreshTokenDto = {
       id: "token_id_001",
       userId: "user_id_001",
       token: "mockToken",
@@ -350,42 +350,42 @@ describe("Test AuthService methods", () => {
         .spyOn(authService, "createJwtTokens")
         .mockReturnValue(loginResponseDto);
 
-      const result = await authService.refreshToken(refreshTokenDto);
+      const result = await authService.refreshToken(refreshDto);
 
       expect(result).toEqual(loginResponseDto);
 
       expect(authService.verifyToken).toHaveBeenCalledWith({
-        token: refreshTokenDto.token,
+        token: refreshDto.token,
         secret: REFRESH_TOKEN_SECRET,
       });
 
       expect(mockRefreshTokenService.findToken).toHaveBeenCalledWith(
-        refreshTokenDto.token
+        refreshDto.token
       );
 
       expect(mockRefreshTokenService.deleteToken).toHaveBeenCalledWith(
-        refreshTokenDto.token
+        refreshDto.token
       );
 
       expect(authService.createJwtTokens).toHaveBeenCalledWith(
-        refreshTokenDto.userId
+        refreshDto.userId
       );
     });
 
     it("should throw a ForbiddenError if the token is invalid or expired", async () => {
       jest.spyOn(authService, "verifyToken").mockResolvedValue(null);
 
-      await expect(authService.refreshToken(refreshTokenDto)).rejects.toThrow(
+      await expect(authService.refreshToken(refreshDto)).rejects.toThrow(
         new ForbiddenError(ERROR_MESSAGES.FORBIDDEN)
       );
 
       expect(authService.verifyToken).toHaveBeenCalledWith({
-        token: refreshTokenDto.token,
+        token: refreshDto.token,
         secret: REFRESH_TOKEN_SECRET,
       });
 
       expect(mockRefreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
-        refreshTokenDto.userId
+        refreshDto.userId
       );
 
       expect(mockRefreshTokenService.findToken).not.toHaveBeenCalled();
@@ -398,12 +398,12 @@ describe("Test AuthService methods", () => {
         userId: "user_id_002",
       });
 
-      await expect(authService.refreshToken(refreshTokenDto)).rejects.toThrow(
+      await expect(authService.refreshToken(refreshDto)).rejects.toThrow(
         new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
       );
 
       expect(authService.verifyToken).toHaveBeenCalledWith({
-        token: refreshTokenDto.token,
+        token: refreshDto.token,
         secret: REFRESH_TOKEN_SECRET,
       });
 
@@ -417,21 +417,21 @@ describe("Test AuthService methods", () => {
 
       (mockRefreshTokenService.findToken as jest.Mock).mockResolvedValue(null);
 
-      await expect(authService.refreshToken(refreshTokenDto)).rejects.toThrow(
+      await expect(authService.refreshToken(refreshDto)).rejects.toThrow(
         new ForbiddenError(ERROR_MESSAGES.FORBIDDEN)
       );
 
       expect(authService.verifyToken).toHaveBeenCalledWith({
-        token: refreshTokenDto.token,
+        token: refreshDto.token,
         secret: REFRESH_TOKEN_SECRET,
       });
 
       expect(mockRefreshTokenService.findToken).toHaveBeenCalledWith(
-        refreshTokenDto.token
+        refreshDto.token
       );
 
       expect(mockRefreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
-        refreshTokenDto.userId
+        refreshDto.userId
       );
 
       expect(mockRefreshTokenService.deleteToken).not.toHaveBeenCalled();
