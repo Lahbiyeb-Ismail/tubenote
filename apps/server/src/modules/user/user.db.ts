@@ -1,17 +1,17 @@
 import type { PrismaClient } from "@prisma/client";
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
+
 import type { CreateUserDto } from "./dtos/create-user.dto";
 import type { UpdatePasswordDbDto } from "./dtos/update-password.dto";
 import type { UpdateUserDto } from "./dtos/update-user.dto";
-
-import type { UserEntry } from "./user.type";
+import type { UserDto } from "./dtos/user.dto";
 
 export interface IUserDatabase {
-  create(createUserDto: CreateUserDto): Promise<UserEntry>;
-  findByEmail(email: string): Promise<UserEntry | null>;
-  findById(id: string): Promise<UserEntry | null>;
-  updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserEntry>;
-  updatePassword(updatePasswordDto: UpdatePasswordDbDto): Promise<UserEntry>;
+  create(createUserDto: CreateUserDto): Promise<UserDto>;
+  findByEmail(email: string): Promise<UserDto | null>;
+  findById(id: string): Promise<UserDto | null>;
+  updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserDto>;
+  updatePassword(updatePasswordDto: UpdatePasswordDbDto): Promise<UserDto>;
 }
 
 export class UserDatabase implements IUserDatabase {
@@ -21,7 +21,7 @@ export class UserDatabase implements IUserDatabase {
     this.database = database;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<UserEntry> {
+  async create(createUserDto: CreateUserDto): Promise<UserDto> {
     return handleAsyncOperation(
       () =>
         this.database.user.create({
@@ -31,7 +31,7 @@ export class UserDatabase implements IUserDatabase {
     );
   }
 
-  async findByEmail(email: string): Promise<UserEntry | null> {
+  async findByEmail(email: string): Promise<UserDto | null> {
     const user = handleAsyncOperation(
       () =>
         this.database.user.findUnique({
@@ -45,7 +45,7 @@ export class UserDatabase implements IUserDatabase {
     return user;
   }
 
-  async findById(id: string): Promise<UserEntry | null> {
+  async findById(id: string): Promise<UserDto | null> {
     const user = handleAsyncOperation(
       () =>
         this.database.user.findUnique({
@@ -59,10 +59,7 @@ export class UserDatabase implements IUserDatabase {
     return user;
   }
 
-  async updateUser(
-    id: string,
-    updateUserDto: UpdateUserDto
-  ): Promise<UserEntry> {
+  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserDto> {
     return handleAsyncOperation(
       () =>
         this.database.user.update({
@@ -75,7 +72,7 @@ export class UserDatabase implements IUserDatabase {
 
   async updatePassword(
     updatePasswordDto: UpdatePasswordDbDto
-  ): Promise<UserEntry> {
+  ): Promise<UserDto> {
     const { id, password } = updatePasswordDto;
 
     return handleAsyncOperation(
