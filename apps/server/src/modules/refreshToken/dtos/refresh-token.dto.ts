@@ -1,4 +1,4 @@
-export interface RefreshTokenEntry {
+export interface RefreshTokenDto {
   id: string;
   token: string;
   userId: string;

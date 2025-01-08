@@ -1,12 +1,12 @@
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 import { NotFoundError } from "../../errors";
-import type { RefreshTokenEntry } from "./refresh-token.type";
+import type { RefreshTokenDto } from "./dtos/refresh-token.dto";
 
 import { IRefreshTokenDatabase } from "./refresh-token.db";
 
 export interface IRefreshTokenService {
-  createToken(userId: string, token: string): Promise<RefreshTokenEntry>;
-  findToken(token: string): Promise<RefreshTokenEntry | null>;
+  createToken(userId: string, token: string): Promise<RefreshTokenDto>;
+  findToken(token: string): Promise<RefreshTokenDto | null>;
   deleteToken(token: string): Promise<void>;
   deleteAllTokens(userId: string): Promise<void>;
 }
@@ -18,11 +18,11 @@ export class RefreshTokenService implements IRefreshTokenService {
     this.refreshTokenDB = refreshTokenDB;
   }
 
-  async createToken(userId: string, token: string): Promise<RefreshTokenEntry> {
+  async createToken(userId: string, token: string): Promise<RefreshTokenDto> {
     return await this.refreshTokenDB.create(token, userId);
   }
 
-  async findToken(token: string): Promise<RefreshTokenEntry | null> {
+  async findToken(token: string): Promise<RefreshTokenDto | null> {
     return await this.refreshTokenDB.find(token);
   }
 

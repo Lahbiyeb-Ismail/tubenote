@@ -2,11 +2,11 @@ import type { PrismaClient } from "@prisma/client";
 
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
 
-import type { RefreshTokenEntry } from "./refresh-token.type";
+import type { RefreshTokenDto } from "./dtos/refresh-token.dto";
 
 export interface IRefreshTokenDatabase {
-  create(token: string, userId: string): Promise<RefreshTokenEntry>;
-  find(token: string): Promise<RefreshTokenEntry | null>;
+  create(token: string, userId: string): Promise<RefreshTokenDto>;
+  find(token: string): Promise<RefreshTokenDto | null>;
   delete(token: string): Promise<void>;
   deleteAll(userId: string): Promise<void>;
 }
@@ -18,7 +18,7 @@ export class RefreshTokenDatabase implements IRefreshTokenDatabase {
     this.database = database;
   }
 
-  async create(token: string, userId: string): Promise<RefreshTokenEntry> {
+  async create(token: string, userId: string): Promise<RefreshTokenDto> {
     return handleAsyncOperation(
       () =>
         this.database.refreshToken.create({
@@ -28,7 +28,7 @@ export class RefreshTokenDatabase implements IRefreshTokenDatabase {
     );
   }
 
-  async find(token: string): Promise<RefreshTokenEntry | null> {
+  async find(token: string): Promise<RefreshTokenDto | null> {
     return handleAsyncOperation(
       () =>
         this.database.refreshToken.findUnique({
