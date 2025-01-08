@@ -6,19 +6,19 @@ import type { FindManyDto } from "../../common/dtos/find-many.dto";
 import type { CreateNoteDto } from "./dtos/create-note.dto";
 import type { DeleteNoteDto } from "./dtos/delete-note.dto";
 import type { FindNoteDto } from "./dtos/find-note.dto";
+import type { NoteDto } from "./dtos/note.dto";
 import type { UpdateNoteDto } from "./dtos/update-note.dto";
-import type { NoteEntry } from "./note.type";
 
 export interface INoteDatabase {
-  find(findNoteDto: FindNoteDto): Promise<NoteEntry | null>;
-  create(userId: string, createNoteDto: CreateNoteDto): Promise<NoteEntry>;
+  find(findNoteDto: FindNoteDto): Promise<NoteDto | null>;
+  create(userId: string, createNoteDto: CreateNoteDto): Promise<NoteDto>;
   update(
     findNoteDto: FindNoteDto,
     updateNoteDto: UpdateNoteDto
-  ): Promise<NoteEntry>;
+  ): Promise<NoteDto>;
   delete(deleteNoteDto: DeleteNoteDto): Promise<void>;
-  findMany(findManyDto: FindManyDto): Promise<NoteEntry[]>;
-  findManyByVideoId(id: string, findManyDto: FindManyDto): Promise<NoteEntry[]>;
+  findMany(findManyDto: FindManyDto): Promise<NoteDto[]>;
+  findManyByVideoId(id: string, findManyDto: FindManyDto): Promise<NoteDto[]>;
   count(userId: string): Promise<number>;
 }
 
@@ -29,7 +29,7 @@ export class NoteDatabase implements INoteDatabase {
     this.database = database;
   }
 
-  async find(findNoteDto: FindNoteDto): Promise<NoteEntry | null> {
+  async find(findNoteDto: FindNoteDto): Promise<NoteDto | null> {
     return handleAsyncOperation(
       () =>
         this.database.note.findUnique({
@@ -41,10 +41,7 @@ export class NoteDatabase implements INoteDatabase {
     );
   }
 
-  async create(
-    userId: string,
-    createNoteDto: CreateNoteDto
-  ): Promise<NoteEntry> {
+  async create(userId: string, createNoteDto: CreateNoteDto): Promise<NoteDto> {
     return handleAsyncOperation(
       () =>
         this.database.note.create({
@@ -57,7 +54,7 @@ export class NoteDatabase implements INoteDatabase {
   async update(
     findNoteDto: FindNoteDto,
     updateNoteDto: UpdateNoteDto
-  ): Promise<NoteEntry> {
+  ): Promise<NoteDto> {
     return handleAsyncOperation(
       () =>
         this.database.note.update({
@@ -80,7 +77,7 @@ export class NoteDatabase implements INoteDatabase {
     );
   }
 
-  async findMany(findManyDto: FindManyDto): Promise<NoteEntry[]> {
+  async findMany(findManyDto: FindManyDto): Promise<NoteDto[]> {
     const { userId, limit, sort, skip = 0 } = findManyDto;
 
     return handleAsyncOperation(
@@ -102,7 +99,7 @@ export class NoteDatabase implements INoteDatabase {
   async findManyByVideoId(
     id: string,
     findManyDto: FindManyDto
-  ): Promise<NoteEntry[]> {
+  ): Promise<NoteDto[]> {
     const { userId, limit, sort, skip = 0 } = findManyDto;
 
     return handleAsyncOperation(
