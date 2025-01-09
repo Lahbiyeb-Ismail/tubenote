@@ -1,26 +1,48 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { UserEntry } from "../../src/modules/user/user.type";
-
 import {
   clearRefreshTokenCookieConfig,
   refreshTokenCookieConfig,
 } from "../../src/config/cookie.config";
 import envConfig from "../../src/config/envConfig";
+
 import { REFRESH_TOKEN_NAME } from "../../src/constants/auth";
 import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
 import { UnauthorizedError } from "../../src/errors";
-import AuthController from "../../src/modules/auth/auth.controller";
-import AuthService from "../../src/modules/auth/auth.service";
+
+import {
+  AuthController,
+  IAuthController,
+} from "../../src/modules/auth/auth.controller";
+import { IAuthService } from "../../src/modules/auth/auth.service";
+
 import type { GoogleUser } from "../../src/modules/auth/auth.type";
 import type { LoginUserDto } from "../../src/modules/auth/dtos/login-user.dto";
 import type { RegisterUserDto } from "../../src/modules/auth/dtos/register-user.dto";
+import type { UserDto } from "../../src/modules/user/dtos/user.dto";
 import type { TypedRequest } from "../../src/types";
 
-jest.mock("../../src/modules/auth/auth.service");
-
 describe("AuthController integration tests", () => {
+  let authController: IAuthController;
+  let mockAuthService: IAuthService;
+
+  beforeEach(() => {
+    mockAuthService = {
+      registerUser: jest.fn(),
+      loginUser: jest.fn(),
+      logoutUser: jest.fn(),
+      refreshToken: jest.fn(),
+      googleLogin: jest.fn(),
+      verifyToken: jest.fn(),
+      createJwtTokens: jest.fn(),
+      generateJwtToken: jest.fn(),
+      verifyEmail: jest.fn(),
+    };
+
+    authController = new AuthController(mockAuthService);
+  });
+
   beforeAll(() => {
     jest.clearAllMocks();
   });
@@ -31,14 +53,14 @@ describe("AuthController integration tests", () => {
     let mockJson: jest.Mock;
     let mockStatus: jest.Mock;
 
-    const mockUser: UserEntry = {
+    const mockUser: UserDto = {
       id: "user_id_001",
       username: "testuser",
       email: "testuser@example.com",
       password: "password123",
+      isEmailVerified: false,
       createdAt: new Date(),
       updatedAt: new Date(),
-      videoIds: [],
     };
 
     const mockRegisterCredentials: RegisterUserDto = {
@@ -61,14 +83,14 @@ describe("AuthController integration tests", () => {
     });
 
     it("should successfully register a new user", async () => {
-      (AuthService.registerUser as jest.Mock).mockResolvedValue(mockUser);
+      (mockAuthService.registerUser as jest.Mock).mockResolvedValue(mockUser);
 
-      await AuthController.register(
+      await authController.register(
         mockRequest as TypedRequest<RegisterUserDto>,
         mockResponse as Response
       );
 
-      expect(AuthService.registerUser).toHaveBeenCalledWith(
+      expect(mockAuthService.registerUser).toHaveBeenCalledWith(
         mockRegisterCredentials
       );
 
@@ -79,15 +101,15 @@ describe("AuthController integration tests", () => {
       });
     });
 
-    it("should handle AuthService errors", async () => {
+    it("should handle mockAuthService errors", async () => {
       const errorMessage = "Registration failed";
 
-      (AuthService.registerUser as jest.Mock).mockRejectedValue(
+      (mockAuthService.registerUser as jest.Mock).mockRejectedValue(
         new Error(errorMessage)
       );
 
       await expect(
-        AuthController.register(
+        authController.register(
           mockRequest as TypedRequest<RegisterUserDto>,
           mockResponse as Response
         )
@@ -131,14 +153,16 @@ describe("AuthController integration tests", () => {
         refreshToken: "mock-refresh-token",
       };
 
-      (AuthService.loginUser as jest.Mock).mockResolvedValue(mockTokens);
+      (mockAuthService.loginUser as jest.Mock).mockResolvedValue(mockTokens);
 
-      await AuthController.login(
+      await authController.login(
         mockRequest as TypedRequest<LoginUserDto>,
         mockResponse as Response
       );
 
-      expect(AuthService.loginUser).toHaveBeenCalledWith(mockLoginCredentials);
+      expect(mockAuthService.loginUser).toHaveBeenCalledWith(
+        mockLoginCredentials
+      );
 
       expect(mockResponse.cookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
@@ -153,14 +177,14 @@ describe("AuthController integration tests", () => {
       });
     });
 
-    it("should handle AuthService errors", async () => {
+    it("should handle mockAuthService errors", async () => {
       const errorMessage = "Invalid credentials";
-      (AuthService.loginUser as jest.Mock).mockRejectedValue(
+      (mockAuthService.loginUser as jest.Mock).mockRejectedValue(
         new Error(errorMessage)
       );
 
       await expect(
-        AuthController.login(
+        authController.login(
           mockRequest as TypedRequest<LoginUserDto>,
           mockResponse as Response
         )
@@ -194,14 +218,14 @@ describe("AuthController integration tests", () => {
     });
 
     it("should successfully log out a user", async () => {
-      (AuthService.logoutUser as jest.Mock).mockResolvedValue(undefined);
+      (mockAuthService.logoutUser as jest.Mock).mockResolvedValue(undefined);
 
-      await AuthController.logout(
+      await authController.logout(
         mockRequest as TypedRequest,
         mockResponse as Response
       );
 
-      expect(AuthService.logoutUser).toHaveBeenCalledWith({
+      expect(mockAuthService.logoutUser).toHaveBeenCalledWith({
         refreshToken: "mock-refresh-token",
         userId: "mock-user-id",
       });
@@ -217,12 +241,12 @@ describe("AuthController integration tests", () => {
     it("should handle missing refresh token", async () => {
       mockRequest.cookies = {};
 
-      await AuthController.logout(
+      await authController.logout(
         mockRequest as TypedRequest,
         mockResponse as Response
       );
 
-      expect(AuthService.logoutUser).toHaveBeenCalledWith({
+      expect(mockAuthService.logoutUser).toHaveBeenCalledWith({
         refreshToken: undefined,
         userId: "mock-user-id",
       });
@@ -235,14 +259,14 @@ describe("AuthController integration tests", () => {
       );
     });
 
-    it("should handle AuthService errors", async () => {
+    it("should handle mockAuthService errors", async () => {
       const errorMessage = "Logout failed";
-      (AuthService.logoutUser as jest.Mock).mockRejectedValue(
+      (mockAuthService.logoutUser as jest.Mock).mockRejectedValue(
         new Error(errorMessage)
       );
 
       await expect(
-        AuthController.logout(
+        authController.logout(
           mockRequest as TypedRequest,
           mockResponse as Response
         )
@@ -287,14 +311,14 @@ describe("AuthController integration tests", () => {
     });
 
     it("should successfully refresh the access token", async () => {
-      (AuthService.refreshToken as jest.Mock).mockResolvedValue(mockTokens);
+      (mockAuthService.refreshToken as jest.Mock).mockResolvedValue(mockTokens);
 
-      await AuthController.refresh(
+      await authController.refresh(
         mockRequest as TypedRequest,
         mockResponse as Response
       );
 
-      expect(AuthService.refreshToken).toHaveBeenCalledWith({
+      expect(mockAuthService.refreshToken).toHaveBeenCalledWith({
         token: "mock-refresh-token",
         userId: "mock-user-id",
       });
@@ -320,7 +344,7 @@ describe("AuthController integration tests", () => {
       mockRequest.cookies = {};
 
       await expect(
-        AuthController.refresh(
+        authController.refresh(
           mockRequest as TypedRequest,
           mockResponse as Response
         )
@@ -332,14 +356,14 @@ describe("AuthController integration tests", () => {
       expect(mockResponse.json).not.toHaveBeenCalled();
     });
 
-    it("should handle AuthService errors", async () => {
+    it("should handle mockAuthService errors", async () => {
       const errorMessage = "Refresh token failed";
-      (AuthService.refreshToken as jest.Mock).mockRejectedValue(
+      (mockAuthService.refreshToken as jest.Mock).mockRejectedValue(
         new Error(errorMessage)
       );
 
       await expect(
-        AuthController.refresh(
+        authController.refresh(
           mockRequest as TypedRequest,
           mockResponse as Response
         )
@@ -391,14 +415,16 @@ describe("AuthController integration tests", () => {
     });
 
     it("should successfully log in a user with Google", async () => {
-      (AuthService.googleLogin as jest.Mock).mockResolvedValue(mockTokens);
+      (mockAuthService.googleLogin as jest.Mock).mockResolvedValue(mockTokens);
 
-      await AuthController.loginWithGoogle(
+      await authController.loginWithGoogle(
         mockRequest as TypedRequest,
         mockResponse as Response
       );
 
-      expect(AuthService.googleLogin).toHaveBeenCalledWith(mockProfile._json);
+      expect(mockAuthService.googleLogin).toHaveBeenCalledWith(
+        mockProfile._json
+      );
 
       expect(mockCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
@@ -413,14 +439,14 @@ describe("AuthController integration tests", () => {
       );
     });
 
-    it("should handle AuthService errors", async () => {
+    it("should handle mockAuthService errors", async () => {
       const errorMessage = "Google login failed";
-      (AuthService.googleLogin as jest.Mock).mockRejectedValue(
+      (mockAuthService.googleLogin as jest.Mock).mockRejectedValue(
         new Error(errorMessage)
       );
 
       await expect(
-        AuthController.loginWithGoogle(
+        authController.loginWithGoogle(
           mockRequest as TypedRequest,
           mockResponse as Response
         )
