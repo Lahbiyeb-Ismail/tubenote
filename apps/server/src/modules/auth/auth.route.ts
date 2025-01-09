@@ -31,7 +31,6 @@ const refreshTokenService = new RefreshTokenService(refreshTokenDB);
 const emailService = new EmailService(userDB, verificationTokenDB);
 
 const authService = new AuthService(
-  userDB,
   jwtService,
   userService,
   passwordService,

@@ -7,20 +7,15 @@ import {
 
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 
-import {
-  ConflictError,
-  ForbiddenError,
-  NotFoundError,
-  UnauthorizedError,
-} from "../../errors";
+import { ForbiddenError, NotFoundError, UnauthorizedError } from "../../errors";
 
 import { IEmailService } from "../../services/emailService";
-import { IPasswordService } from "../password/password.service";
-import { IRefreshTokenService } from "../refreshToken/refresh-token.service";
-import { IUserDatabase } from "../user/user.db";
-import { IUserService } from "../user/user.service";
 
 import type { IJwtService } from "../jwt/jwt.service";
+import { IPasswordService } from "../password/password.service";
+import { IRefreshTokenService } from "../refreshToken/refresh-token.service";
+import { IUserService } from "../user/user.service";
+
 import type { UserDto } from "../user/dtos/user.dto";
 import type { GoogleLoginDto } from "./dtos/google-login.dto";
 import type { LoginResponseDto } from "./dtos/login-response.dto";
@@ -40,7 +35,6 @@ export interface IAuthService {
 }
 
 export class AuthService implements IAuthService {
-  private userDB: IUserDatabase;
   private jwtService: IJwtService;
   private userService: IUserService;
   private passwordService: IPasswordService;
@@ -48,14 +42,12 @@ export class AuthService implements IAuthService {
   private emailService: IEmailService;
 
   constructor(
-    userDB: IUserDatabase,
     jwtService: IJwtService,
     userService: IUserService,
     passwordService: IPasswordService,
     refreshTokenService: IRefreshTokenService,
     emailService: IEmailService
   ) {
-    this.userDB = userDB;
     this.jwtService = jwtService;
     this.userService = userService;
     this.passwordService = passwordService;
@@ -64,21 +56,7 @@ export class AuthService implements IAuthService {
   }
 
   async registerUser(registerUserDto: RegisterUserDto): Promise<UserDto> {
-    const { email, username, password } = registerUserDto;
-
-    const userExists = await this.userDB.findByEmail(email);
-
-    if (userExists) {
-      throw new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
-    }
-
-    const hashedPassword = await this.passwordService.hashPassword(password);
-
-    const newUser = await this.userDB.create({
-      username,
-      email,
-      password: hashedPassword,
-    });
+    const newUser = await this.userService.createUser(registerUserDto);
 
     await this.emailService.sendVerificationEmail(newUser.email);
 
@@ -88,7 +66,7 @@ export class AuthService implements IAuthService {
   async loginUser(loginUserDto: LoginUserDto): Promise<LoginResponseDto> {
     const { email, password } = loginUserDto;
 
-    const user = await this.userDB.findByEmail(email);
+    const user = await this.userService.getUserByEmail(email);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -177,10 +155,10 @@ export class AuthService implements IAuthService {
       throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
-    let foundUser = await this.userDB.findByEmail(email);
+    let foundUser = await this.userService.getUserByEmail(email);
 
     if (!foundUser) {
-      foundUser = await this.userDB.create({
+      foundUser = await this.userService.createUser({
         username: name,
         isEmailVerified: email_verified,
         password: googleId,
@@ -189,7 +167,7 @@ export class AuthService implements IAuthService {
         googleId,
       });
     } else if (!foundUser.googleId) {
-      foundUser = await this.userDB.updateUser(foundUser.id, {
+      foundUser = await this.userService.updateUser(foundUser.id, {
         googleId,
       });
     }
