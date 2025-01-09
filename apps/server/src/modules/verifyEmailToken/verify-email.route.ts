@@ -10,6 +10,8 @@ import prismaClient from "../../lib/prisma";
 import { EmailService } from "../../services/emailService";
 import { AuthService } from "../auth/auth.service";
 import { PasswordService } from "../password/password.service";
+import { RefreshTokenDatabase } from "../refreshToken/refresh-token.db";
+import { RefreshTokenService } from "../refreshToken/refresh-token.service";
 import { UserDatabase } from "../user/user.db";
 import { UserService } from "../user/user.service";
 import { VerificationTokenDatabase } from "./verification-token.db";
@@ -17,13 +19,16 @@ import { VerifyEmailService } from "./verify-email.service";
 
 const userDB = new UserDatabase(prismaClient);
 const verificationTokenDB = new VerificationTokenDatabase(prismaClient);
+const refreshTokenDB = new RefreshTokenDatabase(prismaClient);
 const passwordService = new PasswordService();
 const userService = new UserService(userDB, passwordService);
+const refreshTokenService = new RefreshTokenService(refreshTokenDB);
 const emailService = new EmailService(userDB, verificationTokenDB);
 const authService = new AuthService(
   userDB,
   userService,
   passwordService,
+  refreshTokenService,
   emailService
 );
 const verifyEmailService = new VerifyEmailService(
