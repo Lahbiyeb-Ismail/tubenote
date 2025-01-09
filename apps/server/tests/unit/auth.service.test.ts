@@ -22,13 +22,12 @@ import type { IRefreshTokenService } from "../../src/modules/refreshToken/refres
 import type { CreateUserDto } from "../../src/modules/user/dtos/create-user.dto";
 import type { UserDto } from "../../src/modules/user/dtos/user.dto";
 
-import { IUserDatabase } from "../../src/modules/user/user.db";
 import { IUserService } from "../../src/modules/user/user.service";
 import type { IEmailService } from "../../src/services/emailService";
 
 import type { JwtPayload } from "../../src/types";
 
-describe("Test AuthService methods", () => {
+describe("AuthService methods tests", () => {
   const mockUserId = "user_id_001";
 
   const mockUser: UserDto = {
@@ -47,7 +46,6 @@ describe("Test AuthService methods", () => {
   };
 
   let authService: IAuthService;
-  let mockUserDB: IUserDatabase;
   let mockJwtService: IJwtService;
   let mockUserService: IUserService;
   let mockPasswordService: IPasswordService;
@@ -55,20 +53,13 @@ describe("Test AuthService methods", () => {
   let mockEmailService: IEmailService;
 
   beforeEach(() => {
-    mockUserDB = {
-      findByEmail: jest.fn(),
-      create: jest.fn(),
-      findById: jest.fn(),
-      updateUser: jest.fn(),
-      updatePassword: jest.fn(),
-    };
-
     mockJwtService = {
       verify: jest.fn(),
       sign: jest.fn(),
     };
 
     mockUserService = {
+      createUser: jest.fn(),
       getUserById: jest.fn(),
       verifyUserEmail: jest.fn(),
       getUserByEmail: jest.fn(),
@@ -96,7 +87,6 @@ describe("Test AuthService methods", () => {
     };
 
     authService = new AuthService(
-      mockUserDB,
       mockJwtService,
       mockUserService,
       mockPasswordService,
@@ -125,13 +115,7 @@ describe("Test AuthService methods", () => {
     });
 
     it("should successfully register a new user", async () => {
-      (mockUserDB.findByEmail as jest.Mock).mockResolvedValue(null);
-
-      (mockPasswordService.hashPassword as jest.Mock).mockResolvedValue(
-        "hashedPassword"
-      );
-
-      (mockUserDB.create as jest.Mock).mockResolvedValue(mockUser);
+      (mockUserService.createUser as jest.Mock).mockResolvedValue(mockUser);
 
       (mockEmailService.sendVerificationEmail as jest.Mock).mockResolvedValue(
         undefined
@@ -139,18 +123,7 @@ describe("Test AuthService methods", () => {
 
       const result = await authService.registerUser(registerUserDto);
 
-      expect(mockUserDB.findByEmail).toHaveBeenCalledWith(
-        registerUserDto.email
-      );
-      expect(mockPasswordService.hashPassword).toHaveBeenCalledWith(
-        registerUserDto.password
-      );
-
-      expect(mockUserDB.create).toHaveBeenCalledWith({
-        username: registerUserDto.username,
-        email: registerUserDto.email,
-        password: "hashedPassword",
-      });
+      expect(mockUserService.createUser).toHaveBeenCalledWith(registerUserDto);
 
       expect(mockEmailService.sendVerificationEmail).toHaveBeenCalledWith(
         registerUserDto.email
@@ -160,21 +133,15 @@ describe("Test AuthService methods", () => {
     });
 
     it("should throw a ConflictError if the email is already exists", async () => {
-      (mockUserDB.findByEmail as jest.Mock).mockResolvedValue(mockUser);
+      (mockUserService.createUser as jest.Mock).mockRejectedValue(
+        new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS)
+      );
 
-      await expect(
-        authService.registerUser({
-          username: "testuser",
-          email: "test@example.com",
-          password: "password123",
-        })
-      ).rejects.toThrow(new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS));
+      await expect(authService.registerUser(registerUserDto)).rejects.toThrow(
+        new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS)
+      );
 
-      expect(mockUserDB.findByEmail).toHaveBeenCalledWith("test@example.com");
-
-      expect(mockPasswordService.hashPassword).not.toHaveBeenCalled();
-
-      expect(mockUserDB.create).not.toHaveBeenCalled();
+      expect(mockUserService.createUser).toHaveBeenCalledWith(registerUserDto);
 
       expect(mockEmailService.sendVerificationEmail).not.toHaveBeenCalled();
     });
@@ -191,7 +158,7 @@ describe("Test AuthService methods", () => {
     });
 
     it("should successfully login a user", async () => {
-      (mockUserDB.findByEmail as jest.Mock).mockResolvedValue({
+      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue({
         ...mockUser,
         isEmailVerified: true,
       });
@@ -208,7 +175,9 @@ describe("Test AuthService methods", () => {
 
       expect(result).toEqual(loginResponseDto);
 
-      expect(mockUserDB.findByEmail).toHaveBeenCalledWith(loginUserDto.email);
+      expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(
+        loginUserDto.email
+      );
 
       expect(mockPasswordService.comparePasswords).toHaveBeenCalledWith({
         password: loginUserDto.password,
@@ -224,13 +193,15 @@ describe("Test AuthService methods", () => {
     });
 
     it("should throw a NotFoundError if the user doesn't exist", async () => {
-      (mockUserDB.findByEmail as jest.Mock).mockResolvedValue(null);
+      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue(null);
 
       await expect(authService.loginUser(loginUserDto)).rejects.toThrow(
         new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
       );
 
-      expect(mockUserDB.findByEmail).toHaveBeenCalledWith(loginUserDto.email);
+      expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(
+        loginUserDto.email
+      );
 
       expect(mockPasswordService.comparePasswords).not.toHaveBeenCalled();
 
@@ -240,13 +211,15 @@ describe("Test AuthService methods", () => {
     });
 
     it("should throw a UnauthorizedError if the email is not verified", async () => {
-      (mockUserDB.findByEmail as jest.Mock).mockResolvedValue(mockUser);
+      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue(mockUser);
 
       await expect(authService.loginUser(loginUserDto)).rejects.toThrow(
         new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED)
       );
 
-      expect(mockUserDB.findByEmail).toHaveBeenCalledWith(loginUserDto.email);
+      expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(
+        loginUserDto.email
+      );
 
       expect(mockPasswordService.comparePasswords).not.toHaveBeenCalled();
 
@@ -256,7 +229,7 @@ describe("Test AuthService methods", () => {
     });
 
     it("should throw a ForbiddenError if the password is incorrect", async () => {
-      (mockUserDB.findByEmail as jest.Mock).mockResolvedValue({
+      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue({
         ...mockUser,
         isEmailVerified: true,
       });
@@ -269,7 +242,9 @@ describe("Test AuthService methods", () => {
         new ForbiddenError(ERROR_MESSAGES.INVALID_CREDENTIALS)
       );
 
-      expect(mockUserDB.findByEmail).toHaveBeenCalledWith(loginUserDto.email);
+      expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(
+        loginUserDto.email
+      );
 
       expect(mockPasswordService.comparePasswords).toHaveBeenCalledWith({
         password: loginUserDto.password,
@@ -482,16 +457,20 @@ describe("Test AuthService methods", () => {
     });
 
     it("should successfully login a user with google", async () => {
-      (mockUserDB.findByEmail as jest.Mock).mockResolvedValue(null);
-      (mockUserDB.create as jest.Mock).mockResolvedValue(mockCreatedUser);
+      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue(null);
+      (mockUserService.createUser as jest.Mock).mockResolvedValue(
+        mockCreatedUser
+      );
 
       const result = await authService.googleLogin(googleLoginDto);
 
       expect(result).toEqual(loginResponseDto);
 
-      expect(mockUserDB.findByEmail).toHaveBeenCalledWith(googleLoginDto.email);
+      expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(
+        googleLoginDto.email
+      );
 
-      expect(mockUserDB.create).toHaveBeenCalledWith(createUserDto);
+      expect(mockUserService.createUser).toHaveBeenCalledWith(createUserDto);
 
       expect(authService.generateAuthTokens).toHaveBeenCalledWith(
         mockCreatedUser.id
@@ -504,22 +483,29 @@ describe("Test AuthService methods", () => {
     });
 
     it("should successfully login a user with google and update the googleId", async () => {
-      (mockUserDB.findByEmail as jest.Mock).mockResolvedValue({
+      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue({
         ...mockCreatedUser,
         googleId: "",
       });
 
-      (mockUserDB.updateUser as jest.Mock).mockResolvedValue(mockCreatedUser);
+      (mockUserService.updateUser as jest.Mock).mockResolvedValue(
+        mockCreatedUser
+      );
 
       const result = await authService.googleLogin(googleLoginDto);
 
       expect(result).toEqual(loginResponseDto);
 
-      expect(mockUserDB.findByEmail).toHaveBeenCalledWith(googleLoginDto.email);
+      expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(
+        googleLoginDto.email
+      );
 
-      expect(mockUserDB.updateUser).toHaveBeenCalledWith(mockCreatedUser.id, {
-        googleId: googleLoginDto.sub,
-      });
+      expect(mockUserService.updateUser).toHaveBeenCalledWith(
+        mockCreatedUser.id,
+        {
+          googleId: googleLoginDto.sub,
+        }
+      );
       expect(authService.generateAuthTokens).toHaveBeenCalledWith(
         mockCreatedUser.id
       );
@@ -541,9 +527,9 @@ describe("Test AuthService methods", () => {
         new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED)
       );
 
-      expect(mockUserDB.findByEmail).not.toHaveBeenCalled();
-      expect(mockUserDB.create).not.toHaveBeenCalled();
-      expect(mockUserDB.updateUser).not.toHaveBeenCalled();
+      expect(mockUserService.getUserByEmail).not.toHaveBeenCalled();
+      expect(mockUserService.createUser).not.toHaveBeenCalled();
+      expect(mockUserService.updateUser).not.toHaveBeenCalled();
       expect(mockRefreshTokenService.createToken).not.toHaveBeenCalled();
     });
   });
