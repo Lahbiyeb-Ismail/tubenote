@@ -19,13 +19,12 @@ import { VerificationTokenDatabase } from "../verifyEmailToken/verification-toke
 import { loginUserSchema } from "./schemas/login-user.schema";
 import { registerUserSchema } from "./schemas/register-user.schema";
 
-const passwordService = new PasswordService();
-
 const userDB = new UserDatabase(prismaClient);
 const refreshTokenDB = new RefreshTokenDatabase(prismaClient);
 const verificationTokenDB = new VerificationTokenDatabase(prismaClient);
 
 const jwtService = new JwtService();
+const passwordService = new PasswordService(userDB);
 const userService = new UserService(userDB, passwordService);
 const refreshTokenService = new RefreshTokenService(refreshTokenDB);
 const emailService = new EmailService(userDB, verificationTokenDB);
