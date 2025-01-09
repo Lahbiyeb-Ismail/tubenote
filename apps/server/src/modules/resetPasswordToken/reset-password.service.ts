@@ -6,15 +6,15 @@ import { ERROR_MESSAGES } from "../../constants/errorMessages";
 import { ForbiddenError, NotFoundError } from "../../errors";
 import type { IEmailService } from "../../services/emailService";
 import type { IUserDatabase } from "../user/user.db";
-import type { ResetTokenEntry } from "./reset-password.type";
+import type { ResetTokenDto } from "./dtos/reset-token.dto";
 
 export interface IResetPasswordService {
   sendResetToken(email: string): Promise<void>;
   createToken(userId: string): Promise<string>;
   reset(token: string, password: string): Promise<void>;
-  findResetToken(token: string): Promise<ResetTokenEntry | null>;
-  isResetTokenExpired(resetToken: ResetTokenEntry): Promise<boolean>;
-  verifyResetToken(token: string): Promise<ResetTokenEntry>;
+  findResetToken(token: string): Promise<ResetTokenDto | null>;
+  isResetTokenExpired(resetToken: ResetTokenDto): Promise<boolean>;
+  verifyResetToken(token: string): Promise<ResetTokenDto>;
 }
 
 export class ResetPasswordService implements IResetPasswordService {
@@ -93,7 +93,7 @@ export class ResetPasswordService implements IResetPasswordService {
     await this.resetTokenDB.deleteMany(resetToken.userId);
   }
 
-  async findResetToken(token: string): Promise<ResetTokenEntry | null> {
+  async findResetToken(token: string): Promise<ResetTokenDto | null> {
     const resetToken = await this.resetTokenDB.findByToken(token);
 
     if (!resetToken) {
@@ -103,7 +103,7 @@ export class ResetPasswordService implements IResetPasswordService {
     return resetToken;
   }
 
-  async isResetTokenExpired(resetToken: ResetTokenEntry): Promise<boolean> {
+  async isResetTokenExpired(resetToken: ResetTokenDto): Promise<boolean> {
     if (resetToken.expiresAt < new Date()) {
       return true;
     }
@@ -111,7 +111,7 @@ export class ResetPasswordService implements IResetPasswordService {
     return false;
   }
 
-  async verifyResetToken(token: string): Promise<ResetTokenEntry> {
+  async verifyResetToken(token: string): Promise<ResetTokenDto> {
     const resetToken = await this.findResetToken(token);
 
     if (!resetToken) {

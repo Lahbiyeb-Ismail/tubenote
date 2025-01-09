@@ -1,4 +1,4 @@
-export interface ResetTokenEntry {
+export interface ResetTokenDto {
   token: string;
   id: string;
   userId: string;

@@ -2,11 +2,11 @@ import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
-import type { ResetTokenEntry } from "./reset-password.type";
+import type { ResetTokenDto } from "./dtos/reset-token.dto";
 
 export interface IResetPasswordTokenDatabase {
-  findByUserId(userId: string): Promise<ResetTokenEntry | null>;
-  findByToken(token: string): Promise<ResetTokenEntry | null>;
+  findByUserId(userId: string): Promise<ResetTokenDto | null>;
+  findByToken(token: string): Promise<ResetTokenDto | null>;
   create(userId: string): Promise<string>;
   deleteMany(userId: string): Promise<void>;
 }
@@ -18,7 +18,7 @@ export class ResetPasswordTokenDatabase implements IResetPasswordTokenDatabase {
     this.database = database;
   }
 
-  async findByUserId(userId: string): Promise<ResetTokenEntry | null> {
+  async findByUserId(userId: string): Promise<ResetTokenDto | null> {
     return handleAsyncOperation(
       () =>
         this.database.resetPasswordToken.findFirst({
@@ -31,7 +31,7 @@ export class ResetPasswordTokenDatabase implements IResetPasswordTokenDatabase {
     );
   }
 
-  async findByToken(token: string): Promise<ResetTokenEntry | null> {
+  async findByToken(token: string): Promise<ResetTokenDto | null> {
     return handleAsyncOperation(
       () =>
         this.database.resetPasswordToken.findUnique({
