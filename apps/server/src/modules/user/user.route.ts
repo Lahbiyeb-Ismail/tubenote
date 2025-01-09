@@ -12,7 +12,8 @@ import { UserDatabase } from "./user.db";
 import { UserService } from "./user.service";
 
 const userDB = new UserDatabase(prismaClient);
-const passwordService = new PasswordService();
+const passwordService = new PasswordService(userDB);
+
 const userService = new UserService(userDB, passwordService);
 const userController = new UserController(userService);
 
@@ -31,10 +32,10 @@ router
   );
 
 // - PATCH /update-password: Update the current user's password (requires request body validation)
-router
-  .route("/update-password")
-  .patch(validateRequest({ body: updatePasswordSchema }), (req, res) =>
-    userController.updateUserPassword(req, res)
-  );
+// router
+//   .route("/update-password")
+//   .patch(validateRequest({ body: updatePasswordSchema }), (req, res) =>
+//     userController.updateUserPassword(req, res)
+//   );
 
 export default router;

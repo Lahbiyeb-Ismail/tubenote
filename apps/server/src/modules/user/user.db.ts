@@ -1,8 +1,8 @@
 import type { PrismaClient } from "@prisma/client";
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
 
+import type { UpdatePasswordDto } from "../password/dtos/update-password.dto";
 import type { CreateUserDto } from "./dtos/create-user.dto";
-import type { UpdatePasswordDbDto } from "./dtos/update-password.dto";
 import type { UpdateUserDto } from "./dtos/update-user.dto";
 import type { UserDto } from "./dtos/user.dto";
 
@@ -11,7 +11,7 @@ export interface IUserDatabase {
   findByEmail(email: string): Promise<UserDto | null>;
   findById(id: string): Promise<UserDto | null>;
   updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserDto>;
-  updatePassword(updatePasswordDto: UpdatePasswordDbDto): Promise<UserDto>;
+  updatePassword(userId: string, hashedPassword: string): Promise<UserDto>;
 }
 
 export class UserDatabase implements IUserDatabase {
@@ -71,16 +71,15 @@ export class UserDatabase implements IUserDatabase {
   }
 
   async updatePassword(
-    updatePasswordDto: UpdatePasswordDbDto
+    userId: string,
+    hashedPassword: string
   ): Promise<UserDto> {
-    const { id, password } = updatePasswordDto;
-
     return handleAsyncOperation(
       () =>
         this.database.user.update({
-          where: { id },
+          where: { id: userId },
           data: {
-            password,
+            password: hashedPassword,
           },
         }),
       { errorMessage: "Failed to update user's password." }

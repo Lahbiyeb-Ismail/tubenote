@@ -3,7 +3,6 @@ import httpStatus from "http-status";
 
 import type { TypedRequest } from "../../types";
 
-import type { UpdatePasswordDto } from "./dtos/update-password.dto";
 import type { UpdateUserDto } from "./dtos/update-user.dto";
 import { IUserService } from "./user.service";
 
@@ -11,10 +10,6 @@ export interface IUserController {
   getCurrentUser(req: TypedRequest, res: Response): Promise<void>;
   updateCurrentUser(
     req: TypedRequest<UpdateUserDto>,
-    res: Response
-  ): Promise<void>;
-  updateUserPassword(
-    req: TypedRequest<UpdatePasswordDto>,
     res: Response
   ): Promise<void>;
 }
@@ -68,24 +63,5 @@ export class UserController implements IUserController {
     await this.userService.updateUser(userId, req.body);
 
     res.status(httpStatus.OK).json({ message: "User updated successfully." });
-  }
-
-  /**
-   * Update the current user's password.
-   *
-   * @param req - The request object containing the user ID and password data.
-   * @param res - The response object to confirm the password update.
-   */
-  async updateUserPassword(
-    req: TypedRequest<UpdatePasswordDto>,
-    res: Response
-  ): Promise<void> {
-    const userId = req.userId;
-
-    await this.userService.updatePassword(userId, req.body);
-
-    res
-      .status(httpStatus.OK)
-      .json({ message: "Password updated successfully." });
   }
 }

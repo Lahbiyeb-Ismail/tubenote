@@ -6,7 +6,6 @@ import { IPasswordService } from "../password/password.service";
 import { IUserDatabase } from "./user.db";
 
 import type { CreateUserDto } from "./dtos/create-user.dto";
-import type { UpdatePasswordDto } from "./dtos/update-password.dto";
 import type { UpdateUserDto } from "./dtos/update-user.dto";
 import type { UserDto } from "./dtos/user.dto";
 
@@ -15,10 +14,6 @@ export interface IUserService {
   getUserByEmail(email: string): Promise<UserDto | null>;
   getUserById(userId: string): Promise<UserDto>;
   updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserDto>;
-  updatePassword(
-    id: string,
-    updatePasswordDto: UpdatePasswordDto
-  ): Promise<UserDto>;
   verifyUserEmail(id: string): Promise<UserDto>;
 }
 
@@ -78,32 +73,6 @@ export class UserService implements IUserService {
     }
 
     return await this.userDB.updateUser(id, updateUserDto);
-  }
-
-  async updatePassword(
-    id: string,
-    updatePasswordDto: UpdatePasswordDto
-  ): Promise<UserDto> {
-    const { currentPassword, newPassword } = updatePasswordDto;
-
-    const user = await this.getUserById(id);
-
-    const isPasswordValid = await this.passwordService.comparePasswords({
-      password: currentPassword,
-      hashedPassword: user.password,
-    });
-
-    if (!isPasswordValid) {
-      throw new BadRequestError(ERROR_MESSAGES.INVALID_CREDENTIALS);
-    }
-
-    if (currentPassword === newPassword) {
-      throw new BadRequestError(ERROR_MESSAGES.PASSWORD_SAME_AS_CURRENT);
-    }
-
-    const hashedPassword = await this.passwordService.hashPassword(newPassword);
-
-    return await this.userDB.updatePassword({ id, password: hashedPassword });
   }
 
   async verifyUserEmail(id: string): Promise<UserDto> {
