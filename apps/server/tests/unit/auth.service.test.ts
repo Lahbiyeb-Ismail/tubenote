@@ -15,6 +15,7 @@ import type { LoginUserDto } from "../../src/modules/auth/dtos/login-user.dto";
 import type { LogoutUserDto } from "../../src/modules/auth/dtos/logout-user.dto";
 import type { RefreshDto } from "../../src/modules/auth/dtos/refresh.dto";
 import type { RegisterUserDto } from "../../src/modules/auth/dtos/register-user.dto";
+import type { IJwtService } from "../../src/modules/jwt/jwt.service";
 import { IPasswordService } from "../../src/modules/password/password.service";
 import type { RefreshTokenDto } from "../../src/modules/refreshToken/dtos/refresh-token.dto";
 import type { IRefreshTokenService } from "../../src/modules/refreshToken/refresh-token.service";
@@ -28,8 +29,26 @@ import type { IEmailService } from "../../src/services/emailService";
 import type { JwtPayload } from "../../src/types";
 
 describe("Test AuthService methods", () => {
+  const mockUserId = "user_id_001";
+
+  const mockUser: UserDto = {
+    id: mockUserId,
+    username: "testuser",
+    email: "test@example.com",
+    password: "hashedPassword",
+    isEmailVerified: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const loginResponseDto: LoginResponseDto = {
+    accessToken: "mock_access_token",
+    refreshToken: "mock_refresh_oken",
+  };
+
   let authService: IAuthService;
   let mockUserDB: IUserDatabase;
+  let mockJwtService: IJwtService;
   let mockUserService: IUserService;
   let mockPasswordService: IPasswordService;
   let mockRefreshTokenService: IRefreshTokenService;
@@ -43,6 +62,12 @@ describe("Test AuthService methods", () => {
       updateUser: jest.fn(),
       updatePassword: jest.fn(),
     };
+
+    mockJwtService = {
+      verify: jest.fn(),
+      sign: jest.fn(),
+    };
+
     mockUserService = {
       getUserById: jest.fn(),
       verifyUserEmail: jest.fn(),
@@ -50,6 +75,7 @@ describe("Test AuthService methods", () => {
       updateUser: jest.fn(),
       updatePassword: jest.fn(),
     };
+
     mockPasswordService = {
       hashPassword: jest.fn(),
       comparePasswords: jest.fn(),
@@ -71,29 +97,17 @@ describe("Test AuthService methods", () => {
 
     authService = new AuthService(
       mockUserDB,
+      mockJwtService,
       mockUserService,
       mockPasswordService,
       mockRefreshTokenService,
       mockEmailService
     );
+
+    jest
+      .spyOn(authService, "generateAuthTokens")
+      .mockReturnValue(loginResponseDto);
   });
-
-  const mockUserId = "user_id_001";
-
-  const mockUser: UserDto = {
-    id: mockUserId,
-    username: "testuser",
-    email: "test@example.com",
-    password: "hashedPassword",
-    isEmailVerified: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  const loginResponseDto: LoginResponseDto = {
-    accessToken: "mock_access_token",
-    refreshToken: "mock_refresh_oken",
-  };
 
   beforeAll(() => {
     jest.clearAllMocks();
@@ -174,9 +188,6 @@ describe("Test AuthService methods", () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      jest
-        .spyOn(authService, "createJwtTokens")
-        .mockReturnValue(loginResponseDto);
     });
 
     it("should successfully login a user", async () => {
@@ -204,7 +215,7 @@ describe("Test AuthService methods", () => {
         hashedPassword: mockUser.password,
       });
 
-      expect(authService.createJwtTokens).toHaveBeenCalledWith(mockUser.id);
+      expect(authService.generateAuthTokens).toHaveBeenCalledWith(mockUser.id);
 
       expect(mockRefreshTokenService.createToken).toHaveBeenCalledWith(
         mockUser.id,
@@ -223,7 +234,7 @@ describe("Test AuthService methods", () => {
 
       expect(mockPasswordService.comparePasswords).not.toHaveBeenCalled();
 
-      expect(authService.createJwtTokens).not.toHaveBeenCalled();
+      expect(authService.generateAuthTokens).not.toHaveBeenCalled();
 
       expect(mockRefreshTokenService.createToken).not.toHaveBeenCalled();
     });
@@ -239,7 +250,7 @@ describe("Test AuthService methods", () => {
 
       expect(mockPasswordService.comparePasswords).not.toHaveBeenCalled();
 
-      expect(authService.createJwtTokens).not.toHaveBeenCalled();
+      expect(authService.generateAuthTokens).not.toHaveBeenCalled();
 
       expect(mockRefreshTokenService.createToken).not.toHaveBeenCalled();
     });
@@ -265,7 +276,7 @@ describe("Test AuthService methods", () => {
         hashedPassword: mockUser.password,
       });
 
-      expect(authService.createJwtTokens).not.toHaveBeenCalled();
+      expect(authService.generateAuthTokens).not.toHaveBeenCalled();
 
       expect(mockRefreshTokenService.createToken).not.toHaveBeenCalled();
     });
@@ -336,7 +347,7 @@ describe("Test AuthService methods", () => {
     });
 
     it("should successfully refresh the token", async () => {
-      jest.spyOn(authService, "verifyToken").mockResolvedValue(mockJwtPayload);
+      (mockJwtService.verify as jest.Mock).mockResolvedValue(mockJwtPayload);
 
       (mockRefreshTokenService.findToken as jest.Mock).mockResolvedValue(
         mockRefreshToken
@@ -346,15 +357,11 @@ describe("Test AuthService methods", () => {
         undefined
       );
 
-      jest
-        .spyOn(authService, "createJwtTokens")
-        .mockReturnValue(loginResponseDto);
-
       const result = await authService.refreshToken(refreshDto);
 
       expect(result).toEqual(loginResponseDto);
 
-      expect(authService.verifyToken).toHaveBeenCalledWith({
+      expect(mockJwtService.verify).toHaveBeenCalledWith({
         token: refreshDto.token,
         secret: REFRESH_TOKEN_SECRET,
       });
@@ -367,19 +374,19 @@ describe("Test AuthService methods", () => {
         refreshDto.token
       );
 
-      expect(authService.createJwtTokens).toHaveBeenCalledWith(
+      expect(authService.generateAuthTokens).toHaveBeenCalledWith(
         refreshDto.userId
       );
     });
 
     it("should throw a ForbiddenError if the token is invalid or expired", async () => {
-      jest.spyOn(authService, "verifyToken").mockResolvedValue(null);
+      (mockJwtService.verify as jest.Mock).mockResolvedValue(null);
 
       await expect(authService.refreshToken(refreshDto)).rejects.toThrow(
         new ForbiddenError(ERROR_MESSAGES.FORBIDDEN)
       );
 
-      expect(authService.verifyToken).toHaveBeenCalledWith({
+      expect(mockJwtService.verify).toHaveBeenCalledWith({
         token: refreshDto.token,
         secret: REFRESH_TOKEN_SECRET,
       });
@@ -393,7 +400,7 @@ describe("Test AuthService methods", () => {
     });
 
     it("should throw a UnauthorizedError if the userId in the token is not the same as the userId in the request", async () => {
-      jest.spyOn(authService, "verifyToken").mockResolvedValue({
+      (mockJwtService.verify as jest.Mock).mockResolvedValue({
         ...mockJwtPayload,
         userId: "user_id_002",
       });
@@ -402,7 +409,7 @@ describe("Test AuthService methods", () => {
         new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
       );
 
-      expect(authService.verifyToken).toHaveBeenCalledWith({
+      expect(mockJwtService.verify).toHaveBeenCalledWith({
         token: refreshDto.token,
         secret: REFRESH_TOKEN_SECRET,
       });
@@ -413,7 +420,7 @@ describe("Test AuthService methods", () => {
     });
 
     it("should throw a ForbiddenError if the token is not found in the database (token reuses)", async () => {
-      jest.spyOn(authService, "verifyToken").mockResolvedValue(mockJwtPayload);
+      (mockJwtService.verify as jest.Mock).mockResolvedValue(mockJwtPayload);
 
       (mockRefreshTokenService.findToken as jest.Mock).mockResolvedValue(null);
 
@@ -421,7 +428,7 @@ describe("Test AuthService methods", () => {
         new ForbiddenError(ERROR_MESSAGES.FORBIDDEN)
       );
 
-      expect(authService.verifyToken).toHaveBeenCalledWith({
+      expect(mockJwtService.verify).toHaveBeenCalledWith({
         token: refreshDto.token,
         secret: REFRESH_TOKEN_SECRET,
       });
@@ -478,10 +485,6 @@ describe("Test AuthService methods", () => {
       (mockUserDB.findByEmail as jest.Mock).mockResolvedValue(null);
       (mockUserDB.create as jest.Mock).mockResolvedValue(mockCreatedUser);
 
-      jest
-        .spyOn(authService, "createJwtTokens")
-        .mockReturnValue(loginResponseDto);
-
       const result = await authService.googleLogin(googleLoginDto);
 
       expect(result).toEqual(loginResponseDto);
@@ -490,7 +493,7 @@ describe("Test AuthService methods", () => {
 
       expect(mockUserDB.create).toHaveBeenCalledWith(createUserDto);
 
-      expect(authService.createJwtTokens).toHaveBeenCalledWith(
+      expect(authService.generateAuthTokens).toHaveBeenCalledWith(
         mockCreatedUser.id
       );
 
@@ -508,10 +511,6 @@ describe("Test AuthService methods", () => {
 
       (mockUserDB.updateUser as jest.Mock).mockResolvedValue(mockCreatedUser);
 
-      jest
-        .spyOn(authService, "createJwtTokens")
-        .mockReturnValue(loginResponseDto);
-
       const result = await authService.googleLogin(googleLoginDto);
 
       expect(result).toEqual(loginResponseDto);
@@ -521,7 +520,7 @@ describe("Test AuthService methods", () => {
       expect(mockUserDB.updateUser).toHaveBeenCalledWith(mockCreatedUser.id, {
         googleId: googleLoginDto.sub,
       });
-      expect(authService.createJwtTokens).toHaveBeenCalledWith(
+      expect(authService.generateAuthTokens).toHaveBeenCalledWith(
         mockCreatedUser.id
       );
       expect(mockRefreshTokenService.createToken).toHaveBeenCalledWith(
