@@ -1,15 +1,17 @@
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 
-import { BadRequestError, NotFoundError } from "../../errors";
+import { BadRequestError, ConflictError, NotFoundError } from "../../errors";
 
 import { IPasswordService } from "../password/password.service";
 import { IUserDatabase } from "./user.db";
 
+import type { CreateUserDto } from "./dtos/create-user.dto";
 import type { UpdatePasswordDto } from "./dtos/update-password.dto";
 import type { UpdateUserDto } from "./dtos/update-user.dto";
 import type { UserDto } from "./dtos/user.dto";
 
 export interface IUserService {
+  createUser(createUserDto: CreateUserDto): Promise<UserDto>;
   getUserByEmail(email: string): Promise<UserDto | null>;
   getUserById(userId: string): Promise<UserDto>;
   updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserDto>;
@@ -27,6 +29,25 @@ export class UserService implements IUserService {
   constructor(userDB: IUserDatabase, passwordService: IPasswordService) {
     this.userDB = userDB;
     this.passwordService = passwordService;
+  }
+
+  async createUser(createUserDto: CreateUserDto): Promise<UserDto> {
+    const { email } = createUserDto;
+
+    const existingUser = await this.getUserByEmail(email);
+
+    if (existingUser) {
+      throw new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
+    }
+
+    const hashedPassword = await this.passwordService.hashPassword(
+      createUserDto.password
+    );
+
+    return await this.userDB.create({
+      ...createUserDto,
+      password: hashedPassword,
+    });
   }
 
   async getUserByEmail(email: string): Promise<UserDto | null> {
