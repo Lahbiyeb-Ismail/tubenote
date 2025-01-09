@@ -34,10 +34,8 @@ describe("AuthController integration tests", () => {
       logoutUser: jest.fn(),
       refreshToken: jest.fn(),
       googleLogin: jest.fn(),
-      verifyToken: jest.fn(),
-      createJwtTokens: jest.fn(),
-      generateJwtToken: jest.fn(),
       verifyEmail: jest.fn(),
+      generateAuthTokens: jest.fn(),
     };
 
     authController = new AuthController(mockAuthService);

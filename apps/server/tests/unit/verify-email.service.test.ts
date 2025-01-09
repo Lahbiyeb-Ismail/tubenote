@@ -34,14 +34,12 @@ describe("VerifyEmailService methods test", () => {
 
     mockAuthService = {
       verifyEmail: jest.fn(),
-      generateJwtToken: jest.fn(),
-      createJwtTokens: jest.fn(),
       registerUser: jest.fn(),
       loginUser: jest.fn(),
       logoutUser: jest.fn(),
       refreshToken: jest.fn(),
       googleLogin: jest.fn(),
-      verifyToken: jest.fn(),
+      generateAuthTokens: jest.fn(),
     };
 
     verifyEmailService = new VerifyEmailService(
