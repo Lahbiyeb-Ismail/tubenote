@@ -1,5 +1,3 @@
-import jwt from "jsonwebtoken";
-
 import {
   ACCESS_TOKEN_EXPIRE,
   ACCESS_TOKEN_SECRET,
@@ -16,43 +14,34 @@ import {
   UnauthorizedError,
 } from "../../errors";
 
-import type { JwtPayload } from "../../types";
-
-import logger from "../../utils/logger";
-
 import { IEmailService } from "../../services/emailService";
 import { IPasswordService } from "../password/password.service";
 import { IRefreshTokenService } from "../refreshToken/refresh-token.service";
 import { IUserDatabase } from "../user/user.db";
 import { IUserService } from "../user/user.service";
 
+import type { IJwtService } from "../jwt/jwt.service";
 import type { UserDto } from "../user/dtos/user.dto";
-import type { GenerateTokenDto } from "./dtos/generate-token.dto";
 import type { GoogleLoginDto } from "./dtos/google-login.dto";
 import type { LoginResponseDto } from "./dtos/login-response.dto";
 import type { LoginUserDto } from "./dtos/login-user.dto";
 import type { LogoutUserDto } from "./dtos/logout-user.dto";
 import type { RefreshDto } from "./dtos/refresh.dto";
 import type { RegisterUserDto } from "./dtos/register-user.dto";
-import type { VerifyJwtTokenDto } from "./dtos/verfiy-jwt-token.dto";
 
 export interface IAuthService {
-  verifyToken(verifyTokenDto: VerifyJwtTokenDto): Promise<JwtPayload | null>;
-  generateJwtToken(generateTokenDto: GenerateTokenDto): string;
-  createJwtTokens(userId: string): {
-    accessToken: string;
-    refreshToken: string;
-  };
   registerUser(registerUserDto: RegisterUserDto): Promise<UserDto>;
   loginUser(loginUserDto: LoginUserDto): Promise<LoginResponseDto>;
   logoutUser(logoutUserDto: LogoutUserDto): Promise<void>;
   refreshToken(refreshDto: RefreshDto): Promise<LoginResponseDto>;
   googleLogin(googleLoginDto: GoogleLoginDto): Promise<LoginResponseDto>;
   verifyEmail(userId: string): Promise<void>;
+  generateAuthTokens(userId: string): LoginResponseDto;
 }
 
 export class AuthService implements IAuthService {
   private userDB: IUserDatabase;
+  private jwtService: IJwtService;
   private userService: IUserService;
   private passwordService: IPasswordService;
   private refreshTokenService: IRefreshTokenService;
@@ -60,60 +49,18 @@ export class AuthService implements IAuthService {
 
   constructor(
     userDB: IUserDatabase,
+    jwtService: IJwtService,
     userService: IUserService,
     passwordService: IPasswordService,
     refreshTokenService: IRefreshTokenService,
     emailService: IEmailService
   ) {
     this.userDB = userDB;
+    this.jwtService = jwtService;
     this.userService = userService;
     this.passwordService = passwordService;
     this.refreshTokenService = refreshTokenService;
     this.emailService = emailService;
-  }
-
-  async verifyToken(
-    verifyTokenDto: VerifyJwtTokenDto
-  ): Promise<JwtPayload | null> {
-    const { token, secret } = verifyTokenDto;
-
-    return new Promise((resolve, _reject) => {
-      jwt.verify(token, secret, (err, payload) => {
-        if (err) {
-          logger.error(`Error verifying token: ${err}`);
-          resolve(null);
-        }
-
-        resolve(payload as JwtPayload);
-      });
-    });
-  }
-
-  generateJwtToken(generateTokenDto: GenerateTokenDto): string {
-    const { userId, secret, expiresIn } = generateTokenDto;
-
-    return jwt.sign({ userId }, secret, {
-      expiresIn,
-    });
-  }
-
-  createJwtTokens(userId: string): {
-    accessToken: string;
-    refreshToken: string;
-  } {
-    const accessToken = this.generateJwtToken({
-      userId,
-      secret: ACCESS_TOKEN_SECRET,
-      expiresIn: ACCESS_TOKEN_EXPIRE,
-    });
-
-    const refreshToken = this.generateJwtToken({
-      userId,
-      secret: REFRESH_TOKEN_SECRET,
-      expiresIn: REFRESH_TOKEN_EXPIRE,
-    });
-
-    return { accessToken, refreshToken };
   }
 
   async registerUser(registerUserDto: RegisterUserDto): Promise<UserDto> {
@@ -160,7 +107,7 @@ export class AuthService implements IAuthService {
       throw new ForbiddenError(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
-    const { accessToken, refreshToken } = this.createJwtTokens(user.id);
+    const { accessToken, refreshToken } = this.generateAuthTokens(user.id);
 
     await this.refreshTokenService.createToken(user.id, refreshToken);
 
@@ -180,7 +127,7 @@ export class AuthService implements IAuthService {
   async refreshToken(refreshDto: RefreshDto): Promise<LoginResponseDto> {
     const { userId, token } = refreshDto;
 
-    const payload = await this.verifyToken({
+    const payload = await this.jwtService.verify({
       token,
       secret: REFRESH_TOKEN_SECRET,
     });
@@ -206,7 +153,7 @@ export class AuthService implements IAuthService {
 
     await this.refreshTokenService.deleteToken(token);
 
-    const { accessToken, refreshToken } = this.createJwtTokens(userId);
+    const { accessToken, refreshToken } = this.generateAuthTokens(userId);
 
     await this.refreshTokenService.createToken(userId, refreshToken);
 
@@ -247,7 +194,7 @@ export class AuthService implements IAuthService {
       });
     }
 
-    const { accessToken, refreshToken } = this.createJwtTokens(foundUser.id);
+    const { accessToken, refreshToken } = this.generateAuthTokens(foundUser.id);
 
     await this.refreshTokenService.createToken(foundUser.id, refreshToken);
 
@@ -262,5 +209,21 @@ export class AuthService implements IAuthService {
     }
 
     await this.userService.verifyUserEmail(userId);
+  }
+
+  generateAuthTokens(userId: string): LoginResponseDto {
+    const accessToken = this.jwtService.sign({
+      userId,
+      secret: ACCESS_TOKEN_SECRET,
+      expiresIn: ACCESS_TOKEN_EXPIRE,
+    });
+
+    const refreshToken = this.jwtService.sign({
+      userId,
+      secret: REFRESH_TOKEN_SECRET,
+      expiresIn: REFRESH_TOKEN_EXPIRE,
+    });
+
+    return { accessToken, refreshToken };
   }
 }

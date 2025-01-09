@@ -10,6 +10,7 @@ import isAuthenticated from "../../middlewares/isAuthenticated";
 import validateRequest from "../../middlewares/validateRequest";
 
 import { EmailService } from "../../services/emailService";
+import { JwtService } from "../jwt/jwt.service";
 import { PasswordService } from "../password/password.service";
 import { RefreshTokenDatabase } from "../refreshToken/refresh-token.db";
 import { RefreshTokenService } from "../refreshToken/refresh-token.service";
@@ -24,11 +25,14 @@ const userDB = new UserDatabase(prismaClient);
 const refreshTokenDB = new RefreshTokenDatabase(prismaClient);
 const verificationTokenDB = new VerificationTokenDatabase(prismaClient);
 
+const jwtService = new JwtService();
 const userService = new UserService(userDB, passwordService);
 const refreshTokenService = new RefreshTokenService(refreshTokenDB);
 const emailService = new EmailService(userDB, verificationTokenDB);
+
 const authService = new AuthService(
   userDB,
+  jwtService,
   userService,
   passwordService,
   refreshTokenService,
