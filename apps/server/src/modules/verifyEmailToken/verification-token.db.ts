@@ -2,11 +2,11 @@ import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
-import type { VerificationTokenEntry } from "./verify-email.type";
+import type { VerifyEmailTokenDto } from "./dtos/verify-email-token.dto";
 
 export interface IVerificationTokenDB {
-  findByUserId(userId: string): Promise<VerificationTokenEntry | null>;
-  findByToken(token: string): Promise<VerificationTokenEntry | null>;
+  findByUserId(userId: string): Promise<VerifyEmailTokenDto | null>;
+  findByToken(token: string): Promise<VerifyEmailTokenDto | null>;
   create(userId: string): Promise<string>;
   deleteMany(userId: string): Promise<void>;
 }
@@ -18,7 +18,7 @@ export class VerificationTokenDatabase implements IVerificationTokenDB {
     this.database = database;
   }
 
-  async findByUserId(userId: string): Promise<VerificationTokenEntry | null> {
+  async findByUserId(userId: string): Promise<VerifyEmailTokenDto | null> {
     return handleAsyncOperation(
       () =>
         this.database.emailVerificationToken.findFirst({
@@ -30,7 +30,7 @@ export class VerificationTokenDatabase implements IVerificationTokenDB {
     );
   }
 
-  async findByToken(token: string): Promise<VerificationTokenEntry | null> {
+  async findByToken(token: string): Promise<VerifyEmailTokenDto | null> {
     return handleAsyncOperation(
       () =>
         this.database.emailVerificationToken.findFirst({

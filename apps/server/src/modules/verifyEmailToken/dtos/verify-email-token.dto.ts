@@ -1,4 +1,4 @@
-export interface VerificationTokenEntry {
+export interface VerifyEmailTokenDto {
   id: string;
   token: string;
   userId: string;

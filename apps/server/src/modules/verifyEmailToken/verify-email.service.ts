@@ -3,7 +3,6 @@ import { ForbiddenError } from "../../errors";
 
 import { IVerificationTokenDB } from "./verification-token.db";
 
-import { IEmailService } from "../../services/emailService";
 import { IAuthService } from "../auth/auth.service";
 import { IUserDatabase } from "../user/user.db";
 
