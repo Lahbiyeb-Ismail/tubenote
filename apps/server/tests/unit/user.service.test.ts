@@ -1,11 +1,10 @@
 import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
-import { BadRequestError, NotFoundError } from "../../src/errors";
+import { NotFoundError } from "../../src/errors";
 
 import { IPasswordService } from "../../src/modules/password/password.service";
 import { IUserDatabase } from "../../src/modules/user/user.db";
 import { IUserService, UserService } from "../../src/modules/user/user.service";
 
-import type { UpdatePasswordDto } from "../../src/modules/user/dtos/update-password.dto";
 import type { UpdateUserDto } from "../../src/modules/user/dtos/update-user.dto";
 import type { UserDto } from "../../src/modules/user/dtos/user.dto";
 
@@ -26,6 +25,8 @@ describe("UserService methods test", () => {
     mockPasswordService = {
       hashPassword: jest.fn(),
       comparePasswords: jest.fn(),
+      updatePassword: jest.fn(),
+      resetPassword: jest.fn(),
     };
 
     userService = new UserService(mockUserDB, mockPasswordService);
@@ -210,108 +211,6 @@ describe("UserService methods test", () => {
         updateUserDto.email
       );
       expect(mockUserDB.updateUser).toHaveBeenCalled();
-    });
-  });
-
-  describe("UserService - updatePassword", () => {
-    const updatePasswordDto: UpdatePasswordDto = {
-      currentPassword: "oldpassword",
-      newPassword: "newpassword",
-    };
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it("should successfully update the user's password", async () => {
-      jest.spyOn(userService, "getUserById").mockResolvedValue(mockUser);
-
-      (mockPasswordService.comparePasswords as jest.Mock).mockResolvedValue(
-        true
-      );
-
-      (mockPasswordService.hashPassword as jest.Mock).mockResolvedValue(
-        "newhashedpassword"
-      );
-
-      await userService.updatePassword(mockUserId, updatePasswordDto);
-
-      expect(userService.getUserById).toHaveBeenCalledWith(mockUserId);
-
-      expect(mockPasswordService.comparePasswords).toHaveBeenCalledWith({
-        password: updatePasswordDto.currentPassword,
-        hashedPassword: mockUser.password,
-      });
-
-      expect(mockPasswordService.hashPassword).toHaveBeenCalledWith(
-        updatePasswordDto.newPassword
-      );
-
-      expect(mockUserDB.updatePassword).toHaveBeenCalledWith({
-        id: mockUserId,
-        password: "newhashedpassword",
-      });
-    });
-
-    it("should throw a BadRequestError if the current password is invalid", async () => {
-      jest.spyOn(userService, "getUserById").mockResolvedValue(mockUser);
-
-      (mockPasswordService.comparePasswords as jest.Mock).mockResolvedValue(
-        false
-      );
-
-      await expect(
-        userService.updatePassword(mockUserId, {
-          ...updatePasswordDto,
-          currentPassword: "invalidpassword",
-        })
-      ).rejects.toThrow(
-        new BadRequestError(ERROR_MESSAGES.INVALID_CREDENTIALS)
-      );
-
-      expect(userService.getUserById).toHaveBeenCalledWith(mockUserId);
-
-      expect(mockPasswordService.comparePasswords).toHaveBeenCalledWith({
-        password: "invalidpassword",
-        hashedPassword: mockUser.password,
-      });
-    });
-
-    it("should throw a BadRequestError if the new password is the same as the current password", async () => {
-      jest.spyOn(userService, "getUserById").mockResolvedValue(mockUser);
-      (mockPasswordService.comparePasswords as jest.Mock).mockResolvedValue(
-        true
-      );
-
-      await expect(
-        userService.updatePassword(mockUserId, {
-          ...updatePasswordDto,
-          newPassword: updatePasswordDto.currentPassword,
-        })
-      ).rejects.toThrow(
-        new BadRequestError(ERROR_MESSAGES.PASSWORD_SAME_AS_CURRENT)
-      );
-
-      expect(userService.getUserById).toHaveBeenCalledWith(mockUserId);
-
-      expect(mockPasswordService.comparePasswords).toHaveBeenCalledWith({
-        password: updatePasswordDto.currentPassword,
-        hashedPassword: mockUser.password,
-      });
-    });
-
-    it("should throw a NotFoundError if the user doesn't exist", async () => {
-      jest
-        .spyOn(userService, "getUserById")
-        .mockRejectedValue(
-          new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
-        );
-
-      await expect(
-        userService.updatePassword(mockUserId, updatePasswordDto)
-      ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
-
-      expect(userService.getUserById).toHaveBeenCalledWith(mockUserId);
     });
   });
 });

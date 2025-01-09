@@ -9,7 +9,6 @@ import { IUserService } from "../../src/modules/user/user.service";
 
 import type { TypedRequest } from "../../src/types";
 
-import type { UpdatePasswordDto } from "../../src/modules/user/dtos/update-password.dto";
 import type { UpdateUserDto } from "../../src/modules/user/dtos/update-user.dto";
 import type { UserDto } from "../../src/modules/user/dtos/user.dto";
 
@@ -19,9 +18,9 @@ describe("userController integration tests", () => {
 
   beforeEach(() => {
     mockUserService = {
+      createUser: jest.fn(),
       getUserById: jest.fn(),
       updateUser: jest.fn(),
-      updatePassword: jest.fn(),
       getUserByEmail: jest.fn(),
       verifyUserEmail: jest.fn(),
     };
@@ -174,70 +173,70 @@ describe("userController integration tests", () => {
     });
   });
 
-  describe("AuthController - updateUserPassword", () => {
-    let mockRequest: Partial<TypedRequest<UpdatePasswordDto>>;
-    let mockResponse: Partial<Response>;
-    let mockStatus: jest.Mock;
-    let mockJson: jest.Mock;
+  // describe("AuthController - updateUserPassword", () => {
+  //   let mockRequest: Partial<TypedRequest<UpdatePasswordDto>>;
+  //   let mockResponse: Partial<Response>;
+  //   let mockStatus: jest.Mock;
+  //   let mockJson: jest.Mock;
 
-    const mockUserId = "user_id_001";
+  //   const mockUserId = "user_id_001";
 
-    const updatePasswordDto: UpdatePasswordDto = {
-      currentPassword: "current_user_password",
-      newPassword: "new_user_password",
-    };
+  //   const updatePasswordDto: UpdatePasswordDto = {
+  //     currentPassword: "current_user_password",
+  //     newPassword: "new_user_password",
+  //   };
 
-    beforeEach(() => {
-      mockJson = jest.fn();
-      mockStatus = jest.fn().mockReturnValue({ json: mockJson });
-      mockResponse = {
-        status: mockStatus,
-        json: mockJson,
-      };
-      mockRequest = {
-        body: updatePasswordDto,
-        userId: mockUserId,
-      };
-    });
+  //   beforeEach(() => {
+  //     mockJson = jest.fn();
+  //     mockStatus = jest.fn().mockReturnValue({ json: mockJson });
+  //     mockResponse = {
+  //       status: mockStatus,
+  //       json: mockJson,
+  //     };
+  //     mockRequest = {
+  //       body: updatePasswordDto,
+  //       userId: mockUserId,
+  //     };
+  //   });
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
+  //   afterEach(() => {
+  //     jest.clearAllMocks();
+  //   });
 
-    it("should update the current user's password", async () => {
-      (mockUserService.updatePassword as jest.Mock).mockResolvedValue(
-        undefined
-      );
+  //   it("should update the current user's password", async () => {
+  //     (mockUserService.updatePassword as jest.Mock).mockResolvedValue(
+  //       undefined
+  //     );
 
-      await userController.updateUserPassword(
-        mockRequest as TypedRequest<UpdatePasswordDto>,
-        mockResponse as Response
-      );
+  //     await userController.updateUserPassword(
+  //       mockRequest as TypedRequest<UpdatePasswordDto>,
+  //       mockResponse as Response
+  //     );
 
-      expect(mockUserService.updatePassword).toHaveBeenCalledWith(
-        mockUserId,
-        mockRequest.body
-      );
+  //     expect(mockUserService.updatePassword).toHaveBeenCalledWith(
+  //       mockUserId,
+  //       mockRequest.body
+  //     );
 
-      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+  //     expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
 
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        message: "Password updated successfully.",
-      });
-    });
+  //     expect(mockResponse.json).toHaveBeenCalledWith({
+  //       message: "Password updated successfully.",
+  //     });
+  //   });
 
-    it("should handle Userservice errors", async () => {
-      const errorMessage = "Error updating user data";
-      (mockUserService.updatePassword as jest.Mock).mockRejectedValue(
-        new Error(errorMessage)
-      );
+  //   it("should handle Userservice errors", async () => {
+  //     const errorMessage = "Error updating user data";
+  //     (mockUserService.updatePassword as jest.Mock).mockRejectedValue(
+  //       new Error(errorMessage)
+  //     );
 
-      await expect(
-        userController.updateUserPassword(
-          mockRequest as TypedRequest<UpdatePasswordDto>,
-          mockResponse as Response
-        )
-      ).rejects.toThrow(errorMessage);
-    });
-  });
+  //     await expect(
+  //       userController.updateUserPassword(
+  //         mockRequest as TypedRequest<UpdatePasswordDto>,
+  //         mockResponse as Response
+  //       )
+  //     ).rejects.toThrow(errorMessage);
+  //   });
+  // });
 });

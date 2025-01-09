@@ -64,12 +64,13 @@ describe("AuthService methods tests", () => {
       verifyUserEmail: jest.fn(),
       getUserByEmail: jest.fn(),
       updateUser: jest.fn(),
-      updatePassword: jest.fn(),
     };
 
     mockPasswordService = {
       hashPassword: jest.fn(),
       comparePasswords: jest.fn(),
+      updatePassword: jest.fn(),
+      resetPassword: jest.fn(),
     };
 
     mockRefreshTokenService = {
