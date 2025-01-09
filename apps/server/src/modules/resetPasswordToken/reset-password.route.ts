@@ -21,12 +21,11 @@ const resetTokenDB = new ResetPasswordTokenDatabase(prismaClient);
 const userDB = new UserDatabase(prismaClient);
 const verificationTokenDB = new VerificationTokenDatabase(prismaClient);
 
-const passwordService = new PasswordService();
+const passwordService = new PasswordService(userDB);
 const userService = new UserService(userDB, passwordService);
 const emailService = new EmailService(userDB, verificationTokenDB);
 const resetPasswordService = new ResetPasswordService(
   resetTokenDB,
-  userDB,
   userService,
   passwordService,
   emailService

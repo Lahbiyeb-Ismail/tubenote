@@ -5,7 +5,6 @@ import { IResetPasswordTokenDatabase } from "./reset-password.db";
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 import { ForbiddenError, NotFoundError } from "../../errors";
 import type { IEmailService } from "../../services/emailService";
-import type { IUserDatabase } from "../user/user.db";
 import type { ResetTokenDto } from "./dtos/reset-token.dto";
 
 export interface IResetPasswordService {
@@ -19,20 +18,17 @@ export interface IResetPasswordService {
 
 export class ResetPasswordService implements IResetPasswordService {
   private resetTokenDB: IResetPasswordTokenDatabase;
-  private userDB: IUserDatabase;
   private userService: IUserService;
   private passwordService: IPasswordService;
   private emailService: IEmailService;
 
   constructor(
     resetTokenDB: IResetPasswordTokenDatabase,
-    userDB: IUserDatabase,
     userService: IUserService,
     passwordService: IPasswordService,
     emailService: IEmailService
   ) {
     this.resetTokenDB = resetTokenDB;
-    this.userDB = userDB;
     this.userService = userService;
     this.passwordService = passwordService;
     this.emailService = emailService;
@@ -83,11 +79,9 @@ export class ResetPasswordService implements IResetPasswordService {
       throw new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN);
     }
 
-    const hashedPassword = await this.passwordService.hashPassword(password);
-
-    await this.userDB.updatePassword({
-      id: resetToken.userId,
-      password: hashedPassword,
+    await this.passwordService.resetPassword({
+      userId: resetToken.userId,
+      password,
     });
 
     await this.resetTokenDB.deleteMany(resetToken.userId);
