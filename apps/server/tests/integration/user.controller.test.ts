@@ -1,18 +1,34 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { UserEntry } from "../../src/modules/user/user.type";
-import type { TypedRequest } from "../../src/types";
+import {
+  IUserController,
+  UserController,
+} from "../../src/modules/user/user.controller";
+import { IUserService } from "../../src/modules/user/user.service";
 
-import UserService from "../../src/modules/user/user.service";
+import type { TypedRequest } from "../../src/types";
 
 import type { UpdatePasswordDto } from "../../src/modules/user/dtos/update-password.dto";
 import type { UpdateUserDto } from "../../src/modules/user/dtos/update-user.dto";
-import UserController from "../../src/modules/user/user.controller";
+import type { UserDto } from "../../src/modules/user/dtos/user.dto";
 
-jest.mock("../../src/modules/user/user.service");
+describe("userController integration tests", () => {
+  let userController: IUserController;
+  let mockUserService: IUserService;
 
-describe("UserController integration tests", () => {
+  beforeEach(() => {
+    mockUserService = {
+      getUserById: jest.fn(),
+      updateUser: jest.fn(),
+      updatePassword: jest.fn(),
+      getUserByEmail: jest.fn(),
+      verifyUserEmail: jest.fn(),
+    };
+
+    userController = new UserController(mockUserService);
+  });
+
   beforeAll(() => {
     jest.clearAllMocks();
   });
@@ -25,7 +41,7 @@ describe("UserController integration tests", () => {
 
     const mockUserId = "user_id_001";
 
-    const mockUser: UserEntry = {
+    const mockUser: UserDto = {
       id: mockUserId,
       username: "test_user",
       email: "testuser@example.com",
@@ -54,14 +70,14 @@ describe("UserController integration tests", () => {
     });
 
     it("should send the current user's information", async () => {
-      (UserService.getUserById as jest.Mock).mockResolvedValue(mockUser);
+      (mockUserService.getUserById as jest.Mock).mockResolvedValue(mockUser);
 
-      await UserController.getCurrentUser(
+      await userController.getCurrentUser(
         mockRequest as TypedRequest,
         mockResponse as Response
       );
 
-      expect(UserService.getUserById).toHaveBeenCalledWith(mockUserId);
+      expect(mockUserService.getUserById).toHaveBeenCalledWith(mockUserId);
 
       expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
 
@@ -80,12 +96,12 @@ describe("UserController integration tests", () => {
 
     it("should handle Userservice errors", async () => {
       const errorMessage = "Error fetching user data";
-      (UserService.getUserById as jest.Mock).mockRejectedValue(
+      (mockUserService.getUserById as jest.Mock).mockRejectedValue(
         new Error(errorMessage)
       );
 
       await expect(
-        UserController.getCurrentUser(
+        userController.getCurrentUser(
           mockRequest as TypedRequest,
           mockResponse as Response
         )
@@ -124,14 +140,14 @@ describe("UserController integration tests", () => {
     });
 
     it("should update the current user's information", async () => {
-      (UserService.updateUser as jest.Mock).mockResolvedValue(undefined);
+      (mockUserService.updateUser as jest.Mock).mockResolvedValue(undefined);
 
-      await UserController.updateCurrentUser(
+      await userController.updateCurrentUser(
         mockRequest as TypedRequest<UpdateUserDto>,
         mockResponse as Response
       );
 
-      expect(UserService.updateUser).toHaveBeenCalledWith(
+      expect(mockUserService.updateUser).toHaveBeenCalledWith(
         mockUserId,
         mockRequest.body
       );
@@ -145,12 +161,12 @@ describe("UserController integration tests", () => {
 
     it("should handle Userservice errors", async () => {
       const errorMessage = "Error updating user data";
-      (UserService.updateUser as jest.Mock).mockRejectedValue(
+      (mockUserService.updateUser as jest.Mock).mockRejectedValue(
         new Error(errorMessage)
       );
 
       await expect(
-        UserController.updateCurrentUser(
+        userController.updateCurrentUser(
           mockRequest as TypedRequest<UpdateUserDto>,
           mockResponse as Response
         )
@@ -189,14 +205,16 @@ describe("UserController integration tests", () => {
     });
 
     it("should update the current user's password", async () => {
-      (UserService.updatePassword as jest.Mock).mockResolvedValue(undefined);
+      (mockUserService.updatePassword as jest.Mock).mockResolvedValue(
+        undefined
+      );
 
-      await UserController.updateUserPassword(
+      await userController.updateUserPassword(
         mockRequest as TypedRequest<UpdatePasswordDto>,
         mockResponse as Response
       );
 
-      expect(UserService.updatePassword).toHaveBeenCalledWith(
+      expect(mockUserService.updatePassword).toHaveBeenCalledWith(
         mockUserId,
         mockRequest.body
       );
@@ -210,12 +228,12 @@ describe("UserController integration tests", () => {
 
     it("should handle Userservice errors", async () => {
       const errorMessage = "Error updating user data";
-      (UserService.updatePassword as jest.Mock).mockRejectedValue(
+      (mockUserService.updatePassword as jest.Mock).mockRejectedValue(
         new Error(errorMessage)
       );
 
       await expect(
-        UserController.updateUserPassword(
+        userController.updateUserPassword(
           mockRequest as TypedRequest<UpdatePasswordDto>,
           mockResponse as Response
         )
