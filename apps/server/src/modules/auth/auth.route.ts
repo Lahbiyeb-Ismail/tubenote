@@ -1,5 +1,6 @@
 import { Router } from "express";
-import passport from "../../lib/passportAuth";
+import passport from "passport";
+
 import prismaClient from "../../lib/prisma";
 
 import { UserDatabase } from "../user/user.db";
@@ -9,6 +10,7 @@ import { AuthService } from "./auth.service";
 import isAuthenticated from "../../middlewares/isAuthenticated";
 import validateRequest from "../../middlewares/validateRequest";
 
+import envConfig from "../../config/envConfig";
 import { EmailService } from "../../services/emailService";
 import { JwtService } from "../jwt/jwt.service";
 import { PasswordService } from "../password/password.service";
@@ -18,6 +20,10 @@ import { UserService } from "../user/user.service";
 import { VerificationTokenDatabase } from "../verifyEmailToken/verification-token.db";
 import { loginUserSchema } from "./schemas/login-user.schema";
 import { registerUserSchema } from "./schemas/register-user.schema";
+import {
+  GoogleAuthStrategy,
+  type GoogleConfig,
+} from "./strategies/google.strategy";
 
 const userDB = new UserDatabase(prismaClient);
 const refreshTokenDB = new RefreshTokenDatabase(prismaClient);
@@ -29,6 +35,12 @@ const userService = new UserService(userDB, passwordService);
 const refreshTokenService = new RefreshTokenService(refreshTokenDB);
 const emailService = new EmailService(userDB, verificationTokenDB);
 
+const googleAuthConfig: GoogleConfig = {
+  clientID: envConfig.google.client_id,
+  clientSecret: envConfig.google.client_secret,
+  callbackURL: "/api/v1/auth/google/callback",
+};
+
 const authService = new AuthService(
   jwtService,
   userService,
@@ -37,6 +49,13 @@ const authService = new AuthService(
   emailService
 );
 const authController = new AuthController(authService);
+
+const googleAuthStrategy = new GoogleAuthStrategy(
+  googleAuthConfig,
+  userService
+);
+
+passport.use(googleAuthStrategy.getStrategy());
 
 const router = Router();
 
@@ -68,10 +87,15 @@ router
   .get(passport.authenticate("google", { scope: ["profile", "email"] }));
 
 // - GET /google/callback: Handle the Google OAuth callback.
-router
-  .route("/google/callback")
-  .get(passport.authenticate("google", { session: false }), (req, res) =>
-    authController.loginWithGoogle(req, res)
-  );
+router.route("/google/callback").get(
+  passport.authenticate("google", {
+    failureRedirect: `${envConfig.client.url}/login`,
+  }),
+  (req, res) => {
+    // Successful authentication, redirect to the dashboard page.
+    console.log("req ->", req.user);
+    res.redirect(`${envConfig.client.url}`);
+  }
+);
 
 export default router;
