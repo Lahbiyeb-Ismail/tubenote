@@ -1,4 +1,4 @@
-import type { NextFunction, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { ZodError, type ZodSchema } from "zod";
 
 import { BadRequestError, InternalServerError } from "../errors";
@@ -44,8 +44,8 @@ function validateRequest<
   Q extends ZodSchema,
 >(
   schema: RequestSchema<B, P, Q>
-): (req: TypedRequest<B, P, Q>, res: Response, next: NextFunction) => void {
-  return (req: TypedRequest<B, P, Q>, _res: Response, next: NextFunction) => {
+): (req: Request, res: Response, next: NextFunction) => void {
+  return (req: Request, _res: Response, next: NextFunction) => {
     try {
       if (schema.body) {
         req.body = schema.body.parse(req.body);
