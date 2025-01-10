@@ -21,8 +21,10 @@
     "db:generate": "pnpm run --filter server prisma:generate",
     "db:push": "pnpm run --filter server prisma:push",
     "test": "jest",
-    "test:server": "pnpm run --filter server test",
     "test:watch": "jest --watch",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:e2e": "jest tests/e2e",
     "test:coverage": "jest --coverage"
   },
   "devDependencies": {

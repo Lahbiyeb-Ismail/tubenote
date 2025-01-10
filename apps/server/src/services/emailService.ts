@@ -3,6 +3,10 @@ import nodemailer, { type Transporter } from "nodemailer";
 import type { EmailContent } from "../types/email.type";
 
 import envConfig from "../config/envConfig";
+import { ERROR_MESSAGES } from "../constants/errorMessages";
+import { ForbiddenError } from "../errors";
+import type { IUserDatabase } from "../modules/user/user.db";
+import type { IVerificationTokenDB } from "../modules/verifyEmailToken/verification-token.db";
 import compileTemplate from "../utils/compileTemplate";
 import logger from "../utils/logger";
 
@@ -26,10 +30,25 @@ interface ISendEmail {
   token: string;
 }
 
-class EmailService {
-  private transporter: Transporter;
+export interface IEmailService {
+  sendEmail(props: ISendEmailProps): Promise<void>;
+  createEmailVerififcationToken(email: string): Promise<string>;
+  sendVerificationEmail(email: string): Promise<void>;
+  sendResetPasswordEmail(props: ISendEmail): Promise<void>;
+}
 
-  constructor() {
+export class EmailService implements IEmailService {
+  private transporter: Transporter;
+  private userDB: IUserDatabase;
+  private verificationTokenDB: IVerificationTokenDB;
+
+  constructor(
+    userDB: IUserDatabase,
+    verificationTokenDB: IVerificationTokenDB
+  ) {
+    this.userDB = userDB;
+    this.verificationTokenDB = verificationTokenDB;
+
     this.transporter = nodemailer.createTransport({
       host: envConfig.email.smtp.host,
       port: +envConfig.email.smtp.port,
@@ -72,7 +91,32 @@ class EmailService {
     });
   }
 
-  async sendVerificationEmail({ email, token }: ISendEmail): Promise<void> {
+  async createEmailVerififcationToken(email: string): Promise<string> {
+    const user = await this.userDB.findByEmail(email);
+
+    if (!user) {
+      throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
+    }
+
+    if (user.isEmailVerified) {
+      throw new ForbiddenError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
+    }
+
+    const existingVerificationToken =
+      await this.verificationTokenDB.findByUserId(user.id);
+
+    if (existingVerificationToken) {
+      throw new ForbiddenError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
+    }
+
+    const verificationToken = await this.verificationTokenDB.create(user.id);
+
+    return verificationToken;
+  }
+
+  async sendVerificationEmail(email: string): Promise<void> {
+    const token = await this.createEmailVerififcationToken(email);
+
     const { htmlContent, logoPath, textContent } =
       await this.buildVerificationEmail(token);
 
@@ -109,5 +153,3 @@ class EmailService {
     return compileTemplate("reset-password", { resetLink });
   }
 }
-
-export default new EmailService();

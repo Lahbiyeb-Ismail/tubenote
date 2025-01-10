@@ -1,8 +1,9 @@
 import type { NextFunction, Request, Response } from "express";
-import httpStatus from "http-status";
 import jwt from "jsonwebtoken";
 
 import { ACCESS_TOKEN_SECRET } from "../constants/auth";
+import { UnauthorizedError } from "../errors";
+
 import type { JwtPayload } from "../types";
 import logger from "../utils/logger";
 
@@ -27,7 +28,7 @@ const { verify } = jwt;
  */
 async function isAuthenticated(
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) {
   const authHeader = req.headers?.authorization;
@@ -35,32 +36,24 @@ async function isAuthenticated(
   if (!authHeader || !authHeader?.startsWith("Bearer ")) {
     logger.error("Authorization header is missing or invalid.");
 
-    res.status(httpStatus.UNAUTHORIZED).json({
-      message: "You need to be authenticated to access this route.",
-    });
-
-    return;
+    throw new UnauthorizedError(
+      "You need to be authenticated to access this route."
+    );
   }
 
   const token: string | undefined = authHeader.split("Bearer ")[1];
 
   if (!token) {
-    logger.error("Token not found in Authorization header.");
-
-    res.status(httpStatus.UNAUTHORIZED).json({
-      message: "You need to be authenticated to access this route.",
-    });
-    return;
+    throw new UnauthorizedError(
+      "You need to be authenticated to access this route."
+    );
   }
 
   verify(token, ACCESS_TOKEN_SECRET, (err, payload) => {
     if (err) {
       logger.error(`Error verifying token: ${err.message}`);
 
-      res.status(httpStatus.UNAUTHORIZED).json({
-        message: "Unauthorized access. Please try again.",
-      });
-      return;
+      throw new UnauthorizedError("Unauthorized access. Please try again.");
     }
 
     const userId = (payload as JwtPayload).userId;
