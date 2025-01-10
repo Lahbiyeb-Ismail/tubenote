@@ -14,7 +14,7 @@ export interface IVideoController {
     req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
     res: Response
   ): Promise<void>;
-  getVideoById(
+  getVideoByIdOrCreate(
     req: TypedRequest<EmptyRecord, IdParamDto>,
     res: Response
   ): Promise<void>;
@@ -79,14 +79,14 @@ export class VideoController implements IVideoController {
    *
    * @returns A JSON response with the video details.
    */
-  async getVideoById(
+  async getVideoByIdOrCreate(
     req: TypedRequest<EmptyRecord, IdParamDto>,
     res: Response
   ) {
     const { id } = req.params;
     const userId = req.userId;
 
-    const video = await this.videoService.findVideo({
+    const video = await this.videoService.findVideoOrCreate({
       userId,
       youtubeVideoId: id,
     });
