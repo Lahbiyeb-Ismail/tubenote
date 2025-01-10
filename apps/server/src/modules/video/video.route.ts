@@ -32,7 +32,7 @@ router
 router
   .route("/:id")
   .get(validateRequest({ params: idParamSchema }), (req, res) =>
-    videoController.getVideoById(req, res)
+    videoController.getVideoByIdOrCreate(req, res)
   );
 
 export default router;
