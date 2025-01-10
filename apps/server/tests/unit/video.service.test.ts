@@ -215,8 +215,7 @@ describe("VideoService methods tests cases", () => {
   });
 
   describe("VideoService - createVideo", () => {
-    const youtubeId = "youtube_id_01";
-    const userId = "user_id_001";
+    const youtubeVideoId = "youtube_id_01";
     const mockYoutubeVideoData: YoutubeVideoData = {
       snippet: {
         categoryId: "1",
@@ -267,8 +266,8 @@ describe("VideoService methods tests cases", () => {
     };
 
     const createVideoDto: CreateVideoDto = {
-      userId,
-      youtubeVideoId: youtubeId,
+      userId: mockUserId,
+      youtubeVideoId: youtubeVideoId,
       videoData: mockYoutubeVideoData,
     };
 
@@ -277,9 +276,13 @@ describe("VideoService methods tests cases", () => {
     });
 
     it("should create a new video entry", async () => {
+      jest
+        .spyOn(videoService, "fetchYoutubeVideoData")
+        .mockResolvedValue(mockYoutubeVideoData);
+
       (mockVideoDB.create as jest.Mock).mockResolvedValue(mockVideos[0]);
 
-      const result = await videoService.createVideo(createVideoDto);
+      const result = await videoService.createVideo(mockUserId, youtubeVideoId);
 
       expect(mockVideoDB.create).toHaveBeenCalledWith(createVideoDto);
 
@@ -318,7 +321,7 @@ describe("VideoService methods tests cases", () => {
     });
   });
 
-  describe("VideoService - findVideo", () => {
+  describe("VideoService - findVideoOrCreate", () => {
     const mockUserId = "user_id_001";
     const mockYoutubeId = "youtube_id_01";
 
@@ -346,7 +349,7 @@ describe("VideoService methods tests cases", () => {
         .spyOn(videoService, "findVideoByYoutubeId")
         .mockResolvedValue(mockVideos[0]);
 
-      const result = await videoService.findVideo(findVideoDto);
+      const result = await videoService.findVideoOrCreate(findVideoDto);
 
       expect(result).toEqual(mockVideos[0]);
 
@@ -391,7 +394,7 @@ describe("VideoService methods tests cases", () => {
     //   const mockNewVideo: VideoDto = {
     //     ...mockVideos[1],
     //     id: "video_003",
-    //     youtubeId: mockNewYoutubeId,
+    //     youtubeVideoId: mockNewYoutubeId,
     //   };
 
     //   const mockLinkedVideo: VideoDto = {
@@ -415,7 +418,7 @@ describe("VideoService methods tests cases", () => {
 
     //   expect(videoService.createVideo).toHaveBeenCalledWith({
     //     userId: mockNewUserId,
-    //     youtubeId: mockNewYoutubeId,
+    //     youtubeVideoId: mockNewYoutubeId,
     //   });
 
     //   expect(videoService.linkVideoToUser).toHaveBeenCalledWith(
