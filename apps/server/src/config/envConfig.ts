@@ -12,6 +12,7 @@ const envSchema = z.object({
   PORT: z.string({ message: "PORT must be a string" }).default("8080"),
   SERVER_URL: z.string({ message: "SERVER_URL must be a string" }),
   CLIENT_URL: z.string({ message: "CLIENT_URL must be a string" }),
+  SESSION_SECRET: z.string().min(8),
   ACCESS_TOKEN_SECRET: z.string().min(8),
   ACCESS_TOKEN_EXPIRE: z.string().default("20m"),
   REFRESH_TOKEN_SECRET: z.string().min(8),
@@ -54,6 +55,7 @@ const envConfig = {
   server: {
     port: validatedEnv.PORT,
     url: validatedEnv.SERVER_URL,
+    session_secret: validatedEnv.SESSION_SECRET,
   },
   client: {
     url: validatedEnv.CLIENT_URL,
