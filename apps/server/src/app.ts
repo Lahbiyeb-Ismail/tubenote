@@ -11,12 +11,12 @@ import express, {
 import helmet from "helmet";
 import passport from "./lib/passportAuth";
 
-import authRoutes from "./routes/auth.route";
-import noteRoutes from "./routes/note.route";
-import resetPasswordRoutes from "./routes/resetPassword.route";
-import userRoutes from "./routes/user.route";
-import verifyEmailRoutes from "./routes/verifyEmail.route";
-import videoRoutes from "./routes/video.route";
+import authRoutes from "./modules/auth/auth.route";
+import noteRoutes from "./modules/note/note.route";
+import resetPasswordRoutes from "./modules/resetPasswordToken/reset-password.route";
+import userRoutes from "./modules/user/user.route";
+import verifyEmailRoutes from "./modules/verifyEmailToken/verify-email.route";
+import videoRoutes from "./modules/video/video.route";
 
 import { errorHandler, notFoundRoute } from "./middlewares/errorsMiddleware";
 import logger from "./utils/logger";
@@ -46,6 +46,10 @@ app.use(
 app.use((req: Request, _res: Response, next: NextFunction) => {
   logger.http(`${req.method} ${req.url}`);
   next();
+});
+
+app.get("/", (_req, res) => {
+  res.json({ message: "Hello from the server!" });
 });
 
 app.use("/api/v1/auth", authRoutes);

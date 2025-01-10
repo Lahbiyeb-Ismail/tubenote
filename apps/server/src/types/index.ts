@@ -1,8 +1,6 @@
 import type { Request } from "express";
-import type { z } from "zod";
 
-import type { ResetPasswordToken } from "@prisma/client";
-import type { paginationQuerySchema } from "src/schemas";
+import type { ResetTokenDto } from "../modules/resetPasswordToken/dtos/reset-token.dto";
 
 /**
  * Represents the payload of a JSON Web Token (JWT).
@@ -25,25 +23,16 @@ export type JwtPayload = {
 declare global {
   namespace Express {
     interface Request {
-      resetToken: ResetPasswordToken;
+      resetToken: ResetTokenDto;
       userId: string;
     }
   }
 }
 
-/**
- * A type representing a typed request with body, params, and query types inferred from Zod schemas.
- *
- * @template B - The Zod schema type for the request body. Defaults to `z.ZodTypeAny`.
- * @template P - The Zod schema type for the request params. Defaults to `z.ZodTypeAny`.
- * @template Q - The Zod schema type for the request query. Defaults to `z.ZodTypeAny`.
- */
+export type EmptyRecord = Record<string, unknown>;
+
 export type TypedRequest<
-  B extends z.ZodType = z.ZodTypeAny,
-  P extends z.ZodType = z.ZodTypeAny,
-  Q extends z.ZodType = z.ZodTypeAny,
-> = Request<z.infer<P>, Record<string, unknown>, z.infer<B>, z.infer<Q>>;
-
-export type PaginationQuery = typeof paginationQuerySchema;
-
-export type EmptyRecord = z.ZodType<Record<string, never>>;
+  B = EmptyRecord,
+  P = EmptyRecord,
+  Q = EmptyRecord,
+> = Request<P, EmptyRecord, B, Q>;

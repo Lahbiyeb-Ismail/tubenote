@@ -5,6 +5,7 @@ import {
   Strategy as GoogleStrategy,
   type Profile,
 } from "passport-google-oauth20";
+import type { GoogleUser } from "../modules/auth/auth.type";
 
 //initialize
 passport.use(
@@ -25,13 +26,13 @@ passport.use(
 );
 
 // function to serialize a user/profile object into the session
-passport.serializeUser((user, done) => {
-  done(null, user as Profile);
+passport.serializeUser((profile, done) => {
+  done(null, profile);
 });
 
 // function to deserialize a user/profile object into the session
-passport.deserializeUser((user, done) => {
-  done(null, user as Profile);
+passport.deserializeUser((profile: Profile, done) => {
+  done(null, profile);
 });
 
 export default passport;

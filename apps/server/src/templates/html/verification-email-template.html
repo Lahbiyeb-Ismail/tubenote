@@ -1,213 +1,112 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Verify Your Email Address</title>
-  </head>
-  <body
-    style="
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-    "
-  >
-    <table role="presentation" style="width: 100%; border-collapse: collapse">
-      <tr>
-        <td align="center" style="padding: 40px 0">
-          <table
-            role="presentation"
-            style="
-              width: 600px;
-              border-collapse: collapse;
-              border: 1px solid #cccccc;
-              background-color: #ffffff;
-            "
-          >
-            <!-- Header -->
-            <tr>
-              <td align="center" style="padding: 40px 0 30px 0">
-                <img
-                  src="cid:logo"
-                  alt="TubeNote Logo"
-                  width="200"
-                  style="height: auto; display: block"
-                />
-              </td>
-            </tr>
-            <!-- Body -->
-            <tr>
-              <td style="padding: 40px 30px 40px 30px">
-                <table
-                  role="presentation"
-                  style="width: 100%; border-collapse: collapse"
-                >
-                  <tr>
-                    <td style="padding: 0 0 20px 0; color: #153643">
-                      <h1
-                        style="
-                          font-size: 24px;
-                          margin: 0 0 20px 0;
-                          font-family: Arial, sans-serif;
-                        "
-                      >
-                        Verify Your Email Address
-                      </h1>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Your Email Address</title>
+</head>
+
+<body
+  style="margin: 0; padding: 0; font-family: 'Inter', Arial, sans-serif; background-color: #f8f5ff; -webkit-font-smoothing: antialiased; font-size: 16px; line-height: 1.4; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td align="center" style="padding: 40px 0;">
+        <table role="presentation"
+          style="width: 100%; max-width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 16px; overflow: hidden;">
+          <!-- Header -->
+          <tr>
+            <td align="center" style="padding: 40px 0 30px 0;">
+              <img src="cid:logo" alt="TubeNote Logo" width="200"
+                style="height: auto; display: block;" />
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding: 0 32px 32px;">
+              <table role="presentation"
+                style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 0 0 24px 0; color: #1A1A1A;">
+                    <h1
+                      style="font-size: 24px; font-weight: 700; margin: 0 0 24px 0;">
+                      Verify Your Email Address
+                    </h1>
+                    <p
+                      style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.5; color: #666666;">
+                      Thank you for signing up! To complete your registration
+                      and activate your account, please verify your email
+                      address by clicking the button below:
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding: 0 0 24px 0;">
+                    <a href="{{verificationLink}}"
+                      style="display: inline-block; background: linear-gradient(90deg, #E12E2E 0%, #B026FF 100%); font-family: 'Inter', Arial, sans-serif; font-size: 16px; font-weight: 600; text-decoration: none; padding: 12px 32px; color: #ffffff; border-radius: 8px;">Verify
+                      Email Address</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 0; color: #666666;">
+                    <p
+                      style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.5;">
+                      If the button doesn't work, you can also copy and paste
+                      the following link into your browser:
+                    </p>
+                    <p
+                      style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.5; word-break: break-all;">
+                      {{verificationLink}}
+                    </p>
+                    <div
+                      style="background-color: #F8F5FF; border-radius: 8px; padding: 24px; margin: 24px 0;">
                       <p
-                        style="
-                          margin: 0 0 12px 0;
-                          font-size: 16px;
-                          line-height: 24px;
-                          font-family: Arial, sans-serif;
-                        "
-                      >
-                        Thank you for signing up! To complete your registration
-                        and activate your account, please verify your email
-                        address by clicking the button below:
-                      </p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td align="center" style="padding: 20px 0 30px 0">
-                      <a
-                        href="{{verificationLink}}"
-                        style="
-                          background: #4caf50;
-                          border: 1px solid #4caf50;
-                          font-family: Arial, sans-serif;
-                          font-size: 16px;
-                          line-height: 1.1;
-                          text-decoration: none;
-                          padding: 13px 17px;
-                          color: #ffffff;
-                          border-radius: 4px;
-                          display: inline-block;
-                        "
-                        >Verify Email Address</a
-                      >
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 0 0 20px 0; color: #153643">
-                      <p
-                        style="
-                          margin: 0 0 12px 0;
-                          font-size: 16px;
-                          line-height: 24px;
-                          font-family: Arial, sans-serif;
-                        "
-                      >
-                        If the button doesn't work, you can also copy and paste
-                        the following link into your browser:
-                      </p>
-                      <p
-                        style="
-                          margin: 0 0 12px 0;
-                          font-size: 14px;
-                          line-height: 24px;
-                          font-family: Arial, sans-serif;
-                          word-break: break-all;
-                        "
-                      >
-                        {{verificationLink}}
-                      </p>
-                      <p
-                        style="
-                          margin: 0 0 12px 0;
-                          font-size: 16px;
-                          line-height: 24px;
-                          font-family: Arial, sans-serif;
-                        "
-                      >
+                        style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.5;">
                         This verification link will expire in 1 hour.
                       </p>
-                      <p
-                        style="
-                          margin: 0;
-                          font-size: 16px;
-                          line-height: 24px;
-                          font-family: Arial, sans-serif;
-                        "
-                      >
+                      <p style="margin: 0; font-size: 14px; line-height: 1.5;">
                         If you didn't create an account with us, please ignore
                         this email.
                       </p>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <!-- Footer -->
-            <tr>
-              <td style="padding: 30px; background: #4caf50">
-                <table
-                  role="presentation"
-                  style="
-                    width: 100%;
-                    border-collapse: collapse;
-                    border: 0;
-                    border-spacing: 0;
-                    font-size: 9px;
-                    font-family: Arial, sans-serif;
-                  "
-                >
-                  <tr>
-                    <td style="padding: 0; width: 50%" align="left">
-                      <p
-                        style="
-                          margin: 0;
-                          font-size: 14px;
-                          line-height: 16px;
-                          font-family: Arial, sans-serif;
-                          color: #ffffff;
-                        "
-                      >
-                        &reg; TubeNote, 2024<br />
-                      </p>
-                    </td>
-                    <td style="padding: 0; width: 50%" align="right">
-                      <table
-                        role="presentation"
-                        style="
-                          border-collapse: collapse;
-                          border: 0;
-                          border-spacing: 0;
-                        "
-                      >
-                        <tr>
-                          <td style="padding: 0 0 0 10px; width: 38px">
-                            <a
-                              href="http://www.twitter.com/"
-                              style="color: #ffffff"
-                              ><img
-                                src="https://assets.codepen.io/210284/tw_1.png"
-                                alt="Twitter"
-                                width="38"
-                                style="height: auto; display: block; border: 0"
-                            /></a>
-                          </td>
-                          <td style="padding: 0 0 0 10px; width: 38px">
-                            <a
-                              href="http://www.facebook.com/"
-                              style="color: #ffffff"
-                              ><img
-                                src="https://assets.codepen.io/210284/fb_1.png"
-                                alt="Facebook"
-                                width="38"
-                                style="height: auto; display: block; border: 0"
-                            /></a>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </body>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td
+              style="padding: 32px; background: #1A1A1A; color: #ffffff; text-align: center;">
+              <p
+                style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.5;">
+                &copy; 2024 TubeNote. All rights reserved.
+              </p>
+              <table role="presentation"
+                style="width: 100%; border-collapse: collapse; border: 0; border-spacing: 0;">
+                <tr>
+                  <td align="center">
+                    <a href="http://www.twitter.com/"
+                      style="color: #ffffff; text-decoration: none; padding: 0 8px;">
+                      <img src="https://assets.codepen.io/210284/tw_1.png"
+                        alt="Twitter" width="24"
+                        style="height: auto; display: inline-block; border: 0;" />
+                    </a>
+                    <a href="http://www.facebook.com/"
+                      style="color: #ffffff; text-decoration: none; padding: 0 8px;">
+                      <img src="https://assets.codepen.io/210284/fb_1.png"
+                        alt="Facebook" width="24"
+                        style="height: auto; display: inline-block; border: 0;" />
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+
 </html>

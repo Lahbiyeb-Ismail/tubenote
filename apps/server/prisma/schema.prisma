@@ -15,15 +15,15 @@ datasource db {
 }
 
 model User {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  username       String
-  email          String   @unique
-  password       String
-  profilePicture String   @default("null")
-  googleId       String   @default("null")
-  emailVerified  Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  username        String
+  email           String   @unique
+  password        String
+  profilePicture  String   @default("")
+  googleId        String   @default("")
+  isEmailVerified Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   notes                   Note[]
   refreshTokens           RefreshToken[]
@@ -76,8 +76,8 @@ model Note {
   userId     String   @db.ObjectId
   videoId    String   @db.ObjectId
 
-  user  User  @relation(fields: [userId], references: [id])
-  video Video @relation(fields: [videoId], references: [id])
+  user  User?  @relation(fields: [userId], references: [id])
+  video Video? @relation(fields: [videoId], references: [id])
 }
 
 model Video {

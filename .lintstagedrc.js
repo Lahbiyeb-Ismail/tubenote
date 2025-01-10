@@ -13,5 +13,5 @@ const buildPrettierCommand = buildBiomeCommand("format --write");
 
 module.exports = {
   "*.{js,jsx,ts,tsx}": [buildEslintCommand, buildPrettierCommand],
-  "*.{json,md}": [buildPrettierCommand],
+  "*.json": [buildPrettierCommand],
 };
