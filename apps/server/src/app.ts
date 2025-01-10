@@ -8,8 +8,9 @@ import express, {
   type Request,
   type Response,
 } from "express";
+import session from "express-session";
 import helmet from "helmet";
-import passport from "./lib/passportAuth";
+import passport from "passport";
 
 import authRoutes from "./modules/auth/auth.route";
 import noteRoutes from "./modules/note/note.route";
@@ -18,6 +19,7 @@ import userRoutes from "./modules/user/user.route";
 import verifyEmailRoutes from "./modules/verifyEmailToken/verify-email.route";
 import videoRoutes from "./modules/video/video.route";
 
+import envConfig from "./config/envConfig";
 import { errorHandler, notFoundRoute } from "./middlewares/errorsMiddleware";
 import logger from "./utils/logger";
 
@@ -29,8 +31,6 @@ app.use(express.json());
 
 app.use(cookieParser());
 
-app.use(passport.initialize());
-
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true }));
 
@@ -41,6 +41,30 @@ app.use(
     credentials: true, // Allow sending cookies along with the requests
   })
 );
+
+// Add session middleware
+app.use(
+  session({
+    secret: envConfig.server.session_secret,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false },
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Serialize user into the session
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+// Deserialize user from the session
+passport.deserializeUser((user, done) => {
+  // @ts-ignore
+  done(null, user);
+});
 
 // Middleware to log HTTP requests
 app.use((req: Request, _res: Response, next: NextFunction) => {
