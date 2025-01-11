@@ -91,11 +91,7 @@ router.route("/google/callback").get(
   passport.authenticate("google", {
     failureRedirect: `${envConfig.client.url}/login`,
   }),
-  (req, res) => {
-    // Successful authentication, redirect to the dashboard page.
-    console.log("req ->", req.user);
-    res.redirect(`${envConfig.client.url}`);
-  }
+  (req, res) => authController.loginWithGoogle(req, res)
 );
 
 export default router;
