@@ -1,9 +1,4 @@
-import {
-  ACCESS_TOKEN_EXPIRE,
-  ACCESS_TOKEN_SECRET,
-  REFRESH_TOKEN_EXPIRE,
-  REFRESH_TOKEN_SECRET,
-} from "../../constants/auth";
+import { REFRESH_TOKEN_SECRET } from "../../constants/auth";
 
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 
@@ -17,7 +12,6 @@ import { IRefreshTokenService } from "../refreshToken/refresh-token.service";
 import { IUserService } from "../user/user.service";
 
 import type { UserDto } from "../user/dtos/user.dto";
-import type { GoogleLoginDto } from "./dtos/google-login.dto";
 import type { LoginResponseDto } from "./dtos/login-response.dto";
 import type { LoginUserDto } from "./dtos/login-user.dto";
 import type { LogoutUserDto } from "./dtos/logout-user.dto";
