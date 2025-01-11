@@ -29,9 +29,8 @@ export interface IAuthService {
   loginUser(loginUserDto: LoginUserDto): Promise<LoginResponseDto>;
   logoutUser(logoutUserDto: LogoutUserDto): Promise<void>;
   refreshToken(refreshDto: RefreshDto): Promise<LoginResponseDto>;
-  googleLogin(googleLoginDto: GoogleLoginDto): Promise<LoginResponseDto>;
+  googleLogin(user: UserDto): Promise<LoginResponseDto>;
   verifyEmail(userId: string): Promise<void>;
-  generateAuthTokens(userId: string): LoginResponseDto;
 }
 
 export class AuthService implements IAuthService {
@@ -85,7 +84,9 @@ export class AuthService implements IAuthService {
       throw new ForbiddenError(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
-    const { accessToken, refreshToken } = this.generateAuthTokens(user.id);
+    const { accessToken, refreshToken } = this.jwtService.generateAuthTokens(
+      user.id
+    );
 
     await this.refreshTokenService.createToken(user.id, refreshToken);
 
@@ -131,50 +132,28 @@ export class AuthService implements IAuthService {
 
     await this.refreshTokenService.deleteToken(token);
 
-    const { accessToken, refreshToken } = this.generateAuthTokens(userId);
+    const { accessToken, refreshToken } =
+      this.jwtService.generateAuthTokens(userId);
 
     await this.refreshTokenService.createToken(userId, refreshToken);
 
     return { accessToken, refreshToken };
   }
 
-  async googleLogin(googleLoginDto: GoogleLoginDto): Promise<LoginResponseDto> {
-    if (!googleLoginDto) {
+  async googleLogin(user: UserDto): Promise<LoginResponseDto> {
+    if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
-    const {
-      sub: googleId,
-      email,
-      email_verified,
-      name,
-      picture,
-    } = googleLoginDto;
-
-    if (!email_verified) {
+    if (!user.isEmailVerified) {
       throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
-    let foundUser = await this.userService.getUserByEmail(email);
+    const { accessToken, refreshToken } = this.jwtService.generateAuthTokens(
+      user.id
+    );
 
-    if (!foundUser) {
-      foundUser = await this.userService.createUser({
-        username: name,
-        isEmailVerified: email_verified,
-        password: googleId,
-        profilePicture: picture,
-        email,
-        googleId,
-      });
-    } else if (!foundUser.googleId) {
-      foundUser = await this.userService.updateUser(foundUser.id, {
-        googleId,
-      });
-    }
-
-    const { accessToken, refreshToken } = this.generateAuthTokens(foundUser.id);
-
-    await this.refreshTokenService.createToken(foundUser.id, refreshToken);
+    await this.refreshTokenService.createToken(user.id, refreshToken);
 
     return { accessToken, refreshToken };
   }
@@ -187,21 +166,5 @@ export class AuthService implements IAuthService {
     }
 
     await this.userService.verifyUserEmail(userId);
-  }
-
-  generateAuthTokens(userId: string): LoginResponseDto {
-    const accessToken = this.jwtService.sign({
-      userId,
-      secret: ACCESS_TOKEN_SECRET,
-      expiresIn: ACCESS_TOKEN_EXPIRE,
-    });
-
-    const refreshToken = this.jwtService.sign({
-      userId,
-      secret: REFRESH_TOKEN_SECRET,
-      expiresIn: REFRESH_TOKEN_EXPIRE,
-    });
-
-    return { accessToken, refreshToken };
   }
 }
