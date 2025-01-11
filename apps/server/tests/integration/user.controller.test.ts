@@ -19,6 +19,7 @@ describe("userController integration tests", () => {
   beforeEach(() => {
     mockUserService = {
       createUser: jest.fn(),
+      findOrCreateUser: jest.fn(),
       getUserById: jest.fn(),
       updateUser: jest.fn(),
       getUserByEmail: jest.fn(),
