@@ -17,7 +17,6 @@ import {
 } from "../../src/modules/auth/auth.controller";
 import { IAuthService } from "../../src/modules/auth/auth.service";
 
-import type { GoogleUser } from "../../src/modules/auth/auth.type";
 import type { LoginUserDto } from "../../src/modules/auth/dtos/login-user.dto";
 import type { RegisterUserDto } from "../../src/modules/auth/dtos/register-user.dto";
 import type { UserDto } from "../../src/modules/user/dtos/user.dto";
@@ -35,7 +34,6 @@ describe("AuthController integration tests", () => {
       refreshToken: jest.fn(),
       googleLogin: jest.fn(),
       verifyEmail: jest.fn(),
-      generateAuthTokens: jest.fn(),
     };
 
     authController = new AuthController(mockAuthService);
@@ -385,18 +383,15 @@ describe("AuthController integration tests", () => {
       refreshToken: "mock-refresh-token",
     };
 
-    const mockGoogleUser: GoogleUser = {
-      sub: "google_user_id",
+    const mockUser: UserDto = {
+      id: "user_id_001",
       email: "testuser@example.com",
-      name: "Test User",
-      picture: "http://example.com/picture.jpg",
-      email_verified: true,
-      given_name: "Test",
-      family_name: "User",
-    };
-
-    const mockProfile = {
-      _json: mockGoogleUser,
+      username: "Test User",
+      password: "",
+      profilePicture: "http://example.com/picture.jpg",
+      isEmailVerified: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     beforeEach(() => {
@@ -407,7 +402,7 @@ describe("AuthController integration tests", () => {
         redirect: mockRedirect,
       };
       mockRequest = {
-        user: mockProfile,
+        user: mockUser,
       };
       jest.clearAllMocks();
     });
@@ -420,9 +415,7 @@ describe("AuthController integration tests", () => {
         mockResponse as Response
       );
 
-      expect(mockAuthService.googleLogin).toHaveBeenCalledWith(
-        mockProfile._json
-      );
+      expect(mockAuthService.googleLogin).toHaveBeenCalledWith(mockUser);
 
       expect(mockCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
