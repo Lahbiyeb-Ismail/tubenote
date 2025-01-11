@@ -1,6 +1,7 @@
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import type { Profile } from "passport-google-oauth20";
 
+import type { UserDto } from "../../user/dtos/user.dto";
 import type { IUserService } from "../../user/user.service";
 
 export interface GoogleConfig {
@@ -56,7 +57,8 @@ export class GoogleAuthStrategy {
         return done(new Error("Failed to create user from Google profile"));
       }
 
-      // TODO: remove password from user object
+      user.password = "";
+
       done(null, user);
     } catch (error) {
       done(error);
