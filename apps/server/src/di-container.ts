@@ -2,7 +2,7 @@ import prismaClient from "./lib/prisma";
 
 import { AuthController } from "./modules/auth/auth.controller";
 import { AuthService } from "./modules/auth/auth.service";
-import { UserDatabase } from "./modules/user/user.db";
+import { UserRepository } from "./modules/user/user.repository";
 
 import { googleAuthConfig } from "./config/google-auth.config";
 import { GoogleAuthStrategy } from "./modules/auth/strategies/google.strategy";
@@ -26,7 +26,7 @@ import { VideoDatabase } from "./modules/video/video.db";
 import { VideoService } from "./modules/video/video.service";
 import { EmailService } from "./services/emailService";
 
-const userDB = new UserDatabase(prismaClient);
+const userRepository = new UserRepository(prismaClient);
 const noteRepository = new NoteRepository(prismaClient);
 const videoDB = new VideoDatabase(prismaClient);
 const refreshTokenRepository = new RefreshTokenRepository(prismaClient);
@@ -34,12 +34,12 @@ const verificationTokenDB = new VerificationTokenDatabase(prismaClient);
 const resetPasswordRepository = new ResetPasswordRepository(prismaClient);
 
 const jwtService = new JwtService();
-const passwordService = new PasswordService(userDB);
+const passwordService = new PasswordService(userRepository);
 const noteService = new NoteService(noteRepository);
 const videoService = new VideoService(videoDB);
 const refreshTokenService = new RefreshTokenService(refreshTokenRepository);
-const userService = new UserService(userDB, passwordService);
-const emailService = new EmailService(userDB, verificationTokenDB);
+const userService = new UserService(userRepository, passwordService);
+const emailService = new EmailService(userRepository, verificationTokenDB);
 const resetPasswordService = new ResetPasswordService(
   resetPasswordRepository,
   userService,
@@ -54,7 +54,7 @@ const authService = new AuthService(
   emailService
 );
 const verifyEmailService = new VerifyEmailService(
-  userDB,
+  userRepository,
   verificationTokenDB,
   authService
 );
