@@ -3,32 +3,16 @@ import httpStatus from "http-status";
 
 import type { EmptyRecord, TypedRequest } from "../../types";
 
-import { IVideoService } from "./video.service";
-
 import type { FindManyDto } from "../../common/dtos/find-many.dto";
 import type { IdParamDto } from "../../common/dtos/id-param.dto";
 import type { QueryPaginationDto } from "../../common/dtos/query-pagination.dto";
-
-export interface IVideoController {
-  getUserVideos(
-    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
-    res: Response
-  ): Promise<void>;
-  getVideoByIdOrCreate(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
-    res: Response
-  ): Promise<void>;
-}
+import type { IVideoController, IVideoService } from "./video.types";
 
 /**
  * Controller for handling video-related operations.
  */
 export class VideoController implements IVideoController {
-  private videoService: IVideoService;
-
-  constructor(videoService: IVideoService) {
-    this.videoService = videoService;
-  }
+  constructor(private readonly _videoService: IVideoService) {}
 
   /**
    * Retrieves a paginated list of videos for a specific user.
@@ -57,7 +41,7 @@ export class VideoController implements IVideoController {
     };
 
     const { totalPages, videos, videosCount } =
-      await this.videoService.getUserVideos(findManyDto);
+      await this._videoService.getUserVideos(findManyDto);
 
     res.status(httpStatus.OK).json({
       videos,
@@ -86,7 +70,7 @@ export class VideoController implements IVideoController {
     const { id } = req.params;
     const userId = req.userId;
 
-    const video = await this.videoService.findVideoOrCreate({
+    const video = await this._videoService.findVideoOrCreate({
       userId,
       youtubeVideoId: id,
     });
