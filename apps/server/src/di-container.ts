@@ -8,7 +8,7 @@ import { googleAuthConfig } from "./config/google-auth.config";
 import { GoogleAuthStrategy } from "./modules/auth/strategies/google.strategy";
 import { JwtService } from "./modules/jwt/jwt.service";
 import { NoteController } from "./modules/note/note.controller";
-import { NoteDatabase } from "./modules/note/note.db";
+import { NoteRepository } from "./modules/note/note.repository";
 import { NoteService } from "./modules/note/note.service";
 import { PasswordService } from "./modules/password/password.service";
 import { RefreshTokenDatabase } from "./modules/refreshToken/refresh-token.db";
@@ -27,7 +27,7 @@ import { VideoService } from "./modules/video/video.service";
 import { EmailService } from "./services/emailService";
 
 const userDB = new UserDatabase(prismaClient);
-const noteDB = new NoteDatabase(prismaClient);
+const noteRepository = new NoteRepository(prismaClient);
 const videoDB = new VideoDatabase(prismaClient);
 const refreshTokenDB = new RefreshTokenDatabase(prismaClient);
 const verificationTokenDB = new VerificationTokenDatabase(prismaClient);
@@ -35,7 +35,7 @@ const resetPasswordTokenDB = new ResetPasswordTokenDatabase(prismaClient);
 
 const jwtService = new JwtService();
 const passwordService = new PasswordService(userDB);
-const noteService = new NoteService(noteDB);
+const noteService = new NoteService(noteRepository);
 const videoService = new VideoService(videoDB);
 const refreshTokenService = new RefreshTokenService(refreshTokenDB);
 const userService = new UserService(userDB, passwordService);
