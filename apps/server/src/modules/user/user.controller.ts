@@ -3,26 +3,15 @@ import httpStatus from "http-status";
 
 import type { TypedRequest } from "../../types";
 
-import type { UpdateUserDto } from "./dtos/update-user.dto";
-import { IUserService } from "./user.service";
+import type { IUserController, IUserService } from "./user.types";
 
-export interface IUserController {
-  getCurrentUser(req: TypedRequest, res: Response): Promise<void>;
-  updateCurrentUser(
-    req: TypedRequest<UpdateUserDto>,
-    res: Response
-  ): Promise<void>;
-}
+import type { UpdateUserDto } from "./dtos/update-user.dto";
 
 /**
  * Controller for handling user-related operations.
  */
 export class UserController implements IUserController {
-  private userService: IUserService;
-
-  constructor(userService: IUserService) {
-    this.userService = userService;
-  }
+  constructor(private readonly _userService: IUserService) {}
 
   /**
    * Get the current user's information.
@@ -33,7 +22,7 @@ export class UserController implements IUserController {
   async getCurrentUser(req: TypedRequest, res: Response): Promise<void> {
     const userId = req.userId;
 
-    const user = await this.userService.getUserById(userId);
+    const user = await this._userService.getUserById(userId);
 
     res.status(httpStatus.OK).json({
       user: {
@@ -60,7 +49,7 @@ export class UserController implements IUserController {
   ): Promise<void> {
     const userId = req.userId;
 
-    await this.userService.updateUser(userId, req.body);
+    await this._userService.updateUser(userId, req.body);
 
     res.status(httpStatus.OK).json({ message: "User updated successfully." });
   }
