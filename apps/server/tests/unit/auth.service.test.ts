@@ -1,4 +1,3 @@
-import { mock } from "node:test";
 import { REFRESH_TOKEN_SECRET } from "../../src/constants/auth";
 import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
 import {
@@ -8,7 +7,9 @@ import {
   UnauthorizedError,
 } from "../../src/errors";
 
-import { AuthService, IAuthService } from "../../src/modules/auth/auth.service";
+import { AuthService } from "../../src/modules/auth/auth.service";
+
+import { IAuthService } from "../../src/modules/auth/auth.types";
 
 import type { GoogleLoginDto } from "../../src/modules/auth/dtos/google-login.dto";
 import type { LoginResponseDto } from "../../src/modules/auth/dtos/login-response.dto";
