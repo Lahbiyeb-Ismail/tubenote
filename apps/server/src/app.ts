@@ -12,7 +12,7 @@ import session from "express-session";
 import helmet from "helmet";
 import passport from "passport";
 
-import authRoutes from "./modules/auth/auth.route";
+import authRoutes from "./modules/auth/auth.routes";
 import noteRoutes from "./modules/note/note.routes";
 import resetPasswordRoutes from "./modules/resetPasswordToken/reset-password.route";
 import userRoutes from "./modules/user/user.route";
