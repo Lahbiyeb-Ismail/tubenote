@@ -1,20 +1,23 @@
 import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
 import { NotFoundError } from "../../src/errors";
 
-import { IPasswordService } from "../../src/modules/password/password.service";
-import { IUserDatabase } from "../../src/modules/user/user.db";
-import { IUserService, UserService } from "../../src/modules/user/user.service";
+import type { User } from "../../src/modules/user/user.model";
+import { UserService } from "../../src/modules/user/user.service";
 
+import type { IPasswordService } from "../../src/modules/password/password.types";
 import type { UpdateUserDto } from "../../src/modules/user/dtos/update-user.dto";
-import type { UserDto } from "../../src/modules/user/dtos/user.dto";
+import type {
+  IUserRepository,
+  IUserService,
+} from "../../src/modules/user/user.types";
 
 describe("UserService methods test", () => {
   let userService: IUserService;
-  let mockUserDB: IUserDatabase;
+  let mockUserRepository: IUserRepository;
   let mockPasswordService: IPasswordService;
 
   beforeEach(() => {
-    mockUserDB = {
+    mockUserRepository = {
       findByEmail: jest.fn(),
       create: jest.fn(),
       findById: jest.fn(),
@@ -29,13 +32,13 @@ describe("UserService methods test", () => {
       resetPassword: jest.fn(),
     };
 
-    userService = new UserService(mockUserDB, mockPasswordService);
+    userService = new UserService(mockUserRepository, mockPasswordService);
   });
 
   const mockUserId = "user_id_001";
   const mockUserEmail = "test@example.com";
 
-  const mockUser: UserDto = {
+  const mockUser: User = {
     id: mockUserId,
     username: "testuser",
     email: mockUserEmail,
@@ -55,18 +58,20 @@ describe("UserService methods test", () => {
     });
 
     it("should return the user when it exists", async () => {
-      (mockUserDB.findByEmail as jest.Mock).mockResolvedValue(mockUser);
+      (mockUserRepository.findByEmail as jest.Mock).mockResolvedValue(mockUser);
 
       const result = await userService.getUserByEmail(mockUserEmail);
 
       expect(result).toEqual(mockUser);
 
-      expect(mockUserDB.findByEmail).toHaveBeenCalledWith(mockUserEmail);
-      expect(mockUserDB.findByEmail).toHaveBeenCalledTimes(1);
+      expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(
+        mockUserEmail
+      );
+      expect(mockUserRepository.findByEmail).toHaveBeenCalledTimes(1);
     });
 
     it("should return null if the user doesn't exist", async () => {
-      (mockUserDB.findByEmail as jest.Mock).mockResolvedValue(null);
+      (mockUserRepository.findByEmail as jest.Mock).mockResolvedValue(null);
 
       const result = await userService.getUserByEmail(
         "nonexistent@example.com"
@@ -74,15 +79,15 @@ describe("UserService methods test", () => {
 
       expect(result).toBeNull();
 
-      expect(mockUserDB.findByEmail).toHaveBeenCalledWith(
+      expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(
         "nonexistent@example.com"
       );
-      expect(mockUserDB.findByEmail).toHaveBeenCalledTimes(1);
+      expect(mockUserRepository.findByEmail).toHaveBeenCalledTimes(1);
     });
 
     it("should handle special characters in email addresses", async () => {
       const specialEmail = "user+test@example.com";
-      (mockUserDB.findByEmail as jest.Mock).mockResolvedValue({
+      (mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
         ...mockUser,
         email: specialEmail,
       });
@@ -90,7 +95,7 @@ describe("UserService methods test", () => {
       const result = await userService.getUserByEmail(specialEmail);
 
       expect(result).not.toBeNull();
-      expect(mockUserDB.findByEmail).toHaveBeenCalledWith(specialEmail);
+      expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(specialEmail);
     });
   });
 
@@ -102,30 +107,32 @@ describe("UserService methods test", () => {
     const nonExistentUserId = "non_existent_user_id";
 
     it("should return the user when it exists", async () => {
-      (mockUserDB.findById as jest.Mock).mockResolvedValue(mockUser);
+      (mockUserRepository.findById as jest.Mock).mockResolvedValue(mockUser);
 
       const result = await userService.getUserById(mockUserId);
 
       expect(result).toEqual(mockUser);
 
-      expect(mockUserDB.findById).toHaveBeenCalledWith(mockUserId);
-      expect(mockUserDB.findById).toHaveBeenCalledTimes(1);
+      expect(mockUserRepository.findById).toHaveBeenCalledWith(mockUserId);
+      expect(mockUserRepository.findById).toHaveBeenCalledTimes(1);
     });
 
     it("should throw a NotFoundError when the user doesn't exist", async () => {
-      (mockUserDB.findById as jest.Mock).mockResolvedValue(null);
+      (mockUserRepository.findById as jest.Mock).mockResolvedValue(null);
 
       await expect(userService.getUserById(nonExistentUserId)).rejects.toThrow(
         new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
       );
 
-      expect(mockUserDB.findById).toHaveBeenCalledWith(nonExistentUserId);
-      expect(mockUserDB.findById).toHaveBeenCalledTimes(1);
+      expect(mockUserRepository.findById).toHaveBeenCalledWith(
+        nonExistentUserId
+      );
+      expect(mockUserRepository.findById).toHaveBeenCalledTimes(1);
     });
 
     it("should handle different types of valid userId formats", async () => {
       const uuidUserId = "550e8400-e29b-41d4-a716-446655440000";
-      (mockUserDB.findById as jest.Mock).mockResolvedValue({
+      (mockUserRepository.findById as jest.Mock).mockResolvedValue({
         ...mockUser,
         id: uuidUserId,
       });
@@ -133,11 +140,11 @@ describe("UserService methods test", () => {
       const result = await userService.getUserById(uuidUserId);
 
       expect(result.id).toBe(uuidUserId);
-      expect(mockUserDB.findById).toHaveBeenCalledWith(uuidUserId);
+      expect(mockUserRepository.findById).toHaveBeenCalledWith(uuidUserId);
     });
 
     it("should return the complete user object", async () => {
-      (mockUserDB.findById as jest.Mock).mockResolvedValue(mockUser);
+      (mockUserRepository.findById as jest.Mock).mockResolvedValue(mockUser);
 
       const result = await userService.getUserById(mockUserId);
 
@@ -159,7 +166,7 @@ describe("UserService methods test", () => {
       jest.spyOn(userService, "getUserById").mockResolvedValue(mockUser);
       jest.spyOn(userService, "getUserByEmail").mockResolvedValue(null);
 
-      (mockUserDB.updateUser as jest.Mock).mockResolvedValue(undefined);
+      (mockUserRepository.updateUser as jest.Mock).mockResolvedValue(undefined);
 
       await userService.updateUser(mockUserId, updateUserDto);
 
@@ -167,7 +174,7 @@ describe("UserService methods test", () => {
       expect(userService.getUserByEmail).toHaveBeenCalledWith(
         updateUserDto.email
       );
-      expect(mockUserDB.updateUser).toHaveBeenCalledWith(
+      expect(mockUserRepository.updateUser).toHaveBeenCalledWith(
         mockUserId,
         updateUserDto
       );
@@ -196,7 +203,7 @@ describe("UserService methods test", () => {
     it("should handle the case when only the email is updated", async () => {
       jest.spyOn(userService, "getUserById").mockResolvedValue(mockUser);
       jest.spyOn(userService, "getUserByEmail").mockResolvedValue(null);
-      (mockUserDB.updateUser as jest.Mock).mockResolvedValue({
+      (mockUserRepository.updateUser as jest.Mock).mockResolvedValue({
         ...mockUser,
         email: updateUserDto.email,
       });
@@ -210,7 +217,7 @@ describe("UserService methods test", () => {
       expect(userService.getUserByEmail).toHaveBeenCalledWith(
         updateUserDto.email
       );
-      expect(mockUserDB.updateUser).toHaveBeenCalled();
+      expect(mockUserRepository.updateUser).toHaveBeenCalled();
     });
   });
 });

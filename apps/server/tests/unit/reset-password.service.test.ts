@@ -1,25 +1,28 @@
 import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
 import { ForbiddenError, NotFoundError } from "../../src/errors";
-import type { IPasswordService } from "../../src/modules/password/password.service";
-import type { ResetTokenDto } from "../../src/modules/resetPasswordToken/dtos/reset-token.dto";
-import type { IResetPasswordTokenDatabase } from "../../src/modules/resetPasswordToken/reset-password.db";
-import {
+
+import type { ResetPasswordToken } from "../../src/modules/resetPasswordToken/reset-password.model";
+import type { User } from "../../src/modules/user/user.model";
+
+import { ResetPasswordService } from "../../src/modules/resetPasswordToken/reset-password.service";
+
+import type { IPasswordService } from "../../src/modules/password/password.types";
+import type {
+  IResetPasswordRespository,
   IResetPasswordService,
-  ResetPasswordService,
-} from "../../src/modules/resetPasswordToken/reset-password.service";
-import type { UserDto } from "../../src/modules/user/dtos/user.dto";
-import type { IUserService } from "../../src/modules/user/user.service";
+} from "../../src/modules/resetPasswordToken/reset-password.types";
+import type { IUserService } from "../../src/modules/user/user.types";
 import type { IEmailService } from "../../src/services/emailService";
 
 describe("resetPasswordService tests", () => {
   let resetPasswordService: IResetPasswordService;
-  let mockResetTokenDB: IResetPasswordTokenDatabase;
+  let mockResetPasswordRepository: IResetPasswordRespository;
   let mockUserService: IUserService;
   let mockPasswordService: IPasswordService;
   let mockEmailService: IEmailService;
 
   beforeEach(() => {
-    mockResetTokenDB = {
+    mockResetPasswordRepository = {
       create: jest.fn(),
       findByUserId: jest.fn(),
       findByToken: jest.fn(),
@@ -50,7 +53,7 @@ describe("resetPasswordService tests", () => {
     };
 
     resetPasswordService = new ResetPasswordService(
-      mockResetTokenDB,
+      mockResetPasswordRepository,
       mockUserService,
       mockPasswordService,
       mockEmailService
@@ -59,7 +62,7 @@ describe("resetPasswordService tests", () => {
 
   const mockEmail = "test@example.com";
 
-  const mockUser: UserDto = {
+  const mockUser: User = {
     id: "user123",
     email: "test@example.com",
     username: "testuser",
@@ -76,7 +79,7 @@ describe("resetPasswordService tests", () => {
   const mockExpiredToken = "expired-token";
   const mockNonExistentToken = "non-existent-token";
 
-  const mockValidResetToken: ResetTokenDto = {
+  const mockValidResetToken: ResetPasswordToken = {
     id: "1",
     token: mockValidToken,
     userId: "user123",
@@ -84,7 +87,7 @@ describe("resetPasswordService tests", () => {
     createdAt: new Date(),
   };
 
-  const mockExpiredResetToken: ResetTokenDto = {
+  const mockExpiredResetToken: ResetPasswordToken = {
     id: "2",
     userId: "user123",
     token: mockExpiredToken,
@@ -131,7 +134,7 @@ describe("resetPasswordService tests", () => {
     it("should throw a ForbiddenError if the reset token is already sent", async () => {
       (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue(mockUser);
 
-      (mockResetTokenDB.findByUserId as jest.Mock).mockResolvedValue(
+      (mockResetPasswordRepository.findByUserId as jest.Mock).mockResolvedValue(
         mockValidResetToken
       );
 
@@ -143,7 +146,9 @@ describe("resetPasswordService tests", () => {
 
       expect(mockUserService.getUserByEmail).toHaveBeenCalledTimes(1);
 
-      expect(mockResetTokenDB.findByUserId).toHaveBeenCalledWith(mockUser.id);
+      expect(mockResetPasswordRepository.findByUserId).toHaveBeenCalledWith(
+        mockUser.id
+      );
 
       expect(mockValidResetToken.userId).toBe(mockUser.id);
     });
@@ -151,7 +156,9 @@ describe("resetPasswordService tests", () => {
     it("should send a reset token email", async () => {
       (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue(mockUser);
 
-      (mockResetTokenDB.findByUserId as jest.Mock).mockResolvedValue(null);
+      (mockResetPasswordRepository.findByUserId as jest.Mock).mockResolvedValue(
+        null
+      );
 
       jest
         .spyOn(resetPasswordService, "createToken")
@@ -163,9 +170,11 @@ describe("resetPasswordService tests", () => {
 
       expect(mockUserService.getUserByEmail).toHaveBeenCalledTimes(1);
 
-      expect(mockResetTokenDB.findByUserId).toHaveBeenCalledWith(mockUser.id);
+      expect(mockResetPasswordRepository.findByUserId).toHaveBeenCalledWith(
+        mockUser.id
+      );
 
-      expect(mockResetTokenDB.findByUserId).toHaveBeenCalledTimes(1);
+      expect(mockResetPasswordRepository.findByUserId).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -175,7 +184,9 @@ describe("resetPasswordService tests", () => {
     });
 
     it("should create a reset token", async () => {
-      (mockResetTokenDB.create as jest.Mock).mockResolvedValue(mockValidToken);
+      (mockResetPasswordRepository.create as jest.Mock).mockResolvedValue(
+        mockValidToken
+      );
 
       const result = await resetPasswordService.createToken(mockUser.id);
 
@@ -206,7 +217,7 @@ describe("resetPasswordService tests", () => {
 
       expect(mockPasswordService.updatePassword).not.toHaveBeenCalled();
 
-      expect(mockResetTokenDB.deleteMany).not.toHaveBeenCalled();
+      expect(mockResetPasswordRepository.deleteMany).not.toHaveBeenCalled();
     });
 
     it("should throw a ForbiddenError if the reset token is expired", async () => {
@@ -230,7 +241,7 @@ describe("resetPasswordService tests", () => {
         mockExpiredResetToken
       );
 
-      expect(mockResetTokenDB.deleteMany).toHaveBeenCalledWith(
+      expect(mockResetPasswordRepository.deleteMany).toHaveBeenCalledWith(
         mockExpiredResetToken.userId
       );
 
@@ -271,7 +282,7 @@ describe("resetPasswordService tests", () => {
     //     password: "newpassword123",
     //   });
 
-    //   expect(mockResetTokenDB.deleteMany).toHaveBeenCalledWith(
+    //   expect(mockResetPasswordRepository.deleteMany).toHaveBeenCalledWith(
     //     mockValidResetToken.userId
     //   );
     // });
@@ -283,7 +294,7 @@ describe("resetPasswordService tests", () => {
     });
 
     it("should return the found ResetToken", async () => {
-      (mockResetTokenDB.findByToken as jest.Mock).mockResolvedValue(
+      (mockResetPasswordRepository.findByToken as jest.Mock).mockResolvedValue(
         mockValidResetToken
       );
 
@@ -354,7 +365,7 @@ describe("resetPasswordService tests", () => {
       expect(resetPasswordService.isResetTokenExpired).toHaveBeenCalledWith(
         mockExpiredResetToken
       );
-      expect(mockResetTokenDB.deleteMany).toHaveBeenCalledWith(
+      expect(mockResetPasswordRepository.deleteMany).toHaveBeenCalledWith(
         mockExpiredResetToken.userId
       );
     });
