@@ -11,7 +11,7 @@ import { NoteController } from "./modules/note/note.controller";
 import { NoteRepository } from "./modules/note/note.repository";
 import { NoteService } from "./modules/note/note.service";
 import { PasswordService } from "./modules/password/password.service";
-import { RefreshTokenDatabase } from "./modules/refreshToken/refresh-token.db";
+import { RefreshTokenRepository } from "./modules/refreshToken/refresh-token.repository";
 import { RefreshTokenService } from "./modules/refreshToken/refresh-token.service";
 import { ResetPasswordController } from "./modules/resetPasswordToken/reset-password.controller";
 import { ResetPasswordTokenDatabase } from "./modules/resetPasswordToken/reset-password.db";
@@ -29,7 +29,7 @@ import { EmailService } from "./services/emailService";
 const userDB = new UserDatabase(prismaClient);
 const noteRepository = new NoteRepository(prismaClient);
 const videoDB = new VideoDatabase(prismaClient);
-const refreshTokenDB = new RefreshTokenDatabase(prismaClient);
+const refreshTokenRepository = new RefreshTokenRepository(prismaClient);
 const verificationTokenDB = new VerificationTokenDatabase(prismaClient);
 const resetPasswordTokenDB = new ResetPasswordTokenDatabase(prismaClient);
 
@@ -37,7 +37,7 @@ const jwtService = new JwtService();
 const passwordService = new PasswordService(userDB);
 const noteService = new NoteService(noteRepository);
 const videoService = new VideoService(videoDB);
-const refreshTokenService = new RefreshTokenService(refreshTokenDB);
+const refreshTokenService = new RefreshTokenService(refreshTokenRepository);
 const userService = new UserService(userDB, passwordService);
 const emailService = new EmailService(userDB, verificationTokenDB);
 const resetPasswordService = new ResetPasswordService(
