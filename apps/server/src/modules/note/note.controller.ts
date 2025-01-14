@@ -1,8 +1,6 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import { INoteService } from "./note.service";
-
 import type { EmptyRecord, TypedRequest } from "../../types";
 
 import type { FindManyDto } from "../../common/dtos/find-many.dto";
@@ -12,42 +10,13 @@ import type { CreateNoteDto } from "./dtos/create-note.dto";
 import type { DeleteNoteDto } from "./dtos/delete-note.dto";
 import type { FindNoteDto } from "./dtos/find-note.dto";
 import type { UpdateNoteDto } from "./dtos/update-note.dto";
-
-export interface INoteController {
-  createNote(req: TypedRequest<CreateNoteDto>, res: Response): Promise<void>;
-  updateNote(
-    req: TypedRequest<UpdateNoteDto, IdParamDto>,
-    res: Response
-  ): Promise<void>;
-  deleteNote(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
-    res: Response
-  ): Promise<void>;
-  getNoteById(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
-    res: Response
-  ): Promise<void>;
-  getUserNotes(
-    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
-    res: Response
-  ): Promise<void>;
-  getUserRecentNotes(req: TypedRequest, res: Response): Promise<void>;
-  getRecentlyUpatedNotes(req: TypedRequest, res: Response): Promise<void>;
-  getNotesByVideoId(
-    req: TypedRequest<EmptyRecord, IdParamDto, QueryPaginationDto>,
-    res: Response
-  ): Promise<void>;
-}
+import type { INoteController, INoteService } from "./note.types";
 
 /**
  * Controller for handling note-related operations.
  */
 export class NoteController implements INoteController {
-  private noteService: INoteService;
-
-  constructor(noteService: INoteService) {
-    this.noteService = noteService;
-  }
+  constructor(private readonly _noteService: INoteService) {}
 
   /**
    * Adds a new note for the authenticated user.
@@ -62,7 +31,7 @@ export class NoteController implements INoteController {
   ): Promise<void> {
     const userId = req.userId;
 
-    const note = await this.noteService.createNote(userId, req.body);
+    const note = await this._noteService.createNote(userId, req.body);
 
     res
       .status(httpStatus.CREATED)
@@ -86,7 +55,7 @@ export class NoteController implements INoteController {
     const updateNoteDto = req.body;
     const findNoteDto: FindNoteDto = { id, userId };
 
-    const updatedNote = await this.noteService.updateNote(
+    const updatedNote = await this._noteService.updateNote(
       findNoteDto,
       updateNoteDto
     );
@@ -112,7 +81,7 @@ export class NoteController implements INoteController {
 
     const deleteNoteDto: DeleteNoteDto = { id, userId };
 
-    await this.noteService.deleteNote(deleteNoteDto);
+    await this._noteService.deleteNote(deleteNoteDto);
 
     res.status(httpStatus.OK).json({ message: "Note deleted successfully." });
   }
@@ -133,7 +102,7 @@ export class NoteController implements INoteController {
 
     const findNoteDto: FindNoteDto = { id, userId };
 
-    const note = await this.noteService.findNote(findNoteDto);
+    const note = await this._noteService.findNote(findNoteDto);
 
     res.status(httpStatus.OK).json({ note });
   }
@@ -164,7 +133,7 @@ export class NoteController implements INoteController {
     };
 
     const { notes, notesCount, totalPages } =
-      await this.noteService.fetchUserNotes(findManyDto);
+      await this._noteService.fetchUserNotes(findManyDto);
 
     res.status(httpStatus.OK).json({
       notes,
@@ -194,7 +163,7 @@ export class NoteController implements INoteController {
       sort: { by: "createdAt", order: "desc" },
     };
 
-    const notes = await this.noteService.fetchRecentNotes(findManyDto);
+    const notes = await this._noteService.fetchRecentNotes(findManyDto);
 
     res.status(httpStatus.OK).json({ notes });
   }
@@ -218,7 +187,7 @@ export class NoteController implements INoteController {
       sort: { by: "updatedAt", order: "desc" },
     };
 
-    const notes = await this.noteService.fetchRecentNotes(findManyDto);
+    const notes = await this._noteService.fetchRecentNotes(findManyDto);
 
     res.status(httpStatus.OK).json({ notes });
   }
@@ -252,7 +221,7 @@ export class NoteController implements INoteController {
     };
 
     const { notes, notesCount, totalPages } =
-      await this.noteService.fetchNotesByVideoId(id, findManyDto);
+      await this._noteService.fetchNotesByVideoId(id, findManyDto);
 
     res.status(httpStatus.OK).json({
       notes,
