@@ -16,7 +16,7 @@ import { IAuthService } from "./auth.service";
 
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 import type { TypedRequest } from "../../types";
-import type { GoogleUser } from "./auth.type";
+import type { UserDto } from "../user/dtos/user.dto";
 import type { LoginUserDto } from "./dtos/login-user.dto";
 import type { RegisterUserDto } from "./dtos/register-user.dto";
 
@@ -124,12 +124,10 @@ export class AuthController implements IAuthController {
    * @param res - The response object.
    */
   async loginWithGoogle(req: TypedRequest, res: Response) {
-    const user = req.user as Profile;
-
-    const googleUser = user._json as GoogleUser;
+    const user = req.user as UserDto;
 
     const { accessToken, refreshToken } =
-      await this.authService.googleLogin(googleUser);
+      await this.authService.googleLogin(user);
 
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 

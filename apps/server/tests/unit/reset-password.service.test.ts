@@ -28,6 +28,7 @@ describe("resetPasswordService tests", () => {
 
     mockUserService = {
       createUser: jest.fn(),
+      findOrCreateUser: jest.fn(),
       getUserById: jest.fn(),
       verifyUserEmail: jest.fn(),
       getUserByEmail: jest.fn(),

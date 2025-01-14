@@ -39,7 +39,6 @@ describe("VerifyEmailService methods test", () => {
       logoutUser: jest.fn(),
       refreshToken: jest.fn(),
       googleLogin: jest.fn(),
-      generateAuthTokens: jest.fn(),
     };
 
     verifyEmailService = new VerifyEmailService(

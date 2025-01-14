@@ -11,6 +11,7 @@ import type { UserDto } from "./dtos/user.dto";
 
 export interface IUserService {
   createUser(createUserDto: CreateUserDto): Promise<UserDto>;
+  findOrCreateUser(createUserDto: CreateUserDto): Promise<UserDto>;
   getUserByEmail(email: string): Promise<UserDto | null>;
   getUserById(userId: string): Promise<UserDto>;
   updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserDto>;
@@ -43,6 +44,18 @@ export class UserService implements IUserService {
       ...createUserDto,
       password: hashedPassword,
     });
+  }
+
+  async findOrCreateUser(createUserDto: CreateUserDto): Promise<UserDto> {
+    const { email } = createUserDto;
+
+    let user = await this.getUserByEmail(email);
+
+    if (!user) {
+      user = await this.createUser(createUserDto);
+    }
+
+    return user;
   }
 
   async getUserByEmail(email: string): Promise<UserDto | null> {
