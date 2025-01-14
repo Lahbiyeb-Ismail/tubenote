@@ -2,25 +2,17 @@ import bcrypt from "bcryptjs";
 
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 import { BadRequestError, NotFoundError } from "../../errors";
+
+import type { IPasswordService } from "./password.types";
+
 import type { UserDto } from "../user/dtos/user.dto";
 import type { IUserDatabase } from "../user/user.db";
 import type { ComparePasswordsDto } from "./dtos/compare-passwords.dto";
 import type { ResetPasswordDto } from "./dtos/reset-password.dto";
 import type { UpdatePasswordDto } from "./dtos/update-password.dto";
 
-export interface IPasswordService {
-  hashPassword(password: string): Promise<string>;
-  comparePasswords(comparePasswordsDto: ComparePasswordsDto): Promise<boolean>;
-  updatePassword(updatePasswordDto: UpdatePasswordDto): Promise<UserDto>;
-  resetPassword(resetPasswordDto: ResetPasswordDto): Promise<UserDto>;
-}
-
 export class PasswordService implements IPasswordService {
-  private userDB: IUserDatabase;
-
-  constructor(userDB: IUserDatabase) {
-    this.userDB = userDB;
-  }
+  constructor(private readonly _userDB: IUserDatabase) {}
 
   async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt(10);
@@ -38,7 +30,7 @@ export class PasswordService implements IPasswordService {
   async updatePassword(updatePasswordDto: UpdatePasswordDto): Promise<UserDto> {
     const { userId, currentPassword, newPassword } = updatePasswordDto;
 
-    const user = await this.userDB.findById(userId);
+    const user = await this._userDB.findById(userId);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -59,7 +51,7 @@ export class PasswordService implements IPasswordService {
 
     const hashedPassword = await this.hashPassword(newPassword);
 
-    return await this.userDB.updatePassword(userId, hashedPassword);
+    return await this._userDB.updatePassword(userId, hashedPassword);
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<UserDto> {
@@ -67,6 +59,6 @@ export class PasswordService implements IPasswordService {
 
     const hashedPassword = await this.hashPassword(password);
 
-    return await this.userDB.updatePassword(userId, hashedPassword);
+    return await this._userDB.updatePassword(userId, hashedPassword);
   }
 }
