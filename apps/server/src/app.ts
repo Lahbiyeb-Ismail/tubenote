@@ -17,7 +17,7 @@ import noteRoutes from "./modules/note/note.routes";
 import resetPasswordRoutes from "./modules/resetPasswordToken/reset-password.routes";
 import userRoutes from "./modules/user/user.routes";
 import verifyEmailRoutes from "./modules/verifyEmailToken/verify-email.routes";
-import videoRoutes from "./modules/video/video.route";
+import videoRoutes from "./modules/video/video.routes";
 
 import envConfig from "./config/envConfig";
 import { errorHandler, notFoundRoute } from "./middlewares/errorsMiddleware";
