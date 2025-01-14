@@ -18,8 +18,8 @@ import { ResetPasswordRepository } from "./modules/resetPasswordToken/reset-pass
 import { ResetPasswordService } from "./modules/resetPasswordToken/reset-password.service";
 import { UserController } from "./modules/user/user.controller";
 import { UserService } from "./modules/user/user.service";
-import { VerificationTokenDatabase } from "./modules/verifyEmailToken/verification-token.db";
 import { VerifyEmailController } from "./modules/verifyEmailToken/verify-email.controller";
+import { VerifyEmailRepository } from "./modules/verifyEmailToken/verify-email.repository";
 import { VerifyEmailService } from "./modules/verifyEmailToken/verify-email.service";
 import { VideoController } from "./modules/video/video.controller";
 import { VideoDatabase } from "./modules/video/video.db";
@@ -30,7 +30,7 @@ const userRepository = new UserRepository(prismaClient);
 const noteRepository = new NoteRepository(prismaClient);
 const videoDB = new VideoDatabase(prismaClient);
 const refreshTokenRepository = new RefreshTokenRepository(prismaClient);
-const verificationTokenDB = new VerificationTokenDatabase(prismaClient);
+const verifyEmailRepository = new VerifyEmailRepository(prismaClient);
 const resetPasswordRepository = new ResetPasswordRepository(prismaClient);
 
 const jwtService = new JwtService();
@@ -39,7 +39,7 @@ const noteService = new NoteService(noteRepository);
 const videoService = new VideoService(videoDB);
 const refreshTokenService = new RefreshTokenService(refreshTokenRepository);
 const userService = new UserService(userRepository, passwordService);
-const emailService = new EmailService(userRepository, verificationTokenDB);
+const emailService = new EmailService(userRepository, verifyEmailRepository);
 const resetPasswordService = new ResetPasswordService(
   resetPasswordRepository,
   userService,
@@ -55,7 +55,7 @@ const authService = new AuthService(
 );
 const verifyEmailService = new VerifyEmailService(
   userRepository,
-  verificationTokenDB,
+  verifyEmailRepository,
   authService
 );
 
