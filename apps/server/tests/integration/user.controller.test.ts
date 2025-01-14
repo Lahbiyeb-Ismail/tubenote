@@ -1,16 +1,16 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import {
-  IUserController,
-  UserController,
-} from "../../src/modules/user/user.controller";
-import { IUserService } from "../../src/modules/user/user.service";
-
 import type { TypedRequest } from "../../src/types";
 
+import { UserController } from "../../src/modules/user/user.controller";
+import {
+  IUserController,
+  IUserService,
+} from "../../src/modules/user/user.types";
+
 import type { UpdateUserDto } from "../../src/modules/user/dtos/update-user.dto";
-import type { UserDto } from "../../src/modules/user/dtos/user.dto";
+import type { User } from "../../src/modules/user/user.model";
 
 describe("userController integration tests", () => {
   let userController: IUserController;
@@ -41,7 +41,7 @@ describe("userController integration tests", () => {
 
     const mockUserId = "user_id_001";
 
-    const mockUser: UserDto = {
+    const mockUser: User = {
       id: mockUserId,
       username: "test_user",
       email: "testuser@example.com",

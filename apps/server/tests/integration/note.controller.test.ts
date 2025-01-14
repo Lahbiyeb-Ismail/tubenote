@@ -1,19 +1,21 @@
 import { Response } from "express";
 import httpStatus from "http-status";
 
+import { NoteController } from "../../src/modules/note/note.controller";
 import {
   INoteController,
-  NoteController,
-} from "../../src/modules/note/note.controller";
-import { INoteService } from "../../src/modules/note/note.service";
+  INoteService,
+} from "../../src/modules/note/note.types";
+
+import type { EmptyRecord, TypedRequest } from "../../src/types";
+
+import type { Note } from "../../src/modules/note/note.model";
 
 import type { IdParamDto } from "../../src/common/dtos/id-param.dto";
 import type { CreateNoteDto } from "../../src/modules/note/dtos/create-note.dto";
 import type { DeleteNoteDto } from "../../src/modules/note/dtos/delete-note.dto";
 import type { FindNoteDto } from "../../src/modules/note/dtos/find-note.dto";
-import { type NoteDto } from "../../src/modules/note/dtos/note.dto";
 import type { UpdateNoteDto } from "../../src/modules/note/dtos/update-note.dto";
-import { type EmptyRecord, TypedRequest } from "../../src/types";
 
 describe("noteController integration tests", () => {
   let noteController: INoteController;
@@ -74,7 +76,7 @@ describe("noteController integration tests", () => {
     });
 
     it("should add a new note successfully", async () => {
-      const mockCreatedNote: NoteDto = {
+      const mockCreatedNote: Note = {
         id: "note_id_001",
         title: "Test Note",
         content: "Test Content",
@@ -133,7 +135,7 @@ describe("noteController integration tests", () => {
     const mockUserId = "user_id_001";
     const mockNoteId = "note_id_001";
 
-    const mockNote: NoteDto = {
+    const mockNote: Note = {
       id: mockNoteId,
       userId: mockUserId,
       title: "Test Note",
