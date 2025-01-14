@@ -22,13 +22,13 @@ import { VerifyEmailController } from "./modules/verifyEmailToken/verify-email.c
 import { VerifyEmailRepository } from "./modules/verifyEmailToken/verify-email.repository";
 import { VerifyEmailService } from "./modules/verifyEmailToken/verify-email.service";
 import { VideoController } from "./modules/video/video.controller";
-import { VideoDatabase } from "./modules/video/video.db";
+import { VideoRepository } from "./modules/video/video.repository";
 import { VideoService } from "./modules/video/video.service";
 import { EmailService } from "./services/emailService";
 
 const userRepository = new UserRepository(prismaClient);
 const noteRepository = new NoteRepository(prismaClient);
-const videoDB = new VideoDatabase(prismaClient);
+const videoRepository = new VideoRepository(prismaClient);
 const refreshTokenRepository = new RefreshTokenRepository(prismaClient);
 const verifyEmailRepository = new VerifyEmailRepository(prismaClient);
 const resetPasswordRepository = new ResetPasswordRepository(prismaClient);
@@ -36,7 +36,7 @@ const resetPasswordRepository = new ResetPasswordRepository(prismaClient);
 const jwtService = new JwtService();
 const passwordService = new PasswordService(userRepository);
 const noteService = new NoteService(noteRepository);
-const videoService = new VideoService(videoDB);
+const videoService = new VideoService(videoRepository);
 const refreshTokenService = new RefreshTokenService(refreshTokenRepository);
 const userService = new UserService(userRepository, passwordService);
 const emailService = new EmailService(userRepository, verifyEmailRepository);
