@@ -14,7 +14,7 @@ import passport from "passport";
 
 import authRoutes from "./modules/auth/auth.routes";
 import noteRoutes from "./modules/note/note.routes";
-import resetPasswordRoutes from "./modules/resetPasswordToken/reset-password.route";
+import resetPasswordRoutes from "./modules/resetPasswordToken/reset-password.routes";
 import userRoutes from "./modules/user/user.route";
 import verifyEmailRoutes from "./modules/verifyEmailToken/verify-email.route";
 import videoRoutes from "./modules/video/video.route";
