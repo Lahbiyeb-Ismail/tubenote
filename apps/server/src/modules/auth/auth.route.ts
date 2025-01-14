@@ -1,19 +1,17 @@
 import { Router } from "express";
 import passport from "passport";
 
+import envConfig from "../../config/envConfig";
+
 import isAuthenticated from "../../middlewares/isAuthenticated";
 import validateRequest from "../../middlewares/validateRequest";
 
-import envConfig from "../../config/envConfig";
-
-import { configurePassport } from "./config/passport.config";
+import { authController, googleAuthStrategy } from "../../di-container";
 
 import { loginUserSchema } from "./schemas/login-user.schema";
 import { registerUserSchema } from "./schemas/register-user.schema";
 
-import { authController } from "./di-container";
-
-configurePassport();
+passport.use(googleAuthStrategy.getStrategy());
 
 const router = Router();
 

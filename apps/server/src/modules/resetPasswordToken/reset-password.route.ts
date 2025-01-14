@@ -1,39 +1,12 @@
 import { Router } from "express";
 
-import prismaClient from "../../lib/prisma";
 import validateRequest from "../../middlewares/validateRequest";
 
-import { EmailService } from "../../services/emailService";
-import { PasswordService } from "../password/password.service";
-import { UserDatabase } from "../user/user.db";
-import { UserService } from "../user/user.service";
-import { VerificationTokenDatabase } from "../verifyEmailToken/verification-token.db";
-import { ResetPasswordTokenDatabase } from "./reset-password.db";
-import { ResetPasswordService } from "./reset-password.service";
-
-import { ResetPasswordController } from "./reset-password.controller";
+import { resetPasswordController } from "../../di-container";
 
 import { emailBodySchema } from "../../common/schemas/email-body.schema";
 import { tokenParamSchema } from "../../common/schemas/token-param.schema";
 import { passwordBodySchema } from "./schemas/password-body.schema";
-
-const resetTokenDB = new ResetPasswordTokenDatabase(prismaClient);
-const userDB = new UserDatabase(prismaClient);
-const verificationTokenDB = new VerificationTokenDatabase(prismaClient);
-
-const passwordService = new PasswordService(userDB);
-const userService = new UserService(userDB, passwordService);
-const emailService = new EmailService(userDB, verificationTokenDB);
-const resetPasswordService = new ResetPasswordService(
-  resetTokenDB,
-  userService,
-  passwordService,
-  emailService
-);
-
-const resetPasswordController = new ResetPasswordController(
-  resetPasswordService
-);
 
 const router = Router();
 
