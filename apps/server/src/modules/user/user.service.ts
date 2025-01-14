@@ -2,32 +2,21 @@ import { ERROR_MESSAGES } from "../../constants/errorMessages";
 
 import { BadRequestError, ConflictError, NotFoundError } from "../../errors";
 
-import { IPasswordService } from "../password/password.service";
-import { IUserDatabase } from "./user.db";
+import type { User } from "./user.model";
+
+import type { IPasswordService } from "../password/password.types";
+import type { IUserRepository, IUserService } from "./user.types";
 
 import type { CreateUserDto } from "./dtos/create-user.dto";
 import type { UpdateUserDto } from "./dtos/update-user.dto";
-import type { UserDto } from "./dtos/user.dto";
-
-export interface IUserService {
-  createUser(createUserDto: CreateUserDto): Promise<UserDto>;
-  findOrCreateUser(createUserDto: CreateUserDto): Promise<UserDto>;
-  getUserByEmail(email: string): Promise<UserDto | null>;
-  getUserById(userId: string): Promise<UserDto>;
-  updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserDto>;
-  verifyUserEmail(id: string): Promise<UserDto>;
-}
 
 export class UserService implements IUserService {
-  private userDB: IUserDatabase;
-  private passwordService: IPasswordService;
+  constructor(
+    private readonly _userRepository: IUserRepository,
+    private readonly _passwordService: IPasswordService
+  ) {}
 
-  constructor(userDB: IUserDatabase, passwordService: IPasswordService) {
-    this.userDB = userDB;
-    this.passwordService = passwordService;
-  }
-
-  async createUser(createUserDto: CreateUserDto): Promise<UserDto> {
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
     const { email } = createUserDto;
 
     const existingUser = await this.getUserByEmail(email);
@@ -36,17 +25,17 @@ export class UserService implements IUserService {
       throw new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
-    const hashedPassword = await this.passwordService.hashPassword(
+    const hashedPassword = await this._passwordService.hashPassword(
       createUserDto.password
     );
 
-    return await this.userDB.create({
+    return await this._userRepository.create({
       ...createUserDto,
       password: hashedPassword,
     });
   }
 
-  async findOrCreateUser(createUserDto: CreateUserDto): Promise<UserDto> {
+  async findOrCreateUser(createUserDto: CreateUserDto): Promise<User> {
     const { email } = createUserDto;
 
     let user = await this.getUserByEmail(email);
@@ -58,14 +47,14 @@ export class UserService implements IUserService {
     return user;
   }
 
-  async getUserByEmail(email: string): Promise<UserDto | null> {
-    const user = await this.userDB.findByEmail(email);
+  async getUserByEmail(email: string): Promise<User | null> {
+    const user = await this._userRepository.findByEmail(email);
 
     return user;
   }
 
-  async getUserById(userId: string): Promise<UserDto> {
-    const user = await this.userDB.findById(userId);
+  async getUserById(userId: string): Promise<User> {
+    const user = await this._userRepository.findById(userId);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -74,7 +63,7 @@ export class UserService implements IUserService {
     return user;
   }
 
-  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserDto> {
+  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.getUserById(id);
 
     if (updateUserDto.email && updateUserDto.email !== user.email) {
@@ -85,10 +74,10 @@ export class UserService implements IUserService {
       }
     }
 
-    return await this.userDB.updateUser(id, updateUserDto);
+    return await this._userRepository.updateUser(id, updateUserDto);
   }
 
-  async verifyUserEmail(id: string): Promise<UserDto> {
-    return await this.userDB.updateUser(id, { isEmailVerified: true });
+  async verifyUserEmail(id: string): Promise<User> {
+    return await this._userRepository.updateUser(id, { isEmailVerified: true });
   }
 }
