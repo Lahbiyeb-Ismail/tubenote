@@ -1,14 +1,16 @@
 import nodemailer, { type Transporter } from "nodemailer";
 
-import type { EmailContent } from "../types/email.type";
-
 import envConfig from "../config/envConfig";
+
 import { ERROR_MESSAGES } from "../constants/errorMessages";
 import { ForbiddenError } from "../errors";
-import type { IUserDatabase } from "../modules/user/user.db";
-import type { IVerificationTokenDB } from "../modules/verifyEmailToken/verification-token.db";
+
 import compileTemplate from "../utils/compileTemplate";
 import logger from "../utils/logger";
+
+import type { IUserRepository } from "../modules/user/user.types";
+import type { IVerifyEmailRepository } from "../modules/verifyEmailToken/verify-email.types";
+import type { EmailContent } from "../types/email.type";
 
 /**
  * This function sends an email to the given email with the email verification link
@@ -39,16 +41,11 @@ export interface IEmailService {
 
 export class EmailService implements IEmailService {
   private transporter: Transporter;
-  private userDB: IUserDatabase;
-  private verificationTokenDB: IVerificationTokenDB;
 
   constructor(
-    userDB: IUserDatabase,
-    verificationTokenDB: IVerificationTokenDB
+    private readonly _userRepository: IUserRepository,
+    private readonly _verifyEmailRepository: IVerifyEmailRepository
   ) {
-    this.userDB = userDB;
-    this.verificationTokenDB = verificationTokenDB;
-
     this.transporter = nodemailer.createTransport({
       host: envConfig.email.smtp.host,
       port: +envConfig.email.smtp.port,
@@ -92,7 +89,7 @@ export class EmailService implements IEmailService {
   }
 
   async createEmailVerififcationToken(email: string): Promise<string> {
-    const user = await this.userDB.findByEmail(email);
+    const user = await this._userRepository.findByEmail(email);
 
     if (!user) {
       throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
@@ -103,13 +100,13 @@ export class EmailService implements IEmailService {
     }
 
     const existingVerificationToken =
-      await this.verificationTokenDB.findByUserId(user.id);
+      await this._verifyEmailRepository.findByUserId(user.id);
 
     if (existingVerificationToken) {
       throw new ForbiddenError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
     }
 
-    const verificationToken = await this.verificationTokenDB.create(user.id);
+    const verificationToken = await this._verifyEmailRepository.create(user.id);
 
     return verificationToken;
   }
