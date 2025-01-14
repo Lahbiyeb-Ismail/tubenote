@@ -1,8 +1,7 @@
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import type { Profile } from "passport-google-oauth20";
 
-import type { UserDto } from "../../user/dtos/user.dto";
-import type { IUserService } from "../../user/user.service";
+import type { IUserService } from "../../user/user.types";
 
 export interface GoogleConfig {
   clientID: string;
