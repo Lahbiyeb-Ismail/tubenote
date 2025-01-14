@@ -16,7 +16,7 @@ import authRoutes from "./modules/auth/auth.routes";
 import noteRoutes from "./modules/note/note.routes";
 import resetPasswordRoutes from "./modules/resetPasswordToken/reset-password.routes";
 import userRoutes from "./modules/user/user.routes";
-import verifyEmailRoutes from "./modules/verifyEmailToken/verify-email.route";
+import verifyEmailRoutes from "./modules/verifyEmailToken/verify-email.routes";
 import videoRoutes from "./modules/video/video.route";
 
 import envConfig from "./config/envConfig";
