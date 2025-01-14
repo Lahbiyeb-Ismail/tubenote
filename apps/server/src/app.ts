@@ -13,7 +13,7 @@ import helmet from "helmet";
 import passport from "passport";
 
 import authRoutes from "./modules/auth/auth.route";
-import noteRoutes from "./modules/note/note.route";
+import noteRoutes from "./modules/note/note.routes";
 import resetPasswordRoutes from "./modules/resetPasswordToken/reset-password.route";
 import userRoutes from "./modules/user/user.route";
 import verifyEmailRoutes from "./modules/verifyEmailToken/verify-email.route";
