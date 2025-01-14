@@ -5,7 +5,7 @@ import type { ResetPasswordToken } from "./reset-password.model";
 
 import type { IEmailService } from "../../services/emailService";
 import type { IPasswordService } from "../password/password.types";
-import type { IUserService } from "../user/user.service";
+import type { IUserService } from "../user/user.types";
 import type {
   IResetPasswordRespository,
   IResetPasswordService,
