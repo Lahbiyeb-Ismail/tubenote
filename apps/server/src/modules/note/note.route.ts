@@ -1,22 +1,14 @@
 import { Router } from "express";
 
-import prismaClient from "../../lib/prisma";
-
-import { NoteController } from "./note.controller";
-import { NoteDatabase } from "./note.db";
-import { NoteService } from "./note.service";
-
 import isAuthenticated from "../../middlewares/isAuthenticated";
 import validateRequest from "../../middlewares/validateRequest";
+
+import { noteController } from "../../di-container";
 
 import { idParamSchema } from "../../common/schemas/id-param.schema";
 import { paginationSchema } from "../../common/schemas/query-pagination.schema";
 import { createNoteSchema } from "./schemas/create-note.schema";
 import { updateNoteSchema } from "./schemas/update-note.schema";
-
-const noteDB = new NoteDatabase(prismaClient);
-const noteService = new NoteService(noteDB);
-const noteController = new NoteController(noteService);
 
 const router = Router();
 
