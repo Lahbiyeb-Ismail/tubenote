@@ -15,7 +15,8 @@ import { UnauthorizedError } from "../../errors";
 import type { IAuthController, IAuthService } from "./auth.types";
 
 import type { TypedRequest } from "../../types";
-import type { UserDto } from "../user/dtos/user.dto";
+import type { User } from "../user/user.model";
+
 import type { LoginUserDto } from "./dtos/login-user.dto";
 import type { RegisterUserDto } from "./dtos/register-user.dto";
 
@@ -111,7 +112,7 @@ export class AuthController implements IAuthController {
    * @param res - The response object.
    */
   async loginWithGoogle(req: TypedRequest, res: Response) {
-    const user = req.user as UserDto;
+    const user = req.user as User;
 
     const { accessToken, refreshToken } =
       await this._authService.googleLogin(user);

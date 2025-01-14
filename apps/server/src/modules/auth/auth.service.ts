@@ -4,16 +4,16 @@ import { ERROR_MESSAGES } from "../../constants/errorMessages";
 
 import { ForbiddenError, NotFoundError, UnauthorizedError } from "../../errors";
 
-import { IEmailService } from "../../services/emailService";
-
 import type { IAuthService } from "./auth.types";
 
-import type { IJwtService } from "../jwt/jwt.service";
-import type { IPasswordService } from "../password/password.service";
-import type { IRefreshTokenService } from "../refreshToken/refresh-token.service";
-import type { IUserService } from "../user/user.service";
+import type { IEmailService } from "../../services/emailService";
+import type { IJwtService } from "../jwt/jwt.types";
+import type { IPasswordService } from "../password/password.types";
+import type { IRefreshTokenService } from "../refreshToken/refresh-token.types";
+import type { IUserService } from "../user/user.types";
 
-import type { UserDto } from "../user/dtos/user.dto";
+import type { User } from "../user/user.model";
+
 import type { LoginResponseDto } from "./dtos/login-response.dto";
 import type { LoginUserDto } from "./dtos/login-user.dto";
 import type { LogoutUserDto } from "./dtos/logout-user.dto";
@@ -29,7 +29,7 @@ export class AuthService implements IAuthService {
     private readonly _emailService: IEmailService
   ) {}
 
-  async registerUser(registerUserDto: RegisterUserDto): Promise<UserDto> {
+  async registerUser(registerUserDto: RegisterUserDto): Promise<User> {
     const newUser = await this._userService.createUser(registerUserDto);
 
     await this._emailService.sendVerificationEmail(newUser.email);
@@ -63,7 +63,10 @@ export class AuthService implements IAuthService {
       user.id
     );
 
-    await this._refreshTokenService.createToken(user.id, refreshToken);
+    await this._refreshTokenService.createToken({
+      userId: user.id,
+      token: refreshToken,
+    });
 
     return { accessToken, refreshToken };
   }
@@ -110,12 +113,15 @@ export class AuthService implements IAuthService {
     const { accessToken, refreshToken } =
       this._jwtService.generateAuthTokens(userId);
 
-    await this._refreshTokenService.createToken(userId, refreshToken);
+    await this._refreshTokenService.createToken({
+      userId,
+      token: refreshToken,
+    });
 
     return { accessToken, refreshToken };
   }
 
-  async googleLogin(user: UserDto): Promise<LoginResponseDto> {
+  async googleLogin(user: User): Promise<LoginResponseDto> {
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
@@ -128,7 +134,10 @@ export class AuthService implements IAuthService {
       user.id
     );
 
-    await this._refreshTokenService.createToken(user.id, refreshToken);
+    await this._refreshTokenService.createToken({
+      userId: user.id,
+      token: refreshToken,
+    });
 
     return { accessToken, refreshToken };
   }
