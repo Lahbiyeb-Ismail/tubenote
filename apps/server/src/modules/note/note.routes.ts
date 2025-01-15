@@ -3,7 +3,7 @@ import { Router } from "express";
 import isAuthenticated from "../../middlewares/isAuthenticated";
 import validateRequest from "../../middlewares/validateRequest";
 
-import { noteController } from "../../di-container";
+import { noteController } from "./note.module";
 
 import { idParamSchema } from "../../common/schemas/id-param.schema";
 import { paginationSchema } from "../../common/schemas/query-pagination.schema";

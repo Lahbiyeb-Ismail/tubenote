@@ -2,7 +2,7 @@ import { ERROR_MESSAGES } from "../../constants/errorMessages";
 import { ForbiddenError } from "../../errors";
 
 import type { IAuthService } from "../auth/auth.types";
-import type { IUserRepository } from "../user/user.types";
+import type { IUserService } from "../user/user.types";
 import type {
   IVerifyEmailRepository,
   IVerifyEmailService,
@@ -10,13 +10,13 @@ import type {
 
 export class VerifyEmailService implements IVerifyEmailService {
   constructor(
-    private readonly _userRepository: IUserRepository,
     private readonly _verifyEmailRepository: IVerifyEmailRepository,
+    private readonly _userService: IUserService,
     private readonly _authService: IAuthService
   ) {}
 
   async generateToken(email: string): Promise<string> {
-    const user = await this._userRepository.findByEmail(email);
+    const user = await this._userService.getUserByEmail(email);
 
     if (!user) {
       throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);

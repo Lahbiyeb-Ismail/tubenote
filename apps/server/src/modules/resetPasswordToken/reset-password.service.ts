@@ -3,7 +3,7 @@ import { ForbiddenError, NotFoundError } from "../../errors";
 
 import type { ResetPasswordToken } from "./reset-password.model";
 
-import type { IEmailService } from "../../services/emailService";
+import type { IMailSenderService } from "../mailSender/mail-sender.types";
 import type { IPasswordService } from "../password/password.types";
 import type { IUserService } from "../user/user.types";
 import type {
@@ -16,7 +16,7 @@ export class ResetPasswordService implements IResetPasswordService {
     private readonly _resetPasswordRepository: IResetPasswordRespository,
     private readonly _userService: IUserService,
     private readonly _passwordService: IPasswordService,
-    private readonly _emailService: IEmailService
+    private readonly _mailSenderService: IMailSenderService
   ) {}
 
   async sendResetToken(email: string): Promise<void> {
@@ -39,7 +39,7 @@ export class ResetPasswordService implements IResetPasswordService {
 
     const token = await this.createToken(user.id);
 
-    await this._emailService.sendResetPasswordEmail({
+    await this._mailSenderService.sendResetPasswordEmail({
       email: user.email,
       token,
     });

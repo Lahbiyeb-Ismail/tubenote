@@ -6,8 +6,8 @@ import { ForbiddenError, NotFoundError, UnauthorizedError } from "../../errors";
 
 import type { IAuthService } from "./auth.types";
 
-import type { IEmailService } from "../../services/emailService";
 import type { IJwtService } from "../jwt/jwt.types";
+import type { IMailSenderService } from "../mailSender/mail-sender.types";
 import type { IPasswordService } from "../password/password.types";
 import type { IRefreshTokenService } from "../refreshToken/refresh-token.types";
 import type { IUserService } from "../user/user.types";
@@ -26,13 +26,13 @@ export class AuthService implements IAuthService {
     private readonly _userService: IUserService,
     private readonly _passwordService: IPasswordService,
     private readonly _refreshTokenService: IRefreshTokenService,
-    private readonly _emailService: IEmailService
+    private readonly _mailSenderService: IMailSenderService
   ) {}
 
   async registerUser(registerUserDto: RegisterUserDto): Promise<User> {
     const newUser = await this._userService.createUser(registerUserDto);
 
-    await this._emailService.sendVerificationEmail(newUser.email);
+    await this._mailSenderService.sendVerificationEmail(newUser.email);
 
     return newUser;
   }

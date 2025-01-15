@@ -6,7 +6,7 @@ import envConfig from "../../config/envConfig";
 import isAuthenticated from "../../middlewares/isAuthenticated";
 import validateRequest from "../../middlewares/validateRequest";
 
-import { authController, googleAuthStrategy } from "../../di-container";
+import { authController, googleAuthStrategy } from "./auth.module";
 
 import { loginUserSchema } from "./schemas/login-user.schema";
 import { registerUserSchema } from "./schemas/register-user.schema";
