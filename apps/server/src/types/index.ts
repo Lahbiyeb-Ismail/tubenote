@@ -1,6 +1,6 @@
 import type { Request } from "express";
 
-import type { ResetTokenDto } from "../modules/resetPasswordToken/dtos/reset-token.dto";
+import type { ResetPasswordToken } from "../modules/resetPasswordToken/reset-password.model";
 
 /**
  * Represents the payload of a JSON Web Token (JWT).
@@ -23,7 +23,7 @@ export type JwtPayload = {
 declare global {
   namespace Express {
     interface Request {
-      resetToken: ResetTokenDto;
+      resetToken: ResetPasswordToken;
       userId: string;
     }
   }

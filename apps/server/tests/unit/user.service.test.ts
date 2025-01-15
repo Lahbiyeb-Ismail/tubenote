@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
+import { ERROR_MESSAGES } from "../../src/constants/error-messages.contants";
 import { NotFoundError } from "../../src/errors";
 
 import type { User } from "../../src/modules/user/user.model";

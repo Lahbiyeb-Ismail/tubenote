@@ -1,4 +1,4 @@
-import prismaClient from "../../lib/prisma";
+import prismaClient from "../../config/database.config";
 import { authService } from "../auth/auth.module";
 import { userService } from "../user/user.module";
 import { VerifyEmailController } from "./verify-email.controller";

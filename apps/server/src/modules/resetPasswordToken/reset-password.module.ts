@@ -1,4 +1,4 @@
-import prismaClient from "../../lib/prisma";
+import prismaClient from "../../config/database.config";
 import { mailSenderService } from "../mailSender/mail-sender.module";
 import { passwordService } from "../password/password.module";
 import { userService } from "../user/user.module";

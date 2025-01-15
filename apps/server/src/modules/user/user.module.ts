@@ -1,4 +1,4 @@
-import prismaClient from "../../lib/prisma";
+import prismaClient from "../../config/database.config";
 import { passwordService } from "../password/password.module";
 import { UserController } from "./user.controller";
 import { UserRepository } from "./user.repository";

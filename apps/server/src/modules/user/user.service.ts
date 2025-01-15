@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from "../../constants/errorMessages";
+import { ERROR_MESSAGES } from "../../constants/error-messages.contants";
 
 import { BadRequestError, ConflictError, NotFoundError } from "../../errors";
 

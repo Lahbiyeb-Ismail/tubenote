@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from "../../constants/errorMessages";
+import { ERROR_MESSAGES } from "../../constants/error-messages.contants";
 import { NotFoundError } from "../../errors";
 import type { CreateTokenDto } from "./dtos/create-token.dto";
 

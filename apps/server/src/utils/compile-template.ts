@@ -1,8 +1,8 @@
 import Handlebars from "handlebars";
 
-import { LOGO_PATH } from "../constants";
-import type { EmailContent } from "../types/email.type";
-import readTemplate from "./readTemplate";
+import { LOGO_PATH } from "../constants/app.contants";
+import type { EmailContent } from "../modules/mailSender/mail-sender.types";
+import readTemplate from "./read-template";
 
 type TemplateData = {
   [key: string]: string;

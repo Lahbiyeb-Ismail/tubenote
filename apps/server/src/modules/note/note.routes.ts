@@ -1,7 +1,7 @@
 import { Router } from "express";
 
-import isAuthenticated from "../../middlewares/isAuthenticated";
-import validateRequest from "../../middlewares/validateRequest";
+import isAuthenticated from "../../middlewares/auth.middleware";
+import validateRequest from "../../middlewares/validate-request.middleware";
 
 import { noteController } from "./note.module";
 

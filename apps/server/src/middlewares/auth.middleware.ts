@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-import { ACCESS_TOKEN_SECRET } from "../constants/auth";
+import { ACCESS_TOKEN_SECRET } from "../constants/auth.contants";
 import { UnauthorizedError } from "../errors";
 
 import type { JwtPayload } from "../types";

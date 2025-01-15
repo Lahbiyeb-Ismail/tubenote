@@ -5,10 +5,10 @@ import {
   clearRefreshTokenCookieConfig,
   refreshTokenCookieConfig,
 } from "../../src/config/cookie.config";
-import envConfig from "../../src/config/envConfig";
+import envConfig from "../../src/config/env.config";
 
-import { REFRESH_TOKEN_NAME } from "../../src/constants/auth";
-import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
+import { REFRESH_TOKEN_NAME } from "../../src/constants/auth.contants";
+import { ERROR_MESSAGES } from "../../src/constants/error-messages.contants";
 import { UnauthorizedError } from "../../src/errors";
 
 import { AuthController } from "../../src/modules/auth/auth.controller";

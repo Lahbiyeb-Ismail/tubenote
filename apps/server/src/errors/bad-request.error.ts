@@ -1,5 +1,5 @@
 import httpStatus from "http-status";
-import { BaseError } from "./BaseError";
+import { BaseError } from "./base.error";
 
 /**
  * Represents an error for a bad request (HTTP 400).

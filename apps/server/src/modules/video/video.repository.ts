@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 
-import handleAsyncOperation from "../../utils/handleAsyncOperation";
+import handleAsyncOperation from "../../utils/handle-async-operation";
 
 import type { Video } from "./video.model";
 import type { IVideoRepository } from "./video.types";

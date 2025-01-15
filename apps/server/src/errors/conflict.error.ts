@@ -1,5 +1,5 @@
 import httpStatus from "http-status";
-import { BaseError } from "./BaseError";
+import { BaseError } from "./base.error";
 
 /**
  * Represents a conflict error that occurs when a request cannot be completed due to a conflict with the current state of the target resource.
