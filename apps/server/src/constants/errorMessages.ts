@@ -21,4 +21,5 @@ export const ERROR_MESSAGES = {
     "A verification link has already been sent to your email.",
   INVALID_TOKEN: "The provided token is invalid.",
   EXPIRED_TOKEN: "The provided token has expired.",
+  MAIL_SENDING_FAILED: "An error occurred while sending the email.",
 } as const;
