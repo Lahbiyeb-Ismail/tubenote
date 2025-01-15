@@ -1,5 +1,5 @@
 import httpStatus from "http-status";
-import { BaseError } from "./BaseError";
+import { BaseError } from "./base.error";
 
 /**
  * Class representing a NotFoundError.

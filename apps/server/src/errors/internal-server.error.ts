@@ -1,5 +1,5 @@
 import httpStatus from "http-status";
-import { BaseError } from "./BaseError";
+import { BaseError } from "./base.error";
 
 /**
  * Represents an internal server error.
