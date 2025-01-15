@@ -1,6 +1,6 @@
-import { REFRESH_TOKEN_SECRET } from "../../constants/auth";
+import { REFRESH_TOKEN_SECRET } from "../../constants/auth.contants";
 
-import { ERROR_MESSAGES } from "../../constants/errorMessages";
+import { ERROR_MESSAGES } from "../../constants/error-messages.contants";
 
 import { ForbiddenError, NotFoundError, UnauthorizedError } from "../../errors";
 

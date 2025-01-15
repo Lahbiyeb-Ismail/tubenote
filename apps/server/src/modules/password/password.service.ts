@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 
-import { ERROR_MESSAGES } from "../../constants/errorMessages";
+import { ERROR_MESSAGES } from "../../constants/error-messages.contants";
 import { BadRequestError, NotFoundError } from "../../errors";
 
 import type { User } from "../user/user.model";

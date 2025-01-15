@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from "../../constants/errorMessages";
+import { ERROR_MESSAGES } from "../../constants/error-messages.contants";
 import { ForbiddenError, NotFoundError } from "../../errors";
 
 import type { ResetPasswordToken } from "./reset-password.model";

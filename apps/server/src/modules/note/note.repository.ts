@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 
-import handleAsyncOperation from "../../utils/handleAsyncOperation";
+import handleAsyncOperation from "../../utils/handle-async-operation";
 
 import type { Note } from "./note.model";
 import type { INoteRepository } from "./note.types";

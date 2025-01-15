@@ -1,18 +1,17 @@
 import type { Transporter } from "nodemailer";
 
-import envConfig from "../../config/envConfig";
+import envConfig from "../../config/env.config";
 
-import compileTemplate from "../../utils/compileTemplate";
+import compileTemplate from "../../utils/compile-template";
 import logger from "../../utils/logger";
 
-import { ERROR_MESSAGES } from "../../constants/errorMessages";
+import { ERROR_MESSAGES } from "../../constants/error-messages.contants";
 import { BadRequestError } from "../../errors";
 
 import type { IVerifyEmailService } from "../../modules/verifyEmailToken/verify-email.types";
-import type { EmailContent } from "../../types/email.type";
 import type { IResetPasswordService } from "../resetPasswordToken/reset-password.types";
 import type { SendMailDto } from "./dtos/send-mail.dto";
-import type { IMailSenderService } from "./mail-sender.types";
+import type { EmailContent, IMailSenderService } from "./mail-sender.types";
 
 export class MailSenderService implements IMailSenderService {
   constructor(

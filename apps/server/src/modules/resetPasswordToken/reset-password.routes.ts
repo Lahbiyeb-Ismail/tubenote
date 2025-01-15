@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import validateRequest from "../../middlewares/validateRequest";
+import validateRequest from "../../middlewares/validate-request.middleware";
 
 import { resetPasswordController } from "./reset-password.module";
 

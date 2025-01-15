@@ -5,3 +5,9 @@ export interface IMailSenderService {
   sendVerificationEmail(email: string): Promise<void>;
   sendResetPasswordEmail(email: string): Promise<void>;
 }
+
+export type EmailContent = {
+  htmlContent: string;
+  textContent: string;
+  logoPath: string;
+};

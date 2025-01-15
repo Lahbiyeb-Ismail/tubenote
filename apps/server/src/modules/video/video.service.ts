@@ -1,5 +1,5 @@
-import { YOUTUBE_API_KEY, YOUTUBE_API_URL } from "../../constants";
-import { ERROR_MESSAGES } from "../../constants/errorMessages";
+import { YOUTUBE_API_KEY, YOUTUBE_API_URL } from "../../constants/app.contants";
+import { ERROR_MESSAGES } from "../../constants/error-messages.contants";
 
 import { BadRequestError, NotFoundError } from "../../errors";
 

@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-import envConfig from "../../config/envConfig";
+import envConfig from "../../config/env.config";
 import logger from "../../utils/logger";
 
 import type { JwtPayload } from "../../types";

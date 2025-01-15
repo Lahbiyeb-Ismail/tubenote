@@ -1,10 +1,10 @@
 import { Router } from "express";
 import passport from "passport";
 
-import envConfig from "../../config/envConfig";
+import envConfig from "../../config/env.config";
 
-import isAuthenticated from "../../middlewares/isAuthenticated";
-import validateRequest from "../../middlewares/validateRequest";
+import isAuthenticated from "../../middlewares/auth.middleware";
+import validateRequest from "../../middlewares/validate-request.middleware";
 
 import { authController, googleAuthStrategy } from "./auth.module";
 
