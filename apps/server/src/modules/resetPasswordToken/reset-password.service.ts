@@ -1,41 +1,26 @@
-import { IPasswordService } from "../password/password.service";
-import { IUserService } from "../user/user.service";
-import { IResetPasswordTokenDatabase } from "./reset-password.db";
-
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 import { ForbiddenError, NotFoundError } from "../../errors";
-import type { IEmailService } from "../../services/emailService";
-import type { ResetTokenDto } from "./dtos/reset-token.dto";
 
-export interface IResetPasswordService {
-  sendResetToken(email: string): Promise<void>;
-  createToken(userId: string): Promise<string>;
-  reset(token: string, password: string): Promise<void>;
-  findResetToken(token: string): Promise<ResetTokenDto | null>;
-  isResetTokenExpired(resetToken: ResetTokenDto): Promise<boolean>;
-  verifyResetToken(token: string): Promise<ResetTokenDto>;
-}
+import type { ResetPasswordToken } from "./reset-password.model";
+
+import type { IEmailService } from "../../services/emailService";
+import type { IPasswordService } from "../password/password.types";
+import type { IUserService } from "../user/user.types";
+import type {
+  IResetPasswordRespository,
+  IResetPasswordService,
+} from "./reset-password.types";
 
 export class ResetPasswordService implements IResetPasswordService {
-  private resetTokenDB: IResetPasswordTokenDatabase;
-  private userService: IUserService;
-  private passwordService: IPasswordService;
-  private emailService: IEmailService;
-
   constructor(
-    resetTokenDB: IResetPasswordTokenDatabase,
-    userService: IUserService,
-    passwordService: IPasswordService,
-    emailService: IEmailService
-  ) {
-    this.resetTokenDB = resetTokenDB;
-    this.userService = userService;
-    this.passwordService = passwordService;
-    this.emailService = emailService;
-  }
+    private readonly _resetPasswordRepository: IResetPasswordRespository,
+    private readonly _userService: IUserService,
+    private readonly _passwordService: IPasswordService,
+    private readonly _emailService: IEmailService
+  ) {}
 
   async sendResetToken(email: string): Promise<void> {
-    const user = await this.userService.getUserByEmail(email);
+    const user = await this._userService.getUserByEmail(email);
 
     if (!user) {
       throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
@@ -45,9 +30,8 @@ export class ResetPasswordService implements IResetPasswordService {
       throw new ForbiddenError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
-    const isResetTokenAlreadySent = await this.resetTokenDB.findByUserId(
-      user.id
-    );
+    const isResetTokenAlreadySent =
+      await this._resetPasswordRepository.findByUserId(user.id);
 
     if (isResetTokenAlreadySent) {
       throw new ForbiddenError(ERROR_MESSAGES.RESET_LINK_SENT);
@@ -55,14 +39,14 @@ export class ResetPasswordService implements IResetPasswordService {
 
     const token = await this.createToken(user.id);
 
-    await this.emailService.sendResetPasswordEmail({
+    await this._emailService.sendResetPasswordEmail({
       email: user.email,
       token,
     });
   }
 
   async createToken(userId: string): Promise<string> {
-    const token = await this.resetTokenDB.create(userId);
+    const token = await this._resetPasswordRepository.create(userId);
 
     return token;
   }
@@ -75,20 +59,20 @@ export class ResetPasswordService implements IResetPasswordService {
     const isTokenExpired = await this.isResetTokenExpired(resetToken);
 
     if (isTokenExpired) {
-      await this.resetTokenDB.deleteMany(resetToken.userId);
+      await this._resetPasswordRepository.deleteMany(resetToken.userId);
       throw new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN);
     }
 
-    await this.passwordService.resetPassword({
+    await this._passwordService.resetPassword({
       userId: resetToken.userId,
       password,
     });
 
-    await this.resetTokenDB.deleteMany(resetToken.userId);
+    await this._resetPasswordRepository.deleteMany(resetToken.userId);
   }
 
-  async findResetToken(token: string): Promise<ResetTokenDto | null> {
-    const resetToken = await this.resetTokenDB.findByToken(token);
+  async findResetToken(token: string): Promise<ResetPasswordToken | null> {
+    const resetToken = await this._resetPasswordRepository.findByToken(token);
 
     if (!resetToken) {
       return null;
@@ -97,7 +81,7 @@ export class ResetPasswordService implements IResetPasswordService {
     return resetToken;
   }
 
-  async isResetTokenExpired(resetToken: ResetTokenDto): Promise<boolean> {
+  async isResetTokenExpired(resetToken: ResetPasswordToken): Promise<boolean> {
     if (resetToken.expiresAt < new Date()) {
       return true;
     }
@@ -105,7 +89,7 @@ export class ResetPasswordService implements IResetPasswordService {
     return false;
   }
 
-  async verifyResetToken(token: string): Promise<ResetTokenDto> {
+  async verifyResetToken(token: string): Promise<ResetPasswordToken> {
     const resetToken = await this.findResetToken(token);
 
     if (!resetToken) {
@@ -115,7 +99,7 @@ export class ResetPasswordService implements IResetPasswordService {
     const isTokenExpired = await this.isResetTokenExpired(resetToken);
 
     if (isTokenExpired) {
-      await this.resetTokenDB.deleteMany(resetToken.userId);
+      await this._resetPasswordRepository.deleteMany(resetToken.userId);
       throw new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN);
     }
 

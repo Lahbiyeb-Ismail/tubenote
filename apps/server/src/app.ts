@@ -12,12 +12,12 @@ import session from "express-session";
 import helmet from "helmet";
 import passport from "passport";
 
-import authRoutes from "./modules/auth/auth.route";
-import noteRoutes from "./modules/note/note.route";
-import resetPasswordRoutes from "./modules/resetPasswordToken/reset-password.route";
-import userRoutes from "./modules/user/user.route";
-import verifyEmailRoutes from "./modules/verifyEmailToken/verify-email.route";
-import videoRoutes from "./modules/video/video.route";
+import authRoutes from "./modules/auth/auth.routes";
+import noteRoutes from "./modules/note/note.routes";
+import resetPasswordRoutes from "./modules/resetPasswordToken/reset-password.routes";
+import userRoutes from "./modules/user/user.routes";
+import verifyEmailRoutes from "./modules/verifyEmailToken/verify-email.routes";
+import videoRoutes from "./modules/video/video.routes";
 
 import envConfig from "./config/envConfig";
 import { errorHandler, notFoundRoute } from "./middlewares/errorsMiddleware";

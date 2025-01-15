@@ -1,25 +1,24 @@
+import { VideoService } from "../../src/modules/video/video.service";
+
+import type {
+  Video,
+  YoutubeVideoData,
+} from "../../src/modules/video/video.model";
+import type {
+  IVideoRepository,
+  IVideoService,
+} from "../../src/modules/video/video.types";
+
 import type { FindManyDto } from "../../src/common/dtos/find-many.dto";
-import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
-import { BadRequestError, NotFoundError } from "../../src/errors";
 import type { CreateVideoDto } from "../../src/modules/video/dtos/create-video.dto";
 import type { FindVideoDto } from "../../src/modules/video/dtos/find-video.dto";
-import type {
-  VideoDto,
-  YoutubeVideoData,
-} from "../../src/modules/video/dtos/video.dto";
-import type { IVideoDatabase } from "../../src/modules/video/video.db";
-
-import {
-  IVideoService,
-  VideoService,
-} from "../../src/modules/video/video.service";
 
 describe("VideoService methods tests cases", () => {
   let videoService: IVideoService;
-  let mockVideoDB: IVideoDatabase;
+  let mockVideoRepository: IVideoRepository;
 
   beforeEach(() => {
-    mockVideoDB = {
+    mockVideoRepository = {
       create: jest.fn(),
       findMany: jest.fn(),
       count: jest.fn(),
@@ -27,13 +26,13 @@ describe("VideoService methods tests cases", () => {
       connectVideoToUser: jest.fn(),
     };
 
-    videoService = new VideoService(mockVideoDB);
+    videoService = new VideoService(mockVideoRepository);
   });
 
   const mockUserId = "user_id_001";
   const mockVideosCount = 2;
 
-  const mockVideos: VideoDto[] = [
+  const mockVideos: Video[] = [
     {
       id: "video_001",
       youtubeId: "youtube_id_01",
@@ -155,14 +154,16 @@ describe("VideoService methods tests cases", () => {
     });
 
     it("should return videos for a specific user", async () => {
-      (mockVideoDB.findMany as jest.Mock).mockResolvedValue(mockVideos);
-      (mockVideoDB.count as jest.Mock).mockResolvedValue(mockVideosCount);
+      (mockVideoRepository.findMany as jest.Mock).mockResolvedValue(mockVideos);
+      (mockVideoRepository.count as jest.Mock).mockResolvedValue(
+        mockVideosCount
+      );
 
       const result = await videoService.getUserVideos(findManyDto);
 
       const totalPages = Math.ceil(mockVideosCount / findManyDto.limit);
 
-      expect(mockVideoDB.findMany).toHaveBeenCalledWith(findManyDto);
+      expect(mockVideoRepository.findMany).toHaveBeenCalledWith(findManyDto);
 
       expect(result.videos).toEqual(mockVideos);
       expect(result.videosCount).toBe(mockVideosCount);
@@ -170,12 +171,12 @@ describe("VideoService methods tests cases", () => {
     });
 
     it("should return empty videos list and total pages as 0 when no videos found", async () => {
-      (mockVideoDB.findMany as jest.Mock).mockResolvedValue([]);
-      (mockVideoDB.count as jest.Mock).mockResolvedValue(0);
+      (mockVideoRepository.findMany as jest.Mock).mockResolvedValue([]);
+      (mockVideoRepository.count as jest.Mock).mockResolvedValue(0);
 
       const result = await videoService.getUserVideos(findManyDto);
 
-      expect(mockVideoDB.findMany).toHaveBeenCalledWith(findManyDto);
+      expect(mockVideoRepository.findMany).toHaveBeenCalledWith(findManyDto);
 
       expect(result.videos).toEqual([]);
       expect(result.videosCount).toBe(0);
@@ -192,11 +193,13 @@ describe("VideoService methods tests cases", () => {
       const videoId = "video_001";
       const mockVideo = mockVideos[0];
 
-      (mockVideoDB.findByYoutubeId as jest.Mock).mockResolvedValue(mockVideo);
+      (mockVideoRepository.findByYoutubeId as jest.Mock).mockResolvedValue(
+        mockVideo
+      );
 
       const result = await videoService.findVideoByYoutubeId(videoId);
 
-      expect(mockVideoDB.findByYoutubeId).toHaveBeenCalledWith(videoId);
+      expect(mockVideoRepository.findByYoutubeId).toHaveBeenCalledWith(videoId);
 
       expect(result).toEqual(mockVideo);
     });
@@ -204,11 +207,13 @@ describe("VideoService methods tests cases", () => {
     it("should return null if no video found", async () => {
       const videoId = "video_004";
 
-      (mockVideoDB.findByYoutubeId as jest.Mock).mockResolvedValue(null);
+      (mockVideoRepository.findByYoutubeId as jest.Mock).mockResolvedValue(
+        null
+      );
 
       const result = await videoService.findVideoByYoutubeId(videoId);
 
-      expect(mockVideoDB.findByYoutubeId).toHaveBeenCalledWith(videoId);
+      expect(mockVideoRepository.findByYoutubeId).toHaveBeenCalledWith(videoId);
 
       expect(result).toBeNull();
     });
@@ -280,11 +285,13 @@ describe("VideoService methods tests cases", () => {
         .spyOn(videoService, "fetchYoutubeVideoData")
         .mockResolvedValue(mockYoutubeVideoData);
 
-      (mockVideoDB.create as jest.Mock).mockResolvedValue(mockVideos[0]);
+      (mockVideoRepository.create as jest.Mock).mockResolvedValue(
+        mockVideos[0]
+      );
 
       const result = await videoService.createVideo(mockUserId, youtubeVideoId);
 
-      expect(mockVideoDB.create).toHaveBeenCalledWith(createVideoDto);
+      expect(mockVideoRepository.create).toHaveBeenCalledWith(createVideoDto);
 
       expect(result).toEqual(mockVideos[0]);
     });
@@ -305,13 +312,13 @@ describe("VideoService methods tests cases", () => {
         userIds: [...(mockVideos[0].userIds || []), newUserId],
       };
 
-      (mockVideoDB.connectVideoToUser as jest.Mock).mockResolvedValue(
+      (mockVideoRepository.connectVideoToUser as jest.Mock).mockResolvedValue(
         updatedVideo
       );
 
       const result = await videoService.linkVideoToUser(video, newUserId);
 
-      expect(mockVideoDB.connectVideoToUser).toHaveBeenCalledWith(
+      expect(mockVideoRepository.connectVideoToUser).toHaveBeenCalledWith(
         video.id,
         newUserId
       );
@@ -360,7 +367,7 @@ describe("VideoService methods tests cases", () => {
 
     // it("should return video data if found in the database and link the user to the video", async () => {
     //   const mockNewUserId = "user_124";
-    //   const mockUpdatedVideo: VideoDto = {
+    //   const mockUpdatedVideo: Video = {
     //     ...mockVideos[0],
     //     userIds: [...(mockVideos[0].userIds || []), mockNewUserId],
     //   };
@@ -391,13 +398,13 @@ describe("VideoService methods tests cases", () => {
     //   const mockNewYoutubeId = "youtube_id_002";
     //   const mockNewUserId = "user_124";
 
-    //   const mockNewVideo: VideoDto = {
+    //   const mockNewVideo: Video = {
     //     ...mockVideos[1],
     //     id: "video_003",
     //     youtubeVideoId: mockNewYoutubeId,
     //   };
 
-    //   const mockLinkedVideo: VideoDto = {
+    //   const mockLinkedVideo: Video = {
     //     ...mockNewVideo,
     //     userIds: [...(mockNewVideo.userIds || []), mockNewUserId],
     //   };

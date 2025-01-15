@@ -2,41 +2,31 @@ import type { PrismaClient } from "@prisma/client";
 
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
 
+import type { Video } from "./video.model";
+import type { IVideoRepository } from "./video.types";
+
 import type { FindManyDto } from "../../common/dtos/find-many.dto";
 import type { CreateVideoDto } from "./dtos/create-video.dto";
-import type { VideoDto } from "./dtos/video.dto";
 
-export interface IVideoDatabase {
-  findByYoutubeId(youtubeId: string): Promise<VideoDto | null>;
-  findMany(findManyDto: FindManyDto): Promise<VideoDto[]>;
-  count(userId: string): Promise<number>;
-  create(createVideoDto: CreateVideoDto): Promise<VideoDto>;
-  connectVideoToUser(videoId: string, userId: string): Promise<VideoDto>;
-}
+export class VideoRepository implements IVideoRepository {
+  constructor(private readonly _db: PrismaClient) {}
 
-export class VideoDatabase implements IVideoDatabase {
-  private database: PrismaClient;
-
-  constructor(database: PrismaClient) {
-    this.database = database;
-  }
-
-  async findByYoutubeId(youtubeId: string): Promise<VideoDto | null> {
+  async findByYoutubeId(youtubeId: string): Promise<Video | null> {
     return handleAsyncOperation(
       () =>
-        this.database.video.findUnique({
+        this._db.video.findUnique({
           where: { youtubeId },
         }),
       { errorMessage: "Faild to find video" }
     );
   }
 
-  async findMany(findManyDto: FindManyDto): Promise<VideoDto[]> {
+  async findMany(findManyDto: FindManyDto): Promise<Video[]> {
     const { userId, limit, skip, sort } = findManyDto;
 
     return handleAsyncOperation(
       async () => {
-        const videos = await this.database.video.findMany({
+        const videos = await this._db.video.findMany({
           where: { users: { every: { id: userId } } },
           omit: { userIds: true },
           take: limit,
@@ -55,7 +45,7 @@ export class VideoDatabase implements IVideoDatabase {
   async count(userId: string): Promise<number> {
     return handleAsyncOperation(
       () =>
-        this.database.video.count({
+        this._db.video.count({
           where: {
             userIds: { has: userId },
           },
@@ -64,13 +54,13 @@ export class VideoDatabase implements IVideoDatabase {
     );
   }
 
-  async create(createVideoDto: CreateVideoDto): Promise<VideoDto> {
+  async create(createVideoDto: CreateVideoDto): Promise<Video> {
     return handleAsyncOperation(
       async () => {
         const { userId, youtubeVideoId, videoData } = createVideoDto;
         const { snippet, statistics, player } = videoData;
 
-        return await this.database.video.create({
+        return await this._db.video.create({
           data: {
             youtubeId: youtubeVideoId,
             userIds: [userId],
@@ -94,10 +84,10 @@ export class VideoDatabase implements IVideoDatabase {
     );
   }
 
-  async connectVideoToUser(videoId: string, userId: string): Promise<VideoDto> {
+  async connectVideoToUser(videoId: string, userId: string): Promise<Video> {
     return handleAsyncOperation(
       () =>
-        this.database.video.update({
+        this._db.video.update({
           where: { id: videoId },
           data: {
             userIds: {

@@ -1,35 +1,22 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import { IResetPasswordService } from "./reset-password.service";
-
 import type { EmptyRecord, TypedRequest } from "../../types";
+
+import type {
+  IResetPasswordController,
+  IResetPasswordService,
+} from "./reset-password.types";
 
 import type { EmailBodyDto } from "../../common/dtos/email-body.dto";
 import type { TokenParamDto } from "../../common/dtos/token-param.dto";
 import type { PasswordBodyDto } from "./dtos/password-body.dto";
 
-export interface IResetPasswordController {
-  forgotPassword(req: TypedRequest<EmailBodyDto>, res: Response): Promise<void>;
-  resetPassword(
-    req: TypedRequest<PasswordBodyDto, TokenParamDto>,
-    res: Response
-  ): Promise<void>;
-  verifyResetToken(
-    req: TypedRequest<EmptyRecord, TokenParamDto>,
-    res: Response
-  ): Promise<void>;
-}
-
 /**
  * Controller for handling password reset operations.
  */
 export class ResetPasswordController implements IResetPasswordController {
-  private resetPasswordService: IResetPasswordService;
-
-  constructor(resetPasswordService: IResetPasswordService) {
-    this.resetPasswordService = resetPasswordService;
-  }
+  constructor(private readonly _resetPasswordService: IResetPasswordService) {}
 
   /**
    * Handles the forgot password request by sending a reset token to the user's email.
@@ -44,7 +31,7 @@ export class ResetPasswordController implements IResetPasswordController {
   ): Promise<void> {
     const { email } = req.body;
 
-    await this.resetPasswordService.sendResetToken(email);
+    await this._resetPasswordService.sendResetToken(email);
 
     res
       .status(httpStatus.OK)
@@ -65,7 +52,7 @@ export class ResetPasswordController implements IResetPasswordController {
     const { password } = req.body;
     const { token } = req.params;
 
-    await this.resetPasswordService.reset(token, password);
+    await this._resetPasswordService.reset(token, password);
 
     res.status(httpStatus.OK).json({ message: "Password reset successful." });
   }
@@ -83,7 +70,7 @@ export class ResetPasswordController implements IResetPasswordController {
   ): Promise<void> {
     const { token } = req.params;
 
-    await this.resetPasswordService.verifyResetToken(token);
+    await this._resetPasswordService.verifyResetToken(token);
 
     res.status(httpStatus.OK).json({ message: "Reset token verified." });
   }

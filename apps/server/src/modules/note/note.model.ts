@@ -1,4 +1,4 @@
-export interface NoteDto {
+export interface Note {
   id: string;
   userId: string;
   videoId: string;

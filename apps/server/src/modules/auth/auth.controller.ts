@@ -1,6 +1,5 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
-import type { Profile } from "passport-google-oauth20";
 
 import {
   clearRefreshTokenCookieConfig,
@@ -9,34 +8,23 @@ import {
 import envConfig from "../../config/envConfig";
 
 import { REFRESH_TOKEN_NAME } from "../../constants/auth";
+import { ERROR_MESSAGES } from "../../constants/errorMessages";
 
 import { UnauthorizedError } from "../../errors";
 
-import { IAuthService } from "./auth.service";
+import type { IAuthController, IAuthService } from "./auth.types";
 
-import { ERROR_MESSAGES } from "../../constants/errorMessages";
 import type { TypedRequest } from "../../types";
-import type { UserDto } from "../user/dtos/user.dto";
+import type { User } from "../user/user.model";
+
 import type { LoginUserDto } from "./dtos/login-user.dto";
 import type { RegisterUserDto } from "./dtos/register-user.dto";
-
-export interface IAuthController {
-  register(req: TypedRequest<RegisterUserDto>, res: Response): Promise<void>;
-  login(req: TypedRequest<LoginUserDto>, res: Response): Promise<void>;
-  logout(req: TypedRequest, res: Response): Promise<void>;
-  refresh(req: TypedRequest, res: Response): Promise<void>;
-  loginWithGoogle(req: TypedRequest, res: Response): Promise<void>;
-}
 
 /**
  * Controller for handling authentication-related operations.
  */
 export class AuthController implements IAuthController {
-  private authService: IAuthService;
-
-  constructor(authService: IAuthService) {
-    this.authService = authService;
-  }
+  constructor(private readonly _authService: IAuthService) {}
 
   /**
    * Registers a new user.
@@ -44,7 +32,7 @@ export class AuthController implements IAuthController {
    * @param res - The response object.
    */
   async register(req: TypedRequest<RegisterUserDto>, res: Response) {
-    const user = await this.authService.registerUser(req.body);
+    const user = await this._authService.registerUser(req.body);
 
     res.status(httpStatus.CREATED).json({
       message: "A verification email has been sent to your email.",
@@ -58,7 +46,7 @@ export class AuthController implements IAuthController {
    * @param res - The response object.
    */
   async login(req: TypedRequest<LoginUserDto>, res: Response) {
-    const { accessToken, refreshToken } = await this.authService.loginUser(
+    const { accessToken, refreshToken } = await this._authService.loginUser(
       req.body
     );
 
@@ -81,7 +69,7 @@ export class AuthController implements IAuthController {
 
     const refreshToken = cookies[REFRESH_TOKEN_NAME];
 
-    await this.authService.logoutUser({ refreshToken, userId });
+    await this._authService.logoutUser({ refreshToken, userId });
 
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
@@ -106,7 +94,7 @@ export class AuthController implements IAuthController {
 
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
-    const { accessToken, refreshToken } = await this.authService.refreshToken({
+    const { accessToken, refreshToken } = await this._authService.refreshToken({
       token,
       userId,
     });
@@ -124,10 +112,10 @@ export class AuthController implements IAuthController {
    * @param res - The response object.
    */
   async loginWithGoogle(req: TypedRequest, res: Response) {
-    const user = req.user as UserDto;
+    const user = req.user as User;
 
     const { accessToken, refreshToken } =
-      await this.authService.googleLogin(user);
+      await this._authService.googleLogin(user);
 
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 

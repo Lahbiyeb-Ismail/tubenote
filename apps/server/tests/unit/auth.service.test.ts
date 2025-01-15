@@ -1,4 +1,3 @@
-import { mock } from "node:test";
 import { REFRESH_TOKEN_SECRET } from "../../src/constants/auth";
 import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
 import {
@@ -8,29 +7,31 @@ import {
   UnauthorizedError,
 } from "../../src/errors";
 
-import { AuthService, IAuthService } from "../../src/modules/auth/auth.service";
+import { AuthService } from "../../src/modules/auth/auth.service";
+
+import type { IAuthService } from "../../src/modules/auth/auth.types";
+import type { RegisterUserDto } from "../../src/modules/auth/dtos/register-user.dto";
+import type { IJwtService } from "../../src/modules/jwt/jwt.types";
+import type { IPasswordService } from "../../src/modules/password/password.types";
+import type { IRefreshTokenService } from "../../src/modules/refreshToken/refresh-token.types";
+import type { IUserService } from "../../src/modules/user/user.types";
+import type { IEmailService } from "../../src/services/emailService";
+
+import type { RefreshToken } from "../../src/modules/refreshToken/refresh-token.model";
+import type { User } from "../../src/modules/user/user.model";
 
 import type { GoogleLoginDto } from "../../src/modules/auth/dtos/google-login.dto";
 import type { LoginResponseDto } from "../../src/modules/auth/dtos/login-response.dto";
 import type { LoginUserDto } from "../../src/modules/auth/dtos/login-user.dto";
 import type { LogoutUserDto } from "../../src/modules/auth/dtos/logout-user.dto";
 import type { RefreshDto } from "../../src/modules/auth/dtos/refresh.dto";
-import type { RegisterUserDto } from "../../src/modules/auth/dtos/register-user.dto";
-import type { IJwtService } from "../../src/modules/jwt/jwt.service";
-import { IPasswordService } from "../../src/modules/password/password.service";
-import type { RefreshTokenDto } from "../../src/modules/refreshToken/dtos/refresh-token.dto";
-import type { IRefreshTokenService } from "../../src/modules/refreshToken/refresh-token.service";
-import type { UserDto } from "../../src/modules/user/dtos/user.dto";
-
-import { IUserService } from "../../src/modules/user/user.service";
-import type { IEmailService } from "../../src/services/emailService";
 
 import type { JwtPayload } from "../../src/types";
 
 describe("AuthService methods tests", () => {
   const mockUserId = "user_id_001";
 
-  const mockUser: UserDto = {
+  const mockUser: User = {
     id: mockUserId,
     username: "testuser",
     email: "test@example.com",
@@ -191,10 +192,10 @@ describe("AuthService methods tests", () => {
         mockUser.id
       );
 
-      expect(mockRefreshTokenService.createToken).toHaveBeenCalledWith(
-        mockUser.id,
-        loginResponseDto.refreshToken
-      );
+      expect(mockRefreshTokenService.createToken).toHaveBeenCalledWith({
+        userId: mockUser.id,
+        token: loginResponseDto.refreshToken,
+      });
     });
 
     it("should throw a NotFoundError if the user doesn't exist", async () => {
@@ -315,7 +316,7 @@ describe("AuthService methods tests", () => {
       userId: "user_id_001",
     };
 
-    const mockRefreshToken: RefreshTokenDto = {
+    const mockRefreshToken: RefreshToken = {
       id: "token_id_001",
       userId: "user_id_001",
       token: "mockToken",
@@ -440,7 +441,7 @@ describe("AuthService methods tests", () => {
       family_name: "user",
     };
 
-    const mockCreatedUser: UserDto = {
+    const mockCreatedUser: User = {
       id: "user_id_001",
       email: googleLoginDto.email,
       username: googleLoginDto.name,
@@ -469,10 +470,10 @@ describe("AuthService methods tests", () => {
         mockCreatedUser.id
       );
 
-      expect(mockRefreshTokenService.createToken).toHaveBeenCalledWith(
-        mockCreatedUser.id,
-        loginResponseDto.refreshToken
-      );
+      expect(mockRefreshTokenService.createToken).toHaveBeenCalledWith({
+        userId: mockCreatedUser.id,
+        token: loginResponseDto.refreshToken,
+      });
     });
 
     // it("should successfully login a user with google and update the googleId", async () => {

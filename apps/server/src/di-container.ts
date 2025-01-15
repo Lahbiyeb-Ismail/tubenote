@@ -2,46 +2,46 @@ import prismaClient from "./lib/prisma";
 
 import { AuthController } from "./modules/auth/auth.controller";
 import { AuthService } from "./modules/auth/auth.service";
-import { UserDatabase } from "./modules/user/user.db";
+import { UserRepository } from "./modules/user/user.repository";
 
 import { googleAuthConfig } from "./config/google-auth.config";
 import { GoogleAuthStrategy } from "./modules/auth/strategies/google.strategy";
 import { JwtService } from "./modules/jwt/jwt.service";
 import { NoteController } from "./modules/note/note.controller";
-import { NoteDatabase } from "./modules/note/note.db";
+import { NoteRepository } from "./modules/note/note.repository";
 import { NoteService } from "./modules/note/note.service";
 import { PasswordService } from "./modules/password/password.service";
-import { RefreshTokenDatabase } from "./modules/refreshToken/refresh-token.db";
+import { RefreshTokenRepository } from "./modules/refreshToken/refresh-token.repository";
 import { RefreshTokenService } from "./modules/refreshToken/refresh-token.service";
 import { ResetPasswordController } from "./modules/resetPasswordToken/reset-password.controller";
-import { ResetPasswordTokenDatabase } from "./modules/resetPasswordToken/reset-password.db";
+import { ResetPasswordRepository } from "./modules/resetPasswordToken/reset-password.repository";
 import { ResetPasswordService } from "./modules/resetPasswordToken/reset-password.service";
 import { UserController } from "./modules/user/user.controller";
 import { UserService } from "./modules/user/user.service";
-import { VerificationTokenDatabase } from "./modules/verifyEmailToken/verification-token.db";
 import { VerifyEmailController } from "./modules/verifyEmailToken/verify-email.controller";
+import { VerifyEmailRepository } from "./modules/verifyEmailToken/verify-email.repository";
 import { VerifyEmailService } from "./modules/verifyEmailToken/verify-email.service";
 import { VideoController } from "./modules/video/video.controller";
-import { VideoDatabase } from "./modules/video/video.db";
+import { VideoRepository } from "./modules/video/video.repository";
 import { VideoService } from "./modules/video/video.service";
 import { EmailService } from "./services/emailService";
 
-const userDB = new UserDatabase(prismaClient);
-const noteDB = new NoteDatabase(prismaClient);
-const videoDB = new VideoDatabase(prismaClient);
-const refreshTokenDB = new RefreshTokenDatabase(prismaClient);
-const verificationTokenDB = new VerificationTokenDatabase(prismaClient);
-const resetPasswordTokenDB = new ResetPasswordTokenDatabase(prismaClient);
+const userRepository = new UserRepository(prismaClient);
+const noteRepository = new NoteRepository(prismaClient);
+const videoRepository = new VideoRepository(prismaClient);
+const refreshTokenRepository = new RefreshTokenRepository(prismaClient);
+const verifyEmailRepository = new VerifyEmailRepository(prismaClient);
+const resetPasswordRepository = new ResetPasswordRepository(prismaClient);
 
 const jwtService = new JwtService();
-const passwordService = new PasswordService(userDB);
-const noteService = new NoteService(noteDB);
-const videoService = new VideoService(videoDB);
-const refreshTokenService = new RefreshTokenService(refreshTokenDB);
-const userService = new UserService(userDB, passwordService);
-const emailService = new EmailService(userDB, verificationTokenDB);
+const passwordService = new PasswordService(userRepository);
+const noteService = new NoteService(noteRepository);
+const videoService = new VideoService(videoRepository);
+const refreshTokenService = new RefreshTokenService(refreshTokenRepository);
+const userService = new UserService(userRepository, passwordService);
+const emailService = new EmailService(userRepository, verifyEmailRepository);
 const resetPasswordService = new ResetPasswordService(
-  resetPasswordTokenDB,
+  resetPasswordRepository,
   userService,
   passwordService,
   emailService
@@ -54,8 +54,8 @@ const authService = new AuthService(
   emailService
 );
 const verifyEmailService = new VerifyEmailService(
-  userDB,
-  verificationTokenDB,
+  userRepository,
+  verifyEmailRepository,
   authService
 );
 

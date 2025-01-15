@@ -11,16 +11,18 @@ import { REFRESH_TOKEN_NAME } from "../../src/constants/auth";
 import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
 import { UnauthorizedError } from "../../src/errors";
 
-import {
-  AuthController,
+import { AuthController } from "../../src/modules/auth/auth.controller";
+import type {
   IAuthController,
-} from "../../src/modules/auth/auth.controller";
-import { IAuthService } from "../../src/modules/auth/auth.service";
+  IAuthService,
+} from "../../src/modules/auth/auth.types";
+
+import type { TypedRequest } from "../../src/types";
+
+import type { User } from "../../src/modules/user/user.model";
 
 import type { LoginUserDto } from "../../src/modules/auth/dtos/login-user.dto";
 import type { RegisterUserDto } from "../../src/modules/auth/dtos/register-user.dto";
-import type { UserDto } from "../../src/modules/user/dtos/user.dto";
-import type { TypedRequest } from "../../src/types";
 
 describe("AuthController integration tests", () => {
   let authController: IAuthController;
@@ -49,7 +51,7 @@ describe("AuthController integration tests", () => {
     let mockJson: jest.Mock;
     let mockStatus: jest.Mock;
 
-    const mockUser: UserDto = {
+    const mockUser: User = {
       id: "user_id_001",
       username: "testuser",
       email: "testuser@example.com",
@@ -383,7 +385,7 @@ describe("AuthController integration tests", () => {
       refreshToken: "mock-refresh-token",
     };
 
-    const mockUser: UserDto = {
+    const mockUser: User = {
       id: "user_id_001",
       email: "testuser@example.com",
       username: "Test User",
@@ -402,7 +404,7 @@ describe("AuthController integration tests", () => {
         redirect: mockRedirect,
       };
       mockRequest = {
-        user: mockUser,
+        user: mockUser as User,
       };
       jest.clearAllMocks();
     });

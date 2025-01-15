@@ -1,33 +1,22 @@
 import { ERROR_MESSAGES } from "../../constants/errorMessages";
 import { ForbiddenError } from "../../errors";
 
-import { IVerificationTokenDB } from "./verification-token.db";
-
-import { IAuthService } from "../auth/auth.service";
-import { IUserDatabase } from "../user/user.db";
-
-export interface IVerifyEmailService {
-  generateToken(email: string): Promise<string>;
-  verifyUserEmail(token: string): Promise<void>;
-}
+import type { IAuthService } from "../auth/auth.types";
+import type { IUserRepository } from "../user/user.types";
+import type {
+  IVerifyEmailRepository,
+  IVerifyEmailService,
+} from "./verify-email.types";
 
 export class VerifyEmailService implements IVerifyEmailService {
-  private userDB: IUserDatabase;
-  private verificationTokenDB: IVerificationTokenDB;
-  private authService: IAuthService;
-
   constructor(
-    userDB: IUserDatabase,
-    verificationTokenDB: IVerificationTokenDB,
-    authService: IAuthService
-  ) {
-    this.userDB = userDB;
-    this.verificationTokenDB = verificationTokenDB;
-    this.authService = authService;
-  }
+    private readonly _userRepository: IUserRepository,
+    private readonly _verifyEmailRepository: IVerifyEmailRepository,
+    private readonly _authService: IAuthService
+  ) {}
 
   async generateToken(email: string): Promise<string> {
-    const user = await this.userDB.findByEmail(email);
+    const user = await this._userRepository.findByEmail(email);
 
     if (!user) {
       throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
@@ -38,19 +27,19 @@ export class VerifyEmailService implements IVerifyEmailService {
     }
 
     const existingVerificationToken =
-      await this.verificationTokenDB.findByUserId(user.id);
+      await this._verifyEmailRepository.findByUserId(user.id);
 
     if (existingVerificationToken) {
       throw new ForbiddenError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
     }
 
-    const verificationToken = await this.verificationTokenDB.create(user.id);
+    const verificationToken = await this._verifyEmailRepository.create(user.id);
 
     return verificationToken;
   }
 
   async verifyUserEmail(token: string): Promise<void> {
-    const foundToken = await this.verificationTokenDB.findByToken(token);
+    const foundToken = await this._verifyEmailRepository.findByToken(token);
 
     if (!foundToken) {
       throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
@@ -61,8 +50,8 @@ export class VerifyEmailService implements IVerifyEmailService {
     }
 
     // Updates the user's isEmailVerified status to true.
-    await this.authService.verifyEmail(foundToken.userId);
+    await this._authService.verifyEmail(foundToken.userId);
     // Deletes the email verification token from the database.
-    await this.verificationTokenDB.deleteMany(foundToken.userId);
+    await this._verifyEmailRepository.deleteMany(foundToken.userId);
   }
 }

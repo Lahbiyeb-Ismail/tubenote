@@ -2,36 +2,28 @@ import type { PrismaClient } from "@prisma/client";
 
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
 
-import type { RefreshTokenDto } from "./dtos/refresh-token.dto";
+import type { RefreshToken } from "./refresh-token.model";
+import type { IRefreshTokenRepository } from "./refresh-token.types";
 
-export interface IRefreshTokenDatabase {
-  create(token: string, userId: string): Promise<RefreshTokenDto>;
-  find(token: string): Promise<RefreshTokenDto | null>;
-  delete(token: string): Promise<void>;
-  deleteAll(userId: string): Promise<void>;
-}
+import type { CreateTokenDto } from "./dtos/create-token.dto";
 
-export class RefreshTokenDatabase implements IRefreshTokenDatabase {
-  private database: PrismaClient;
+export class RefreshTokenRepository implements IRefreshTokenRepository {
+  constructor(private readonly _db: PrismaClient) {}
 
-  constructor(database: PrismaClient) {
-    this.database = database;
-  }
-
-  async create(token: string, userId: string): Promise<RefreshTokenDto> {
+  async create(createTokenDto: CreateTokenDto): Promise<RefreshToken> {
     return handleAsyncOperation(
       () =>
-        this.database.refreshToken.create({
-          data: { token, userId },
+        this._db.refreshToken.create({
+          data: { ...createTokenDto },
         }),
       { errorMessage: "Failed to create refresh token" }
     );
   }
 
-  async find(token: string): Promise<RefreshTokenDto | null> {
+  async find(token: string): Promise<RefreshToken | null> {
     return handleAsyncOperation(
       () =>
-        this.database.refreshToken.findUnique({
+        this._db.refreshToken.findUnique({
           where: {
             token,
           },
@@ -42,7 +34,7 @@ export class RefreshTokenDatabase implements IRefreshTokenDatabase {
   async delete(token: string): Promise<void> {
     await handleAsyncOperation(
       () =>
-        this.database.refreshToken.delete({
+        this._db.refreshToken.delete({
           where: {
             token,
           },
@@ -53,7 +45,7 @@ export class RefreshTokenDatabase implements IRefreshTokenDatabase {
   async deleteAll(userId: string): Promise<void> {
     await handleAsyncOperation(
       () =>
-        this.database.refreshToken.deleteMany({
+        this._db.refreshToken.deleteMany({
           where: {
             userId,
           },

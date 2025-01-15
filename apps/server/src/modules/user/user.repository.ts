@@ -1,40 +1,29 @@
 import type { PrismaClient } from "@prisma/client";
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
 
-import type { UpdatePasswordDto } from "../password/dtos/update-password.dto";
+import type { User } from "./user.model";
+import type { IUserRepository } from "./user.types";
+
 import type { CreateUserDto } from "./dtos/create-user.dto";
 import type { UpdateUserDto } from "./dtos/update-user.dto";
-import type { UserDto } from "./dtos/user.dto";
 
-export interface IUserDatabase {
-  create(createUserDto: CreateUserDto): Promise<UserDto>;
-  findByEmail(email: string): Promise<UserDto | null>;
-  findById(id: string): Promise<UserDto | null>;
-  updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserDto>;
-  updatePassword(userId: string, hashedPassword: string): Promise<UserDto>;
-}
+export class UserRepository implements IUserRepository {
+  constructor(private readonly _db: PrismaClient) {}
 
-export class UserDatabase implements IUserDatabase {
-  private database: PrismaClient;
-
-  constructor(database: PrismaClient) {
-    this.database = database;
-  }
-
-  async create(createUserDto: CreateUserDto): Promise<UserDto> {
+  async create(createUserDto: CreateUserDto): Promise<User> {
     return handleAsyncOperation(
       () =>
-        this.database.user.create({
+        this._db.user.create({
           data: { ...createUserDto },
         }),
       { errorMessage: "Failed to create new user." }
     );
   }
 
-  async findByEmail(email: string): Promise<UserDto | null> {
+  async findByEmail(email: string): Promise<User | null> {
     const user = handleAsyncOperation(
       () =>
-        this.database.user.findUnique({
+        this._db.user.findUnique({
           where: {
             email,
           },
@@ -45,10 +34,10 @@ export class UserDatabase implements IUserDatabase {
     return user;
   }
 
-  async findById(id: string): Promise<UserDto | null> {
+  async findById(id: string): Promise<User | null> {
     const user = handleAsyncOperation(
       () =>
-        this.database.user.findUnique({
+        this._db.user.findUnique({
           where: {
             id,
           },
@@ -59,10 +48,10 @@ export class UserDatabase implements IUserDatabase {
     return user;
   }
 
-  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserDto> {
+  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     return handleAsyncOperation(
       () =>
-        this.database.user.update({
+        this._db.user.update({
           where: { id },
           data: { ...updateUserDto },
         }),
@@ -70,13 +59,10 @@ export class UserDatabase implements IUserDatabase {
     );
   }
 
-  async updatePassword(
-    userId: string,
-    hashedPassword: string
-  ): Promise<UserDto> {
+  async updatePassword(userId: string, hashedPassword: string): Promise<User> {
     return handleAsyncOperation(
       () =>
-        this.database.user.update({
+        this._db.user.update({
           where: { id: userId },
           data: {
             password: hashedPassword,

@@ -2,26 +2,17 @@ import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
-import type { VerifyEmailTokenDto } from "./dtos/verify-email-token.dto";
 
-export interface IVerificationTokenDB {
-  findByUserId(userId: string): Promise<VerifyEmailTokenDto | null>;
-  findByToken(token: string): Promise<VerifyEmailTokenDto | null>;
-  create(userId: string): Promise<string>;
-  deleteMany(userId: string): Promise<void>;
-}
+import type { VerifyEmailToken } from "./verify-email.model";
+import type { IVerifyEmailRepository } from "./verify-email.types";
 
-export class VerificationTokenDatabase implements IVerificationTokenDB {
-  private database: PrismaClient;
+export class VerifyEmailRepository implements IVerifyEmailRepository {
+  constructor(private readonly _db: PrismaClient) {}
 
-  constructor(database: PrismaClient) {
-    this.database = database;
-  }
-
-  async findByUserId(userId: string): Promise<VerifyEmailTokenDto | null> {
+  async findByUserId(userId: string): Promise<VerifyEmailToken | null> {
     return handleAsyncOperation(
       () =>
-        this.database.emailVerificationToken.findFirst({
+        this._db.emailVerificationToken.findFirst({
           where: {
             userId,
           },
@@ -30,10 +21,10 @@ export class VerificationTokenDatabase implements IVerificationTokenDB {
     );
   }
 
-  async findByToken(token: string): Promise<VerifyEmailTokenDto | null> {
+  async findByToken(token: string): Promise<VerifyEmailToken | null> {
     return handleAsyncOperation(
       () =>
-        this.database.emailVerificationToken.findFirst({
+        this._db.emailVerificationToken.findFirst({
           where: {
             token,
           },
@@ -48,7 +39,7 @@ export class VerificationTokenDatabase implements IVerificationTokenDB {
 
     handleAsyncOperation(
       () =>
-        this.database.emailVerificationToken.create({
+        this._db.emailVerificationToken.create({
           data: {
             token,
             expiresAt,
@@ -64,7 +55,7 @@ export class VerificationTokenDatabase implements IVerificationTokenDB {
   async deleteMany(userId: string): Promise<void> {
     handleAsyncOperation(
       () =>
-        this.database.emailVerificationToken.deleteMany({
+        this._db.emailVerificationToken.deleteMany({
           where: { userId },
         }),
       { errorMessage: "Failed to delete email verification tokens." }

@@ -2,26 +2,16 @@ import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 
 import handleAsyncOperation from "../../utils/handleAsyncOperation";
-import type { ResetTokenDto } from "./dtos/reset-token.dto";
+import type { ResetPasswordToken } from "./reset-password.model";
+import type { IResetPasswordRespository } from "./reset-password.types";
 
-export interface IResetPasswordTokenDatabase {
-  findByUserId(userId: string): Promise<ResetTokenDto | null>;
-  findByToken(token: string): Promise<ResetTokenDto | null>;
-  create(userId: string): Promise<string>;
-  deleteMany(userId: string): Promise<void>;
-}
+export class ResetPasswordRepository implements IResetPasswordRespository {
+  constructor(private readonly _db: PrismaClient) {}
 
-export class ResetPasswordTokenDatabase implements IResetPasswordTokenDatabase {
-  private database: PrismaClient;
-
-  constructor(database: PrismaClient) {
-    this.database = database;
-  }
-
-  async findByUserId(userId: string): Promise<ResetTokenDto | null> {
+  async findByUserId(userId: string): Promise<ResetPasswordToken | null> {
     return handleAsyncOperation(
       () =>
-        this.database.resetPasswordToken.findFirst({
+        this._db.resetPasswordToken.findFirst({
           where: {
             userId,
             expiresAt: { gt: new Date() },
@@ -31,10 +21,10 @@ export class ResetPasswordTokenDatabase implements IResetPasswordTokenDatabase {
     );
   }
 
-  async findByToken(token: string): Promise<ResetTokenDto | null> {
+  async findByToken(token: string): Promise<ResetPasswordToken | null> {
     return handleAsyncOperation(
       () =>
-        this.database.resetPasswordToken.findUnique({
+        this._db.resetPasswordToken.findUnique({
           where: {
             token,
           },
@@ -49,7 +39,7 @@ export class ResetPasswordTokenDatabase implements IResetPasswordTokenDatabase {
 
     handleAsyncOperation(
       () =>
-        this.database.resetPasswordToken.create({
+        this._db.resetPasswordToken.create({
           data: {
             token,
             userId,
@@ -65,7 +55,7 @@ export class ResetPasswordTokenDatabase implements IResetPasswordTokenDatabase {
   async deleteMany(userId: string): Promise<void> {
     handleAsyncOperation(
       () =>
-        this.database.resetPasswordToken.deleteMany({
+        this._db.resetPasswordToken.deleteMany({
           where: {
             userId,
           },

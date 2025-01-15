@@ -1,4 +1,4 @@
-export interface VerifyEmailTokenDto {
+export interface ResetPasswordToken {
   id: string;
   token: string;
   userId: string;

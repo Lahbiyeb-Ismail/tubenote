@@ -3,29 +3,18 @@ import { ERROR_MESSAGES } from "../../constants/errorMessages";
 
 import { BadRequestError, NotFoundError } from "../../errors";
 
-import { IVideoDatabase } from "./video.db";
-
-import type { VideoDto, YoutubeVideoData } from "./dtos/video.dto";
-import type { UserVideos } from "./video.type";
+import type { Video, YoutubeVideoData } from "./video.model";
+import type {
+  IVideoRepository,
+  IVideoService,
+  UserVideos,
+} from "./video.types";
 
 import type { FindManyDto } from "../../common/dtos/find-many.dto";
 import type { FindVideoDto } from "./dtos/find-video.dto";
 
-export interface IVideoService {
-  fetchYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData>;
-  findVideoByYoutubeId(youtubeId: string): Promise<VideoDto | null>;
-  createVideo(userId: string, youtubeVideoId: string): Promise<VideoDto>;
-  linkVideoToUser(video: VideoDto, userId: string): Promise<VideoDto>;
-  getUserVideos(findManyDto: FindManyDto): Promise<UserVideos>;
-  findVideoOrCreate(findVideoDto: FindVideoDto): Promise<VideoDto>;
-}
-
 export class VideoService implements IVideoService {
-  private videoDB: IVideoDatabase;
-
-  constructor(videoDB: IVideoDatabase) {
-    this.videoDB = videoDB;
-  }
+  constructor(private readonly _videoRepository: IVideoRepository) {}
 
   async fetchYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData> {
     const response = await fetch(
@@ -45,16 +34,16 @@ export class VideoService implements IVideoService {
     return data.items[0];
   }
 
-  async findVideoByYoutubeId(youtubeId: string): Promise<VideoDto | null> {
-    const video = await this.videoDB.findByYoutubeId(youtubeId);
+  async findVideoByYoutubeId(youtubeId: string): Promise<Video | null> {
+    const video = await this._videoRepository.findByYoutubeId(youtubeId);
 
     return video;
   }
 
-  async createVideo(userId: string, youtubeVideoId: string): Promise<VideoDto> {
+  async createVideo(userId: string, youtubeVideoId: string): Promise<Video> {
     const videoData = await this.fetchYoutubeVideoData(youtubeVideoId);
 
-    const newVideo = await this.videoDB.create({
+    const newVideo = await this._videoRepository.create({
       userId,
       youtubeVideoId,
       videoData,
@@ -63,8 +52,8 @@ export class VideoService implements IVideoService {
     return newVideo;
   }
 
-  async linkVideoToUser(video: VideoDto, userId: string): Promise<VideoDto> {
-    const updatedVideo = await this.videoDB.connectVideoToUser(
+  async linkVideoToUser(video: Video, userId: string): Promise<Video> {
+    const updatedVideo = await this._videoRepository.connectVideoToUser(
       video.id,
       userId
     );
@@ -74,8 +63,8 @@ export class VideoService implements IVideoService {
 
   async getUserVideos(findManyDto: FindManyDto): Promise<UserVideos> {
     const [videos, videosCount] = await Promise.all([
-      this.videoDB.findMany(findManyDto),
-      this.videoDB.count(findManyDto.userId),
+      this._videoRepository.findMany(findManyDto),
+      this._videoRepository.count(findManyDto.userId),
     ]);
 
     const totalPages = Math.ceil(videosCount / findManyDto.limit);
@@ -83,7 +72,7 @@ export class VideoService implements IVideoService {
     return { videos, videosCount, totalPages };
   }
 
-  async findVideoOrCreate(findVideoDto: FindVideoDto): Promise<VideoDto> {
+  async findVideoOrCreate(findVideoDto: FindVideoDto): Promise<Video> {
     const { userId, youtubeVideoId } = findVideoDto;
 
     if (!youtubeVideoId || !userId) {
