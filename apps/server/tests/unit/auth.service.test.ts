@@ -12,10 +12,10 @@ import { AuthService } from "../../src/modules/auth/auth.service";
 import type { IAuthService } from "../../src/modules/auth/auth.types";
 import type { RegisterUserDto } from "../../src/modules/auth/dtos/register-user.dto";
 import type { IJwtService } from "../../src/modules/jwt/jwt.types";
+import type { IMailSenderService } from "../../src/modules/mailSender/mail-sender.types";
 import type { IPasswordService } from "../../src/modules/password/password.types";
 import type { IRefreshTokenService } from "../../src/modules/refreshToken/refresh-token.types";
 import type { IUserService } from "../../src/modules/user/user.types";
-import type { IEmailService } from "../../src/services/emailService";
 
 import type { RefreshToken } from "../../src/modules/refreshToken/refresh-token.model";
 import type { User } from "../../src/modules/user/user.model";
@@ -51,7 +51,7 @@ describe("AuthService methods tests", () => {
   let mockUserService: IUserService;
   let mockPasswordService: IPasswordService;
   let mockRefreshTokenService: IRefreshTokenService;
-  let mockEmailService: IEmailService;
+  let mockMailSenderService: IMailSenderService;
 
   beforeEach(() => {
     mockJwtService = {
@@ -83,11 +83,10 @@ describe("AuthService methods tests", () => {
       findToken: jest.fn(),
     };
 
-    mockEmailService = {
+    mockMailSenderService = {
       sendVerificationEmail: jest.fn(),
-      createEmailVerififcationToken: jest.fn(),
       sendResetPasswordEmail: jest.fn(),
-      sendEmail: jest.fn(),
+      sendMail: jest.fn(),
     };
 
     authService = new AuthService(
@@ -95,7 +94,7 @@ describe("AuthService methods tests", () => {
       mockUserService,
       mockPasswordService,
       mockRefreshTokenService,
-      mockEmailService
+      mockMailSenderService
     );
   });
 
@@ -117,15 +116,15 @@ describe("AuthService methods tests", () => {
     it("should successfully register a new user", async () => {
       (mockUserService.createUser as jest.Mock).mockResolvedValue(mockUser);
 
-      (mockEmailService.sendVerificationEmail as jest.Mock).mockResolvedValue(
-        undefined
-      );
+      (
+        mockMailSenderService.sendVerificationEmail as jest.Mock
+      ).mockResolvedValue(undefined);
 
       const result = await authService.registerUser(registerUserDto);
 
       expect(mockUserService.createUser).toHaveBeenCalledWith(registerUserDto);
 
-      expect(mockEmailService.sendVerificationEmail).toHaveBeenCalledWith(
+      expect(mockMailSenderService.sendVerificationEmail).toHaveBeenCalledWith(
         registerUserDto.email
       );
 
@@ -143,7 +142,9 @@ describe("AuthService methods tests", () => {
 
       expect(mockUserService.createUser).toHaveBeenCalledWith(registerUserDto);
 
-      expect(mockEmailService.sendVerificationEmail).not.toHaveBeenCalled();
+      expect(
+        mockMailSenderService.sendVerificationEmail
+      ).not.toHaveBeenCalled();
     });
   });
 

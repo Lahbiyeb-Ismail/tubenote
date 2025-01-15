@@ -7,7 +7,7 @@ import type { User } from "../../src/modules/user/user.model";
 import type { VerifyEmailToken } from "../../src/modules/verifyEmailToken/verify-email.model";
 
 import type { IAuthService } from "../../src/modules/auth/auth.types";
-import type { IUserRepository } from "../../src/modules/user/user.types";
+import type { IUserService } from "../../src/modules/user/user.types";
 import type {
   IVerifyEmailRepository,
   IVerifyEmailService,
@@ -16,7 +16,7 @@ import type {
 describe("VerifyEmailService methods test", () => {
   let verifyEmailService: IVerifyEmailService;
   let mockVerifyEmailRepository: IVerifyEmailRepository;
-  let mockUserRepository: IUserRepository;
+  let mockUserService: IUserService;
   let mockAuthService: IAuthService;
 
   beforeEach(() => {
@@ -27,12 +27,13 @@ describe("VerifyEmailService methods test", () => {
       deleteMany: jest.fn(),
     };
 
-    mockUserRepository = {
-      findByEmail: jest.fn(),
-      create: jest.fn(),
-      findById: jest.fn(),
+    mockUserService = {
+      createUser: jest.fn(),
+      getUserByEmail: jest.fn(),
+      getUserById: jest.fn(),
+      findOrCreateUser: jest.fn(),
       updateUser: jest.fn(),
-      updatePassword: jest.fn(),
+      verifyUserEmail: jest.fn(),
     };
 
     mockAuthService = {
@@ -45,8 +46,8 @@ describe("VerifyEmailService methods test", () => {
     };
 
     verifyEmailService = new VerifyEmailService(
-      mockUserRepository,
       mockVerifyEmailRepository,
+      mockUserService,
       mockAuthService
     );
   });
@@ -93,29 +94,29 @@ describe("VerifyEmailService methods test", () => {
     });
 
     it("should throw a ForbiddenError if the user does not exist", async () => {
-      (mockUserRepository.findByEmail as jest.Mock).mockResolvedValue(null);
+      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue(null);
 
       await expect(verifyEmailService.generateToken(mockEmail)).rejects.toThrow(
         new ForbiddenError(ERROR_MESSAGES.FORBIDDEN)
       );
 
-      expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(mockEmail);
-      expect(mockUserRepository.findByEmail).toHaveBeenCalledTimes(1);
+      expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
+      expect(mockUserService.getUserByEmail).toHaveBeenCalledTimes(1);
     });
 
     it("should throw a ForbiddenError if the user email is already verified", async () => {
-      (mockUserRepository.findByEmail as jest.Mock).mockResolvedValue(mockUser);
+      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue(mockUser);
 
       await expect(verifyEmailService.generateToken(mockEmail)).rejects.toThrow(
         new ForbiddenError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED)
       );
 
-      expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(mockEmail);
-      expect(mockUserRepository.findByEmail).toHaveBeenCalledTimes(1);
+      expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
+      expect(mockUserService.getUserByEmail).toHaveBeenCalledTimes(1);
     });
 
     it("should throw a ForbiddenError if the user already has a verification token", async () => {
-      (mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
+      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue({
         ...mockUser,
         isEmailVerified: false,
       });
@@ -127,8 +128,8 @@ describe("VerifyEmailService methods test", () => {
         new ForbiddenError(ERROR_MESSAGES.VERIFICATION_LINK_SENT)
       );
 
-      expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(mockEmail);
-      expect(mockUserRepository.findByEmail).toHaveBeenCalledTimes(1);
+      expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
+      expect(mockUserService.getUserByEmail).toHaveBeenCalledTimes(1);
 
       expect(mockVerifyEmailRepository.findByUserId).toHaveBeenCalledWith(
         mockUser.id
@@ -137,7 +138,7 @@ describe("VerifyEmailService methods test", () => {
     });
 
     it("should return the new created verification token", async () => {
-      (mockUserRepository.findByEmail as jest.Mock).mockResolvedValue({
+      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue({
         ...mockUser,
         isEmailVerified: false,
       });
@@ -154,8 +155,8 @@ describe("VerifyEmailService methods test", () => {
 
       expect(result).toBe(mockToken);
 
-      expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(mockEmail);
-      expect(mockUserRepository.findByEmail).toHaveBeenCalledTimes(1);
+      expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
+      expect(mockUserService.getUserByEmail).toHaveBeenCalledTimes(1);
 
       expect(mockVerifyEmailRepository.findByUserId).toHaveBeenCalledWith(
         mockUser.id

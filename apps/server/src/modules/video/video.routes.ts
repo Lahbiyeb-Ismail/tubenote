@@ -3,7 +3,7 @@ import { Router } from "express";
 import isAuthenticated from "../../middlewares/isAuthenticated";
 import validateRequest from "../../middlewares/validateRequest";
 
-import { videoController } from "../../di-container";
+import { videoController } from "./video.module";
 
 import { idParamSchema } from "../../common/schemas/id-param.schema";
 import { paginationSchema } from "../../common/schemas/query-pagination.schema";

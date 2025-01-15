@@ -3,7 +3,7 @@ import { Router } from "express";
 import isAuthenticated from "../../middlewares/isAuthenticated";
 import validateRequest from "../../middlewares/validateRequest";
 
-import { userController } from "../../di-container";
+import { userController } from "./user.module";
 
 import { updateUserSchema } from "./schema/update-user.schema";
 
