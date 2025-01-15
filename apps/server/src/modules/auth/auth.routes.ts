@@ -8,6 +8,7 @@ import validateRequest from "../../middlewares/validate-request.middleware";
 
 import { authController, googleAuthStrategy } from "./auth.module";
 
+import { localAuthController } from "./local-auth/local-auth.module";
 import { loginUserSchema } from "./schemas/login-user.schema";
 import { registerUserSchema } from "./schemas/register-user.schema";
 
@@ -19,14 +20,14 @@ const router = Router();
 router
   .route("/register")
   .post(validateRequest({ body: registerUserSchema }), (req, res) =>
-    authController.register(req, res)
+    localAuthController.register(req, res)
   );
 
 // - POST /login: Authenticate a user (requires request body validation).
 router
   .route("/login")
   .post(validateRequest({ body: loginUserSchema }), (req, res) =>
-    authController.login(req, res)
+    localAuthController.login(req, res)
   );
 
 // - POST /logout: Log out the current user.
