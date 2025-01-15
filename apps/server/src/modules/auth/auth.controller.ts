@@ -27,38 +27,6 @@ export class AuthController implements IAuthController {
   constructor(private readonly _authService: IAuthService) {}
 
   /**
-   * Registers a new user.
-   * @param req - The request object containing user registration credentials.
-   * @param res - The response object.
-   */
-  async register(req: TypedRequest<RegisterUserDto>, res: Response) {
-    const user = await this._authService.registerUser(req.body);
-
-    res.status(httpStatus.CREATED).json({
-      message: "A verification email has been sent to your email.",
-      email: user.email,
-    });
-  }
-
-  /**
-   * Logs in a user.
-   * @param req - The request object containing user login credentials.
-   * @param res - The response object.
-   */
-  async login(req: TypedRequest<LoginUserDto>, res: Response) {
-    const { accessToken, refreshToken } = await this._authService.loginUser(
-      req.body
-    );
-
-    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
-
-    res.status(httpStatus.OK).json({
-      message: "Login successful",
-      accessToken,
-    });
-  }
-
-  /**
    * Logs out a user.
    * @param req - The request object.
    * @param res - The response object.
