@@ -37,12 +37,7 @@ export class ResetPasswordService implements IResetPasswordService {
       throw new ForbiddenError(ERROR_MESSAGES.RESET_LINK_SENT);
     }
 
-    const token = await this.createToken(user.id);
-
-    await this._mailSenderService.sendResetPasswordEmail({
-      email: user.email,
-      token,
-    });
+    await this._mailSenderService.sendResetPasswordEmail(user.email);
   }
 
   async createToken(userId: string): Promise<string> {
