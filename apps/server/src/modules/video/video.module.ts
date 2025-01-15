@@ -1,4 +1,4 @@
-import prismaClient from "../../lib/prisma";
+import prismaClient from "../../config/database.config";
 import { VideoController } from "./video.controller";
 import { VideoRepository } from "./video.repository";
 import { VideoService } from "./video.service";

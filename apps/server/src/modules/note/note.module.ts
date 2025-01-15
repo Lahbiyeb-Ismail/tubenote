@@ -1,4 +1,4 @@
-import prismaClient from "../../lib/prisma";
+import prismaClient from "../../config/database.config";
 import { NoteController } from "./note.controller";
 import { NoteRepository } from "./note.repository";
 import { NoteService } from "./note.service";

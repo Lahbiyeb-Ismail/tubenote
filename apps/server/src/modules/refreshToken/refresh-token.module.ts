@@ -1,4 +1,4 @@
-import prismaClient from "../../lib/prisma";
+import prismaClient from "../../config/database.config";
 import { RefreshTokenRepository } from "./refresh-token.repository";
 import { RefreshTokenService } from "./refresh-token.service";
 
