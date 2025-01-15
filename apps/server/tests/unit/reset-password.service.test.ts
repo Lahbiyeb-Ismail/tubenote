@@ -6,20 +6,20 @@ import type { User } from "../../src/modules/user/user.model";
 
 import { ResetPasswordService } from "../../src/modules/resetPasswordToken/reset-password.service";
 
+import type { IMailSenderService } from "../../src/modules/mailSender/mail-sender.types";
 import type { IPasswordService } from "../../src/modules/password/password.types";
 import type {
   IResetPasswordRespository,
   IResetPasswordService,
 } from "../../src/modules/resetPasswordToken/reset-password.types";
 import type { IUserService } from "../../src/modules/user/user.types";
-import type { IEmailService } from "../../src/services/emailService";
 
 describe("resetPasswordService tests", () => {
   let resetPasswordService: IResetPasswordService;
   let mockResetPasswordRepository: IResetPasswordRespository;
   let mockUserService: IUserService;
   let mockPasswordService: IPasswordService;
-  let mockEmailService: IEmailService;
+  let mockMailSenderService: IMailSenderService;
 
   beforeEach(() => {
     mockResetPasswordRepository = {
@@ -45,18 +45,17 @@ describe("resetPasswordService tests", () => {
       resetPassword: jest.fn(),
     };
 
-    mockEmailService = {
+    mockMailSenderService = {
       sendVerificationEmail: jest.fn(),
-      createEmailVerififcationToken: jest.fn(),
       sendResetPasswordEmail: jest.fn(),
-      sendEmail: jest.fn(),
+      sendMail: jest.fn(),
     };
 
     resetPasswordService = new ResetPasswordService(
       mockResetPasswordRepository,
       mockUserService,
       mockPasswordService,
-      mockEmailService
+      mockMailSenderService
     );
   });
 
