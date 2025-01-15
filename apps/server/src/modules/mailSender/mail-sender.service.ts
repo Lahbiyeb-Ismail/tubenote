@@ -10,13 +10,15 @@ import { BadRequestError } from "../../errors";
 
 import type { IVerifyEmailService } from "../../modules/verifyEmailToken/verify-email.types";
 import type { EmailContent } from "../../types/email.type";
+import type { IResetPasswordService } from "../resetPasswordToken/reset-password.types";
 import type { SendMailDto } from "./dtos/send-mail.dto";
 import type { IMailSenderService } from "./mail-sender.types";
 
 export class MailSenderService implements IMailSenderService {
   constructor(
     private readonly _transporter: Transporter,
-    private readonly _verifyEmailService: IVerifyEmailService
+    private readonly _verifyEmailService: IVerifyEmailService,
+    private readonly _resetPasswordService: IResetPasswordService
   ) {}
 
   async sendMail(sendMailDto: SendMailDto): Promise<void> {
@@ -60,10 +62,9 @@ export class MailSenderService implements IMailSenderService {
     });
   }
 
-  async sendResetPasswordEmail({
-    email,
-    token,
-  }: { email: string; token: string }): Promise<void> {
+  async sendResetPasswordEmail(email: string): Promise<void> {
+    const token = await this._resetPasswordService.createToken(email);
+
     const { htmlContent, logoPath, textContent } =
       await this.buildResetPasswordEmail(token);
 
