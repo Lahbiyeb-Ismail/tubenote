@@ -1,5 +1,5 @@
-import { REFRESH_TOKEN_SECRET } from "../../src/constants/auth";
-import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
+import { REFRESH_TOKEN_SECRET } from "../../src/constants/auth.contants";
+import { ERROR_MESSAGES } from "../../src/constants/error-messages.contants";
 import {
   ConflictError,
   ForbiddenError,

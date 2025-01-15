@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from "../../src/constants/errorMessages";
+import { ERROR_MESSAGES } from "../../src/constants/error-messages.contants";
 import { NotFoundError } from "../../src/errors";
 
 import { NoteService } from "../../src/modules/note/note.service";
