@@ -19,8 +19,8 @@ import userRoutes from "./modules/user/user.routes";
 import verifyEmailRoutes from "./modules/verifyEmailToken/verify-email.routes";
 import videoRoutes from "./modules/video/video.routes";
 
-import envConfig from "./config/envConfig";
-import { errorHandler, notFoundRoute } from "./middlewares/errorsMiddleware";
+import envConfig from "./config/env.config";
+import { errorHandler, notFoundRoute } from "./middlewares/error.middleware";
 import logger from "./utils/logger";
 
 const app: Express = express();
