@@ -1,4 +1,4 @@
-import envConfig from "./envConfig";
+import envConfig from "./env.config";
 
 import type { GoogleConfig } from "../modules/auth/strategies/google.strategy";
 
