@@ -1,5 +1,6 @@
 import { ERROR_MESSAGES } from "../../../constants/error-messages.contants";
 import {
+  BadRequestError,
   ForbiddenError,
   NotFoundError,
   UnauthorizedError,
@@ -9,11 +10,12 @@ import type { User } from "../../user/user.model";
 
 import type { IJwtService } from "../../jwt/jwt.types";
 import type { IMailSenderService } from "../../mailSender/mail-sender.types";
-import type { IPasswordService } from "../../password/password.types";
 import type { IRefreshTokenService } from "../../refreshToken/refresh-token.types";
 import type { IUserService } from "../../user/user.types";
 import type { ILocalAuthService } from "./local-auth.types";
 
+import type { UpdatePasswordDto } from "../../../common/dtos/update-password.dto";
+import type { IPasswordHasherService } from "../../password-hasher/password-hasher.types";
 import type { LoginResponseDto } from "../dtos/login-response.dto";
 import type { LoginUserDto } from "../dtos/login-user.dto";
 import type { RegisterUserDto } from "../dtos/register-user.dto";
@@ -22,7 +24,7 @@ export class LocalAuthService implements ILocalAuthService {
   constructor(
     private readonly _jwtService: IJwtService,
     private readonly _userService: IUserService,
-    private readonly _passwordService: IPasswordService,
+    private readonly _passwordHasherService: IPasswordHasherService,
     private readonly _refreshTokenService: IRefreshTokenService,
     private readonly _mailSenderService: IMailSenderService
   ) {}
@@ -48,7 +50,7 @@ export class LocalAuthService implements ILocalAuthService {
       throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
-    const isPasswordMatch = await this._passwordService.comparePasswords({
+    const isPasswordMatch = await this._passwordHasherService.comparePassword({
       password,
       hashedPassword: user.password,
     });
@@ -67,5 +69,17 @@ export class LocalAuthService implements ILocalAuthService {
     });
 
     return { accessToken, refreshToken };
+  }
+
+  async updatePassword(
+    userId: string,
+    updatePasswordDto: UpdatePasswordDto
+  ): Promise<User> {
+    const updatedUser = await this._userService.updatePassword(
+      userId,
+      updatePasswordDto
+    );
+
+    return updatedUser;
   }
 }

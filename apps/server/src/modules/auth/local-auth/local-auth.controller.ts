@@ -1,5 +1,6 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
+import type { UpdatePasswordDto } from "../../../common/dtos/update-password.dto";
 import { refreshTokenCookieConfig } from "../../../config/cookie.config";
 import { REFRESH_TOKEN_NAME } from "../../../constants/auth.contants";
 import type { TypedRequest } from "../../../types";
@@ -41,6 +42,17 @@ export class LocalAuthController implements ILocalAuthController {
     res.status(httpStatus.OK).json({
       message: "Login successful",
       accessToken,
+    });
+  }
+
+  async updatePassword(req: TypedRequest<UpdatePasswordDto>, res: Response) {
+    const userId = req.userId;
+
+    const user = await this._localAuthService.updatePassword(userId, req.body);
+
+    res.status(httpStatus.OK).json({
+      message: "Password updated successfully",
+      email: user.email,
     });
   }
 }
