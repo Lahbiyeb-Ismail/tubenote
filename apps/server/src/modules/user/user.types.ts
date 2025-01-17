@@ -4,8 +4,10 @@ import type { TypedRequest } from "../../types";
 
 import type { User } from "./user.model";
 
+import type { UpdatePasswordDto } from "../../common/dtos/update-password.dto";
 import type { CreateUserDto } from "./dtos/create-user.dto";
 import type { UpdateUserDto } from "./dtos/update-user.dto";
+
 export interface IUserRepository {
   create(createUserDto: CreateUserDto): Promise<User>;
   findByEmail(email: string): Promise<User | null>;
@@ -20,6 +22,10 @@ export interface IUserService {
   getUserByEmail(email: string): Promise<User | null>;
   getUserById(userId: string): Promise<User>;
   updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User>;
+  updatePassword(
+    userId: string,
+    updatePasswordDto: UpdatePasswordDto
+  ): Promise<User>;
   verifyUserEmail(id: string): Promise<User>;
 }
 

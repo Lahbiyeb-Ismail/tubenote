@@ -21,11 +21,4 @@ router
     userController.updateCurrentUser(req, res)
   );
 
-// - PATCH /update-password: Update the current user's password (requires request body validation)
-// router
-//   .route("/update-password")
-//   .patch(validateRequest({ body: updatePasswordSchema }), (req, res) =>
-//     userController.updateUserPassword(req, res)
-//   );
-
 export default router;
