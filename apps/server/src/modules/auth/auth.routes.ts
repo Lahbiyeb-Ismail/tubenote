@@ -11,6 +11,7 @@ import { authController, googleAuthStrategy } from "./auth.module";
 import { localAuthController } from "./local-auth/local-auth.module";
 import { loginUserSchema } from "./schemas/login-user.schema";
 import { registerUserSchema } from "./schemas/register-user.schema";
+import { updatePasswordSchema } from "./schemas/update-password.schema";
 
 passport.use(googleAuthStrategy.getStrategy());
 
@@ -28,6 +29,15 @@ router
   .route("/login")
   .post(validateRequest({ body: loginUserSchema }), (req, res) =>
     localAuthController.login(req, res)
+  );
+
+// - PATCH /update-password: Update the current user's password (requires request body validation)
+router
+  .route("/update-password")
+  .patch(
+    isAuthenticated,
+    validateRequest({ body: updatePasswordSchema }),
+    (req, res) => localAuthController.updatePassword(req, res)
   );
 
 // - POST /logout: Log out the current user.
