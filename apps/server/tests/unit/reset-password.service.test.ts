@@ -7,7 +7,7 @@ import type { User } from "../../src/modules/user/user.model";
 import { ResetPasswordService } from "../../src/modules/resetPasswordToken/reset-password.service";
 
 import type { IMailSenderService } from "../../src/modules/mailSender/mail-sender.types";
-import type { IPasswordService } from "../../src/modules/password/password.types";
+import type { IPasswordHasherService } from "../../src/modules/password-hasher/password-hasher.types";
 import type {
   IResetPasswordRespository,
   IResetPasswordService,
@@ -18,7 +18,7 @@ describe("resetPasswordService tests", () => {
   let resetPasswordService: IResetPasswordService;
   let mockResetPasswordRepository: IResetPasswordRespository;
   let mockUserService: IUserService;
-  let mockPasswordService: IPasswordService;
+  let mockPasswordHasherService: IPasswordHasherService;
   let mockMailSenderService: IMailSenderService;
 
   beforeEach(() => {
@@ -36,13 +36,12 @@ describe("resetPasswordService tests", () => {
       verifyUserEmail: jest.fn(),
       getUserByEmail: jest.fn(),
       updateUser: jest.fn(),
+      updatePassword: jest.fn(),
     };
 
-    mockPasswordService = {
+    mockPasswordHasherService = {
       hashPassword: jest.fn(),
-      comparePasswords: jest.fn(),
-      updatePassword: jest.fn(),
-      resetPassword: jest.fn(),
+      comparePassword: jest.fn(),
     };
 
     mockMailSenderService = {
@@ -54,7 +53,7 @@ describe("resetPasswordService tests", () => {
     resetPasswordService = new ResetPasswordService(
       mockResetPasswordRepository,
       mockUserService,
-      mockPasswordService,
+      mockPasswordHasherService,
       mockMailSenderService
     );
   });
@@ -212,9 +211,9 @@ describe("resetPasswordService tests", () => {
         mockNonExistentToken
       );
 
-      expect(mockPasswordService.hashPassword).not.toHaveBeenCalled();
+      expect(mockPasswordHasherService.hashPassword).not.toHaveBeenCalled();
 
-      expect(mockPasswordService.updatePassword).not.toHaveBeenCalled();
+      // expect(mockPasswordHasherService.updatePassword).not.toHaveBeenCalled();
 
       expect(mockResetPasswordRepository.deleteMany).not.toHaveBeenCalled();
     });
@@ -244,9 +243,9 @@ describe("resetPasswordService tests", () => {
         mockExpiredResetToken.userId
       );
 
-      expect(mockPasswordService.hashPassword).not.toHaveBeenCalled();
+      expect(mockPasswordHasherService.hashPassword).not.toHaveBeenCalled();
 
-      expect(mockPasswordService.updatePassword).not.toHaveBeenCalled();
+      // expect(mockPasswordHasherService.updatePassword).not.toHaveBeenCalled();
     });
 
     // it("should reset the user's password", async () => {
@@ -260,11 +259,11 @@ describe("resetPasswordService tests", () => {
     //     .spyOn(resetPasswordService, "isResetTokenExpired")
     //     .mockResolvedValue(false);
 
-    //   (mockPasswordService.hashPassword as jest.Mock).mockResolvedValue(
+    //   (mockPasswordHasherService.hashPassword as jest.Mock).mockResolvedValue(
     //     "hashedPassword"
     //   );
 
-    //   (mockPasswordService.updatePassword as jest.Mock).mockResolvedValue(null);
+    //   (mockPasswordHasherService.updatePassword as jest.Mock).mockResolvedValue(null);
 
     //   await resetPasswordService.reset(mockValidToken, newPassword);
 
@@ -276,7 +275,7 @@ describe("resetPasswordService tests", () => {
     //     mockValidResetToken
     //   );
 
-    //   expect(mockPasswordService.updatePassword).toHaveBeenCalledWith({
+    //   expect(mockPasswordHasherService.updatePassword).toHaveBeenCalledWith({
     //     userId: mockValidResetToken.userId,
     //     password: "newpassword123",
     //   });

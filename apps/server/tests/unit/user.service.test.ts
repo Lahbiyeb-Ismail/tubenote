@@ -4,7 +4,7 @@ import { NotFoundError } from "../../src/errors";
 import type { User } from "../../src/modules/user/user.model";
 import { UserService } from "../../src/modules/user/user.service";
 
-import type { IPasswordService } from "../../src/modules/password/password.types";
+import type { IPasswordHasherService } from "../../src/modules/password-hasher/password-hasher.types";
 import type { UpdateUserDto } from "../../src/modules/user/dtos/update-user.dto";
 import type {
   IUserRepository,
@@ -14,7 +14,7 @@ import type {
 describe("UserService methods test", () => {
   let userService: IUserService;
   let mockUserRepository: IUserRepository;
-  let mockPasswordService: IPasswordService;
+  let mockPasswordHasherService: IPasswordHasherService;
 
   beforeEach(() => {
     mockUserRepository = {
@@ -25,14 +25,15 @@ describe("UserService methods test", () => {
       updatePassword: jest.fn(),
     };
 
-    mockPasswordService = {
+    mockPasswordHasherService = {
       hashPassword: jest.fn(),
-      comparePasswords: jest.fn(),
-      updatePassword: jest.fn(),
-      resetPassword: jest.fn(),
+      comparePassword: jest.fn(),
     };
 
-    userService = new UserService(mockUserRepository, mockPasswordService);
+    userService = new UserService(
+      mockUserRepository,
+      mockPasswordHasherService
+    );
   });
 
   const mockUserId = "user_id_001";

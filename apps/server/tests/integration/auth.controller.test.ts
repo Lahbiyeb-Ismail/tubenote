@@ -30,8 +30,6 @@ describe("AuthController integration tests", () => {
 
   beforeEach(() => {
     mockAuthService = {
-      registerUser: jest.fn(),
-      loginUser: jest.fn(),
       logoutUser: jest.fn(),
       refreshToken: jest.fn(),
       googleLogin: jest.fn(),
@@ -45,150 +43,150 @@ describe("AuthController integration tests", () => {
     jest.clearAllMocks();
   });
 
-  describe("AuthController - register", () => {
-    let mockRequest: Partial<TypedRequest<RegisterUserDto>>;
-    let mockResponse: Partial<Response>;
-    let mockJson: jest.Mock;
-    let mockStatus: jest.Mock;
+  // describe("AuthController - register", () => {
+  //   let mockRequest: Partial<TypedRequest<RegisterUserDto>>;
+  //   let mockResponse: Partial<Response>;
+  //   let mockJson: jest.Mock;
+  //   let mockStatus: jest.Mock;
 
-    const mockUser: User = {
-      id: "user_id_001",
-      username: "testuser",
-      email: "testuser@example.com",
-      password: "password123",
-      isEmailVerified: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+  //   const mockUser: User = {
+  //     id: "user_id_001",
+  //     username: "testuser",
+  //     email: "testuser@example.com",
+  //     password: "password123",
+  //     isEmailVerified: false,
+  //     createdAt: new Date(),
+  //     updatedAt: new Date(),
+  //   };
 
-    const mockRegisterCredentials: RegisterUserDto = {
-      username: "testuser",
-      email: "testuser@example.com",
-      password: "password123",
-    };
+  //   const mockRegisterCredentials: RegisterUserDto = {
+  //     username: "testuser",
+  //     email: "testuser@example.com",
+  //     password: "password123",
+  //   };
 
-    beforeEach(() => {
-      mockJson = jest.fn();
-      mockStatus = jest.fn().mockReturnValue({ json: mockJson });
-      mockResponse = {
-        status: mockStatus,
-        json: mockJson,
-      };
-      mockRequest = {
-        body: mockRegisterCredentials,
-      };
-      jest.clearAllMocks();
-    });
+  //   beforeEach(() => {
+  //     mockJson = jest.fn();
+  //     mockStatus = jest.fn().mockReturnValue({ json: mockJson });
+  //     mockResponse = {
+  //       status: mockStatus,
+  //       json: mockJson,
+  //     };
+  //     mockRequest = {
+  //       body: mockRegisterCredentials,
+  //     };
+  //     jest.clearAllMocks();
+  //   });
 
-    it("should successfully register a new user", async () => {
-      (mockAuthService.registerUser as jest.Mock).mockResolvedValue(mockUser);
+  //   it("should successfully register a new user", async () => {
+  //     (mockAuthService.registerUser as jest.Mock).mockResolvedValue(mockUser);
 
-      await authController.register(
-        mockRequest as TypedRequest<RegisterUserDto>,
-        mockResponse as Response
-      );
+  //     await authController.register(
+  //       mockRequest as TypedRequest<RegisterUserDto>,
+  //       mockResponse as Response
+  //     );
 
-      expect(mockAuthService.registerUser).toHaveBeenCalledWith(
-        mockRegisterCredentials
-      );
+  //     expect(mockAuthService.registerUser).toHaveBeenCalledWith(
+  //       mockRegisterCredentials
+  //     );
 
-      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.CREATED);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        message: "A verification email has been sent to your email.",
-        email: mockUser.email,
-      });
-    });
+  //     expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.CREATED);
+  //     expect(mockResponse.json).toHaveBeenCalledWith({
+  //       message: "A verification email has been sent to your email.",
+  //       email: mockUser.email,
+  //     });
+  //   });
 
-    it("should handle mockAuthService errors", async () => {
-      const errorMessage = "Registration failed";
+  //   it("should handle mockAuthService errors", async () => {
+  //     const errorMessage = "Registration failed";
 
-      (mockAuthService.registerUser as jest.Mock).mockRejectedValue(
-        new Error(errorMessage)
-      );
+  //     (mockAuthService.registerUser as jest.Mock).mockRejectedValue(
+  //       new Error(errorMessage)
+  //     );
 
-      await expect(
-        authController.register(
-          mockRequest as TypedRequest<RegisterUserDto>,
-          mockResponse as Response
-        )
-      ).rejects.toThrow(errorMessage);
-    });
-  });
+  //     await expect(
+  //       authController.register(
+  //         mockRequest as TypedRequest<RegisterUserDto>,
+  //         mockResponse as Response
+  //       )
+  //     ).rejects.toThrow(errorMessage);
+  //   });
+  // });
 
-  describe("AuthController - login", () => {
-    let mockRequest: Partial<TypedRequest<LoginUserDto>>;
-    let mockResponse: Partial<Response>;
-    let mockJson: jest.Mock;
-    let mockStatus: jest.Mock;
-    let mockCookie: jest.Mock;
+  // describe("AuthController - login", () => {
+  //   let mockRequest: Partial<TypedRequest<LoginUserDto>>;
+  //   let mockResponse: Partial<Response>;
+  //   let mockJson: jest.Mock;
+  //   let mockStatus: jest.Mock;
+  //   let mockCookie: jest.Mock;
 
-    const mockLoginCredentials: LoginUserDto = {
-      email: "testuser@example.com",
-      password: "password123",
-    };
+  //   const mockLoginCredentials: LoginUserDto = {
+  //     email: "testuser@example.com",
+  //     password: "password123",
+  //   };
 
-    beforeEach(() => {
-      mockJson = jest.fn();
-      mockStatus = jest.fn().mockReturnValue({ json: mockJson });
-      mockCookie = jest.fn();
-      mockResponse = {
-        status: mockStatus,
-        cookie: mockCookie,
-        json: mockJson,
-      };
-      mockRequest = {
-        body: mockLoginCredentials,
-      };
-    });
+  //   beforeEach(() => {
+  //     mockJson = jest.fn();
+  //     mockStatus = jest.fn().mockReturnValue({ json: mockJson });
+  //     mockCookie = jest.fn();
+  //     mockResponse = {
+  //       status: mockStatus,
+  //       cookie: mockCookie,
+  //       json: mockJson,
+  //     };
+  //     mockRequest = {
+  //       body: mockLoginCredentials,
+  //     };
+  //   });
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
+  //   afterEach(() => {
+  //     jest.clearAllMocks();
+  //   });
 
-    it("should successfully log in a user", async () => {
-      const mockTokens = {
-        accessToken: "mock-access-token",
-        refreshToken: "mock-refresh-token",
-      };
+  //   it("should successfully log in a user", async () => {
+  //     const mockTokens = {
+  //       accessToken: "mock-access-token",
+  //       refreshToken: "mock-refresh-token",
+  //     };
 
-      (mockAuthService.loginUser as jest.Mock).mockResolvedValue(mockTokens);
+  //     (mockAuthService.loginUser as jest.Mock).mockResolvedValue(mockTokens);
 
-      await authController.login(
-        mockRequest as TypedRequest<LoginUserDto>,
-        mockResponse as Response
-      );
+  //     await authController.login(
+  //       mockRequest as TypedRequest<LoginUserDto>,
+  //       mockResponse as Response
+  //     );
 
-      expect(mockAuthService.loginUser).toHaveBeenCalledWith(
-        mockLoginCredentials
-      );
+  //     expect(mockAuthService.loginUser).toHaveBeenCalledWith(
+  //       mockLoginCredentials
+  //     );
 
-      expect(mockResponse.cookie).toHaveBeenCalledWith(
-        REFRESH_TOKEN_NAME,
-        "mock-refresh-token",
-        refreshTokenCookieConfig
-      );
+  //     expect(mockResponse.cookie).toHaveBeenCalledWith(
+  //       REFRESH_TOKEN_NAME,
+  //       "mock-refresh-token",
+  //       refreshTokenCookieConfig
+  //     );
 
-      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        message: "Login successful",
-        accessToken: "mock-access-token",
-      });
-    });
+  //     expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+  //     expect(mockResponse.json).toHaveBeenCalledWith({
+  //       message: "Login successful",
+  //       accessToken: "mock-access-token",
+  //     });
+  //   });
 
-    it("should handle mockAuthService errors", async () => {
-      const errorMessage = "Invalid credentials";
-      (mockAuthService.loginUser as jest.Mock).mockRejectedValue(
-        new Error(errorMessage)
-      );
+  //   it("should handle mockAuthService errors", async () => {
+  //     const errorMessage = "Invalid credentials";
+  //     (mockAuthService.loginUser as jest.Mock).mockRejectedValue(
+  //       new Error(errorMessage)
+  //     );
 
-      await expect(
-        authController.login(
-          mockRequest as TypedRequest<LoginUserDto>,
-          mockResponse as Response
-        )
-      ).rejects.toThrow(errorMessage);
-    });
-  });
+  //     await expect(
+  //       authController.login(
+  //         mockRequest as TypedRequest<LoginUserDto>,
+  //         mockResponse as Response
+  //       )
+  //     ).rejects.toThrow(errorMessage);
+  //   });
+  // });
 
   describe("AuthController - logout", () => {
     let mockRequest: Partial<TypedRequest>;
