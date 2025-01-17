@@ -1,6 +1,6 @@
 import prismaClient from "../../config/database.config";
 import { mailSenderService } from "../mailSender/mail-sender.module";
-import { passwordService } from "../password/password.module";
+import { passwordHasherService } from "../password-hasher/password-hasher.module";
 import { userService } from "../user/user.module";
 import { ResetPasswordController } from "./reset-password.controller";
 import { ResetPasswordRepository } from "./reset-password.repository";
@@ -10,7 +10,7 @@ const resetPasswordRepository = new ResetPasswordRepository(prismaClient);
 const resetPasswordService = new ResetPasswordService(
   resetPasswordRepository,
   userService,
-  passwordService,
+  passwordHasherService,
   mailSenderService
 );
 const resetPasswordController = new ResetPasswordController(

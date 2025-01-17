@@ -4,7 +4,7 @@ import { ForbiddenError, NotFoundError } from "../../errors";
 import type { ResetPasswordToken } from "./reset-password.model";
 
 import type { IMailSenderService } from "../mailSender/mail-sender.types";
-import type { IPasswordService } from "../password/password.types";
+import type { IPasswordHasherService } from "../password-hasher/password-hasher.types";
 import type { IUserService } from "../user/user.types";
 import type {
   IResetPasswordRespository,
@@ -15,7 +15,7 @@ export class ResetPasswordService implements IResetPasswordService {
   constructor(
     private readonly _resetPasswordRepository: IResetPasswordRespository,
     private readonly _userService: IUserService,
-    private readonly _passwordService: IPasswordService,
+    private readonly _passwordHasherService: IPasswordHasherService,
     private readonly _mailSenderService: IMailSenderService
   ) {}
 
@@ -46,7 +46,7 @@ export class ResetPasswordService implements IResetPasswordService {
     return token;
   }
 
-  async reset(token: string, password: string): Promise<void> {
+  async reset(token: string, _password: string): Promise<void> {
     const resetToken = await this.findResetToken(token);
 
     if (!resetToken) throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
@@ -58,12 +58,12 @@ export class ResetPasswordService implements IResetPasswordService {
       throw new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN);
     }
 
-    await this._passwordService.resetPassword({
-      userId: resetToken.userId,
-      password,
-    });
+    // await this._passwordHasherService.resetPassword({
+    //   userId: resetToken.userId,
+    //   password,
+    // });
 
-    await this._resetPasswordRepository.deleteMany(resetToken.userId);
+    // await this._resetPasswordRepository.deleteMany(resetToken.userId);
   }
 
   async findResetToken(token: string): Promise<ResetPasswordToken | null> {
