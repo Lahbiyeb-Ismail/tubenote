@@ -10,8 +10,8 @@ import type { User } from "../../user/user.model";
 
 import type { IJwtService } from "../../jwt/jwt.types";
 import type { IMailSenderService } from "../../mailSender/mail-sender.types";
-import type { IRefreshTokenService } from "../../refreshToken/refresh-token.types";
 import type { IUserService } from "../../user/user.types";
+import type { IRefreshTokenService } from "../refresh-token/refresh-token.types";
 import type { ILocalAuthService } from "./local-auth.types";
 
 import type { IPasswordHasherService } from "../../password-hasher/password-hasher.types";
