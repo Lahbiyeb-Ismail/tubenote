@@ -4,8 +4,8 @@ import type { TypedRequest } from "../../types";
 
 import type { User } from "./user.model";
 
-import type { UpdatePasswordDto } from "../../common/dtos/update-password.dto";
 import type { CreateUserDto } from "./dtos/create-user.dto";
+import type { UpdatePasswordDto } from "./dtos/update-password.dto";
 import type { UpdateUserDto } from "./dtos/update-user.dto";
 
 export interface IUserRepository {
@@ -33,6 +33,10 @@ export interface IUserController {
   getCurrentUser(req: TypedRequest, res: Response): Promise<void>;
   updateCurrentUser(
     req: TypedRequest<UpdateUserDto>,
+    res: Response
+  ): Promise<void>;
+  updatePassword(
+    req: TypedRequest<UpdatePasswordDto>,
     res: Response
   ): Promise<void>;
 }
