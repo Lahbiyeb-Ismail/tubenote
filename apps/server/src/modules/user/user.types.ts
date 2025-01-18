@@ -26,7 +26,6 @@ export interface IUserService {
     userId: string,
     updatePasswordDto: UpdatePasswordDto
   ): Promise<User>;
-  verifyUserEmail(id: string): Promise<User>;
 }
 
 export interface IUserController {
