@@ -15,7 +15,6 @@ import passport from "passport";
 import authRoutes from "./modules/auth/auth.routes";
 import noteRoutes from "./modules/note/note.routes";
 import userRoutes from "./modules/user/user.routes";
-import verifyEmailRoutes from "./modules/verifyEmailToken/verify-email.routes";
 import videoRoutes from "./modules/video/video.routes";
 
 import envConfig from "./config/env.config";
@@ -79,7 +78,6 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/videos", videoRoutes);
 app.use("/api/v1/notes", noteRoutes);
 app.use("/api/v1/users", userRoutes);
-app.use("/api/v1", verifyEmailRoutes);
 
 // ?: Global Error middleware
 app.use(notFoundRoute);
