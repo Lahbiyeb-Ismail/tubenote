@@ -9,6 +9,7 @@ import { authController, googleAuthStrategy } from "./auth.module";
 
 import localAuthRoutes from "./local-auth/local-auth.routes";
 import resetPasswordRoutes from "./reset-password/reset-password.routes";
+import verifyEmailRoutes from "./verify-email/verify-email.routes";
 
 passport.use(googleAuthStrategy.getStrategy());
 
@@ -19,6 +20,9 @@ router.use("/", localAuthRoutes);
 
 // Password reset routes
 router.use("/", resetPasswordRoutes);
+
+// Verify email routes
+router.use("/", verifyEmailRoutes);
 
 // - POST /logout: Log out the current user.
 router

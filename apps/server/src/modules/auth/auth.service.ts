@@ -93,14 +93,4 @@ export class AuthService implements IAuthService {
 
     return { accessToken, refreshToken };
   }
-
-  async verifyEmail(userId: string): Promise<void> {
-    const user = await this._userService.getUserById(userId);
-
-    if (user.isEmailVerified) {
-      throw new ForbiddenError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
-    }
-
-    await this._userService.verifyUserEmail(userId);
-  }
 }

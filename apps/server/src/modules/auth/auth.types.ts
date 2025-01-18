@@ -11,7 +11,6 @@ export interface IAuthService {
   logoutUser(logoutUserDto: LogoutUserDto): Promise<void>;
   refreshToken(refreshDto: RefreshDto): Promise<LoginResponseDto>;
   googleLogin(user: User): Promise<LoginResponseDto>;
-  verifyEmail(userId: string): Promise<void>;
 }
 
 export interface IAuthController {
