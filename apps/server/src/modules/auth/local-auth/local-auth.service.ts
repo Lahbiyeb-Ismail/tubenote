@@ -14,7 +14,6 @@ import type { IRefreshTokenService } from "../../refreshToken/refresh-token.type
 import type { IUserService } from "../../user/user.types";
 import type { ILocalAuthService } from "./local-auth.types";
 
-import type { UpdatePasswordDto } from "../../../common/dtos/update-password.dto";
 import type { IPasswordHasherService } from "../../password-hasher/password-hasher.types";
 import type { LoginResponseDto } from "../dtos/login-response.dto";
 import type { LoginUserDto } from "../dtos/login-user.dto";
@@ -69,17 +68,5 @@ export class LocalAuthService implements ILocalAuthService {
     });
 
     return { accessToken, refreshToken };
-  }
-
-  async updatePassword(
-    userId: string,
-    updatePasswordDto: UpdatePasswordDto
-  ): Promise<User> {
-    const updatedUser = await this._userService.updatePassword(
-      userId,
-      updatePasswordDto
-    );
-
-    return updatedUser;
   }
 }
