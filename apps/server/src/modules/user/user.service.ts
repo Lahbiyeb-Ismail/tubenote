@@ -7,6 +7,7 @@ import type { User } from "./user.model";
 import type { IPasswordHasherService } from "../password-hasher/password-hasher.types";
 import type { IUserRepository, IUserService } from "./user.types";
 
+import type { ResetPasswordDto } from "../auth/reset-password/dtos/reset-password.dto";
 import type { CreateUserDto } from "./dtos/create-user.dto";
 import type { UpdatePasswordDto } from "./dtos/update-password.dto";
 import type { UpdateUserDto } from "./dtos/update-user.dto";
@@ -107,6 +108,15 @@ export class UserService implements IUserService {
       await this._passwordHasherService.hashPassword(newPassword);
 
     return await this._userRepository.updatePassword(user.id, hashedPassword);
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<User> {
+    const { userId, password } = resetPasswordDto;
+
+    const hashedPassword =
+      await this._passwordHasherService.hashPassword(password);
+
+    return await this._userRepository.updatePassword(userId, hashedPassword);
   }
 
   async verifyUserEmail(id: string): Promise<User> {

@@ -4,6 +4,7 @@ import type { TypedRequest } from "../../types";
 
 import type { User } from "./user.model";
 
+import type { ResetPasswordDto } from "../auth/reset-password/dtos/reset-password.dto";
 import type { CreateUserDto } from "./dtos/create-user.dto";
 import type { UpdatePasswordDto } from "./dtos/update-password.dto";
 import type { UpdateUserDto } from "./dtos/update-user.dto";
@@ -26,6 +27,7 @@ export interface IUserService {
     userId: string,
     updatePasswordDto: UpdatePasswordDto
   ): Promise<User>;
+  resetPassword(resetPasswordDto: ResetPasswordDto): Promise<User>;
   verifyUserEmail(id: string): Promise<User>;
 }
 
