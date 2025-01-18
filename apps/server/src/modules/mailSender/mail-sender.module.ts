@@ -1,6 +1,6 @@
 import transporter from "../../config/node-mailer.config";
-import { resetPasswordService } from "../resetPasswordToken/reset-password.module";
-import { verifyEmailService } from "../verifyEmailToken/verify-email.module";
+import { resetPasswordService } from "../auth/reset-password/reset-password.module";
+import { verifyEmailService } from "../auth/verify-email/verify-email.module";
 import { MailSenderService } from "./mail-sender.service";
 
 import type { IMailSenderService } from "./mail-sender.types";

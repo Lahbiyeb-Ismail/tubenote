@@ -8,8 +8,8 @@ import logger from "../../utils/logger";
 import { ERROR_MESSAGES } from "../../constants/error-messages.contants";
 import { BadRequestError } from "../../errors";
 
-import type { IVerifyEmailService } from "../../modules/verifyEmailToken/verify-email.types";
-import type { IResetPasswordService } from "../resetPasswordToken/reset-password.types";
+import type { IResetPasswordService } from "../auth/reset-password/reset-password.types";
+import type { IVerifyEmailService } from "../auth/verify-email/verify-email.types";
 import type { SendMailDto } from "./dtos/send-mail.dto";
 import type { EmailContent, IMailSenderService } from "./mail-sender.types";
 
