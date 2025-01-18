@@ -110,15 +110,6 @@ export class UserService implements IUserService {
     return await this._userRepository.updatePassword(user.id, hashedPassword);
   }
 
-  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<User> {
-    const { userId, password } = resetPasswordDto;
-
-    const hashedPassword =
-      await this._passwordHasherService.hashPassword(password);
-
-    return await this._userRepository.updatePassword(userId, hashedPassword);
-  }
-
   async verifyUserEmail(id: string): Promise<User> {
     return await this._userRepository.updateUser(id, { isEmailVerified: true });
   }
