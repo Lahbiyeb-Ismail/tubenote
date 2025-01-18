@@ -45,36 +45,6 @@ export class AuthController implements IAuthController {
   }
 
   /**
-   * Refreshes the access token using the refresh token.
-   * @param req - The request object.
-   * @param res - The response object.
-   * @throws {UnauthorizedError} If the refresh token is not provided.
-   */
-  async refresh(req: TypedRequest, res: Response) {
-    const cookies = req.cookies;
-    const userId = req.userId;
-
-    const token: string | null = cookies[REFRESH_TOKEN_NAME];
-
-    if (!token) {
-      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
-    }
-
-    res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
-
-    const { accessToken, refreshToken } = await this._authService.refreshToken({
-      token,
-      userId,
-    });
-
-    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
-
-    res.status(httpStatus.OK).json({
-      accessToken,
-    });
-  }
-
-  /**
    * Logs in a user using Google authentication.
    * @param req - The request object containing the Google user profile.
    * @param res - The response object.
