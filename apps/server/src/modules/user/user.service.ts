@@ -7,8 +7,8 @@ import type { User } from "./user.model";
 import type { IPasswordHasherService } from "../password-hasher/password-hasher.types";
 import type { IUserRepository, IUserService } from "./user.types";
 
-import type { UpdatePasswordDto } from "../../common/dtos/update-password.dto";
 import type { CreateUserDto } from "./dtos/create-user.dto";
+import type { UpdatePasswordDto } from "./dtos/update-password.dto";
 import type { UpdateUserDto } from "./dtos/update-user.dto";
 
 export class UserService implements IUserService {
