@@ -1,5 +1,6 @@
-import { jwtService } from "../../../jwt/jwt.module";
-import { refreshTokenService } from "../../refresh-token/refresh-token.module";
+import { refreshTokenService } from "@modules/auth/refresh-token/refresh-token.module";
+import { jwtService } from "@modules/jwt/jwt.module";
+
 import { GoogleController } from "./google-auth.controller";
 import { GoogleAuthService } from "./goole-auth.service";
 

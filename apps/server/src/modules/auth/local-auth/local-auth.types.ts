@@ -1,10 +1,10 @@
+import type { TypedRequest } from "@/types";
 import type { Response } from "express";
-import type { TypedRequest } from "../../../types";
 
-import type { User } from "../../user/user.model";
-import type { LoginResponseDto } from "../dtos/login-response.dto";
-import type { LoginUserDto } from "../dtos/login-user.dto";
-import type { RegisterUserDto } from "../dtos/register-user.dto";
+import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
+import type { LoginUserDto } from "@modules/auth/dtos/login-user.dto";
+import type { RegisterUserDto } from "@modules/auth/dtos/register-user.dto";
+import type { User } from "@modules/user/user.model";
 
 export interface ILocalAuthService {
   registerUser: (registerUserDto: RegisterUserDto) => Promise<User>;

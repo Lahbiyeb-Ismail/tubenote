@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import isAuthenticated from "../../middlewares/auth.middleware";
+import isAuthenticated from "@middlewares/auth.middleware";
 
 import { authController } from "./auth.module";
 

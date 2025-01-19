@@ -1,10 +1,10 @@
-import { ERROR_MESSAGES } from "../../constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import { BadRequestError, ConflictError, NotFoundError } from "../../errors";
+import { BadRequestError, ConflictError, NotFoundError } from "@/errors";
 
 import type { User } from "./user.model";
 
-import type { IPasswordHasherService } from "../password-hasher/password-hasher.types";
+import type { IPasswordHasherService } from "@modules/password-hasher/password-hasher.types";
 import type { IUserRepository, IUserService } from "./user.types";
 
 import type { CreateUserDto } from "./dtos/create-user.dto";

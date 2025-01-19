@@ -1,16 +1,15 @@
-import { REFRESH_TOKEN_SECRET } from "../../../constants/auth.contants";
-import { ERROR_MESSAGES } from "../../../constants/error-messages.contants";
-import {
-  ForbiddenError,
-  NotFoundError,
-  UnauthorizedError,
-} from "../../../errors";
-import type { IJwtService } from "../../jwt/jwt.types";
-import type { LoginResponseDto } from "../dtos/login-response.dto";
-import type { RefreshDto } from "../dtos/refresh.dto";
-import type { CreateTokenDto } from "./dtos/create-token.dto";
+import { ForbiddenError, NotFoundError, UnauthorizedError } from "@/errors";
+import { REFRESH_TOKEN_SECRET } from "@constants/auth.contants";
+import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
+import type { IJwtService } from "@modules/jwt/jwt.types";
+
+import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
+import type { RefreshDto } from "@modules/auth/dtos/refresh.dto";
+
+import type { CreateTokenDto } from "./dtos/create-token.dto";
 import type { RefreshToken } from "./refresh-token.model";
+
 import type {
   IRefreshTokenRepository,
   IRefreshTokenService,

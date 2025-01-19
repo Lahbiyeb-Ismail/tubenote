@@ -1,5 +1,7 @@
-import prismaClient from "../../config/database.config";
-import { passwordHasherService } from "../password-hasher/password-hasher.module";
+import prismaClient from "@config/database.config";
+
+import { passwordHasherService } from "@modules/password-hasher/password-hasher.module";
+
 import { UserController } from "./user.controller";
 import { UserRepository } from "./user.repository";
 import { UserService } from "./user.service";

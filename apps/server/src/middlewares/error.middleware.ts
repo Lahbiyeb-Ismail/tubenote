@@ -1,9 +1,9 @@
 import type { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 
-import envConfig from "../config/env.config";
-import { type BaseError, NotFoundError } from "../errors";
-import logger from "../utils/logger";
+import { type BaseError, NotFoundError } from "@/errors";
+import envConfig from "@config/env.config";
+import logger from "@utils/logger";
 
 /**
  * Middleware function to handle errors in the application.

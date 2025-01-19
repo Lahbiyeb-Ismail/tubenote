@@ -1,11 +1,11 @@
-import { ERROR_MESSAGES } from "../../../constants/error-messages.contants";
-import { ForbiddenError, NotFoundError } from "../../../errors";
+import { ForbiddenError, NotFoundError } from "@/errors";
+import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import type { ResetPasswordToken } from "./reset-password.model";
 
-import type { IMailSenderService } from "../../mailSender/mail-sender.types";
-import type { IPasswordHasherService } from "../../password-hasher/password-hasher.types";
-import type { IUserRepository } from "../../user/user.types";
+import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
+import type { IPasswordHasherService } from "@modules/password-hasher/password-hasher.types";
+import type { IUserRepository } from "@modules/user/user.types";
 import type {
   IResetPasswordRespository,
   IResetPasswordService,

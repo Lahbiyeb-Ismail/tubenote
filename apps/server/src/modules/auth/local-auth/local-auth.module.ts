@@ -1,11 +1,11 @@
 import { LocalAuthController } from "./local-auth.controller";
 import { LocalAuthService } from "./local-auth.service";
 
-import { jwtService } from "../../jwt/jwt.module";
-import { mailSenderService } from "../../mailSender/mail-sender.module";
-import { passwordHasherService } from "../../password-hasher/password-hasher.module";
-import { userService } from "../../user/user.module";
-import { refreshTokenService } from "../refresh-token/refresh-token.module";
+import { refreshTokenService } from "@modules/auth/refresh-token/refresh-token.module";
+import { jwtService } from "@modules/jwt/jwt.module";
+import { mailSenderService } from "@modules/mailSender/mail-sender.module";
+import { passwordHasherService } from "@modules/password-hasher/password-hasher.module";
+import { userService } from "@modules/user/user.module";
 
 const localAuthService = new LocalAuthService(
   jwtService,

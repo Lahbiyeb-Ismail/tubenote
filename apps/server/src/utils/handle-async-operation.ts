@@ -1,5 +1,5 @@
+import { InternalServerError } from "@/errors";
 import { Prisma } from "@prisma/client";
-import { InternalServerError } from "../errors";
 
 /**
  * Represents an asynchronous operation that returns a promise of type T.

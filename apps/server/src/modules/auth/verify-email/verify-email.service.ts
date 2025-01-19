@@ -1,8 +1,7 @@
-import { ERROR_MESSAGES } from "../../../constants/error-messages.contants";
-import { ForbiddenError } from "../../../errors";
+import { ForbiddenError } from "@/errors";
+import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import type { IUserService } from "../../user/user.types";
-import type { IAuthService } from "../auth.types";
+import type { IUserService } from "@modules/user/user.types";
 import type {
   IVerifyEmailRepository,
   IVerifyEmailService,

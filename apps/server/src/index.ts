@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 
-import app from "./app";
-import envConfig from "./config/env.config";
-import logger from "./utils/logger";
+import app from "@/app";
+import envConfig from "@config/env.config";
+import logger from "@utils/logger";
 
 /**
  * Event listener for uncaught exceptions.

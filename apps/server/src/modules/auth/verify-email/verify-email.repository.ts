@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 
-import handleAsyncOperation from "../../../utils/handle-async-operation";
+import handleAsyncOperation from "@/utils/handle-async-operation";
 
 import type { VerifyEmailToken } from "./verify-email.model";
 import type { IVerifyEmailRepository } from "./verify-email.types";

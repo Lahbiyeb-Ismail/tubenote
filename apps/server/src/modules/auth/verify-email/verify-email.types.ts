@@ -1,8 +1,8 @@
 import type { Response } from "express";
 
-import type { EmptyRecord, TypedRequest } from "../../../types";
+import type { EmptyRecord, TypedRequest } from "@/types";
 
-import type { TokenParamDto } from "../../../common/dtos/token-param.dto";
+import type { TokenParamDto } from "@common/dtos/token-param.dto";
 import type { VerifyEmailToken } from "./verify-email.model";
 
 export interface IVerifyEmailRepository {

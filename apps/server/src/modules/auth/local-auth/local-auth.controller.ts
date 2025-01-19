@@ -1,10 +1,12 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
-import { refreshTokenCookieConfig } from "../../../config/cookie.config";
-import { REFRESH_TOKEN_NAME } from "../../../constants/auth.contants";
-import type { TypedRequest } from "../../../types";
-import type { LoginUserDto } from "../dtos/login-user.dto";
-import type { RegisterUserDto } from "../dtos/register-user.dto";
+
+import type { TypedRequest } from "@/types";
+import { refreshTokenCookieConfig } from "@config/cookie.config";
+import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
+
+import type { LoginUserDto } from "@modules/auth/dtos/login-user.dto";
+import type { RegisterUserDto } from "@modules/auth/dtos/register-user.dto";
 import type {
   ILocalAuthController,
   ILocalAuthService,

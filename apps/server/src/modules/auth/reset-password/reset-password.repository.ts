@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 
-import handleAsyncOperation from "../../../utils/handle-async-operation";
+import handleAsyncOperation from "@/utils/handle-async-operation";
 
 import type { ResetPasswordToken } from "./reset-password.model";
 import type { IResetPasswordRespository } from "./reset-password.types";

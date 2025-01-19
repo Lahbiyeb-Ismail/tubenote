@@ -1,7 +1,9 @@
 import { Router } from "express";
 import passport from "passport";
-import envConfig from "../../../../config/env.config";
-import { googleAuthStrategy } from "../../auth.module";
+
+import envConfig from "@config/env.config";
+
+import { googleAuthStrategy } from "@modules/auth/auth.module";
 import { googleAuthController } from "./google-auth.module";
 
 passport.use(googleAuthStrategy.getStrategy());
