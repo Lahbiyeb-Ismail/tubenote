@@ -1,6 +1,6 @@
-import { ERROR_MESSAGES } from "../../constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import { UnauthorizedError } from "../../errors";
+import { UnauthorizedError } from "@/errors";
 
 import type { IAuthService } from "./auth.types";
 

@@ -1,11 +1,12 @@
 import type { PrismaClient } from "@prisma/client";
 
-import handleAsyncOperation from "../../utils/handle-async-operation";
+import handleAsyncOperation from "@/utils/handle-async-operation";
 
 import type { Note } from "./note.model";
 import type { INoteRepository } from "./note.types";
 
-import type { FindManyDto } from "../../common/dtos/find-many.dto";
+import type { FindManyDto } from "@common/dtos/find-many.dto";
+
 import type { CreateNoteDto } from "./dtos/create-note.dto";
 import type { DeleteNoteDto } from "./dtos/delete-note.dto";
 import type { FindNoteDto } from "./dtos/find-note.dto";

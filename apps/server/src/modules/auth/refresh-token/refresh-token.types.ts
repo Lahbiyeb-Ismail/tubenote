@@ -1,9 +1,12 @@
 import type { Response } from "express";
-import type { TypedRequest } from "../../../types";
-import type { LoginResponseDto } from "../dtos/login-response.dto";
-import type { RefreshDto } from "../dtos/refresh.dto";
-import type { CreateTokenDto } from "./dtos/create-token.dto";
+
+import type { TypedRequest } from "@/types";
+
 import type { RefreshToken } from "./refresh-token.model";
+
+import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
+import type { RefreshDto } from "@modules/auth/dtos/refresh.dto";
+import type { CreateTokenDto } from "./dtos/create-token.dto";
 
 export interface IRefreshTokenRepository {
   create(createTokenDto: CreateTokenDto): Promise<RefreshToken>;

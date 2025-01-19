@@ -1,10 +1,10 @@
 import { Router } from "express";
 
-import validateRequest from "../../../middlewares/validate-request.middleware";
+import validateRequest from "@middlewares/validate-request.middleware";
 
 import { verifyEmailController } from "./verify-email.module";
 
-import { tokenParamSchema } from "../../../common/schemas/token-param.schema";
+import { tokenParamSchema } from "@common/schemas/token-param.schema";
 
 const router = Router();
 

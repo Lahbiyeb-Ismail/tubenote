@@ -1,11 +1,10 @@
 import { Router } from "express";
 
-import envConfig from "../../../config/env.config";
+import validateRequest from "@middlewares/validate-request.middleware";
 
-import validateRequest from "../../../middlewares/validate-request.middleware";
+import { loginUserSchema } from "@modules/auth/schemas/login-user.schema";
+import { registerUserSchema } from "@modules/auth/schemas/register-user.schema";
 
-import { loginUserSchema } from "../schemas/login-user.schema";
-import { registerUserSchema } from "../schemas/register-user.schema";
 import { localAuthController } from "./local-auth.module";
 
 const router = Router();

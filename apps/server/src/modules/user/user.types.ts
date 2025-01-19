@@ -1,6 +1,6 @@
 import type { Response } from "express";
 
-import type { TypedRequest } from "../../types";
+import type { TypedRequest } from "@/types";
 
 import type { User } from "./user.model";
 

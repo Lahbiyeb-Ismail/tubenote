@@ -1,8 +1,8 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { TokenParamDto } from "../../../common/dtos/token-param.dto";
-import type { EmptyRecord, TypedRequest } from "../../../types";
+import type { EmptyRecord, TypedRequest } from "@/types";
+import type { TokenParamDto } from "@common/dtos/token-param.dto";
 import type {
   IVerifyEmailController,
   IVerifyEmailService,

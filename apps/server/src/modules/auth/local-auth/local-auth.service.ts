@@ -1,23 +1,18 @@
-import { ERROR_MESSAGES } from "../../../constants/error-messages.contants";
-import {
-  BadRequestError,
-  ForbiddenError,
-  NotFoundError,
-  UnauthorizedError,
-} from "../../../errors";
+import { ForbiddenError, NotFoundError, UnauthorizedError } from "@/errors";
+import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import type { User } from "../../user/user.model";
+import type { User } from "@modules/user/user.model";
 
-import type { IJwtService } from "../../jwt/jwt.types";
-import type { IMailSenderService } from "../../mailSender/mail-sender.types";
-import type { IUserService } from "../../user/user.types";
-import type { IRefreshTokenService } from "../refresh-token/refresh-token.types";
+import type { IRefreshTokenService } from "@modules/auth/refresh-token/refresh-token.types";
+import type { IJwtService } from "@modules/jwt/jwt.types";
+import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
+import type { IUserService } from "@modules/user/user.types";
 import type { ILocalAuthService } from "./local-auth.types";
 
-import type { IPasswordHasherService } from "../../password-hasher/password-hasher.types";
-import type { LoginResponseDto } from "../dtos/login-response.dto";
-import type { LoginUserDto } from "../dtos/login-user.dto";
-import type { RegisterUserDto } from "../dtos/register-user.dto";
+import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
+import type { LoginUserDto } from "@modules/auth/dtos/login-user.dto";
+import type { RegisterUserDto } from "@modules/auth/dtos/register-user.dto";
+import type { IPasswordHasherService } from "@modules/password-hasher/password-hasher.types";
 
 export class LocalAuthService implements ILocalAuthService {
   constructor(

@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+
 import type { ComparePasswordDto } from "./dtos/compare-password.dto";
 import type { IPasswordHasherService } from "./password-hasher.types";
 

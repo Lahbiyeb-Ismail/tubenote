@@ -1,12 +1,13 @@
 import { Router } from "express";
 
-import isAuthenticated from "../../middlewares/auth.middleware";
-import validateRequest from "../../middlewares/validate-request.middleware";
+import isAuthenticated from "@middlewares/auth.middleware";
+import validateRequest from "@middlewares/validate-request.middleware";
 
 import { noteController } from "./note.module";
 
-import { idParamSchema } from "../../common/schemas/id-param.schema";
-import { paginationSchema } from "../../common/schemas/query-pagination.schema";
+import { idParamSchema } from "@common/schemas/id-param.schema";
+import { paginationSchema } from "@common/schemas/query-pagination.schema";
+
 import { createNoteSchema } from "./schemas/create-note.schema";
 import { updateNoteSchema } from "./schemas/update-note.schema";
 

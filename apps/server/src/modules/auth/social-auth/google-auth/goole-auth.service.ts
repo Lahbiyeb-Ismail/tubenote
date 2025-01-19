@@ -1,10 +1,13 @@
-import { ERROR_MESSAGES } from "../../../../constants/error-messages.contants";
-import { NotFoundError, UnauthorizedError } from "../../../../errors";
-import type { IJwtService } from "../../../jwt/jwt.types";
-import type { User } from "../../../user/user.model";
-import type { LoginResponseDto } from "../../dtos/login-response.dto";
-import type { IRefreshTokenService } from "../../refresh-token/refresh-token.types";
+import { NotFoundError, UnauthorizedError } from "@/errors";
+import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+
+import type { IJwtService } from "@modules/jwt/jwt.types";
 import type { IGoogleAuthService } from "./google-auth.types";
+
+import type { User } from "@modules/user/user.model";
+
+import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
+import type { IRefreshTokenService } from "@modules/auth/refresh-token/refresh-token.types";
 
 export class GoogleAuthService implements IGoogleAuthService {
   constructor(

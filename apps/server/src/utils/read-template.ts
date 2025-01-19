@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { TEMPLATES_DIR } from "../constants/app.contants";
+
+import { TEMPLATES_DIR } from "@constants/app.contants";
 
 /**
  * Reads a template file from the specified directory and returns its content as a string.

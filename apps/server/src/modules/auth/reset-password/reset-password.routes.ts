@@ -1,11 +1,11 @@
 import { Router } from "express";
 
-import validateRequest from "../../../middlewares/validate-request.middleware";
+import validateRequest from "@middlewares/validate-request.middleware";
 
 import { resetPasswordController } from "./reset-password.module";
 
-import { emailBodySchema } from "../../../common/schemas/email-body.schema";
-import { tokenParamSchema } from "../../../common/schemas/token-param.schema";
+import { emailBodySchema } from "@common/schemas/email-body.schema";
+import { tokenParamSchema } from "@common/schemas/token-param.schema";
 import { passwordBodySchema } from "./schemas/password-body.schema";
 
 const router = Router();

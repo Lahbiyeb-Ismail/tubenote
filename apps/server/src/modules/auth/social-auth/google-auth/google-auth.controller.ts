@@ -1,12 +1,12 @@
 import type { Response } from "express";
 
-import { refreshTokenCookieConfig } from "../../../../config/cookie.config";
-import envConfig from "../../../../config/env.config";
-import { REFRESH_TOKEN_NAME } from "../../../../constants/auth.contants";
+import { refreshTokenCookieConfig } from "@config/cookie.config";
+import envConfig from "@config/env.config";
+import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 
-import type { TypedRequest } from "../../../../types";
+import type { TypedRequest } from "@/types";
 
-import type { User } from "../../../user/user.model";
+import type { User } from "@modules/user/user.model";
 import type {
   IGoogleAuthController,
   IGoogleAuthService,

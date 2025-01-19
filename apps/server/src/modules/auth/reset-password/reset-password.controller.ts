@@ -1,15 +1,15 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { EmptyRecord, TypedRequest } from "../../../types";
+import type { EmptyRecord, TypedRequest } from "@/types";
 
 import type {
   IResetPasswordController,
   IResetPasswordService,
 } from "./reset-password.types";
 
-import type { EmailBodyDto } from "../../../common/dtos/email-body.dto";
-import type { TokenParamDto } from "../../../common/dtos/token-param.dto";
+import type { EmailBodyDto } from "@common/dtos/email-body.dto";
+import type { TokenParamDto } from "@common/dtos/token-param.dto";
 import type { PasswordBodyDto } from "./dtos/password-body.dto";
 
 /**

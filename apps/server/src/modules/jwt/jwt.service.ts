@@ -1,12 +1,12 @@
 import jwt from "jsonwebtoken";
 
-import envConfig from "../../config/env.config";
-import logger from "../../utils/logger";
+import envConfig from "@config/env.config";
+import logger from "@utils/logger";
 
-import type { JwtPayload } from "../../types";
+import type { JwtPayload } from "@/types";
 import type { IJwtService } from "./jwt.types";
 
-import type { LoginResponseDto } from "../auth/dtos/login-response.dto";
+import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
 import type { SignTokenDto } from "./dtos/sign-token.dto";
 import type { VerifyTokenDto } from "./dtos/verify-token.dto";
 
