@@ -4,7 +4,7 @@ import { UnauthorizedError } from "../../src/errors";
 import { AuthService } from "../../src/modules/auth/auth.service";
 
 import type { IAuthService } from "../../src/modules/auth/auth.types";
-import type { IRefreshTokenService } from "../../src/modules/auth/refresh-token/refresh-token.types";
+import type { IRefreshTokenService } from "../../src/modules/auth/features/refresh-token/refresh-token.types";
 
 import type { LogoutUserDto } from "../../src/modules/auth/dtos/logout-user.dto";
 

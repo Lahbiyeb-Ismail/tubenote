@@ -1,16 +1,16 @@
 import { ERROR_MESSAGES } from "../../../src/constants/error-messages.contants";
 import { NotFoundError } from "../../../src/errors";
 
-import { RefreshTokenService } from "../../../src/modules/auth/refresh-token/refresh-token.service";
+import { RefreshTokenService } from "../../../src/modules/auth/features/refresh-token/refresh-token.service";
 
-import type { RefreshToken } from "../../../src/modules/auth/refresh-token/refresh-token.model";
+import type { RefreshToken } from "../../../src/modules/auth/features/refresh-token/refresh-token.model";
 
 import type { IJwtService } from "../../../src/modules/auth/core/jwt/jwt.types";
-import type { CreateTokenDto } from "../../../src/modules/auth/refresh-token/dtos/create-token.dto";
+import type { CreateTokenDto } from "../../../src/modules/auth/features/refresh-token/dtos/create-token.dto";
 import type {
   IRefreshTokenRepository,
   IRefreshTokenService,
-} from "../../../src/modules/auth/refresh-token/refresh-token.types";
+} from "../../../src/modules/auth/features/refresh-token/refresh-token.types";
 
 describe("RefreshTokenService methods test", () => {
   let refreshTokenService: IRefreshTokenService;

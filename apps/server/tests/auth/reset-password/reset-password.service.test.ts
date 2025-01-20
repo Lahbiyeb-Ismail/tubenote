@@ -1,16 +1,16 @@
 import { ERROR_MESSAGES } from "../../../src/constants/error-messages.contants";
 import { ForbiddenError, NotFoundError } from "../../../src/errors";
 
-import type { ResetPasswordToken } from "../../../src/modules/auth/reset-password/reset-password.model";
+import type { ResetPasswordToken } from "../../../src/modules/auth/features/reset-password/reset-password.model";
 import type { User } from "../../../src/modules/user/user.model";
 
-import { ResetPasswordService } from "../../../src/modules/auth/reset-password/reset-password.service";
+import { ResetPasswordService } from "../../../src/modules/auth/features/reset-password/reset-password.service";
 
 import type { IPasswordHasherService } from "../../../src/modules/auth/core/password-hasher/password-hasher.types";
 import type {
   IResetPasswordRespository,
   IResetPasswordService,
-} from "../../../src/modules/auth/reset-password/reset-password.types";
+} from "../../../src/modules/auth/features/reset-password/reset-password.types";
 import type { IMailSenderService } from "../../../src/modules/mailSender/mail-sender.types";
 import type { IUserRepository } from "../../../src/modules/user/user.types";
 

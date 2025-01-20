@@ -1,15 +1,15 @@
 import { ERROR_MESSAGES } from "../../../src/constants/error-messages.contants";
 import { ForbiddenError } from "../../../src/errors";
 
-import { VerifyEmailService } from "../../../src/modules/auth/verify-email/verify-email.service";
+import { VerifyEmailService } from "../../../src/modules/auth/features/verify-email/verify-email.service";
 
-import type { VerifyEmailToken } from "../../../src/modules/auth/verify-email/verify-email.model";
+import type { VerifyEmailToken } from "../../../src/modules/auth/features/verify-email/verify-email.model";
 import type { User } from "../../../src/modules/user/user.model";
 
 import type {
   IVerifyEmailRepository,
   IVerifyEmailService,
-} from "../../../src/modules/auth/verify-email/verify-email.types";
+} from "../../../src/modules/auth/features/verify-email/verify-email.types";
 import type { UpdateUserDto } from "../../../src/modules/user/dtos/update-user.dto";
 import type { IUserService } from "../../../src/modules/user/user.types";
 
