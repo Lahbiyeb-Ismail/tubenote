@@ -1,7 +1,7 @@
 import prismaClient from "@config/database.config";
 
+import { passwordHasherService } from "@modules/auth/core/password-hasher/password-hasher.module";
 import { mailSenderService } from "@modules/mailSender/mail-sender.module";
-import { passwordHasherService } from "@modules/password-hasher/password-hasher.module";
 import { userRepository } from "@modules/user/user.module";
 
 import { ResetPasswordController } from "./reset-password.controller";

@@ -9,10 +9,10 @@ import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
 import type { IUserService } from "@modules/user/user.types";
 import type { ILocalAuthService } from "./local-auth.types";
 
+import type { IPasswordHasherService } from "@modules/auth/core/password-hasher/password-hasher.types";
 import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
 import type { LoginUserDto } from "@modules/auth/dtos/login-user.dto";
 import type { RegisterUserDto } from "@modules/auth/dtos/register-user.dto";
-import type { IPasswordHasherService } from "@modules/password-hasher/password-hasher.types";
 
 export class LocalAuthService implements ILocalAuthService {
   constructor(
