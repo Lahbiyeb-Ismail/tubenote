@@ -5,12 +5,12 @@ import { RefreshTokenService } from "../../../src/modules/auth/refresh-token/ref
 
 import type { RefreshToken } from "../../../src/modules/auth/refresh-token/refresh-token.model";
 
+import type { IJwtService } from "../../../src/modules/auth/core/jwt/jwt.types";
 import type { CreateTokenDto } from "../../../src/modules/auth/refresh-token/dtos/create-token.dto";
 import type {
   IRefreshTokenRepository,
   IRefreshTokenService,
 } from "../../../src/modules/auth/refresh-token/refresh-token.types";
-import type { IJwtService } from "../../../src/modules/jwt/jwt.types";
 
 describe("RefreshTokenService methods test", () => {
   let refreshTokenService: IRefreshTokenService;
