@@ -1,6 +1,6 @@
 import envConfig from "./env.config";
 
-import type { GoogleConfig } from "@modules/auth/strategies/google.strategy";
+import type { GoogleConfig } from "@/modules/auth/core/strategies/google.strategy";
 
 export const googleAuthConfig: GoogleConfig = {
   clientID: envConfig.google.client_id,
