@@ -22,6 +22,7 @@ const envSchema = z.object({
   YOUTUBE_API_KEY: z.string(),
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
+  GOOGLE_CALLBACK_URL: z.string(),
   GOOGLE_REDIRECT_URI: z.string(),
   SMTP_HOST: z.string(),
   SMTP_PORT: z.string(),
@@ -80,6 +81,7 @@ const envConfig = {
   google: {
     client_id: validatedEnv.GOOGLE_CLIENT_ID,
     client_secret: validatedEnv.GOOGLE_CLIENT_SECRET,
+    google_callback_url: validatedEnv.GOOGLE_CALLBACK_URL,
     redirect_uri: validatedEnv.GOOGLE_REDIRECT_URI,
   },
   email: {
