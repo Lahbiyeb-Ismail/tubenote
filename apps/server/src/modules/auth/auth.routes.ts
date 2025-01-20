@@ -8,7 +8,7 @@ import localAuthRoutes from "./features/local-auth/local-auth.routes";
 import refreshTokenRoutes from "./features/refresh-token/refresh-token.routes";
 import resetPasswordRoutes from "./features/reset-password/reset-password.routes";
 import verifyEmailRoutes from "./features/verify-email/verify-email.routes";
-import googleAuthRoutes from "./social-auth/google-auth/google-auth.routes";
+import googleAuthRoutes from "./providers/google/google.routes";
 
 const router = Router();
 
