@@ -4,11 +4,11 @@ import isAuthenticated from "@middlewares/auth.middleware";
 
 import { authController } from "./auth.module";
 
+import refreshTokenRoutes from "./features/refresh-token/refresh-token.routes";
+import resetPasswordRoutes from "./features/reset-password/reset-password.routes";
+import verifyEmailRoutes from "./features/verify-email/verify-email.routes";
 import localAuthRoutes from "./local-auth/local-auth.routes";
-import refreshTokenRoutes from "./refresh-token/refresh-token.routes";
-import resetPasswordRoutes from "./reset-password/reset-password.routes";
 import googleAuthRoutes from "./social-auth/google-auth/google-auth.routes";
-import verifyEmailRoutes from "./verify-email/verify-email.routes";
 
 const router = Router();
 

@@ -4,7 +4,7 @@ import { UnauthorizedError } from "@/errors";
 
 import type { IAuthService } from "./auth.types";
 
-import type { IRefreshTokenService } from "./refresh-token/refresh-token.types";
+import type { IRefreshTokenService } from "./features/refresh-token/refresh-token.types";
 
 import type { LogoutUserDto } from "./dtos/logout-user.dto";
 

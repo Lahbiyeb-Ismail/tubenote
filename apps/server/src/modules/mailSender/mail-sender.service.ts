@@ -8,8 +8,8 @@ import compileTemplate from "../../utils/compile-template";
 import { BadRequestError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import type { IResetPasswordService } from "../auth/reset-password/reset-password.types";
-import type { IVerifyEmailService } from "../auth/verify-email/verify-email.types";
+import type { IResetPasswordService } from "../auth/features/reset-password/reset-password.types";
+import type { IVerifyEmailService } from "../auth/features/verify-email/verify-email.types";
 import type { SendMailDto } from "./dtos/send-mail.dto";
 import type { EmailContent, IMailSenderService } from "./mail-sender.types";
 

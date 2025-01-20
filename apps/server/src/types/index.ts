@@ -1,6 +1,6 @@
 import type { Request } from "express";
 
-import type { ResetPasswordToken } from "@modules/auth/reset-password/reset-password.model";
+import type { ResetPasswordToken } from "@modules/auth/features/reset-password/reset-password.model";
 
 /**
  * Represents the payload of a JSON Web Token (JWT).

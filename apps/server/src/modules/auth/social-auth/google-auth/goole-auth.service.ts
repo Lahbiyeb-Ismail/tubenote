@@ -7,7 +7,7 @@ import type { IGoogleAuthService } from "./google-auth.types";
 import type { User } from "@modules/user/user.model";
 
 import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
-import type { IRefreshTokenService } from "@modules/auth/refresh-token/refresh-token.types";
+import type { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
 
 export class GoogleAuthService implements IGoogleAuthService {
   constructor(

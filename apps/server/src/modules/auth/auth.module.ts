@@ -5,7 +5,7 @@ import { googleAuthConfig } from "@config/google-auth.config";
 import { GoogleAuthStrategy } from "./strategies/google.strategy";
 
 import { userService } from "@modules/user/user.module";
-import { refreshTokenService } from "./refresh-token/refresh-token.module";
+import { refreshTokenService } from "./features/refresh-token/refresh-token.module";
 
 const authService = new AuthService(refreshTokenService);
 
