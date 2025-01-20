@@ -2,7 +2,7 @@ import { ForbiddenError, NotFoundError, UnauthorizedError } from "@/errors";
 import { REFRESH_TOKEN_SECRET } from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import type { IJwtService } from "@modules/jwt/jwt.types";
+import { IJwtService } from "@modules/auth/core/jwt/jwt.types";
 
 import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
 import type { RefreshDto } from "@modules/auth/dtos/refresh.dto";

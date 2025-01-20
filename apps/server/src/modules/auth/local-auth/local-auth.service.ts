@@ -3,8 +3,8 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import type { User } from "@modules/user/user.model";
 
+import { IJwtService } from "@modules/auth/core/jwt/jwt.types";
 import type { IRefreshTokenService } from "@modules/auth/refresh-token/refresh-token.types";
-import type { IJwtService } from "@modules/jwt/jwt.types";
 import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
 import type { IUserService } from "@modules/user/user.types";
 import type { ILocalAuthService } from "./local-auth.types";

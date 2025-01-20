@@ -1,7 +1,7 @@
 import { NotFoundError, UnauthorizedError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import type { IJwtService } from "@modules/jwt/jwt.types";
+import { IJwtService } from "@modules/auth/core/jwt/jwt.types";
 import type { IGoogleAuthService } from "./google-auth.types";
 
 import type { User } from "@modules/user/user.model";
