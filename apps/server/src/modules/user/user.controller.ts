@@ -1,10 +1,11 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { TypedRequest } from "../../types";
+import type { TypedRequest } from "@/types";
 
 import type { IUserController, IUserService } from "./user.types";
 
+import type { UpdatePasswordDto } from "./dtos/update-password.dto";
 import type { UpdateUserDto } from "./dtos/update-user.dto";
 
 /**
@@ -52,5 +53,16 @@ export class UserController implements IUserController {
     await this._userService.updateUser(userId, req.body);
 
     res.status(httpStatus.OK).json({ message: "User updated successfully." });
+  }
+
+  async updatePassword(req: TypedRequest<UpdatePasswordDto>, res: Response) {
+    const userId = req.userId;
+
+    const user = await this._userService.updatePassword(userId, req.body);
+
+    res.status(httpStatus.OK).json({
+      message: "Password updated successfully",
+      email: user.email,
+    });
   }
 }

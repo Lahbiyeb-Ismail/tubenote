@@ -1,12 +1,12 @@
-import { ERROR_MESSAGES } from "../../constants/error-messages.contants";
-import { NotFoundError } from "../../errors";
+import { NotFoundError } from "@/errors";
+import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import type { Note } from "./note.model";
 
 import type { UserNotes } from "./note.types";
 import type { INoteRepository, INoteService } from "./note.types";
 
-import type { FindManyDto } from "../../common/dtos/find-many.dto";
+import type { FindManyDto } from "@common/dtos/find-many.dto";
 import type { CreateNoteDto } from "./dtos/create-note.dto";
 import type { DeleteNoteDto } from "./dtos/delete-note.dto";
 import type { FindNoteDto } from "./dtos/find-note.dto";

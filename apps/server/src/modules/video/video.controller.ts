@@ -1,11 +1,12 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { EmptyRecord, TypedRequest } from "../../types";
+import type { EmptyRecord, TypedRequest } from "@/types";
 
-import type { FindManyDto } from "../../common/dtos/find-many.dto";
-import type { IdParamDto } from "../../common/dtos/id-param.dto";
-import type { QueryPaginationDto } from "../../common/dtos/query-pagination.dto";
+import type { FindManyDto } from "@common/dtos/find-many.dto";
+import type { IdParamDto } from "@common/dtos/id-param.dto";
+import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
+
 import type { IVideoController, IVideoService } from "./video.types";
 
 /**

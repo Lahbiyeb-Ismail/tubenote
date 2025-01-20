@@ -1,5 +1,5 @@
+import handleAsyncOperation from "@/utils/handle-async-operation";
 import type { PrismaClient } from "@prisma/client";
-import handleAsyncOperation from "../../utils/handle-async-operation";
 
 import type { User } from "./user.model";
 import type { IUserRepository } from "./user.types";

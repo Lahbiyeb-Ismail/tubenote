@@ -12,16 +12,14 @@ import session from "express-session";
 import helmet from "helmet";
 import passport from "passport";
 
-import authRoutes from "./modules/auth/auth.routes";
-import noteRoutes from "./modules/note/note.routes";
-import resetPasswordRoutes from "./modules/resetPasswordToken/reset-password.routes";
-import userRoutes from "./modules/user/user.routes";
-import verifyEmailRoutes from "./modules/verifyEmailToken/verify-email.routes";
-import videoRoutes from "./modules/video/video.routes";
+import authRoutes from "@modules/auth/auth.routes";
+import noteRoutes from "@modules/note/note.routes";
+import userRoutes from "@modules/user/user.routes";
+import videoRoutes from "@modules/video/video.routes";
 
-import envConfig from "./config/env.config";
-import { errorHandler, notFoundRoute } from "./middlewares/error.middleware";
-import logger from "./utils/logger";
+import envConfig from "@config/env.config";
+import { errorHandler, notFoundRoute } from "@middlewares/error.middleware";
+import logger from "@utils/logger";
 
 const app: Express = express();
 
@@ -80,8 +78,6 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/videos", videoRoutes);
 app.use("/api/v1/notes", noteRoutes);
 app.use("/api/v1/users", userRoutes);
-app.use("/api/v1", verifyEmailRoutes);
-app.use("/api/v1", resetPasswordRoutes);
 
 // ?: Global Error middleware
 app.use(notFoundRoute);

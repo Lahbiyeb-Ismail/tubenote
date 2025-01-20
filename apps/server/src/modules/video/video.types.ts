@@ -1,11 +1,11 @@
+import type { EmptyRecord, TypedRequest } from "@/types";
 import type { Response } from "express";
-import type { EmptyRecord, TypedRequest } from "../../types";
 
 import type { Video, YoutubeVideoData } from "./video.model";
 
-import type { FindManyDto } from "../../common/dtos/find-many.dto";
-import type { IdParamDto } from "../../common/dtos/id-param.dto";
-import type { QueryPaginationDto } from "../../common/dtos/query-pagination.dto";
+import type { FindManyDto } from "@common/dtos/find-many.dto";
+import type { IdParamDto } from "@common/dtos/id-param.dto";
+import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
 
 import type { CreateVideoDto } from "./dtos/create-video.dto";
 import type { FindVideoDto } from "./dtos/find-video.dto";

@@ -1,11 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-import { ACCESS_TOKEN_SECRET } from "../constants/auth.contants";
-import { UnauthorizedError } from "../errors";
+import { UnauthorizedError } from "@/errors";
+import { ACCESS_TOKEN_SECRET } from "@constants/auth.contants";
 
-import type { JwtPayload } from "../types";
-import logger from "../utils/logger";
+import type { JwtPayload } from "@/types";
+import logger from "@utils/logger";
 
 const { verify } = jwt;
 

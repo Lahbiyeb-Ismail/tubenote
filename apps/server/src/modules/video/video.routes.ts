@@ -1,12 +1,12 @@
 import { Router } from "express";
 
-import isAuthenticated from "../../middlewares/auth.middleware";
-import validateRequest from "../../middlewares/validate-request.middleware";
+import isAuthenticated from "@middlewares/auth.middleware";
+import validateRequest from "@middlewares/validate-request.middleware";
 
 import { videoController } from "./video.module";
 
-import { idParamSchema } from "../../common/schemas/id-param.schema";
-import { paginationSchema } from "../../common/schemas/query-pagination.schema";
+import { idParamSchema } from "@common/schemas/id-param.schema";
+import { paginationSchema } from "@common/schemas/query-pagination.schema";
 
 const router = Router();
 

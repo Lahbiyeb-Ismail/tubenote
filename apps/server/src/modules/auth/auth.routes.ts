@@ -1,53 +1,35 @@
 import { Router } from "express";
-import passport from "passport";
 
-import envConfig from "../../config/env.config";
+import isAuthenticated from "@middlewares/auth.middleware";
 
-import isAuthenticated from "../../middlewares/auth.middleware";
-import validateRequest from "../../middlewares/validate-request.middleware";
+import { authController } from "./auth.module";
 
-import { authController, googleAuthStrategy } from "./auth.module";
-
-import { loginUserSchema } from "./schemas/login-user.schema";
-import { registerUserSchema } from "./schemas/register-user.schema";
-
-passport.use(googleAuthStrategy.getStrategy());
+import localAuthRoutes from "./features/local-auth/local-auth.routes";
+import refreshTokenRoutes from "./features/refresh-token/refresh-token.routes";
+import resetPasswordRoutes from "./features/reset-password/reset-password.routes";
+import verifyEmailRoutes from "./features/verify-email/verify-email.routes";
+import googleAuthRoutes from "./providers/google/google.routes";
 
 const router = Router();
 
-// - POST /register: Register a new user (requires request body validation).
-router
-  .route("/register")
-  .post(validateRequest({ body: registerUserSchema }), (req, res) =>
-    authController.register(req, res)
-  );
+// Local authentication routes
+router.use("/", localAuthRoutes);
 
-// - POST /login: Authenticate a user (requires request body validation).
-router
-  .route("/login")
-  .post(validateRequest({ body: loginUserSchema }), (req, res) =>
-    authController.login(req, res)
-  );
+// Google authentication routes
+router.use("/", googleAuthRoutes);
+
+// Password reset routes
+router.use("/", resetPasswordRoutes);
+
+// Verify email routes
+router.use("/", verifyEmailRoutes);
+
+// Refresh token routes
+router.use("/", refreshTokenRoutes);
 
 // - POST /logout: Log out the current user.
 router
   .route("/logout")
   .post(isAuthenticated, (req, res) => authController.logout(req, res));
-
-// - POST /refresh: Refresh the user's access token.
-router.route("/refresh").post((req, res) => authController.refresh(req, res));
-
-// - GET /google: Initiate Google OAuth authentication.
-router
-  .route("/google")
-  .get(passport.authenticate("google", { scope: ["profile", "email"] }));
-
-// - GET /google/callback: Handle the Google OAuth callback.
-router.route("/google/callback").get(
-  passport.authenticate("google", {
-    failureRedirect: `${envConfig.client.url}/login`,
-  }),
-  (req, res) => authController.loginWithGoogle(req, res)
-);
 
 export default router;

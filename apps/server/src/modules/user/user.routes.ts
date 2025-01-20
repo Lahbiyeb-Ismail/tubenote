@@ -1,10 +1,11 @@
 import { Router } from "express";
 
-import isAuthenticated from "../../middlewares/auth.middleware";
-import validateRequest from "../../middlewares/validate-request.middleware";
+import isAuthenticated from "@middlewares/auth.middleware";
+import validateRequest from "@middlewares/validate-request.middleware";
 
 import { userController } from "./user.module";
 
+import { updatePasswordSchema } from "./schema/update-password.schema";
 import { updateUserSchema } from "./schema/update-user.schema";
 
 const router = Router();
@@ -22,10 +23,10 @@ router
   );
 
 // - PATCH /update-password: Update the current user's password (requires request body validation)
-// router
-//   .route("/update-password")
-//   .patch(validateRequest({ body: updatePasswordSchema }), (req, res) =>
-//     userController.updateUserPassword(req, res)
-//   );
+router
+  .route("/update-password")
+  .patch(validateRequest({ body: updatePasswordSchema }), (req, res) =>
+    userController.updatePassword(req, res)
+  );
 
 export default router;

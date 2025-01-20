@@ -102,7 +102,9 @@
         "useIsNan": "error",
         "useJsxKeyInIterable": "off",
         "useValidForDirection": "error",
-        "useYield": "error"
+        "useYield": "error",
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error"
       },
       "security": {
         "noDangerouslySetInnerHtml": "warn",
@@ -263,7 +265,8 @@
             "noUndeclaredVariables": "off",
             "noUnreachable": "off",
             "noUnreachableSuper": "off",
-            "noUnusedVariables": "error"
+            "noUnusedVariables": "error",
+            "noUnusedImports": "error"
           },
           "suspicious": {
             "noDuplicateClassMembers": "off",
