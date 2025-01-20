@@ -6,12 +6,12 @@ import type { User } from "../../../src/modules/user/user.model";
 
 import { ResetPasswordService } from "../../../src/modules/auth/reset-password/reset-password.service";
 
+import type { IPasswordHasherService } from "../../../src/modules/auth/core/password-hasher/password-hasher.types";
 import type {
   IResetPasswordRespository,
   IResetPasswordService,
 } from "../../../src/modules/auth/reset-password/reset-password.types";
 import type { IMailSenderService } from "../../../src/modules/mailSender/mail-sender.types";
-import type { IPasswordHasherService } from "../../../src/modules/password-hasher/password-hasher.types";
 import type { IUserRepository } from "../../../src/modules/user/user.types";
 
 describe("resetPasswordService tests", () => {

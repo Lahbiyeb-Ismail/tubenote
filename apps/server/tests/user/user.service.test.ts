@@ -4,7 +4,7 @@ import { NotFoundError } from "../../src/errors";
 import type { User } from "../../src/modules/user/user.model";
 import { UserService } from "../../src/modules/user/user.service";
 
-import type { IPasswordHasherService } from "../../src/modules/password-hasher/password-hasher.types";
+import type { IPasswordHasherService } from "../../src/modules/auth/core/password-hasher/password-hasher.types";
 import type { UpdateUserDto } from "../../src/modules/user/dtos/update-user.dto";
 import type {
   IUserRepository,
