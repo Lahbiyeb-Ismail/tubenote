@@ -4,10 +4,10 @@ import isAuthenticated from "@middlewares/auth.middleware";
 
 import { authController } from "./auth.module";
 
+import localAuthRoutes from "./features/local-auth/local-auth.routes";
 import refreshTokenRoutes from "./features/refresh-token/refresh-token.routes";
 import resetPasswordRoutes from "./features/reset-password/reset-password.routes";
 import verifyEmailRoutes from "./features/verify-email/verify-email.routes";
-import localAuthRoutes from "./local-auth/local-auth.routes";
 import googleAuthRoutes from "./social-auth/google-auth/google-auth.routes";
 
 const router = Router();
