@@ -3,7 +3,7 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import type { ResetPasswordToken } from "./reset-password.model";
 
-import type { IPasswordHasherService } from "@modules/auth/core/password-hasher/password-hasher.types";
+import type { IPasswordHasherService } from "@modules/auth/core/services/password-hasher/password-hasher.types";
 import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
 import type { IUserRepository } from "@modules/user/user.types";
 import type {
