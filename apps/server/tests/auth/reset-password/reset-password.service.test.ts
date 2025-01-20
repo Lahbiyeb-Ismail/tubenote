@@ -6,7 +6,7 @@ import type { User } from "../../../src/modules/user/user.model";
 
 import { ResetPasswordService } from "../../../src/modules/auth/features/reset-password/reset-password.service";
 
-import type { IPasswordHasherService } from "../../../src/modules/auth/core/password-hasher/password-hasher.types";
+import type { IPasswordHasherService } from "../../../src/modules/auth/core/services/password-hasher/password-hasher.types";
 import type {
   IResetPasswordRespository,
   IResetPasswordService,

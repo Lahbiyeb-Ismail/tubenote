@@ -5,7 +5,7 @@ import { RefreshTokenService } from "../../../src/modules/auth/features/refresh-
 
 import type { RefreshToken } from "../../../src/modules/auth/features/refresh-token/refresh-token.model";
 
-import type { IJwtService } from "../../../src/modules/auth/core/jwt/jwt.types";
+import type { IJwtService } from "../../../src/modules/auth/core/services/jwt/jwt.types";
 import type { CreateTokenDto } from "../../../src/modules/auth/features/refresh-token/dtos/create-token.dto";
 import type {
   IRefreshTokenRepository,
