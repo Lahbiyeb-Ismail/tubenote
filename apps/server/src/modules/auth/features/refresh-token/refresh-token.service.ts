@@ -63,8 +63,8 @@ export class RefreshTokenService implements IRefreshTokenService {
 
     const refreshTokenFromDB = await this.findToken(token);
 
+    // Detected refresh token reuse!
     if (!refreshTokenFromDB) {
-      // Detected refresh token reuse!
       await this.deleteAllTokens(userId);
 
       throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
