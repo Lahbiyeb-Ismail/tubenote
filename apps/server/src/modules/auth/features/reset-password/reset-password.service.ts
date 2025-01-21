@@ -7,13 +7,13 @@ import type { IPasswordHasherService } from "@modules/auth/core/services/passwor
 import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
 import type { IUserRepository } from "@modules/user/user.types";
 import type {
-  IResetPasswordRespository,
+  IResetPasswordRepository,
   IResetPasswordService,
 } from "./reset-password.types";
 
 export class ResetPasswordService implements IResetPasswordService {
   constructor(
-    private readonly _resetPasswordRepository: IResetPasswordRespository,
+    private readonly _resetPasswordRepository: IResetPasswordRepository,
     private readonly _userRepository: IUserRepository,
     private readonly _passwordHasherService: IPasswordHasherService,
     private readonly _mailSenderService: IMailSenderService
