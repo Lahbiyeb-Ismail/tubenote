@@ -8,7 +8,7 @@ import type { EmailBodyDto } from "@common/dtos/email-body.dto";
 import type { TokenParamDto } from "@common/dtos/token-param.dto";
 import type { PasswordBodyDto } from "./dtos/password-body.dto";
 
-export interface IResetPasswordRespository {
+export interface IResetPasswordRepository {
   findByUserId(userId: string): Promise<ResetPasswordToken | null>;
   findByToken(token: string): Promise<ResetPasswordToken | null>;
   create(userId: string): Promise<string>;
