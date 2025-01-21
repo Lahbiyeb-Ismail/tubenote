@@ -5,6 +5,7 @@ import handleAsyncOperation from "@/utils/handle-async-operation";
 import type { RefreshToken } from "./refresh-token.model";
 import type { IRefreshTokenRepository } from "./refresh-token.types";
 
+import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import type { CreateTokenDto } from "./dtos/create-token.dto";
 
 export class RefreshTokenRepository implements IRefreshTokenRepository {
@@ -16,7 +17,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
         this._db.refreshToken.create({
           data: { ...createTokenDto },
         }),
-      { errorMessage: "Failed to create refresh token" }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
     );
   }
 
@@ -28,7 +29,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
             token,
           },
         }),
-      { errorMessage: "Failed to find refresh token" }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
   async delete(token: string): Promise<void> {
@@ -39,7 +40,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
             token,
           },
         }),
-      { errorMessage: "Failed to delete refresh token" }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_DELETE }
     );
   }
   async deleteAll(userId: string): Promise<void> {
@@ -50,7 +51,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
             userId,
           },
         }),
-      { errorMessage: "Failed to delete refresh tokens for user" }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_DELETE_ALL }
     );
   }
 }
