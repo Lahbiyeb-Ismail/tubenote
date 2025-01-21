@@ -1,12 +1,13 @@
 import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 
+import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import handleAsyncOperation from "@/utils/handle-async-operation";
 
 import type { ResetPasswordToken } from "./reset-password.model";
-import type { IResetPasswordRespository } from "./reset-password.types";
+import type { IResetPasswordRepository } from "./reset-password.types";
 
-export class ResetPasswordRepository implements IResetPasswordRespository {
+export class ResetPasswordRepository implements IResetPasswordRepository {
   constructor(private readonly _db: PrismaClient) {}
 
   async findByUserId(userId: string): Promise<ResetPasswordToken | null> {
@@ -18,7 +19,7 @@ export class ResetPasswordRepository implements IResetPasswordRespository {
             expiresAt: { gt: new Date() },
           },
         }),
-      { errorMessage: "Failed to find reset password token." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
 
@@ -30,7 +31,7 @@ export class ResetPasswordRepository implements IResetPasswordRespository {
             token,
           },
         }),
-      { errorMessage: "Failed to find reset password token." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
 
@@ -47,7 +48,7 @@ export class ResetPasswordRepository implements IResetPasswordRespository {
             expiresAt,
           },
         }),
-      { errorMessage: "Failed to create reset password token." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
     );
 
     return token;
@@ -61,7 +62,7 @@ export class ResetPasswordRepository implements IResetPasswordRespository {
             userId,
           },
         }),
-      { errorMessage: "Failed to delete reset password tokens." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_DELETE_ALL }
     );
   }
 }
