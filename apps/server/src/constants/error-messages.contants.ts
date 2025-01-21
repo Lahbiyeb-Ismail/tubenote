@@ -1,5 +1,10 @@
 export const ERROR_MESSAGES = {
   RESOURCE_NOT_FOUND: "The requested resource could not be found.",
+  FAILD_TO_FIND: "Failed to find the resource.",
+  FAILD_TO_CREATE: "Failed to create the resource.",
+  FAILD_TO_DELETE: "Failed to delete the resource.",
+  FAILD_TO_UPDATE: "Failed to update the resource.",
+  FAILD_TO_DELETE_ALL: "Failed to delete all resources.",
   EMAIL_ALREADY_EXISTS:
     "The email address provided is already associated with another account.",
   EMAIL_NOT_VERIFIED: "Email not verified. Please verify your email address.",
