@@ -14,7 +14,7 @@ import type {
 import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
 import type { IUserRepository } from "@modules/user/user.types";
 
-describe("resetPasswordService tests", () => {
+describe("ResetPasswordService test suites", () => {
   let resetPasswordService: IResetPasswordService;
   let mockResetPasswordRepository: IResetPasswordRepository;
   let mockUserRepository: IUserRepository;
@@ -79,15 +79,15 @@ describe("resetPasswordService tests", () => {
     id: "1",
     token: mockValidToken,
     userId: "user123",
+    createdAt: new Date(Date.now()),
     expiresAt: new Date(Date.now() + 3600000), // 1 hour from now
-    createdAt: new Date(),
   };
 
   const mockExpiredResetToken: ResetPasswordToken = {
     id: "2",
     userId: "user123",
     token: mockExpiredToken,
-    createdAt: new Date(),
+    createdAt: new Date(Date.now()),
     expiresAt: new Date(Date.now() - 3600000), // 1 hour ago
   };
 
@@ -95,7 +95,7 @@ describe("resetPasswordService tests", () => {
     jest.clearAllMocks();
   });
 
-  describe("sendResetToken", () => {
+  describe("ResetPasswordService - sendResetToken", () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -180,7 +180,7 @@ describe("resetPasswordService tests", () => {
     });
   });
 
-  describe("createToken", () => {
+  describe("ResetPasswordService - createToken", () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -218,50 +218,51 @@ describe("resetPasswordService tests", () => {
     });
   });
 
-  describe("resetPassword", () => {
+  describe("ResetPasswordService - resetPassword", () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    // it("should reset the user's password", async () => {
-    //   const newPassword = "newpassword123";
+    it("should reset the user's password", async () => {
+      const newPassword = "newpassword123";
+      const hashedPassword = "hashedPassword";
 
-    //   jest
-    //     .spyOn(resetPasswordService, "findResetToken")
-    //     .mockResolvedValue(mockValidResetToken);
+      jest
+        .spyOn(resetPasswordService, "findResetToken")
+        .mockResolvedValue(mockValidResetToken);
 
-    //   jest
-    //     .spyOn(resetPasswordService, "isResetTokenExpired")
-    //     .mockResolvedValue(false);
+      jest
+        .spyOn(resetPasswordService, "isResetTokenExpired")
+        .mockResolvedValue(false);
 
-    //   (mockPasswordHasherService.hashPassword as jest.Mock).mockResolvedValue(
-    //     "hashedPassword"
-    //   );
+      (mockPasswordHasherService.hashPassword as jest.Mock).mockResolvedValue(
+        hashedPassword
+      );
 
-    //   (mockUserRepository.updateUser as jest.Mock).mockResolvedValue({
-    //     ...mockUser,
-    //     password: "hashedPassword",
-    //   });
+      (mockUserRepository.updatePassword as jest.Mock).mockResolvedValue({
+        ...mockUser,
+        password: hashedPassword,
+      });
 
-    //   await resetPasswordService.resetPassword(mockValidToken, newPassword);
+      await resetPasswordService.resetPassword(mockValidToken, newPassword);
 
-    //   expect(resetPasswordService.findResetToken).toHaveBeenCalledWith(
-    //     mockValidToken
-    //   );
+      expect(resetPasswordService.findResetToken).toHaveBeenCalledWith(
+        mockValidToken
+      );
 
-    //   expect(resetPasswordService.isResetTokenExpired).toHaveBeenCalledWith(
-    //     mockValidResetToken
-    //   );
+      expect(resetPasswordService.isResetTokenExpired).toHaveBeenCalledWith(
+        mockValidResetToken
+      );
 
-    //   expect(mockUserRepository.updateUser).toHaveBeenCalledWith({
-    //     userId: mockValidResetToken.userId,
-    //     password: "newpassword123",
-    //   });
+      expect(mockUserRepository.updatePassword).toHaveBeenCalledWith(
+        mockValidResetToken.userId,
+        hashedPassword
+      );
 
-    //   expect(mockResetPasswordRepository.deleteMany).toHaveBeenCalledWith(
-    //     mockValidResetToken.userId
-    //   );
-    // });
+      expect(mockResetPasswordRepository.deleteMany).toHaveBeenCalledWith(
+        mockValidResetToken.userId
+      );
+    });
 
     it("should throw a ForbiddenError if the reset token is invalid", async () => {
       jest
@@ -278,7 +279,7 @@ describe("resetPasswordService tests", () => {
 
       expect(mockPasswordHasherService.hashPassword).not.toHaveBeenCalled();
 
-      // expect(mockPasswordHasherService.updatePassword).not.toHaveBeenCalled();
+      expect(mockUserRepository.updatePassword).not.toHaveBeenCalled();
 
       expect(mockResetPasswordRepository.deleteMany).not.toHaveBeenCalled();
     });
@@ -310,11 +311,11 @@ describe("resetPasswordService tests", () => {
 
       expect(mockPasswordHasherService.hashPassword).not.toHaveBeenCalled();
 
-      // expect(mockPasswordHasherService.updatePassword).not.toHaveBeenCalled();
+      expect(mockUserRepository.updatePassword).not.toHaveBeenCalled();
     });
   });
 
-  describe("findResetToken", () => {
+  describe("ResetPasswordService - findResetToken", () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -331,7 +332,7 @@ describe("resetPasswordService tests", () => {
     });
   });
 
-  describe("verifyResetToken", () => {
+  describe("ResetPasswordService - verifyResetToken", () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
