@@ -1,4 +1,4 @@
-import { ForbiddenError } from "@/errors";
+import { ForbiddenError, NotFoundError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import type { IUserService } from "@modules/user/user.types";
@@ -17,7 +17,7 @@ export class VerifyEmailService implements IVerifyEmailService {
     const user = await this._userService.getUserByEmail(email);
 
     if (!user) {
-      throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
+      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
     if (user.isEmailVerified) {
