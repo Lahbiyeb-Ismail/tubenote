@@ -18,7 +18,7 @@ async function readTemplate(
   const filePath = path.join(
     TEMPLATES_DIR,
     format,
-    `${templateName}-template.${format}`
+    `${templateName}.template.${format}`
   );
   try {
     return await fs.readFile(filePath, "utf-8");
