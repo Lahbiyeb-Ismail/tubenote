@@ -77,19 +77,11 @@ export class ResetPasswordService implements IResetPasswordService {
   async findResetToken(token: string): Promise<ResetPasswordToken | null> {
     const resetToken = await this._resetPasswordRepository.findByToken(token);
 
-    if (!resetToken) {
-      return null;
-    }
-
     return resetToken;
   }
 
   async isResetTokenExpired(resetToken: ResetPasswordToken): Promise<boolean> {
-    if (resetToken.expiresAt < new Date()) {
-      return true;
-    }
-
-    return false;
+    return resetToken.expiresAt < new Date();
   }
 
   async verifyResetToken(token: string): Promise<ResetPasswordToken> {
