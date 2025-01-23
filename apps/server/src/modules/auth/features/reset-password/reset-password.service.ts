@@ -1,4 +1,4 @@
-import { ForbiddenError, NotFoundError } from "@/errors";
+import { BadRequestError, ForbiddenError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import type { ResetPasswordToken } from "./reset-password.model";
@@ -91,14 +91,14 @@ export class ResetPasswordService implements IResetPasswordService {
     const resetToken = await this.findResetToken(token);
 
     if (!resetToken) {
-      throw new NotFoundError(ERROR_MESSAGES.INVALID_TOKEN);
+      throw new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
     }
 
     const isTokenExpired = await this.isResetTokenExpired(resetToken);
 
     if (isTokenExpired) {
       await this._resetPasswordRepository.deleteMany(resetToken.userId);
-      throw new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN);
+      throw new BadRequestError(ERROR_MESSAGES.EXPIRED_TOKEN);
     }
 
     return resetToken;
