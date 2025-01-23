@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 
 import handleAsyncOperation from "@/utils/handle-async-operation";
@@ -34,11 +33,14 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
     );
   }
 
-  async create(userId: string): Promise<string> {
-    const token = randomUUID();
-    const expiresAt = new Date(Date.now() + 3600000); // Token expires in 1 hour
+  async saveToken(
+    userId: string,
+    token: string,
+    expiresIn: string
+  ): Promise<VerifyEmailToken> {
+    const expiresAt = new Date(Date.now() + expiresIn);
 
-    handleAsyncOperation(
+    return handleAsyncOperation(
       () =>
         this._db.emailVerificationToken.create({
           data: {
@@ -49,8 +51,6 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
         }),
       { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
     );
-
-    return token;
   }
 
   async deleteMany(userId: string): Promise<void> {
