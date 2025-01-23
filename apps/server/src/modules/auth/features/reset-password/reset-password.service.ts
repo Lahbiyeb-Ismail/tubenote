@@ -5,7 +5,7 @@ import type { ResetPasswordToken } from "./reset-password.model";
 
 import type { IPasswordHasherService } from "@modules/auth/core/services/password-hasher/password-hasher.types";
 import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
-import type { IUserRepository } from "@modules/user/user.types";
+import type { IUserService } from "@modules/user/user.types";
 import type {
   IResetPasswordRepository,
   IResetPasswordService,
@@ -14,13 +14,13 @@ import type {
 export class ResetPasswordService implements IResetPasswordService {
   constructor(
     private readonly _resetPasswordRepository: IResetPasswordRepository,
-    private readonly _userRepository: IUserRepository,
+    private readonly _userService: IUserService,
     private readonly _passwordHasherService: IPasswordHasherService,
     private readonly _mailSenderService: IMailSenderService
   ) {}
 
   async sendResetToken(email: string): Promise<void> {
-    const user = await this._userRepository.findByEmail(email);
+    const user = await this._userService.getUserByEmail(email);
 
     if (!user) {
       throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
@@ -37,7 +37,12 @@ export class ResetPasswordService implements IResetPasswordService {
       throw new ForbiddenError(ERROR_MESSAGES.RESET_LINK_SENT);
     }
 
-    await this._mailSenderService.sendResetPasswordEmail(user.email);
+    const resetToken = await this.createToken(user.id);
+
+    await this._mailSenderService.sendResetPasswordEmail(
+      user.email,
+      resetToken
+    );
   }
 
   async createToken(userId: string): Promise<string> {
@@ -46,7 +51,7 @@ export class ResetPasswordService implements IResetPasswordService {
     return token;
   }
 
-  async resetPassword(token: string, password: string): Promise<void> {
+  async resetPassword(token: string, _password: string): Promise<void> {
     const resetToken = await this.findResetToken(token);
 
     if (!resetToken) throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
@@ -58,15 +63,15 @@ export class ResetPasswordService implements IResetPasswordService {
       throw new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN);
     }
 
-    const hashedPassword =
-      await this._passwordHasherService.hashPassword(password);
+    // const hashedPassword =
+    //   await this._passwordHasherService.hashPassword(password);
 
-    const user = await this._userRepository.updatePassword(
-      resetToken.userId,
-      hashedPassword
-    );
+    // const user = await this._userService.updatePassword(
+    //   resetToken.userId,
+    //   hashedPassword
+    // );
 
-    await this._resetPasswordRepository.deleteMany(user.id);
+    // await this._resetPasswordRepository.deleteMany(user.id);
   }
 
   async findResetToken(token: string): Promise<ResetPasswordToken | null> {
