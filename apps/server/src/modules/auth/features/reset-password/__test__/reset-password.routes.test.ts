@@ -4,6 +4,7 @@ import request from "supertest";
 import app from "@/app";
 
 import type { EmailBodyDto } from "@/common/dtos/email-body.dto";
+import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import { resetPasswordController } from "../reset-password.module";
 
 jest.mock("../reset-password.module", () => ({
@@ -28,6 +29,11 @@ describe("Reset password Routes", () => {
   const mockValidToken = "valid-token";
   const mockInvalidToken = "invalid-token";
   const mockExpiredToken = "expired-token";
+
+  const mockErrorResponse = {
+    statusCode: httpStatus.BAD_REQUEST,
+    name: "BAD_REQUEST",
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -105,6 +111,30 @@ describe("Reset password Routes", () => {
 
       expect(response.body.error.name).toBe("BAD_REQUEST");
     });
+
+    it("should return a 404 status code for a non-existent email", async () => {
+      (resetPasswordController.forgotPassword as jest.Mock).mockImplementation(
+        (_req, res) => {
+          res.status(httpStatus.NOT_FOUND).json({
+            error: {
+              name: "NOT_FOUND",
+              statusCode: httpStatus.NOT_FOUND,
+              message: ERROR_MESSAGES.RESOURCE_NOT_FOUND,
+            },
+          });
+        }
+      );
+
+      const response = await request(app)
+        .post("/api/v1/auth/forgot-password")
+        .send({ email: "nonexistent@example.com" });
+
+      expect(response.status).toBe(httpStatus.NOT_FOUND);
+
+      expect(response.body.error.message).toBe(
+        ERROR_MESSAGES.RESOURCE_NOT_FOUND
+      );
+    });
   });
 
   describe("GET /api/v1/auth/reset-password/:token/verify", () => {
@@ -133,7 +163,12 @@ describe("Reset password Routes", () => {
       (
         resetPasswordController.verifyResetToken as jest.Mock
       ).mockImplementation((_req, res) => {
-        res.status(httpStatus.BAD_REQUEST).json();
+        res.status(httpStatus.BAD_REQUEST).json({
+          error: {
+            ...mockErrorResponse,
+            message: ERROR_MESSAGES.INVALID_TOKEN,
+          },
+        });
       });
 
       const response = await request(app).get(
@@ -141,13 +176,20 @@ describe("Reset password Routes", () => {
       );
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
+
+      expect(response.body.error.message).toBe(ERROR_MESSAGES.INVALID_TOKEN);
     });
 
     it("should return a 400 status code for an expired token", async () => {
       (
         resetPasswordController.verifyResetToken as jest.Mock
       ).mockImplementation((_req, res) => {
-        res.status(httpStatus.BAD_REQUEST).json();
+        res.status(httpStatus.BAD_REQUEST).json({
+          error: {
+            ...mockErrorResponse,
+            message: ERROR_MESSAGES.EXPIRED_TOKEN,
+          },
+        });
       });
 
       const response = await request(app).get(
@@ -155,6 +197,8 @@ describe("Reset password Routes", () => {
       );
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
+
+      expect(response.body.error.message).toBe(ERROR_MESSAGES.EXPIRED_TOKEN);
     });
   });
 
@@ -178,7 +222,12 @@ describe("Reset password Routes", () => {
     it("should return a 400 status code for an invalid token", async () => {
       (resetPasswordController.resetPassword as jest.Mock).mockImplementation(
         (_req, res) => {
-          res.status(httpStatus.BAD_REQUEST).json();
+          res.status(httpStatus.BAD_REQUEST).json({
+            error: {
+              ...mockErrorResponse,
+              message: ERROR_MESSAGES.INVALID_TOKEN,
+            },
+          });
         }
       );
 
@@ -187,12 +236,19 @@ describe("Reset password Routes", () => {
         .send({ password: "newPassword123!" });
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
+
+      expect(response.body.error.message).toBe(ERROR_MESSAGES.INVALID_TOKEN);
     });
 
     it("should return a 400 status code for an expired token", async () => {
       (resetPasswordController.resetPassword as jest.Mock).mockImplementation(
         (_req, res) => {
-          res.status(httpStatus.BAD_REQUEST).json();
+          res.status(httpStatus.BAD_REQUEST).json({
+            error: {
+              ...mockErrorResponse,
+              message: ERROR_MESSAGES.EXPIRED_TOKEN,
+            },
+          });
         }
       );
 
@@ -201,6 +257,8 @@ describe("Reset password Routes", () => {
         .send({ password: "newPassword123!" });
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
+
+      expect(response.body.error.message).toBe(ERROR_MESSAGES.EXPIRED_TOKEN);
     });
 
     it("should throw a BadRequest validation error if the password is to short", async () => {
@@ -227,6 +285,7 @@ describe("Reset password Routes", () => {
         .send({ password: "" });
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
+
       expect(response.body.error.name).toBe("BAD_REQUEST");
     });
 
