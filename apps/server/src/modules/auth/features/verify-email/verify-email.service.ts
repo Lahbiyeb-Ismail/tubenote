@@ -1,7 +1,10 @@
 import { ForbiddenError, NotFoundError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
+import type { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
 import type { IUserService } from "@modules/user/user.types";
+
+import envConfig from "@/config/env.config";
 import type {
   IVerifyEmailRepository,
   IVerifyEmailService,
@@ -10,7 +13,8 @@ import type {
 export class VerifyEmailService implements IVerifyEmailService {
   constructor(
     private readonly _verifyEmailRepository: IVerifyEmailRepository,
-    private readonly _userService: IUserService
+    private readonly _userService: IUserService,
+    private readonly _jwtService: IJwtService
   ) {}
 
   async generateToken(email: string): Promise<string> {
@@ -31,9 +35,17 @@ export class VerifyEmailService implements IVerifyEmailService {
       throw new ForbiddenError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
     }
 
-    const verificationToken = await this._verifyEmailRepository.create(user.id);
+    const expiresIn = envConfig.jwt.verify_email_token.expire;
 
-    return verificationToken;
+    const token = this._jwtService.sign({
+      userId: user.id,
+      secret: envConfig.jwt.verify_email_token.secret,
+      expiresIn,
+    });
+
+    await this._verifyEmailRepository.saveToken(user.id, token, expiresIn);
+
+    return token;
   }
 
   async verifyUserEmail(token: string): Promise<void> {
