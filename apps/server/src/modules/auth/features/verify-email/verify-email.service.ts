@@ -40,7 +40,7 @@ export class VerifyEmailService implements IVerifyEmailService {
     const foundToken = await this._verifyEmailRepository.findByToken(token);
 
     if (!foundToken) {
-      throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
+      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
     if (foundToken.expiresAt < new Date()) {
