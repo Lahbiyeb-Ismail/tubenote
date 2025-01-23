@@ -25,6 +25,10 @@ describe("Reset password Routes", () => {
     email: "invalidemail.com",
   };
 
+  const mockValidToken = "valid-token";
+  const mockInvalidToken = "invalid-token";
+  const mockExpiredToken = "expired-token";
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -103,45 +107,135 @@ describe("Reset password Routes", () => {
     });
   });
 
-  // describe("GET /api/v1/auth/reset-password/:token/verify", () => {
-  //   const validResetToken = "valid-token";
-  //   const invalidResetToken = "invalid-token";
+  describe("GET /api/v1/auth/reset-password/:token/verify", () => {
+    const validResetToken = "valid-token";
+    const invalidResetToken = "invalid-token";
 
-  //   it("should return 200 status code for a valid token", async () => {
-  //     const message = "Reset token verified.";
+    it("should return a 200 status code for a valid token", async () => {
+      const message = "Reset token verified.";
 
-  //     const response = await request(app).get(
-  //       `/api/v1/auth/reset-password/${validResetToken}/verify`
-  //     );
+      (
+        resetPasswordController.verifyResetToken as jest.Mock
+      ).mockImplementation((_req, res) => {
+        res.status(httpStatus.OK).json({ message });
+      });
 
-  //     expect(response.status).toBe(httpStatus.OK);
+      const response = await request(app).get(
+        `/api/v1/auth/reset-password/${validResetToken}/verify`
+      );
 
-  //     expect(response.body.message).toBe(message);
-  //   });
+      expect(response.status).toBe(httpStatus.OK);
 
-  //   it("should return 400 status code for an invalid token", async () => {
-  //     const response = await request(app).get(
-  //       `/api/v1/auth/reset-password/${invalidResetToken}/verify`
-  //     );
+      expect(response.body.message).toBe(message);
+    });
 
-  //     expect(response.status).toBe(httpStatus.BAD_REQUEST);
-  //   });
+    it("should return a 400 status code for an invalid token", async () => {
+      (
+        resetPasswordController.verifyResetToken as jest.Mock
+      ).mockImplementation((_req, res) => {
+        res.status(httpStatus.BAD_REQUEST).json();
+      });
 
-  //   it("should return 400 for an expired token", async () => {
-  //     const response = await request(app).get(
-  //       "/api/v1/auth/reset-password/expired-token/verify"
-  //     );
+      const response = await request(app).get(
+        `/api/v1/auth/reset-password/${invalidResetToken}/verify`
+      );
 
-  //     expect(response.status).toBe(400);
-  //     expect(response.body.error).toBe("Token has expired");
-  //   });
+      expect(response.status).toBe(httpStatus.BAD_REQUEST);
+    });
 
-  //   it("should return 404 for a missing token", async () => {
-  //     const response = await request(app).get(
-  //       "/api/v1/auth/reset-password//verify"
-  //     );
+    it("should return a 400 status code for an expired token", async () => {
+      (
+        resetPasswordController.verifyResetToken as jest.Mock
+      ).mockImplementation((_req, res) => {
+        res.status(httpStatus.BAD_REQUEST).json();
+      });
 
-  //     expect(response.status).toBe(404);
-  //   });
-  // });
+      const response = await request(app).get(
+        "/api/v1/auth/reset-password/expired-token/verify"
+      );
+
+      expect(response.status).toBe(httpStatus.BAD_REQUEST);
+    });
+  });
+
+  describe("POST /api/v1/auth/reset-password/:token", () => {
+    it("should return a 200 status code for a valid token and password", async () => {
+      const message = "Password reset successfully";
+
+      (resetPasswordController.resetPassword as jest.Mock).mockImplementation(
+        (_req, res) => {
+          res.status(httpStatus.OK).json({ message });
+        }
+      );
+      const response = await request(app)
+        .post(`/api/v1/auth/reset-password/${mockValidToken}`)
+        .send({ password: "newPassword123!" });
+
+      expect(response.status).toBe(httpStatus.OK);
+      expect(response.body.message).toBe(message);
+    });
+
+    it("should return a 400 status code for an invalid token", async () => {
+      (resetPasswordController.resetPassword as jest.Mock).mockImplementation(
+        (_req, res) => {
+          res.status(httpStatus.BAD_REQUEST).json();
+        }
+      );
+
+      const response = await request(app)
+        .post(`/api/v1/auth/reset-password/${mockInvalidToken}`)
+        .send({ password: "newPassword123!" });
+
+      expect(response.status).toBe(httpStatus.BAD_REQUEST);
+    });
+
+    it("should return a 400 status code for an expired token", async () => {
+      (resetPasswordController.resetPassword as jest.Mock).mockImplementation(
+        (_req, res) => {
+          res.status(httpStatus.BAD_REQUEST).json();
+        }
+      );
+
+      const response = await request(app)
+        .post(`/api/v1/auth/reset-password/${mockExpiredToken}`)
+        .send({ password: "newPassword123!" });
+
+      expect(response.status).toBe(httpStatus.BAD_REQUEST);
+    });
+
+    it("should throw a BadRequest validation error if the password is to short", async () => {
+      const response = await request(app)
+        .post(`/api/v1/auth/reset-password/${mockValidToken}`)
+        .send({ password: "weak" });
+
+      expect(response.status).toBe(httpStatus.BAD_REQUEST);
+      expect(response.body.error.name).toBe("BAD_REQUEST");
+    });
+
+    it("should throw a BadRequest validation error for a missing password field", async () => {
+      const response = await request(app)
+        .post(`/api/v1/auth/reset-password/${mockValidToken}`)
+        .send({});
+
+      expect(response.status).toBe(httpStatus.BAD_REQUEST);
+      expect(response.body.error.name).toBe("BAD_REQUEST");
+    });
+
+    it("should return a 400 status code for an empty password field", async () => {
+      const response = await request(app)
+        .post(`/api/v1/auth/reset-password/${mockValidToken}`)
+        .send({ password: "" });
+
+      expect(response.status).toBe(httpStatus.BAD_REQUEST);
+      expect(response.body.error.name).toBe("BAD_REQUEST");
+    });
+
+    it("should return a 404 status code for a missing token", async () => {
+      const response = await request(app)
+        .post("/api/v1/auth/reset-password/")
+        .send({ password: "newPassword123!" });
+
+      expect(response.status).toBe(httpStatus.NOT_FOUND);
+    });
+  });
 });
