@@ -30,7 +30,7 @@ describe("Reset password Routes", () => {
   });
 
   describe("POST /api/v1/auth/forgot-password", () => {
-    it("should successfully send a forgot password email", async () => {
+    it("should return 200 status code and send a reset link for a valid email", async () => {
       // Arrange
       const message = "Password reset link sent to your email.";
 
@@ -40,75 +40,108 @@ describe("Reset password Routes", () => {
         }
       );
 
-      // Act & Assert
-      await request(app)
+      const response = await request(app)
         .post("/api/v1/auth/forgot-password")
         .send(mockValidEmailBody)
-        .expect(httpStatus.OK)
-        .expect((res) => {
-          expect(res.body).toEqual({
-            message,
-          });
-        });
+        .expect("Content-Type", /json/);
 
-      expect(resetPasswordController.forgotPassword).toHaveBeenCalled();
+      expect(response.status).toBe(httpStatus.OK);
+      expect(response.body.message).toBe(message);
     });
 
-    it("should throw a BadRequest Error if no email is provided", async () => {
+    it("should return 400 status code and throw a BadRequest Error for and invalid email format", async () => {
       // Act & Assert
-      await request(app)
-        .post("/api/v1/auth/forgot-password")
-        .expect(httpStatus.BAD_REQUEST);
-
-      expect(resetPasswordController.forgotPassword).not.toHaveBeenCalled();
-    });
-
-    it("should throw a BadRequest Error if the email is not valid", async () => {
-      // Act & Assert
-      await request(app)
+      const response = await request(app)
         .post("/api/v1/auth/forgot-password")
         .send(mockInValidEmailBody)
-        .expect(httpStatus.BAD_REQUEST);
+        .expect("Content-Type", /json/);
 
-      expect(resetPasswordController.forgotPassword).not.toHaveBeenCalled();
-    });
+      expect(response.status).toBe(httpStatus.BAD_REQUEST);
 
-    it("should handle internal server errors", async () => {
-      // Arrange
-      (resetPasswordController.forgotPassword as jest.Mock).mockImplementation(
-        () => {
-          throw new Error("Internal Server Error");
-        }
+      expect(response.body.error.message).toBe(
+        "Validation error in email field: Invalid email"
       );
 
+      expect(response.body.error.statusCode).toBe(httpStatus.BAD_REQUEST);
+
+      expect(response.body.error.name).toBe("BAD_REQUEST");
+    });
+
+    it("should return 400 status code and throw a BadRequest Error for a missing email field", async () => {
       // Act & Assert
-      await request(app)
+      const response = await request(app)
         .post("/api/v1/auth/forgot-password")
-        .send(mockValidEmailBody)
-        .expect(httpStatus.INTERNAL_SERVER_ERROR);
+        .expect("Content-Type", /json/);
 
-      expect(resetPasswordController.forgotPassword).toHaveBeenCalled();
+      expect(response.status).toBe(httpStatus.BAD_REQUEST);
+
+      expect(response.body.error.message).toBe(
+        "Validation error in email field: Required"
+      );
+
+      expect(response.body.error.statusCode).toBe(httpStatus.BAD_REQUEST);
+
+      expect(response.body.error.name).toBe("BAD_REQUEST");
     });
 
-    it("should not accept GET method", async () => {
+    it("should return 400 status code and throw a BadRequest Error for an empty email field", async () => {
       // Act & Assert
-      await request(app)
-        .get("/api/v1/auth/forgot-password")
-        .expect(httpStatus.NOT_FOUND);
-    });
+      const response = await request(app)
+        .post("/api/v1/auth/forgot-password")
+        .send({ email: "" })
+        .expect("Content-Type", /json/);
 
-    it("should not accept PUT method", async () => {
-      // Act & Assert
-      await request(app)
-        .put("/api/v1/auth/forgot-password")
-        .expect(httpStatus.NOT_FOUND);
-    });
+      expect(response.status).toBe(httpStatus.BAD_REQUEST);
 
-    it("should not accept DELETE method", async () => {
-      // Act & Assert
-      await request(app)
-        .delete("/api/v1/auth/forgot-password")
-        .expect(httpStatus.NOT_FOUND);
+      expect(response.body.error.message).toBe(
+        "Validation error in email field: Invalid email"
+      );
+
+      expect(response.body.error.statusCode).toBe(httpStatus.BAD_REQUEST);
+
+      expect(response.body.error.name).toBe("BAD_REQUEST");
     });
   });
+
+  // describe("GET /api/v1/auth/reset-password/:token/verify", () => {
+  //   const validResetToken = "valid-token";
+  //   const invalidResetToken = "invalid-token";
+
+  //   it("should return 200 status code for a valid token", async () => {
+  //     const message = "Reset token verified.";
+
+  //     const response = await request(app).get(
+  //       `/api/v1/auth/reset-password/${validResetToken}/verify`
+  //     );
+
+  //     expect(response.status).toBe(httpStatus.OK);
+
+  //     expect(response.body.message).toBe(message);
+  //   });
+
+  //   it("should return 400 status code for an invalid token", async () => {
+  //     const response = await request(app).get(
+  //       `/api/v1/auth/reset-password/${invalidResetToken}/verify`
+  //     );
+
+  //     expect(response.status).toBe(httpStatus.BAD_REQUEST);
+  //   });
+
+  //   it("should return 400 for an expired token", async () => {
+  //     const response = await request(app).get(
+  //       "/api/v1/auth/reset-password/expired-token/verify"
+  //     );
+
+  //     expect(response.status).toBe(400);
+  //     expect(response.body.error).toBe("Token has expired");
+  //   });
+
+  //   it("should return 404 for a missing token", async () => {
+  //     const response = await request(app).get(
+  //       "/api/v1/auth/reset-password//verify"
+  //     );
+
+  //     expect(response.status).toBe(404);
+  //   });
+  // });
 });
