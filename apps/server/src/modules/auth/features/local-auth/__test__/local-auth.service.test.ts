@@ -14,6 +14,10 @@ describe("LocalAuthService", () => {
     getUserByEmail: jest.fn(),
   };
 
+  const mockVerifyEmailService = {
+    generateToken: jest.fn(),
+  };
+
   const mockPasswordHasherService = {
     comparePassword: jest.fn(),
   };
@@ -45,6 +49,7 @@ describe("LocalAuthService", () => {
     localAuthService = new LocalAuthService(
       mockJwtService as any,
       mockUserService as any,
+      mockVerifyEmailService as any,
       mockPasswordHasherService as any,
       mockRefreshTokenService as any,
       mockMailSenderService as any
@@ -61,8 +66,12 @@ describe("LocalAuthService", () => {
       username: "Test User",
     };
 
+    const verifyEmailToken = "verify-email-token";
+
     it("should successfully register a new user", async () => {
       mockUserService.createUser.mockResolvedValue(mockUser);
+
+      mockVerifyEmailService.generateToken.mockResolvedValue(verifyEmailToken);
 
       mockMailSenderService.sendVerificationEmail.mockResolvedValue(undefined);
 
@@ -71,7 +80,8 @@ describe("LocalAuthService", () => {
       expect(result).toEqual(mockUser);
       expect(mockUserService.createUser).toHaveBeenCalledWith(registerUserDto);
       expect(mockMailSenderService.sendVerificationEmail).toHaveBeenCalledWith(
-        mockUser.email
+        mockUser.email,
+        verifyEmailToken
       );
     });
 
@@ -82,14 +92,36 @@ describe("LocalAuthService", () => {
       await expect(
         localAuthService.registerUser(registerUserDto)
       ).rejects.toThrow(error);
+
+      expect(mockVerifyEmailService.generateToken).not.toHaveBeenCalled();
+
+      expect(
+        mockMailSenderService.sendVerificationEmail
+      ).not.toHaveBeenCalled();
+    });
+
+    it("should throw error if verification token generation fails", async () => {
+      const error = new Error("Token generation failed");
+
+      mockUserService.createUser.mockResolvedValue(mockUser);
+
+      mockVerifyEmailService.generateToken.mockRejectedValue(error);
+
+      await expect(
+        localAuthService.registerUser(registerUserDto)
+      ).rejects.toThrow(error);
+
       expect(
         mockMailSenderService.sendVerificationEmail
       ).not.toHaveBeenCalled();
     });
 
     it("should throw error if email verification sending fails", async () => {
-      mockUserService.createUser.mockResolvedValue(mockUser);
       const error = new Error("Email sending failed");
+      mockUserService.createUser.mockResolvedValue(mockUser);
+
+      mockVerifyEmailService.generateToken.mockResolvedValue(verifyEmailToken);
+
       mockMailSenderService.sendVerificationEmail.mockRejectedValue(error);
 
       await expect(

@@ -13,11 +13,13 @@ import type { IPasswordHasherService } from "@modules/auth/core/services/passwor
 import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
 import type { LoginUserDto } from "@modules/auth/dtos/login-user.dto";
 import type { RegisterUserDto } from "@modules/auth/dtos/register-user.dto";
+import type { IVerifyEmailService } from "../verify-email/verify-email.types";
 
 export class LocalAuthService implements ILocalAuthService {
   constructor(
     private readonly _jwtService: IJwtService,
     private readonly _userService: IUserService,
+    private readonly _verifyEmailService: IVerifyEmailService,
     private readonly _passwordHasherService: IPasswordHasherService,
     private readonly _refreshTokenService: IRefreshTokenService,
     private readonly _mailSenderService: IMailSenderService
@@ -26,7 +28,14 @@ export class LocalAuthService implements ILocalAuthService {
   async registerUser(registerUserDto: RegisterUserDto): Promise<User> {
     const newUser = await this._userService.createUser(registerUserDto);
 
-    await this._mailSenderService.sendVerificationEmail(newUser.email);
+    const verifyEmailToken = await this._verifyEmailService.generateToken(
+      newUser.email
+    );
+
+    await this._mailSenderService.sendVerificationEmail(
+      newUser.email,
+      verifyEmailToken
+    );
 
     return newUser;
   }

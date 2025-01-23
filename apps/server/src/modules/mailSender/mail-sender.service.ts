@@ -8,17 +8,11 @@ import compileTemplate from "../../utils/compile-template";
 import { BadRequestError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import type { IResetPasswordService } from "../auth/features/reset-password/reset-password.types";
-import type { IVerifyEmailService } from "../auth/features/verify-email/verify-email.types";
 import type { SendMailDto } from "./dtos/send-mail.dto";
 import type { EmailContent, IMailSenderService } from "./mail-sender.types";
 
 export class MailSenderService implements IMailSenderService {
-  constructor(
-    private readonly _transporter: Transporter,
-    private readonly _verifyEmailService: IVerifyEmailService,
-    private readonly _resetPasswordService: IResetPasswordService
-  ) {}
+  constructor(private readonly _transporter: Transporter) {}
 
   async sendMail(sendMailDto: SendMailDto): Promise<void> {
     const mailOptions = {
@@ -46,11 +40,12 @@ export class MailSenderService implements IMailSenderService {
     });
   }
 
-  async sendVerificationEmail(email: string): Promise<void> {
-    const token = await this._verifyEmailService.generateToken(email);
-
+  async sendVerificationEmail(
+    email: string,
+    verifyEmailToken: string
+  ): Promise<void> {
     const { htmlContent, logoPath, textContent } =
-      await this.buildVerificationEmail(token);
+      await this.buildVerificationEmail(verifyEmailToken);
 
     await this.sendMail({
       emailRecipient: email,
@@ -61,11 +56,12 @@ export class MailSenderService implements IMailSenderService {
     });
   }
 
-  async sendResetPasswordEmail(email: string): Promise<void> {
-    const token = await this._resetPasswordService.createToken(email);
-
+  async sendResetPasswordEmail(
+    email: string,
+    resetPasswordToken: string
+  ): Promise<void> {
     const { htmlContent, logoPath, textContent } =
-      await this.buildResetPasswordEmail(token);
+      await this.buildResetPasswordEmail(resetPasswordToken);
 
     await this.sendMail({
       emailRecipient: email,
