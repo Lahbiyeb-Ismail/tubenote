@@ -126,12 +126,12 @@ describe("ResetPasswordService test suites", () => {
       );
     });
 
-    it("should throw a ForbiddenError if user does not exist", async () => {
+    it("should throw a NotFoundError if user does not exist", async () => {
       (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue(null);
 
       await expect(
         resetPasswordService.sendResetToken(mockEmail)
-      ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.FORBIDDEN));
+      ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
 
       expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
 
