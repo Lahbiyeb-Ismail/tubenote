@@ -3,6 +3,7 @@ import type { PrismaClient } from "@prisma/client";
 
 import handleAsyncOperation from "@/utils/handle-async-operation";
 
+import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import type { VerifyEmailToken } from "./verify-email.model";
 import type { IVerifyEmailRepository } from "./verify-email.types";
 
@@ -17,7 +18,7 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
             userId,
           },
         }),
-      { errorMessage: "Failed to get email verification token." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
 
@@ -29,7 +30,7 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
             token,
           },
         }),
-      { errorMessage: "Failed to get email verification token." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
 
@@ -46,7 +47,7 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
             userId,
           },
         }),
-      { errorMessage: "Failed to create email verification token." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
     );
 
     return token;
@@ -58,7 +59,7 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
         this._db.emailVerificationToken.deleteMany({
           where: { userId },
         }),
-      { errorMessage: "Failed to delete email verification tokens." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_DELETE }
     );
   }
 }
