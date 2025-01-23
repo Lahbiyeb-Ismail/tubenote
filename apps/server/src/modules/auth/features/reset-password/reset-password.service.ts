@@ -1,4 +1,4 @@
-import { BadRequestError, ForbiddenError } from "@/errors";
+import { BadRequestError, ForbiddenError, NotFoundError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import type { ResetPasswordToken } from "./reset-password.model";
@@ -23,7 +23,7 @@ export class ResetPasswordService implements IResetPasswordService {
     const user = await this._userService.getUserByEmail(email);
 
     if (!user) {
-      throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
+      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
     if (!user.isEmailVerified) {
