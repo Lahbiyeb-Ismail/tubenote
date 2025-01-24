@@ -1,5 +1,6 @@
 import prismaClient from "@config/database.config";
 
+import { jwtService } from "@modules/auth/core/services/jwt/jwt.module";
 import { passwordHasherService } from "@modules/auth/core/services/password-hasher/password-hasher.module";
 import { mailSenderService } from "@modules/mailSender/mail-sender.module";
 import { userService } from "@modules/user/user.module";
@@ -12,6 +13,7 @@ const resetPasswordRepository = new ResetPasswordRepository(prismaClient);
 const resetPasswordService = new ResetPasswordService(
   resetPasswordRepository,
   userService,
+  jwtService,
   passwordHasherService,
   mailSenderService
 );
