@@ -8,11 +8,7 @@ import type { VerifyEmailToken } from "./verify-email.model";
 export interface IVerifyEmailRepository {
   findByUserId(userId: string): Promise<VerifyEmailToken | null>;
   findByToken(token: string): Promise<VerifyEmailToken | null>;
-  saveToken(
-    userId: string,
-    token: string,
-    expiresIn: string
-  ): Promise<VerifyEmailToken>;
+  saveToken(userId: string, token: string): Promise<VerifyEmailToken>;
   deleteMany(userId: string): Promise<void>;
 }
 
