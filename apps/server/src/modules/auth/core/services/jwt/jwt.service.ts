@@ -1,29 +1,33 @@
 import jwt from "jsonwebtoken";
 
 import envConfig from "@config/env.config";
-import logger from "@utils/logger";
 
 import type { JwtPayload } from "@/types";
 import type { IJwtService } from "./jwt.types";
 
+import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
+import { BadRequestError } from "@/errors";
+import logger from "@/utils/logger";
 import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
 import type { SignTokenDto } from "./dtos/sign-token.dto";
 import type { VerifyTokenDto } from "./dtos/verify-token.dto";
 
 export class JwtService implements IJwtService {
-  async verify(verifyTokenDto: VerifyTokenDto): Promise<JwtPayload | null> {
+  async verify(verifyTokenDto: VerifyTokenDto): Promise<JwtPayload> {
     const { token, secret } = verifyTokenDto;
-
-    return new Promise((resolve, _reject) => {
-      jwt.verify(token, secret, (err, payload) => {
+    const payload = await new Promise<JwtPayload>((resolve, reject) => {
+      jwt.verify(token, secret, (err, decoded) => {
         if (err) {
-          logger.error(`Error verifying token: ${err}`);
-          resolve(null);
-        }
+          logger.error(`Error verifying token: ${err.message}`);
 
-        resolve(payload as JwtPayload);
+          reject(new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN));
+        } else {
+          resolve(decoded as JwtPayload);
+        }
       });
     });
+
+    return payload;
   }
 
   sign(signTokenDto: SignTokenDto): string {
