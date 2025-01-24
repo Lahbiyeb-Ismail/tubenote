@@ -1,5 +1,5 @@
 import {
-  VERIFY_EMAIL_TOKEN_EXPIRE,
+  VERIFY_EMAIL_TOKEN_EXPIRES_IN,
   VERIFY_EMAIL_TOKEN_SECRET,
 } from "@/constants/auth.contants";
 import { ForbiddenError, NotFoundError } from "@/errors";
@@ -41,7 +41,7 @@ export class VerifyEmailService implements IVerifyEmailService {
     const token = this._jwtService.sign({
       userId: user.id,
       secret: VERIFY_EMAIL_TOKEN_SECRET,
-      expiresIn: VERIFY_EMAIL_TOKEN_EXPIRE,
+      expiresIn: VERIFY_EMAIL_TOKEN_EXPIRES_IN,
     });
 
     await this._verifyEmailRepository.saveToken(user.id, token);
