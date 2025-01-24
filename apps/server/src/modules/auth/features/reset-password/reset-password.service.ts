@@ -3,6 +3,12 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import type { ResetPasswordToken } from "./reset-password.model";
 
+import {
+  RESET_PASSWORD_TOKEN_EXPIRES_IN,
+  RESET_PASSWORD_TOKEN_SECRET,
+} from "@/constants/auth.contants";
+import { stringToDate } from "@/utils/convert-string-to-date";
+import type { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
 import type { IPasswordHasherService } from "@modules/auth/core/services/password-hasher/password-hasher.types";
 import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
 import type { IUserService } from "@modules/user/user.types";
@@ -15,6 +21,7 @@ export class ResetPasswordService implements IResetPasswordService {
   constructor(
     private readonly _resetPasswordRepository: IResetPasswordRepository,
     private readonly _userService: IUserService,
+    private readonly _jwtService: IJwtService,
     private readonly _passwordHasherService: IPasswordHasherService,
     private readonly _mailSenderService: IMailSenderService
   ) {}
@@ -37,65 +44,51 @@ export class ResetPasswordService implements IResetPasswordService {
       throw new ForbiddenError(ERROR_MESSAGES.RESET_LINK_SENT);
     }
 
-    const resetToken = await this.createToken(user.id);
+    const expiresIn = RESET_PASSWORD_TOKEN_EXPIRES_IN;
 
-    await this._mailSenderService.sendResetPasswordEmail(
-      user.email,
-      resetToken
-    );
+    const token = this._jwtService.sign({
+      userId: user.id,
+      secret: RESET_PASSWORD_TOKEN_SECRET,
+      expiresIn,
+    });
+
+    await this._resetPasswordRepository.saveToken({
+      userId: user.id,
+      token,
+      expiresAt: stringToDate(expiresIn),
+    });
+
+    await this._mailSenderService.sendResetPasswordEmail(user.email, token);
   }
 
-  async createToken(userId: string): Promise<string> {
-    const token = await this._resetPasswordRepository.create(userId);
+  async resetPassword(token: string, password: string): Promise<void> {
+    const resetToken = await this.verifyResetToken(token);
 
-    return token;
-  }
+    const hashedPassword =
+      await this._passwordHasherService.hashPassword(password);
 
-  async resetPassword(token: string, _password: string): Promise<void> {
-    const resetToken = await this.findResetToken(token);
+    await this._userService.resetPassword(resetToken.userId, hashedPassword);
 
-    if (!resetToken) throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
-
-    const isTokenExpired = await this.isResetTokenExpired(resetToken);
-
-    if (isTokenExpired) {
-      await this._resetPasswordRepository.deleteMany(resetToken.userId);
-      throw new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN);
-    }
-
-    // const hashedPassword =
-    //   await this._passwordHasherService.hashPassword(password);
-
-    // const user = await this._userService.updatePassword(
-    //   resetToken.userId,
-    //   hashedPassword
-    // );
-
-    // await this._resetPasswordRepository.deleteMany(user.id);
-  }
-
-  async findResetToken(token: string): Promise<ResetPasswordToken | null> {
-    const resetToken = await this._resetPasswordRepository.findByToken(token);
-
-    return resetToken;
-  }
-
-  async isResetTokenExpired(resetToken: ResetPasswordToken): Promise<boolean> {
-    return resetToken.expiresAt < new Date();
+    await this._resetPasswordRepository.deleteMany(resetToken.userId);
   }
 
   async verifyResetToken(token: string): Promise<ResetPasswordToken> {
-    const resetToken = await this.findResetToken(token);
+    const decocedToken = await this._jwtService.verify({
+      token,
+      secret: RESET_PASSWORD_TOKEN_SECRET,
+    });
 
-    if (!resetToken) {
+    const user = await this._userService.getUserById(decocedToken.userId);
+
+    if (!user) {
       throw new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
     }
 
-    const isTokenExpired = await this.isResetTokenExpired(resetToken);
+    const resetToken = await this._resetPasswordRepository.findByToken(token);
 
-    if (isTokenExpired) {
-      await this._resetPasswordRepository.deleteMany(resetToken.userId);
-      throw new BadRequestError(ERROR_MESSAGES.EXPIRED_TOKEN);
+    if (!resetToken) {
+      await this._resetPasswordRepository.deleteMany(user.id);
+      throw new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
     }
 
     return resetToken;
