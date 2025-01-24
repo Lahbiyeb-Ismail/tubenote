@@ -108,4 +108,11 @@ export class UserService implements IUserService {
 
     return await this._userRepository.updatePassword(user.id, hashedPassword);
   }
+
+  async resetPassword(userId: string, newPassword: string): Promise<User> {
+    const hashedPassword =
+      await this._passwordHasherService.hashPassword(newPassword);
+
+    return await this._userRepository.updatePassword(userId, hashedPassword);
+  }
 }

@@ -26,6 +26,7 @@ export interface IUserService {
     userId: string,
     updatePasswordDto: UpdatePasswordDto
   ): Promise<User>;
+  resetPassword(userId: string, newPassword: string): Promise<User>;
 }
 
 export interface IUserController {
