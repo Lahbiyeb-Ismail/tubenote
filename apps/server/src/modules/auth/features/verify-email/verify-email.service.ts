@@ -1,10 +1,13 @@
+import {
+  VERIFY_EMAIL_TOKEN_EXPIRE,
+  VERIFY_EMAIL_TOKEN_SECRET,
+} from "@/constants/auth.contants";
 import { ForbiddenError, NotFoundError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import type { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
 import type { IUserService } from "@modules/user/user.types";
 
-import envConfig from "@/config/env.config";
 import type {
   IVerifyEmailRepository,
   IVerifyEmailService,
@@ -35,15 +38,13 @@ export class VerifyEmailService implements IVerifyEmailService {
       throw new ForbiddenError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
     }
 
-    const expiresIn = envConfig.jwt.verify_email_token.expire;
-
     const token = this._jwtService.sign({
       userId: user.id,
-      secret: envConfig.jwt.verify_email_token.secret,
-      expiresIn,
+      secret: VERIFY_EMAIL_TOKEN_SECRET,
+      expiresIn: VERIFY_EMAIL_TOKEN_EXPIRE,
     });
 
-    await this._verifyEmailRepository.saveToken(user.id, token, expiresIn);
+    await this._verifyEmailRepository.saveToken(user.id, token);
 
     return token;
   }
@@ -55,9 +56,10 @@ export class VerifyEmailService implements IVerifyEmailService {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
-    if (foundToken.expiresAt < new Date()) {
-      throw new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN);
-    }
+    // TODO: Check if the token has expired.
+    // if (foundToken.expiresAt < new Date()) {
+    //   throw new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN);
+    // }
 
     // Updates the user's isEmailVerified status to true.
     await this._userService.updateUser(foundToken.userId, {
