@@ -49,7 +49,7 @@ export class ResetPasswordRepository implements IResetPasswordRepository {
   }
 
   async deleteMany(userId: string): Promise<void> {
-    handleAsyncOperation(
+    await handleAsyncOperation(
       () =>
         this._db.resetPasswordToken.deleteMany({
           where: {
