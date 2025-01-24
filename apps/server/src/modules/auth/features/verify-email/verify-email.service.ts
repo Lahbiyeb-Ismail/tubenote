@@ -2,8 +2,11 @@ import {
   VERIFY_EMAIL_TOKEN_EXPIRES_IN,
   VERIFY_EMAIL_TOKEN_SECRET,
 } from "@/constants/auth.contants";
-import { ForbiddenError, NotFoundError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+
+import { BadRequestError, ForbiddenError, NotFoundError } from "@/errors";
+
+import { stringToDate } from "@utils/convert-string-to-date";
 
 import type { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
 import type { IUserService } from "@modules/user/user.types";
@@ -38,28 +41,40 @@ export class VerifyEmailService implements IVerifyEmailService {
       throw new ForbiddenError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
     }
 
+    const expiresIn = VERIFY_EMAIL_TOKEN_EXPIRES_IN;
+
     const token = this._jwtService.sign({
       userId: user.id,
       secret: VERIFY_EMAIL_TOKEN_SECRET,
-      expiresIn: VERIFY_EMAIL_TOKEN_EXPIRES_IN,
+      expiresIn,
     });
 
-    await this._verifyEmailRepository.saveToken(user.id, token);
+    await this._verifyEmailRepository.saveToken({
+      userId: user.id,
+      token,
+      expiresAt: stringToDate(expiresIn),
+    });
 
     return token;
   }
 
   async verifyUserEmail(token: string): Promise<void> {
-    const foundToken = await this._verifyEmailRepository.findByToken(token);
+    const payload = await this._jwtService.verify({
+      token,
+      secret: VERIFY_EMAIL_TOKEN_SECRET,
+    });
 
-    if (!foundToken) {
+    const user = await this._userService.getUserById(payload.userId);
+
+    if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
-    // TODO: Check if the token has expired.
-    // if (foundToken.expiresAt < new Date()) {
-    //   throw new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN);
-    // }
+    const foundToken = await this._verifyEmailRepository.findByToken(token);
+
+    if (!foundToken) {
+      throw new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
+    }
 
     // Updates the user's isEmailVerified status to true.
     await this._userService.updateUser(foundToken.userId, {
