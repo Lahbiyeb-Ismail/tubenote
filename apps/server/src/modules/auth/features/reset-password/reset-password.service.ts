@@ -9,7 +9,6 @@ import {
 } from "@/constants/auth.contants";
 import { stringToDate } from "@/utils/convert-string-to-date";
 import type { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
-import type { IPasswordHasherService } from "@modules/auth/core/services/password-hasher/password-hasher.types";
 import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
 import type { IUserService } from "@modules/user/user.types";
 import type {
@@ -22,7 +21,6 @@ export class ResetPasswordService implements IResetPasswordService {
     private readonly _resetPasswordRepository: IResetPasswordRepository,
     private readonly _userService: IUserService,
     private readonly _jwtService: IJwtService,
-    private readonly _passwordHasherService: IPasswordHasherService,
     private readonly _mailSenderService: IMailSenderService
   ) {}
 
@@ -64,10 +62,7 @@ export class ResetPasswordService implements IResetPasswordService {
   async resetPassword(token: string, password: string): Promise<void> {
     const resetToken = await this.verifyResetToken(token);
 
-    const hashedPassword =
-      await this._passwordHasherService.hashPassword(password);
-
-    await this._userService.resetPassword(resetToken.userId, hashedPassword);
+    await this._userService.resetPassword(resetToken.userId, password);
 
     await this._resetPasswordRepository.deleteMany(resetToken.userId);
   }
