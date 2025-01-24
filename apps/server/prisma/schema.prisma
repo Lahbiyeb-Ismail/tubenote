@@ -47,7 +47,6 @@ model EmailVerificationToken {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   token     String   @unique
   userId    String   @db.ObjectId
-  expiresAt DateTime
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
@@ -57,7 +56,6 @@ model ResetPasswordToken {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   token     String   @unique
   userId    String   @db.ObjectId
-  expiresAt DateTime
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
