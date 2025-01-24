@@ -48,6 +48,7 @@ model EmailVerificationToken {
   token     String   @unique
   userId    String   @db.ObjectId
   createdAt DateTime @default(now())
+  expiresAt DateTime
 
   user User @relation(fields: [userId], references: [id])
 }
@@ -57,6 +58,7 @@ model ResetPasswordToken {
   token     String   @unique
   userId    String   @db.ObjectId
   createdAt DateTime @default(now())
+  expiresAt DateTime
 
   user User @relation(fields: [userId], references: [id])
 }
