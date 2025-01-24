@@ -16,7 +16,7 @@ const envSchema = z.object({
   ACCESS_TOKEN_SECRET: z.string().min(8),
   ACCESS_TOKEN_EXPIRE: z.string().default("20m"),
   REFRESH_TOKEN_SECRET: z.string().min(8),
-  REFRESH_TOKEN_EXPIRE: z.string().default("1d"),
+  REFRESH_TOKEN_EXPIRES_IN: z.string().default("1d"),
   REFRESH_TOKEN_COOKIE_NAME: z.string().default("refresh_token"),
   RESET_PASSWORD_TOKEN_SECRET: z.string().min(8),
   RESET_PASSWORD_TOKEN_EXPIRES_IN: z.string().default("1h"),
@@ -72,7 +72,7 @@ const envConfig = {
     },
     refresh_token: {
       secret: validatedEnv.REFRESH_TOKEN_SECRET,
-      expire: validatedEnv.REFRESH_TOKEN_EXPIRE,
+      expires_in: validatedEnv.REFRESH_TOKEN_EXPIRES_IN,
       cookie_name: validatedEnv.REFRESH_TOKEN_COOKIE_NAME,
     },
     reset_password_token: {
