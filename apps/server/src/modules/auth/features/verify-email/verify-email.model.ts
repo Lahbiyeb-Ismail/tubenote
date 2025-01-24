@@ -3,4 +3,5 @@ export interface VerifyEmailToken {
   token: string;
   userId: string;
   createdAt: Date;
+  expiresAt: Date;
 }
