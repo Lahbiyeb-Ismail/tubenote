@@ -28,7 +28,7 @@ export const REFRESH_TOKEN_SECRET = envConfig.jwt.refresh_token.secret;
  * The expiration time for the refresh token.
  * This value is retrieved from the environment configuration.
  */
-export const REFRESH_TOKEN_EXPIRE = envConfig.jwt.refresh_token.expire;
+export const REFRESH_TOKEN_EXPIRES_IN = envConfig.jwt.refresh_token.expires_in;
 
 /**
  * Secret key used for signing and verifying verify email tokens.
