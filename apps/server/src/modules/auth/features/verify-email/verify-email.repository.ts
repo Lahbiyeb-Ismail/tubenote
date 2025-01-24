@@ -33,19 +33,12 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
     );
   }
 
-  async saveToken(
-    userId: string,
-    token: string,
-    expiresIn: string
-  ): Promise<VerifyEmailToken> {
-    const expiresAt = new Date(Date.now() + expiresIn);
-
+  async saveToken(userId: string, token: string): Promise<VerifyEmailToken> {
     return handleAsyncOperation(
       () =>
         this._db.emailVerificationToken.create({
           data: {
             token,
-            expiresAt,
             userId,
           },
         }),
