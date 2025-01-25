@@ -1,6 +1,8 @@
 import { ForbiddenError, NotFoundError, UnauthorizedError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
+import { stringToDate } from "@utils/convert-string-to-date";
+
 import type { User } from "@modules/user/user.model";
 
 import { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
@@ -9,6 +11,7 @@ import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
 import type { IUserService } from "@modules/user/user.types";
 import type { ILocalAuthService } from "./local-auth.types";
 
+import { REFRESH_TOKEN_EXPIRES_IN } from "@/constants/auth.contants";
 import type { IPasswordHasherService } from "@modules/auth/core/services/password-hasher/password-hasher.types";
 import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
 import type { LoginUserDto } from "@modules/auth/dtos/login-user.dto";
@@ -66,9 +69,10 @@ export class LocalAuthService implements ILocalAuthService {
       user.id
     );
 
-    await this._refreshTokenService.createToken({
+    await this._refreshTokenService.saveToken({
       userId: user.id,
       token: refreshToken,
+      expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
     });
 
     return { accessToken, refreshToken };
