@@ -1,52 +1,76 @@
-import { ForbiddenError, NotFoundError } from "@/errors";
+import {
+  VERIFY_EMAIL_TOKEN_EXPIRES_IN,
+  VERIFY_EMAIL_TOKEN_SECRET,
+} from "@/constants/auth.contants";
+import {
+  BadRequestError,
+  DatabaseError,
+  ForbiddenError,
+  NotFoundError,
+} from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+
+import { stringToDate } from "@utils/convert-string-to-date";
 
 import { VerifyEmailService } from "../verify-email.service";
 
 import type { User } from "@modules/user/user.model";
 import type { VerifyEmailToken } from "../verify-email.model";
 
-import type { UpdateUserDto } from "@modules/user/dtos/update-user.dto";
+import type { SignTokenDto } from "@/modules/auth/core/services/jwt/dtos/sign-token.dto";
+import type { IJwtService } from "@/modules/auth/core/services/jwt/jwt.types";
+import type { JwtPayload } from "@/types";
 import type { IUserService } from "@modules/user/user.types";
-import type {
-  IVerifyEmailRepository,
-  IVerifyEmailService,
-} from "../verify-email.types";
+import type { SaveTokenDto } from "../dtos/save-token.dto";
+import type { IVerifyEmailRepository } from "../verify-email.types";
+
+jest.mock("@utils/convert-string-to-date");
 
 describe("VerifyEmailService methods test", () => {
-  let verifyEmailService: IVerifyEmailService;
-  let mockVerifyEmailRepository: IVerifyEmailRepository;
-  let mockUserService: IUserService;
+  let verifyEmailService: VerifyEmailService;
+  let mockVerifyEmailRepository: jest.Mocked<IVerifyEmailRepository>;
+  let mockUserService: jest.Mocked<IUserService>;
+  let mockJwtService: jest.Mocked<IJwtService>;
 
   beforeEach(() => {
     mockVerifyEmailRepository = {
-      findByToken: jest.fn(),
       findByUserId: jest.fn(),
-      create: jest.fn(),
+      saveToken: jest.fn(),
+      findByToken: jest.fn(),
       deleteMany: jest.fn(),
     };
 
     mockUserService = {
-      createUser: jest.fn(),
       getUserByEmail: jest.fn(),
       getUserById: jest.fn(),
-      findOrCreateUser: jest.fn(),
       updateUser: jest.fn(),
+      createUser: jest.fn(),
+      findOrCreateUser: jest.fn(),
+      resetPassword: jest.fn(),
       updatePassword: jest.fn(),
+    };
+
+    mockJwtService = {
+      sign: jest.fn(),
+      verify: jest.fn(),
+      generateAuthTokens: jest.fn(),
     };
 
     verifyEmailService = new VerifyEmailService(
       mockVerifyEmailRepository,
-      mockUserService
+      mockUserService,
+      mockJwtService
     );
   });
 
   const mockEmail = "test@example.com";
-  const mockToken = "verificationtoken";
+  const mockValidToken = "jwt-verification-token";
+  const mockUserId = "user-id-123";
+  const mockTokenId = "token-id-123";
 
   const mockUser: User = {
-    id: "1",
-    email: "test@example.com",
+    id: mockUserId,
+    email: mockEmail,
     username: "testuser",
     password: "hashedpassword",
     isEmailVerified: true,
@@ -57,20 +81,26 @@ describe("VerifyEmailService methods test", () => {
     videoIds: [],
   };
 
-  const mockValidToken: VerifyEmailToken = {
-    id: "token-001",
-    userId: "user-123",
-    token: "verificationtoken",
-    expiresAt: new Date(Date.now() + 1000 * 60 * 60),
-    createdAt: new Date(),
+  const expiresIn = stringToDate(VERIFY_EMAIL_TOKEN_EXPIRES_IN);
+
+  const mockVerificationToken: VerifyEmailToken = {
+    id: mockTokenId,
+    userId: mockUserId,
+    token: mockValidToken,
+    createdAt: new Date(Date.now()),
+    expiresAt: expiresIn,
   };
 
-  const mockExpiredToken: VerifyEmailToken = {
-    id: "token-001",
-    userId: "user-123",
-    token: "verificationtoken",
-    expiresAt: new Date(0),
-    createdAt: new Date(),
+  const saveTokenDto: SaveTokenDto = {
+    userId: mockUserId,
+    token: mockValidToken,
+    expiresAt: expiresIn,
+  };
+
+  const signTokenDto: SignTokenDto = {
+    userId: mockUserId,
+    secret: VERIFY_EMAIL_TOKEN_SECRET,
+    expiresIn: VERIFY_EMAIL_TOKEN_EXPIRES_IN,
   };
 
   beforeAll(() => {
@@ -82,8 +112,39 @@ describe("VerifyEmailService methods test", () => {
       jest.clearAllMocks();
     });
 
-    it("should throw a ForbiddenError if the user does not exist", async () => {
-      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue(null);
+    it("should successfully generate a verification token for an unverified email and save it to the database", async () => {
+      mockUserService.getUserByEmail.mockResolvedValue({
+        ...mockUser,
+        isEmailVerified: false,
+      });
+
+      mockVerifyEmailRepository.findByUserId.mockResolvedValue(null);
+
+      mockJwtService.sign.mockReturnValue(mockValidToken);
+
+      mockVerifyEmailRepository.saveToken.mockResolvedValue(
+        mockVerificationToken
+      );
+
+      const result = await verifyEmailService.generateToken(mockEmail);
+
+      expect(result).toBe(mockValidToken);
+
+      expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
+
+      expect(mockVerifyEmailRepository.findByUserId).toHaveBeenCalledWith(
+        mockUser.id
+      );
+
+      expect(mockJwtService.sign).toHaveBeenCalledWith(signTokenDto);
+
+      expect(mockVerifyEmailRepository.saveToken).toHaveBeenCalledWith(
+        saveTokenDto
+      );
+    });
+
+    it("should throw a NotFoundError if the user is not found", async () => {
+      mockUserService.getUserByEmail.mockResolvedValue(null);
 
       await expect(verifyEmailService.generateToken(mockEmail)).rejects.toThrow(
         new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
@@ -92,24 +153,24 @@ describe("VerifyEmailService methods test", () => {
       expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
     });
 
-    it("should throw a ForbiddenError if the user email is already verified", async () => {
-      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue(mockUser);
+    it("should throw a ForbiddenError if the user's email is already verified", async () => {
+      mockUserService.getUserByEmail.mockResolvedValue(mockUser);
 
       await expect(verifyEmailService.generateToken(mockEmail)).rejects.toThrow(
         new ForbiddenError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED)
       );
 
       expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
-      expect(mockUserService.getUserByEmail).toHaveBeenCalledTimes(1);
     });
 
-    it("should throw a ForbiddenError if the user already has a verification token", async () => {
-      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue({
+    it("should throw a ForbiddenError if a verification link was already sent", async () => {
+      mockUserService.getUserByEmail.mockResolvedValue({
         ...mockUser,
         isEmailVerified: false,
       });
-      (mockVerifyEmailRepository.findByUserId as jest.Mock).mockResolvedValue(
-        mockValidToken
+
+      mockVerifyEmailRepository.findByUserId.mockResolvedValue(
+        mockVerificationToken
       );
 
       await expect(verifyEmailService.generateToken(mockEmail)).rejects.toThrow(
@@ -117,148 +178,112 @@ describe("VerifyEmailService methods test", () => {
       );
 
       expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
-      expect(mockUserService.getUserByEmail).toHaveBeenCalledTimes(1);
 
       expect(mockVerifyEmailRepository.findByUserId).toHaveBeenCalledWith(
         mockUser.id
       );
-      expect(mockVerifyEmailRepository.findByUserId).toHaveBeenCalledTimes(1);
     });
 
-    it("should return the new created verification token", async () => {
-      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue({
+    it("should throw an Error if token generation fails", async () => {
+      mockUserService.getUserByEmail.mockResolvedValue({
         ...mockUser,
         isEmailVerified: false,
       });
 
-      (mockVerifyEmailRepository.findByUserId as jest.Mock).mockResolvedValue(
-        null
+      mockVerifyEmailRepository.findByUserId.mockResolvedValue(null);
+
+      mockJwtService.sign.mockImplementation(() => {
+        throw new Error("Token generation failed");
+      });
+
+      await expect(verifyEmailService.generateToken(mockEmail)).rejects.toThrow(
+        new Error("Token generation failed")
       );
-
-      (mockVerifyEmailRepository.create as jest.Mock).mockResolvedValue(
-        mockToken
-      );
-
-      const result = await verifyEmailService.generateToken(mockEmail);
-
-      expect(result).toBe(mockToken);
-
-      expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
-      expect(mockUserService.getUserByEmail).toHaveBeenCalledTimes(1);
-
-      expect(mockVerifyEmailRepository.findByUserId).toHaveBeenCalledWith(
-        mockUser.id
-      );
-      expect(mockVerifyEmailRepository.findByUserId).toHaveBeenCalledTimes(1);
-
-      expect(mockVerifyEmailRepository.create).toHaveBeenCalledWith(
-        mockUser.id
-      );
-      expect(mockVerifyEmailRepository.create).toHaveBeenCalledTimes(1);
     });
   });
 
   describe("VerifyEmailService - verifyUserEmail", () => {
-    const mockUpdateUserDto: UpdateUserDto = {
-      isEmailVerified: true,
+    const decodedToken: JwtPayload = {
+      userId: mockUserId,
+      iat: 1234567890,
+      exp: 1234567890,
     };
 
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    it("should throw a NotFound error if the token is not found", async () => {
-      (mockVerifyEmailRepository.findByToken as jest.Mock).mockResolvedValue(
-        null
+    it("should verify user email with a valid token", async () => {
+      mockJwtService.verify.mockResolvedValue(decodedToken);
+
+      mockUserService.getUserById.mockResolvedValue(mockUser);
+
+      mockVerifyEmailRepository.findByToken.mockResolvedValue(
+        mockVerificationToken
       );
 
-      await expect(
-        verifyEmailService.verifyUserEmail(mockToken)
-      ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
+      await verifyEmailService.verifyUserEmail(mockValidToken);
 
-      expect(mockVerifyEmailRepository.findByToken).toHaveBeenCalledWith(
-        mockToken
-      );
-      expect(mockUserService.updateUser).not.toHaveBeenCalled();
-
-      expect(mockVerifyEmailRepository.deleteMany).not.toHaveBeenCalled();
-    });
-
-    it("should throw a ForbiddenError if the token is expired", async () => {
-      (mockVerifyEmailRepository.findByToken as jest.Mock).mockResolvedValue(
-        mockExpiredToken
-      );
-
-      await expect(
-        verifyEmailService.verifyUserEmail(mockToken)
-      ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN));
-
-      expect(mockVerifyEmailRepository.findByToken).toHaveBeenCalledWith(
-        mockToken
-      );
-      expect(mockVerifyEmailRepository.findByToken).toHaveBeenCalledTimes(1);
-
-      expect(mockUserService.updateUser).not.toHaveBeenCalled();
-
-      expect(mockVerifyEmailRepository.deleteMany).not.toHaveBeenCalled();
-    });
-
-    it("should verify the user email and delete the verification token", async () => {
-      (mockVerifyEmailRepository.findByToken as jest.Mock).mockResolvedValue(
-        mockValidToken
-      );
-
-      await verifyEmailService.verifyUserEmail(mockToken);
-
-      expect(mockVerifyEmailRepository.findByToken).toHaveBeenCalledWith(
-        mockToken
-      );
-      expect(mockVerifyEmailRepository.findByToken).toHaveBeenCalledTimes(1);
-
-      expect(mockUserService.updateUser).toHaveBeenCalledWith(
-        mockValidToken.userId,
-        mockUpdateUserDto
-      );
-      expect(mockUserService.updateUser).toHaveBeenCalledTimes(1);
+      expect(mockUserService.updateUser).toHaveBeenCalledWith(mockUserId, {
+        isEmailVerified: true,
+      });
 
       expect(mockVerifyEmailRepository.deleteMany).toHaveBeenCalledWith(
-        mockValidToken.userId
+        mockUserId
       );
-      expect(mockVerifyEmailRepository.deleteMany).toHaveBeenCalledTimes(1);
     });
 
-    it("should throw a ForbiddenError if the user email is already verified", async () => {
-      (mockVerifyEmailRepository.findByToken as jest.Mock).mockResolvedValue(
-        mockValidToken
-      );
+    it("should throw BadRequestError for an invalid token", async () => {
+      const error = new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
+      const mockInvalidToken = "invalid-token";
 
-      (mockUserService.updateUser as jest.Mock).mockRejectedValue(
-        new ForbiddenError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED)
-      );
+      mockJwtService.verify.mockRejectedValue(error);
 
       await expect(
-        verifyEmailService.verifyUserEmail(mockToken)
-      ).rejects.toThrow(
-        new ForbiddenError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED)
+        verifyEmailService.verifyUserEmail(mockInvalidToken)
+      ).rejects.toThrow(error);
+    });
+
+    it("should throw NotFoundError if user is not found", async () => {
+      const error = new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
+
+      mockJwtService.verify.mockResolvedValue(decodedToken);
+
+      mockUserService.getUserById.mockRejectedValue(error);
+
+      await expect(
+        verifyEmailService.verifyUserEmail(mockValidToken)
+      ).rejects.toThrow(error);
+    });
+
+    it("should throw BadRequestError if token is not found in the database", async () => {
+      mockJwtService.verify.mockResolvedValue(decodedToken);
+
+      mockUserService.getUserById.mockResolvedValue(mockUser);
+
+      mockVerifyEmailRepository.findByToken.mockResolvedValue(null);
+
+      await expect(
+        verifyEmailService.verifyUserEmail(mockValidToken)
+      ).rejects.toThrow(new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN));
+    });
+
+    it("should throw a DatabaseError if database operation fails", async () => {
+      const error = new DatabaseError("Database error");
+
+      mockJwtService.verify.mockResolvedValue(decodedToken);
+
+      mockUserService.getUserById.mockResolvedValue(mockUser);
+
+      mockVerifyEmailRepository.findByToken.mockResolvedValue(
+        mockVerificationToken
       );
 
-      expect(mockVerifyEmailRepository.findByToken).toHaveBeenCalledWith(
-        mockToken
-      );
-      expect(mockVerifyEmailRepository.findByToken).toHaveBeenCalledTimes(1);
+      mockUserService.updateUser.mockRejectedValue(error);
 
-      expect(mockUserService.updateUser).toHaveBeenCalledWith(
-        mockValidToken.userId,
-        mockUpdateUserDto
-      );
-
-      expect(mockUserService.updateUser).toHaveBeenCalledWith(
-        mockValidToken.userId,
-        mockUpdateUserDto
-      );
-      expect(mockUserService.updateUser).toHaveBeenCalledTimes(1);
-
-      expect(mockVerifyEmailRepository.deleteMany).not.toHaveBeenCalled();
+      await expect(
+        verifyEmailService.verifyUserEmail(mockValidToken)
+      ).rejects.toThrow(error);
     });
   });
 });
