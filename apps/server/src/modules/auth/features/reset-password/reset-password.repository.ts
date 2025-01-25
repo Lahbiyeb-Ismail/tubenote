@@ -1,9 +1,9 @@
-import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import handleAsyncOperation from "@/utils/handle-async-operation";
 
+import type { SaveTokenDto } from "./dtos/save-token.dto";
 import type { ResetPasswordToken } from "./reset-password.model";
 import type { IResetPasswordRepository } from "./reset-password.types";
 
@@ -29,33 +29,27 @@ export class ResetPasswordRepository implements IResetPasswordRepository {
         this._db.resetPasswordToken.findUnique({
           where: {
             token,
+            expiresAt: { gt: new Date() },
           },
         }),
       { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
 
-  async create(userId: string): Promise<string> {
-    const token = randomUUID();
-    const expiresAt = new Date(Date.now() + 3600000); // Token expires in 1 hour
-
-    handleAsyncOperation(
+  async saveToken(saveTokenDto: SaveTokenDto): Promise<ResetPasswordToken> {
+    return handleAsyncOperation(
       () =>
         this._db.resetPasswordToken.create({
           data: {
-            token,
-            userId,
-            expiresAt,
+            ...saveTokenDto,
           },
         }),
       { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
     );
-
-    return token;
   }
 
   async deleteMany(userId: string): Promise<void> {
-    handleAsyncOperation(
+    await handleAsyncOperation(
       () =>
         this._db.resetPasswordToken.deleteMany({
           where: {

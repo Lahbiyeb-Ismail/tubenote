@@ -24,6 +24,7 @@ describe("userController integration tests", () => {
       updateUser: jest.fn(),
       getUserByEmail: jest.fn(),
       updatePassword: jest.fn(),
+      resetPassword: jest.fn(),
     };
 
     userController = new UserController(mockUserService);

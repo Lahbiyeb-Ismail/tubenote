@@ -1,133 +1,105 @@
-import envConfig from "@config/env.config";
-import logger from "@utils/logger";
 import jwt from "jsonwebtoken";
-import { JwtService } from "../jwt.service";
 
-// Mock dependencies
-jest.mock("jsonwebtoken");
-jest.mock("@config/env.config");
-jest.mock("@utils/logger");
+import { BadRequestError } from "@/errors";
+import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { JwtService } from "../jwt.service";
 
 describe("JwtService", () => {
   let jwtService: JwtService;
-  const mockUserId = "test-user-123";
-  const mockSecret = "test-secret";
-  const mockToken = "mock.jwt.token";
+
+  const mockUserId = "user-id-123";
+  const mockValidTokenSecret = "valid-token-secret";
+  const mockInvalidToken = "invalid-jwt-token";
 
   beforeEach(() => {
     jwtService = new JwtService();
-    jest.clearAllMocks();
   });
 
-  describe("JwtService - verify method", () => {
-    it("should successfully verify a valid token", async () => {
-      const mockPayload = { userId: mockUserId };
-
-      (jwt.verify as jest.Mock).mockImplementation(
-        (_token, _secret, callback) => {
-          callback(null, mockPayload);
-        }
-      );
-
-      const result = await jwtService.verify({
-        token: mockToken,
-        secret: mockSecret,
-      });
-
-      expect(result).toEqual(mockPayload);
-      expect(jwt.verify).toHaveBeenCalledWith(
-        mockToken,
-        mockSecret,
-        expect.any(Function)
-      );
-    });
-
-    it("should return null and log error when token verification fails", async () => {
-      const mockError = new Error("Token verification failed");
-      (jwt.verify as jest.Mock).mockImplementation(
-        (_token, _secret, callback) => {
-          callback(mockError, null);
-        }
-      );
-
-      const result = await jwtService.verify({
-        token: mockToken,
-        secret: mockSecret,
-      });
-
-      expect(result).toBeNull();
-      expect(logger.error).toHaveBeenCalledWith(
-        `Error verifying token: ${mockError}`
-      );
-    });
-  });
-
-  describe("JwtService- sign method", () => {
-    it("should successfully sign a token", () => {
-      const mockSignedToken = "signed.jwt.token";
-
-      (jwt.sign as jest.Mock).mockReturnValue(mockSignedToken);
-
-      const result = jwtService.sign({
-        userId: mockUserId,
-        secret: mockSecret,
+  describe("verify", () => {
+    it("should verify a valid token", async () => {
+      const token = jwt.sign({ userId: mockUserId }, mockValidTokenSecret, {
         expiresIn: "1h",
       });
 
-      expect(result).toBe(mockSignedToken);
-      expect(jwt.sign).toHaveBeenCalledWith(
+      const payload = await jwtService.verify({
+        token,
+        secret: mockValidTokenSecret,
+      });
+
+      expect(payload.userId).toBe(mockUserId);
+    });
+
+    it("should throw BadRequestError for an invalid token", async () => {
+      await expect(
+        jwtService.verify({
+          token: mockInvalidToken,
+          secret: mockValidTokenSecret,
+        })
+      ).rejects.toThrow(new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN));
+    });
+
+    it("should throw BadRequestError for an expired token", async () => {
+      const expiredToken = jwt.sign(
         { userId: mockUserId },
-        mockSecret,
-        { expiresIn: "1h" }
+        mockValidTokenSecret,
+        {
+          expiresIn: "-1s",
+        }
       );
+
+      await expect(
+        jwtService.verify({ token: expiredToken, secret: mockValidTokenSecret })
+      ).rejects.toThrow(new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN));
+    });
+
+    it("should throw BadRequestError for an invalid secret", async () => {
+      const token = jwt.sign({ userId: mockUserId }, mockValidTokenSecret, {
+        expiresIn: "1h",
+      });
+
+      await expect(
+        jwtService.verify({ token, secret: "invalid-secret" })
+      ).rejects.toThrow(new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN));
     });
   });
 
-  describe("JwtService- generateAuthTokens method", () => {
-    beforeEach(() => {
-      // Mock environment config
-      (envConfig.jwt as any) = {
-        access_token: {
-          secret: "access-secret",
-          expire: "15m",
-        },
-        refresh_token: {
-          secret: "refresh-secret",
-          expire: "7d",
-        },
-      };
-    });
-
-    it("should generate both access and refresh tokens", () => {
-      const mockAccessToken = "mock.access.token";
-      const mockRefreshToken = "mock.refresh.token";
-
-      // Mock sign method to return different tokens
-      (jwt.sign as jest.Mock)
-        .mockReturnValueOnce(mockAccessToken)
-        .mockReturnValueOnce(mockRefreshToken);
-
-      const result = jwtService.generateAuthTokens(mockUserId);
-
-      expect(result).toEqual({
-        accessToken: mockAccessToken,
-        refreshToken: mockRefreshToken,
+  describe("sign", () => {
+    it("should sign a valid payload", () => {
+      const token = jwtService.sign({
+        userId: mockUserId,
+        secret: mockValidTokenSecret,
+        expiresIn: "1h",
       });
 
-      // Verify access token generation
-      expect(jwt.sign).toHaveBeenNthCalledWith(
-        1,
-        { userId: mockUserId },
-        envConfig.jwt.access_token.secret,
-        { expiresIn: envConfig.jwt.access_token.expire }
-      );
+      expect(typeof token).toBe("string");
+      expect(token.length).toBeGreaterThan(0);
+    });
 
-      // Verify refresh token generation
-      expect(jwt.sign).toHaveBeenNthCalledWith(
-        2,
-        { userId: mockUserId },
-        envConfig.jwt.refresh_token.secret,
-        { expiresIn: envConfig.jwt.refresh_token.expire }
+    it("should throw Error for an invalid secret", () => {
+      expect(() =>
+        jwtService.sign({ userId: mockUserId, secret: "", expiresIn: "1h" })
+      ).toThrow();
+    });
+  });
+
+  describe("generateAuthTokens", () => {
+    it("should generate valid access and refresh tokens", () => {
+      const tokens = jwtService.generateAuthTokens(mockUserId);
+
+      expect(typeof tokens.accessToken).toBe("string");
+      expect(typeof tokens.refreshToken).toBe("string");
+
+      expect(tokens.accessToken.length).toBeGreaterThan(0);
+      expect(tokens.refreshToken.length).toBeGreaterThan(0);
+    });
+
+    it("should throw Error if token generation fails", () => {
+      jest.spyOn(jwtService, "sign").mockImplementation(() => {
+        throw new Error("Token generation failed");
+      });
+
+      expect(() => jwtService.generateAuthTokens(mockUserId)).toThrow(
+        new Error("Token generation failed")
       );
     });
   });

@@ -5,7 +5,7 @@ import type { SignTokenDto } from "./dtos/sign-token.dto";
 import type { VerifyTokenDto } from "./dtos/verify-token.dto";
 
 export interface IJwtService {
-  verify(verifyTokenDto: VerifyTokenDto): Promise<JwtPayload | null>;
+  verify(verifyTokenDto: VerifyTokenDto): Promise<JwtPayload>;
   sign(signTokenDto: SignTokenDto): string;
   generateAuthTokens(userId: string): LoginResponseDto;
 }

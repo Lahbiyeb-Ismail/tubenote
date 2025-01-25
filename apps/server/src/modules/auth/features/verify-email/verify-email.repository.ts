@@ -1,8 +1,9 @@
-import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 
 import handleAsyncOperation from "@/utils/handle-async-operation";
 
+import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
+import type { SaveTokenDto } from "./dtos/save-token.dto";
 import type { VerifyEmailToken } from "./verify-email.model";
 import type { IVerifyEmailRepository } from "./verify-email.types";
 
@@ -17,7 +18,7 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
             userId,
           },
         }),
-      { errorMessage: "Failed to get email verification token." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
 
@@ -27,29 +28,23 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
         this._db.emailVerificationToken.findFirst({
           where: {
             token,
+            expiresAt: { gte: new Date() },
           },
         }),
-      { errorMessage: "Failed to get email verification token." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
 
-  async create(userId: string): Promise<string> {
-    const token = randomUUID();
-    const expiresAt = new Date(Date.now() + 3600000); // Token expires in 1 hour
-
-    handleAsyncOperation(
+  async saveToken(saveTokenDto: SaveTokenDto): Promise<VerifyEmailToken> {
+    return handleAsyncOperation(
       () =>
         this._db.emailVerificationToken.create({
           data: {
-            token,
-            expiresAt,
-            userId,
+            ...saveTokenDto,
           },
         }),
-      { errorMessage: "Failed to create email verification token." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
     );
-
-    return token;
   }
 
   async deleteMany(userId: string): Promise<void> {
@@ -58,7 +53,7 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
         this._db.emailVerificationToken.deleteMany({
           where: { userId },
         }),
-      { errorMessage: "Failed to delete email verification tokens." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_DELETE }
     );
   }
 }

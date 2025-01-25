@@ -14,10 +14,14 @@ const envSchema = z.object({
   CLIENT_URL: z.string({ message: "CLIENT_URL must be a string" }),
   SESSION_SECRET: z.string().min(8),
   ACCESS_TOKEN_SECRET: z.string().min(8),
-  ACCESS_TOKEN_EXPIRE: z.string().default("20m"),
+  ACCESS_TOKEN_EXPIRES_IN: z.string().default("15m"),
   REFRESH_TOKEN_SECRET: z.string().min(8),
-  REFRESH_TOKEN_EXPIRE: z.string().default("1d"),
+  REFRESH_TOKEN_EXPIRES_IN: z.string().default("1d"),
   REFRESH_TOKEN_COOKIE_NAME: z.string().default("refresh_token"),
+  RESET_PASSWORD_TOKEN_SECRET: z.string().min(8),
+  RESET_PASSWORD_TOKEN_EXPIRES_IN: z.string().default("1h"),
+  VERIFY_EMAIL_TOKEN_SECRET: z.string().min(8),
+  VERIFY_EMAIL_TOKEN_EXPIRES_IN: z.string().default("1d"),
   YOUTUBE_API_URL: z.string().url().includes("www.googleapis.com"),
   YOUTUBE_API_KEY: z.string(),
   GOOGLE_CLIENT_ID: z.string(),
@@ -64,12 +68,20 @@ const envConfig = {
   jwt: {
     access_token: {
       secret: validatedEnv.ACCESS_TOKEN_SECRET,
-      expire: validatedEnv.ACCESS_TOKEN_EXPIRE,
+      expires_in: validatedEnv.ACCESS_TOKEN_EXPIRES_IN,
     },
     refresh_token: {
       secret: validatedEnv.REFRESH_TOKEN_SECRET,
-      expire: validatedEnv.REFRESH_TOKEN_EXPIRE,
+      expires_in: validatedEnv.REFRESH_TOKEN_EXPIRES_IN,
       cookie_name: validatedEnv.REFRESH_TOKEN_COOKIE_NAME,
+    },
+    reset_password_token: {
+      secret: validatedEnv.RESET_PASSWORD_TOKEN_SECRET,
+      expires_in: validatedEnv.RESET_PASSWORD_TOKEN_EXPIRES_IN,
+    },
+    verify_email_token: {
+      secret: validatedEnv.VERIFY_EMAIL_TOKEN_SECRET,
+      expires_in: validatedEnv.VERIFY_EMAIL_TOKEN_EXPIRES_IN,
     },
   },
   youtube: {

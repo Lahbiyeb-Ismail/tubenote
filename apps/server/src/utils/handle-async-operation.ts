@@ -1,4 +1,5 @@
 import { DatabaseError } from "@/errors";
+import { Prisma } from "@prisma/client";
 import logger from "./logger";
 
 /**
@@ -34,8 +35,45 @@ async function handleAsyncOperation<T>(
   try {
     return await operation();
   } catch (error) {
-    logger.error(error);
-    throw new DatabaseError(errorMessage);
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError ||
+      error instanceof Prisma.PrismaClientValidationError ||
+      error instanceof Prisma.PrismaClientUnknownRequestError
+    ) {
+      // Log the detailed error for debugging
+      console.error("Prisma error details:", {
+        errorType: error.constructor.name,
+        errorCode: "code" in error ? error.code : undefined,
+        errorMessage: error.message,
+        errorName: error.name,
+      });
+
+      throw new DatabaseError(`A database error occurred: ${errorMessage}`);
+    }
+
+    if (
+      error instanceof Prisma.PrismaClientInitializationError ||
+      error instanceof Prisma.PrismaClientRustPanicError
+    ) {
+      // Log the critical error
+      console.error("Critical Prisma error:", error);
+
+      throw new DatabaseError(
+        `A critical database error occurred: ${errorMessage}`
+      );
+    }
+
+    if (error instanceof Error) {
+      // Log the unexpected error
+      logger.error(`Unexpected error: ${error}`);
+
+      // Throw a generic error for the client
+      throw new DatabaseError(`An unexpected error occurred: ${errorMessage}`);
+    }
+    // Log the unknown error
+    logger.error(`Unknown error: ${error}`);
+
+    throw new DatabaseError(`Unknow error: ${errorMessage}`);
   }
 }
 

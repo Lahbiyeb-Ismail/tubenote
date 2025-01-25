@@ -1,15 +1,20 @@
-import { ForbiddenError, NotFoundError, UnauthorizedError } from "@/errors";
-import { REFRESH_TOKEN_SECRET } from "@constants/auth.contants";
+import { ForbiddenError, UnauthorizedError } from "@/errors";
+import {
+  REFRESH_TOKEN_EXPIRES_IN,
+  REFRESH_TOKEN_SECRET,
+} from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+
+import { stringToDate } from "@utils/convert-string-to-date";
 
 import { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
 
 import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
 import type { RefreshDto } from "@modules/auth/dtos/refresh.dto";
 
-import type { CreateTokenDto } from "./dtos/create-token.dto";
+import logger from "@/utils/logger";
+import type { SaveTokenDto } from "./dtos/save-token.dto";
 import type { RefreshToken } from "./refresh-token.model";
-
 import type {
   IRefreshTokenRepository,
   IRefreshTokenService,
@@ -20,66 +25,56 @@ export class RefreshTokenService implements IRefreshTokenService {
     private readonly _refreshTokenRepository: IRefreshTokenRepository,
     private readonly _jwtService: IJwtService
   ) {}
+  async refreshToken(refreshDto: RefreshDto): Promise<LoginResponseDto> {
+    const { userId, token } = refreshDto;
 
-  async createToken(createTokenDto: CreateTokenDto): Promise<RefreshToken> {
-    return await this._refreshTokenRepository.create(createTokenDto);
-  }
+    const decodedToken = await this._jwtService.verify({
+      token,
+      secret: REFRESH_TOKEN_SECRET,
+    });
 
-  async findToken(token: string): Promise<RefreshToken | null> {
-    return await this._refreshTokenRepository.find(token);
-  }
+    // Ensure the decoded token contains a valid userId
+    if (
+      typeof decodedToken.userId !== "string" ||
+      decodedToken.userId !== userId
+    ) {
+      await this._refreshTokenRepository.deleteAll(userId);
 
-  async deleteToken(token: string): Promise<void> {
-    const refreshToken = await this._refreshTokenRepository.find(token);
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
+    }
 
-    if (!refreshToken) {
-      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
+    // Check if the token exists in the database
+    const refreshTokenFromDB =
+      await this._refreshTokenRepository.findValidToken(token);
+
+    // Detected refresh token reuse!
+    if (!refreshTokenFromDB) {
+      logger.warn(`Detected refresh token reuse for user ${userId}`);
+
+      await this._refreshTokenRepository.deleteAll(userId);
+
+      throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
     }
 
     await this._refreshTokenRepository.delete(token);
+
+    const { accessToken, refreshToken } =
+      this._jwtService.generateAuthTokens(userId);
+
+    await this._refreshTokenRepository.saveToken({
+      userId,
+      token: refreshToken,
+      expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+    });
+
+    return { accessToken, refreshToken };
   }
 
   async deleteAllTokens(userId: string): Promise<void> {
     await this._refreshTokenRepository.deleteAll(userId);
   }
 
-  async refreshToken(refreshDto: RefreshDto): Promise<LoginResponseDto> {
-    const { userId, token } = refreshDto;
-
-    const payload = await this._jwtService.verify({
-      token,
-      secret: REFRESH_TOKEN_SECRET,
-    });
-
-    if (!payload) {
-      await this.deleteAllTokens(userId);
-
-      throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
-    }
-
-    if (payload.userId !== userId) {
-      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
-    }
-
-    const refreshTokenFromDB = await this.findToken(token);
-
-    // Detected refresh token reuse!
-    if (!refreshTokenFromDB) {
-      await this.deleteAllTokens(userId);
-
-      throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
-    }
-
-    await this.deleteToken(token);
-
-    const { accessToken, refreshToken } =
-      this._jwtService.generateAuthTokens(userId);
-
-    await this.createToken({
-      userId,
-      token: refreshToken,
-    });
-
-    return { accessToken, refreshToken };
+  async saveToken(saveTokenDto: SaveTokenDto): Promise<RefreshToken> {
+    return await this._refreshTokenRepository.saveToken(saveTokenDto);
   }
 }

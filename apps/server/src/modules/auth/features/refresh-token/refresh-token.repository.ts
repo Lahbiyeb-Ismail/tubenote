@@ -6,27 +6,28 @@ import type { RefreshToken } from "./refresh-token.model";
 import type { IRefreshTokenRepository } from "./refresh-token.types";
 
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
-import type { CreateTokenDto } from "./dtos/create-token.dto";
+import type { SaveTokenDto } from "./dtos/save-token.dto";
 
 export class RefreshTokenRepository implements IRefreshTokenRepository {
   constructor(private readonly _db: PrismaClient) {}
 
-  async create(createTokenDto: CreateTokenDto): Promise<RefreshToken> {
+  async saveToken(saveTokenDto: SaveTokenDto): Promise<RefreshToken> {
     return handleAsyncOperation(
       () =>
         this._db.refreshToken.create({
-          data: { ...createTokenDto },
+          data: { ...saveTokenDto },
         }),
       { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
     );
   }
 
-  async find(token: string): Promise<RefreshToken | null> {
+  async findValidToken(token: string): Promise<RefreshToken | null> {
     return handleAsyncOperation(
       () =>
         this._db.refreshToken.findUnique({
           where: {
             token,
+            expiresAt: { gt: new Date() },
           },
         }),
       { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }

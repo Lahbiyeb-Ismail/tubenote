@@ -6,6 +6,8 @@ import type { IGoogleAuthService } from "./google.types";
 
 import type { User } from "@modules/user/user.model";
 
+import { REFRESH_TOKEN_EXPIRES_IN } from "@/constants/auth.contants";
+import { stringToDate } from "@/utils/convert-string-to-date";
 import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
 import type { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
 
@@ -28,9 +30,10 @@ export class GoogleAuthService implements IGoogleAuthService {
       user.id
     );
 
-    await this._refreshTokenService.createToken({
+    await this._refreshTokenService.saveToken({
       userId: user.id,
       token: refreshToken,
+      expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
     });
 
     return { accessToken, refreshToken };

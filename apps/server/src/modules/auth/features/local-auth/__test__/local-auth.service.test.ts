@@ -23,7 +23,7 @@ describe("LocalAuthService", () => {
   };
 
   const mockRefreshTokenService = {
-    createToken: jest.fn(),
+    saveToken: jest.fn(),
   };
 
   const mockMailSenderService = {
@@ -138,7 +138,7 @@ describe("LocalAuthService", () => {
 
     beforeEach(() => {
       mockJwtService.generateAuthTokens.mockReturnValue(mockTokens);
-      mockRefreshTokenService.createToken.mockResolvedValue(undefined);
+      mockRefreshTokenService.saveToken.mockResolvedValue(undefined);
     });
 
     it("should successfully login a user", async () => {
@@ -158,9 +158,10 @@ describe("LocalAuthService", () => {
       expect(mockJwtService.generateAuthTokens).toHaveBeenCalledWith(
         mockUser.id
       );
-      expect(mockRefreshTokenService.createToken).toHaveBeenCalledWith({
+      expect(mockRefreshTokenService.saveToken).toHaveBeenCalledWith({
         userId: mockUser.id,
         token: mockTokens.refreshToken,
+        expiresAt: expect.any(Date),
       });
     });
 
@@ -199,7 +200,7 @@ describe("LocalAuthService", () => {
       mockUserService.getUserByEmail.mockResolvedValue(mockUser);
       mockPasswordHasherService.comparePassword.mockResolvedValue(true);
       const error = new Error("Token creation failed");
-      mockRefreshTokenService.createToken.mockRejectedValue(error);
+      mockRefreshTokenService.saveToken.mockRejectedValue(error);
 
       await expect(localAuthService.loginUser(loginUserDto)).rejects.toThrow(
         error
