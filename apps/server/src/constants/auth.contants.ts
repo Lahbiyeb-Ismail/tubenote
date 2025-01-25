@@ -16,7 +16,7 @@ export const ACCESS_TOKEN_SECRET = envConfig.jwt.access_token.secret;
  * The expiration time for the access token.
  * This value is retrieved from the environment configuration.
  */
-export const ACCESS_TOKEN_EXPIRE = envConfig.jwt.access_token.expire;
+export const ACCESS_TOKEN_EXPIRES_IN = envConfig.jwt.access_token.expires_in;
 
 /**
  * Secret key used for signing and verifying refresh tokens.

@@ -14,7 +14,7 @@ const envSchema = z.object({
   CLIENT_URL: z.string({ message: "CLIENT_URL must be a string" }),
   SESSION_SECRET: z.string().min(8),
   ACCESS_TOKEN_SECRET: z.string().min(8),
-  ACCESS_TOKEN_EXPIRE: z.string().default("20m"),
+  ACCESS_TOKEN_EXPIRES_IN: z.string().default("15m"),
   REFRESH_TOKEN_SECRET: z.string().min(8),
   REFRESH_TOKEN_EXPIRES_IN: z.string().default("1d"),
   REFRESH_TOKEN_COOKIE_NAME: z.string().default("refresh_token"),
@@ -68,7 +68,7 @@ const envConfig = {
   jwt: {
     access_token: {
       secret: validatedEnv.ACCESS_TOKEN_SECRET,
-      expire: validatedEnv.ACCESS_TOKEN_EXPIRE,
+      expires_in: validatedEnv.ACCESS_TOKEN_EXPIRES_IN,
     },
     refresh_token: {
       secret: validatedEnv.REFRESH_TOKEN_SECRET,
