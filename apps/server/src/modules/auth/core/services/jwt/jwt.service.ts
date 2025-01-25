@@ -1,16 +1,22 @@
 import jwt from "jsonwebtoken";
 
-import envConfig from "@config/env.config";
+import logger from "@utils/logger";
+
+import {
+  ACCESS_TOKEN_EXPIRES_IN,
+  ACCESS_TOKEN_SECRET,
+  REFRESH_TOKEN_EXPIRES_IN,
+  REFRESH_TOKEN_SECRET,
+} from "@constants/auth.contants";
+import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+
+import { BadRequestError } from "@/errors";
 
 import type { JwtPayload } from "@/types";
-import type { IJwtService } from "./jwt.types";
-
-import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
-import { BadRequestError } from "@/errors";
-import logger from "@/utils/logger";
 import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
 import type { SignTokenDto } from "./dtos/sign-token.dto";
 import type { VerifyTokenDto } from "./dtos/verify-token.dto";
+import type { IJwtService } from "./jwt.types";
 
 export class JwtService implements IJwtService {
   async verify(verifyTokenDto: VerifyTokenDto): Promise<JwtPayload> {
@@ -41,14 +47,14 @@ export class JwtService implements IJwtService {
   generateAuthTokens(userId: string): LoginResponseDto {
     const accessToken = this.sign({
       userId,
-      secret: envConfig.jwt.access_token.secret,
-      expiresIn: envConfig.jwt.access_token.expire,
+      secret: ACCESS_TOKEN_SECRET,
+      expiresIn: ACCESS_TOKEN_EXPIRES_IN,
     });
 
     const refreshToken = this.sign({
       userId,
-      secret: envConfig.jwt.refresh_token.secret,
-      expiresIn: envConfig.jwt.refresh_token.expire,
+      secret: REFRESH_TOKEN_SECRET,
+      expiresIn: REFRESH_TOKEN_EXPIRES_IN,
     });
 
     return {
