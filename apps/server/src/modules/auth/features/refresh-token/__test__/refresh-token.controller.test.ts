@@ -22,10 +22,8 @@ describe("RefreshTokenController", () => {
 
   // Mock the refresh token service
   const mockRefreshTokenService: jest.Mocked<IRefreshTokenService> = {
-    createToken: jest.fn(),
+    saveToken: jest.fn(),
     deleteAllTokens: jest.fn(),
-    findToken: jest.fn(),
-    deleteToken: jest.fn(),
     refreshToken: jest.fn(),
   };
 

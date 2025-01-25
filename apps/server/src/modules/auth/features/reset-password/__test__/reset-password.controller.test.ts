@@ -17,9 +17,6 @@ describe("ResetPassowrdController", () => {
 
   // Mock the refresh token service
   const mockResetPasswordService: jest.Mocked<IResetPasswordService> = {
-    createToken: jest.fn(),
-    findResetToken: jest.fn(),
-    isResetTokenExpired: jest.fn(),
     resetPassword: jest.fn(),
     sendResetToken: jest.fn(),
     verifyResetToken: jest.fn(),
