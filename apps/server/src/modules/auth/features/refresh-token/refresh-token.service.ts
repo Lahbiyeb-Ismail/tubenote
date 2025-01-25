@@ -12,6 +12,7 @@ import { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
 import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
 import type { RefreshDto } from "@modules/auth/dtos/refresh.dto";
 
+import logger from "@/utils/logger";
 import type {
   IRefreshTokenRepository,
   IRefreshTokenService,
@@ -30,17 +31,24 @@ export class RefreshTokenService implements IRefreshTokenService {
       secret: REFRESH_TOKEN_SECRET,
     });
 
-    if (decodedToken.userId !== userId) {
+    // Ensure the decoded token contains a valid userId
+    if (
+      typeof decodedToken.userId !== "string" ||
+      decodedToken.userId !== userId
+    ) {
       await this._refreshTokenRepository.deleteAll(userId);
 
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
+    // Check if the token exists in the database
     const refreshTokenFromDB =
       await this._refreshTokenRepository.findValidToken(token);
 
     // Detected refresh token reuse!
     if (!refreshTokenFromDB) {
+      logger.warn(`Detected refresh token reuse for user ${userId}`);
+
       await this._refreshTokenRepository.deleteAll(userId);
 
       throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
