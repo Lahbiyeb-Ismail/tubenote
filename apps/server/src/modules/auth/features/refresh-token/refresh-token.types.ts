@@ -17,6 +17,8 @@ export interface IRefreshTokenRepository {
 
 export interface IRefreshTokenService {
   refreshToken(refreshDto: RefreshDto): Promise<LoginResponseDto>;
+  deleteAllTokens(userId: string): Promise<void>;
+  saveToken(saveTokenDto: SaveTokenDto): Promise<RefreshToken>;
 }
 
 export interface IRefreshTokenController {
