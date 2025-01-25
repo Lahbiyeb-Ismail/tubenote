@@ -13,6 +13,8 @@ import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
 import type { RefreshDto } from "@modules/auth/dtos/refresh.dto";
 
 import logger from "@/utils/logger";
+import type { SaveTokenDto } from "./dtos/save-token.dto";
+import type { RefreshToken } from "./refresh-token.model";
 import type {
   IRefreshTokenRepository,
   IRefreshTokenService,
@@ -66,5 +68,13 @@ export class RefreshTokenService implements IRefreshTokenService {
     });
 
     return { accessToken, refreshToken };
+  }
+
+  async deleteAllTokens(userId: string): Promise<void> {
+    await this._refreshTokenRepository.deleteAll(userId);
+  }
+
+  async saveToken(saveTokenDto: SaveTokenDto): Promise<RefreshToken> {
+    return await this._refreshTokenRepository.saveToken(saveTokenDto);
   }
 }
