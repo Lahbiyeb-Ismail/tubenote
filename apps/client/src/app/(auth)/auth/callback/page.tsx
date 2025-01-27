@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { exchangeGoogleCodeForAccessToken } from "@/actions/auth.actions";
+import { exchangeOauthCodeForAuthTokens } from "@/actions/auth.actions";
 import { setStorageValue } from "@/utils/localStorage";
 
 export default function AuthCallback() {
@@ -15,7 +15,7 @@ export default function AuthCallback() {
   const exchangeAttempted = useRef(false);
 
   useEffect(() => {
-    async function exchangeCodeWithAccessToken() {
+    async function exchangeOauthCodeWithAccessToken() {
       if (exchangeAttempted.current) return;
 
       exchangeAttempted.current = true;
@@ -29,7 +29,7 @@ export default function AuthCallback() {
       }
 
       try {
-        const accessToken = await exchangeGoogleCodeForAccessToken(code);
+        const accessToken = await exchangeOauthCodeForAuthTokens(code);
 
         setStorageValue("accessToken", accessToken);
 
@@ -43,7 +43,7 @@ export default function AuthCallback() {
       }
     }
 
-    exchangeCodeWithAccessToken();
+    exchangeOauthCodeWithAccessToken();
   }, [searchParams, router]);
 
   return (

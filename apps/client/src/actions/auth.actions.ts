@@ -80,16 +80,16 @@ export async function refreshAccessToken(): Promise<void> {
 }
 
 /**
- * Exchanges a Google authorization code for an access token.
+ * Exchanges a Oauth authorization code for an access token.
  *
- * @param code - The Google authorization code to exchange.
+ * @param code - The Oauth authorization code to exchange.
  * @returns A promise that resolves to the access token as a string.
  */
-export async function exchangeGoogleCodeForAccessToken(
+export async function exchangeOauthCodeForAuthTokens(
   code: string
 ): Promise<string> {
   const response = await axios.post(
-    `${API_URL}/auth/google/exchange`,
+    `${API_URL}/auth/exchange-oauth-code`,
     { code },
     { withCredentials: true }
   );
