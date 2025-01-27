@@ -2,10 +2,11 @@ import { UnauthorizedError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { GoogleAuthService } from "../google.service";
 
+import type { ICacheService } from "@/modules/utils/cache/cache.types";
 import { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
 import { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
 
-import type { LoginResponseDto } from "@/modules/auth/dtos/login-response.dto";
+import type { OauthLoginResponseDto } from "@/modules/auth/dtos/oauth-login-response.dto";
 import type { RefreshToken } from "@/modules/auth/features/refresh-token/refresh-token.model";
 import type { User } from "@modules/user/user.model";
 
@@ -13,6 +14,7 @@ describe("GoogleAuthService", () => {
   let googleAuthService: GoogleAuthService;
   let mockJwtService: jest.Mocked<IJwtService>;
   let mockRefreshTokenService: jest.Mocked<IRefreshTokenService>;
+  let mockCacheService: jest.Mocked<ICacheService>;
 
   const mockUser: User = {
     id: "user-id-123",
@@ -45,18 +47,30 @@ describe("GoogleAuthService", () => {
       refreshToken: jest.fn(),
       deleteAllTokens: jest.fn(),
     };
+
+    mockCacheService = {
+      get: jest.fn(),
+      set: jest.fn(),
+      del: jest.fn(),
+      flush: jest.fn(),
+      getStats: jest.fn(),
+    };
+
     googleAuthService = new GoogleAuthService(
       mockJwtService,
-      mockRefreshTokenService
+      mockRefreshTokenService,
+      mockCacheService
     );
   });
 
   describe("googleLogin", () => {
     it("should generate tokens and save refresh token if user is valid", async () => {
-      const tokens: LoginResponseDto = {
+      const tokens: OauthLoginResponseDto = {
         accessToken: "access-token",
         refreshToken: "refresh-token",
+        temporaryCode: "temporary-oauth-code",
       };
+
       mockJwtService.generateAuthTokens.mockReturnValue(tokens);
       mockRefreshTokenService.saveToken.mockResolvedValue(mockRefreshToken);
 
@@ -70,7 +84,8 @@ describe("GoogleAuthService", () => {
         token: tokens.refreshToken,
         expiresAt: expect.any(Date), // Ensure the date is correctly parsed
       });
-      expect(result).toEqual(tokens);
+
+      expect(result.accessToken).toEqual(tokens.accessToken);
     });
 
     it("should throw UnauthorizedError if user email is not verified", async () => {
