@@ -78,3 +78,21 @@ export async function refreshAccessToken(): Promise<void> {
     console.error("Error refreshing token:", error);
   }
 }
+
+/**
+ * Exchanges a Google authorization code for an access token.
+ *
+ * @param code - The Google authorization code to exchange.
+ * @returns A promise that resolves to the access token as a string.
+ */
+export async function exchangeGoogleCodeForAccessToken(
+  code: string
+): Promise<string> {
+  const response = await axios.post(
+    `${API_URL}/auth/google/exchange`,
+    { code },
+    { withCredentials: true }
+  );
+
+  return response.data.accessToken;
+}
