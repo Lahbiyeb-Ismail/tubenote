@@ -1,18 +1,31 @@
 import type { Response } from "express";
 
-import { refreshTokenCookieConfig } from "@config/cookie.config";
-import envConfig from "@config/env.config";
-import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
-
 import type { TypedRequest } from "@/types";
 
-import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import { UnauthorizedError } from "@/errors";
+
+import { refreshTokenCookieConfig } from "@config/cookie.config";
+import envConfig from "@config/env.config";
+
+import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
+import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+
+import { IGoogleAuthController, IGoogleAuthService } from "./google.types";
+
 import type { User } from "@modules/user/user.model";
-import type { IGoogleAuthController, IGoogleAuthService } from "./google.types";
 
 export class GoogleController implements IGoogleAuthController {
   constructor(private readonly _googleAuthService: IGoogleAuthService) {}
+
+  private setRefreshTokenCookie(res: Response, refreshToken: string) {
+    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+  }
+
+  private redirectWithTemporaryCode(res: Response, temporaryCode: string) {
+    res.redirect(
+      `${envConfig.client.url}/auth/callback?code=${encodeURIComponent(temporaryCode)}`
+    );
+  }
 
   /**
    * Logs in a user using Google authentication.
@@ -26,21 +39,11 @@ export class GoogleController implements IGoogleAuthController {
 
     const user = req.user as User;
 
-    const { accessToken, refreshToken } =
+    const { refreshToken, temporaryCode } =
       await this._googleAuthService.googleLogin(user);
 
     this.setRefreshTokenCookie(res, refreshToken);
 
-    this.redirectWithAccessToken(res, accessToken);
-  }
-
-  private setRefreshTokenCookie(res: Response, refreshToken: string) {
-    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
-  }
-
-  private redirectWithAccessToken(res: Response, accessToken: string) {
-    res.redirect(
-      `${envConfig.client.url}/auth/callback?access_token=${encodeURIComponent(accessToken)}`
-    );
+    this.redirectWithTemporaryCode(res, temporaryCode);
   }
 }
