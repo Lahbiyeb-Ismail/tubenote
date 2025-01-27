@@ -2,7 +2,7 @@ import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 
 import { googleAuthConfig } from "./config/google-auth.config";
-import { GoogleAuthStrategy } from "./core/strategies/google.strategy";
+import { GoogleAuthStrategy } from "./providers/google/google.strategy";
 
 import { userService } from "@modules/user/user.module";
 import { refreshTokenService } from "./features/refresh-token/refresh-token.module";
