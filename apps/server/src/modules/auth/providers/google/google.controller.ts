@@ -6,6 +6,8 @@ import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 
 import type { TypedRequest } from "@/types";
 
+import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
+import { UnauthorizedError } from "@/errors";
 import type { User } from "@modules/user/user.model";
 import type { IGoogleAuthController, IGoogleAuthService } from "./google.types";
 
@@ -18,15 +20,27 @@ export class GoogleController implements IGoogleAuthController {
    * @param res - The response object.
    */
   async googleLogin(req: TypedRequest, res: Response) {
+    if (!req.user) {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
+    }
+
     const user = req.user as User;
 
     const { accessToken, refreshToken } =
       await this._googleAuthService.googleLogin(user);
 
-    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+    this.setRefreshTokenCookie(res, refreshToken);
 
+    this.redirectWithAccessToken(res, accessToken);
+  }
+
+  private setRefreshTokenCookie(res: Response, refreshToken: string) {
+    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+  }
+
+  private redirectWithAccessToken(res: Response, accessToken: string) {
     res.redirect(
-      `${envConfig.client.url}/auth/callback?access_token=${encodeURIComponent(JSON.stringify(accessToken))}`
+      `${envConfig.client.url}/auth/callback?access_token=${encodeURIComponent(accessToken)}`
     );
   }
 }
