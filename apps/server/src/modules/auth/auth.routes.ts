@@ -5,7 +5,7 @@ import isAuthenticated from "@middlewares/auth.middleware";
 
 import { authController } from "./auth.module";
 
-import { oauthTemporaryCodeSchema } from "./schemas/oauth-temp-code.schema";
+import { oauthCodeSchema } from "./schemas";
 
 import localAuthRoutes from "./features/local-auth/local-auth.routes";
 import refreshTokenRoutes from "./features/refresh-token/refresh-token.routes";
@@ -32,7 +32,7 @@ router.use("/", refreshTokenRoutes);
 
 router
   .route("/exchange-oauth-code")
-  .post(validateRequest({ body: oauthTemporaryCodeSchema }), (req, res) =>
+  .post(validateRequest({ body: oauthCodeSchema }), (req, res) =>
     authController.exchangeOauthCodeForTokens(req, res)
   );
 

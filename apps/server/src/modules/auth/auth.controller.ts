@@ -7,7 +7,7 @@ import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 import type { TypedRequest } from "@/types";
 
 import type { IAuthController, IAuthService } from "./auth.types";
-import type { OauthCodeBodyDto } from "./dtos/oauth-temp-code-body.dto";
+import type { OAuthCodeDto } from "./dtos";
 
 /**
  * Controller for handling authentication-related operations.
@@ -34,7 +34,7 @@ export class AuthController implements IAuthController {
   }
 
   async exchangeOauthCodeForTokens(
-    req: TypedRequest<OauthCodeBodyDto>,
+    req: TypedRequest<OAuthCodeDto>,
     res: Response
   ): Promise<void> {
     const { code } = req.body;

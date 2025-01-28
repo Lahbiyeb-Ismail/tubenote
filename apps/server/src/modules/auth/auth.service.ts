@@ -8,9 +8,7 @@ import type { IAuthService } from "./auth.types";
 import type { IRefreshTokenService } from "./features/refresh-token/refresh-token.types";
 
 import type { ICacheService } from "../utils/cache/cache.types";
-import type { LoginResponseDto } from "./dtos/login-response.dto";
-import type { LogoutUserDto } from "./dtos/logout-user.dto";
-import type { OAuthTemporaryCodePayloadDto } from "./dtos/oauth-temp-code-payload.dto";
+import type { AuthResponseDto, LogoutDto, OAuthCodePayloadDto } from "./dtos";
 
 export class AuthService implements IAuthService {
   constructor(
@@ -18,7 +16,7 @@ export class AuthService implements IAuthService {
     private readonly _cacheService: ICacheService
   ) {}
 
-  async logoutUser(logoutUserDto: LogoutUserDto): Promise<void> {
+  async logoutUser(logoutUserDto: LogoutDto): Promise<void> {
     const { userId, refreshToken } = logoutUserDto;
 
     if (!refreshToken || !userId) {
@@ -28,8 +26,8 @@ export class AuthService implements IAuthService {
     await this._refreshTokenService.deleteAllTokens(userId);
   }
 
-  async exchangeOauthCodeForTokens(code: string): Promise<LoginResponseDto> {
-    const codeData = this._cacheService.get<OAuthTemporaryCodePayloadDto>(code);
+  async exchangeOauthCodeForTokens(code: string): Promise<AuthResponseDto> {
+    const codeData = this._cacheService.get<OAuthCodePayloadDto>(code);
 
     logger.info(`Retrieved codeData: ${codeData}`);
 
