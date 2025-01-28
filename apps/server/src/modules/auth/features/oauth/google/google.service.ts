@@ -7,14 +7,13 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { stringToDate } from "@utils/convert-string-to-date";
 import logger from "@utils/logger";
 
-import { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
+import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 import { ICacheService } from "@modules/utils/cache/cache.types";
 import { IGoogleAuthService } from "./google.types";
 
 import type { User } from "@modules/user/user.model";
 
-import type { OauthLoginResponseDto } from "@modules/auth/dtos/oauth-login-response.dto";
-import type { OAuthTemporaryCodePayloadDto } from "@modules/auth/dtos/oauth-temp-code-payload.dto";
+import type { OAuthCodePayloadDto, OAuthResponseDto } from "@modules/auth/dtos";
 import type { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
 
 export class GoogleAuthService implements IGoogleAuthService {
@@ -27,11 +26,11 @@ export class GoogleAuthService implements IGoogleAuthService {
   /**
    * Authenticates a user using Google OAuth and generates access and refresh tokens.
    * @param user - The user object retrieved from Google OAuth.
-   * @returns A promise resolving to a LoginResponseDto containing access and refresh tokens.
+   * @returns A promise resolving to a AuthResponseDto containing access and refresh tokens.
    * @throws NotFoundError if the user is not found.
    * @throws UnauthorizedError if the user's email is not verified.
    */
-  async googleLogin(user: User): Promise<OauthLoginResponseDto> {
+  async googleLogin(user: User): Promise<OAuthResponseDto> {
     if (!user || !user.id) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
@@ -62,16 +61,13 @@ export class GoogleAuthService implements IGoogleAuthService {
   }
 
   async generateTemporaryCode(
-    temporaryCodePayloadDto: OAuthTemporaryCodePayloadDto
+    temporaryCodePayloadDto: OAuthCodePayloadDto
   ): Promise<string> {
     const code = uuidv4();
 
-    const setResult = this._cacheService.set<OAuthTemporaryCodePayloadDto>(
-      code,
-      {
-        ...temporaryCodePayloadDto,
-      }
-    );
+    const setResult = this._cacheService.set<OAuthCodePayloadDto>(code, {
+      ...temporaryCodePayloadDto,
+    });
 
     logger.info(`Code ${code} set in cache: ${setResult}`);
     logger.info(`Cache stats after set: ${this._cacheService.getStats()}`);

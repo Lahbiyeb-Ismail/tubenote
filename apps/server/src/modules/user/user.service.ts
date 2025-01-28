@@ -4,7 +4,7 @@ import { BadRequestError, ConflictError, NotFoundError } from "@/errors";
 
 import type { User } from "./user.model";
 
-import type { IPasswordHasherService } from "@modules/auth/core/services/password-hasher/password-hasher.types";
+import type { IPasswordHasherService } from "@modules/auth/utils/services/password-hasher/password-hasher.types";
 import type { IUserRepository, IUserService } from "./user.types";
 
 import type { CreateUserDto } from "./dtos/create-user.dto";

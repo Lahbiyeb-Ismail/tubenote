@@ -17,8 +17,8 @@ import { VerifyEmailService } from "../verify-email.service";
 import type { User } from "@modules/user/user.model";
 import type { VerifyEmailToken } from "../verify-email.model";
 
-import type { SignTokenDto } from "@/modules/auth/core/services/jwt/dtos/sign-token.dto";
-import type { IJwtService } from "@/modules/auth/core/services/jwt/jwt.types";
+import type { SignTokenDto } from "@/modules/auth/utils/services/jwt/dtos/sign-token.dto";
+import type { IJwtService } from "@/modules/auth/utils/services/jwt/jwt.types";
 import type { JwtPayload } from "@/types";
 import type { IUserService } from "@modules/user/user.types";
 import type { SaveTokenDto } from "../dtos/save-token.dto";

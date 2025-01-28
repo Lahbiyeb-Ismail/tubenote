@@ -4,8 +4,8 @@ import type { TypedRequest } from "@/types";
 
 import type { RefreshToken } from "./refresh-token.model";
 
-import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
-import type { RefreshDto } from "@modules/auth/dtos/refresh.dto";
+import type { AuthResponseDto, RefreshDto } from "@modules/auth/dtos";
+
 import type { SaveTokenDto } from "./dtos/save-token.dto";
 
 export interface IRefreshTokenRepository {
@@ -16,7 +16,7 @@ export interface IRefreshTokenRepository {
 }
 
 export interface IRefreshTokenService {
-  refreshToken(refreshDto: RefreshDto): Promise<LoginResponseDto>;
+  refreshToken(refreshDto: RefreshDto): Promise<AuthResponseDto>;
   deleteAllTokens(userId: string): Promise<void>;
   saveToken(saveTokenDto: SaveTokenDto): Promise<RefreshToken>;
 }

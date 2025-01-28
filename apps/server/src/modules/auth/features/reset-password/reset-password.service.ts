@@ -8,7 +8,7 @@ import {
   RESET_PASSWORD_TOKEN_SECRET,
 } from "@/constants/auth.contants";
 import { stringToDate } from "@/utils/convert-string-to-date";
-import type { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
+import type { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
 import type { IUserService } from "@modules/user/user.types";
 import type {

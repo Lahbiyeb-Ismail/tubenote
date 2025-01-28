@@ -1,7 +1,9 @@
 import { ForbiddenError, NotFoundError, UnauthorizedError } from "@/errors";
-import type { RegisterUserDto } from "@/modules/auth/dtos/register-user.dto";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+
 import { LocalAuthService } from "../local-auth.service";
+
+import type { RegisterDto } from "@/modules/auth/dtos";
 
 describe("LocalAuthService", () => {
   // Mock dependencies
@@ -60,7 +62,7 @@ describe("LocalAuthService", () => {
   });
 
   describe("LocalAuthService - registerUser method", () => {
-    const registerUserDto: RegisterUserDto = {
+    const registerUserDto: RegisterDto = {
       email: "test@example.com",
       password: "password123",
       username: "Test User",
@@ -131,7 +133,7 @@ describe("LocalAuthService", () => {
   });
 
   describe("LocalAuthService - loginUser method", () => {
-    const loginUserDto = {
+    const LoginDto = {
       email: "test@example.com",
       password: "password123",
     };
@@ -145,14 +147,14 @@ describe("LocalAuthService", () => {
       mockUserService.getUserByEmail.mockResolvedValue(mockUser);
       mockPasswordHasherService.comparePassword.mockResolvedValue(true);
 
-      const result = await localAuthService.loginUser(loginUserDto);
+      const result = await localAuthService.loginUser(LoginDto);
 
       expect(result).toEqual(mockTokens);
       expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(
-        loginUserDto.email
+        LoginDto.email
       );
       expect(mockPasswordHasherService.comparePassword).toHaveBeenCalledWith({
-        password: loginUserDto.password,
+        password: LoginDto.password,
         hashedPassword: mockUser.password,
       });
       expect(mockJwtService.generateAuthTokens).toHaveBeenCalledWith(
@@ -168,7 +170,7 @@ describe("LocalAuthService", () => {
     it("should throw NotFoundError if user does not exist", async () => {
       mockUserService.getUserByEmail.mockResolvedValue(null);
 
-      await expect(localAuthService.loginUser(loginUserDto)).rejects.toThrow(
+      await expect(localAuthService.loginUser(LoginDto)).rejects.toThrow(
         new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
       );
       expect(mockPasswordHasherService.comparePassword).not.toHaveBeenCalled();
@@ -180,7 +182,7 @@ describe("LocalAuthService", () => {
         isEmailVerified: false,
       });
 
-      await expect(localAuthService.loginUser(loginUserDto)).rejects.toThrow(
+      await expect(localAuthService.loginUser(LoginDto)).rejects.toThrow(
         new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED)
       );
       expect(mockPasswordHasherService.comparePassword).not.toHaveBeenCalled();
@@ -190,7 +192,7 @@ describe("LocalAuthService", () => {
       mockUserService.getUserByEmail.mockResolvedValue(mockUser);
       mockPasswordHasherService.comparePassword.mockResolvedValue(false);
 
-      await expect(localAuthService.loginUser(loginUserDto)).rejects.toThrow(
+      await expect(localAuthService.loginUser(LoginDto)).rejects.toThrow(
         new ForbiddenError(ERROR_MESSAGES.INVALID_CREDENTIALS)
       );
       expect(mockJwtService.generateAuthTokens).not.toHaveBeenCalled();
@@ -202,9 +204,7 @@ describe("LocalAuthService", () => {
       const error = new Error("Token creation failed");
       mockRefreshTokenService.saveToken.mockRejectedValue(error);
 
-      await expect(localAuthService.loginUser(loginUserDto)).rejects.toThrow(
-        error
-      );
+      await expect(localAuthService.loginUser(LoginDto)).rejects.toThrow(error);
     });
   });
 

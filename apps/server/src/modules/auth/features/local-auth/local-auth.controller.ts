@@ -5,8 +5,8 @@ import type { TypedRequest } from "@/types";
 import { refreshTokenCookieConfig } from "@config/cookie.config";
 import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 
-import type { LoginUserDto } from "@modules/auth/dtos/login-user.dto";
-import type { RegisterUserDto } from "@modules/auth/dtos/register-user.dto";
+import type { LoginDto, RegisterDto } from "@modules/auth/dtos";
+
 import type {
   ILocalAuthController,
   ILocalAuthService,
@@ -20,7 +20,7 @@ export class LocalAuthController implements ILocalAuthController {
    * @param req - The request object containing user registration credentials.
    * @param res - The response object.
    */
-  async register(req: TypedRequest<RegisterUserDto>, res: Response) {
+  async register(req: TypedRequest<RegisterDto>, res: Response) {
     const user = await this._localAuthService.registerUser(req.body);
 
     res.status(httpStatus.CREATED).json({
@@ -34,7 +34,7 @@ export class LocalAuthController implements ILocalAuthController {
    * @param req - The request object containing user login credentials.
    * @param res - The response object.
    */
-  async login(req: TypedRequest<LoginUserDto>, res: Response) {
+  async login(req: TypedRequest<LoginDto>, res: Response) {
     const { accessToken, refreshToken } =
       await this._localAuthService.loginUser(req.body);
 

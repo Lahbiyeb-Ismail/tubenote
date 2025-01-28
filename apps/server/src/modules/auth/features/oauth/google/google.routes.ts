@@ -3,8 +3,7 @@ import passport from "passport";
 
 import envConfig from "@config/env.config";
 
-import { googleAuthStrategy } from "@modules/auth/auth.module";
-import { googleAuthController } from "./google.module";
+import { googleAuthController, googleAuthStrategy } from "./google.module";
 
 passport.use(googleAuthStrategy.getStrategy());
 

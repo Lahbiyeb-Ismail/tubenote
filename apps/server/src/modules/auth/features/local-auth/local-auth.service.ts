@@ -1,22 +1,28 @@
 import { ForbiddenError, NotFoundError, UnauthorizedError } from "@/errors";
+
+import { REFRESH_TOKEN_EXPIRES_IN } from "@/constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import { stringToDate } from "@utils/convert-string-to-date";
 
+import { ILocalAuthService } from "./local-auth.types";
+
+import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
+import { IPasswordHasherService } from "@modules/auth/utils/services/password-hasher/password-hasher.types";
+
+import { IMailSenderService } from "@modules/mailSender/mail-sender.types";
+import { IUserService } from "@modules/user/user.types";
+
+import { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
+import type { IVerifyEmailService } from "@modules/auth/features/verify-email/verify-email.types";
+
 import type { User } from "@modules/user/user.model";
 
-import { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
-import type { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
-import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
-import type { IUserService } from "@modules/user/user.types";
-import type { ILocalAuthService } from "./local-auth.types";
-
-import { REFRESH_TOKEN_EXPIRES_IN } from "@/constants/auth.contants";
-import type { IPasswordHasherService } from "@modules/auth/core/services/password-hasher/password-hasher.types";
-import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
-import type { LoginUserDto } from "@modules/auth/dtos/login-user.dto";
-import type { RegisterUserDto } from "@modules/auth/dtos/register-user.dto";
-import type { IVerifyEmailService } from "../verify-email/verify-email.types";
+import type {
+  AuthResponseDto,
+  LoginDto,
+  RegisterDto,
+} from "@modules/auth/dtos";
 
 export class LocalAuthService implements ILocalAuthService {
   constructor(
@@ -28,7 +34,7 @@ export class LocalAuthService implements ILocalAuthService {
     private readonly _mailSenderService: IMailSenderService
   ) {}
 
-  async registerUser(registerUserDto: RegisterUserDto): Promise<User> {
+  async registerUser(registerUserDto: RegisterDto): Promise<User> {
     const newUser = await this._userService.createUser(registerUserDto);
 
     const verifyEmailToken = await this._verifyEmailService.generateToken(
@@ -43,8 +49,8 @@ export class LocalAuthService implements ILocalAuthService {
     return newUser;
   }
 
-  async loginUser(loginUserDto: LoginUserDto): Promise<LoginResponseDto> {
-    const { email, password } = loginUserDto;
+  async loginUser(LoginDto: LoginDto): Promise<AuthResponseDto> {
+    const { email, password } = LoginDto;
 
     const user = await this._userService.getUserByEmail(email);
 

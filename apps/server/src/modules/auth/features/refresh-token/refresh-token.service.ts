@@ -6,13 +6,12 @@ import {
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import { stringToDate } from "@utils/convert-string-to-date";
+import logger from "@utils/logger";
 
-import { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
+import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 
-import type { LoginResponseDto } from "@modules/auth/dtos/login-response.dto";
-import type { RefreshDto } from "@modules/auth/dtos/refresh.dto";
+import type { AuthResponseDto, RefreshDto } from "@modules/auth/dtos";
 
-import logger from "@/utils/logger";
 import type { SaveTokenDto } from "./dtos/save-token.dto";
 import type { RefreshToken } from "./refresh-token.model";
 import type {
@@ -25,7 +24,7 @@ export class RefreshTokenService implements IRefreshTokenService {
     private readonly _refreshTokenRepository: IRefreshTokenRepository,
     private readonly _jwtService: IJwtService
   ) {}
-  async refreshToken(refreshDto: RefreshDto): Promise<LoginResponseDto> {
+  async refreshToken(refreshDto: RefreshDto): Promise<AuthResponseDto> {
     const { userId, token } = refreshDto;
 
     const decodedToken = await this._jwtService.verify({

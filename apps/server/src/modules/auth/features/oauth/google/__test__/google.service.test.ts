@@ -3,10 +3,10 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { GoogleAuthService } from "../google.service";
 
 import type { ICacheService } from "@/modules/utils/cache/cache.types";
-import { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
 import { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
+import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 
-import type { OauthLoginResponseDto } from "@/modules/auth/dtos/oauth-login-response.dto";
+import type { OAuthResponseDto } from "@/modules/auth/dtos";
 import type { RefreshToken } from "@/modules/auth/features/refresh-token/refresh-token.model";
 import type { User } from "@modules/user/user.model";
 
@@ -65,7 +65,7 @@ describe("GoogleAuthService", () => {
 
   describe("googleLogin", () => {
     it("should generate tokens and save refresh token if user is valid", async () => {
-      const tokens: OauthLoginResponseDto = {
+      const tokens: OAuthResponseDto = {
         accessToken: "access-token",
         refreshToken: "refresh-token",
         temporaryCode: "temporary-oauth-code",
