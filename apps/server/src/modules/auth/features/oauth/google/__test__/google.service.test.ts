@@ -6,7 +6,10 @@ import type { ICacheService } from "@/modules/utils/cache/cache.types";
 import { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
 import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 
-import type { OAuthResponseDto } from "@/modules/auth/dtos";
+import type {
+  OAuthCodePayloadDto,
+  OAuthResponseDto,
+} from "@/modules/auth/dtos";
 import type { RefreshToken } from "@/modules/auth/features/refresh-token/refresh-token.model";
 import type { User } from "@modules/user/user.model";
 
@@ -63,16 +66,21 @@ describe("GoogleAuthService", () => {
     );
   });
 
-  describe("googleLogin", () => {
+  describe("GoogleAuthService - googleLogin", () => {
     it("should generate tokens and save refresh token if user is valid", async () => {
-      const tokens: OAuthResponseDto = {
+      const mockOAuthResponse: OAuthResponseDto = {
         accessToken: "access-token",
         refreshToken: "refresh-token",
         temporaryCode: "temporary-oauth-code",
       };
 
-      mockJwtService.generateAuthTokens.mockReturnValue(tokens);
+      mockJwtService.generateAuthTokens.mockReturnValue(mockOAuthResponse);
+
       mockRefreshTokenService.saveToken.mockResolvedValue(mockRefreshToken);
+
+      jest
+        .spyOn(googleAuthService, "generateTemporaryCode")
+        .mockResolvedValue(mockOAuthResponse.temporaryCode);
 
       const result = await googleAuthService.googleLogin(mockUser);
 
@@ -81,11 +89,17 @@ describe("GoogleAuthService", () => {
       );
       expect(mockRefreshTokenService.saveToken).toHaveBeenCalledWith({
         userId: mockUser.id,
-        token: tokens.refreshToken,
+        token: mockOAuthResponse.refreshToken,
         expiresAt: expect.any(Date), // Ensure the date is correctly parsed
       });
 
-      expect(result.accessToken).toEqual(tokens.accessToken);
+      expect(googleAuthService.generateTemporaryCode).toHaveBeenCalledWith({
+        userId: mockUser.id,
+        accessToken: mockOAuthResponse.accessToken,
+        refreshToken: mockOAuthResponse.refreshToken,
+      });
+
+      expect(result).toEqual(mockOAuthResponse);
     });
 
     it("should throw UnauthorizedError if user email is not verified", async () => {
@@ -121,6 +135,57 @@ describe("GoogleAuthService", () => {
       await expect(googleAuthService.googleLogin(mockUser)).rejects.toThrow(
         "Database error"
       );
+    });
+
+    it("should handle temporary code generation failure", async () => {
+      const tokens = {
+        accessToken: "access-token",
+        refreshToken: "refresh-token",
+      };
+
+      mockJwtService.generateAuthTokens.mockReturnValue(tokens);
+
+      mockRefreshTokenService.saveToken.mockResolvedValue(mockRefreshToken);
+
+      jest
+        .spyOn(googleAuthService, "generateTemporaryCode")
+        .mockRejectedValue(new Error("Failed to generate temporary code"));
+
+      await expect(googleAuthService.googleLogin(mockUser)).rejects.toThrow(
+        "Failed to generate temporary code"
+      );
+    });
+  });
+
+  describe("GoogleAuthService - generateTemporaryCode", () => {
+    const mockOAuthCodePayload: OAuthCodePayloadDto = {
+      userId: "user-id-123",
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+    };
+
+    it("should generate a temporary code and store payload in cache", async () => {
+      mockCacheService.set.mockReturnValue(true);
+
+      const code =
+        await googleAuthService.generateTemporaryCode(mockOAuthCodePayload);
+
+      expect(code).toBeTruthy();
+      expect(typeof code).toBe("string");
+      expect(mockCacheService.set).toHaveBeenCalledWith(
+        code,
+        mockOAuthCodePayload
+      );
+    });
+
+    it("should handle cache service errors", async () => {
+      mockCacheService.set.mockImplementation(() => {
+        throw new Error("Cache service error");
+      });
+
+      await expect(
+        googleAuthService.generateTemporaryCode(mockOAuthCodePayload)
+      ).rejects.toThrow("Cache service error");
     });
   });
 });
