@@ -1,12 +1,15 @@
-import type { LoginUserDto } from "@/modules/auth/dtos/login-user.dto";
-import type { RegisterUserDto } from "@/modules/auth/dtos/register-user.dto";
-import type { User } from "@/modules/user/user.model";
-import type { TypedRequest } from "@/types";
-import { refreshTokenCookieConfig } from "@config/cookie.config";
-import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 import type { Response } from "express";
 import httpStatus from "http-status";
+
+import { refreshTokenCookieConfig } from "@config/cookie.config";
+import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
+
 import { LocalAuthController } from "../local-auth.controller";
+
+import type { TypedRequest } from "@/types";
+
+import type { LoginDto, RegisterDto } from "@/modules/auth/dtos";
+import type { User } from "@/modules/user/user.model";
 
 describe("LocalAuthController", () => {
   // Mock LocalAuthService
@@ -45,7 +48,7 @@ describe("LocalAuthController", () => {
   });
 
   describe("LocalAuthController - register", () => {
-    const mockRegisterDto: RegisterUserDto = {
+    const mockRegisterDto: RegisterDto = {
       email: "test@example.com",
       password: "Password123!",
       username: "Test User",
@@ -53,7 +56,7 @@ describe("LocalAuthController", () => {
 
     const mockRequest = {
       body: mockRegisterDto,
-    } as TypedRequest<RegisterUserDto>;
+    } as TypedRequest<RegisterDto>;
 
     it("should successfully register a new user", async () => {
       mockLocalAuthService.registerUser.mockResolvedValue(mockUser);
@@ -82,14 +85,14 @@ describe("LocalAuthController", () => {
   });
 
   describe("LocalAuthController - login", () => {
-    const mockLoginDto: LoginUserDto = {
+    const mockLoginDto: LoginDto = {
       email: "test@example.com",
       password: "Password123!",
     };
 
     const mockRequest = {
       body: mockLoginDto,
-    } as TypedRequest<LoginUserDto>;
+    } as TypedRequest<LoginDto>;
 
     const mockAuthTokens = {
       accessToken: "mock-access-token",

@@ -1,15 +1,21 @@
+import type { Response } from "express";
+import httpStatus from "http-status";
+
 import {
   clearRefreshTokenCookieConfig,
   refreshTokenCookieConfig,
 } from "@/config/cookie.config";
+
 import { UnauthorizedError } from "@/errors";
-import type { LoginResponseDto } from "@/modules/auth/dtos/login-response.dto";
-import type { TypedRequest } from "@/types";
 import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
-import type { Response } from "express";
-import httpStatus from "http-status";
+
+import type { AuthResponseDto } from "@/modules/auth/dtos";
+
+import type { TypedRequest } from "@/types";
+
 import { RefreshTokenController } from "../refresh-token.controller";
+
 import type {
   IRefreshTokenController,
   IRefreshTokenService,
@@ -30,7 +36,7 @@ describe("RefreshTokenController", () => {
   const mockUserId = "test-user-id";
   const mockRefreshToken = "valid-refresh-token";
 
-  const mockNewTokens: LoginResponseDto = {
+  const mockNewTokens: AuthResponseDto = {
     accessToken: "new-access-token",
     refreshToken: "new-refresh-token",
   };

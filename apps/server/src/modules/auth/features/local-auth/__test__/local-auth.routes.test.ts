@@ -5,8 +5,7 @@ import { localAuthController } from "../local-auth.module";
 
 import app from "@/app";
 
-import type { LoginUserDto } from "@/modules/auth/dtos/login-user.dto";
-import type { RegisterUserDto } from "@/modules/auth/dtos/register-user.dto";
+import type { LoginDto, RegisterDto } from "@/modules/auth/dtos";
 
 jest.mock("../local-auth.module", () => ({
   localAuthController: {
@@ -16,13 +15,13 @@ jest.mock("../local-auth.module", () => ({
 }));
 
 describe("Local Auth Routes", () => {
-  const validRegisterPayload: RegisterUserDto = {
+  const validRegisterPayload: RegisterDto = {
     email: "test@example.com",
     password: "Password123!",
     username: "testuser",
   };
 
-  const validLoginPayload: LoginUserDto = {
+  const validLoginPayload: LoginDto = {
     email: "test@example.com",
     password: "Password123!",
   };

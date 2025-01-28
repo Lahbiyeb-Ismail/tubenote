@@ -12,8 +12,7 @@ import { stringToDate } from "@utils/convert-string-to-date";
 import { RefreshTokenService } from "../refresh-token.service";
 
 import type { IJwtService } from "@/modules/auth/core/services/jwt/jwt.types";
-import type { LoginResponseDto } from "@/modules/auth/dtos/login-response.dto";
-import type { RefreshDto } from "@/modules/auth/dtos/refresh.dto";
+import type { AuthResponseDto, RefreshDto } from "@/modules/auth/dtos";
 import type { JwtPayload } from "@/types";
 import type { RefreshToken } from "../refresh-token.model";
 import {
@@ -46,7 +45,7 @@ describe("RefreshTokenService", () => {
   const mockNewRefreshToken = "new-refresh-token";
   const expiresIn = stringToDate(REFRESH_TOKEN_EXPIRES_IN);
 
-  const mockLoginResponse: LoginResponseDto = {
+  const mockLoginResponse: AuthResponseDto = {
     accessToken: mockAccessToken,
     refreshToken: mockNewRefreshToken,
   };
