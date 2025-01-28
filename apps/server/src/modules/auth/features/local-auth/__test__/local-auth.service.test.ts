@@ -1,9 +1,15 @@
-import { ForbiddenError, NotFoundError, UnauthorizedError } from "@/errors";
+import {
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+} from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import { LocalAuthService } from "../local-auth.service";
 
-import type { RegisterDto } from "@/modules/auth/dtos";
+import type { AuthResponseDto, RegisterDto } from "@/modules/auth/dtos";
+import type { User } from "@/modules/user/user.model";
 
 describe("LocalAuthService", () => {
   // Mock dependencies
@@ -35,16 +41,25 @@ describe("LocalAuthService", () => {
   let localAuthService: LocalAuthService;
 
   // Mock data
-  const mockUser = {
+  const mockUser: User = {
     id: "user-123",
     email: "test@example.com",
     password: "hashed-password",
+    username: "Test User",
+    createdAt: new Date(),
+    updatedAt: new Date(),
     isEmailVerified: true,
   };
 
-  const mockTokens = {
+  const mockTokens: AuthResponseDto = {
     accessToken: "mock-access-token",
     refreshToken: "mock-refresh-token",
+  };
+
+  const registerUserDto: RegisterDto = {
+    email: "test@example.com",
+    password: "password123",
+    username: "Test User",
   };
 
   beforeEach(() => {
@@ -62,12 +77,6 @@ describe("LocalAuthService", () => {
   });
 
   describe("LocalAuthService - registerUser method", () => {
-    const registerUserDto: RegisterDto = {
-      email: "test@example.com",
-      password: "password123",
-      username: "Test User",
-    };
-
     const verifyEmailToken = "verify-email-token";
 
     it("should successfully register a new user", async () => {
@@ -129,6 +138,45 @@ describe("LocalAuthService", () => {
       await expect(
         localAuthService.registerUser(registerUserDto)
       ).rejects.toThrow(error);
+    });
+
+    it("should handle empty email in registerUserDto", async () => {
+      const invalidDto = {
+        ...registerUserDto,
+        email: "",
+      };
+
+      await expect(localAuthService.registerUser(invalidDto)).rejects.toThrow();
+    });
+
+    it("should handle invalid email format in registerUserDto", async () => {
+      const invalidDto = {
+        ...registerUserDto,
+        email: "invalid-email",
+      };
+
+      await expect(localAuthService.registerUser(invalidDto)).rejects.toThrow();
+    });
+
+    it("should handle empty username in registerUserDto", async () => {
+      const invalidDto = {
+        ...registerUserDto,
+        username: "",
+      };
+
+      await expect(localAuthService.registerUser(invalidDto)).rejects.toThrow();
+    });
+
+    it("should handle concurrent user registration with same email", async () => {
+      const conflictError = new ConflictError(
+        ERROR_MESSAGES.EMAIL_ALREADY_EXISTS
+      );
+
+      mockUserService.createUser.mockRejectedValueOnce(conflictError);
+
+      await expect(
+        localAuthService.registerUser(registerUserDto)
+      ).rejects.toThrow(conflictError);
     });
   });
 
@@ -206,6 +254,32 @@ describe("LocalAuthService", () => {
 
       await expect(localAuthService.loginUser(LoginDto)).rejects.toThrow(error);
     });
+
+    it("should handle JWT token generation failure", async () => {
+      mockUserService.getUserByEmail.mockResolvedValue(mockUser);
+
+      mockPasswordHasherService.comparePassword.mockResolvedValue(true);
+
+      mockJwtService.generateAuthTokens.mockImplementation(() => {
+        throw new Error("Token generation failed");
+      });
+
+      await expect(localAuthService.loginUser(LoginDto)).rejects.toThrow(
+        "Token generation failed"
+      );
+    });
+
+    it("should handle saveToken failure", async () => {
+      mockUserService.getUserByEmail.mockResolvedValue(mockUser);
+
+      mockPasswordHasherService.comparePassword.mockResolvedValue(true);
+
+      const error = new Error("Database error");
+
+      mockRefreshTokenService.saveToken.mockRejectedValue(error);
+
+      await expect(localAuthService.loginUser(LoginDto)).rejects.toThrow(error);
+    });
   });
 
   describe("error handling", () => {
@@ -232,6 +306,45 @@ describe("LocalAuthService", () => {
           password: "password123",
         })
       ).rejects.toThrow(error);
+    });
+  });
+
+  describe("Integration scenarios", () => {
+    it("should handle complete flow of registration and login", async () => {
+      // Registration
+      mockUserService.createUser.mockResolvedValue(mockUser);
+      mockVerifyEmailService.generateToken.mockResolvedValue(
+        "verify-email-token"
+      );
+      mockMailSenderService.sendVerificationEmail.mockResolvedValue(undefined);
+
+      const registeredUser =
+        await localAuthService.registerUser(registerUserDto);
+
+      // Login
+      mockUserService.getUserByEmail.mockResolvedValue(registeredUser);
+      mockPasswordHasherService.comparePassword.mockResolvedValue(true);
+      mockJwtService.generateAuthTokens.mockReturnValue(mockTokens);
+      mockRefreshTokenService.saveToken.mockResolvedValue(undefined);
+
+      const loginResult = await localAuthService.loginUser({
+        email: registeredUser.email,
+        password: "password123",
+      });
+
+      expect(loginResult).toEqual(mockTokens);
+    });
+
+    it("should handle registration success but email verification failure", async () => {
+      mockUserService.createUser.mockResolvedValue(mockUser);
+      mockVerifyEmailService.generateToken.mockResolvedValue("token");
+      mockMailSenderService.sendVerificationEmail.mockRejectedValue(
+        new Error("Email service down")
+      );
+
+      await expect(
+        localAuthService.registerUser(registerUserDto)
+      ).rejects.toThrow("Email service down");
     });
   });
 });
