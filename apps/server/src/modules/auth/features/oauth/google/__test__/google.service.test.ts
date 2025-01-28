@@ -3,8 +3,8 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { GoogleAuthService } from "../google.service";
 
 import type { ICacheService } from "@/modules/utils/cache/cache.types";
-import { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
 import { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
+import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 
 import type { OAuthResponseDto } from "@/modules/auth/dtos";
 import type { RefreshToken } from "@/modules/auth/features/refresh-token/refresh-token.model";

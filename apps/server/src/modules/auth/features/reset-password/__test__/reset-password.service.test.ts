@@ -19,7 +19,7 @@ import type { User } from "@modules/user/user.model";
 
 import { ResetPasswordService } from "@modules/auth/features/reset-password/reset-password.service";
 
-import type { IJwtService } from "@/modules/auth/core/services/jwt/jwt.types";
+import type { IJwtService } from "@/modules/auth/utils/services/jwt/jwt.types";
 import type {
   IResetPasswordRepository,
   IResetPasswordService,

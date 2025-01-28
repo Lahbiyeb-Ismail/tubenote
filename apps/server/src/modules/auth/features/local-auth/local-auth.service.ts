@@ -7,8 +7,8 @@ import { stringToDate } from "@utils/convert-string-to-date";
 
 import { ILocalAuthService } from "./local-auth.types";
 
-import { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
-import { IPasswordHasherService } from "@modules/auth/core/services/password-hasher/password-hasher.types";
+import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
+import { IPasswordHasherService } from "@modules/auth/utils/services/password-hasher/password-hasher.types";
 
 import { IMailSenderService } from "@modules/mailSender/mail-sender.types";
 import { IUserService } from "@modules/user/user.types";

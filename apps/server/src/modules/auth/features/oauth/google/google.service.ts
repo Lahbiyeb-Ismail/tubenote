@@ -7,7 +7,7 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { stringToDate } from "@utils/convert-string-to-date";
 import logger from "@utils/logger";
 
-import { IJwtService } from "@modules/auth/core/services/jwt/jwt.types";
+import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 import { ICacheService } from "@modules/utils/cache/cache.types";
 import { IGoogleAuthService } from "./google.types";
 

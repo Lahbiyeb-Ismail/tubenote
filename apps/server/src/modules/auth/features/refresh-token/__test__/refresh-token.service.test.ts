@@ -11,8 +11,8 @@ import { stringToDate } from "@utils/convert-string-to-date";
 
 import { RefreshTokenService } from "../refresh-token.service";
 
-import type { IJwtService } from "@/modules/auth/core/services/jwt/jwt.types";
 import type { AuthResponseDto, RefreshDto } from "@/modules/auth/dtos";
+import type { IJwtService } from "@/modules/auth/utils/services/jwt/jwt.types";
 import type { JwtPayload } from "@/types";
 import type { RefreshToken } from "../refresh-token.model";
 import {
