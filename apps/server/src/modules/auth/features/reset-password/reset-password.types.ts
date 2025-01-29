@@ -19,7 +19,7 @@ export interface IResetPasswordRepository {
 export interface IResetPasswordService {
   sendResetToken(email: string): Promise<void>;
   resetPassword(token: string, password: string): Promise<void>;
-  verifyResetToken(token: string): Promise<ResetPasswordToken>;
+  verifyResetToken(token: string): Promise<string>;
 }
 export interface IResetPasswordController {
   forgotPassword(req: TypedRequest<EmailBodyDto>, res: Response): Promise<void>;
