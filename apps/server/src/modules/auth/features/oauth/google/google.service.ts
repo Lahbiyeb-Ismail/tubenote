@@ -1,4 +1,4 @@
-import { NotFoundError, UnauthorizedError } from "@/errors";
+import { UnauthorizedError } from "@/errors";
 import { REFRESH_TOKEN_EXPIRES_IN } from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
@@ -31,10 +31,6 @@ export class GoogleAuthService implements IGoogleAuthService {
    * @throws UnauthorizedError if the user's email is not verified.
    */
   async googleLogin(user: User): Promise<OAuthResponseDto> {
-    if (!user || !user.id) {
-      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
-    }
-
     const { isEmailVerified, id: userId } = user;
 
     if (!isEmailVerified) {
