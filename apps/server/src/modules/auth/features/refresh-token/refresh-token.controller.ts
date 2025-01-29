@@ -30,9 +30,11 @@ export class RefreshTokenController implements IRefreshTokenController {
     const cookies = req.cookies;
     const userId = req.userId;
 
-    const token: string | null = cookies[REFRESH_TOKEN_NAME];
+    res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
-    if (!token) {
+    const token = cookies[REFRESH_TOKEN_NAME];
+
+    if (!token || typeof token !== "string") {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
