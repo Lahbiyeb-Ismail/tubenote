@@ -6,7 +6,7 @@ import {
   refreshTokenCookieConfig,
 } from "@/config/cookie.config";
 
-import { UnauthorizedError } from "@/errors";
+import { BadRequestError, ForbiddenError, UnauthorizedError } from "@/errors";
 import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
@@ -16,6 +16,7 @@ import type { TypedRequest } from "@/types";
 
 import { RefreshTokenController } from "../refresh-token.controller";
 
+import envConfig from "@/config/env.config";
 import type {
   IRefreshTokenController,
   IRefreshTokenService,
@@ -59,6 +60,7 @@ describe("RefreshTokenController", () => {
       cookie: jest.fn().mockReturnThis(),
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis(),
+      header: jest.fn().mockReturnThis(),
     };
   });
 
@@ -140,6 +142,117 @@ describe("RefreshTokenController", () => {
       expect(mockResponse.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
         clearRefreshTokenCookieConfig
+      );
+    });
+
+    it("should handle non-string refresh token values", async () => {
+      mockRequest.cookies = {
+        [REFRESH_TOKEN_NAME]: [123, "invalid"] as unknown as string,
+      };
+
+      await expect(
+        refreshTokenController.refreshToken(
+          mockRequest as TypedRequest,
+          mockResponse as Response
+        )
+      ).rejects.toThrow(UnauthorizedError);
+
+      expect(mockResponse.clearCookie).toHaveBeenCalled();
+    });
+
+    it("should handle multiple concurrent refresh attempts", async () => {
+      mockRequest.cookies = { [REFRESH_TOKEN_NAME]: mockRefreshToken };
+
+      // First attempt
+      mockRefreshTokenService.refreshToken.mockResolvedValueOnce(mockNewTokens);
+
+      await refreshTokenController.refreshToken(
+        mockRequest as TypedRequest,
+        mockResponse as Response
+      );
+
+      // Second concurrent attempt with same token
+      mockRefreshTokenService.refreshToken.mockRejectedValueOnce(
+        new ForbiddenError(ERROR_MESSAGES.FORBIDDEN)
+      );
+      await expect(
+        refreshTokenController.refreshToken(
+          mockRequest as TypedRequest,
+          mockResponse as Response
+        )
+      ).rejects.toThrow(ForbiddenError);
+    });
+
+    it("should handle malformed JWT tokens", async () => {
+      const malformedTokens = [
+        "invalid.token.structure",
+        "a".repeat(500), // Long invalid token
+        "header.payload.signature", // Proper structure but invalid
+      ];
+
+      for (const token of malformedTokens) {
+        mockRequest.cookies = { [REFRESH_TOKEN_NAME]: token };
+        mockRefreshTokenService.refreshToken.mockRejectedValue(
+          new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN)
+        );
+
+        await expect(
+          refreshTokenController.refreshToken(
+            mockRequest as TypedRequest,
+            mockResponse as Response
+          )
+        ).rejects.toThrow(BadRequestError);
+      }
+    });
+
+    it("should maintain cookie consistency after multiple operations", async () => {
+      // First successful refresh
+      mockRequest.cookies = { [REFRESH_TOKEN_NAME]: mockRefreshToken };
+
+      mockRefreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
+
+      await refreshTokenController.refreshToken(
+        mockRequest as TypedRequest,
+        mockResponse as Response
+      );
+
+      // Subsequent request with new token
+      mockRequest.cookies = {
+        [REFRESH_TOKEN_NAME]: mockNewTokens.refreshToken,
+      };
+
+      mockRefreshTokenService.refreshToken.mockResolvedValue({
+        accessToken: "another-access-token",
+        refreshToken: "another-refresh-token",
+      });
+
+      await refreshTokenController.refreshToken(
+        mockRequest as TypedRequest,
+        mockResponse as Response
+      );
+
+      expect(mockResponse.clearCookie).toHaveBeenCalledTimes(4);
+      expect(mockResponse.cookie).toHaveBeenCalledTimes(2);
+    });
+
+    it("should validate cookie security configurations", async () => {
+      mockRequest.cookies = { [REFRESH_TOKEN_NAME]: mockRefreshToken };
+      mockRefreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
+
+      await refreshTokenController.refreshToken(
+        mockRequest as TypedRequest,
+        mockResponse as Response
+      );
+
+      expect(mockResponse.cookie).toHaveBeenCalledWith(
+        REFRESH_TOKEN_NAME,
+        mockNewTokens.refreshToken,
+        expect.objectContaining({
+          httpOnly: true,
+          secure: envConfig.node_env === "production",
+          sameSite: "lax",
+          maxAge: 24 * 60 * 60 * 1000,
+        })
       );
     });
   });
