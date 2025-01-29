@@ -14,6 +14,7 @@ import { RefreshTokenService } from "../refresh-token.service";
 import type { AuthResponseDto, RefreshDto } from "@/modules/auth/dtos";
 import type { IJwtService } from "@/modules/auth/utils/services/jwt/jwt.types";
 import type { JwtPayload } from "@/types";
+import type { SaveTokenDto } from "../dtos/save-token.dto";
 import type { RefreshToken } from "../refresh-token.model";
 import {
   type IRefreshTokenRepository,
@@ -167,6 +168,98 @@ describe("RefreshTokenService", () => {
       await expect(
         refreshTokenService.refreshToken(refreshDto)
       ).rejects.toThrow(databaseError);
+    });
+
+    it("should throw error for expired refresh token", async () => {
+      const expiredError = new UnauthorizedError(ERROR_MESSAGES.EXPIRED_TOKEN);
+
+      mockJwtService.verify.mockRejectedValue(expiredError);
+
+      await expect(
+        refreshTokenService.refreshToken(refreshDto)
+      ).rejects.toThrow(expiredError);
+    });
+
+    it("should handle invalid token payload structure", async () => {
+      const invalidDecodedToken = { foo: "bar" } as unknown as JwtPayload;
+      mockJwtService.verify.mockResolvedValue(invalidDecodedToken);
+
+      await expect(
+        refreshTokenService.refreshToken(refreshDto)
+      ).rejects.toThrow(UnauthorizedError);
+
+      expect(mockRefreshTokenRepository.deleteAll).toHaveBeenCalled();
+    });
+
+    it("should handle saveToken failure after token deletion", async () => {
+      mockJwtService.verify.mockResolvedValue(decodedToken);
+
+      mockRefreshTokenRepository.findValidToken.mockResolvedValue(
+        mockRefreshToken
+      );
+
+      mockRefreshTokenRepository.delete.mockResolvedValue();
+
+      mockRefreshTokenRepository.saveToken.mockRejectedValue(
+        new DatabaseError("Save failed")
+      );
+
+      await expect(
+        refreshTokenService.refreshToken(refreshDto)
+      ).rejects.toThrow(DatabaseError);
+
+      // Verify old token was deleted but new token wasn't saved
+      expect(mockRefreshTokenRepository.delete).toHaveBeenCalled();
+      expect(mockRefreshTokenRepository.saveToken).toHaveBeenCalled();
+    });
+  });
+
+  describe("RefreshTokenService - deleteAllTokens", () => {
+    it("should delete all tokens for a user", async () => {
+      await refreshTokenService.deleteAllTokens(mockUserId);
+
+      expect(mockRefreshTokenRepository.deleteAll).toHaveBeenCalledWith(
+        mockUserId
+      );
+    });
+
+    it("should handle deleteAllTokens repository failure", async () => {
+      const dbError = new DatabaseError(ERROR_MESSAGES.FAILD_TO_DELETE);
+
+      mockRefreshTokenRepository.deleteAll.mockRejectedValue(dbError);
+
+      await expect(
+        refreshTokenService.deleteAllTokens(mockUserId)
+      ).rejects.toThrow(dbError);
+    });
+  });
+
+  describe("RefreshTokenService - saveToken", () => {
+    const saveDto: SaveTokenDto = {
+      userId: mockUserId,
+      token: "new-token",
+      expiresAt: new Date(),
+    };
+
+    it("should save a valid token", async () => {
+      mockRefreshTokenRepository.saveToken.mockResolvedValue({
+        ...saveDto,
+        id: "new-id",
+        createdAt: new Date(),
+      });
+
+      const result = await refreshTokenService.saveToken(saveDto);
+      expect(result).toMatchObject(saveDto);
+    });
+
+    it("should propagate refreshTokenRepository errors", async () => {
+      const dbError = new DatabaseError(ERROR_MESSAGES.FAILD_TO_CREATE);
+
+      mockRefreshTokenRepository.saveToken.mockRejectedValue(dbError);
+
+      await expect(refreshTokenService.saveToken(saveDto)).rejects.toThrow(
+        dbError
+      );
     });
   });
 });
