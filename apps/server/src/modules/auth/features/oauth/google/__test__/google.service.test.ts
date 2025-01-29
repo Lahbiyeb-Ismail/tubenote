@@ -1,5 +1,6 @@
 import { UnauthorizedError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+
 import { GoogleAuthService } from "../google.service";
 
 import type { ICacheService } from "@/modules/utils/cache/cache.types";
@@ -40,6 +41,14 @@ describe("GoogleAuthService", () => {
     createdAt: new Date(),
     expiresAt: new Date(),
   };
+
+  const mockOAuthCodePayload: OAuthCodePayloadDto = {
+    userId: "user-id-123",
+    accessToken: "access-token",
+    refreshToken: "refresh-token",
+  };
+
+  const mockRandomOAuthCode = "random-code";
 
   beforeEach(() => {
     mockJwtService = {
@@ -122,7 +131,7 @@ describe("GoogleAuthService", () => {
       );
     });
 
-    it("should throw an error if token generation fails", async () => {
+    it("should propagate jwtService erros", async () => {
       mockJwtService.generateAuthTokens.mockImplementation(() => {
         throw new Error("Token generation failed");
       });
@@ -132,7 +141,7 @@ describe("GoogleAuthService", () => {
       );
     });
 
-    it("should throw an error if saving refresh token fails", async () => {
+    it("should propagate refreshTookenService errors", async () => {
       const tokens = {
         accessToken: "access-token",
         refreshToken: "refresh-token",
@@ -147,7 +156,7 @@ describe("GoogleAuthService", () => {
       );
     });
 
-    it("should handle temporary code generation failure", async () => {
+    it("should propagate generateTemporaryCode method errors", async () => {
       const tokens = {
         accessToken: "access-token",
         refreshToken: "refresh-token",
@@ -168,17 +177,9 @@ describe("GoogleAuthService", () => {
   });
 
   describe("GoogleAuthService - generateTemporaryCode", () => {
-    const mockOAuthCodePayload: OAuthCodePayloadDto = {
-      userId: "user-id-123",
-      accessToken: "access-token",
-      refreshToken: "refresh-token",
-    };
-
     it("should generate a temporary code and store payload in cache", async () => {
-      const mockRandomCode = "random-code";
-
       mockCryptoService.generateRandomSecureToken.mockReturnValue(
-        mockRandomCode
+        mockRandomOAuthCode
       );
       mockCacheService.set.mockReturnValue(true);
 
@@ -187,7 +188,7 @@ describe("GoogleAuthService", () => {
 
       expect(typeof code).toBe("string");
 
-      expect(code).toBe(mockRandomCode);
+      expect(code).toBe(mockRandomOAuthCode);
 
       expect(mockCacheService.set).toHaveBeenCalledWith(
         code,
@@ -195,7 +196,25 @@ describe("GoogleAuthService", () => {
       );
     });
 
-    it("should handle cache service errors", async () => {
+    it("should generate unique codes for subsequent calls", async () => {
+      const codes = new Set();
+      const mockCodes = ["code1", "code2", "code3"];
+
+      mockCryptoService.generateRandomSecureToken
+        .mockImplementationOnce(() => mockCodes[0])
+        .mockImplementationOnce(() => mockCodes[1])
+        .mockImplementationOnce(() => mockCodes[2]);
+
+      for (const _code of mockCodes) {
+        const generatedCode =
+          await googleAuthService.generateTemporaryCode(mockOAuthCodePayload);
+        codes.add(generatedCode);
+      }
+
+      expect(codes.size).toBe(mockCodes.length);
+    });
+
+    it("should propagate cacheService errors", async () => {
       mockCacheService.set.mockImplementation(() => {
         throw new Error("Cache service error");
       });
@@ -203,6 +222,16 @@ describe("GoogleAuthService", () => {
       await expect(
         googleAuthService.generateTemporaryCode(mockOAuthCodePayload)
       ).rejects.toThrow("Cache service error");
+    });
+
+    it("should propagate crypto service errors", async () => {
+      mockCryptoService.generateRandomSecureToken.mockImplementation(() => {
+        throw new Error("Crypto service failure");
+      });
+
+      await expect(
+        googleAuthService.generateTemporaryCode(mockOAuthCodePayload)
+      ).rejects.toThrow("Crypto service failure");
     });
   });
 });
