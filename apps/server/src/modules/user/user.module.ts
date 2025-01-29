@@ -1,13 +1,13 @@
 import prismaClient from "@config/database.config";
 
-import { passwordHasherService } from "@modules/auth/utils/services/password-hasher/password-hasher.module";
+import { cryptoService } from "@modules/utils/crypto";
 
 import { UserController } from "./user.controller";
 import { UserRepository } from "./user.repository";
 import { UserService } from "./user.service";
 
 const userRepository = new UserRepository(prismaClient);
-const userService = new UserService(userRepository, passwordHasherService);
+const userService = new UserService(userRepository, cryptoService);
 const userController = new UserController(userService);
 
 export { userController, userService, userRepository };
