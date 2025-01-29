@@ -7,6 +7,8 @@ import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import { UnauthorizedError } from "@/errors";
 import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 
+import isAuthenticated from "@/middlewares/auth.middleware";
+
 import { refreshTokenController } from "../refresh-token.module";
 
 jest.mock("../refresh-token.module", () => ({
@@ -15,7 +17,12 @@ jest.mock("../refresh-token.module", () => ({
   },
 }));
 
+jest.mock("@/middlewares/auth.middleware", () => jest.fn());
+
 describe("Refresh Token Routes", () => {
+  const mockUserId = "user-id-001";
+  const validRefreshToken = "valid-refresh-token";
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -25,6 +32,11 @@ describe("Refresh Token Routes", () => {
       // Arrange
       const mockAccessToken = "new-access-token";
 
+      (isAuthenticated as jest.Mock).mockImplementation((req, _res, next) => {
+        req.userId = mockUserId;
+        next();
+      });
+
       (refreshTokenController.refreshToken as jest.Mock).mockImplementation(
         (_req, res) => {
           res.status(httpStatus.OK).json({ accessToken: mockAccessToken });
@@ -32,15 +44,12 @@ describe("Refresh Token Routes", () => {
       );
 
       // Act & Assert
-      await request(app)
+      const response = await request(app)
         .post("/api/v1/auth/refresh")
-        .set("Cookie", [`${REFRESH_TOKEN_NAME}=valid-refresh-token`])
-        .expect(httpStatus.OK)
-        .expect((res) => {
-          expect(res.body).toEqual({
-            accessToken: mockAccessToken,
-          });
-        });
+        .set("Cookie", [`${REFRESH_TOKEN_NAME}=${validRefreshToken}`]);
+
+      expect(response.statusCode).toBe(httpStatus.OK);
+      expect(response.body).toEqual({ accessToken: mockAccessToken });
 
       expect(refreshTokenController.refreshToken).toHaveBeenCalled();
     });
@@ -165,6 +174,21 @@ describe("Refresh Token Routes", () => {
         });
 
       expect(refreshTokenController.refreshToken).toHaveBeenCalled();
+    });
+
+    it("should handle concurrent refresh requests", async () => {
+      const requests = Array(5)
+        .fill(0)
+        .map(() =>
+          request(app)
+            .post("/api/v1/auth/refresh")
+            .set("Cookie", `${REFRESH_TOKEN_NAME}=valid-token`)
+        );
+
+      const responses = await Promise.all(requests);
+      responses.forEach((response) => {
+        expect(response.status).toBe(httpStatus.OK);
+      });
     });
   });
 });
