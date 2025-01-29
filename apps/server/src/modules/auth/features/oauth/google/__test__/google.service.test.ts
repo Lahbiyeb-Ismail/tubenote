@@ -3,8 +3,9 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { GoogleAuthService } from "../google.service";
 
 import type { ICacheService } from "@/modules/utils/cache/cache.types";
-import { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
-import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
+import type { ICryptoService } from "@/modules/utils/crypto";
+import type { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
+import type { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 
 import type {
   OAuthCodePayloadDto,
@@ -17,6 +18,7 @@ describe("GoogleAuthService", () => {
   let googleAuthService: GoogleAuthService;
   let mockJwtService: jest.Mocked<IJwtService>;
   let mockRefreshTokenService: jest.Mocked<IRefreshTokenService>;
+  let mockCryptoService: jest.Mocked<ICryptoService>;
   let mockCacheService: jest.Mocked<ICacheService>;
 
   const mockUser: User = {
@@ -51,6 +53,13 @@ describe("GoogleAuthService", () => {
       deleteAllTokens: jest.fn(),
     };
 
+    mockCryptoService = {
+      comparePasswords: jest.fn(),
+      hashPassword: jest.fn(),
+      generateRandomSecureToken: jest.fn(),
+      hashToken: jest.fn(),
+    };
+
     mockCacheService = {
       get: jest.fn(),
       set: jest.fn(),
@@ -62,6 +71,7 @@ describe("GoogleAuthService", () => {
     googleAuthService = new GoogleAuthService(
       mockJwtService,
       mockRefreshTokenService,
+      mockCryptoService,
       mockCacheService
     );
   });
@@ -165,13 +175,20 @@ describe("GoogleAuthService", () => {
     };
 
     it("should generate a temporary code and store payload in cache", async () => {
+      const mockRandomCode = "random-code";
+
+      mockCryptoService.generateRandomSecureToken.mockReturnValue(
+        mockRandomCode
+      );
       mockCacheService.set.mockReturnValue(true);
 
       const code =
         await googleAuthService.generateTemporaryCode(mockOAuthCodePayload);
 
-      expect(code).toBeTruthy();
       expect(typeof code).toBe("string");
+
+      expect(code).toBe(mockRandomCode);
+
       expect(mockCacheService.set).toHaveBeenCalledWith(
         code,
         mockOAuthCodePayload

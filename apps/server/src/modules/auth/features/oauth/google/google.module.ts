@@ -2,6 +2,7 @@ import { googleAuthConfig } from "@/modules/auth/config/google-auth.config";
 
 import { userService } from "@/modules/user/user.module";
 import { cacheService } from "@/modules/utils/cache/cache.module";
+import { cryptoService } from "@/modules/utils/crypto";
 import { refreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.module";
 import { jwtService } from "@modules/auth/utils/services/jwt/jwt.module";
 
@@ -17,6 +18,7 @@ const googleAuthStrategy = new GoogleAuthStrategy(
 const googleAuthService = new GoogleAuthService(
   jwtService,
   refreshTokenService,
+  cryptoService,
   cacheService
 );
 

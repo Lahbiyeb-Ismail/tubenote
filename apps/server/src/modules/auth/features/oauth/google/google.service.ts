@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
-
 import { NotFoundError, UnauthorizedError } from "@/errors";
 import { REFRESH_TOKEN_EXPIRES_IN } from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
@@ -7,6 +5,7 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { stringToDate } from "@utils/convert-string-to-date";
 import logger from "@utils/logger";
 
+import { ICryptoService } from "@/modules/utils/crypto";
 import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 import { ICacheService } from "@modules/utils/cache/cache.types";
 import { IGoogleAuthService } from "./google.types";
@@ -20,6 +19,7 @@ export class GoogleAuthService implements IGoogleAuthService {
   constructor(
     private readonly _jwtService: IJwtService,
     private readonly _refreshTokenService: IRefreshTokenService,
+    private readonly _cryptoService: ICryptoService,
     private readonly _cacheService: ICacheService
   ) {}
 
@@ -63,7 +63,7 @@ export class GoogleAuthService implements IGoogleAuthService {
   async generateTemporaryCode(
     temporaryCodePayloadDto: OAuthCodePayloadDto
   ): Promise<string> {
-    const code = uuidv4();
+    const code = this._cryptoService.generateRandomSecureToken();
 
     const setResult = this._cacheService.set<OAuthCodePayloadDto>(code, {
       ...temporaryCodePayloadDto,
