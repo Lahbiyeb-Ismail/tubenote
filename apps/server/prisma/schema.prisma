@@ -5,8 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["omitApi"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -28,7 +27,6 @@ model User {
   notes                   Note[]
   refreshTokens           RefreshToken[]
   emailVerificationTokens EmailVerificationToken[]
-  resetPasswordTokens     ResetPasswordToken[]
 
   videoIds String[] @db.ObjectId
   videos   Video[]  @relation(fields: [videoIds], references: [id])
@@ -45,16 +43,6 @@ model RefreshToken {
 }
 
 model EmailVerificationToken {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  token     String   @unique
-  userId    String   @db.ObjectId
-  createdAt DateTime @default(now())
-  expiresAt DateTime
-
-  user User @relation(fields: [userId], references: [id])
-}
-
-model ResetPasswordToken {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   token     String   @unique
   userId    String   @db.ObjectId
