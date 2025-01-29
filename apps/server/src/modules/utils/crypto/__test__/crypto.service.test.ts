@@ -1,17 +1,17 @@
 import bcrypt from "bcryptjs";
-import { PasswordHasherService } from "../password-hasher.service";
+import { CryptoService } from "../crypto.service";
 
 // Mock bcrypt
 jest.mock("bcryptjs");
 
-describe("PasswordHasherService", () => {
-  let passwordHasherService: PasswordHasherService;
+describe("CryptoService", () => {
+  let cryptoService: CryptoService;
   const mockPlainPassword = "test-password-123";
   const mockHashedPassword = "hashed-password-xyz";
   const mockSalt = "test-salt";
 
   beforeEach(() => {
-    passwordHasherService = new PasswordHasherService();
+    cryptoService = new CryptoService();
     jest.clearAllMocks();
 
     // Setup default mock implementations
@@ -20,10 +20,9 @@ describe("PasswordHasherService", () => {
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
   });
 
-  describe("PasswordHasherService - hashPassword method", () => {
+  describe("CryptoService - hashPassword method", () => {
     it("should successfully hash a valid password", async () => {
-      const result =
-        await passwordHasherService.hashPassword(mockPlainPassword);
+      const result = await cryptoService.hashPassword(mockPlainPassword);
 
       expect(result).toBe(mockHashedPassword);
       expect(bcrypt.genSalt).toHaveBeenCalledWith(12);
@@ -31,14 +30,14 @@ describe("PasswordHasherService", () => {
     });
 
     it("should throw error when password is empty", async () => {
-      await expect(passwordHasherService.hashPassword("")).rejects.toThrow(
+      await expect(cryptoService.hashPassword("")).rejects.toThrow(
         "Password is required for hashing."
       );
     });
 
     it("should throw error when password is undefined", async () => {
       await expect(
-        passwordHasherService.hashPassword(undefined as any)
+        cryptoService.hashPassword(undefined as any)
       ).rejects.toThrow("Password is required for hashing.");
     });
 
@@ -47,7 +46,7 @@ describe("PasswordHasherService", () => {
       (bcrypt.genSalt as jest.Mock).mockRejectedValue(mockError);
 
       await expect(
-        passwordHasherService.hashPassword(mockPlainPassword)
+        cryptoService.hashPassword(mockPlainPassword)
       ).rejects.toThrow(mockError);
     });
 
@@ -56,16 +55,16 @@ describe("PasswordHasherService", () => {
       (bcrypt.hash as jest.Mock).mockRejectedValue(mockError);
 
       await expect(
-        passwordHasherService.hashPassword(mockPlainPassword)
+        cryptoService.hashPassword(mockPlainPassword)
       ).rejects.toThrow(mockError);
     });
   });
 
-  describe("PasswordHasherService - comparePassword method", () => {
+  describe("CryptoService - comparePasswords method", () => {
     it("should return true when passwords match", async () => {
-      const result = await passwordHasherService.comparePassword({
-        password: mockPlainPassword,
-        hashedPassword: mockHashedPassword,
+      const result = await cryptoService.comparePasswords({
+        plainText: mockPlainPassword,
+        hash: mockHashedPassword,
       });
 
       expect(result).toBe(true);
@@ -78,9 +77,9 @@ describe("PasswordHasherService", () => {
     it("should return false when passwords do not match", async () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      const result = await passwordHasherService.comparePassword({
-        password: mockPlainPassword,
-        hashedPassword: mockHashedPassword,
+      const result = await cryptoService.comparePasswords({
+        plainText: mockPlainPassword,
+        hash: mockHashedPassword,
       });
 
       expect(result).toBe(false);
@@ -92,34 +91,34 @@ describe("PasswordHasherService", () => {
 
     it("should throw error when password is empty", async () => {
       await expect(
-        passwordHasherService.comparePassword({
-          password: "",
-          hashedPassword: mockHashedPassword,
+        cryptoService.comparePasswords({
+          plainText: "",
+          hash: mockHashedPassword,
         })
       ).rejects.toThrow(
-        "Both password and hashed password are required for comparison."
+        "Both plainText and hashed passwords are required for comparison."
       );
     });
 
     it("should throw error when hashedPassword is empty", async () => {
       await expect(
-        passwordHasherService.comparePassword({
-          password: mockPlainPassword,
-          hashedPassword: "",
+        cryptoService.comparePasswords({
+          plainText: mockPlainPassword,
+          hash: "",
         })
       ).rejects.toThrow(
-        "Both password and hashed password are required for comparison."
+        "Both plainText and hashed passwords are required for comparison."
       );
     });
 
     it("should throw error when both parameters are empty", async () => {
       await expect(
-        passwordHasherService.comparePassword({
-          password: "",
-          hashedPassword: "",
+        cryptoService.comparePasswords({
+          plainText: "",
+          hash: "",
         })
       ).rejects.toThrow(
-        "Both password and hashed password are required for comparison."
+        "Both plainText and hashed passwords are required for comparison."
       );
     });
 
@@ -128,9 +127,9 @@ describe("PasswordHasherService", () => {
       (bcrypt.compare as jest.Mock).mockRejectedValue(mockError);
 
       await expect(
-        passwordHasherService.comparePassword({
-          password: mockPlainPassword,
-          hashedPassword: mockHashedPassword,
+        cryptoService.comparePasswords({
+          plainText: mockPlainPassword,
+          hash: mockHashedPassword,
         })
       ).rejects.toThrow(mockError);
     });

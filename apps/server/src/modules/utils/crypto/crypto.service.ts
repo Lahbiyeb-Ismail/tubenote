@@ -1,9 +1,13 @@
+import { createHash, randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 
+import type { ICryptoService } from "./crypto.types";
 import type { ComparePasswordDto } from "./dtos/compare-password.dto";
-import type { IPasswordHasherService } from "./password-hasher.types";
 
-export class PasswordHasherService implements IPasswordHasherService {
+export class CryptoService implements ICryptoService {
+  private readonly SALT_ROUNDS = 12;
+  private readonly TOKEN_BYTES = 32;
+
   /**
    * Hashes a plain-text password.
    * @param password - The plain-text password to hash.
@@ -14,7 +18,7 @@ export class PasswordHasherService implements IPasswordHasherService {
       throw new Error("Password is required for hashing.");
     }
 
-    const salt = await bcrypt.genSalt(12);
+    const salt = await bcrypt.genSalt(this.SALT_ROUNDS);
 
     return await bcrypt.hash(password, salt);
   }
@@ -25,16 +29,24 @@ export class PasswordHasherService implements IPasswordHasherService {
    * @param hashedPassword - The hashed password to compare with.
    * @returns True if the passwords match, false otherwise.
    */
-  async comparePassword(
+  async comparePasswords(
     comparePasswordDto: ComparePasswordDto
   ): Promise<boolean> {
-    const { password, hashedPassword } = comparePasswordDto;
+    const { plainText, hash } = comparePasswordDto;
 
-    if (!password || !hashedPassword) {
+    if (!plainText || !hash) {
       throw new Error(
-        "Both password and hashed password are required for comparison."
+        "Both plainText and hashed passwords are required for comparison."
       );
     }
-    return await bcrypt.compare(password, hashedPassword);
+    return await bcrypt.compare(plainText, hash);
+  }
+
+  generateRandomSecureToken(): string {
+    return randomBytes(this.TOKEN_BYTES).toString("hex");
+  }
+
+  async hashToken(token: string): Promise<string> {
+    return createHash("sha256").update(token).digest("hex");
   }
 }
