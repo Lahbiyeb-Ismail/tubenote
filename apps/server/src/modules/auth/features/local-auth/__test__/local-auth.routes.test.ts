@@ -236,4 +236,55 @@ describe("Local Auth Routes", () => {
         .expect(httpStatus.INTERNAL_SERVER_ERROR);
     });
   });
+
+  describe("Request Validation", () => {
+    it("should validate maximum length of username in registration", async () => {
+      const invalidPayload = {
+        ...validRegisterPayload,
+        username: "a".repeat(21), // Assuming max length is 20
+      };
+
+      const response = await request(app)
+        .post("/api/v1/auth/register")
+        .send(invalidPayload);
+
+      expect(response.statusCode).toBe(httpStatus.BAD_REQUEST);
+      expect(response.body.error.message).toBe(
+        "Validation error in username field: Username must be at most 20 characters long."
+      );
+    });
+
+    it("should validate minimum length of password in registration", async () => {
+      const invalidPayload = {
+        ...validRegisterPayload,
+        password: "Aa1!", // Too short
+      };
+
+      const response = await request(app)
+        .post("/api/v1/auth/register")
+        .send(invalidPayload);
+
+      expect(response.statusCode).toBe(httpStatus.BAD_REQUEST);
+
+      expect(response.body.error.message).toBe(
+        "Validation error in password field: Password must be at least 8 characters long."
+      );
+    });
+
+    it("should validate password complexity requirements", async () => {
+      const invalidPayload = {
+        ...validRegisterPayload,
+        password: "password123", // Missing uppercase and special character
+      };
+
+      const response = await request(app)
+        .post("/api/v1/auth/register")
+        .send(invalidPayload);
+
+      expect(response.statusCode).toBe(httpStatus.BAD_REQUEST);
+      expect(response.body.error.message).toBe(
+        "Validation error in password field: Password must contain at least one uppercase letter."
+      );
+    });
+  });
 });
