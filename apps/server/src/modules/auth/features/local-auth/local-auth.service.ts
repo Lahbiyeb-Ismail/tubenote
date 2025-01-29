@@ -8,7 +8,7 @@ import { stringToDate } from "@utils/convert-string-to-date";
 import { ILocalAuthService } from "./local-auth.types";
 
 import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
-import { IPasswordHasherService } from "@modules/auth/utils/services/password-hasher/password-hasher.types";
+import { ICryptoService } from "@modules/utils/crypto";
 
 import { IMailSenderService } from "@modules/mailSender/mail-sender.types";
 import { IUserService } from "@modules/user/user.types";
@@ -29,7 +29,7 @@ export class LocalAuthService implements ILocalAuthService {
     private readonly _jwtService: IJwtService,
     private readonly _userService: IUserService,
     private readonly _verifyEmailService: IVerifyEmailService,
-    private readonly _passwordHasherService: IPasswordHasherService,
+    private readonly _cryptoService: ICryptoService,
     private readonly _refreshTokenService: IRefreshTokenService,
     private readonly _mailSenderService: IMailSenderService
   ) {}
@@ -62,9 +62,9 @@ export class LocalAuthService implements ILocalAuthService {
       throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
-    const isPasswordMatch = await this._passwordHasherService.comparePassword({
-      password,
-      hashedPassword: user.password,
+    const isPasswordMatch = await this._cryptoService.comparePasswords({
+      plainText: password,
+      hash: user.password,
     });
 
     if (!isPasswordMatch) {
