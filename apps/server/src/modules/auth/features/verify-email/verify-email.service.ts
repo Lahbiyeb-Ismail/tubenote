@@ -6,6 +6,7 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import { BadRequestError, ForbiddenError, NotFoundError } from "@/errors";
 
+import logger from "@/utils/logger";
 import { stringToDate } from "@utils/convert-string-to-date";
 
 import type { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
@@ -35,7 +36,7 @@ export class VerifyEmailService implements IVerifyEmailService {
     }
 
     const existingVerificationToken =
-      await this._verifyEmailRepository.findByUserId(user.id);
+      await this._verifyEmailRepository.findActiveToken({ userId: user.id });
 
     if (existingVerificationToken) {
       throw new ForbiddenError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
@@ -55,6 +56,8 @@ export class VerifyEmailService implements IVerifyEmailService {
       expiresAt: stringToDate(expiresIn),
     });
 
+    logger.info(`Verification email token generated for user ${user.id}`);
+
     return token;
   }
 
@@ -70,17 +73,24 @@ export class VerifyEmailService implements IVerifyEmailService {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
-    const foundToken = await this._verifyEmailRepository.findByToken(token);
+    const foundToken = await this._verifyEmailRepository.findActiveToken({
+      token,
+    });
 
     if (!foundToken) {
+      logger.warn(`Token reuse attempt for user ${user.id}`);
+
+      await this._verifyEmailRepository.deleteMany(user.id);
       throw new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
     }
 
-    // Updates the user's isEmailVerified status to true.
-    await this._userService.updateUser(foundToken.userId, {
-      isEmailVerified: true,
-    });
-    // Deletes the email verification token from the database.
-    await this._verifyEmailRepository.deleteMany(foundToken.userId);
+    await Promise.all([
+      // Deletes the email verification token from the database.
+      this._verifyEmailRepository.deleteMany(user.id),
+      // Updates the user's isEmailVerified status to true.
+      this._userService.updateUser(user.id, { isEmailVerified: true }),
+    ]);
+
+    logger.info(`Email verification successful for user ${user.id}`);
   }
 }
