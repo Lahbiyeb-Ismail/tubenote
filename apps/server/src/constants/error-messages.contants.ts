@@ -18,6 +18,7 @@ export const ERROR_MESSAGES = {
     "The request could not be understood or was missing required parameters.",
   INTERNAL_SERVER_ERROR: "An unexpected error occurred on the server.",
   INVALID_EMAIL_FORMAT: "The email address provided is not in a valid format.",
+  UNREGISTERED_EMAIL: "The provided email address is not registered.",
   PASSWORD_TOO_WEAK: "The password provided is too weak.",
   PASSWORD_SAME_AS_CURRENT:
     "The new password must be different from the current password.",
