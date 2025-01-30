@@ -22,7 +22,7 @@ export class ResetPasswordService implements IResetPasswordService {
 
     if (!user) {
       logger.info(`Password reset requested for non-existent email: ${email}`);
-      return;
+      throw new BadRequestError(ERROR_MESSAGES.UNREGISTERED_EMAIL);
     }
 
     if (!user.isEmailVerified) {
