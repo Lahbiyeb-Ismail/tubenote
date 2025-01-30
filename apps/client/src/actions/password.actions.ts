@@ -9,7 +9,7 @@ import axiosInstance from "@/lib/axios.lib";
 export async function sendForgotPasswordEmail(
   email: string
 ): Promise<{ message: string }> {
-  const res = await axiosInstance.post("/forgot-password", { email });
+  const res = await axiosInstance.post("/auth/forgot-password", { email });
 
   return res.data;
 }
@@ -31,7 +31,7 @@ export async function resetPassword({
   password,
   token,
 }: ResetPassword): Promise<{ message: string }> {
-  const res = await axiosInstance.post(`/reset-password/${token}`, {
+  const res = await axiosInstance.post(`/auth/reset-password/${token}`, {
     password,
   });
 
@@ -47,7 +47,7 @@ export async function resetPassword({
 export async function verifyPasswordResetToken(
   token: string
 ): Promise<{ message: string }> {
-  const res = await axiosInstance.get(`/reset-password/${token}/verify`);
+  const res = await axiosInstance.get(`/auth/reset-password/${token}/verify`);
 
   return res.data;
 }

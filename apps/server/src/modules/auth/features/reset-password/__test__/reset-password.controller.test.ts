@@ -1,11 +1,13 @@
-import type { EmailBodyDto } from "@/common/dtos/email-body.dto";
-import type { TokenParamDto } from "@/common/dtos/token-param.dto";
-import type { TypedRequest } from "@/types";
 import type { Response } from "express";
 import httpStatus from "http-status";
-import type { PasswordBodyDto } from "../dtos/password-body.dto";
+
+import type { TypedRequest } from "@/types";
+
 import { ResetPasswordController } from "../reset-password.controller";
-import type { ResetPasswordToken } from "../reset-password.model";
+
+import type { EmailBodyDto } from "@/common/dtos/email-body.dto";
+import type { TokenParamDto } from "@/common/dtos/token-param.dto";
+import type { PasswordBodyDto } from "../dtos/password-body.dto";
 import type {
   IResetPasswordController,
   IResetPasswordService,
@@ -24,16 +26,7 @@ describe("ResetPassowrdController", () => {
 
   const mockEmail = "user@test.com";
   const mockNewPassword = "newpassword";
-  const mockResetTokenValue = "reset-password-token";
-  const mockUserId = "user_id_001";
-
-  const mockResetToken: ResetPasswordToken = {
-    id: "token_id_001",
-    token: mockResetTokenValue,
-    userId: mockUserId,
-    createdAt: new Date(Date.now()),
-    expiresAt: new Date(Date.now() + 36000),
-  };
+  const mockResetToken = "reset-password-token";
 
   beforeEach(() => {
     // Create controller instance
@@ -74,7 +67,7 @@ describe("ResetPassowrdController", () => {
       expect(mockResponse.json).toHaveBeenCalled();
     });
 
-    it("should handle error if the sendResetToken service method fails", async () => {
+    it("should propagate sendResetToken service errors", async () => {
       const error = new Error("Something went wrong");
 
       mockResetPasswordService.sendResetToken.mockRejectedValue(error);
@@ -95,7 +88,7 @@ describe("ResetPassowrdController", () => {
         password: mockNewPassword,
       },
       params: {
-        token: mockResetTokenValue,
+        token: mockResetToken,
       },
     } as TypedRequest<PasswordBodyDto, TokenParamDto>;
 
@@ -110,7 +103,7 @@ describe("ResetPassowrdController", () => {
 
       // Assert
       expect(mockResetPasswordService.resetPassword).toHaveBeenCalledWith(
-        mockResetTokenValue,
+        mockResetToken,
         mockNewPassword
       );
 
@@ -137,7 +130,7 @@ describe("ResetPassowrdController", () => {
   describe("ResetPasswordController - verifyResetToken", () => {
     const mockRequest = {
       params: {
-        token: mockResetTokenValue,
+        token: mockResetToken,
       },
     } as TypedRequest<{}, TokenParamDto>;
 
@@ -154,7 +147,7 @@ describe("ResetPassowrdController", () => {
 
       // Assert
       expect(mockResetPasswordService.verifyResetToken).toHaveBeenCalledWith(
-        mockResetTokenValue
+        mockResetToken
       );
 
       expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
