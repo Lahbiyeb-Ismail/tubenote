@@ -34,9 +34,8 @@ describe("VerifyEmailService methods test", () => {
 
   beforeEach(() => {
     mockVerifyEmailRepository = {
-      findByUserId: jest.fn(),
+      findActiveToken: jest.fn(),
       saveToken: jest.fn(),
-      findByToken: jest.fn(),
       deleteMany: jest.fn(),
     };
 
@@ -118,7 +117,7 @@ describe("VerifyEmailService methods test", () => {
         isEmailVerified: false,
       });
 
-      mockVerifyEmailRepository.findByUserId.mockResolvedValue(null);
+      mockVerifyEmailRepository.findActiveToken.mockResolvedValue(null);
 
       mockJwtService.sign.mockReturnValue(mockValidToken);
 
@@ -132,9 +131,9 @@ describe("VerifyEmailService methods test", () => {
 
       expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
 
-      expect(mockVerifyEmailRepository.findByUserId).toHaveBeenCalledWith(
-        mockUser.id
-      );
+      expect(mockVerifyEmailRepository.findActiveToken).toHaveBeenCalledWith({
+        userId: mockUser.id,
+      });
 
       expect(mockJwtService.sign).toHaveBeenCalledWith(signTokenDto);
 
@@ -169,7 +168,7 @@ describe("VerifyEmailService methods test", () => {
         isEmailVerified: false,
       });
 
-      mockVerifyEmailRepository.findByUserId.mockResolvedValue(
+      mockVerifyEmailRepository.findActiveToken.mockResolvedValue(
         mockVerificationToken
       );
 
@@ -179,9 +178,9 @@ describe("VerifyEmailService methods test", () => {
 
       expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
 
-      expect(mockVerifyEmailRepository.findByUserId).toHaveBeenCalledWith(
-        mockUser.id
-      );
+      expect(mockVerifyEmailRepository.findActiveToken).toHaveBeenCalledWith({
+        userId: mockUser.id,
+      });
     });
 
     it("should throw an Error if token generation fails", async () => {
@@ -190,7 +189,7 @@ describe("VerifyEmailService methods test", () => {
         isEmailVerified: false,
       });
 
-      mockVerifyEmailRepository.findByUserId.mockResolvedValue(null);
+      mockVerifyEmailRepository.findActiveToken.mockResolvedValue(null);
 
       mockJwtService.sign.mockImplementation(() => {
         throw new Error("Token generation failed");
@@ -218,7 +217,7 @@ describe("VerifyEmailService methods test", () => {
 
       mockUserService.getUserById.mockResolvedValue(mockUser);
 
-      mockVerifyEmailRepository.findByToken.mockResolvedValue(
+      mockVerifyEmailRepository.findActiveToken.mockResolvedValue(
         mockVerificationToken
       );
 
@@ -261,7 +260,7 @@ describe("VerifyEmailService methods test", () => {
 
       mockUserService.getUserById.mockResolvedValue(mockUser);
 
-      mockVerifyEmailRepository.findByToken.mockResolvedValue(null);
+      mockVerifyEmailRepository.findActiveToken.mockResolvedValue(null);
 
       await expect(
         verifyEmailService.verifyUserEmail(mockValidToken)
@@ -275,7 +274,7 @@ describe("VerifyEmailService methods test", () => {
 
       mockUserService.getUserById.mockResolvedValue(mockUser);
 
-      mockVerifyEmailRepository.findByToken.mockResolvedValue(
+      mockVerifyEmailRepository.findActiveToken.mockResolvedValue(
         mockVerificationToken
       );
 
