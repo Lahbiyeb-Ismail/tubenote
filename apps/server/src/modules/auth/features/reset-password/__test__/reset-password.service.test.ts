@@ -115,10 +115,12 @@ describe("ResetPasswordService test suites", () => {
       );
     });
 
-    it("should do nothing if email is not registered", async () => {
+    it("should throw a BadRequestError for a not registered email", async () => {
       (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue(null);
 
-      await resetPasswordService.sendResetToken("nonexistent@test.com");
+      await expect(
+        resetPasswordService.sendResetToken("nonexistent@test.com")
+      ).rejects.toThrow(BadRequestError);
 
       expect(
         mockCryptoService.generateRandomSecureToken
