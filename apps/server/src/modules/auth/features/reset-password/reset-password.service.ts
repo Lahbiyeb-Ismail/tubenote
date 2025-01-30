@@ -58,7 +58,11 @@ export class ResetPasswordService implements IResetPasswordService {
   async verifyResetToken(token: string): Promise<string> {
     const tokenData = this._cacheService.get<{ userId: string }>(token);
 
-    if (!tokenData) {
+    if (
+      !tokenData ||
+      !tokenData.userId ||
+      typeof tokenData.userId !== "string"
+    ) {
       logger.error(`Invalid reset token: ${token}`);
       throw new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
     }
