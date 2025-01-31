@@ -26,17 +26,15 @@ export class UserService implements IUserService {
     }
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const { email } = createUserDto;
+  async createUser(dto: CreateUserDto): Promise<User> {
+    const { email } = dto;
 
     await this._ensureEmailIsUnique(email);
 
-    const hashedPassword = await this._cryptoService.hashPassword(
-      createUserDto.password
-    );
+    const hashedPassword = await this._cryptoService.hashPassword(dto.password);
 
     return await this._userRepository.createUser({
-      ...createUserDto,
+      ...dto,
       password: hashedPassword,
     });
   }
@@ -78,21 +76,18 @@ export class UserService implements IUserService {
     return user;
   }
 
-  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async updateUser(id: string, dto: UpdateUserDto): Promise<User> {
     const user = await this.getUserById(id);
 
-    if (updateUserDto.email && updateUserDto.email !== user.email) {
-      await this._ensureEmailIsUnique(updateUserDto.email, user.id);
+    if (dto.email && dto.email !== user.email) {
+      await this._ensureEmailIsUnique(dto.email, user.id);
     }
 
-    return await this._userRepository.updateUser(id, updateUserDto);
+    return await this._userRepository.updateUser(id, dto);
   }
 
-  async updatePassword(
-    userId: string,
-    updatePasswordDto: UpdatePasswordDto
-  ): Promise<User> {
-    const { currentPassword, newPassword } = updatePasswordDto;
+  async updatePassword(userId: string, dto: UpdatePasswordDto): Promise<User> {
+    const { currentPassword, newPassword } = dto;
 
     const user = await this.getUserById(userId);
 
