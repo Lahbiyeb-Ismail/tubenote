@@ -1,57 +1,62 @@
 import handleAsyncOperation from "@/utils/handle-async-operation";
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 
+import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
+import { DatabaseError } from "@/errors";
+
+import type { CreateUserDto, GetUserDto, UpdateUserDto } from "./dtos";
 import type { User } from "./user.model";
 import type { IUserRepository } from "./user.types";
-
-import type { CreateUserDto } from "./dtos/create-user.dto";
-import type { UpdateUserDto } from "./dtos/update-user.dto";
 
 export class UserRepository implements IUserRepository {
   constructor(private readonly _db: PrismaClient) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async createUser(params: CreateUserDto): Promise<User> {
     return handleAsyncOperation(
       () =>
         this._db.user.create({
-          data: { ...createUserDto },
+          data: { ...params },
         }),
-      { errorMessage: "Failed to create new user." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
     );
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  async getUser(params: GetUserDto): Promise<User | null> {
+    const { id, email } = params;
+
+    if (!id && !email) {
+      throw new DatabaseError("Id or email must be provided.");
+    }
+
+    const conditions: Prisma.UserWhereInput[] = [];
+
+    if (id) {
+      conditions.push({ id });
+    }
+
+    if (email) {
+      conditions.push({ email });
+    }
+
     return handleAsyncOperation(
       () =>
-        this._db.user.findUnique({
+        this._db.user.findFirst({
           where: {
-            email,
+            OR: conditions,
           },
         }),
-      { errorMessage: "Failed to find user." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
 
-  async findById(id: string): Promise<User | null> {
-    return handleAsyncOperation(
-      () =>
-        this._db.user.findUnique({
-          where: {
-            id,
-          },
-        }),
-      { errorMessage: "Failed to find user." }
-    );
-  }
-
-  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async updateUser(id: string, params: UpdateUserDto): Promise<User> {
     return handleAsyncOperation(
       () =>
         this._db.user.update({
           where: { id },
-          data: { ...updateUserDto },
+          data: { ...params },
         }),
-      { errorMessage: "Failed to update user." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_UPDATE }
     );
   }
 
@@ -64,7 +69,7 @@ export class UserRepository implements IUserRepository {
             password: hashedPassword,
           },
         }),
-      { errorMessage: "Failed to update user's password." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_UPDATE }
     );
   }
 }
