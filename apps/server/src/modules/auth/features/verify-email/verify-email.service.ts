@@ -4,7 +4,7 @@ import {
 } from "@/constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import { BadRequestError, ForbiddenError, NotFoundError } from "@/errors";
+import { BadRequestError, NotFoundError } from "@/errors";
 
 import logger from "@/utils/logger";
 import { stringToDate } from "@utils/convert-string-to-date";
@@ -32,14 +32,14 @@ export class VerifyEmailService implements IVerifyEmailService {
     }
 
     if (user.isEmailVerified) {
-      throw new ForbiddenError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
+      throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
     }
 
     const existingVerificationToken =
       await this._verifyEmailRepository.findActiveToken({ userId: user.id });
 
     if (existingVerificationToken) {
-      throw new ForbiddenError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
+      throw new BadRequestError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
     }
 
     const expiresIn = VERIFY_EMAIL_TOKEN_EXPIRES_IN;
@@ -71,6 +71,11 @@ export class VerifyEmailService implements IVerifyEmailService {
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
+    }
+
+    if (user.isEmailVerified) {
+      logger.warn(`Email already verified for user ${user.id}`);
+      throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
     }
 
     const foundToken = await this._verifyEmailRepository.findActiveToken({
