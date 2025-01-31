@@ -41,16 +41,25 @@ export class UserService implements IUserService {
     });
   }
 
-  async findOrCreateUser(createUserDto: CreateUserDto): Promise<User> {
-    const { email } = createUserDto;
+  async getOrCreateUser(dto: CreateUserDto): Promise<User> {
+    return this._userRepository.transaction(async (tx) => {
+      // 1. Check if user exists within the transaction
+      const user = await tx.getUser({ email: dto.email });
 
-    let user = await this._userRepository.getUser({ email });
+      // 2. Return existing user if found
+      if (user) return user;
 
-    if (!user) {
-      user = await this.createUser(createUserDto);
-    }
+      // 3. Hash password inside the transaction
+      const hashedPassword = await this._cryptoService.hashPassword(
+        dto.password
+      );
 
-    return user;
+      // 4. Create user within the same transaction
+      return tx.createUser({
+        ...dto,
+        password: hashedPassword,
+      });
+    });
   }
 
   async getUserByEmail(email: string): Promise<User | null> {
