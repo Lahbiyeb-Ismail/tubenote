@@ -43,7 +43,7 @@ export class GoogleAuthStrategy {
         return done(new Error("No email provided from Google"));
       }
 
-      const user = await this.userService.findOrCreateUser({
+      const user = await this.userService.getOrCreateUser({
         email,
         profilePicture,
         username: displayName,

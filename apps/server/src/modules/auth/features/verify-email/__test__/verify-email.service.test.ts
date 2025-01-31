@@ -41,7 +41,7 @@ describe("VerifyEmailService methods test", () => {
       getUserById: jest.fn(),
       updateUser: jest.fn(),
       createUser: jest.fn(),
-      findOrCreateUser: jest.fn(),
+      getOrCreateUser: jest.fn(),
       resetPassword: jest.fn(),
       updatePassword: jest.fn(),
     };

@@ -21,7 +21,7 @@ describe("ResetPasswordService test suites", () => {
   beforeEach(() => {
     mockUserService = {
       createUser: jest.fn(),
-      findOrCreateUser: jest.fn(),
+      getOrCreateUser: jest.fn(),
       getUserByEmail: jest.fn(),
       getUserById: jest.fn(),
       updateUser: jest.fn(),
