@@ -11,19 +11,20 @@ import type {
 import type { User } from "./user.model";
 
 export interface IUserRepository {
-  createUser(params: CreateUserDto): Promise<User>;
-  getUser(params: GetUserDto): Promise<User | null>;
+  transaction<T>(fn: (tx: IUserRepository) => Promise<T>): Promise<T>;
+  createUser(dto: CreateUserDto): Promise<User>;
+  getUser(dto: GetUserDto): Promise<User | null>;
   updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User>;
   updatePassword(userId: string, hashedPassword: string): Promise<User>;
 }
 
 export interface IUserService {
-  createUser(params: CreateUserDto): Promise<User>;
-  findOrCreateUser(params: CreateUserDto): Promise<User>;
+  createUser(dto: CreateUserDto): Promise<User>;
+  getOrCreateUser(dto: CreateUserDto): Promise<User>;
   getUserByEmail(email: string): Promise<User | null>;
   getUserById(userId: string): Promise<User>;
-  updateUser(id: string, params: UpdateUserDto): Promise<User>;
-  updatePassword(userId: string, params: UpdatePasswordDto): Promise<User>;
+  updateUser(id: string, dto: UpdateUserDto): Promise<User>;
+  updatePassword(userId: string, dto: UpdatePasswordDto): Promise<User>;
   resetPassword(userId: string, newPassword: string): Promise<User>;
 }
 
