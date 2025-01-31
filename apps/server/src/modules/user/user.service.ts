@@ -84,10 +84,6 @@ export class UserService implements IUserService {
 
     const user = await this.getUserById(userId);
 
-    if (!user) {
-      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
-    }
-
     const isPasswordValid = await this._cryptoService.comparePasswords({
       plainText: currentPassword,
       hash: user.password,
