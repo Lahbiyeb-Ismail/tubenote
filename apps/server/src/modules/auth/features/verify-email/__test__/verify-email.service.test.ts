@@ -10,6 +10,7 @@ import {
 } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
+import logger from "@/utils/logger";
 import { stringToDate } from "@utils/convert-string-to-date";
 
 import { VerifyEmailService } from "../verify-email.service";
@@ -25,6 +26,7 @@ import type { SaveTokenDto } from "../dtos/save-token.dto";
 import type { IVerifyEmailRepository } from "../verify-email.types";
 
 jest.mock("@utils/convert-string-to-date");
+jest.mock("@/utils/logger");
 
 describe("VerifyEmailService methods test", () => {
   let verifyEmailService: VerifyEmailService;
@@ -199,6 +201,29 @@ describe("VerifyEmailService methods test", () => {
         new Error("Token generation failed")
       );
     });
+
+    it("should log an info message when a verification token is generated", async () => {
+      mockUserService.getUserByEmail.mockResolvedValue({
+        ...mockUser,
+        isEmailVerified: false,
+      });
+
+      mockVerifyEmailRepository.findActiveToken.mockResolvedValue(null);
+
+      mockJwtService.sign.mockReturnValue(mockValidToken);
+
+      mockVerifyEmailRepository.saveToken.mockResolvedValue(
+        mockVerificationToken
+      );
+
+      const loggerSpy = jest.spyOn(logger, "info");
+
+      await verifyEmailService.generateToken(mockEmail);
+
+      expect(loggerSpy).toHaveBeenCalledWith(
+        `Verification email token generated for user ${mockUser.id}`
+      );
+    });
   });
 
   describe("VerifyEmailService - verifyUserEmail", () => {
@@ -279,6 +304,88 @@ describe("VerifyEmailService methods test", () => {
       );
 
       mockUserService.updateUser.mockRejectedValue(error);
+
+      await expect(
+        verifyEmailService.verifyUserEmail(mockValidToken)
+      ).rejects.toThrow(error);
+    });
+
+    it("should log an info message when email verification is successful", async () => {
+      mockJwtService.verify.mockResolvedValue(decodedToken);
+
+      mockUserService.getUserById.mockResolvedValue(mockUser);
+
+      mockVerifyEmailRepository.findActiveToken.mockResolvedValue(
+        mockVerificationToken
+      );
+
+      const loggerSpy = jest.spyOn(logger, "info");
+
+      await verifyEmailService.verifyUserEmail(mockValidToken);
+
+      expect(loggerSpy).toHaveBeenCalledWith(
+        `Email verification successful for user ${mockUser.id}`
+      );
+    });
+
+    it("should log a warning message when token reuse is attempted", async () => {
+      mockJwtService.verify.mockResolvedValue(decodedToken);
+
+      mockUserService.getUserById.mockResolvedValue(mockUser);
+
+      mockVerifyEmailRepository.findActiveToken.mockResolvedValue(null);
+
+      const loggerSpy = jest.spyOn(logger, "warn");
+
+      await expect(
+        verifyEmailService.verifyUserEmail(mockValidToken)
+      ).rejects.toThrow(new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN));
+
+      expect(loggerSpy).toHaveBeenCalledWith(
+        `Token reuse attempt for user ${mockUser.id}`
+      );
+    });
+
+    it("should throw an error if the token verification fails", async () => {
+      const error = new Error("Token verification failed");
+
+      mockJwtService.verify.mockRejectedValue(error);
+
+      await expect(
+        verifyEmailService.verifyUserEmail(mockValidToken)
+      ).rejects.toThrow(error);
+    });
+
+    it("should throw an error if the user update fails", async () => {
+      const error = new DatabaseError("Database error");
+
+      mockJwtService.verify.mockResolvedValue(decodedToken);
+
+      mockUserService.getUserById.mockResolvedValue(mockUser);
+
+      mockVerifyEmailRepository.findActiveToken.mockResolvedValue(
+        mockVerificationToken
+      );
+
+      mockUserService.updateUser.mockRejectedValue(error);
+
+      await expect(
+        verifyEmailService.verifyUserEmail(mockValidToken)
+      ).rejects.toThrow(error);
+    });
+
+    it("should throw an error if deleting tokens fails", async () => {
+      const error = new DatabaseError("Database error");
+
+      mockJwtService.verify.mockResolvedValue(decodedToken);
+
+      mockUserService.getUserById.mockResolvedValue(mockUser);
+
+      mockVerifyEmailRepository.findActiveToken.mockResolvedValue(
+        mockVerificationToken
+      );
+
+      mockVerifyEmailRepository.deleteMany.mockRejectedValue(error);
 
       await expect(
         verifyEmailService.verifyUserEmail(mockValidToken)
