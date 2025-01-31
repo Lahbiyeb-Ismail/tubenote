@@ -1,5 +1,6 @@
 import prismaClient from "@config/database.config";
 
+import { jwtService } from "@modules/auth/utils/services/jwt/jwt.module";
 import { userService } from "@modules/user/user.module";
 
 import { VerifyEmailController } from "./verify-email.controller";
@@ -9,7 +10,8 @@ import { VerifyEmailService } from "./verify-email.service";
 const verifyEmailRepository = new VerifyEmailRepository(prismaClient);
 const verifyEmailService = new VerifyEmailService(
   verifyEmailRepository,
-  userService
+  userService,
+  jwtService
 );
 const verifyEmailController = new VerifyEmailController(verifyEmailService);
 

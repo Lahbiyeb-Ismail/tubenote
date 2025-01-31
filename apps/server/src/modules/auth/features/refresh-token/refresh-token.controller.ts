@@ -1,13 +1,17 @@
-import { UnauthorizedError } from "@/errors";
-import type { TypedRequest } from "@/types";
 import {
   clearRefreshTokenCookieConfig,
   refreshTokenCookieConfig,
 } from "@config/cookie.config";
-import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import type { Response } from "express";
 import httpStatus from "http-status";
+
+import { UnauthorizedError } from "@/errors";
+
+import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
+import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+
+import type { TypedRequest } from "@/types";
+
 import type {
   IRefreshTokenController,
   IRefreshTokenService,
@@ -26,9 +30,11 @@ export class RefreshTokenController implements IRefreshTokenController {
     const cookies = req.cookies;
     const userId = req.userId;
 
-    const token: string | null = cookies[REFRESH_TOKEN_NAME];
+    res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
-    if (!token) {
+    const token = cookies[REFRESH_TOKEN_NAME];
+
+    if (!token || typeof token !== "string") {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 

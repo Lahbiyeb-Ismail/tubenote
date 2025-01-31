@@ -1,0 +1,73 @@
+import { UnauthorizedError } from "@/errors";
+import { REFRESH_TOKEN_EXPIRES_IN } from "@constants/auth.contants";
+import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+
+import { stringToDate } from "@utils/convert-string-to-date";
+import logger from "@utils/logger";
+
+import { ICryptoService } from "@/modules/utils/crypto";
+import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
+import { ICacheService } from "@modules/utils/cache/cache.types";
+import { IGoogleAuthService } from "./google.types";
+
+import type { User } from "@modules/user/user.model";
+
+import type { OAuthCodePayloadDto, OAuthResponseDto } from "@modules/auth/dtos";
+import type { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
+
+export class GoogleAuthService implements IGoogleAuthService {
+  constructor(
+    private readonly _jwtService: IJwtService,
+    private readonly _refreshTokenService: IRefreshTokenService,
+    private readonly _cryptoService: ICryptoService,
+    private readonly _cacheService: ICacheService
+  ) {}
+
+  /**
+   * Authenticates a user using Google OAuth and generates access and refresh tokens.
+   * @param user - The user object retrieved from Google OAuth.
+   * @returns A promise resolving to a AuthResponseDto containing access and refresh tokens.
+   * @throws NotFoundError if the user is not found.
+   * @throws UnauthorizedError if the user's email is not verified.
+   */
+  async googleLogin(user: User): Promise<OAuthResponseDto> {
+    const { isEmailVerified, id: userId } = user;
+
+    if (!isEmailVerified) {
+      throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
+    }
+
+    const { accessToken, refreshToken } =
+      this._jwtService.generateAuthTokens(userId);
+
+    await this._refreshTokenService.saveToken({
+      userId,
+      token: refreshToken,
+      expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+    });
+
+    // Generate a short-lived, one-time use code
+    const temporaryCode = await this.generateTemporaryCode({
+      userId,
+      accessToken,
+      refreshToken,
+    });
+
+    return { accessToken, refreshToken, temporaryCode };
+  }
+
+  async generateTemporaryCode(
+    temporaryCodePayloadDto: OAuthCodePayloadDto
+  ): Promise<string> {
+    const code = this._cryptoService.generateRandomSecureToken();
+
+    const setResult = this._cacheService.set<OAuthCodePayloadDto>(code, {
+      ...temporaryCodePayloadDto,
+    });
+
+    logger.info(`Code ${code} set in cache: ${setResult}`);
+    logger.info(`Cache stats after set: ${this._cacheService.getStats()}`);
+
+    return code;
+  }
+}

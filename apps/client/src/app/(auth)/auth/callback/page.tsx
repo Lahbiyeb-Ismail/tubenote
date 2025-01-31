@@ -1,45 +1,50 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import useGetCurrentUser from "@/hooks/user/useGetCurrentUser";
+import { exchangeOauthCodeForAuthTokens } from "@/actions/auth.actions";
 import { setStorageValue } from "@/utils/localStorage";
 
-function AuthCallbackContent() {
+export default function AuthCallback() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { refetch: refetchCurrentUser } = useGetCurrentUser();
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
   );
+  const exchangeAttempted = useRef(false);
 
   useEffect(() => {
-    async function handleAccessToken() {
-      const accessToken = searchParams.get("access_token") as string;
-      const parsedAccessToken = JSON.parse(decodeURIComponent(accessToken));
+    async function exchangeOauthCodeWithAccessToken() {
+      if (exchangeAttempted.current) return;
 
-      if (!parsedAccessToken) {
+      exchangeAttempted.current = true;
+
+      const code = searchParams.get("code");
+
+      if (!code) {
         setStatus("error");
         setTimeout(() => router.push("/"), 2000);
         return;
       }
 
       try {
-        setStorageValue("accessToken", parsedAccessToken);
+        const accessToken = await exchangeOauthCodeForAuthTokens(code);
 
-        await refetchCurrentUser();
+        setStorageValue("accessToken", accessToken);
+
         setStatus("success");
-        router.push("/");
+        router.push("/dashboard");
       } catch (error) {
         console.error("Authentication error:", error);
+
         setStatus("error");
         setTimeout(() => router.push("/"), 2000);
       }
     }
 
-    handleAccessToken();
-  }, [searchParams, router, refetchCurrentUser]);
+    exchangeOauthCodeWithAccessToken();
+  }, [searchParams, router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">
@@ -49,13 +54,5 @@ function AuthCallbackContent() {
         {status === "success" && "Authentication successful. Redirecting..."}
       </div>
     </div>
-  );
-}
-
-export default function AuthCallback() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <AuthCallbackContent />
-    </Suspense>
   );
 }

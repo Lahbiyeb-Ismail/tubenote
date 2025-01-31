@@ -1,106 +1,72 @@
-import { ForbiddenError, NotFoundError } from "@/errors";
+import { BadRequestError, ForbiddenError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import type { ResetPasswordToken } from "./reset-password.model";
+import logger from "@/utils/logger";
 
-import type { IPasswordHasherService } from "@modules/auth/core/services/password-hasher/password-hasher.types";
+import type { ICacheService } from "@/modules/utils/cache/cache.types";
+import type { ICryptoService } from "@/modules/utils/crypto";
 import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
-import type { IUserRepository } from "@modules/user/user.types";
-import type {
-  IResetPasswordRespository,
-  IResetPasswordService,
-} from "./reset-password.types";
+import type { IUserService } from "@modules/user/user.types";
+import type { IResetPasswordService } from "./reset-password.types";
 
 export class ResetPasswordService implements IResetPasswordService {
   constructor(
-    private readonly _resetPasswordRepository: IResetPasswordRespository,
-    private readonly _userRepository: IUserRepository,
-    private readonly _passwordHasherService: IPasswordHasherService,
+    private readonly _userService: IUserService,
+    private readonly _cryptoService: ICryptoService,
+    private readonly _cacheService: ICacheService,
     private readonly _mailSenderService: IMailSenderService
   ) {}
 
   async sendResetToken(email: string): Promise<void> {
-    const user = await this._userRepository.findByEmail(email);
+    const user = await this._userService.getUserByEmail(email);
 
     if (!user) {
-      throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
+      logger.info(`Password reset requested for non-existent email: ${email}`);
+      throw new BadRequestError(ERROR_MESSAGES.UNREGISTERED_EMAIL);
     }
 
     if (!user.isEmailVerified) {
       throw new ForbiddenError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
     }
 
-    const isResetTokenAlreadySent =
-      await this._resetPasswordRepository.findByUserId(user.id);
+    const resetToken = this._cryptoService.generateRandomSecureToken();
 
-    if (isResetTokenAlreadySent) {
-      throw new ForbiddenError(ERROR_MESSAGES.RESET_LINK_SENT);
-    }
+    const setResult = this._cacheService.set<{ userId: string }>(resetToken, {
+      userId: user.id,
+    });
 
-    await this._mailSenderService.sendResetPasswordEmail(user.email);
-  }
+    logger.info(
+      `Reset token generated for user ${user.id} and set in cache: ${setResult}`
+    );
 
-  async createToken(userId: string): Promise<string> {
-    const token = await this._resetPasswordRepository.create(userId);
-
-    return token;
+    await this._mailSenderService.sendResetPasswordEmail(
+      user.email,
+      resetToken
+    );
   }
 
   async resetPassword(token: string, password: string): Promise<void> {
-    const resetToken = await this.findResetToken(token);
+    const userId = await this.verifyResetToken(token);
 
-    if (!resetToken) throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
+    const deleteResult = this._cacheService.del(token);
+    logger.warn(`Remove reset token ${token} from cache: ${deleteResult}`);
 
-    const isTokenExpired = await this.isResetTokenExpired(resetToken);
-
-    if (isTokenExpired) {
-      await this._resetPasswordRepository.deleteMany(resetToken.userId);
-      throw new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN);
-    }
-
-    const hashedPassword =
-      await this._passwordHasherService.hashPassword(password);
-
-    const user = await this._userRepository.updatePassword(
-      resetToken.userId,
-      hashedPassword
-    );
-
-    await this._resetPasswordRepository.deleteMany(user.id);
+    await this._userService.resetPassword(userId, password);
+    logger.info(`Password reset for user ${userId}`);
   }
 
-  async findResetToken(token: string): Promise<ResetPasswordToken | null> {
-    const resetToken = await this._resetPasswordRepository.findByToken(token);
+  async verifyResetToken(token: string): Promise<string> {
+    const tokenData = this._cacheService.get<{ userId: string }>(token);
 
-    if (!resetToken) {
-      return null;
+    if (
+      !tokenData ||
+      !tokenData.userId ||
+      typeof tokenData.userId !== "string"
+    ) {
+      logger.error(`Invalid reset token: ${token}`);
+      throw new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
     }
 
-    return resetToken;
-  }
-
-  async isResetTokenExpired(resetToken: ResetPasswordToken): Promise<boolean> {
-    if (resetToken.expiresAt < new Date()) {
-      return true;
-    }
-
-    return false;
-  }
-
-  async verifyResetToken(token: string): Promise<ResetPasswordToken> {
-    const resetToken = await this.findResetToken(token);
-
-    if (!resetToken) {
-      throw new NotFoundError(ERROR_MESSAGES.INVALID_TOKEN);
-    }
-
-    const isTokenExpired = await this.isResetTokenExpired(resetToken);
-
-    if (isTokenExpired) {
-      await this._resetPasswordRepository.deleteMany(resetToken.userId);
-      throw new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN);
-    }
-
-    return resetToken;
+    return tokenData.userId;
   }
 }

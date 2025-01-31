@@ -1,17 +1,22 @@
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import { UnauthorizedError } from "@/errors";
+import { BadRequestError, UnauthorizedError } from "@/errors";
+import logger from "@/utils/logger";
 
 import type { IAuthService } from "./auth.types";
 
 import type { IRefreshTokenService } from "./features/refresh-token/refresh-token.types";
 
-import type { LogoutUserDto } from "./dtos/logout-user.dto";
+import type { ICacheService } from "../utils/cache/cache.types";
+import type { AuthResponseDto, LogoutDto, OAuthCodePayloadDto } from "./dtos";
 
 export class AuthService implements IAuthService {
-  constructor(private readonly _refreshTokenService: IRefreshTokenService) {}
+  constructor(
+    private readonly _refreshTokenService: IRefreshTokenService,
+    private readonly _cacheService: ICacheService
+  ) {}
 
-  async logoutUser(logoutUserDto: LogoutUserDto): Promise<void> {
+  async logoutUser(logoutUserDto: LogoutDto): Promise<void> {
     const { userId, refreshToken } = logoutUserDto;
 
     if (!refreshToken || !userId) {
@@ -19,5 +24,25 @@ export class AuthService implements IAuthService {
     }
 
     await this._refreshTokenService.deleteAllTokens(userId);
+  }
+
+  async exchangeOauthCodeForTokens(code: string): Promise<AuthResponseDto> {
+    const codeData = this._cacheService.get<OAuthCodePayloadDto>(code);
+
+    logger.info(`Retrieved codeData: ${codeData}`);
+
+    if (!codeData) {
+      logger.error(`Code ${code} not found in cache`);
+      throw new BadRequestError("Invalid or expired code");
+    }
+
+    const deleteResult = this._cacheService.del(code);
+
+    logger.warn(`Deleted ${deleteResult} items from cache`);
+
+    return {
+      accessToken: codeData.accessToken,
+      refreshToken: codeData.refreshToken,
+    };
   }
 }

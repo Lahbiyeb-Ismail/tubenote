@@ -78,3 +78,21 @@ export async function refreshAccessToken(): Promise<void> {
     console.error("Error refreshing token:", error);
   }
 }
+
+/**
+ * Exchanges a Oauth authorization code for an access token.
+ *
+ * @param code - The Oauth authorization code to exchange.
+ * @returns A promise that resolves to the access token as a string.
+ */
+export async function exchangeOauthCodeForAuthTokens(
+  code: string
+): Promise<string> {
+  const response = await axios.post(
+    `${API_URL}/auth/exchange-oauth-code`,
+    { code },
+    { withCredentials: true }
+  );
+
+  return response.data.accessToken;
+}

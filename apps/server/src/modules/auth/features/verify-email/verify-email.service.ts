@@ -1,7 +1,17 @@
-import { ForbiddenError } from "@/errors";
+import {
+  VERIFY_EMAIL_TOKEN_EXPIRES_IN,
+  VERIFY_EMAIL_TOKEN_SECRET,
+} from "@/constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
+import { BadRequestError, NotFoundError } from "@/errors";
+
+import logger from "@/utils/logger";
+import { stringToDate } from "@utils/convert-string-to-date";
+
+import type { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 import type { IUserService } from "@modules/user/user.types";
+
 import type {
   IVerifyEmailRepository,
   IVerifyEmailService,
@@ -10,48 +20,82 @@ import type {
 export class VerifyEmailService implements IVerifyEmailService {
   constructor(
     private readonly _verifyEmailRepository: IVerifyEmailRepository,
-    private readonly _userService: IUserService
+    private readonly _userService: IUserService,
+    private readonly _jwtService: IJwtService
   ) {}
 
   async generateToken(email: string): Promise<string> {
     const user = await this._userService.getUserByEmail(email);
 
     if (!user) {
-      throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
+      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
     if (user.isEmailVerified) {
-      throw new ForbiddenError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
+      throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
     }
 
     const existingVerificationToken =
-      await this._verifyEmailRepository.findByUserId(user.id);
+      await this._verifyEmailRepository.findActiveToken({ userId: user.id });
 
     if (existingVerificationToken) {
-      throw new ForbiddenError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
+      throw new BadRequestError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
     }
 
-    const verificationToken = await this._verifyEmailRepository.create(user.id);
+    const expiresIn = VERIFY_EMAIL_TOKEN_EXPIRES_IN;
 
-    return verificationToken;
+    const token = this._jwtService.sign({
+      userId: user.id,
+      secret: VERIFY_EMAIL_TOKEN_SECRET,
+      expiresIn,
+    });
+
+    await this._verifyEmailRepository.saveToken({
+      userId: user.id,
+      token,
+      expiresAt: stringToDate(expiresIn),
+    });
+
+    logger.info(`Verification email token generated for user ${user.id}`);
+
+    return token;
   }
 
   async verifyUserEmail(token: string): Promise<void> {
-    const foundToken = await this._verifyEmailRepository.findByToken(token);
+    const payload = await this._jwtService.verify({
+      token,
+      secret: VERIFY_EMAIL_TOKEN_SECRET,
+    });
+
+    const user = await this._userService.getUserById(payload.userId);
+
+    if (!user) {
+      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
+    }
+
+    if (user.isEmailVerified) {
+      logger.warn(`Email already verified for user ${user.id}`);
+      throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
+    }
+
+    const foundToken = await this._verifyEmailRepository.findActiveToken({
+      token,
+    });
 
     if (!foundToken) {
-      throw new ForbiddenError(ERROR_MESSAGES.INVALID_TOKEN);
+      logger.warn(`Token reuse attempt for user ${user.id}`);
+
+      await this._verifyEmailRepository.deleteMany(user.id);
+      throw new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
     }
 
-    if (foundToken.expiresAt < new Date()) {
-      throw new ForbiddenError(ERROR_MESSAGES.EXPIRED_TOKEN);
-    }
+    await Promise.all([
+      // Deletes the email verification token from the database.
+      this._verifyEmailRepository.deleteMany(user.id),
+      // Updates the user's isEmailVerified status to true.
+      this._userService.updateUser(user.id, { isEmailVerified: true }),
+    ]);
 
-    // Updates the user's isEmailVerified status to true.
-    await this._userService.updateUser(foundToken.userId, {
-      isEmailVerified: true,
-    });
-    // Deletes the email verification token from the database.
-    await this._verifyEmailRepository.deleteMany(foundToken.userId);
+    logger.info(`Email verification successful for user ${user.id}`);
   }
 }

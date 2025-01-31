@@ -1,55 +1,62 @@
-import { randomUUID } from "node:crypto";
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
+
+import { DatabaseError } from "@/errors";
 
 import handleAsyncOperation from "@/utils/handle-async-operation";
+
+import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 
 import type { VerifyEmailToken } from "./verify-email.model";
 import type { IVerifyEmailRepository } from "./verify-email.types";
 
+import type { FindActiveTokenDto } from "./dtos/find-active-token.dto";
+import type { SaveTokenDto } from "./dtos/save-token.dto";
+
 export class VerifyEmailRepository implements IVerifyEmailRepository {
   constructor(private readonly _db: PrismaClient) {}
+  async findActiveToken(
+    params: FindActiveTokenDto
+  ): Promise<VerifyEmailToken | null> {
+    const { userId, token } = params;
 
-  async findByUserId(userId: string): Promise<VerifyEmailToken | null> {
+    // Validate input: At least one parameter must be provided
+    if (!token && !userId) {
+      throw new DatabaseError("Token or userId must be provided");
+    }
+
+    // Build dynamic query conditions
+    const conditions: Prisma.EmailVerificationTokenWhereInput[] = [];
+
+    if (token) {
+      conditions.push({ token });
+    }
+
+    if (userId) {
+      conditions.push({ userId });
+    }
+
     return handleAsyncOperation(
       () =>
         this._db.emailVerificationToken.findFirst({
           where: {
-            userId,
+            OR: conditions,
+            expiresAt: { gte: new Date() },
           },
         }),
-      { errorMessage: "Failed to get email verification token." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
 
-  async findByToken(token: string): Promise<VerifyEmailToken | null> {
+  async saveToken(params: SaveTokenDto): Promise<VerifyEmailToken> {
     return handleAsyncOperation(
-      () =>
-        this._db.emailVerificationToken.findFirst({
-          where: {
-            token,
-          },
-        }),
-      { errorMessage: "Failed to get email verification token." }
-    );
-  }
-
-  async create(userId: string): Promise<string> {
-    const token = randomUUID();
-    const expiresAt = new Date(Date.now() + 3600000); // Token expires in 1 hour
-
-    handleAsyncOperation(
       () =>
         this._db.emailVerificationToken.create({
           data: {
-            token,
-            expiresAt,
-            userId,
+            ...params,
           },
         }),
-      { errorMessage: "Failed to create email verification token." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
     );
-
-    return token;
   }
 
   async deleteMany(userId: string): Promise<void> {
@@ -58,7 +65,7 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
         this._db.emailVerificationToken.deleteMany({
           where: { userId },
         }),
-      { errorMessage: "Failed to delete email verification tokens." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_DELETE }
     );
   }
 }

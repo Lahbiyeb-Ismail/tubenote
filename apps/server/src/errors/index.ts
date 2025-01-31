@@ -1,6 +1,7 @@
 import { BadRequestError } from "./bad-request.error";
 import { BaseError } from "./base.error";
 import { ConflictError } from "./conflict.error";
+import { DatabaseError } from "./database.error";
 import { ForbiddenError } from "./forbidden.error";
 import { InternalServerError } from "./internal-server.error";
 import { NotFoundError } from "./not-found.error";
@@ -14,4 +15,5 @@ export {
   UnauthorizedError,
   BadRequestError,
   InternalServerError,
+  DatabaseError,
 };

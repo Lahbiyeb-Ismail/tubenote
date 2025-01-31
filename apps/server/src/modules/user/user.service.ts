@@ -4,7 +4,8 @@ import { BadRequestError, ConflictError, NotFoundError } from "@/errors";
 
 import type { User } from "./user.model";
 
-import type { IPasswordHasherService } from "@modules/auth/core/services/password-hasher/password-hasher.types";
+import type { ICryptoService } from "@modules/utils/crypto";
+
 import type { IUserRepository, IUserService } from "./user.types";
 
 import type { CreateUserDto } from "./dtos/create-user.dto";
@@ -14,7 +15,7 @@ import type { UpdateUserDto } from "./dtos/update-user.dto";
 export class UserService implements IUserService {
   constructor(
     private readonly _userRepository: IUserRepository,
-    private readonly _passwordHasherService: IPasswordHasherService
+    private readonly _cryptoService: ICryptoService
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
@@ -26,7 +27,7 @@ export class UserService implements IUserService {
       throw new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
-    const hashedPassword = await this._passwordHasherService.hashPassword(
+    const hashedPassword = await this._cryptoService.hashPassword(
       createUserDto.password
     );
 
@@ -90,9 +91,9 @@ export class UserService implements IUserService {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
-    const isPasswordValid = await this._passwordHasherService.comparePassword({
-      password: currentPassword,
-      hashedPassword: user.password,
+    const isPasswordValid = await this._cryptoService.comparePasswords({
+      plainText: currentPassword,
+      hash: user.password,
     });
 
     if (!isPasswordValid) {
@@ -103,9 +104,14 @@ export class UserService implements IUserService {
       throw new BadRequestError(ERROR_MESSAGES.PASSWORD_SAME_AS_CURRENT);
     }
 
-    const hashedPassword =
-      await this._passwordHasherService.hashPassword(newPassword);
+    const hashedPassword = await this._cryptoService.hashPassword(newPassword);
 
     return await this._userRepository.updatePassword(user.id, hashedPassword);
+  }
+
+  async resetPassword(userId: string, newPassword: string): Promise<User> {
+    const hashedPassword = await this._cryptoService.hashPassword(newPassword);
+
+    return await this._userRepository.updatePassword(userId, hashedPassword);
   }
 }

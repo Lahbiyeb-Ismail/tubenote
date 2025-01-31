@@ -1,14 +1,17 @@
 import { Router } from "express";
 
+import validateRequest from "@/middlewares/validate-request.middleware";
 import isAuthenticated from "@middlewares/auth.middleware";
 
 import { authController } from "./auth.module";
 
+import { oauthCodeSchema } from "./schemas";
+
 import localAuthRoutes from "./features/local-auth/local-auth.routes";
+import googleAuthRoutes from "./features/oauth/google/google.routes";
 import refreshTokenRoutes from "./features/refresh-token/refresh-token.routes";
 import resetPasswordRoutes from "./features/reset-password/reset-password.routes";
 import verifyEmailRoutes from "./features/verify-email/verify-email.routes";
-import googleAuthRoutes from "./providers/google/google.routes";
 
 const router = Router();
 
@@ -26,6 +29,12 @@ router.use("/", verifyEmailRoutes);
 
 // Refresh token routes
 router.use("/", refreshTokenRoutes);
+
+router
+  .route("/exchange-oauth-code")
+  .post(validateRequest({ body: oauthCodeSchema }), (req, res) =>
+    authController.exchangeOauthCodeForTokens(req, res)
+  );
 
 // - POST /logout: Log out the current user.
 router

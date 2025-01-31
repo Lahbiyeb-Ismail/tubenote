@@ -5,30 +5,32 @@ import handleAsyncOperation from "@/utils/handle-async-operation";
 import type { RefreshToken } from "./refresh-token.model";
 import type { IRefreshTokenRepository } from "./refresh-token.types";
 
-import type { CreateTokenDto } from "./dtos/create-token.dto";
+import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
+import type { SaveTokenDto } from "./dtos/save-token.dto";
 
 export class RefreshTokenRepository implements IRefreshTokenRepository {
   constructor(private readonly _db: PrismaClient) {}
 
-  async create(createTokenDto: CreateTokenDto): Promise<RefreshToken> {
+  async saveToken(saveTokenDto: SaveTokenDto): Promise<RefreshToken> {
     return handleAsyncOperation(
       () =>
         this._db.refreshToken.create({
-          data: { ...createTokenDto },
+          data: { ...saveTokenDto },
         }),
-      { errorMessage: "Failed to create refresh token" }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
     );
   }
 
-  async find(token: string): Promise<RefreshToken | null> {
+  async findValidToken(token: string): Promise<RefreshToken | null> {
     return handleAsyncOperation(
       () =>
         this._db.refreshToken.findUnique({
           where: {
             token,
+            expiresAt: { gt: new Date() },
           },
         }),
-      { errorMessage: "Failed to find refresh token" }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
   async delete(token: string): Promise<void> {
@@ -39,7 +41,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
             token,
           },
         }),
-      { errorMessage: "Failed to delete refresh token" }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_DELETE }
     );
   }
   async deleteAll(userId: string): Promise<void> {
@@ -50,7 +52,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
             userId,
           },
         }),
-      { errorMessage: "Failed to delete refresh tokens for user" }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_DELETE_ALL }
     );
   }
 }

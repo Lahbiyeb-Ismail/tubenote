@@ -1,5 +1,6 @@
-import { InternalServerError } from "@/errors";
+import { DatabaseError } from "@/errors";
 import { Prisma } from "@prisma/client";
+import logger from "./logger";
 
 /**
  * Represents an asynchronous operation that returns a promise of type T.
@@ -47,9 +48,7 @@ async function handleAsyncOperation<T>(
         errorName: error.name,
       });
 
-      throw new InternalServerError(
-        `${errorMessage}: A database error occurred.`
-      );
+      throw new DatabaseError(`A database error occurred: ${errorMessage}`);
     }
 
     if (
@@ -59,26 +58,22 @@ async function handleAsyncOperation<T>(
       // Log the critical error
       console.error("Critical Prisma error:", error);
 
-      throw new InternalServerError(
-        `${errorMessage}: A critical database error occurred.`
+      throw new DatabaseError(
+        `A critical database error occurred: ${errorMessage}`
       );
     }
 
     if (error instanceof Error) {
       // Log the unexpected error
-      console.error("Unexpected error:", error);
+      logger.error(`Unexpected error: ${error}`);
 
       // Throw a generic error for the client
-      throw new InternalServerError(
-        `${errorMessage}: An unexpected error occurred.`
-      );
+      throw new DatabaseError(`An unexpected error occurred: ${errorMessage}`);
     }
     // Log the unknown error
-    console.error("Unknown error:", error);
+    logger.error(`Unknown error: ${error}`);
 
-    throw new InternalServerError(
-      `${errorMessage}: An unknown error occurred.`
-    );
+    throw new DatabaseError(`Unknow error: ${errorMessage}`);
   }
 }
 

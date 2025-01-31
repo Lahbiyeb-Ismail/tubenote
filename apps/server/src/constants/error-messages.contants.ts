@@ -1,5 +1,10 @@
 export const ERROR_MESSAGES = {
   RESOURCE_NOT_FOUND: "The requested resource could not be found.",
+  FAILD_TO_FIND: "Failed to find the resource.",
+  FAILD_TO_CREATE: "Failed to create the resource.",
+  FAILD_TO_DELETE: "Failed to delete the resource.",
+  FAILD_TO_UPDATE: "Failed to update the resource.",
+  FAILD_TO_DELETE_ALL: "Failed to delete all resources.",
   EMAIL_ALREADY_EXISTS:
     "The email address provided is already associated with another account.",
   EMAIL_NOT_VERIFIED: "Email not verified. Please verify your email address.",
@@ -13,6 +18,7 @@ export const ERROR_MESSAGES = {
     "The request could not be understood or was missing required parameters.",
   INTERNAL_SERVER_ERROR: "An unexpected error occurred on the server.",
   INVALID_EMAIL_FORMAT: "The email address provided is not in a valid format.",
+  UNREGISTERED_EMAIL: "The provided email address is not registered.",
   PASSWORD_TOO_WEAK: "The password provided is too weak.",
   PASSWORD_SAME_AS_CURRENT:
     "The new password must be different from the current password.",

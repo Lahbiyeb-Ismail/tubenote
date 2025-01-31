@@ -21,7 +21,7 @@ export class UserRepository implements IUserRepository {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const user = handleAsyncOperation(
+    return handleAsyncOperation(
       () =>
         this._db.user.findUnique({
           where: {
@@ -30,12 +30,10 @@ export class UserRepository implements IUserRepository {
         }),
       { errorMessage: "Failed to find user." }
     );
-
-    return user;
   }
 
   async findById(id: string): Promise<User | null> {
-    const user = handleAsyncOperation(
+    return handleAsyncOperation(
       () =>
         this._db.user.findUnique({
           where: {
@@ -44,8 +42,6 @@ export class UserRepository implements IUserRepository {
         }),
       { errorMessage: "Failed to find user." }
     );
-
-    return user;
   }
 
   async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
