@@ -12,7 +12,12 @@ export interface GetUserDto {
   email?: string;
 }
 
-export interface UpdateUserDto extends Partial<CreateUserDto> {}
+export interface UpdateUserDto {
+  username?: string;
+  email?: string;
+  profilePicture?: string;
+  isEmailVerified?: boolean;
+}
 
 export interface UpdatePasswordDto {
   currentPassword: string;
