@@ -11,6 +11,23 @@ import type { IUserRepository } from "./user.types";
 export class UserRepository implements IUserRepository {
   constructor(private readonly _db: PrismaClient) {}
 
+  /**
+   * Executes a function within a database transaction.
+   *
+   * @template T - The return type of the function to be executed within the transaction.
+   * @param {function(IUserRepository): Promise<T>} fn - A function that takes a transactional repository instance and returns a promise.
+   * @returns {Promise<T>} - A promise that resolves to the result of the function executed within the transaction.
+   *
+   */
+  async transaction<T>(fn: (tx: IUserRepository) => Promise<T>): Promise<T> {
+    // Use Prisma's transaction system
+    return this._db.$transaction(async (prismaTx: Prisma.TransactionClient) => {
+      // Create a new repository instance with the transactional client
+      const txRepository = new UserRepository(prismaTx as PrismaClient);
+      return await fn(txRepository);
+    });
+  }
+
   async createUser(params: CreateUserDto): Promise<User> {
     return handleAsyncOperation(
       () =>
