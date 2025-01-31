@@ -3,10 +3,8 @@ import httpStatus from "http-status";
 
 import type { TypedRequest } from "@/types";
 
+import type { UpdatePasswordDto, UpdateUserDto } from "./dtos";
 import type { IUserController, IUserService } from "./user.types";
-
-import type { UpdatePasswordDto } from "./dtos/update-password.dto";
-import type { UpdateUserDto } from "./dtos/update-user.dto";
 
 /**
  * Controller for handling user-related operations.
