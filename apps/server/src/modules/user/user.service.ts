@@ -15,14 +15,21 @@ export class UserService implements IUserService {
     private readonly _cryptoService: ICryptoService
   ) {}
 
+  private async _ensureEmailIsUnique(
+    email: string,
+    excludedUserId?: string
+  ): Promise<void> {
+    const existingUser = await this._userRepository.getUser({ email });
+
+    if (existingUser && existingUser.id !== excludedUserId) {
+      throw new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
+    }
+  }
+
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     const { email } = createUserDto;
 
-    const existingUser = await this.getUserByEmail(email);
-
-    if (existingUser) {
-      throw new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
-    }
+    await this._ensureEmailIsUnique(email);
 
     const hashedPassword = await this._cryptoService.hashPassword(
       createUserDto.password
@@ -37,7 +44,7 @@ export class UserService implements IUserService {
   async findOrCreateUser(createUserDto: CreateUserDto): Promise<User> {
     const { email } = createUserDto;
 
-    let user = await this.getUserByEmail(email);
+    let user = await this._userRepository.getUser({ email });
 
     if (!user) {
       user = await this.createUser(createUserDto);
@@ -66,11 +73,7 @@ export class UserService implements IUserService {
     const user = await this.getUserById(id);
 
     if (updateUserDto.email && updateUserDto.email !== user.email) {
-      const existingUser = await this.getUserByEmail(updateUserDto.email);
-
-      if (existingUser && existingUser.id !== id) {
-        throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
-      }
+      await this._ensureEmailIsUnique(updateUserDto.email, user.id);
     }
 
     return await this._userRepository.updateUser(id, updateUserDto);
@@ -103,6 +106,9 @@ export class UserService implements IUserService {
   }
 
   async resetPassword(userId: string, newPassword: string): Promise<User> {
+    // Check if the user exists
+    await this.getUserById(userId);
+
     const hashedPassword = await this._cryptoService.hashPassword(newPassword);
 
     return await this._userRepository.updatePassword(userId, hashedPassword);
