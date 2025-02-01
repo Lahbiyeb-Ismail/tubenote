@@ -6,7 +6,12 @@ import type { User } from "./user.model";
 
 import type { ICryptoService } from "@modules/utils/crypto";
 
-import type { CreateUserDto, UpdatePasswordDto, UpdateUserDto } from "./dtos";
+import type {
+  CreateUserDto,
+  GetUserDto,
+  UpdatePasswordDto,
+  UpdateUserDto,
+} from "./dtos";
 import type { IUserRepository, IUserService } from "./user.types";
 
 export class UserService implements IUserService {
@@ -78,14 +83,8 @@ export class UserService implements IUserService {
     });
   }
 
-  async getUserByEmail(email: string): Promise<User | null> {
-    const user = await this._userRepository.getUser({ email });
-
-    return user;
-  }
-
-  async getUserById(userId: string): Promise<User> {
-    const user = await this._userRepository.getUser({ id: userId });
+  async getUser(dto: GetUserDto): Promise<User> {
+    const user = await this._userRepository.getUser(dto);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
