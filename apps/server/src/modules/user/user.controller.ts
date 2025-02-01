@@ -21,7 +21,7 @@ export class UserController implements IUserController {
   async getCurrentUser(req: TypedRequest, res: Response): Promise<void> {
     const userId = req.userId;
 
-    const user = await this._userService.getUserById(userId);
+    const user = await this._userService.getUser({ id: userId });
 
     res.status(httpStatus.OK).json({
       user: {
