@@ -52,7 +52,7 @@ export class LocalAuthService implements ILocalAuthService {
   async loginUser(LoginDto: LoginDto): Promise<AuthResponseDto> {
     const { email, password } = LoginDto;
 
-    const user = await this._userService.getUserByEmail(email);
+    const user = await this._userService.getUser({ email });
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);

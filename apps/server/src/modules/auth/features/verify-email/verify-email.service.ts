@@ -4,7 +4,7 @@ import {
 } from "@/constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import { BadRequestError, NotFoundError } from "@/errors";
+import { BadRequestError } from "@/errors";
 
 import logger from "@/utils/logger";
 import { stringToDate } from "@utils/convert-string-to-date";
@@ -25,11 +25,7 @@ export class VerifyEmailService implements IVerifyEmailService {
   ) {}
 
   async generateToken(email: string): Promise<string> {
-    const user = await this._userService.getUserByEmail(email);
-
-    if (!user) {
-      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
-    }
+    const user = await this._userService.getUser({ email });
 
     if (user.isEmailVerified) {
       throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
@@ -67,11 +63,7 @@ export class VerifyEmailService implements IVerifyEmailService {
       secret: VERIFY_EMAIL_TOKEN_SECRET,
     });
 
-    const user = await this._userService.getUserById(payload.userId);
-
-    if (!user) {
-      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
-    }
+    const user = await this._userService.getUser({ id: payload.userId });
 
     if (user.isEmailVerified) {
       logger.warn(`Email already verified for user ${user.id}`);
