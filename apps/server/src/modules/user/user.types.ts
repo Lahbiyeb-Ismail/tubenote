@@ -21,8 +21,7 @@ export interface IUserRepository {
 export interface IUserService {
   createUser(dto: CreateUserDto): Promise<User>;
   getOrCreateUser(dto: CreateUserDto): Promise<User>;
-  getUserByEmail(email: string): Promise<User | null>;
-  getUserById(userId: string): Promise<User>;
+  getUser(dto: GetUserDto): Promise<User>;
   updateUser(id: string, dto: UpdateUserDto): Promise<User>;
   updatePassword(userId: string, dto: UpdatePasswordDto): Promise<User>;
   resetPassword(userId: string, newPassword: string): Promise<User>;
