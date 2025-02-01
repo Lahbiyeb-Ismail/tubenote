@@ -15,28 +15,54 @@ export class UserService implements IUserService {
     private readonly _cryptoService: ICryptoService
   ) {}
 
-  private async _ensureEmailIsUnique(
-    email: string,
-    excludedUserId?: string
-  ): Promise<void> {
-    const existingUser = await this._userRepository.getUser({ email });
+  private async _createUserWithinTransaction(
+    tx: IUserRepository,
+    dto: CreateUserDto
+  ): Promise<User> {
+    const hashedPassword = await this._cryptoService.hashPassword(dto.password);
 
-    if (existingUser && existingUser.id !== excludedUserId) {
+    return tx.createUser({
+      ...dto,
+      password: hashedPassword,
+    });
+  }
+
+  private async _ensureEmailIsUniqueWithinTransaction(
+    tx: IUserRepository,
+    email: string
+  ): Promise<void> {
+    const existingUser = await tx.getUser({ email });
+
+    if (existingUser) {
       throw new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
+  }
+
+  private async _ensureUserExistsInTransaction(
+    tx: IUserRepository,
+    id: string
+  ): Promise<User> {
+    const user = await tx.getUser({ id });
+
+    if (!user) {
+      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
+    }
+
+    return user;
   }
 
   async createUser(dto: CreateUserDto): Promise<User> {
     const { email } = dto;
 
-    await this._ensureEmailIsUnique(email);
+    const user = await this._userRepository.transaction(async (tx) => {
+      // 1. Ensure email is unique within the transaction
+      await this._ensureEmailIsUniqueWithinTransaction(tx, email);
 
-    const hashedPassword = await this._cryptoService.hashPassword(dto.password);
-
-    return await this._userRepository.createUser({
-      ...dto,
-      password: hashedPassword,
+      // 2. Create user within the transaction
+      return await this._createUserWithinTransaction(tx, dto);
     });
+
+    return user;
   }
 
   async getOrCreateUser(dto: CreateUserDto): Promise<User> {
@@ -47,16 +73,8 @@ export class UserService implements IUserService {
       // 2. Return existing user if found
       if (user) return user;
 
-      // 3. Hash password inside the transaction
-      const hashedPassword = await this._cryptoService.hashPassword(
-        dto.password
-      );
-
-      // 4. Create user within the same transaction
-      return tx.createUser({
-        ...dto,
-        password: hashedPassword,
-      });
+      // 3. Create user if not found
+      return this._createUserWithinTransaction(tx, dto);
     });
   }
 
@@ -77,44 +95,57 @@ export class UserService implements IUserService {
   }
 
   async updateUser(id: string, dto: UpdateUserDto): Promise<User> {
-    const user = await this.getUserById(id);
+    const updatedUser = await this._userRepository.transaction(async (tx) => {
+      const user = await this._ensureUserExistsInTransaction(tx, id);
 
-    if (dto.email && dto.email !== user.email) {
-      await this._ensureEmailIsUnique(dto.email, user.id);
-    }
+      if (dto.email && dto.email !== user.email) {
+        await this._ensureEmailIsUniqueWithinTransaction(tx, dto.email);
+      }
 
-    return await this._userRepository.updateUser(id, dto);
+      return tx.updateUser(user.id, dto);
+    });
+
+    return updatedUser;
   }
 
   async updatePassword(userId: string, dto: UpdatePasswordDto): Promise<User> {
     const { currentPassword, newPassword } = dto;
 
-    const user = await this.getUserById(userId);
+    const updatedUser = await this._userRepository.transaction(async (tx) => {
+      const user = await this._ensureUserExistsInTransaction(tx, userId);
 
-    const isPasswordValid = await this._cryptoService.comparePasswords({
-      plainText: currentPassword,
-      hash: user.password,
+      const isPasswordValid = await this._cryptoService.comparePasswords({
+        plainText: currentPassword,
+        hash: user.password,
+      });
+
+      if (!isPasswordValid) {
+        throw new BadRequestError(ERROR_MESSAGES.INVALID_CREDENTIALS);
+      }
+
+      if (currentPassword === newPassword) {
+        throw new BadRequestError(ERROR_MESSAGES.PASSWORD_SAME_AS_CURRENT);
+      }
+
+      const hashedPassword =
+        await this._cryptoService.hashPassword(newPassword);
+
+      return tx.updatePassword(user.id, hashedPassword);
     });
 
-    if (!isPasswordValid) {
-      throw new BadRequestError(ERROR_MESSAGES.INVALID_CREDENTIALS);
-    }
-
-    if (currentPassword === newPassword) {
-      throw new BadRequestError(ERROR_MESSAGES.PASSWORD_SAME_AS_CURRENT);
-    }
-
-    const hashedPassword = await this._cryptoService.hashPassword(newPassword);
-
-    return await this._userRepository.updatePassword(user.id, hashedPassword);
+    return updatedUser;
   }
 
   async resetPassword(userId: string, newPassword: string): Promise<User> {
-    // Check if the user exists
-    await this.getUserById(userId);
+    const updatedUser = await this._userRepository.transaction(async (tx) => {
+      const user = await this._ensureUserExistsInTransaction(tx, userId);
 
-    const hashedPassword = await this._cryptoService.hashPassword(newPassword);
+      const hashedPassword =
+        await this._cryptoService.hashPassword(newPassword);
 
-    return await this._userRepository.updatePassword(userId, hashedPassword);
+      return tx.updatePassword(user.id, hashedPassword);
+    });
+
+    return updatedUser;
   }
 }
