@@ -35,6 +35,7 @@ describe("UserService", () => {
       createUser: jest.fn(),
       updateUser: jest.fn(),
       updatePassword: jest.fn(),
+      verifyUserEmail: jest.fn(),
     };
 
     mockCryptoService = {
@@ -511,6 +512,67 @@ describe("UserService", () => {
       await expect(
         userService.resetPassword(mockUserId, "newPassword")
       ).rejects.toThrow("Tx update failed");
+    });
+  });
+
+  describe("UserService - verifyUserEmail", () => {
+    it("should verify user email within transaction", async () => {
+      const txMock = {
+        getUserById: jest.fn().mockResolvedValue(mockUser),
+        verifyUserEmail: jest.fn().mockResolvedValue({
+          ...mockUser,
+          isEmailVerified: true,
+        }),
+      };
+      (mockUserRepository.transaction as jest.Mock).mockImplementation(
+        async (fn) => fn(txMock)
+      );
+
+      const result = await userService.verifyUserEmail(mockUserId);
+      expect(result.isEmailVerified).toBe(true);
+    });
+
+    it("should throw NotFoundError if user does not exist during verifyUserEmail", async () => {
+      const txMock = {
+        getUserById: jest.fn().mockResolvedValue(null),
+      };
+      (mockUserRepository.transaction as jest.Mock).mockImplementation(
+        async (fn) => fn(txMock)
+      );
+
+      await expect(userService.verifyUserEmail("invalid")).rejects.toThrow(
+        new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
+      );
+    });
+
+    it("should throw BadRequestError if email is already verified", async () => {
+      const txMock = {
+        getUserById: jest.fn().mockResolvedValue({
+          ...mockUser,
+          isEmailVerified: true,
+        }),
+      };
+      (mockUserRepository.transaction as jest.Mock).mockImplementation(
+        async (fn) => fn(txMock)
+      );
+
+      await expect(userService.verifyUserEmail(mockUserId)).rejects.toThrow(
+        new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED)
+      );
+    });
+
+    it("should propagate error if tx.verifyUserEmail rejects", async () => {
+      const txMock = {
+        getUserById: jest.fn().mockResolvedValue(mockUser),
+        verifyUserEmail: jest.fn().mockRejectedValue(new Error("Verify error")),
+      };
+      (mockUserRepository.transaction as jest.Mock).mockImplementation(
+        async (fn) => fn(txMock)
+      );
+
+      await expect(userService.verifyUserEmail(mockUserId)).rejects.toThrow(
+        "Verify error"
+      );
     });
   });
 
