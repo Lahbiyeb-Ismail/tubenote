@@ -218,4 +218,37 @@ export class UserService implements IUserService {
 
     return updatedUser;
   }
+
+  /**
+   * Verifies the email of a user by their user ID.
+   *
+   * This method performs the following steps:
+   * 1. Starts a transaction to ensure atomicity.
+   * 2. Retrieves the user by their ID.
+   * 3. Throws a `NotFoundError` if the user does not exist.
+   * 4. Throws a `BadRequestError` if the user's email is already verified.
+   * 5. Verifies the user's email within the transaction.
+   *
+   * @param userId - The ID of the user whose email is to be verified.
+   * @returns A promise that resolves to the updated `User` object with the email verified.
+   * @throws `NotFoundError` if the user is not found.
+   * @throws `BadRequestError` if the user's email is already verified.
+   */
+  async verifyUserEmail(userId: string): Promise<User> {
+    const updatedUser = await this._userRepository.transaction(async (tx) => {
+      const user = await tx.getUserById(userId);
+
+      if (!user) {
+        throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
+      }
+
+      if (user.isEmailVerified) {
+        throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
+      }
+
+      return await tx.verifyUserEmail(userId);
+    });
+
+    return updatedUser;
+  }
 }
