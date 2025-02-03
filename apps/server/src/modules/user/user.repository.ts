@@ -28,6 +28,13 @@ export class UserRepository implements IUserRepository {
     });
   }
 
+  /**
+   * Creates a new user in the database.
+   *
+   * @param {CreateUserDto} params - The data transfer object containing user creation parameters.
+   * @returns {Promise<User>} A promise that resolves to the created user.
+   * @throws Will throw an error if the user creation fails.
+   */
   async createUser(params: CreateUserDto): Promise<User> {
     return handleAsyncOperation(
       () =>
@@ -38,6 +45,14 @@ export class UserRepository implements IUserRepository {
     );
   }
 
+  /**
+   * Retrieves a user by their email address.
+   *
+   * @param email - The email address of the user to retrieve.
+   * @returns A promise that resolves to the user object if found, or null if not found.
+   *
+   * @throws Will throw an error if the operation fails.
+   */
   async getUserByEmail(email: string): Promise<User | null> {
     return handleAsyncOperation(
       () =>
@@ -50,6 +65,14 @@ export class UserRepository implements IUserRepository {
     );
   }
 
+  /**
+   * Retrieves a user by their unique identifier.
+   *
+   * @param id - The unique identifier of the user.
+   * @returns A promise that resolves to the user object if found, or null if not found.
+   *
+   * @throws Will throw an error if the operation fails with a message defined in ERROR_MESSAGES.FAILD_TO_FIND.
+   */
   async getUserById(id: string): Promise<User | null> {
     return handleAsyncOperation(
       () =>
@@ -62,6 +85,13 @@ export class UserRepository implements IUserRepository {
     );
   }
 
+  /**
+   * Retrieves a user based on the provided parameters.
+   *
+   * @param {GetUserDto} params - The parameters to find the user by. Must include either an `id` or `email`.
+   * @returns {Promise<User | null>} - A promise that resolves to the user if found, otherwise null.
+   * @throws {DatabaseError} - Throws an error if neither `id` nor `email` is provided.
+   */
   async getUser(params: GetUserDto): Promise<User | null> {
     const { id, email } = params;
 
@@ -90,6 +120,14 @@ export class UserRepository implements IUserRepository {
     );
   }
 
+  /**
+   * Updates a user with the given parameters.
+   *
+   * @param id - The unique identifier of the user to update.
+   * @param params - The parameters to update the user with.
+   * @returns A promise that resolves to the updated user.
+   * @throws Will throw an error if the update operation fails.
+   */
   async updateUser(id: string, params: UpdateUserDto): Promise<User> {
     return handleAsyncOperation(
       () =>
@@ -101,6 +139,14 @@ export class UserRepository implements IUserRepository {
     );
   }
 
+  /**
+   * Updates the password for a user with the given userId.
+   *
+   * @param userId - The unique identifier of the user whose password is to be updated.
+   * @param hashedPassword - The new hashed password to be set for the user.
+   * @returns A promise that resolves to the updated User object.
+   * @throws Will throw an error if the update operation fails.
+   */
   async updatePassword(userId: string, hashedPassword: string): Promise<User> {
     return handleAsyncOperation(
       () =>
