@@ -3,9 +3,11 @@ import { Router } from "express";
 import isAuthenticated from "@middlewares/auth.middleware";
 import validateRequest from "@middlewares/validate-request.middleware";
 
-import { userController } from "./user.module";
-
-import { updatePasswordSchema, updateUserSchema } from "./schemas";
+import {
+  updatePasswordSchema,
+  updateUserSchema,
+  userController,
+} from "@modules/user";
 
 const router = Router();
 
