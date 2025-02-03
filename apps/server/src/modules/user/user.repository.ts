@@ -38,6 +38,30 @@ export class UserRepository implements IUserRepository {
     );
   }
 
+  async getUserByEmail(email: string): Promise<User | null> {
+    return handleAsyncOperation(
+      () =>
+        this._db.user.findUnique({
+          where: {
+            email,
+          },
+        }),
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
+    );
+  }
+
+  async getUserById(id: string): Promise<User | null> {
+    return handleAsyncOperation(
+      () =>
+        this._db.user.findUnique({
+          where: {
+            id,
+          },
+        }),
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
+    );
+  }
+
   async getUser(params: GetUserDto): Promise<User | null> {
     const { id, email } = params;
 
