@@ -12,7 +12,7 @@ import {
   UserController,
 } from "@/modules/user";
 
-describe("userController integration tests", () => {
+describe("UserController tests", () => {
   let userController: IUserController;
   let mockUserService: IUserService;
 
@@ -65,7 +65,7 @@ describe("userController integration tests", () => {
     jest.clearAllMocks();
   });
 
-  describe("AuthController - getCurrentUser", () => {
+  describe("UserController - getCurrentUser", () => {
     afterEach(() => {
       jest.clearAllMocks();
     });
@@ -104,7 +104,7 @@ describe("userController integration tests", () => {
     });
   });
 
-  describe("AuthController - updateCurrentUser", () => {
+  describe("UserController - updateCurrentUser", () => {
     let mockRequest: Partial<TypedRequest<UpdateUserDto>>;
 
     const updateUserDto: UpdateUserDto = {
@@ -181,7 +181,7 @@ describe("userController integration tests", () => {
     });
   });
 
-  describe("AuthController - updateUserPassword", () => {
+  describe("UserController - updateUserPassword", () => {
     let mockRequest: Partial<TypedRequest<UpdatePasswordDto>>;
 
     const updatePasswordDto: UpdatePasswordDto = {
