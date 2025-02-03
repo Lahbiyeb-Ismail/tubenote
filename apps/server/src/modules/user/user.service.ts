@@ -35,19 +35,21 @@ export class UserService implements IUserService {
   private async _ensureEmailIsUniqueWithinTransaction(
     tx: IUserRepository,
     email: string
-  ): Promise<void> {
-    const existingUser = await tx.getUser({ email });
+  ): Promise<null> {
+    const existingUser = await tx.getUserByEmail(email);
 
     if (existingUser) {
       throw new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
+
+    return null;
   }
 
   private async _ensureUserExistsInTransaction(
     tx: IUserRepository,
     id: string
   ): Promise<User> {
-    const user = await tx.getUser({ id });
+    const user = await tx.getUserById(id);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -73,7 +75,7 @@ export class UserService implements IUserService {
   async getOrCreateUser(dto: CreateUserDto): Promise<User> {
     return this._userRepository.transaction(async (tx) => {
       // 1. Check if user exists within the transaction
-      const user = await tx.getUser({ email: dto.email });
+      const user = await tx.getUserByEmail(dto.email);
 
       // 2. Return existing user if found
       if (user) return user;
@@ -96,6 +98,10 @@ export class UserService implements IUserService {
   async updateUser(id: string, dto: UpdateUserDto): Promise<User> {
     const updatedUser = await this._userRepository.transaction(async (tx) => {
       const user = await this._ensureUserExistsInTransaction(tx, id);
+
+      if (Object.keys(dto).length === 0) {
+        return user;
+      }
 
       if (dto.email && dto.email !== user.email) {
         await this._ensureEmailIsUniqueWithinTransaction(tx, dto.email);
