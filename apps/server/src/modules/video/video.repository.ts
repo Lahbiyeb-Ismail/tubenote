@@ -28,7 +28,6 @@ export class VideoRepository implements IVideoRepository {
       async () => {
         const videos = await this._db.video.findMany({
           where: { users: { every: { id: userId } } },
-          omit: { userIds: true },
           take: limit,
           skip,
           orderBy: {
