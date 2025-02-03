@@ -18,6 +18,7 @@ export interface IUserRepository {
   getUser(dto: GetUserDto): Promise<User | null>;
   updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User>;
   updatePassword(userId: string, hashedPassword: string): Promise<User>;
+  verifyUserEmail(userId: string): Promise<User>;
 }
 
 export interface IUserService {
@@ -27,6 +28,7 @@ export interface IUserService {
   updateUser(id: string, dto: UpdateUserDto): Promise<User>;
   updatePassword(userId: string, dto: UpdatePasswordDto): Promise<User>;
   resetPassword(userId: string, newPassword: string): Promise<User>;
+  verifyUserEmail(userId: string): Promise<User>;
 }
 
 export interface IUserController {
