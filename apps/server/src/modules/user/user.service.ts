@@ -20,6 +20,14 @@ export class UserService implements IUserService {
     private readonly _cryptoService: ICryptoService
   ) {}
 
+  /**
+   * Creates a new user within a transaction.
+   *
+   * @param tx - The user repository transaction object.
+   * @param dto - The data transfer object containing user creation details.
+   * @returns A promise that resolves to the created user.
+   * @private
+   */
   private async _createUserWithinTransaction(
     tx: IUserRepository,
     dto: CreateUserDto
@@ -32,6 +40,14 @@ export class UserService implements IUserService {
     });
   }
 
+  /**
+   * Ensures that the provided email is unique within the context of a transaction.
+   *
+   * @param tx - The user repository transaction object.
+   * @param email - The email address to check for uniqueness.
+   * @returns A promise that resolves to null if the email is unique.
+   * @throws {ConflictError} If the email already exists in the repository.
+   */
   private async _ensureEmailIsUniqueWithinTransaction(
     tx: IUserRepository,
     email: string
@@ -45,6 +61,14 @@ export class UserService implements IUserService {
     return null;
   }
 
+  /**
+   * Ensures that a user exists within a transaction.
+   *
+   * @param tx - The transaction repository to use for fetching the user.
+   * @param id - The ID of the user to check for existence.
+   * @returns A promise that resolves to the user if found.
+   * @throws NotFoundError if the user does not exist.
+   */
   private async _ensureUserExistsInTransaction(
     tx: IUserRepository,
     id: string
@@ -58,6 +82,12 @@ export class UserService implements IUserService {
     return user;
   }
 
+  /**
+   * Creates a new user.
+   *
+   * @param dto - The data transfer object containing user creation details.
+   * @returns A promise that resolves to the created user.
+   */
   async createUser(dto: CreateUserDto): Promise<User> {
     const { email } = dto;
 
@@ -72,6 +102,12 @@ export class UserService implements IUserService {
     return user;
   }
 
+  /**
+   * Retrieves an existing user or creates a new one if not found.
+   *
+   * @param dto - The data transfer object containing user details.
+   * @returns A promise that resolves to the retrieved or created user.
+   */
   async getOrCreateUser(dto: CreateUserDto): Promise<User> {
     return this._userRepository.transaction(async (tx) => {
       // 1. Check if user exists within the transaction
@@ -85,6 +121,13 @@ export class UserService implements IUserService {
     });
   }
 
+  /**
+   * Retrieves a user based on the provided criteria.
+   *
+   * @param dto - The data transfer object containing user retrieval details.
+   * @returns A promise that resolves to the retrieved user.
+   * @throws NotFoundError if the user is not found.
+   */
   async getUser(dto: GetUserDto): Promise<User> {
     const user = await this._userRepository.getUser(dto);
 
@@ -95,6 +138,13 @@ export class UserService implements IUserService {
     return user;
   }
 
+  /**
+   * Updates an existing user.
+   *
+   * @param id - The ID of the user to update.
+   * @param dto - The data transfer object containing user update details.
+   * @returns A promise that resolves to the updated user.
+   */
   async updateUser(id: string, dto: UpdateUserDto): Promise<User> {
     const updatedUser = await this._userRepository.transaction(async (tx) => {
       const user = await this._ensureUserExistsInTransaction(tx, id);
@@ -113,6 +163,14 @@ export class UserService implements IUserService {
     return updatedUser;
   }
 
+  /**
+   * Updates the password of an existing user.
+   *
+   * @param userId - The ID of the user whose password is to be updated.
+   * @param dto - The data transfer object containing password update details.
+   * @returns A promise that resolves to the updated user.
+   * @throws BadRequestError if the current password is invalid or the new password is the same as the current password.
+   */
   async updatePassword(userId: string, dto: UpdatePasswordDto): Promise<User> {
     const { currentPassword, newPassword } = dto;
 
@@ -141,6 +199,13 @@ export class UserService implements IUserService {
     return updatedUser;
   }
 
+  /**
+   * Resets the password of an existing user.
+   *
+   * @param userId - The ID of the user whose password is to be reset.
+   * @param newPassword - The new password to set.
+   * @returns A promise that resolves to the updated user.
+   */
   async resetPassword(userId: string, newPassword: string): Promise<User> {
     const updatedUser = await this._userRepository.transaction(async (tx) => {
       const user = await this._ensureUserExistsInTransaction(tx, userId);
