@@ -159,4 +159,25 @@ export class UserRepository implements IUserRepository {
       { errorMessage: ERROR_MESSAGES.FAILD_TO_UPDATE }
     );
   }
+
+  /**
+   * Verifies the email of a user by updating the `isEmailVerified` field to `true`.
+   *
+   * @param {string} userId - The unique identifier of the user whose email is to be verified.
+   * @returns {Promise<User>} - A promise that resolves to the updated user object.
+   *
+   * @throws {Error} - Throws an error if the email verification process fails.
+   */
+  async verifyUserEmail(userId: string): Promise<User> {
+    return handleAsyncOperation(
+      () =>
+        this._db.user.update({
+          where: { id: userId },
+          data: {
+            isEmailVerified: true,
+          },
+        }),
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_UPDATE }
+    );
+  }
 }
