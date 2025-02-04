@@ -1,5 +1,5 @@
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
-import { BadRequestError, ForbiddenError } from "@/errors";
+import { BadRequestError, ForbiddenError, NotFoundError } from "@/errors";
 
 import { ResetPasswordService } from "@modules/auth/features/reset-password/reset-password.service";
 
@@ -22,11 +22,11 @@ describe("ResetPasswordService test suites", () => {
     mockUserService = {
       createUser: jest.fn(),
       getOrCreateUser: jest.fn(),
-      getUserByEmail: jest.fn(),
-      getUserById: jest.fn(),
+      getUser: jest.fn(),
       updateUser: jest.fn(),
       updatePassword: jest.fn(),
       resetPassword: jest.fn(),
+      verifyUserEmail: jest.fn(),
     };
 
     mockCryptoService = {
@@ -87,7 +87,7 @@ describe("ResetPasswordService test suites", () => {
     });
 
     it("should generate token, store it, and send email for valid user", async () => {
-      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue(mockUser);
+      (mockUserService.getUser as jest.Mock).mockResolvedValue(mockUser);
 
       (
         mockCryptoService.generateRandomSecureToken as jest.Mock
@@ -101,7 +101,9 @@ describe("ResetPasswordService test suites", () => {
 
       await resetPasswordService.sendResetToken(mockEmail);
 
-      expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
+      expect(mockUserService.getUser).toHaveBeenCalledWith({
+        email: mockEmail,
+      });
 
       expect(mockCryptoService.generateRandomSecureToken).toHaveBeenCalled();
 
@@ -115,12 +117,14 @@ describe("ResetPasswordService test suites", () => {
       );
     });
 
-    it("should throw a BadRequestError for a not registered email", async () => {
-      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue(null);
+    it("should throw a NotFoundError for a not registered email", async () => {
+      (mockUserService.getUser as jest.Mock).mockRejectedValue(
+        new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
+      );
 
       await expect(
         resetPasswordService.sendResetToken("nonexistent@test.com")
-      ).rejects.toThrow(BadRequestError);
+      ).rejects.toThrow(NotFoundError);
 
       expect(
         mockCryptoService.generateRandomSecureToken
@@ -134,7 +138,7 @@ describe("ResetPasswordService test suites", () => {
     });
 
     it("should throw a ForbiddenError if the email is not verified", async () => {
-      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue({
+      (mockUserService.getUser as jest.Mock).mockResolvedValue({
         ...mockUser,
         isEmailVerified: false,
       });
@@ -143,7 +147,9 @@ describe("ResetPasswordService test suites", () => {
         resetPasswordService.sendResetToken(mockEmail)
       ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED));
 
-      expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
+      expect(mockUserService.getUser).toHaveBeenCalledWith({
+        email: mockEmail,
+      });
 
       expect(
         mockCryptoService.generateRandomSecureToken
@@ -159,7 +165,7 @@ describe("ResetPasswordService test suites", () => {
     it("should propagate userService errors", async () => {
       const error = new Error("Failed to get user");
 
-      (mockUserService.getUserByEmail as jest.Mock).mockRejectedValue(error);
+      (mockUserService.getUser as jest.Mock).mockRejectedValue(error);
 
       await expect(
         resetPasswordService.sendResetToken(mockEmail)
@@ -169,7 +175,7 @@ describe("ResetPasswordService test suites", () => {
     it("should propagate mailSenderService errors", async () => {
       const error = new Error("Failed to send email");
 
-      (mockUserService.getUserByEmail as jest.Mock).mockResolvedValue(mockUser);
+      (mockUserService.getUser as jest.Mock).mockResolvedValue(mockUser);
 
       (
         mockMailSenderService.sendResetPasswordEmail as jest.Mock
