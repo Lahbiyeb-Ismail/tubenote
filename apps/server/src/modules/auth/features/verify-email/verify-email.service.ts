@@ -63,31 +63,24 @@ export class VerifyEmailService implements IVerifyEmailService {
       secret: VERIFY_EMAIL_TOKEN_SECRET,
     });
 
-    const user = await this._userService.getUser({ id: payload.userId });
-
-    if (user.isEmailVerified) {
-      logger.warn(`Email already verified for user ${user.id}`);
-      throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
-    }
-
     const foundToken = await this._verifyEmailRepository.findActiveToken({
       token,
     });
 
     if (!foundToken) {
-      logger.warn(`Token reuse attempt for user ${user.id}`);
+      logger.warn(`Token reuse attempt for user ${payload.userId}`);
 
-      await this._verifyEmailRepository.deleteMany(user.id);
+      await this._verifyEmailRepository.deleteMany(payload.userId);
       throw new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
     }
 
-    await Promise.all([
-      // Deletes the email verification token from the database.
-      this._verifyEmailRepository.deleteMany(user.id),
-      // Updates the user's isEmailVerified status to true.
-      this._userService.updateUser(user.id, { isEmailVerified: true }),
-    ]);
+    // Deletes the email verification token from the database.
+    await this._verifyEmailRepository.deleteMany(foundToken.userId);
 
-    logger.info(`Email verification successful for user ${user.id}`);
+    const verifiedUser = await this._userService.verifyUserEmail(
+      foundToken.userId
+    );
+
+    logger.info(`Email verification successful for user ${verifiedUser.id}`);
   }
 }
