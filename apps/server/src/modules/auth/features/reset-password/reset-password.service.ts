@@ -18,12 +18,7 @@ export class ResetPasswordService implements IResetPasswordService {
   ) {}
 
   async sendResetToken(email: string): Promise<void> {
-    const user = await this._userService.getUserByEmail(email);
-
-    if (!user) {
-      logger.info(`Password reset requested for non-existent email: ${email}`);
-      throw new BadRequestError(ERROR_MESSAGES.UNREGISTERED_EMAIL);
-    }
+    const user = await this._userService.getUser({ email });
 
     if (!user.isEmailVerified) {
       throw new ForbiddenError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);

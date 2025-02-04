@@ -1,4 +1,4 @@
-import { ForbiddenError, NotFoundError, UnauthorizedError } from "@/errors";
+import { ForbiddenError, UnauthorizedError } from "@/errors";
 
 import { REFRESH_TOKEN_EXPIRES_IN } from "@/constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
@@ -11,7 +11,7 @@ import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 import { ICryptoService } from "@modules/utils/crypto";
 
 import { IMailSenderService } from "@modules/mailSender/mail-sender.types";
-import { IUserService } from "@modules/user/user.types";
+import { IUserService } from "@modules/user";
 
 import { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
 import type { IVerifyEmailService } from "@modules/auth/features/verify-email/verify-email.types";
@@ -52,11 +52,7 @@ export class LocalAuthService implements ILocalAuthService {
   async loginUser(LoginDto: LoginDto): Promise<AuthResponseDto> {
     const { email, password } = LoginDto;
 
-    const user = await this._userService.getUserByEmail(email);
-
-    if (!user) {
-      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
-    }
+    const user = await this._userService.getUser({ email });
 
     if (!user.isEmailVerified) {
       throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);

@@ -3,10 +3,11 @@ import { Router } from "express";
 import isAuthenticated from "@middlewares/auth.middleware";
 import validateRequest from "@middlewares/validate-request.middleware";
 
-import { userController } from "./user.module";
-
-import { updatePasswordSchema } from "./schema/update-password.schema";
-import { updateUserSchema } from "./schema/update-user.schema";
+import {
+  updatePasswordSchema,
+  updateUserSchema,
+  userController,
+} from "@modules/user";
 
 const router = Router();
 

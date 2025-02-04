@@ -1,26 +1,63 @@
 import handleAsyncOperation from "@/utils/handle-async-operation";
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 
-import type { User } from "./user.model";
-import type { IUserRepository } from "./user.types";
+import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
+import { DatabaseError } from "@/errors";
 
-import type { CreateUserDto } from "./dtos/create-user.dto";
-import type { UpdateUserDto } from "./dtos/update-user.dto";
+import type {
+  CreateUserDto,
+  GetUserDto,
+  IUserRepository,
+  UpdateUserDto,
+  User,
+} from "@modules/user";
 
 export class UserRepository implements IUserRepository {
   constructor(private readonly _db: PrismaClient) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  /**
+   * Executes a function within a database transaction.
+   *
+   * @template T - The return type of the function to be executed within the transaction.
+   * @param {function(IUserRepository): Promise<T>} fn - A function that takes a transactional repository instance and returns a promise.
+   * @returns {Promise<T>} - A promise that resolves to the result of the function executed within the transaction.
+   *
+   */
+  async transaction<T>(fn: (tx: IUserRepository) => Promise<T>): Promise<T> {
+    // Use Prisma's transaction system
+    return this._db.$transaction(async (prismaTx: Prisma.TransactionClient) => {
+      // Create a new repository instance with the transactional client
+      const txRepository = new UserRepository(prismaTx as PrismaClient);
+      return await fn(txRepository);
+    });
+  }
+
+  /**
+   * Creates a new user in the database.
+   *
+   * @param {CreateUserDto} params - The data transfer object containing user creation parameters.
+   * @returns {Promise<User>} A promise that resolves to the created user.
+   * @throws Will throw an error if the user creation fails.
+   */
+  async createUser(params: CreateUserDto): Promise<User> {
     return handleAsyncOperation(
       () =>
         this._db.user.create({
-          data: { ...createUserDto },
+          data: { ...params },
         }),
-      { errorMessage: "Failed to create new user." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
     );
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  /**
+   * Retrieves a user by their email address.
+   *
+   * @param email - The email address of the user to retrieve.
+   * @returns A promise that resolves to the user object if found, or null if not found.
+   *
+   * @throws Will throw an error if the operation fails.
+   */
+  async getUserByEmail(email: string): Promise<User | null> {
     return handleAsyncOperation(
       () =>
         this._db.user.findUnique({
@@ -28,11 +65,19 @@ export class UserRepository implements IUserRepository {
             email,
           },
         }),
-      { errorMessage: "Failed to find user." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
 
-  async findById(id: string): Promise<User | null> {
+  /**
+   * Retrieves a user by their unique identifier.
+   *
+   * @param id - The unique identifier of the user.
+   * @returns A promise that resolves to the user object if found, or null if not found.
+   *
+   * @throws Will throw an error if the operation fails with a message defined in ERROR_MESSAGES.FAILD_TO_FIND.
+   */
+  async getUserById(id: string): Promise<User | null> {
     return handleAsyncOperation(
       () =>
         this._db.user.findUnique({
@@ -40,21 +85,72 @@ export class UserRepository implements IUserRepository {
             id,
           },
         }),
-      { errorMessage: "Failed to find user." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
 
-  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  /**
+   * Retrieves a user based on the provided parameters.
+   *
+   * @param {GetUserDto} params - The parameters to find the user by. Must include either an `id` or `email`.
+   * @returns {Promise<User | null>} - A promise that resolves to the user if found, otherwise null.
+   * @throws {DatabaseError} - Throws an error if neither `id` nor `email` is provided.
+   */
+  async getUser(params: GetUserDto): Promise<User | null> {
+    const { id, email } = params;
+
+    if (!id && !email) {
+      throw new DatabaseError("Id or email must be provided.");
+    }
+
+    const conditions: Prisma.UserWhereInput[] = [];
+
+    if (id) {
+      conditions.push({ id });
+    }
+
+    if (email) {
+      conditions.push({ email });
+    }
+
+    return handleAsyncOperation(
+      () =>
+        this._db.user.findFirst({
+          where: {
+            OR: conditions,
+          },
+        }),
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
+    );
+  }
+
+  /**
+   * Updates a user with the given parameters.
+   *
+   * @param id - The unique identifier of the user to update.
+   * @param params - The parameters to update the user with.
+   * @returns A promise that resolves to the updated user.
+   * @throws Will throw an error if the update operation fails.
+   */
+  async updateUser(id: string, params: UpdateUserDto): Promise<User> {
     return handleAsyncOperation(
       () =>
         this._db.user.update({
           where: { id },
-          data: { ...updateUserDto },
+          data: { ...params },
         }),
-      { errorMessage: "Failed to update user." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_UPDATE }
     );
   }
 
+  /**
+   * Updates the password for a user with the given userId.
+   *
+   * @param userId - The unique identifier of the user whose password is to be updated.
+   * @param hashedPassword - The new hashed password to be set for the user.
+   * @returns A promise that resolves to the updated User object.
+   * @throws Will throw an error if the update operation fails.
+   */
   async updatePassword(userId: string, hashedPassword: string): Promise<User> {
     return handleAsyncOperation(
       () =>
@@ -64,7 +160,28 @@ export class UserRepository implements IUserRepository {
             password: hashedPassword,
           },
         }),
-      { errorMessage: "Failed to update user's password." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_UPDATE }
+    );
+  }
+
+  /**
+   * Verifies the email of a user by updating the `isEmailVerified` field to `true`.
+   *
+   * @param {string} userId - The unique identifier of the user whose email is to be verified.
+   * @returns {Promise<User>} - A promise that resolves to the updated user object.
+   *
+   * @throws {Error} - Throws an error if the email verification process fails.
+   */
+  async verifyUserEmail(userId: string): Promise<User> {
+    return handleAsyncOperation(
+      () =>
+        this._db.user.update({
+          where: { id: userId },
+          data: {
+            isEmailVerified: true,
+          },
+        }),
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_UPDATE }
     );
   }
 }

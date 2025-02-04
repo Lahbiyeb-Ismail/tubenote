@@ -3,16 +3,32 @@ import httpStatus from "http-status";
 
 import type { TypedRequest } from "@/types";
 
-import type { IUserController, IUserService } from "./user.types";
-
-import type { UpdatePasswordDto } from "./dtos/update-password.dto";
-import type { UpdateUserDto } from "./dtos/update-user.dto";
+import type {
+  IUserController,
+  IUserService,
+  UpdatePasswordDto,
+  UpdateUserDto,
+  User,
+} from "@modules/user";
 
 /**
  * Controller for handling user-related operations.
  */
 export class UserController implements IUserController {
   constructor(private readonly _userService: IUserService) {}
+
+  private _mapUserToResponse(user: User): Omit<User, "password"> {
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      profilePicture: user.profilePicture,
+      isEmailVerified: user.isEmailVerified,
+      videoIds: user.videoIds,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
 
   /**
    * Get the current user's information.
@@ -23,18 +39,11 @@ export class UserController implements IUserController {
   async getCurrentUser(req: TypedRequest, res: Response): Promise<void> {
     const userId = req.userId;
 
-    const user = await this._userService.getUserById(userId);
+    const user = await this._userService.getUser({ id: userId });
 
     res.status(httpStatus.OK).json({
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        profilePicture: user.profilePicture,
-        isEmailVerified: user.isEmailVerified,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      },
+      message: "User retrieved successfully.",
+      user: this._mapUserToResponse(user),
     });
   }
 
@@ -50,9 +59,12 @@ export class UserController implements IUserController {
   ): Promise<void> {
     const userId = req.userId;
 
-    await this._userService.updateUser(userId, req.body);
+    const user = await this._userService.updateUser(userId, req.body);
 
-    res.status(httpStatus.OK).json({ message: "User updated successfully." });
+    res.status(httpStatus.OK).json({
+      message: "User updated successfully.",
+      user: this._mapUserToResponse(user),
+    });
   }
 
   async updatePassword(req: TypedRequest<UpdatePasswordDto>, res: Response) {
@@ -61,8 +73,8 @@ export class UserController implements IUserController {
     const user = await this._userService.updatePassword(userId, req.body);
 
     res.status(httpStatus.OK).json({
-      message: "Password updated successfully",
-      email: user.email,
+      message: "User password updated successfully.",
+      user: this._mapUserToResponse(user),
     });
   }
 }
