@@ -2,7 +2,9 @@ import prismaClient from "@config/database.config";
 
 import { cryptoService } from "@modules/utils/crypto";
 
-import { UserController, UserRepository, UserService } from "@modules/user";
+import { UserController } from "./user.controller";
+import { UserRepository } from "./user.repository";
+import { UserService } from "./user.service";
 
 const userRepository = new UserRepository(prismaClient);
 const userService = new UserService(userRepository, cryptoService);
