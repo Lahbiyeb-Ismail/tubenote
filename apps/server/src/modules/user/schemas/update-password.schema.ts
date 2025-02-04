@@ -7,6 +7,7 @@ export const updatePasswordSchema = z
     currentPassword: passwordSchema,
     newPassword: passwordSchema,
   })
+  .strict()
   .refine((data) => data.currentPassword !== data.newPassword, {
     message: "New password must be different from the current password.",
     path: ["newPassword"],
