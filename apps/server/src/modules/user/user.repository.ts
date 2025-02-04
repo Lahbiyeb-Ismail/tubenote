@@ -4,9 +4,13 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import { DatabaseError } from "@/errors";
 
-import type { CreateUserDto, GetUserDto, UpdateUserDto } from "./dtos";
-import type { User } from "./user.model";
-import type { IUserRepository } from "./user.types";
+import type {
+  CreateUserDto,
+  GetUserDto,
+  IUserRepository,
+  UpdateUserDto,
+  User,
+} from "@modules/user";
 
 export class UserRepository implements IUserRepository {
   constructor(private readonly _db: PrismaClient) {}

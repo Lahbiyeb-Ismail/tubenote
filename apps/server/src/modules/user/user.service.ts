@@ -2,17 +2,17 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import { BadRequestError, ConflictError, NotFoundError } from "@/errors";
 
-import type { User } from "./user.model";
-
-import type { ICryptoService } from "@modules/utils/crypto";
-
 import type {
   CreateUserDto,
   GetUserDto,
+  IUserRepository,
+  IUserService,
   UpdatePasswordDto,
   UpdateUserDto,
-} from "./dtos";
-import type { IUserRepository, IUserService } from "./user.types";
+  User,
+} from "@modules/user";
+
+import type { ICryptoService } from "@modules/utils/crypto";
 
 export class UserService implements IUserService {
   constructor(

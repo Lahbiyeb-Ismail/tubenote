@@ -7,8 +7,8 @@ import type {
   GetUserDto,
   UpdatePasswordDto,
   UpdateUserDto,
-} from "./dtos";
-import type { User } from "./user.model";
+  User,
+} from "@modules/user";
 
 export interface IUserRepository {
   transaction<T>(fn: (tx: IUserRepository) => Promise<T>): Promise<T>;

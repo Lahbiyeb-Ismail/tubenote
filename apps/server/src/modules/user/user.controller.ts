@@ -3,9 +3,13 @@ import httpStatus from "http-status";
 
 import type { TypedRequest } from "@/types";
 
-import type { UpdatePasswordDto, UpdateUserDto } from "./dtos";
-import type { User } from "./user.model";
-import type { IUserController, IUserService } from "./user.types";
+import type {
+  IUserController,
+  IUserService,
+  UpdatePasswordDto,
+  UpdateUserDto,
+  User,
+} from "@modules/user";
 
 /**
  * Controller for handling user-related operations.
