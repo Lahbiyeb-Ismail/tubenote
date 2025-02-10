@@ -12,6 +12,7 @@ import type {
   CreateNoteDto,
   DeleteNoteDto,
   FindNoteDto,
+  FindNotesByVideoIdDto,
   UpdateNoteDto,
 } from "@modules/note";
 
@@ -28,7 +29,7 @@ export interface INoteRepository {
   update(findNoteDto: FindNoteDto, updateNoteDto: UpdateNoteDto): Promise<Note>;
   delete(deleteNoteDto: DeleteNoteDto): Promise<Note>;
   findMany(findManyDto: FindManyDto): Promise<Note[]>;
-  findManyByVideoId(id: string, findManyDto: FindManyDto): Promise<Note[]>;
+  findManyByVideoId(dto: FindNotesByVideoIdDto): Promise<Note[]>;
   count(userId: string): Promise<number>;
 }
 
@@ -43,7 +44,7 @@ export interface INoteService {
   fetchUserNotes(findManyDto: FindManyDto): Promise<UserNotes>;
   fetchRecentNotes(findManyDto: FindManyDto): Promise<Note[]>;
   fetchRecentlyUpdatedNotes(findManyDto: FindManyDto): Promise<Note[]>;
-  fetchNotesByVideoId(id: string, findManyDto: FindManyDto): Promise<UserNotes>;
+  fetchNotesByVideoId(dto: FindNotesByVideoIdDto): Promise<UserNotes>;
 }
 
 export interface INoteController {
