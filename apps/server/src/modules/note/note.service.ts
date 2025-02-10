@@ -120,9 +120,10 @@ export class NoteService implements INoteService {
    */
   async fetchUserNotes(findManyDto: FindManyDto): Promise<PaginatedNotes> {
     return await this._noteRepository.transaction(async (tx) => {
-      const notes = await tx.findMany(findManyDto);
-
-      const notesCount = await tx.count(findManyDto.userId);
+      const [notes, notesCount] = await Promise.all([
+        tx.findMany(findManyDto),
+        tx.count(findManyDto.userId),
+      ]);
 
       const totalPages = Math.ceil(notesCount / findManyDto.limit);
 
