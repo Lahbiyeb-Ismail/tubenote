@@ -26,7 +26,7 @@ export interface INoteRepository {
   find(findNoteDto: FindNoteDto): Promise<Note | null>;
   create(createNoteDto: CreateNoteDto): Promise<Note>;
   update(findNoteDto: FindNoteDto, updateNoteDto: UpdateNoteDto): Promise<Note>;
-  delete(deleteNoteDto: DeleteNoteDto): Promise<void>;
+  delete(deleteNoteDto: DeleteNoteDto): Promise<Note>;
   findMany(findManyDto: FindManyDto): Promise<Note[]>;
   findManyByVideoId(id: string, findManyDto: FindManyDto): Promise<Note[]>;
   count(userId: string): Promise<number>;
@@ -34,12 +34,12 @@ export interface INoteRepository {
 
 export interface INoteService {
   findNote(findNoteDto: FindNoteDto): Promise<Note>;
-  createNote(userId: string, createNoteDto: CreateNoteDto): Promise<Note>;
+  createNote(createNoteDto: CreateNoteDto): Promise<Note>;
   updateNote(
     findNoteDto: FindNoteDto,
     updateNoteDto: UpdateNoteDto
   ): Promise<Note>;
-  deleteNote(deleteNoteDto: DeleteNoteDto): Promise<void>;
+  deleteNote(deleteNoteDto: DeleteNoteDto): Promise<Note>;
   fetchUserNotes(findManyDto: FindManyDto): Promise<UserNotes>;
   fetchRecentNotes(findManyDto: FindManyDto): Promise<Note[]>;
   fetchRecentlyUpdatedNotes(findManyDto: FindManyDto): Promise<Note[]>;
