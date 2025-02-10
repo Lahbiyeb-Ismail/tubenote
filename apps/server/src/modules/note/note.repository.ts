@@ -1,16 +1,18 @@
 import type { PrismaClient } from "@prisma/client";
 
+import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import handleAsyncOperation from "@/utils/handle-async-operation";
-
-import type { Note } from "./note.model";
-import type { INoteRepository } from "./note.types";
 
 import type { FindManyDto } from "@common/dtos/find-many.dto";
 
-import type { CreateNoteDto } from "./dtos/create-note.dto";
-import type { DeleteNoteDto } from "./dtos/delete-note.dto";
-import type { FindNoteDto } from "./dtos/find-note.dto";
-import type { UpdateNoteDto } from "./dtos/update-note.dto";
+import type {
+  CreateNoteDto,
+  DeleteNoteDto,
+  FindNoteDto,
+  INoteRepository,
+  Note,
+  UpdateNoteDto,
+} from "@modules/note";
 
 export class NoteRepository implements INoteRepository {
   constructor(private readonly _db: PrismaClient) {}
@@ -23,17 +25,17 @@ export class NoteRepository implements INoteRepository {
             ...findNoteDto,
           },
         }),
-      { errorMessage: "Failed to find note." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
 
-  async create(userId: string, createNoteDto: CreateNoteDto): Promise<Note> {
+  async create(createNoteDto: CreateNoteDto): Promise<Note> {
     return handleAsyncOperation(
       () =>
         this._db.note.create({
-          data: { userId, ...createNoteDto },
+          data: { ...createNoteDto },
         }),
-      { errorMessage: "Failed to create note." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
     );
   }
 
@@ -49,7 +51,7 @@ export class NoteRepository implements INoteRepository {
           },
           data: { ...updateNoteDto },
         }),
-      { errorMessage: "Failed to update note." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_UPDATE }
     );
   }
 
@@ -59,7 +61,7 @@ export class NoteRepository implements INoteRepository {
         this._db.note.delete({
           where: { ...deleteNoteDto },
         }),
-      { errorMessage: "Failed to delete note." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_DELETE }
     );
   }
 
