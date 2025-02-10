@@ -6,7 +6,7 @@ import type { Note } from "@modules/note";
  * Excludes system-generated fields such as `id`, `createAt`, and `updatedAt`.
  */
 export interface CreateNoteDto
-  extends Omit<Note, "id" | "createAt" | "updatedAt"> {}
+  extends Omit<Note, "id" | "createdAt" | "updatedAt"> {}
 
 /**
  * Data Transfer Object for updating an existing note.
