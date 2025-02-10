@@ -1,5 +1,19 @@
 import { z } from "zod";
 
+/**
+ * Schema for validating the input when creating a new note.
+ *
+ * This schema enforces the following rules:
+ * - **title**: Must be a string with a minimum length of 3 characters.
+ * - **content**: Must be a string with a minimum length of 10 characters.
+ * - **videoTitle**: Must be a string with a minimum length of 3 characters.
+ * - **thumbnail**: Must be a string with a minimum length of 3 characters.
+ * - **videoId**: Must be a string with a minimum length of 3 characters.
+ * - **youtubeId**: Must be a string with a minimum length of 3 characters.
+ * - **timestamp**: Must be a number.
+ *
+ * The `.strict()` method is used to ensure that no additional properties are allowed.
+ */
 export const createNoteSchema = z
   .object({
     title: z
