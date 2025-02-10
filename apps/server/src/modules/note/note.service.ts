@@ -1,19 +1,34 @@
 import { NotFoundError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import type { Note } from "./note.model";
-
-import type { UserNotes } from "./note.types";
-import type { INoteRepository, INoteService } from "./note.types";
+import type {
+  CreateNoteDto,
+  DeleteNoteDto,
+  FindNoteDto,
+  INoteRepository,
+  INoteService,
+  Note,
+  UpdateNoteDto,
+  UserNotes,
+} from "@modules/note";
 
 import type { FindManyDto } from "@common/dtos/find-many.dto";
-import type { CreateNoteDto } from "./dtos/create-note.dto";
-import type { DeleteNoteDto } from "./dtos/delete-note.dto";
-import type { FindNoteDto } from "./dtos/find-note.dto";
-import type { UpdateNoteDto } from "./dtos/update-note.dto";
 
 export class NoteService implements INoteService {
   constructor(private readonly _noteRepository: INoteRepository) {}
+
+  private async _findNoteOrFail(
+    tx: INoteRepository,
+    findNoteDto: FindNoteDto
+  ): Promise<Note> {
+    const note = await tx.find(findNoteDto);
+
+    if (!note) {
+      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
+    }
+
+    return note;
+  }
 
   async findNote(findNoteDto: FindNoteDto): Promise<Note> {
     const note = await this._noteRepository.find(findNoteDto);
@@ -25,11 +40,8 @@ export class NoteService implements INoteService {
     return note;
   }
 
-  async createNote(
-    userId: string,
-    createNoteDto: CreateNoteDto
-  ): Promise<Note> {
-    const note = await this._noteRepository.create(userId, createNoteDto);
+  async createNote(createNoteDto: CreateNoteDto): Promise<Note> {
+    const note = await this._noteRepository.create(createNoteDto);
 
     return note;
   }
@@ -38,31 +50,39 @@ export class NoteService implements INoteService {
     findNoteDto: FindNoteDto,
     updateNoteDto: UpdateNoteDto
   ): Promise<Note> {
-    await this.findNote(findNoteDto);
+    const updatedNote = await this._noteRepository.transaction(async (tx) => {
+      await this._findNoteOrFail(tx, findNoteDto);
 
-    const updatedNote = await this._noteRepository.update(
-      findNoteDto,
-      updateNoteDto
-    );
+      return tx.update(findNoteDto, updateNoteDto);
+    });
 
     return updatedNote;
   }
 
-  async deleteNote(deleteNoteDto: DeleteNoteDto): Promise<void> {
-    await this.findNote(deleteNoteDto);
+  async deleteNote(deleteNoteDto: DeleteNoteDto): Promise<Note> {
+    const deletedNote = await this._noteRepository.transaction(async (tx) => {
+      await this._findNoteOrFail(tx, deleteNoteDto);
 
-    await this._noteRepository.delete(deleteNoteDto);
+      return tx.delete(deleteNoteDto);
+    });
+
+    return deletedNote;
   }
 
   async fetchUserNotes(findManyDto: FindManyDto): Promise<UserNotes> {
-    const [notes, notesCount] = await Promise.all([
-      this._noteRepository.findMany(findManyDto),
-      this._noteRepository.count(findManyDto.userId),
-    ]);
+    const paginatedNotes = await this._noteRepository.transaction(
+      async (tx) => {
+        const notes = await tx.findMany(findManyDto);
 
-    const totalPages = Math.ceil(notesCount / findManyDto.limit);
+        const notesCount = await tx.count(findManyDto.userId);
 
-    return { notes, notesCount, totalPages };
+        const totalPages = Math.ceil(notesCount / findManyDto.limit);
+
+        return { notes, notesCount, totalPages };
+      }
+    );
+
+    return paginatedNotes;
   }
 
   async fetchRecentNotes(findManyDto: FindManyDto): Promise<Note[]> {
@@ -82,13 +102,18 @@ export class NoteService implements INoteService {
     id: string,
     findManyDto: FindManyDto
   ): Promise<UserNotes> {
-    const [notes, notesCount] = await Promise.all([
-      this._noteRepository.findManyByVideoId(id, findManyDto),
-      this._noteRepository.count(findManyDto.userId),
-    ]);
+    const paginatedNotes = await this._noteRepository.transaction(
+      async (tx) => {
+        const notes = await tx.findManyByVideoId(id, findManyDto);
 
-    const totalPages = Math.ceil(notesCount / findManyDto.limit);
+        const notesCount = await tx.count(findManyDto.userId);
 
-    return { notes, notesCount, totalPages };
+        const totalPages = Math.ceil(notesCount / findManyDto.limit);
+
+        return { notes, notesCount, totalPages };
+      }
+    );
+
+    return paginatedNotes;
   }
 }
