@@ -22,6 +22,7 @@ export interface UserNotes {
 }
 
 export interface INoteRepository {
+  transaction<T>(fn: (tx: INoteRepository) => Promise<T>): Promise<T>;
   find(findNoteDto: FindNoteDto): Promise<Note | null>;
   create(createNoteDto: CreateNoteDto): Promise<Note>;
   update(findNoteDto: FindNoteDto, updateNoteDto: UpdateNoteDto): Promise<Note>;

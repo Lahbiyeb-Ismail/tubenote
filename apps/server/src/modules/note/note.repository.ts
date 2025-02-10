@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import handleAsyncOperation from "@/utils/handle-async-operation";
@@ -16,6 +16,15 @@ import type {
 
 export class NoteRepository implements INoteRepository {
   constructor(private readonly _db: PrismaClient) {}
+
+  async transaction<T>(fn: (tx: INoteRepository) => Promise<T>): Promise<T> {
+    // Use Prisma's transaction system
+    return this._db.$transaction(async (prismaTx: Prisma.TransactionClient) => {
+      // Create a new repository instance with the transactional client
+      const txRepository = new NoteRepository(prismaTx as PrismaClient);
+      return await fn(txRepository);
+    });
+  }
 
   async find(findNoteDto: FindNoteDto): Promise<Note | null> {
     return handleAsyncOperation(
