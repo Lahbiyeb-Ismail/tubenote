@@ -17,10 +17,27 @@ import type {
 
 /**
  * Controller for handling note-related operations.
+ *
+ * This controller provides endpoints for creating, updating, deleting,
+ * and retrieving notes for an authenticated user.
+ * It also supports pagination for list endpoints.
  */
 export class NoteController implements INoteController {
+  /**
+   * Creates an instance of NoteController.
+   *
+   * @param _noteService - An instance of the note service that handles business logic.
+   */
   constructor(private readonly _noteService: INoteService) {}
 
+  /**
+   * Sends a standardized paginated response.
+   *
+   * @private
+   * @param res - Express response object used to send the HTTP response.
+   * @param paginationQuery - The query parameters containing pagination details.
+   * @param result - The result object containing notes data and pagination metadata.
+   */
   private _sendPaginatedResponse(
     res: Response,
     paginationQuery: QueryPaginationDto,
@@ -41,6 +58,14 @@ export class NoteController implements INoteController {
     });
   }
 
+  /**
+   * Extracts and calculates pagination parameters from the query.
+   *
+   * @private
+   * @param queries - The query parameters containing pagination and sorting details.
+   * @param defaultLimit - The default limit for items per page (default is 8).
+   * @returns An object with pagination parameters (skip, limit, and sort options) excluding the userId.
+   */
   private _getPaginationQueries(
     queries: QueryPaginationDto,
     defaultLimit = 8
@@ -62,8 +87,8 @@ export class NoteController implements INoteController {
   /**
    * Adds a new note for the authenticated user.
    *
-   * @param req - The request object containing the note data and user ID.
-   * @param res - The response object used to send the status and result.
+   * @param req - The request object containing note data (excluding userId) in the body and the userId on the request.
+   * @param res - The response object used to send the HTTP status and result.
    * @returns A promise that resolves to void.
    */
   async createNote(
@@ -71,7 +96,6 @@ export class NoteController implements INoteController {
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-
     const note = await this._noteService.createNote({ userId, ...req.body });
 
     res.status(httpStatus.CREATED).json({
@@ -84,8 +108,8 @@ export class NoteController implements INoteController {
   /**
    * Updates an existing note for the authenticated user.
    *
-   * @param req - The request object containing the note ID in the parameters and the updated note data in the body.
-   * @param res - The response object used to send the status and updated note data.
+   * @param req - The request object containing the note ID in the parameters and updated note data in the body.
+   * @param res - The response object used to send the HTTP status and updated note data.
    * @returns A promise that resolves to void.
    */
   async updateNote(
@@ -110,8 +134,8 @@ export class NoteController implements INoteController {
   /**
    * Deletes a note based on the provided note ID and user ID.
    *
-   * @param req - The request object containing the user ID and note ID.
-   * @param res - The response object used to send the status and message.
+   * @param req - The request object containing the note ID in the parameters and the userId.
+   * @param res - The response object used to send the HTTP status and confirmation message.
    * @returns A promise that resolves to void.
    */
   async deleteNote(
@@ -131,8 +155,8 @@ export class NoteController implements INoteController {
   /**
    * Retrieves a note by its ID for the authenticated user.
    *
-   * @param req - The request object containing the user ID and note ID parameters.
-   * @param res - The response object used to send the note data.
+   * @param req - The request object containing the note ID in the parameters and the userId.
+   * @param res - The response object used to send the HTTP status and note data.
    * @returns A promise that resolves to void.
    */
   async getNoteById(
@@ -153,8 +177,8 @@ export class NoteController implements INoteController {
   /**
    * Retrieves the notes of a user with pagination.
    *
-   * @param req - The request object containing user ID and pagination query parameters.
-   * @param res - The response object used to send the notes and pagination details.
+   * @param req - The request object containing the userId and pagination query parameters.
+   * @param res - The response object used to send the HTTP status, notes data, and pagination metadata.
    * @returns A promise that resolves to void.
    */
   async getUserNotes(
@@ -162,7 +186,6 @@ export class NoteController implements INoteController {
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-
     const paginationQueries = this._getPaginationQueries(req.query);
 
     const result = await this._noteService.fetchUserNotes({
@@ -176,8 +199,8 @@ export class NoteController implements INoteController {
   /**
    * Retrieves the most recent notes for a specific user.
    *
-   * @param req - The request object containing user information.
-   * @param res - The response object used to send back the notes.
+   * @param req - The request object containing the userId and pagination query parameters.
+   * @param res - The response object used to send the HTTP status and recent notes data.
    * @returns A promise that resolves to void.
    */
   async getUserRecentNotes(
@@ -185,7 +208,6 @@ export class NoteController implements INoteController {
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-
     const paginationQueries = this._getPaginationQueries(req.query, 2);
 
     const notes = await this._noteService.fetchRecentNotes({
@@ -199,8 +221,8 @@ export class NoteController implements INoteController {
   /**
    * Retrieves the most recently updated notes for the authenticated user.
    *
-   * @param req - The request object, containing the authenticated user's ID.
-   * @param res - The response object used to send the JSON response.
+   * @param req - The request object containing the userId and pagination query parameters.
+   * @param res - The response object used to send the HTTP status and recently updated notes data.
    * @returns A promise that resolves to void.
    */
   async getRecentlyUpatedNotes(
@@ -208,7 +230,6 @@ export class NoteController implements INoteController {
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-
     const paginationQueries = this._getPaginationQueries(req.query, 2);
 
     const notes = await this._noteService.fetchRecentNotes({
@@ -222,16 +243,14 @@ export class NoteController implements INoteController {
   /**
    * Retrieves notes associated with a specific video ID, with pagination support.
    *
-   * @param req - The request object containing user ID, video ID parameter, and pagination query.
-   * @param res - The response object used to send back the notes and pagination details.
-   *
-   * @returns A JSON response containing the notes and pagination information.
-   *
+   * @param req - The request object containing the video ID as a parameter, the userId, and pagination query parameters.
+   * @param res - The response object used to send the HTTP status, notes data, and pagination metadata.
+   * @returns A promise that resolves to void.
    */
   async getNotesByVideoId(
     req: TypedRequest<EmptyRecord, IdParamDto, QueryPaginationDto>,
     res: Response
-  ) {
+  ): Promise<void> {
     const userId = req.userId;
     const { id } = req.params;
 
