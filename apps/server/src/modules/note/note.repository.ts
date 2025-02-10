@@ -9,6 +9,7 @@ import type {
   CreateNoteDto,
   DeleteNoteDto,
   FindNoteDto,
+  FindNotesByVideoIdDto,
   INoteRepository,
   Note,
   UpdateNoteDto,
@@ -95,18 +96,15 @@ export class NoteRepository implements INoteRepository {
     );
   }
 
-  async findManyByVideoId(
-    id: string,
-    findManyDto: FindManyDto
-  ): Promise<Note[]> {
-    const { userId, limit, sort, skip = 0 } = findManyDto;
+  async findManyByVideoId(dto: FindNotesByVideoIdDto): Promise<Note[]> {
+    const { videoId, userId, limit, sort, skip = 0 } = dto;
 
     return handleAsyncOperation(
       () =>
         this._db.note.findMany({
           where: {
             userId,
-            youtubeId: id,
+            youtubeId: videoId,
           },
           take: limit,
           skip,
