@@ -12,6 +12,7 @@ import type {
   INoteController,
   INoteService,
   UpdateNoteDto,
+  UserNotes,
 } from "@modules/note";
 
 /**
@@ -19,6 +20,44 @@ import type {
  */
 export class NoteController implements INoteController {
   constructor(private readonly _noteService: INoteService) {}
+
+  private _sendPaginatedResponse(
+    res: Response,
+    paginationQuery: QueryPaginationDto,
+    result: UserNotes
+  ): void {
+    const currentPage = Number(paginationQuery.page) || 1;
+
+    res.status(httpStatus.OK).json({
+      success: true,
+      data: result.notes,
+      pagination: {
+        totalPages: result.totalPages,
+        currentPage,
+        totalItems: result.notesCount,
+        hasNextPage: currentPage < result.totalPages,
+        hasPrevPage: currentPage > 1,
+      },
+    });
+  }
+
+  private _getPaginationQueries(
+    queries: QueryPaginationDto,
+    defaultLimit = 8
+  ): Omit<FindManyDto, "userId"> {
+    const page = Math.max(Number(queries.page) || 1, 1);
+    const limit = Math.max(Number(queries.limit) || defaultLimit, 1);
+    const skip = (page - 1) * limit;
+
+    return {
+      skip,
+      limit,
+      sort: {
+        by: queries.sortBy || "createdAt",
+        order: queries.order || "desc",
+      },
+    };
+  }
 
   /**
    * Adds a new note for the authenticated user.
@@ -35,9 +74,11 @@ export class NoteController implements INoteController {
 
     const note = await this._noteService.createNote({ userId, ...req.body });
 
-    res
-      .status(httpStatus.CREATED)
-      .json({ message: "Note created successfully.", note });
+    res.status(httpStatus.CREATED).json({
+      success: true,
+      data: note,
+      message: "Note created successfully.",
+    });
   }
 
   /**
@@ -59,9 +100,11 @@ export class NoteController implements INoteController {
       req.body
     );
 
-    res
-      .status(httpStatus.OK)
-      .json({ message: "Note updated successfully.", note: updatedNote });
+    res.status(httpStatus.OK).json({
+      success: true,
+      data: updatedNote,
+      message: "Note updated successfully.",
+    });
   }
 
   /**
@@ -78,11 +121,11 @@ export class NoteController implements INoteController {
     const userId = req.userId;
     const { id } = req.params;
 
-    const note = await this._noteService.deleteNote({ noteId: id, userId });
+    await this._noteService.deleteNote({ noteId: id, userId });
 
     res
       .status(httpStatus.OK)
-      .json({ message: "Note deleted successfully.", note });
+      .json({ success: true, message: "Note deleted successfully." });
   }
 
   /**
@@ -101,7 +144,10 @@ export class NoteController implements INoteController {
 
     const note = await this._noteService.findNote({ noteId: id, userId });
 
-    res.status(httpStatus.OK).json({ note });
+    res.status(httpStatus.OK).json({
+      success: true,
+      data: note,
+    });
   }
 
   /**
@@ -117,31 +163,14 @@ export class NoteController implements INoteController {
   ): Promise<void> {
     const userId = req.userId;
 
-    const page = Number(req.query.page);
-    const limit = Number(req.query.limit);
+    const paginationQueries = this._getPaginationQueries(req.query);
 
-    const skip = (page - 1) * limit;
-
-    const findManyDto: FindManyDto = {
+    const result = await this._noteService.fetchUserNotes({
       userId,
-      skip,
-      limit,
-      sort: { by: "createdAt", order: "desc" },
-    };
-
-    const { notes, notesCount, totalPages } =
-      await this._noteService.fetchUserNotes(findManyDto);
-
-    res.status(httpStatus.OK).json({
-      notes,
-      pagination: {
-        totalPages,
-        currentPage: page,
-        totalNotes: notesCount,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1,
-      },
+      ...paginationQueries,
     });
+
+    this._sendPaginatedResponse(res, req.query, result);
   }
 
   /**
@@ -151,18 +180,20 @@ export class NoteController implements INoteController {
    * @param res - The response object used to send back the notes.
    * @returns A promise that resolves to void.
    */
-  async getUserRecentNotes(req: TypedRequest, res: Response): Promise<void> {
+  async getUserRecentNotes(
+    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
+    res: Response
+  ): Promise<void> {
     const userId = req.userId;
 
-    const findManyDto: FindManyDto = {
+    const paginationQueries = this._getPaginationQueries(req.query, 2);
+
+    const notes = await this._noteService.fetchRecentNotes({
       userId,
-      limit: 2,
-      sort: { by: "createdAt", order: "desc" },
-    };
+      ...paginationQueries,
+    });
 
-    const notes = await this._noteService.fetchRecentNotes(findManyDto);
-
-    res.status(httpStatus.OK).json({ notes });
+    res.status(httpStatus.OK).json({ success: true, data: notes });
   }
 
   /**
@@ -173,20 +204,19 @@ export class NoteController implements INoteController {
    * @returns A promise that resolves to void.
    */
   async getRecentlyUpatedNotes(
-    req: TypedRequest,
+    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
 
-    const findManyDto: FindManyDto = {
+    const paginationQueries = this._getPaginationQueries(req.query, 2);
+
+    const notes = await this._noteService.fetchRecentNotes({
       userId,
-      limit: 2,
-      sort: { by: "updatedAt", order: "desc" },
-    };
+      ...paginationQueries,
+    });
 
-    const notes = await this._noteService.fetchRecentNotes(findManyDto);
-
-    res.status(httpStatus.OK).json({ notes });
+    res.status(httpStatus.OK).json({ success: true, data: notes });
   }
 
   /**
@@ -205,30 +235,14 @@ export class NoteController implements INoteController {
     const userId = req.userId;
     const { id } = req.params;
 
-    const page = Number(req.query.page);
-    const limit = Number(req.query.limit);
+    const paginationQueries = this._getPaginationQueries(req.query);
 
-    const skip = (page - 1) * limit;
-
-    const findManyDto: FindManyDto = {
+    const result = await this._noteService.fetchNotesByVideoId({
+      videoId: id,
       userId,
-      skip,
-      limit,
-      sort: { by: "createdAt", order: "desc" },
-    };
-
-    const { notes, notesCount, totalPages } =
-      await this._noteService.fetchNotesByVideoId(id, findManyDto);
-
-    res.status(httpStatus.OK).json({
-      notes,
-      pagination: {
-        totalPages,
-        currentPage: page,
-        totalNotes: notesCount,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1,
-      },
+      ...paginationQueries,
     });
+
+    this._sendPaginatedResponse(res, req.query, result);
   }
 }
