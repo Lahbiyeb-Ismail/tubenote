@@ -8,10 +8,12 @@ import type { FindManyDto } from "@common/dtos/find-many.dto";
 import type { IdParamDto } from "@common/dtos/id-param.dto";
 import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
 
-import type { CreateNoteDto } from "./dtos/create-note.dto";
-import type { DeleteNoteDto } from "./dtos/delete-note.dto";
-import type { FindNoteDto } from "./dtos/find-note.dto";
-import type { UpdateNoteDto } from "./dtos/update-note.dto";
+import type {
+  CreateNoteDto,
+  DeleteNoteDto,
+  FindNoteDto,
+  UpdateNoteDto,
+} from "@modules/note";
 
 export interface UserNotes {
   notes: Note[];
@@ -21,7 +23,7 @@ export interface UserNotes {
 
 export interface INoteRepository {
   find(findNoteDto: FindNoteDto): Promise<Note | null>;
-  create(userId: string, createNoteDto: CreateNoteDto): Promise<Note>;
+  create(createNoteDto: CreateNoteDto): Promise<Note>;
   update(findNoteDto: FindNoteDto, updateNoteDto: UpdateNoteDto): Promise<Note>;
   delete(deleteNoteDto: DeleteNoteDto): Promise<void>;
   findMany(findManyDto: FindManyDto): Promise<Note[]>;
