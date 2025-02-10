@@ -19,7 +19,7 @@ import type {
 /**
  * Represents paginated notes data for a user.
  */
-export interface UserNotes {
+export interface PaginatedNotes {
   /**
    * The list of notes.
    */
@@ -151,7 +151,7 @@ export interface INoteService {
    * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
    * @returns A promise that resolves to the paginated notes information.
    */
-  fetchUserNotes(findManyDto: FindManyDto): Promise<UserNotes>;
+  fetchUserNotes(findManyDto: FindManyDto): Promise<PaginatedNotes>;
 
   /**
    * Fetches recent notes for a user.
@@ -175,7 +175,7 @@ export interface INoteService {
    * @param dto - Data transfer object containing the video ID and pagination parameters.
    * @returns A promise that resolves to the paginated notes information.
    */
-  fetchNotesByVideoId(dto: FindNotesByVideoIdDto): Promise<UserNotes>;
+  fetchNotesByVideoId(dto: FindNotesByVideoIdDto): Promise<PaginatedNotes>;
 }
 
 /**

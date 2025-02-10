@@ -9,8 +9,8 @@ import type {
   INoteRepository,
   INoteService,
   Note,
+  PaginatedNotes,
   UpdateNoteDto,
-  UserNotes,
 } from "@modules/note";
 
 import type { FindManyDto } from "@common/dtos/find-many.dto";
@@ -116,9 +116,9 @@ export class NoteService implements INoteService {
    * the total number of pages based on the provided limit.
    *
    * @param {FindManyDto} findManyDto - Data transfer object containing user id, pagination, and sorting details.
-   * @returns {Promise<UserNotes>} A promise that resolves to an object containing the notes, total count, and total pages.
+   * @returns {Promise<PaginatedNotes>} A promise that resolves to an object containing the notes, total count, and total pages.
    */
-  async fetchUserNotes(findManyDto: FindManyDto): Promise<UserNotes> {
+  async fetchUserNotes(findManyDto: FindManyDto): Promise<PaginatedNotes> {
     return await this._noteRepository.transaction(async (tx) => {
       const notes = await tx.findMany(findManyDto);
 
@@ -159,9 +159,11 @@ export class NoteService implements INoteService {
    * the total number of pages based on the provided limit.
    *
    * @param {FindNotesByVideoIdDto} dto - Data transfer object containing video id, user id, pagination, and sorting details.
-   * @returns {Promise<UserNotes>} A promise that resolves to an object containing the notes, total count, and total pages.
+   * @returns {Promise<PaginatedNotes>} A promise that resolves to an object containing the notes, total count, and total pages.
    */
-  async fetchNotesByVideoId(dto: FindNotesByVideoIdDto): Promise<UserNotes> {
+  async fetchNotesByVideoId(
+    dto: FindNotesByVideoIdDto
+  ): Promise<PaginatedNotes> {
     return await this._noteRepository.transaction(async (tx) => {
       const [notes, notesCount] = await Promise.all([
         tx.findManyByVideoId(dto),

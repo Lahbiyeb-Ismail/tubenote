@@ -11,8 +11,8 @@ import type {
   CreateNoteDto,
   INoteController,
   INoteService,
+  PaginatedNotes,
   UpdateNoteDto,
-  UserNotes,
 } from "@modules/note";
 
 /**
@@ -41,7 +41,7 @@ export class NoteController implements INoteController {
   private _sendPaginatedResponse(
     res: Response,
     paginationQuery: QueryPaginationDto,
-    result: UserNotes
+    result: PaginatedNotes
   ): void {
     const currentPage = Number(paginationQuery.page) || 1;
 
