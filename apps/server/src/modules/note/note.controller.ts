@@ -7,12 +7,12 @@ import type { FindManyDto } from "@common/dtos/find-many.dto";
 import type { IdParamDto } from "@common/dtos/id-param.dto";
 import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
 
-import type { CreateNoteDto } from "./dtos/create-note.dto";
-import type { DeleteNoteDto } from "./dtos/delete-note.dto";
-import type { FindNoteDto } from "./dtos/find-note.dto";
-import type { UpdateNoteDto } from "./dtos/update-note.dto";
-
-import type { INoteController, INoteService } from "./note.types";
+import type {
+  CreateNoteDto,
+  INoteController,
+  INoteService,
+  UpdateNoteDto,
+} from "@modules/note";
 
 /**
  * Controller for handling note-related operations.
@@ -28,12 +28,12 @@ export class NoteController implements INoteController {
    * @returns A promise that resolves to void.
    */
   async createNote(
-    req: TypedRequest<CreateNoteDto>,
+    req: TypedRequest<Omit<CreateNoteDto, "userId">>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
 
-    const note = await this._noteService.createNote(userId, req.body);
+    const note = await this._noteService.createNote({ userId, ...req.body });
 
     res
       .status(httpStatus.CREATED)
@@ -54,12 +54,9 @@ export class NoteController implements INoteController {
     const userId = req.userId;
     const { id } = req.params;
 
-    const updateNoteDto = req.body;
-    const findNoteDto: FindNoteDto = { id, userId };
-
     const updatedNote = await this._noteService.updateNote(
-      findNoteDto,
-      updateNoteDto
+      { noteId: id, userId },
+      req.body
     );
 
     res
@@ -81,11 +78,11 @@ export class NoteController implements INoteController {
     const userId = req.userId;
     const { id } = req.params;
 
-    const deleteNoteDto: DeleteNoteDto = { id, userId };
+    const note = await this._noteService.deleteNote({ noteId: id, userId });
 
-    await this._noteService.deleteNote(deleteNoteDto);
-
-    res.status(httpStatus.OK).json({ message: "Note deleted successfully." });
+    res
+      .status(httpStatus.OK)
+      .json({ message: "Note deleted successfully.", note });
   }
 
   /**
@@ -102,9 +99,7 @@ export class NoteController implements INoteController {
     const userId = req.userId;
     const { id } = req.params;
 
-    const findNoteDto: FindNoteDto = { id, userId };
-
-    const note = await this._noteService.findNote(findNoteDto);
+    const note = await this._noteService.findNote({ noteId: id, userId });
 
     res.status(httpStatus.OK).json({ note });
   }
