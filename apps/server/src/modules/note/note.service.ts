@@ -5,6 +5,7 @@ import type {
   CreateNoteDto,
   DeleteNoteDto,
   FindNoteDto,
+  FindNotesByVideoIdDto,
   INoteRepository,
   INoteService,
   Note,
@@ -17,20 +18,7 @@ import type { FindManyDto } from "@common/dtos/find-many.dto";
 export class NoteService implements INoteService {
   constructor(private readonly _noteRepository: INoteRepository) {}
 
-  private async _findNoteOrFail(
-    tx: INoteRepository,
-    findNoteDto: FindNoteDto
-  ): Promise<Note> {
-    const note = await tx.find(findNoteDto);
-
-    if (!note) {
-      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
-    }
-
-    return note;
-  }
-
-  async findNote(findNoteDto: FindNoteDto): Promise<Note> {
+  private async _findNoteOrFail(findNoteDto: FindNoteDto): Promise<Note> {
     const note = await this._noteRepository.find(findNoteDto);
 
     if (!note) {
@@ -40,80 +28,63 @@ export class NoteService implements INoteService {
     return note;
   }
 
-  async createNote(createNoteDto: CreateNoteDto): Promise<Note> {
-    const note = await this._noteRepository.create(createNoteDto);
+  async findNote(findNoteDto: FindNoteDto): Promise<Note> {
+    return await this._findNoteOrFail(findNoteDto);
+  }
 
-    return note;
+  async createNote(createNoteDto: CreateNoteDto): Promise<Note> {
+    return await this._noteRepository.create(createNoteDto);
   }
 
   async updateNote(
     findNoteDto: FindNoteDto,
     updateNoteDto: UpdateNoteDto
   ): Promise<Note> {
-    const updatedNote = await this._noteRepository.transaction(async (tx) => {
-      await this._findNoteOrFail(tx, findNoteDto);
+    return await this._noteRepository.transaction(async (tx) => {
+      await this._findNoteOrFail(findNoteDto);
 
       return tx.update(findNoteDto, updateNoteDto);
     });
-
-    return updatedNote;
   }
 
   async deleteNote(deleteNoteDto: DeleteNoteDto): Promise<Note> {
-    const deletedNote = await this._noteRepository.transaction(async (tx) => {
-      await this._findNoteOrFail(tx, deleteNoteDto);
+    return await this._noteRepository.transaction(async (tx) => {
+      await this._findNoteOrFail(deleteNoteDto);
 
       return tx.delete(deleteNoteDto);
     });
-
-    return deletedNote;
   }
 
   async fetchUserNotes(findManyDto: FindManyDto): Promise<UserNotes> {
-    const paginatedNotes = await this._noteRepository.transaction(
-      async (tx) => {
-        const notes = await tx.findMany(findManyDto);
+    return await this._noteRepository.transaction(async (tx) => {
+      const notes = await tx.findMany(findManyDto);
 
-        const notesCount = await tx.count(findManyDto.userId);
+      const notesCount = await tx.count(findManyDto.userId);
 
-        const totalPages = Math.ceil(notesCount / findManyDto.limit);
+      const totalPages = Math.ceil(notesCount / findManyDto.limit);
 
-        return { notes, notesCount, totalPages };
-      }
-    );
-
-    return paginatedNotes;
+      return { notes, notesCount, totalPages };
+    });
   }
 
   async fetchRecentNotes(findManyDto: FindManyDto): Promise<Note[]> {
-    const recentNotes = await this._noteRepository.findMany(findManyDto);
-
-    return recentNotes;
+    return await this._noteRepository.findMany(findManyDto);
   }
 
   async fetchRecentlyUpdatedNotes(findManyDto: FindManyDto): Promise<Note[]> {
-    const recentlyUpdatedNotes =
-      await this._noteRepository.findMany(findManyDto);
-
-    return recentlyUpdatedNotes;
+    return await this._noteRepository.findMany(findManyDto);
   }
 
-  async fetchNotesByVideoId(
-    id: string,
-    findManyDto: FindManyDto
-  ): Promise<UserNotes> {
-    const paginatedNotes = await this._noteRepository.transaction(
-      async (tx) => {
-        const notes = await tx.findManyByVideoId(id, findManyDto);
+  async fetchNotesByVideoId(dto: FindNotesByVideoIdDto): Promise<UserNotes> {
+    return await this._noteRepository.transaction(async (tx) => {
+      const [notes, notesCount] = await Promise.all([
+        tx.findManyByVideoId(dto),
+        tx.count(dto.userId),
+      ]);
 
-        const notesCount = await tx.count(findManyDto.userId);
+      const totalPages = Math.ceil(notesCount / dto.limit);
 
-        const totalPages = Math.ceil(notesCount / findManyDto.limit);
-
-        return { notes, notesCount, totalPages };
-      }
-    );
-
-    return paginatedNotes;
+      return { notes, notesCount, totalPages };
+    });
   }
 }
