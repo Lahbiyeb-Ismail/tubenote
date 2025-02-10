@@ -31,7 +31,8 @@ export class NoteRepository implements INoteRepository {
       () =>
         this._db.note.findUnique({
           where: {
-            ...findNoteDto,
+            id: findNoteDto.noteId,
+            userId: findNoteDto.userId,
           },
         }),
       { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
@@ -56,7 +57,8 @@ export class NoteRepository implements INoteRepository {
       () =>
         this._db.note.update({
           where: {
-            ...findNoteDto,
+            id: findNoteDto.noteId,
+            userId: findNoteDto.userId,
           },
           data: { ...updateNoteDto },
         }),
@@ -68,7 +70,7 @@ export class NoteRepository implements INoteRepository {
     return handleAsyncOperation(
       () =>
         this._db.note.delete({
-          where: { ...deleteNoteDto },
+          where: { id: deleteNoteDto.noteId, userId: deleteNoteDto.userId },
         }),
       { errorMessage: ERROR_MESSAGES.FAILD_TO_DELETE }
     );
