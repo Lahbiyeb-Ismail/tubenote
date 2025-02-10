@@ -64,8 +64,8 @@ export class NoteRepository implements INoteRepository {
     );
   }
 
-  async delete(deleteNoteDto: DeleteNoteDto): Promise<void> {
-    handleAsyncOperation(
+  async delete(deleteNoteDto: DeleteNoteDto): Promise<Note> {
+    return handleAsyncOperation(
       () =>
         this._db.note.delete({
           where: { ...deleteNoteDto },
