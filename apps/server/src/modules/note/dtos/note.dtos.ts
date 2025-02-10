@@ -7,12 +7,12 @@ export interface UpdateNoteDto
   extends Partial<Pick<Note, "title" | "content" | "timestamp">> {}
 
 export interface FindNoteDto {
-  id: string;
+  noteId: string;
   userId: string;
 }
 
 export interface DeleteNoteDto {
-  id: string;
+  noteId: string;
   userId: string;
 }
 
