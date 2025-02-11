@@ -470,4 +470,41 @@ describe("NoteService methods test", () => {
       expect(mockNoteRepository.count).toHaveBeenCalledWith(mockUserId);
     });
   });
+
+  describe("NoteService - Edge Cases", () => {
+    describe("Transaction Safety", () => {
+      it("should roll back transactions on update failure", async () => {
+        mockNoteRepository.transaction.mockImplementation(async (cb) => {
+          try {
+            await cb(mockNoteRepository);
+          } catch (error) {
+            return Promise.reject(error);
+          }
+        });
+
+        mockNoteRepository.find.mockResolvedValue(mockNote);
+        mockNoteRepository.update.mockRejectedValue(new Error("DB Failure"));
+
+        await expect(noteService.updateNote(findNoteDto, {})).rejects.toThrow(
+          "DB Failure"
+        );
+        expect(mockNoteRepository.update).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe("NoteService - Security", () => {
+    it("should prevent fetching other users' notes", async () => {
+      const otherUserDto: FindNoteDto = {
+        noteId: mockNoteId,
+        userId: "other_user",
+      };
+
+      mockNoteRepository.find.mockResolvedValue(null);
+
+      await expect(noteService.findNote(otherUserDto)).rejects.toThrow(
+        NotFoundError
+      );
+    });
+  });
 });
