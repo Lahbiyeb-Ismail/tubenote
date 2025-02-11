@@ -111,6 +111,18 @@ describe("NoteService methods test", () => {
 
       expect(mockNoteRepository.find).toHaveBeenCalledWith(findNoteDto);
     });
+
+    it("should propagate any errors thrown by the repository", async () => {
+      const mockError = new Error("Test error");
+
+      (mockNoteRepository.find as jest.Mock).mockRejectedValue(mockError);
+
+      await expect(noteService.findNote(findNoteDto)).rejects.toThrow(
+        mockError
+      );
+
+      expect(mockNoteRepository.find).toHaveBeenCalledWith(findNoteDto);
+    });
   });
 
   describe("NoteService - createNote", () => {
@@ -142,7 +154,19 @@ describe("NoteService methods test", () => {
       const result = await noteService.createNote(createNoteDto);
 
       expect(result).toBe(mockNewNote);
-      // Note: The create method is called with only the createNoteDto parameter.
+
+      expect(mockNoteRepository.create).toHaveBeenCalledWith(createNoteDto);
+    });
+
+    it("should propagate any errors thrown by the repository", async () => {
+      const mockError = new Error("Test error");
+
+      (mockNoteRepository.create as jest.Mock).mockRejectedValue(mockError);
+
+      await expect(noteService.createNote(createNoteDto)).rejects.toThrow(
+        mockError
+      );
+
       expect(mockNoteRepository.create).toHaveBeenCalledWith(createNoteDto);
     });
   });
@@ -171,6 +195,7 @@ describe("NoteService methods test", () => {
 
     it("should update and return the note if found", async () => {
       (mockNoteRepository.find as jest.Mock).mockResolvedValue(mockNote);
+
       (mockNoteRepository.update as jest.Mock).mockResolvedValue(
         mockUpdatedNote
       );
@@ -178,7 +203,9 @@ describe("NoteService methods test", () => {
       const result = await noteService.updateNote(findNoteDto, updateNoteDto);
 
       expect(result).toBe(mockUpdatedNote);
+
       expect(mockNoteRepository.find).toHaveBeenCalledWith(findNoteDto);
+
       expect(mockNoteRepository.update).toHaveBeenCalledWith(
         findNoteDto,
         updateNoteDto
@@ -194,6 +221,25 @@ describe("NoteService methods test", () => {
 
       expect(mockNoteRepository.find).toHaveBeenCalledWith(findNoteDto);
       expect(mockNoteRepository.update).not.toHaveBeenCalled();
+    });
+
+    it("should propagate any errors thrown by the repository", async () => {
+      const mockError = new Error("Test error");
+
+      (mockNoteRepository.find as jest.Mock).mockResolvedValue(mockNote);
+
+      (mockNoteRepository.update as jest.Mock).mockRejectedValue(mockError);
+
+      await expect(
+        noteService.updateNote(findNoteDto, updateNoteDto)
+      ).rejects.toThrow(mockError);
+
+      expect(mockNoteRepository.find).toHaveBeenCalledWith(findNoteDto);
+
+      expect(mockNoteRepository.update).toHaveBeenCalledWith(
+        findNoteDto,
+        updateNoteDto
+      );
     });
   });
 
@@ -232,6 +278,20 @@ describe("NoteService methods test", () => {
 
       expect(mockNoteRepository.find).toHaveBeenCalledWith(deleteNoteDto);
       expect(mockNoteRepository.delete).not.toHaveBeenCalled();
+    });
+
+    it("should propagate any errors thrown by the repository", async () => {
+      const mockError = new Error("Test error");
+
+      (mockNoteRepository.find as jest.Mock).mockResolvedValue(mockNote);
+      (mockNoteRepository.delete as jest.Mock).mockRejectedValue(mockError);
+
+      await expect(noteService.deleteNote(deleteNoteDto)).rejects.toThrow(
+        mockError
+      );
+
+      expect(mockNoteRepository.find).toHaveBeenCalledWith(deleteNoteDto);
+      expect(mockNoteRepository.delete).toHaveBeenCalledWith(deleteNoteDto);
     });
   });
 
