@@ -41,6 +41,11 @@ describe("NoteController Tests", () => {
     updatedAt: new Date(),
   };
 
+  const mockNotes = [
+    { _id: "noteId1", title: "Note 1" },
+    { _id: "noteId2", title: "Note 2" },
+  ];
+
   beforeEach(() => {
     mockNoteService = {
       createNote: jest.fn(),
@@ -283,11 +288,8 @@ describe("NoteController Tests", () => {
     });
 
     it("should get user notes successfully", async () => {
-      const mockNotes = [
-        { _id: "noteId1", title: "Note 1" },
-        { _id: "noteId2", title: "Note 2" },
-      ];
       const mockResult = { notes: mockNotes, notesCount: 2, totalPages: 1 };
+
       (mockNoteService.fetchUserNotes as jest.Mock).mockResolvedValue(
         mockResult
       );
@@ -318,6 +320,87 @@ describe("NoteController Tests", () => {
       });
     });
 
+    it("should get user notes successfully with default pagination values", async () => {
+      mockRequest = {
+        userId: "mockUserId",
+        query: {}, // Empty query to use default values
+      };
+
+      const mockResult = { notes: mockNotes, notesCount: 2, totalPages: 1 };
+
+      (mockNoteService.fetchUserNotes as jest.Mock).mockResolvedValue(
+        mockResult
+      );
+
+      await noteController.getUserNotes(
+        mockRequest as TypedRequest<{}, {}, QueryPaginationDto>,
+        mockResponse as Response
+      );
+
+      expect(mockNoteService.fetchUserNotes).toHaveBeenCalledWith({
+        userId: "mockUserId",
+        skip: 0,
+        limit: 8, // Default limit
+        sort: { by: "createdAt", order: "desc" }, // Default sort
+      });
+
+      expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockJson).toHaveBeenCalledWith({
+        success: true,
+        data: mockNotes,
+        pagination: {
+          totalPages: 1,
+          currentPage: 1,
+          totalItems: 2,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
+      });
+    });
+
+    it("should handle different page numbers correctly", async () => {
+      mockRequest = {
+        userId: "mockUserId",
+        query: {
+          page: "2",
+          limit: "10",
+          order: "desc",
+          sortBy: "createdAt",
+        },
+      };
+
+      const mockResult = { notes: mockNotes, notesCount: 2, totalPages: 1 };
+
+      (mockNoteService.fetchUserNotes as jest.Mock).mockResolvedValue(
+        mockResult
+      );
+
+      await noteController.getUserNotes(
+        mockRequest as TypedRequest<{}, {}, QueryPaginationDto>,
+        mockResponse as Response
+      );
+
+      expect(mockNoteService.fetchUserNotes).toHaveBeenCalledWith({
+        userId: "mockUserId",
+        skip: 10, // Skip should be (page - 1) * limit = (2 - 1) * 10 = 10
+        limit: 10,
+        sort: { by: "createdAt", order: "desc" },
+      });
+
+      expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockJson).toHaveBeenCalledWith({
+        success: true,
+        data: mockNotes,
+        pagination: {
+          totalPages: 1,
+          currentPage: 2,
+          totalItems: 2,
+          hasNextPage: false,
+          hasPrevPage: true,
+        },
+      });
+    });
+
     it("should handle errors when getting user notes", async () => {
       const error = new Error("Failed to fetch user notes");
       (mockNoteService.fetchUserNotes as jest.Mock).mockRejectedValue(error);
@@ -332,6 +415,11 @@ describe("NoteController Tests", () => {
   });
 
   describe("NoteController - getUserRecentNotes", () => {
+    const mockRecentNotes = [
+      { _id: "noteId1", title: "Recent Note 1" },
+      { _id: "noteId2", title: "Recent Note 2" },
+    ];
+
     beforeEach(() => {
       mockRequest = {
         userId: "mockUserId",
@@ -345,12 +433,8 @@ describe("NoteController Tests", () => {
     });
 
     it("should get user recent notes successfully", async () => {
-      const mockNotes = [
-        { _id: "noteId1", title: "Recent Note 1" },
-        { _id: "noteId2", title: "Recent Note 2" },
-      ];
       (mockNoteService.fetchRecentNotes as jest.Mock).mockResolvedValue(
-        mockNotes
+        mockRecentNotes
       );
 
       await noteController.getUserRecentNotes(
@@ -365,7 +449,38 @@ describe("NoteController Tests", () => {
         sort: { by: "createdAt", order: "desc" },
       });
       expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
-      expect(mockJson).toHaveBeenCalledWith({ success: true, data: mockNotes });
+      expect(mockJson).toHaveBeenCalledWith({
+        success: true,
+        data: mockRecentNotes,
+      });
+    });
+
+    it("should get user recent notes successfully with default pagination values", async () => {
+      mockRequest = {
+        userId: "mockUserId",
+        query: {}, // Empty query to use default values
+      };
+
+      (mockNoteService.fetchRecentNotes as jest.Mock).mockResolvedValue(
+        mockRecentNotes
+      );
+
+      await noteController.getUserRecentNotes(
+        mockRequest as TypedRequest,
+        mockResponse as Response
+      );
+
+      expect(mockNoteService.fetchRecentNotes).toHaveBeenCalledWith({
+        userId: "mockUserId",
+        limit: 2, // Default limit for recent notes
+        skip: 0,
+        sort: { by: "createdAt", order: "desc" }, // Default sort
+      });
+      expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockJson).toHaveBeenCalledWith({
+        success: true,
+        data: mockRecentNotes,
+      });
     });
 
     it("should handle errors when getting user recent notes", async () => {
@@ -382,6 +497,11 @@ describe("NoteController Tests", () => {
   });
 
   describe("NoteController - getRecentlyUpdatedNotes", () => {
+    const mockRecentlyUpdatedNotes = [
+      { _id: "noteId1", title: "Updated Note 1" },
+      { _id: "noteId2", title: "Updated Note 2" },
+    ];
+
     beforeEach(() => {
       mockRequest = {
         userId: "mockUserId",
@@ -395,13 +515,8 @@ describe("NoteController Tests", () => {
     });
 
     it("should get recently updated notes successfully", async () => {
-      const mockNotes = [
-        { _id: "noteId1", title: "Updated Note 1" },
-        { _id: "noteId2", title: "Updated Note 2" },
-      ];
-
       (mockNoteService.fetchRecentNotes as jest.Mock).mockResolvedValue(
-        mockNotes
+        mockRecentlyUpdatedNotes
       );
 
       await noteController.getRecentlyUpdatedNotes(
@@ -416,7 +531,10 @@ describe("NoteController Tests", () => {
         sort: { by: "updatedAt", order: "desc" },
       });
       expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
-      expect(mockJson).toHaveBeenCalledWith({ success: true, data: mockNotes });
+      expect(mockJson).toHaveBeenCalledWith({
+        success: true,
+        data: mockRecentlyUpdatedNotes,
+      });
     });
 
     it("should handle errors when getting recently updated notes", async () => {
@@ -453,10 +571,6 @@ describe("NoteController Tests", () => {
     });
 
     it("should get notes by video id successfully", async () => {
-      const mockNotes = [
-        { _id: "noteId1", title: "Video Note 1" },
-        { _id: "noteId2", title: "Video Note 2" },
-      ];
       const mockResult = { notes: mockNotes, notesCount: 2, totalPages: 1 };
 
       (mockNoteService.fetchNotesByVideoId as jest.Mock).mockResolvedValue(
@@ -478,6 +592,52 @@ describe("NoteController Tests", () => {
         limit: Number(getNotesByVideoIdRequest.query?.limit),
         skip: 0,
         sort: { by: "createdAt", order: "desc" },
+      });
+
+      expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockJson).toHaveBeenCalledWith({
+        success: true,
+        data: mockNotes,
+        pagination: {
+          totalPages: 1,
+          currentPage: 1,
+          totalItems: 2,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
+      });
+    });
+
+    it("should get notes by video id successfully with default pagination", async () => {
+      getNotesByVideoIdRequest = {
+        userId: "mockUserId",
+        query: {}, // Empty query to use default values
+        params: {
+          id: "mockVideoId",
+        },
+      };
+
+      const mockResult = { notes: mockNotes, notesCount: 2, totalPages: 1 };
+
+      (mockNoteService.fetchNotesByVideoId as jest.Mock).mockResolvedValue(
+        mockResult
+      );
+
+      await noteController.getNotesByVideoId(
+        getNotesByVideoIdRequest as TypedRequest<
+          {},
+          IdParamDto,
+          QueryPaginationDto
+        >,
+        mockResponse as Response
+      );
+
+      expect(mockNoteService.fetchNotesByVideoId).toHaveBeenCalledWith({
+        userId: getNotesByVideoIdRequest.userId,
+        videoId: getNotesByVideoIdRequest.params?.id,
+        limit: 8, // Default limit
+        skip: 0,
+        sort: { by: "createdAt", order: "desc" }, // Default sort
       });
       expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
       expect(mockJson).toHaveBeenCalledWith({
