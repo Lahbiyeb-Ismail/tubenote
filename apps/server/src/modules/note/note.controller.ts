@@ -225,7 +225,7 @@ export class NoteController implements INoteController {
    * @param res - The response object used to send the HTTP status and recently updated notes data.
    * @returns A promise that resolves to void.
    */
-  async getRecentlyUpatedNotes(
+  async getRecentlyUpdatedNotes(
     req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
     res: Response
   ): Promise<void> {

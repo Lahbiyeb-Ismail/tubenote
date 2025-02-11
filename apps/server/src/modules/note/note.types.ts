@@ -255,7 +255,7 @@ export interface INoteController {
    * @param res - The response object used to send the HTTP response.
    * @returns A promise that resolves when the updated notes are retrieved.
    */
-  getRecentlyUpatedNotes(req: TypedRequest, res: Response): Promise<void>;
+  getRecentlyUpdatedNotes(req: TypedRequest, res: Response): Promise<void>;
 
   /**
    * Retrieves notes associated with a specific video ID with pagination support.
