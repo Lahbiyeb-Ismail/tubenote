@@ -7,7 +7,7 @@ import type { FindManyDto } from "@common/dtos/find-many.dto";
 import type { IdParamDto } from "@common/dtos/id-param.dto";
 import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
 
-import type { IVideoController, IVideoService } from "./video.types";
+import type { IVideoController, IVideoService } from "@modules/video";
 
 /**
  * Controller for handling video-related operations.

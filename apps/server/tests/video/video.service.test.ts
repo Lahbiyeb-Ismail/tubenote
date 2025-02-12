@@ -1,17 +1,14 @@
-import { VideoService } from "../../src/modules/video/video.service";
-
-import type {
-  Video,
-  YoutubeVideoData,
-} from "../../src/modules/video/video.model";
-import type {
+import {
+  CreateVideoDto,
+  FindVideoDto,
   IVideoRepository,
   IVideoService,
-} from "../../src/modules/video/video.types";
+  Video,
+  VideoService,
+  YoutubeVideoData,
+} from "../../src/modules/video";
 
 import type { FindManyDto } from "../../src/common/dtos/find-many.dto";
-import type { CreateVideoDto } from "../../src/modules/video/dtos/create-video.dto";
-import type { FindVideoDto } from "../../src/modules/video/dtos/find-video.dto";
 
 describe("VideoService methods tests cases", () => {
   let videoService: IVideoService;

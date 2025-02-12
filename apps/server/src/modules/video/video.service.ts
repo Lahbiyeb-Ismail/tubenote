@@ -1,17 +1,18 @@
+import { YOUTUBE_API_KEY, YOUTUBE_API_URL } from "@constants/app.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
-import { YOUTUBE_API_KEY, YOUTUBE_API_URL } from "../../constants/app.contants";
 
 import { BadRequestError, NotFoundError } from "@/errors";
 
-import type { Video, YoutubeVideoData } from "./video.model";
 import type {
+  FindVideoDto,
   IVideoRepository,
   IVideoService,
   UserVideos,
-} from "./video.types";
+  Video,
+  YoutubeVideoData,
+} from "@modules/video";
 
 import type { FindManyDto } from "@common/dtos/find-many.dto";
-import type { FindVideoDto } from "./dtos/find-video.dto";
 
 export class VideoService implements IVideoService {
   constructor(private readonly _videoRepository: IVideoRepository) {}

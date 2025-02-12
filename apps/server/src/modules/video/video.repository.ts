@@ -2,11 +2,9 @@ import type { PrismaClient } from "@prisma/client";
 
 import handleAsyncOperation from "@/utils/handle-async-operation";
 
-import type { Video } from "./video.model";
-import type { IVideoRepository } from "./video.types";
+import type { CreateVideoDto, IVideoRepository, Video } from "@modules/video";
 
 import type { FindManyDto } from "@common/dtos/find-many.dto";
-import type { CreateVideoDto } from "./dtos/create-video.dto";
 
 export class VideoRepository implements IVideoRepository {
   constructor(private readonly _db: PrismaClient) {}

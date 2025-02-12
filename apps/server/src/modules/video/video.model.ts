@@ -1,4 +1,4 @@
-import type { Note } from "../note/note.model";
+import type { Note } from "@modules/note";
 
 interface Snippet {
   publishedAt: string;
