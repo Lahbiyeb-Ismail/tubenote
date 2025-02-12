@@ -1,42 +1,95 @@
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 
+import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import handleAsyncOperation from "@/utils/handle-async-operation";
-
-import type { Note } from "./note.model";
-import type { INoteRepository } from "./note.types";
 
 import type { FindManyDto } from "@common/dtos/find-many.dto";
 
-import type { CreateNoteDto } from "./dtos/create-note.dto";
-import type { DeleteNoteDto } from "./dtos/delete-note.dto";
-import type { FindNoteDto } from "./dtos/find-note.dto";
-import type { UpdateNoteDto } from "./dtos/update-note.dto";
+import type {
+  CreateNoteDto,
+  DeleteNoteDto,
+  FindNoteDto,
+  FindNotesByVideoIdDto,
+  INoteRepository,
+  Note,
+  UpdateNoteDto,
+} from "@modules/note";
 
+/**
+ * Repository for performing CRUD operations on Notes.
+ *
+ * Implements the INoteRepository interface to provide a set of methods to interact with the note data
+ * via the PrismaClient. It uses a utility function for handling asynchronous operations with standardized
+ * error messaging.
+ */
 export class NoteRepository implements INoteRepository {
+  /**
+   * Creates an instance of NoteRepository.
+   *
+   * @param _db - An instance of PrismaClient for database operations.
+   */
   constructor(private readonly _db: PrismaClient) {}
 
+  /**
+   * Executes a set of operations within a transaction.
+   *
+   * This method uses Prisma's transaction API to run the provided function within a transactional scope.
+   * A new instance of the repository is created with the transactional client to ensure that all operations
+   * participate in the transaction.
+   *
+   * @template T - The type of the return value from the transactional operation.
+   * @param fn - A function that takes an INoteRepository (transactional instance) and returns a Promise.
+   * @returns A Promise that resolves with the result of the transactional function.
+   */
+  async transaction<T>(fn: (tx: INoteRepository) => Promise<T>): Promise<T> {
+    return this._db.$transaction(async (prismaTx: Prisma.TransactionClient) => {
+      const txRepository = new NoteRepository(prismaTx as PrismaClient);
+      return await fn(txRepository);
+    });
+  }
+
+  /**
+   * Finds a single note based on the provided criteria.
+   *
+   * @param findNoteDto - The DTO containing noteId and userId to locate the note.
+   * @returns A Promise that resolves with the found Note or null if no note matches the criteria.
+   */
   async find(findNoteDto: FindNoteDto): Promise<Note | null> {
     return handleAsyncOperation(
       () =>
         this._db.note.findUnique({
           where: {
-            ...findNoteDto,
+            id: findNoteDto.noteId,
+            userId: findNoteDto.userId,
           },
         }),
-      { errorMessage: "Failed to find note." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
 
-  async create(userId: string, createNoteDto: CreateNoteDto): Promise<Note> {
+  /**
+   * Creates a new note.
+   *
+   * @param createNoteDto - The DTO containing the data required to create a note.
+   * @returns A Promise that resolves with the created Note.
+   */
+  async create(createNoteDto: CreateNoteDto): Promise<Note> {
     return handleAsyncOperation(
       () =>
         this._db.note.create({
-          data: { userId, ...createNoteDto },
+          data: { ...createNoteDto },
         }),
-      { errorMessage: "Failed to create note." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
     );
   }
 
+  /**
+   * Updates an existing note.
+   *
+   * @param findNoteDto - The DTO containing noteId and userId to locate the note.
+   * @param updateNoteDto - The DTO containing the data to update the note.
+   * @returns A Promise that resolves with the updated Note.
+   */
   async update(
     findNoteDto: FindNoteDto,
     updateNoteDto: UpdateNoteDto
@@ -45,24 +98,37 @@ export class NoteRepository implements INoteRepository {
       () =>
         this._db.note.update({
           where: {
-            ...findNoteDto,
+            id: findNoteDto.noteId,
+            userId: findNoteDto.userId,
           },
           data: { ...updateNoteDto },
         }),
-      { errorMessage: "Failed to update note." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_UPDATE }
     );
   }
 
-  async delete(deleteNoteDto: DeleteNoteDto): Promise<void> {
-    handleAsyncOperation(
+  /**
+   * Deletes a note.
+   *
+   * @param deleteNoteDto - The DTO containing noteId and userId to locate the note.
+   * @returns A Promise that resolves with the deleted Note.
+   */
+  async delete(deleteNoteDto: DeleteNoteDto): Promise<Note> {
+    return handleAsyncOperation(
       () =>
         this._db.note.delete({
-          where: { ...deleteNoteDto },
+          where: { id: deleteNoteDto.noteId, userId: deleteNoteDto.userId },
         }),
-      { errorMessage: "Failed to delete note." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_DELETE }
     );
   }
 
+  /**
+   * Retrieves multiple notes for a given user with pagination and sorting options.
+   *
+   * @param findManyDto - The DTO containing userId, limit, sort options, and skip value.
+   * @returns A Promise that resolves with an array of Notes.
+   */
   async findMany(findManyDto: FindManyDto): Promise<Note[]> {
     const { userId, limit, sort, skip = 0 } = findManyDto;
 
@@ -82,18 +148,21 @@ export class NoteRepository implements INoteRepository {
     );
   }
 
-  async findManyByVideoId(
-    id: string,
-    findManyDto: FindManyDto
-  ): Promise<Note[]> {
-    const { userId, limit, sort, skip = 0 } = findManyDto;
+  /**
+   * Retrieves multiple notes for a given user filtered by video ID with pagination and sorting options.
+   *
+   * @param dto - The DTO containing videoId, userId, limit, sort options, and skip value.
+   * @returns A Promise that resolves with an array of Notes associated with the given video ID.
+   */
+  async findManyByVideoId(dto: FindNotesByVideoIdDto): Promise<Note[]> {
+    const { videoId, userId, limit, sort, skip = 0 } = dto;
 
     return handleAsyncOperation(
       () =>
         this._db.note.findMany({
           where: {
             userId,
-            youtubeId: id,
+            youtubeId: videoId,
           },
           take: limit,
           skip,
@@ -105,6 +174,12 @@ export class NoteRepository implements INoteRepository {
     );
   }
 
+  /**
+   * Counts the number of notes for a given user.
+   *
+   * @param userId - The ID of the user whose notes are to be counted.
+   * @returns A Promise that resolves with the count of notes.
+   */
   async count(userId: string): Promise<number> {
     return handleAsyncOperation(
       () =>

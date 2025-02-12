@@ -7,44 +7,109 @@ import type { FindManyDto } from "@common/dtos/find-many.dto";
 import type { IdParamDto } from "@common/dtos/id-param.dto";
 import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
 
-import type { CreateNoteDto } from "./dtos/create-note.dto";
-import type { DeleteNoteDto } from "./dtos/delete-note.dto";
-import type { FindNoteDto } from "./dtos/find-note.dto";
-import type { UpdateNoteDto } from "./dtos/update-note.dto";
-
-import type { INoteController, INoteService } from "./note.types";
+import type {
+  CreateNoteDto,
+  INoteController,
+  INoteService,
+  PaginatedNotes,
+  UpdateNoteDto,
+} from "@modules/note";
 
 /**
  * Controller for handling note-related operations.
+ *
+ * This controller provides endpoints for creating, updating, deleting,
+ * and retrieving notes for an authenticated user.
+ * It also supports pagination for list endpoints.
  */
 export class NoteController implements INoteController {
+  /**
+   * Creates an instance of NoteController.
+   *
+   * @param _noteService - An instance of the note service that handles business logic.
+   */
   constructor(private readonly _noteService: INoteService) {}
+
+  /**
+   * Sends a standardized paginated response.
+   *
+   * @private
+   * @param res - Express response object used to send the HTTP response.
+   * @param paginationQuery - The query parameters containing pagination details.
+   * @param result - The result object containing notes data and pagination metadata.
+   */
+  private _sendPaginatedResponse(
+    res: Response,
+    paginationQuery: QueryPaginationDto,
+    result: PaginatedNotes
+  ): void {
+    const currentPage = Number(paginationQuery.page) || 1;
+
+    res.status(httpStatus.OK).json({
+      success: true,
+      data: result.notes,
+      pagination: {
+        totalPages: result.totalPages,
+        currentPage,
+        totalItems: result.notesCount,
+        hasNextPage: currentPage < result.totalPages,
+        hasPrevPage: currentPage > 1,
+      },
+    });
+  }
+
+  /**
+   * Extracts and calculates pagination parameters from the query.
+   *
+   * @private
+   * @param queries - The query parameters containing pagination and sorting details.
+   * @param defaultLimit - The default limit for items per page (default is 8).
+   * @returns An object with pagination parameters (skip, limit, and sort options) excluding the userId.
+   */
+  private _getPaginationQueries(
+    queries: QueryPaginationDto,
+    defaultLimit = 8
+  ): Omit<FindManyDto, "userId"> {
+    const page = Math.max(Number(queries.page) || 1, 1);
+    const limit = Math.max(Number(queries.limit) || defaultLimit, 1);
+    const skip = (page - 1) * limit;
+
+    return {
+      skip,
+      limit,
+      sort: {
+        by: queries.sortBy || "createdAt",
+        order: queries.order || "desc",
+      },
+    };
+  }
 
   /**
    * Adds a new note for the authenticated user.
    *
-   * @param req - The request object containing the note data and user ID.
-   * @param res - The response object used to send the status and result.
+   * @param req - The request object containing note data (excluding userId) in the body and the userId on the request.
+   * @param res - The response object used to send the HTTP status and result.
    * @returns A promise that resolves to void.
    */
   async createNote(
-    req: TypedRequest<CreateNoteDto>,
+    req: TypedRequest<Omit<CreateNoteDto, "userId">>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
+    const note = await this._noteService.createNote({ userId, ...req.body });
 
-    const note = await this._noteService.createNote(userId, req.body);
-
-    res
-      .status(httpStatus.CREATED)
-      .json({ message: "Note created successfully.", note });
+    res.status(httpStatus.CREATED).json({
+      success: true,
+      data: note,
+      message: "Note created successfully.",
+    });
   }
 
   /**
    * Updates an existing note for the authenticated user.
    *
-   * @param req - The request object containing the note ID in the parameters and the updated note data in the body.
-   * @param res - The response object used to send the status and updated note data.
+   * @param req - The request object containing the note ID in the parameters and updated note data in the body.
+   * @param res - The response object used to send the HTTP status and updated note data.
    * @returns A promise that resolves to void.
    */
   async updateNote(
@@ -54,24 +119,23 @@ export class NoteController implements INoteController {
     const userId = req.userId;
     const { id } = req.params;
 
-    const updateNoteDto = req.body;
-    const findNoteDto: FindNoteDto = { id, userId };
-
     const updatedNote = await this._noteService.updateNote(
-      findNoteDto,
-      updateNoteDto
+      { noteId: id, userId },
+      req.body
     );
 
-    res
-      .status(httpStatus.OK)
-      .json({ message: "Note updated successfully.", note: updatedNote });
+    res.status(httpStatus.OK).json({
+      success: true,
+      data: updatedNote,
+      message: "Note updated successfully.",
+    });
   }
 
   /**
    * Deletes a note based on the provided note ID and user ID.
    *
-   * @param req - The request object containing the user ID and note ID.
-   * @param res - The response object used to send the status and message.
+   * @param req - The request object containing the note ID in the parameters and the userId.
+   * @param res - The response object used to send the HTTP status and confirmation message.
    * @returns A promise that resolves to void.
    */
   async deleteNote(
@@ -81,18 +145,18 @@ export class NoteController implements INoteController {
     const userId = req.userId;
     const { id } = req.params;
 
-    const deleteNoteDto: DeleteNoteDto = { id, userId };
+    await this._noteService.deleteNote({ noteId: id, userId });
 
-    await this._noteService.deleteNote(deleteNoteDto);
-
-    res.status(httpStatus.OK).json({ message: "Note deleted successfully." });
+    res
+      .status(httpStatus.OK)
+      .json({ success: true, message: "Note deleted successfully." });
   }
 
   /**
    * Retrieves a note by its ID for the authenticated user.
    *
-   * @param req - The request object containing the user ID and note ID parameters.
-   * @param res - The response object used to send the note data.
+   * @param req - The request object containing the note ID in the parameters and the userId.
+   * @param res - The response object used to send the HTTP status and note data.
    * @returns A promise that resolves to void.
    */
   async getNoteById(
@@ -102,18 +166,19 @@ export class NoteController implements INoteController {
     const userId = req.userId;
     const { id } = req.params;
 
-    const findNoteDto: FindNoteDto = { id, userId };
+    const note = await this._noteService.findNote({ noteId: id, userId });
 
-    const note = await this._noteService.findNote(findNoteDto);
-
-    res.status(httpStatus.OK).json({ note });
+    res.status(httpStatus.OK).json({
+      success: true,
+      data: note,
+    });
   }
 
   /**
    * Retrieves the notes of a user with pagination.
    *
-   * @param req - The request object containing user ID and pagination query parameters.
-   * @param res - The response object used to send the notes and pagination details.
+   * @param req - The request object containing the userId and pagination query parameters.
+   * @param res - The response object used to send the HTTP status, notes data, and pagination metadata.
    * @returns A promise that resolves to void.
    */
   async getUserNotes(
@@ -121,119 +186,82 @@ export class NoteController implements INoteController {
     res: Response
   ): Promise<void> {
     const userId = req.userId;
+    const paginationQueries = this._getPaginationQueries(req.query);
 
-    const page = Number(req.query.page);
-    const limit = Number(req.query.limit);
-
-    const skip = (page - 1) * limit;
-
-    const findManyDto: FindManyDto = {
+    const result = await this._noteService.fetchUserNotes({
       userId,
-      skip,
-      limit,
-      sort: { by: "createdAt", order: "desc" },
-    };
-
-    const { notes, notesCount, totalPages } =
-      await this._noteService.fetchUserNotes(findManyDto);
-
-    res.status(httpStatus.OK).json({
-      notes,
-      pagination: {
-        totalPages,
-        currentPage: page,
-        totalNotes: notesCount,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1,
-      },
+      ...paginationQueries,
     });
+
+    this._sendPaginatedResponse(res, req.query, result);
   }
 
   /**
    * Retrieves the most recent notes for a specific user.
    *
-   * @param req - The request object containing user information.
-   * @param res - The response object used to send back the notes.
+   * @param req - The request object containing the userId and pagination query parameters.
+   * @param res - The response object used to send the HTTP status and recent notes data.
    * @returns A promise that resolves to void.
    */
-  async getUserRecentNotes(req: TypedRequest, res: Response): Promise<void> {
+  async getUserRecentNotes(
+    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
+    res: Response
+  ): Promise<void> {
     const userId = req.userId;
+    const paginationQueries = this._getPaginationQueries(req.query, 2);
 
-    const findManyDto: FindManyDto = {
+    const notes = await this._noteService.fetchRecentNotes({
       userId,
-      limit: 2,
-      sort: { by: "createdAt", order: "desc" },
-    };
+      ...paginationQueries,
+    });
 
-    const notes = await this._noteService.fetchRecentNotes(findManyDto);
-
-    res.status(httpStatus.OK).json({ notes });
+    res.status(httpStatus.OK).json({ success: true, data: notes });
   }
 
   /**
    * Retrieves the most recently updated notes for the authenticated user.
    *
-   * @param req - The request object, containing the authenticated user's ID.
-   * @param res - The response object used to send the JSON response.
+   * @param req - The request object containing the userId and pagination query parameters.
+   * @param res - The response object used to send the HTTP status and recently updated notes data.
    * @returns A promise that resolves to void.
    */
-  async getRecentlyUpatedNotes(
-    req: TypedRequest,
+  async getRecentlyUpdatedNotes(
+    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
+    const paginationQueries = this._getPaginationQueries(req.query, 2);
 
-    const findManyDto: FindManyDto = {
+    const notes = await this._noteService.fetchRecentNotes({
       userId,
-      limit: 2,
-      sort: { by: "updatedAt", order: "desc" },
-    };
+      ...paginationQueries,
+    });
 
-    const notes = await this._noteService.fetchRecentNotes(findManyDto);
-
-    res.status(httpStatus.OK).json({ notes });
+    res.status(httpStatus.OK).json({ success: true, data: notes });
   }
 
   /**
    * Retrieves notes associated with a specific video ID, with pagination support.
    *
-   * @param req - The request object containing user ID, video ID parameter, and pagination query.
-   * @param res - The response object used to send back the notes and pagination details.
-   *
-   * @returns A JSON response containing the notes and pagination information.
-   *
+   * @param req - The request object containing the video ID as a parameter, the userId, and pagination query parameters.
+   * @param res - The response object used to send the HTTP status, notes data, and pagination metadata.
+   * @returns A promise that resolves to void.
    */
   async getNotesByVideoId(
     req: TypedRequest<EmptyRecord, IdParamDto, QueryPaginationDto>,
     res: Response
-  ) {
+  ): Promise<void> {
     const userId = req.userId;
     const { id } = req.params;
 
-    const page = Number(req.query.page);
-    const limit = Number(req.query.limit);
+    const paginationQueries = this._getPaginationQueries(req.query);
 
-    const skip = (page - 1) * limit;
-
-    const findManyDto: FindManyDto = {
+    const result = await this._noteService.fetchNotesByVideoId({
+      videoId: id,
       userId,
-      skip,
-      limit,
-      sort: { by: "createdAt", order: "desc" },
-    };
-
-    const { notes, notesCount, totalPages } =
-      await this._noteService.fetchNotesByVideoId(id, findManyDto);
-
-    res.status(httpStatus.OK).json({
-      notes,
-      pagination: {
-        totalPages,
-        currentPage: page,
-        totalNotes: notesCount,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1,
-      },
+      ...paginationQueries,
     });
+
+    this._sendPaginatedResponse(res, req.query, result);
   }
 }

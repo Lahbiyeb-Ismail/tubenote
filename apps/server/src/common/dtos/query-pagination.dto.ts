@@ -1,4 +1,6 @@
 export interface QueryPaginationDto {
-  page?: number;
-  limit?: number;
+  page?: string;
+  limit?: string;
+  sortBy?: "createdAt" | "updatedAt";
+  order?: "desc" | "asc";
 }

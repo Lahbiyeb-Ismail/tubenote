@@ -35,7 +35,7 @@ router
 // - GET /recently-updated: Get the recently updated notes for the authenticated user.
 router
   .route("/recently-updated")
-  .get((req, res) => noteController.getRecentlyUpatedNotes(req, res));
+  .get((req, res) => noteController.getRecentlyUpdatedNotes(req, res));
 
 // - GET /video/:id: Get all notes for a specific video (requires request params validation).
 router.route("/video/:id").get(
