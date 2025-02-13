@@ -1,12 +1,7 @@
 import type { EmptyRecord, TypedRequest } from "@/types";
 import type { Response } from "express";
 
-import type {
-  CreateVideoDto,
-  FindVideoDto,
-  Video,
-  YoutubeVideoData,
-} from "@modules/video";
+import type { CreateVideoDto, FindVideoDto, Video } from "@modules/video";
 
 import type { FindManyDto } from "@common/dtos/find-many.dto";
 import type { IdParamDto } from "@common/dtos/id-param.dto";
@@ -28,7 +23,6 @@ export interface IVideoRepository {
 }
 
 export interface IVideoService {
-  fetchYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData>;
   findVideoByYoutubeId(youtubeId: string): Promise<Video | null>;
   createVideo(userId: string, youtubeVideoId: string): Promise<Video>;
   linkVideoToUser(video: Video, userId: string): Promise<Video>;

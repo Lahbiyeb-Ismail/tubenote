@@ -17,7 +17,9 @@ import type { FindManyDto } from "@common/dtos/find-many.dto";
 export class VideoService implements IVideoService {
   constructor(private readonly _videoRepository: IVideoRepository) {}
 
-  async fetchYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData> {
+  private async _getYoutubeVideoData(
+    youtubeId: string
+  ): Promise<YoutubeVideoData> {
     const response = await fetch(
       `${YOUTUBE_API_URL}/videos?id=${youtubeId}&key=${YOUTUBE_API_KEY}&part=snippet,statistics,player`
     );
@@ -28,7 +30,7 @@ export class VideoService implements IVideoService {
 
     const data = await response.json();
 
-    if (!data.items.length) {
+    if (!data?.items?.length) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
@@ -36,30 +38,21 @@ export class VideoService implements IVideoService {
   }
 
   async findVideoByYoutubeId(youtubeId: string): Promise<Video | null> {
-    const video = await this._videoRepository.findByYoutubeId(youtubeId);
-
-    return video;
+    return this._videoRepository.findByYoutubeId(youtubeId);
   }
 
   async createVideo(userId: string, youtubeVideoId: string): Promise<Video> {
-    const videoData = await this.fetchYoutubeVideoData(youtubeVideoId);
+    const videoData = await this._getYoutubeVideoData(youtubeVideoId);
 
-    const newVideo = await this._videoRepository.create({
+    return this._videoRepository.create({
       userId,
       youtubeVideoId,
       videoData,
     });
-
-    return newVideo;
   }
 
   async linkVideoToUser(video: Video, userId: string): Promise<Video> {
-    const updatedVideo = await this._videoRepository.connectVideoToUser(
-      video.id,
-      userId
-    );
-
-    return updatedVideo;
+    return this._videoRepository.connectVideoToUser(video.id, userId);
   }
 
   async getUserVideos(findManyDto: FindManyDto): Promise<UserVideos> {
@@ -80,14 +73,19 @@ export class VideoService implements IVideoService {
       throw new BadRequestError(ERROR_MESSAGES.BAD_REQUEST);
     }
 
-    const video = await this.findVideoByYoutubeId(youtubeVideoId);
+    const existingVideo = await this.findVideoByYoutubeId(youtubeVideoId);
 
-    if (!video) {
-      return await this.createVideo(userId, youtubeVideoId);
+    if (!existingVideo) {
+      // If video doesn't exist, create it.
+      return this.createVideo(userId, youtubeVideoId);
     }
 
-    if (video && video.userIds && video.userIds.includes(userId)) return video;
+    if (existingVideo.userIds?.includes(userId)) {
+      // If video is already linked to the user, return it.
+      return existingVideo;
+    }
 
-    return await this.linkVideoToUser(video, userId);
+    // Otherwise, link the existing video to the user.
+    return this.linkVideoToUser(existingVideo, userId);
   }
 }
