@@ -37,33 +37,45 @@ export class VideoService implements IVideoService {
     return data.items[0];
   }
 
-  async findVideoByYoutubeId(youtubeId: string): Promise<Video | null> {
-    return this._videoRepository.findByYoutubeId(youtubeId);
+  private async _findVideoByYoutubeId(
+    tx: IVideoRepository,
+    youtubeId: string
+  ): Promise<Video | null> {
+    return tx.findByYoutubeId(youtubeId);
   }
 
-  async createVideo(userId: string, youtubeVideoId: string): Promise<Video> {
+  private async _createVideo(
+    tx: IVideoRepository,
+    userId: string,
+    youtubeVideoId: string
+  ): Promise<Video> {
     const videoData = await this._getYoutubeVideoData(youtubeVideoId);
 
-    return this._videoRepository.create({
+    return tx.create({
       userId,
       youtubeVideoId,
       videoData,
     });
   }
 
-  async linkVideoToUser(video: Video, userId: string): Promise<Video> {
-    return this._videoRepository.connectVideoToUser(video.id, userId);
+  private async _linkVideoToUser(
+    tx: IVideoRepository,
+    video: Video,
+    userId: string
+  ): Promise<Video> {
+    return tx.connectVideoToUser(video.id, userId);
   }
 
   async getUserVideos(findManyDto: FindManyDto): Promise<UserVideos> {
-    const [videos, videosCount] = await Promise.all([
-      this._videoRepository.findMany(findManyDto),
-      this._videoRepository.count(findManyDto.userId),
-    ]);
+    return this._videoRepository.transaction(async (tx) => {
+      const [videos, videosCount] = await Promise.all([
+        tx.findMany(findManyDto),
+        tx.count(findManyDto.userId),
+      ]);
 
-    const totalPages = Math.ceil(videosCount / findManyDto.limit);
-
-    return { videos, videosCount, totalPages };
+      const totalPages = Math.ceil(videosCount / findManyDto.limit);
+      return { videos, videosCount, totalPages };
+    });
   }
 
   async findVideoOrCreate(findVideoDto: FindVideoDto): Promise<Video> {
@@ -73,19 +85,24 @@ export class VideoService implements IVideoService {
       throw new BadRequestError(ERROR_MESSAGES.BAD_REQUEST);
     }
 
-    const existingVideo = await this.findVideoByYoutubeId(youtubeVideoId);
+    return this._videoRepository.transaction(async (tx) => {
+      const existingVideo = await this._findVideoByYoutubeId(
+        tx,
+        youtubeVideoId
+      );
 
-    if (!existingVideo) {
-      // If video doesn't exist, create it.
-      return this.createVideo(userId, youtubeVideoId);
-    }
+      if (!existingVideo) {
+        // If video doesn't exist, create it.
+        return this._createVideo(tx, userId, youtubeVideoId);
+      }
 
-    if (existingVideo.userIds?.includes(userId)) {
-      // If video is already linked to the user, return it.
-      return existingVideo;
-    }
+      if (existingVideo.userIds?.includes(userId)) {
+        // If video is already linked to the user, return it.
+        return existingVideo;
+      }
 
-    // Otherwise, link the existing video to the user.
-    return this.linkVideoToUser(existingVideo, userId);
+      // Otherwise, link the existing video to the user.
+      return this._linkVideoToUser(tx, existingVideo, userId);
+    });
   }
 }
