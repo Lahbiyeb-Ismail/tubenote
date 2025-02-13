@@ -7,13 +7,17 @@ import type { FindManyDto } from "@common/dtos/find-many.dto";
 import type { IdParamDto } from "@common/dtos/id-param.dto";
 import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
 
+import type { IResponseFormatter } from "@modules/utils/response-formatter";
 import type { IVideoController, IVideoService } from "@modules/video";
 
 /**
  * Controller for handling video-related operations.
  */
 export class VideoController implements IVideoController {
-  constructor(private readonly _videoService: IVideoService) {}
+  constructor(
+    private readonly _responseFormatter: IResponseFormatter,
+    private readonly _videoService: IVideoService
+  ) {}
 
   /**
    * Retrieves a paginated list of videos for a specific user.
@@ -31,6 +35,8 @@ export class VideoController implements IVideoController {
 
     const page = Number(req.query.page);
     const limit = Number(req.query.limit);
+    const order = String(req.query.order);
+    const sortBy = String(req.query.sortBy);
 
     const skip = (page - 1) * limit;
 
@@ -38,22 +44,17 @@ export class VideoController implements IVideoController {
       userId,
       limit,
       skip,
-      sort: { by: "createdAt", order: "desc" },
+      sort: { by: sortBy, order },
     };
 
-    const { totalPages, videos, videosCount } =
-      await this._videoService.getUserVideos(findManyDto);
+    const paginatedItems = await this._videoService.getUserVideos(findManyDto);
 
-    res.status(httpStatus.OK).json({
-      videos,
-      pagination: {
-        totalPages,
-        currentPage: page,
-        totalVideos: videosCount,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1,
-      },
-    });
+    const formattedResponse = this._responseFormatter.formatPaginatedResponse(
+      req.query,
+      paginatedItems
+    );
+
+    res.status(httpStatus.OK).json(formattedResponse);
   }
 
   /**
@@ -76,6 +77,8 @@ export class VideoController implements IVideoController {
       youtubeVideoId: id,
     });
 
-    res.status(httpStatus.OK).json(video);
+    const formattedResponse = this._responseFormatter.formatResponse(video);
+
+    res.status(httpStatus.OK).json(formattedResponse);
   }
 }
