@@ -23,11 +23,8 @@ export interface IVideoRepository {
 }
 
 export interface IVideoService {
-  findVideoByYoutubeId(youtubeId: string): Promise<Video | null>;
-  createVideo(userId: string, youtubeVideoId: string): Promise<Video>;
-  linkVideoToUser(video: Video, userId: string): Promise<Video>;
-  getUserVideos(findManyDto: FindManyDto): Promise<UserVideos>;
   findVideoOrCreate(findVideoDto: FindVideoDto): Promise<Video>;
+  getUserVideos(findManyDto: FindManyDto): Promise<UserVideos>;
 }
 
 export interface IVideoController {
