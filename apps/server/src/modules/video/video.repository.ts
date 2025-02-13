@@ -62,25 +62,12 @@ export class VideoRepository implements IVideoRepository {
     return handleAsyncOperation(
       async () => {
         const { userId, youtubeVideoId, videoData } = createVideoDto;
-        const { snippet, statistics, player } = videoData;
 
         return await this._db.video.create({
           data: {
             youtubeId: youtubeVideoId,
             userIds: [userId],
-            snippet: {
-              title: snippet.title,
-              categoryId: snippet.categoryId,
-              channelId: snippet.channelId,
-              channelTitle: snippet.channelTitle,
-              description: snippet.description,
-              liveBroadcastContent: snippet.liveBroadcastContent,
-              publishedAt: snippet.publishedAt,
-              tags: snippet.tags || [],
-              thumbnails: snippet.thumbnails,
-            },
-            statistics,
-            player,
+            ...videoData,
           },
         });
       },
