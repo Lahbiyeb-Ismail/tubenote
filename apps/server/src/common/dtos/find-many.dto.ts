@@ -6,6 +6,6 @@ export interface FindManyDto {
 }
 
 export interface Sort {
-  by: "createdAt" | "updatedAt";
-  order: "asc" | "desc";
+  by: string;
+  order: string;
 }
