@@ -34,7 +34,19 @@ export class VideoService implements IVideoService {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
-    return data.items[0];
+    const { title, description, channelTitle, thumbnails, tags } =
+      data.items[0].snippet;
+
+    const { embedHtml: embedHtmlPlayer } = data.items[0].player;
+
+    return {
+      title,
+      description,
+      channelTitle,
+      embedHtmlPlayer,
+      tags,
+      thumbnails,
+    };
   }
 
   private async _findVideoByYoutubeId(
