@@ -7,11 +7,11 @@ import type {
   FindVideoDto,
   IVideoRepository,
   IVideoService,
-  UserVideos,
   Video,
   YoutubeVideoData,
 } from "@modules/video";
 
+import type { PaginatedItems } from "@/common/dtos/paginated-items.dto";
 import type { FindManyDto } from "@common/dtos/find-many.dto";
 
 export class VideoService implements IVideoService {
@@ -66,15 +66,17 @@ export class VideoService implements IVideoService {
     return tx.connectVideoToUser(video.id, userId);
   }
 
-  async getUserVideos(findManyDto: FindManyDto): Promise<UserVideos> {
+  async getUserVideos(
+    findManyDto: FindManyDto
+  ): Promise<PaginatedItems<Video>> {
     return this._videoRepository.transaction(async (tx) => {
-      const [videos, videosCount] = await Promise.all([
+      const [items, totalItems] = await Promise.all([
         tx.findMany(findManyDto),
         tx.count(findManyDto.userId),
       ]);
 
-      const totalPages = Math.ceil(videosCount / findManyDto.limit);
-      return { videos, videosCount, totalPages };
+      const totalPages = Math.ceil(totalItems / findManyDto.limit);
+      return { items, totalItems, totalPages };
     });
   }
 
