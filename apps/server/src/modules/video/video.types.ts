@@ -19,6 +19,7 @@ export interface UserVideos {
 }
 
 export interface IVideoRepository {
+  transaction<T>(fn: (tx: IVideoRepository) => Promise<T>): Promise<T>;
   findByYoutubeId(youtubeId: string): Promise<Video | null>;
   findMany(findManyDto: FindManyDto): Promise<Video[]>;
   count(userId: string): Promise<number>;
