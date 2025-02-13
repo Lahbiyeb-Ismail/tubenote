@@ -3,15 +3,10 @@ import type { Response } from "express";
 
 import type { CreateVideoDto, FindVideoDto, Video } from "@modules/video";
 
+import type { PaginatedItems } from "@/common/dtos/paginated-items.dto";
 import type { FindManyDto } from "@common/dtos/find-many.dto";
 import type { IdParamDto } from "@common/dtos/id-param.dto";
 import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
-
-export interface UserVideos {
-  videos: Video[];
-  videosCount: number;
-  totalPages: number;
-}
 
 export interface IVideoRepository {
   transaction<T>(fn: (tx: IVideoRepository) => Promise<T>): Promise<T>;
@@ -24,7 +19,7 @@ export interface IVideoRepository {
 
 export interface IVideoService {
   findVideoOrCreate(findVideoDto: FindVideoDto): Promise<Video>;
-  getUserVideos(findManyDto: FindManyDto): Promise<UserVideos>;
+  getUserVideos(findManyDto: FindManyDto): Promise<PaginatedItems<Video>>;
 }
 
 export interface IVideoController {
