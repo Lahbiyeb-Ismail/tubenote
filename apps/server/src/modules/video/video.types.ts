@@ -1,7 +1,12 @@
 import type { EmptyRecord, TypedRequest } from "@/types";
 import type { Response } from "express";
 
-import type { CreateVideoDto, FindVideoDto, Video } from "@modules/video";
+import type {
+  CreateVideoDto,
+  FindVideoDto,
+  Video,
+  YoutubeVideoData,
+} from "@modules/video";
 
 import type { PaginatedItems } from "@/common/dtos/paginated-items.dto";
 import type { FindManyDto } from "@common/dtos/find-many.dto";
@@ -18,6 +23,7 @@ export interface IVideoRepository {
 }
 
 export interface IVideoService {
+  getYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData>;
   findVideoOrCreate(findVideoDto: FindVideoDto): Promise<Video>;
   getUserVideos(findManyDto: FindManyDto): Promise<PaginatedItems<Video>>;
 }
