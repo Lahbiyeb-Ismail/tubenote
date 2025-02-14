@@ -17,9 +17,36 @@ import type { FindManyDto } from "@common/dtos/find-many.dto";
 export class VideoService implements IVideoService {
   constructor(private readonly _videoRepository: IVideoRepository) {}
 
-  private async _getYoutubeVideoData(
+  private async _findVideoByYoutubeId(
+    tx: IVideoRepository,
     youtubeId: string
-  ): Promise<YoutubeVideoData> {
+  ): Promise<Video | null> {
+    return tx.findByYoutubeId(youtubeId);
+  }
+
+  private async _createVideo(
+    tx: IVideoRepository,
+    userId: string,
+    youtubeVideoId: string
+  ): Promise<Video> {
+    const videoData = await this.getYoutubeVideoData(youtubeVideoId);
+
+    return tx.create({
+      userId,
+      youtubeVideoId,
+      videoData,
+    });
+  }
+
+  private async _linkVideoToUser(
+    tx: IVideoRepository,
+    video: Video,
+    userId: string
+  ): Promise<Video> {
+    return tx.connectVideoToUser(video.id, userId);
+  }
+
+  async getYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData> {
     const response = await fetch(
       `${YOUTUBE_API_URL}/videos?id=${youtubeId}&key=${YOUTUBE_API_KEY}&part=snippet,statistics,player`
     );
@@ -47,35 +74,6 @@ export class VideoService implements IVideoService {
       tags,
       thumbnails,
     };
-  }
-
-  private async _findVideoByYoutubeId(
-    tx: IVideoRepository,
-    youtubeId: string
-  ): Promise<Video | null> {
-    return tx.findByYoutubeId(youtubeId);
-  }
-
-  private async _createVideo(
-    tx: IVideoRepository,
-    userId: string,
-    youtubeVideoId: string
-  ): Promise<Video> {
-    const videoData = await this._getYoutubeVideoData(youtubeVideoId);
-
-    return tx.create({
-      userId,
-      youtubeVideoId,
-      videoData,
-    });
-  }
-
-  private async _linkVideoToUser(
-    tx: IVideoRepository,
-    video: Video,
-    userId: string
-  ): Promise<Video> {
-    return tx.connectVideoToUser(video.id, userId);
   }
 
   async getUserVideos(
