@@ -4,6 +4,7 @@ export const ERROR_MESSAGES = {
   FAILD_TO_CREATE: "Failed to create the resource.",
   FAILD_TO_DELETE: "Failed to delete the resource.",
   FAILD_TO_UPDATE: "Failed to update the resource.",
+  FAILD_TO_COUNT: "Failed to count the resources.",
   FAILD_TO_DELETE_ALL: "Failed to delete all resources.",
   EMAIL_ALREADY_EXISTS:
     "The email address provided is already associated with another account.",

@@ -1,15 +1,23 @@
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 
+import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import handleAsyncOperation from "@/utils/handle-async-operation";
 
-import type { Video } from "./video.model";
-import type { IVideoRepository } from "./video.types";
+import type { CreateVideoDto, IVideoRepository, Video } from "@modules/video";
 
 import type { FindManyDto } from "@common/dtos/find-many.dto";
-import type { CreateVideoDto } from "./dtos/create-video.dto";
 
 export class VideoRepository implements IVideoRepository {
   constructor(private readonly _db: PrismaClient) {}
+
+  async transaction<T>(fn: (tx: IVideoRepository) => Promise<T>): Promise<T> {
+    // Use Prisma's transaction system
+    return this._db.$transaction(async (prismaTx: Prisma.TransactionClient) => {
+      // Create a new repository instance with the transactional client
+      const txRepository = new VideoRepository(prismaTx as PrismaClient);
+      return await fn(txRepository);
+    });
+  }
 
   async findByYoutubeId(youtubeId: string): Promise<Video | null> {
     return handleAsyncOperation(
@@ -17,7 +25,7 @@ export class VideoRepository implements IVideoRepository {
         this._db.video.findUnique({
           where: { youtubeId },
         }),
-      { errorMessage: "Faild to find video" }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
 
@@ -25,19 +33,16 @@ export class VideoRepository implements IVideoRepository {
     const { userId, limit, skip, sort } = findManyDto;
 
     return handleAsyncOperation(
-      async () => {
-        const videos = await this._db.video.findMany({
+      () =>
+        this._db.video.findMany({
           where: { users: { every: { id: userId } } },
           take: limit,
           skip,
           orderBy: {
             [sort.by]: sort.order,
           },
-        });
-
-        return videos;
-      },
-      { errorMessage: "Failed to find user videos" }
+        }),
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
     );
   }
 
@@ -49,7 +54,7 @@ export class VideoRepository implements IVideoRepository {
             userIds: { has: userId },
           },
         }),
-      { errorMessage: "Failed to count user videos." }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_COUNT }
     );
   }
 
@@ -57,29 +62,16 @@ export class VideoRepository implements IVideoRepository {
     return handleAsyncOperation(
       async () => {
         const { userId, youtubeVideoId, videoData } = createVideoDto;
-        const { snippet, statistics, player } = videoData;
 
         return await this._db.video.create({
           data: {
             youtubeId: youtubeVideoId,
             userIds: [userId],
-            snippet: {
-              title: snippet.title,
-              categoryId: snippet.categoryId,
-              channelId: snippet.channelId,
-              channelTitle: snippet.channelTitle,
-              description: snippet.description,
-              liveBroadcastContent: snippet.liveBroadcastContent,
-              publishedAt: snippet.publishedAt,
-              tags: snippet.tags || [],
-              thumbnails: snippet.thumbnails,
-            },
-            statistics,
-            player,
+            ...videoData,
           },
         });
       },
-      { errorMessage: "Failed to create video" }
+      { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
     );
   }
 
@@ -95,7 +87,7 @@ export class VideoRepository implements IVideoRepository {
           },
         }),
       {
-        errorMessage: "Failed to update video",
+        errorMessage: ERROR_MESSAGES.FAILD_TO_UPDATE,
       }
     );
   }

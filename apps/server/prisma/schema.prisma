@@ -70,28 +70,21 @@ model Note {
 }
 
 model Video {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  youtubeId String @unique
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  youtubeId       String   @unique
+  title           String
+  description     String
+  channelTitle    String
+  embedHtmlPlayer String
+  tags            String[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  snippet    Snippet
-  statistics Statistics
-  player     Player
+  thumbnails Thumbnails
   notes      Note[]
 
   userIds String[] @db.ObjectId
   users   User[]   @relation(fields: [userIds], references: [id])
-}
-
-type Snippet {
-  publishedAt          String
-  channelId            String
-  title                String
-  description          String
-  channelTitle         String
-  categoryId           String
-  liveBroadcastContent String
-  tags                 String[]   @default([])
-  thumbnails           Thumbnails
 }
 
 type Thumbnails {
@@ -106,15 +99,4 @@ type ThumbnailSize {
   url    String
   width  Int
   height Int
-}
-
-type Statistics {
-  viewCount     String
-  likeCount     String
-  favoriteCount String
-  commentCount  String
-}
-
-type Player {
-  embedHtml String
 }

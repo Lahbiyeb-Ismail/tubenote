@@ -1,16 +1,4 @@
-import type { Note } from "../note/note.model";
-
-interface Snippet {
-  publishedAt: string;
-  channelId: string;
-  title: string;
-  description: string;
-  channelTitle: string;
-  categoryId: string;
-  liveBroadcastContent: string;
-  tags: string[];
-  thumbnails: Thumbnails;
-}
+import type { Note } from "@modules/note";
 
 interface Thumbnails {
   default: ThumbnailSize;
@@ -26,26 +14,20 @@ interface ThumbnailSize {
   height: number;
 }
 
-interface Statistics {
-  viewCount: string;
-  likeCount: string;
-  favoriteCount: string;
-  commentCount: string;
-}
-
-interface Player {
-  embedHtml: string;
-}
-
 export interface YoutubeVideoData {
-  snippet: Snippet;
-  statistics: Statistics;
-  player: Player;
+  title: string;
+  description: string;
+  channelTitle: string;
+  tags: string[];
+  embedHtmlPlayer: string;
+  thumbnails: Thumbnails;
 }
 
 export interface Video extends YoutubeVideoData {
   id: string;
   youtubeId: string;
+  createdAt: Date;
+  updatedAt: Date;
   notes?: Note[];
   userIds?: string[];
 }
