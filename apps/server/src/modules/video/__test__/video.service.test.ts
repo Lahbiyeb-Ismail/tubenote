@@ -5,8 +5,10 @@ import {
   IVideoService,
   Video,
   VideoService,
+  type YoutubeVideoData,
 } from "@modules/video";
 
+import { BadRequestError, NotFoundError } from "@/errors";
 import type { FindManyDto } from "@common/dtos/find-many.dto";
 
 describe("VideoService methods tests cases", () => {
@@ -97,43 +99,45 @@ describe("VideoService methods tests cases", () => {
     },
   ];
 
+  const mockYoutubeVideoData: YoutubeVideoData = {
+    title: "Video 3",
+    description: "Video description",
+    channelTitle: "Channel 1",
+    thumbnails: {
+      default: {
+        url: "url",
+        width: 120,
+        height: 90,
+      },
+      medium: {
+        url: "url",
+        width: 320,
+        height: 180,
+      },
+      high: {
+        url: "url",
+        width: 480,
+        height: 360,
+      },
+      standard: {
+        url: "url",
+        width: 640,
+        height: 480,
+      },
+      maxres: {
+        url: "url",
+        width: 1280,
+        height: 720,
+      },
+    },
+    tags: ["tag1", "tag2"],
+    embedHtmlPlayer: "embed_html",
+  };
+
   const createVideoDto: CreateVideoDto = {
     userId: mockUserId,
     youtubeVideoId: "youtube_id_03",
-    videoData: {
-      description: "Video description",
-      tags: ["tag1", "tag2"],
-      channelTitle: "Channel 1",
-      thumbnails: {
-        default: {
-          url: "url",
-          width: 120,
-          height: 90,
-        },
-        medium: {
-          url: "url",
-          width: 320,
-          height: 180,
-        },
-        high: {
-          url: "url",
-          width: 480,
-          height: 360,
-        },
-        standard: {
-          url: "url",
-          width: 640,
-          height: 480,
-        },
-        maxres: {
-          url: "url",
-          width: 1280,
-          height: 720,
-        },
-      },
-      title: "Video 3",
-      embedHtmlPlayer: "embed_html",
-    },
+    videoData: mockYoutubeVideoData,
   };
 
   const mockNewVideo: Video = {
@@ -166,9 +170,30 @@ describe("VideoService methods tests cases", () => {
     jest.clearAllMocks();
   });
 
+  describe("VideoService - getYoutubeVideoData", () => {
+    it("should throw proper error for network failures", async () => {
+      jest.spyOn(global, "fetch").mockRejectedValue(new Error("Network error"));
+
+      await expect(
+        videoService.getYoutubeVideoData("valid_id")
+      ).rejects.toThrow("Network error");
+    });
+
+    it("should handle malformed YouTube API response", async () => {
+      jest.spyOn(global, "fetch").mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ items: [{}] }), // Missing required fields
+      } as Response);
+
+      await expect(
+        videoService.getYoutubeVideoData("valid_id")
+      ).rejects.toThrow(Error);
+    });
+  });
+
   describe("videoService - getUserVideos", () => {
     const findManyDto: FindManyDto = {
-      userId: "user_123",
+      userId: mockUserId,
       limit: 2,
       skip: 0,
       sort: { by: "createdAt", order: "desc" },
@@ -208,6 +233,42 @@ describe("VideoService methods tests cases", () => {
       expect(result.totalItems).toBe(0);
       expect(result.totalPages).toBe(0);
     });
+
+    // it("should handle invalid limit values by defaulting to positive numbers", async () => {
+    //   const invalidDto = { ...findManyDto, limit: -5 };
+
+    //   await videoService.getUserVideos(invalidDto);
+
+    //   expect(mockVideoRepository.findMany).toHaveBeenCalledWith(
+    //     expect.objectContaining({ limit: 0 })
+    //   );
+    // });
+
+    it("should handle database errors during findMany", async () => {
+      (mockVideoRepository.findMany as jest.Mock).mockRejectedValue(
+        new Error("Database error")
+      );
+      await expect(videoService.getUserVideos(findManyDto)).rejects.toThrow(
+        "Database error"
+      );
+    });
+
+    it("should handle database errors during count", async () => {
+      (mockVideoRepository.count as jest.Mock).mockRejectedValue(
+        new Error("Count error")
+      );
+      await expect(videoService.getUserVideos(findManyDto)).rejects.toThrow(
+        "Count error"
+      );
+    });
+
+    it("should handle pagination edge case (exact division)", async () => {
+      const exactLimitDto = { ...findManyDto, limit: 2, skip: 2 };
+      (mockVideoRepository.count as jest.Mock).mockResolvedValue(4);
+
+      const result = await videoService.getUserVideos(exactLimitDto);
+      expect(result.totalPages).toBe(2);
+    });
   });
 
   describe("VideoService - findVideoOrCreate", () => {
@@ -223,22 +284,33 @@ describe("VideoService methods tests cases", () => {
       jest.clearAllMocks();
     });
 
-    // it("should create a video if it does not exist", async () => {
-    //   // Simulate that no existing video is found.
-    //   (mockVideoRepository.findByYoutubeId as jest.Mock).mockResolvedValue(
-    //     null
-    //   );
+    it("should create a video if it does not exist", async () => {
+      // Simulate that no existing video is found.
+      (mockVideoRepository.findByYoutubeId as jest.Mock).mockResolvedValue(
+        null
+      );
 
-    //   const result = await videoService.findVideoOrCreate(createVideoDto);
+      jest
+        .spyOn(videoService, "getYoutubeVideoData")
+        .mockResolvedValue(mockYoutubeVideoData);
 
-    //   expect(mockVideoRepository.findByYoutubeId).toHaveBeenCalledWith(
-    //     createVideoDto.youtubeVideoId
-    //   );
+      const result = await videoService.findVideoOrCreate({
+        ...findVideoDto,
+        youtubeVideoId: "youtube_id_03",
+      });
 
-    //   expect(mockVideoRepository.create).toHaveBeenCalledWith(createVideoDto);
+      expect(mockVideoRepository.findByYoutubeId).toHaveBeenCalledWith(
+        "youtube_id_03"
+      );
 
-    //   expect(result).toEqual(mockNewVideo);
-    // });
+      expect(videoService.getYoutubeVideoData).toHaveBeenCalledWith(
+        "youtube_id_03"
+      );
+
+      expect(mockVideoRepository.create).toHaveBeenCalledWith(createVideoDto);
+
+      expect(result).toEqual(mockNewVideo);
+    });
 
     it("should return existing video if already linked to the user", async () => {
       const result = await videoService.findVideoOrCreate(findVideoDto);
@@ -265,6 +337,170 @@ describe("VideoService methods tests cases", () => {
       expect(result.userIds).toContain(mockNewUserId);
 
       expect(mockVideoRepository.create).not.toHaveBeenCalled();
+    });
+
+    it("should throw BadRequestError for missing userId or youtubeVideoId", async () => {
+      await expect(
+        videoService.findVideoOrCreate({
+          userId: "",
+          youtubeVideoId: "test",
+        })
+      ).rejects.toThrow(BadRequestError);
+
+      await expect(
+        videoService.findVideoOrCreate({
+          userId: "123",
+          youtubeVideoId: "",
+        })
+      ).rejects.toThrow(BadRequestError);
+    });
+
+    it("should handle YouTube API errors gracefully", async () => {
+      jest.spyOn(global, "fetch").mockResolvedValue({
+        ok: false,
+        status: 403,
+      } as Response);
+
+      await expect(
+        videoService.getYoutubeVideoData("invalid_id")
+      ).rejects.toThrow(BadRequestError);
+    });
+
+    it("should handle empty YouTube API response", async () => {
+      jest.spyOn(global, "fetch").mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ items: [] }),
+      } as Response);
+
+      await expect(
+        videoService.getYoutubeVideoData("valid_id")
+      ).rejects.toThrow(NotFoundError);
+    });
+
+    it("should handle transaction rollback on creation failure", async () => {
+      (mockVideoRepository.findByYoutubeId as jest.Mock).mockResolvedValue(
+        null
+      );
+
+      jest
+        .spyOn(videoService, "getYoutubeVideoData")
+        .mockResolvedValue(mockYoutubeVideoData);
+
+      (mockVideoRepository.create as jest.Mock).mockRejectedValue(
+        new Error("Create failed")
+      );
+
+      await expect(
+        videoService.findVideoOrCreate(createVideoDto)
+      ).rejects.toThrow("Create failed");
+    });
+
+    it("should handle invalid YouTube API response structure", async () => {
+      jest.spyOn(global, "fetch").mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ invalid: "response" }),
+      } as Response);
+
+      await expect(
+        videoService.getYoutubeVideoData("valid_id")
+      ).rejects.toThrow(NotFoundError);
+    });
+
+    it("should handle video linking failures", async () => {
+      (mockVideoRepository.connectVideoToUser as jest.Mock).mockRejectedValue(
+        new Error("Linking failed")
+      );
+
+      await expect(
+        videoService.findVideoOrCreate({
+          userId: "new_user",
+          youtubeVideoId: mockVideos[0].youtubeId,
+        })
+      ).rejects.toThrow("Linking failed");
+    });
+
+    it("should handle concurrent requests for same video", async () => {
+      const userOneReqDto: FindVideoDto = {
+        userId: "user_id_001",
+        youtubeVideoId: "video_id_1",
+      };
+
+      const userTwoReqDto: FindVideoDto = {
+        userId: "user_id_002",
+        youtubeVideoId: "video_id_1",
+      };
+
+      // Simulate race condition where two users try to create the same video
+      (mockVideoRepository.findByYoutubeId as jest.Mock)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(mockNewVideo);
+
+      jest
+        .spyOn(videoService, "getYoutubeVideoData")
+        .mockResolvedValue(mockYoutubeVideoData);
+
+      (mockVideoRepository.connectVideoToUser as jest.Mock).mockResolvedValue({
+        ...mockNewVideo,
+        userIds: [userOneReqDto.userId, userTwoReqDto.userId],
+      });
+
+      const [result1, result2] = await Promise.all([
+        videoService.findVideoOrCreate(userOneReqDto),
+        videoService.findVideoOrCreate(userTwoReqDto),
+      ]);
+
+      expect(result1.userIds).toHaveLength(1);
+      expect(result2.userIds).toHaveLength(2);
+
+      expect(result1.id).toBe(result2.id);
+
+      expect(mockVideoRepository.create).toHaveBeenCalledTimes(1);
+
+      expect(mockVideoRepository.connectVideoToUser).toHaveBeenCalledTimes(1);
+
+      expect(result1.userIds).toEqual(
+        expect.arrayContaining([userOneReqDto.userId])
+      );
+
+      expect(result2.userIds).toEqual(
+        expect.arrayContaining([userOneReqDto.userId, userTwoReqDto.userId])
+      );
+
+      expect(result1.userIds).not.toEqual(result2.userIds);
+    });
+  });
+
+  describe("VideoService - transaction handling", () => {
+    it("should rollback transaction on any error", async () => {
+      mockVideoRepository.transaction = jest
+        .fn()
+        .mockImplementation(async (cb) => {
+          try {
+            await cb(mockVideoRepository);
+          } catch (error) {
+            return Promise.reject(error);
+          }
+        });
+
+      (mockVideoRepository.findByYoutubeId as jest.Mock).mockResolvedValue(
+        null
+      );
+
+      jest
+        .spyOn(videoService, "getYoutubeVideoData")
+        .mockResolvedValue(mockYoutubeVideoData);
+
+      (mockVideoRepository.create as jest.Mock).mockRejectedValue(
+        new Error("DB failure")
+      );
+
+      await expect(
+        videoService.findVideoOrCreate(createVideoDto)
+      ).rejects.toThrow("DB failure");
+
+      expect(mockVideoRepository.transaction).toHaveBeenCalled();
+
+      expect(mockVideoRepository.create).toHaveBeenCalled();
     });
   });
 });
