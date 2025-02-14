@@ -14,7 +14,6 @@ import {
 // MOCK THE JSONWEBTOKEN MODULE TO SIMULATE TOKEN VERIFICATION
 // **********************************************
 jest.mock("jsonwebtoken", () => {
-  // Get the actual module to spread the rest of its exports.
   const actualJwt = jest.requireActual("jsonwebtoken");
   return {
     ...actualJwt,
@@ -25,10 +24,8 @@ jest.mock("jsonwebtoken", () => {
         callback: (err: Error | null, payload?: any) => void
       ) => {
         if (token === "valid-token") {
-          // Simulate a successful verification with a payload.
           callback(null, { userId: "user_id_001" });
         } else {
-          // Simulate an error during verification.
           callback(new Error("Invalid token"), null);
         }
       }
@@ -39,6 +36,13 @@ jest.mock("jsonwebtoken", () => {
 describe("Video routes tests", () => {
   const mockUserOneId = "user_id_001";
   const mockUserTwoId = "user_id_002";
+  const thumbnails = {
+    default: { url: "url", width: 120, height: 90 },
+    medium: { url: "url", width: 320, height: 180 },
+    high: { url: "url", width: 480, height: 360 },
+    standard: { url: "url", width: 640, height: 480 },
+    maxres: { url: "url", width: 1280, height: 720 },
+  };
 
   const mockVideos: Video[] = [
     {
@@ -47,33 +51,7 @@ describe("Video routes tests", () => {
       channelTitle: "Channel 1",
       description: "Video description",
       tags: ["tag1", "tag2"],
-      thumbnails: {
-        default: {
-          url: "url",
-          width: 120,
-          height: 90,
-        },
-        medium: {
-          url: "url",
-          width: 320,
-          height: 180,
-        },
-        high: {
-          url: "url",
-          width: 480,
-          height: 360,
-        },
-        standard: {
-          url: "url",
-          width: 640,
-          height: 480,
-        },
-        maxres: {
-          url: "url",
-          width: 1280,
-          height: 720,
-        },
-      },
+      thumbnails,
       title: "Video 1",
       embedHtmlPlayer: "embed_html",
       userIds: [mockUserOneId],
@@ -86,33 +64,7 @@ describe("Video routes tests", () => {
       channelTitle: "Channel 2",
       description: "Video description",
       tags: ["tag1", "tag2"],
-      thumbnails: {
-        default: {
-          url: "url",
-          width: 120,
-          height: 90,
-        },
-        medium: {
-          url: "url",
-          width: 320,
-          height: 180,
-        },
-        high: {
-          url: "url",
-          width: 480,
-          height: 360,
-        },
-        standard: {
-          url: "url",
-          width: 640,
-          height: 480,
-        },
-        maxres: {
-          url: "url",
-          width: 1280,
-          height: 720,
-        },
-      },
+      thumbnails,
       title: "Video 2",
       embedHtmlPlayer: "embed_html",
       userIds: [mockUserTwoId],
@@ -125,76 +77,57 @@ describe("Video routes tests", () => {
     title: "Video 3",
     description: "Video description",
     channelTitle: "Channel 1",
-    thumbnails: {
-      default: {
-        url: "url",
-        width: 120,
-        height: 90,
-      },
-      medium: {
-        url: "url",
-        width: 320,
-        height: 180,
-      },
-      high: {
-        url: "url",
-        width: 480,
-        height: 360,
-      },
-      standard: {
-        url: "url",
-        width: 640,
-        height: 480,
-      },
-      maxres: {
-        url: "url",
-        width: 1280,
-        height: 720,
-      },
-    },
+    thumbnails,
     tags: ["tag1", "tag2"],
     embedHtmlPlayer: "embed_html",
   };
 
-  const createVideoDto: CreateVideoDto = {
+  const _createVideoDto: CreateVideoDto = {
     userId: mockUserOneId,
     youtubeVideoId: "youtube_id_03",
     videoData: mockYoutubeVideoData,
   };
 
-  const _mockNewVideo: Video = {
-    id: "video_003",
-    youtubeId: "youtube_id_03",
-    userIds: [mockUserOneId],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    ...createVideoDto.videoData,
-  };
-
-  const _mockVideosCount = mockVideos.length;
   beforeAll(() => {
-    // Mock the videoController.getVideos method
+    // Mock GET /videos for the authenticated user.
     (videoController.getUserVideos as jest.Mock) = jest
       .fn()
       .mockImplementation((req, res) => {
         const videos = mockVideos.filter((video) =>
           video.userIds?.includes(req.userId)
         );
-
         const currentPage = Number(req.query.page) || 1;
         const totalPages = Math.ceil(videos.length / 10);
-
         return res.status(httpStatus.OK).json({
           success: true,
           data: videos,
           pagination: {
             currentPage,
-            limit: 10,
             totalItems: videos.length,
             totalPages,
             hasNextPage: currentPage < totalPages,
             hasPrevPage: currentPage > 1,
           },
+        });
+      });
+
+    // Mock GET /videos/:id for the authenticated user.
+    (videoController.getVideoByIdOrCreate as jest.Mock) = jest
+      .fn()
+      .mockImplementation((req, res) => {
+        // Only return the video if it belongs to the authenticated user.
+        const video = mockVideos.find(
+          (v) => v.id === req.params.id && v.userIds?.includes(req.userId)
+        );
+        if (!video) {
+          return res.status(httpStatus.NOT_FOUND).json({
+            success: false,
+            error: { message: "Video not found." },
+          });
+        }
+        return res.status(httpStatus.OK).json({
+          success: true,
+          data: video,
         });
       });
 
@@ -253,7 +186,108 @@ describe("Video routes tests", () => {
       expect(res.body).toHaveProperty("data");
       expect(res.body).toHaveProperty("pagination");
 
+      // Only videos for user_id_001 should be returned.
       expect(res.body.data).toHaveLength(1);
+    });
+  });
+
+  // **********************************************
+  // GET /api/v1/videos
+  // **********************************************
+  describe("GET /api/v1/videos", () => {
+    it("should get all videos for the authenticated user", async () => {
+      const res = await request(app)
+        .get("/api/v1/videos")
+        .set("Authorization", "Bearer valid-token");
+
+      expect(res.statusCode).toEqual(httpStatus.OK);
+      expect(res.body.success).toEqual(true);
+      expect(res.body).toHaveProperty("data");
+
+      // Only video_001 belongs to user_id_001.
+      expect(res.body.data).toHaveLength(1);
+      expect(res.body).toHaveProperty("pagination");
+
+      expect(videoController.getUserVideos).toHaveBeenCalled();
+    });
+
+    it("should handle pagination query parameters", async () => {
+      const res = await request(app)
+        .get("/api/v1/videos?page=1")
+        .set("Authorization", "Bearer valid-token");
+
+      expect(res.statusCode).toEqual(httpStatus.OK);
+      expect(res.body.pagination).toHaveProperty("currentPage", 1);
+      expect(videoController.getUserVideos).toHaveBeenCalled();
+    });
+
+    it("should return 400 for invalid pagination parameters", async () => {
+      const res = await request(app)
+        .get("/api/v1/videos?page=invalid&limit=invalid")
+        .set("Authorization", "Bearer valid-token");
+
+      expect(res.statusCode).toEqual(httpStatus.BAD_REQUEST);
+    });
+
+    it("should return 400 for invalid query parameters", async () => {
+      const res = await request(app)
+        .get("/api/v1/videos?invalidParam=true")
+        .set("Authorization", "Bearer valid-token");
+
+      expect(res.statusCode).toEqual(httpStatus.BAD_REQUEST);
+    });
+
+    it("should propagate errors from the controller", async () => {
+      (videoController.getUserVideos as jest.Mock).mockImplementation(() => {
+        throw new Error("Test error");
+      });
+
+      const res = await request(app)
+        .get("/api/v1/videos")
+        .set("Authorization", "Bearer valid-token");
+
+      expect(res.statusCode).toEqual(httpStatus.INTERNAL_SERVER_ERROR);
+    });
+  });
+
+  // **********************************************
+  // GET /api/v1/videos/:id
+  // **********************************************
+  describe("GET /api/v1/videos/:id", () => {
+    it("should get a video by ID for the authenticated user", async () => {
+      const res = await request(app)
+        .get("/api/v1/videos/video_001")
+        .set("Authorization", "Bearer valid-token");
+
+      expect(res.statusCode).toEqual(httpStatus.OK);
+      expect(res.body.success).toEqual(true);
+      expect(res.body.data).toHaveProperty("id", "video_001");
+      expect(videoController.getVideoByIdOrCreate).toHaveBeenCalled();
+    });
+
+    it("should return 404 if the video is not found for the authenticated user", async () => {
+      // video_002 does not belong to user_id_001.
+      const res = await request(app)
+        .get("/api/v1/videos/video_002")
+        .set("Authorization", "Bearer valid-token");
+
+      expect(res.statusCode).toEqual(httpStatus.NOT_FOUND);
+      expect(res.body.success).toEqual(false);
+      expect(videoController.getVideoByIdOrCreate).toHaveBeenCalled();
+    });
+
+    it("should propagate errors from the controller", async () => {
+      (videoController.getVideoByIdOrCreate as jest.Mock).mockImplementation(
+        () => {
+          throw new Error("Test error");
+        }
+      );
+
+      const res = await request(app)
+        .get("/api/v1/videos/video_001")
+        .set("Authorization", "Bearer valid-token");
+
+      expect(res.statusCode).toEqual(httpStatus.INTERNAL_SERVER_ERROR);
     });
   });
 });
