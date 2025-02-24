@@ -3,13 +3,13 @@ import { Router } from "express";
 import isAuthenticated from "@middlewares/auth.middleware";
 import validateRequest from "@middlewares/validate-request.middleware";
 
-import { noteController } from "./note.module";
+import {
+  createNoteSchema,
+  noteController,
+  updateNoteSchema,
+} from "@modules/note";
 
-import { idParamSchema } from "@common/schemas/id-param.schema";
-import { paginationSchema } from "@common/schemas/query-pagination.schema";
-
-import { createNoteSchema } from "./schemas/create-note.schema";
-import { updateNoteSchema } from "./schemas/update-note.schema";
+import { paramIdSchema, querypaginationSchema } from "@modules/shared";
 
 const router = Router();
 
@@ -20,7 +20,7 @@ router.use(isAuthenticated);
 // - POST /: Create a new note (requires request body validation).
 router
   .route("/")
-  .get(validateRequest({ query: paginationSchema }), (req, res) =>
+  .get(validateRequest({ query: querypaginationSchema }), (req, res) =>
     noteController.getUserNotes(req, res)
   )
   .post(validateRequest({ body: createNoteSchema }), (req, res) =>
@@ -40,8 +40,8 @@ router
 // - GET /video/:id: Get all notes for a specific video (requires request params validation).
 router.route("/video/:id").get(
   validateRequest({
-    params: idParamSchema,
-    query: paginationSchema,
+    params: paramIdSchema,
+    query: querypaginationSchema,
   }),
   (req, res) => noteController.getNotesByVideoId(req, res)
 );
@@ -51,7 +51,7 @@ router.route("/video/:id").get(
 // - DELETE /:id: Delete a specific note by its ID (requires request params validation).
 router
   .route("/:id")
-  .all(validateRequest({ params: idParamSchema }))
+  .all(validateRequest({ params: paramIdSchema }))
   .patch(validateRequest({ body: updateNoteSchema }), (req, res) =>
     noteController.updateNote(req, res)
   )
