@@ -3,13 +3,13 @@ import type { Response } from "express";
 
 import type { Video, YoutubeVideoData } from "@modules/video";
 
-import type { IdParamDto } from "@common/dtos/id-param.dto";
-import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
 import type {
   ICreateDto,
   IFindAllDto,
   IFindUniqueDto,
   IPaginatedItems,
+  IParamIdDto,
+  IQueryPaginationDto,
 } from "@modules/shared";
 
 export interface IVideoRepository {
@@ -29,11 +29,11 @@ export interface IVideoService {
 
 export interface IVideoController {
   getUserVideos(
-    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IQueryPaginationDto>,
     res: Response
   ): Promise<void>;
   getVideoByIdOrCreate(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ): Promise<void>;
 }
