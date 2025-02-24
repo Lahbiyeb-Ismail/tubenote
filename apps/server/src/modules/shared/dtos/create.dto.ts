@@ -20,9 +20,9 @@ export type ICreateBodyDto<T> = Omit<
  */
 export interface ICreateDto<T> {
   /**
-   * Optional user ID associated with the creation request.
+   * User ID associated with the creation request.
    */
-  userId?: string;
+  userId: string;
 
   /**
    * The data to be created.
