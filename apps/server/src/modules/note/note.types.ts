@@ -14,26 +14,9 @@ import type {
   IDeleteDto,
   IFindAllDto,
   IFindUniqueDto,
+  IPaginatedItems,
   IUpdateDto,
 } from "@modules/shared";
-
-/**
- * Represents paginated notes data for a user.
- */
-export interface PaginatedNotes {
-  /**
-   * The list of notes.
-   */
-  notes: Note[];
-  /**
-   * The total count of notes.
-   */
-  notesCount: number;
-  /**
-   * The total number of pages available based on the notes count and pagination limit.
-   */
-  totalPages: number;
-}
 
 /**
  * Interface defining the repository methods for interacting with note data.
@@ -124,7 +107,7 @@ export interface INoteService {
    * @param createNoteDto - Data transfer object containing the note details.
    * @returns A promise that resolves to the newly created note.
    */
-  createNote(createNoteDto: CreateNoteDto): Promise<Note>;
+  createNote(createNoteDto: ICreateDto<Note>): Promise<Note>;
 
   /**
    * Updates an existing note.
@@ -133,10 +116,7 @@ export interface INoteService {
    * @param updateNoteDto - Data transfer object containing the updated note data.
    * @returns A promise that resolves to the updated note.
    */
-  updateNote(
-    findNoteDto: IFindUniqueDto,
-    updateNoteDto: UpdateNoteDto
-  ): Promise<Note>;
+  updateNote(updateNoteDto: IUpdateDto<Note>): Promise<Note>;
 
   /**
    * Deletes a note.
@@ -152,7 +132,7 @@ export interface INoteService {
    * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
    * @returns A promise that resolves to the paginated notes information.
    */
-  fetchUserNotes(findManyDto: IFindAllDto): Promise<PaginatedNotes>;
+  fetchUserNotes(findManyDto: IFindAllDto): Promise<IPaginatedItems<Note>>;
 
   /**
    * Fetches recent notes for a user.
@@ -178,7 +158,7 @@ export interface INoteService {
    */
   fetchNotesByVideoId(
     dto: IFindAllDto & { videoId: string }
-  ): Promise<PaginatedNotes>;
+  ): Promise<IPaginatedItems<Note>>;
 }
 
 /**

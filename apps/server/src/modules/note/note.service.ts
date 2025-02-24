@@ -1,19 +1,16 @@
 import { NotFoundError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import type {
-  CreateNoteDto,
-  DeleteNoteDto,
-  FindNoteDto,
-  FindNotesByVideoIdDto,
-  INoteRepository,
-  INoteService,
-  Note,
-  PaginatedNotes,
-  UpdateNoteDto,
-} from "@modules/note";
+import type { INoteRepository, INoteService, Note } from "@modules/note";
 
-import type { FindManyDto } from "@common/dtos/find-many.dto";
+import type {
+  ICreateDto,
+  IDeleteDto,
+  IFindAllDto,
+  IFindUniqueDto,
+  IPaginatedItems,
+  IUpdateDto,
+} from "@modules/shared";
 
 /**
  * Service class for handling business logic related to Notes.
@@ -38,7 +35,7 @@ export class NoteService implements INoteService {
    * @returns {Promise<Note>} A promise that resolves to the found note.
    * @throws {NotFoundError} If no note is found matching the criteria.
    */
-  private async _findNoteOrFail(findNoteDto: FindNoteDto): Promise<Note> {
+  private async _findNoteOrFail(findNoteDto: IFindUniqueDto): Promise<Note> {
     const note = await this._noteRepository.find(findNoteDto);
 
     if (!note) {
@@ -55,7 +52,7 @@ export class NoteService implements INoteService {
    * @returns {Promise<Note>} A promise that resolves to the found note.
    * @throws {NotFoundError} If no note is found matching the criteria.
    */
-  async findNote(findNoteDto: FindNoteDto): Promise<Note> {
+  async findNote(findNoteDto: IFindUniqueDto): Promise<Note> {
     return await this._findNoteOrFail(findNoteDto);
   }
 
@@ -65,29 +62,25 @@ export class NoteService implements INoteService {
    * @param {CreateNoteDto} createNoteDto - Data transfer object containing the details of the note to create.
    * @returns {Promise<Note>} A promise that resolves to the newly created note.
    */
-  async createNote(createNoteDto: CreateNoteDto): Promise<Note> {
+  async createNote(createNoteDto: ICreateDto<Note>): Promise<Note> {
     return await this._noteRepository.create(createNoteDto);
   }
 
   /**
-   * Updates an existing note.
+   * Updates a note with the provided data.
    *
-   * Executes the update within a transaction. It first ensures that the note exists; otherwise, it throws a
-   * NotFoundError.
-   *
-   * @param {FindNoteDto} findNoteDto - Data transfer object containing note identification details.
-   * @param {UpdateNoteDto} updateNoteDto - Data transfer object containing the updated note data.
-   * @returns {Promise<Note>} A promise that resolves to the updated note.
-   * @throws {NotFoundError} If the note is not found.
+   * @param {IUpdateDto<Note>} updateNoteDto - The data transfer object containing the note update information.
+   * @returns {Promise<Note>} - A promise that resolves to the updated note.
+   * @throws {Error} - Throws an error if the note is not found.
    */
-  async updateNote(
-    findNoteDto: FindNoteDto,
-    updateNoteDto: UpdateNoteDto
-  ): Promise<Note> {
+  async updateNote(updateNoteDto: IUpdateDto<Note>): Promise<Note> {
     return await this._noteRepository.transaction(async (tx) => {
-      await this._findNoteOrFail(findNoteDto);
+      await this._findNoteOrFail({
+        id: updateNoteDto.id,
+        userId: updateNoteDto.userId,
+      });
 
-      return tx.update(findNoteDto, updateNoteDto);
+      return tx.update(updateNoteDto);
     });
   }
 
@@ -101,7 +94,7 @@ export class NoteService implements INoteService {
    * @returns {Promise<Note>} A promise that resolves to the deleted note.
    * @throws {NotFoundError} If the note is not found.
    */
-  async deleteNote(deleteNoteDto: DeleteNoteDto): Promise<Note> {
+  async deleteNote(deleteNoteDto: IDeleteDto): Promise<Note> {
     return await this._noteRepository.transaction(async (tx) => {
       await this._findNoteOrFail(deleteNoteDto);
 
@@ -110,24 +103,23 @@ export class NoteService implements INoteService {
   }
 
   /**
-   * Fetches a paginated list of notes for a user.
+   * Fetches the notes for a user based on the provided criteria.
    *
-   * Executes the operation within a transaction. It retrieves the notes, counts the total number, and calculates
-   * the total number of pages based on the provided limit.
-   *
-   * @param {FindManyDto} findManyDto - Data transfer object containing user id, pagination, and sorting details.
-   * @returns {Promise<PaginatedNotes>} A promise that resolves to an object containing the notes, total count, and total pages.
+   * @param {IFindAllDto} findManyDto - The data transfer object containing the criteria for finding notes.
+   * @returns {Promise<IPaginatedItems<Note>>} A promise that resolves to an object containing the paginated notes, total number of notes, and total pages.
    */
-  async fetchUserNotes(findManyDto: FindManyDto): Promise<PaginatedNotes> {
+  async fetchUserNotes(
+    findManyDto: IFindAllDto
+  ): Promise<IPaginatedItems<Note>> {
     return await this._noteRepository.transaction(async (tx) => {
-      const [notes, notesCount] = await Promise.all([
+      const [items, totalItems] = await Promise.all([
         tx.findMany(findManyDto),
         tx.count(findManyDto.userId),
       ]);
 
-      const totalPages = Math.ceil(notesCount / findManyDto.limit);
+      const totalPages = Math.ceil(totalItems / findManyDto.limit);
 
-      return { notes, notesCount, totalPages };
+      return { items, totalItems, totalPages };
     });
   }
 
@@ -137,7 +129,7 @@ export class NoteService implements INoteService {
    * @param {FindManyDto} findManyDto - Data transfer object containing user id, pagination, and sorting details.
    * @returns {Promise<Note[]>} A promise that resolves to an array of recent notes.
    */
-  async fetchRecentNotes(findManyDto: FindManyDto): Promise<Note[]> {
+  async fetchRecentNotes(findManyDto: IFindAllDto): Promise<Note[]> {
     return await this._noteRepository.findMany(findManyDto);
   }
 
@@ -149,31 +141,32 @@ export class NoteService implements INoteService {
    * @param {FindManyDto} findManyDto - Data transfer object containing user id, pagination, and sorting details.
    * @returns {Promise<Note[]>} A promise that resolves to an array of recently updated notes.
    */
-  async fetchRecentlyUpdatedNotes(findManyDto: FindManyDto): Promise<Note[]> {
+  async fetchRecentlyUpdatedNotes(findManyDto: IFindAllDto): Promise<Note[]> {
     return await this._noteRepository.findMany(findManyDto);
   }
 
   /**
-   * Fetches notes for a specific video for a user with pagination.
+   * Fetches notes associated with a specific video ID.
    *
-   * Executes the operation within a transaction. It concurrently fetches the notes and counts them, then calculates
-   * the total number of pages based on the provided limit.
+   * @param dto - Data transfer object containing the video ID and pagination information.
+   * @returns A promise that resolves to an object containing the paginated notes, total number of notes, and total pages.
    *
-   * @param {FindNotesByVideoIdDto} dto - Data transfer object containing video id, user id, pagination, and sorting details.
-   * @returns {Promise<PaginatedNotes>} A promise that resolves to an object containing the notes, total count, and total pages.
+   * @template IFindAllDto - Interface for the data transfer object that includes pagination and user information.
+   * @template IPaginatedItems - Interface for the paginated items response.
+   * @template Note - Type representing a note.
    */
   async fetchNotesByVideoId(
-    dto: FindNotesByVideoIdDto
-  ): Promise<PaginatedNotes> {
+    dto: IFindAllDto & { videoId: string }
+  ): Promise<IPaginatedItems<Note>> {
     return await this._noteRepository.transaction(async (tx) => {
-      const [notes, notesCount] = await Promise.all([
+      const [items, totalItems] = await Promise.all([
         tx.findManyByVideoId(dto),
         tx.count(dto.userId),
       ]);
 
-      const totalPages = Math.ceil(notesCount / dto.limit);
+      const totalPages = Math.ceil(totalItems / dto.limit);
 
-      return { notes, notesCount, totalPages };
+      return { items, totalItems, totalPages };
     });
   }
 }
