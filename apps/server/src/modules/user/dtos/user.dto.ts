@@ -1,25 +1,16 @@
-export interface CreateUserDto {
-  username: string;
-  email: string;
-  password: string;
-  profilePicture?: string;
-  googleId?: string;
-  isEmailVerified?: boolean;
-}
+import type { ICreateDto, IUpdateDto } from "@/modules/shared";
+import type { User } from "@modules/user";
 
-export interface GetUserDto {
+export interface ICreateUserDto extends Omit<ICreateDto<User>, "userId"> {}
+
+export interface IGetUserDto {
   id?: string;
   email?: string;
 }
 
-export interface UpdateUserDto {
-  username?: string;
-  email?: string;
-  profilePicture?: string;
-  isEmailVerified?: boolean;
-}
+export interface IUpdateUserDto extends Omit<IUpdateDto<User>, "userId"> {}
 
-export interface UpdatePasswordDto {
+export interface IUpdatePasswordDto {
   currentPassword: string;
   newPassword: string;
 }

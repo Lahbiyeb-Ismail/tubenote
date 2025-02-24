@@ -5,10 +5,10 @@ import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import { DatabaseError } from "@/errors";
 
 import type {
-  CreateUserDto,
-  GetUserDto,
+  ICreateUserDto,
+  IGetUserDto,
+  IUpdateUserDto,
   IUserRepository,
-  UpdateUserDto,
   User,
 } from "@modules/user";
 
@@ -35,15 +35,15 @@ export class UserRepository implements IUserRepository {
   /**
    * Creates a new user in the database.
    *
-   * @param {CreateUserDto} params - The data transfer object containing user creation parameters.
+   * @param {CreateUserDto} createUserDto - The data transfer object containing user creation parameters.
    * @returns {Promise<User>} A promise that resolves to the created user.
    * @throws Will throw an error if the user creation fails.
    */
-  async createUser(params: CreateUserDto): Promise<User> {
+  async createUser(createUserDto: ICreateUserDto): Promise<User> {
     return handleAsyncOperation(
       () =>
         this._db.user.create({
-          data: { ...params },
+          data: { ...createUserDto.data },
         }),
       { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
     );
@@ -92,12 +92,12 @@ export class UserRepository implements IUserRepository {
   /**
    * Retrieves a user based on the provided parameters.
    *
-   * @param {GetUserDto} params - The parameters to find the user by. Must include either an `id` or `email`.
+   * @param {GetUserDto} getUserDto - The parameters to find the user by. Must include either an `id` or `email`.
    * @returns {Promise<User | null>} - A promise that resolves to the user if found, otherwise null.
    * @throws {DatabaseError} - Throws an error if neither `id` nor `email` is provided.
    */
-  async getUser(params: GetUserDto): Promise<User | null> {
-    const { id, email } = params;
+  async getUser(getUserDto: IGetUserDto): Promise<User | null> {
+    const { id, email } = getUserDto;
 
     if (!id && !email) {
       throw new DatabaseError("Id or email must be provided.");
@@ -127,17 +127,18 @@ export class UserRepository implements IUserRepository {
   /**
    * Updates a user with the given parameters.
    *
-   * @param id - The unique identifier of the user to update.
-   * @param params - The parameters to update the user with.
+   * @param updatedUserDto - The parameters to update the user with.
    * @returns A promise that resolves to the updated user.
    * @throws Will throw an error if the update operation fails.
    */
-  async updateUser(id: string, params: UpdateUserDto): Promise<User> {
+  async updateUser(updatedUserDto: IUpdateUserDto): Promise<User> {
+    const { id, data } = updatedUserDto;
+
     return handleAsyncOperation(
       () =>
         this._db.user.update({
           where: { id },
-          data: { ...params },
+          data: { ...data },
         }),
       { errorMessage: ERROR_MESSAGES.FAILD_TO_UPDATE }
     );
