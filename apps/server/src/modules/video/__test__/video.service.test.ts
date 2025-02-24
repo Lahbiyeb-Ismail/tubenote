@@ -1,6 +1,4 @@
 import {
-  CreateVideoDto,
-  FindVideoDto,
   IVideoRepository,
   IVideoService,
   Video,
@@ -9,7 +7,7 @@ import {
 } from "@modules/video";
 
 import { BadRequestError, NotFoundError } from "@/errors";
-import type { FindManyDto } from "@common/dtos/find-many.dto";
+import type { ICreateDto, IFindAllDto, IFindUniqueDto } from "@/modules/shared";
 
 describe("VideoService methods tests cases", () => {
   let videoService: IVideoService;
@@ -100,6 +98,7 @@ describe("VideoService methods tests cases", () => {
   ];
 
   const mockYoutubeVideoData: YoutubeVideoData = {
+    youtubeId: "youtube_id_03",
     title: "Video 3",
     description: "Video description",
     channelTitle: "Channel 1",
@@ -134,19 +133,17 @@ describe("VideoService methods tests cases", () => {
     embedHtmlPlayer: "embed_html",
   };
 
-  const createVideoDto: CreateVideoDto = {
+  const createVideoDto: ICreateDto<YoutubeVideoData> = {
     userId: mockUserId,
-    youtubeVideoId: "youtube_id_03",
-    videoData: mockYoutubeVideoData,
+    data: mockYoutubeVideoData,
   };
 
   const mockNewVideo: Video = {
     id: "video_003",
-    youtubeId: "youtube_id_03",
     userIds: [mockUserId],
     createdAt: new Date(),
     updatedAt: new Date(),
-    ...createVideoDto.videoData,
+    ...createVideoDto.data,
   };
 
   const mockVideosCount = mockVideos.length;
@@ -192,7 +189,7 @@ describe("VideoService methods tests cases", () => {
   });
 
   describe("videoService - getUserVideos", () => {
-    const findManyDto: FindManyDto = {
+    const findManyDto: IFindAllDto = {
       userId: mockUserId,
       limit: 2,
       skip: 0,
@@ -275,8 +272,8 @@ describe("VideoService methods tests cases", () => {
     const mockUserId = "user_id_001";
     const mockYoutubeId = "youtube_id_01";
 
-    const findVideoDto: FindVideoDto = {
-      youtubeVideoId: mockYoutubeId,
+    const findVideoDto: IFindUniqueDto = {
+      id: mockYoutubeId,
       userId: mockUserId,
     };
 
@@ -296,7 +293,7 @@ describe("VideoService methods tests cases", () => {
 
       const result = await videoService.findVideoOrCreate({
         ...findVideoDto,
-        youtubeVideoId: "youtube_id_03",
+        id: "youtube_id_03",
       });
 
       expect(mockVideoRepository.findByYoutubeId).toHaveBeenCalledWith(
@@ -330,7 +327,7 @@ describe("VideoService methods tests cases", () => {
 
       const result = await videoService.findVideoOrCreate({
         userId: mockNewUserId,
-        youtubeVideoId: mockVideos[0].youtubeId,
+        id: mockVideos[0].youtubeId,
       });
 
       expect(result.userIds).toHaveLength(2);
@@ -343,14 +340,14 @@ describe("VideoService methods tests cases", () => {
       await expect(
         videoService.findVideoOrCreate({
           userId: "",
-          youtubeVideoId: "test",
+          id: "test",
         })
       ).rejects.toThrow(BadRequestError);
 
       await expect(
         videoService.findVideoOrCreate({
           userId: "123",
-          youtubeVideoId: "",
+          id: "",
         })
       ).rejects.toThrow(BadRequestError);
     });
@@ -391,7 +388,7 @@ describe("VideoService methods tests cases", () => {
       );
 
       await expect(
-        videoService.findVideoOrCreate(createVideoDto)
+        videoService.findVideoOrCreate(findVideoDto)
       ).rejects.toThrow("Create failed");
     });
 
@@ -414,20 +411,20 @@ describe("VideoService methods tests cases", () => {
       await expect(
         videoService.findVideoOrCreate({
           userId: "new_user",
-          youtubeVideoId: mockVideos[0].youtubeId,
+          id: mockVideos[0].youtubeId,
         })
       ).rejects.toThrow("Linking failed");
     });
 
     it("should handle concurrent requests for same video", async () => {
-      const userOneReqDto: FindVideoDto = {
+      const userOneReqDto: IFindUniqueDto = {
         userId: "user_id_001",
-        youtubeVideoId: "video_id_1",
+        id: "video_id_1",
       };
 
-      const userTwoReqDto: FindVideoDto = {
+      const userTwoReqDto: IFindUniqueDto = {
         userId: "user_id_002",
-        youtubeVideoId: "video_id_1",
+        id: "video_id_1",
       };
 
       // Simulate race condition where two users try to create the same video
@@ -471,6 +468,10 @@ describe("VideoService methods tests cases", () => {
   });
 
   describe("VideoService - transaction handling", () => {
+    const findVideoDto: IFindUniqueDto = {
+      userId: "user_id_001",
+      id: "video_id_1",
+    };
     it("should rollback transaction on any error", async () => {
       mockVideoRepository.transaction = jest
         .fn()
@@ -495,7 +496,7 @@ describe("VideoService methods tests cases", () => {
       );
 
       await expect(
-        videoService.findVideoOrCreate(createVideoDto)
+        videoService.findVideoOrCreate(findVideoDto)
       ).rejects.toThrow("DB failure");
 
       expect(mockVideoRepository.transaction).toHaveBeenCalled();
