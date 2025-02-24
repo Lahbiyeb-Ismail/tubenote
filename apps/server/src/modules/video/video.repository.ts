@@ -3,9 +3,9 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import handleAsyncOperation from "@/utils/handle-async-operation";
 
-import type { CreateVideoDto, IVideoRepository, Video } from "@modules/video";
+import type { IVideoRepository, Video, YoutubeVideoData } from "@modules/video";
 
-import type { FindManyDto } from "@common/dtos/find-many.dto";
+import type { ICreateDto, IFindAllDto } from "@modules/shared";
 
 export class VideoRepository implements IVideoRepository {
   constructor(private readonly _db: PrismaClient) {}
@@ -29,8 +29,8 @@ export class VideoRepository implements IVideoRepository {
     );
   }
 
-  async findMany(findManyDto: FindManyDto): Promise<Video[]> {
-    const { userId, limit, skip, sort } = findManyDto;
+  async findMany(findAllDto: IFindAllDto): Promise<Video[]> {
+    const { userId, limit, skip, sort } = findAllDto;
 
     return handleAsyncOperation(
       () =>
@@ -58,16 +58,15 @@ export class VideoRepository implements IVideoRepository {
     );
   }
 
-  async create(createVideoDto: CreateVideoDto): Promise<Video> {
+  async create(createVideoDto: ICreateDto<YoutubeVideoData>): Promise<Video> {
     return handleAsyncOperation(
       async () => {
-        const { userId, youtubeVideoId, videoData } = createVideoDto;
+        const { userId, data } = createVideoDto;
 
         return await this._db.video.create({
           data: {
-            youtubeId: youtubeVideoId,
             userIds: [userId],
-            ...videoData,
+            ...data,
           },
         });
       },
