@@ -4,17 +4,18 @@ import type { Note } from "./note.model";
 
 import type { EmptyRecord, TypedRequest } from "@/types";
 
-import type { FindManyDto } from "@common/dtos/find-many.dto";
 import type { IdParamDto } from "@common/dtos/id-param.dto";
 import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
 
+import type { CreateNoteDto, UpdateNoteDto } from "@modules/note";
+
 import type {
-  CreateNoteDto,
-  DeleteNoteDto,
-  FindNoteDto,
-  FindNotesByVideoIdDto,
-  UpdateNoteDto,
-} from "@modules/note";
+  ICreateDto,
+  IDeleteDto,
+  IFindAllDto,
+  IFindUniqueDto,
+  IUpdateDto,
+} from "@modules/shared";
 
 /**
  * Represents paginated notes data for a user.
@@ -53,7 +54,7 @@ export interface INoteRepository {
    * @param findNoteDto - Data transfer object containing the note ID and user ID.
    * @returns A promise that resolves to the found note or null if no note is found.
    */
-  find(findNoteDto: FindNoteDto): Promise<Note | null>;
+  find(findNoteDto: IFindUniqueDto): Promise<Note | null>;
 
   /**
    * Creates a new note.
@@ -61,16 +62,16 @@ export interface INoteRepository {
    * @param createNoteDto - Data transfer object containing the note details.
    * @returns A promise that resolves to the newly created note.
    */
-  create(createNoteDto: CreateNoteDto): Promise<Note>;
+  create(createNoteDto: ICreateDto<Note>): Promise<Note>;
 
   /**
    * Updates an existing note.
    *
-   * @param findNoteDto - Data transfer object containing the note ID and user ID.
-   * @param updateNoteDto - Data transfer object containing the updated note data.
+   * @param {IUpdateDto<Note>} updateNoteDto - The data transfer object containing the note's ID, user ID, and the data to update.
    * @returns A promise that resolves to the updated note.
+   * @throws {Error} - Throws an error if the update operation fails.
    */
-  update(findNoteDto: FindNoteDto, updateNoteDto: UpdateNoteDto): Promise<Note>;
+  update(updateNoteDto: IUpdateDto<Note>): Promise<Note>;
 
   /**
    * Deletes a note.
@@ -78,7 +79,7 @@ export interface INoteRepository {
    * @param deleteNoteDto - Data transfer object containing the note ID and user ID.
    * @returns A promise that resolves to the deleted note.
    */
-  delete(deleteNoteDto: DeleteNoteDto): Promise<Note>;
+  delete(deleteNoteDto: IDeleteDto): Promise<Note>;
 
   /**
    * Retrieves multiple notes with pagination.
@@ -86,7 +87,7 @@ export interface INoteRepository {
    * @param findManyDto - Data transfer object containing pagination and sorting parameters.
    * @returns A promise that resolves to an array of notes.
    */
-  findMany(findManyDto: FindManyDto): Promise<Note[]>;
+  findMany(findManyDto: IFindAllDto): Promise<Note[]>;
 
   /**
    * Retrieves multiple notes associated with a specific video.
@@ -94,7 +95,7 @@ export interface INoteRepository {
    * @param dto - Data transfer object containing the video ID along with pagination parameters.
    * @returns A promise that resolves to an array of notes.
    */
-  findManyByVideoId(dto: FindNotesByVideoIdDto): Promise<Note[]>;
+  findManyByVideoId(dto: IFindAllDto & { videoId: string }): Promise<Note[]>;
 
   /**
    * Counts the total number of notes for a specific user.
@@ -115,7 +116,7 @@ export interface INoteService {
    * @param findNoteDto - Data transfer object containing the note ID and user ID.
    * @returns A promise that resolves to the found note.
    */
-  findNote(findNoteDto: FindNoteDto): Promise<Note>;
+  findNote(findNoteDto: IFindUniqueDto): Promise<Note>;
 
   /**
    * Creates a new note.
@@ -133,7 +134,7 @@ export interface INoteService {
    * @returns A promise that resolves to the updated note.
    */
   updateNote(
-    findNoteDto: FindNoteDto,
+    findNoteDto: IFindUniqueDto,
     updateNoteDto: UpdateNoteDto
   ): Promise<Note>;
 
@@ -143,7 +144,7 @@ export interface INoteService {
    * @param deleteNoteDto - Data transfer object containing the note ID and user ID.
    * @returns A promise that resolves to the deleted note.
    */
-  deleteNote(deleteNoteDto: DeleteNoteDto): Promise<Note>;
+  deleteNote(deleteNoteDto: IDeleteDto): Promise<Note>;
 
   /**
    * Fetches paginated notes for a user.
@@ -151,7 +152,7 @@ export interface INoteService {
    * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
    * @returns A promise that resolves to the paginated notes information.
    */
-  fetchUserNotes(findManyDto: FindManyDto): Promise<PaginatedNotes>;
+  fetchUserNotes(findManyDto: IFindAllDto): Promise<PaginatedNotes>;
 
   /**
    * Fetches recent notes for a user.
@@ -159,7 +160,7 @@ export interface INoteService {
    * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
    * @returns A promise that resolves to an array of recent notes.
    */
-  fetchRecentNotes(findManyDto: FindManyDto): Promise<Note[]>;
+  fetchRecentNotes(findManyDto: IFindAllDto): Promise<Note[]>;
 
   /**
    * Fetches recently updated notes for a user.
@@ -167,7 +168,7 @@ export interface INoteService {
    * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
    * @returns A promise that resolves to an array of recently updated notes.
    */
-  fetchRecentlyUpdatedNotes(findManyDto: FindManyDto): Promise<Note[]>;
+  fetchRecentlyUpdatedNotes(findManyDto: IFindAllDto): Promise<Note[]>;
 
   /**
    * Fetches notes associated with a specific video with pagination.
@@ -175,7 +176,9 @@ export interface INoteService {
    * @param dto - Data transfer object containing the video ID and pagination parameters.
    * @returns A promise that resolves to the paginated notes information.
    */
-  fetchNotesByVideoId(dto: FindNotesByVideoIdDto): Promise<PaginatedNotes>;
+  fetchNotesByVideoId(
+    dto: IFindAllDto & { videoId: string }
+  ): Promise<PaginatedNotes>;
 }
 
 /**
