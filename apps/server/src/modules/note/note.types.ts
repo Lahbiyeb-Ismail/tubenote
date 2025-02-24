@@ -4,17 +4,16 @@ import type { Note } from "./note.model";
 
 import type { EmptyRecord, TypedRequest } from "@/types";
 
-import type { IdParamDto } from "@common/dtos/id-param.dto";
-import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
-
-import type { CreateNoteDto, UpdateNoteDto } from "@modules/note";
-
 import type {
+  ICreateBodyDto,
   ICreateDto,
   IDeleteDto,
   IFindAllDto,
   IFindUniqueDto,
   IPaginatedItems,
+  IParamIdDto,
+  IQueryPaginationDto,
+  IUpdateBodyDto,
   IUpdateDto,
 } from "@modules/shared";
 
@@ -172,7 +171,10 @@ export interface INoteController {
    * @param res - The response object used to send the HTTP response.
    * @returns A promise that resolves when the note is created.
    */
-  createNote(req: TypedRequest<CreateNoteDto>, res: Response): Promise<void>;
+  createNote(
+    req: TypedRequest<ICreateBodyDto<Note>>,
+    res: Response
+  ): Promise<void>;
 
   /**
    * Handles updating an existing note.
@@ -182,7 +184,7 @@ export interface INoteController {
    * @returns A promise that resolves when the note is updated.
    */
   updateNote(
-    req: TypedRequest<UpdateNoteDto, IdParamDto>,
+    req: TypedRequest<IUpdateBodyDto<Note>, IParamIdDto>,
     res: Response
   ): Promise<void>;
 
@@ -194,7 +196,7 @@ export interface INoteController {
    * @returns A promise that resolves when the note is deleted.
    */
   deleteNote(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ): Promise<void>;
 
@@ -206,7 +208,7 @@ export interface INoteController {
    * @returns A promise that resolves when the note is retrieved.
    */
   getNoteById(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ): Promise<void>;
 
@@ -218,7 +220,7 @@ export interface INoteController {
    * @returns A promise that resolves when the notes are retrieved.
    */
   getUserNotes(
-    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IQueryPaginationDto>,
     res: Response
   ): Promise<void>;
 
@@ -248,7 +250,7 @@ export interface INoteController {
    * @returns A promise that resolves when the notes are retrieved.
    */
   getNotesByVideoId(
-    req: TypedRequest<EmptyRecord, IdParamDto, QueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto, IQueryPaginationDto>,
     res: Response
   ): Promise<void>;
 }

@@ -3,17 +3,16 @@ import httpStatus from "http-status";
 
 import type { EmptyRecord, TypedRequest } from "@/types";
 
-import type { FindManyDto } from "@common/dtos/find-many.dto";
-import type { IdParamDto } from "@common/dtos/id-param.dto";
-import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
+import type { INoteController, INoteService, Note } from "@modules/note";
 
 import type {
-  CreateNoteDto,
-  INoteController,
-  INoteService,
-  PaginatedNotes,
-  UpdateNoteDto,
-} from "@modules/note";
+  ICreateBodyDto,
+  IFindAllDto,
+  IPaginatedItems,
+  IParamIdDto,
+  IQueryPaginationDto,
+  IUpdateBodyDto,
+} from "@modules/shared";
 
 /**
  * Controller for handling note-related operations.
@@ -40,18 +39,18 @@ export class NoteController implements INoteController {
    */
   private _sendPaginatedResponse(
     res: Response,
-    paginationQuery: QueryPaginationDto,
-    result: PaginatedNotes
+    paginationQuery: IQueryPaginationDto,
+    result: IPaginatedItems<Note>
   ): void {
     const currentPage = Number(paginationQuery.page) || 1;
 
     res.status(httpStatus.OK).json({
       success: true,
-      data: result.notes,
+      data: result.items,
       pagination: {
         totalPages: result.totalPages,
         currentPage,
-        totalItems: result.notesCount,
+        totalItems: result.totalItems,
         hasNextPage: currentPage < result.totalPages,
         hasPrevPage: currentPage > 1,
       },
@@ -67,9 +66,9 @@ export class NoteController implements INoteController {
    * @returns An object with pagination parameters (skip, limit, and sort options) excluding the userId.
    */
   private _getPaginationQueries(
-    queries: QueryPaginationDto,
+    queries: IQueryPaginationDto,
     defaultLimit = 8
-  ): Omit<FindManyDto, "userId"> {
+  ): Omit<IFindAllDto, "userId"> {
     const page = Math.max(Number(queries.page) || 1, 1);
     const limit = Math.max(Number(queries.limit) || defaultLimit, 1);
     const skip = (page - 1) * limit;
@@ -92,11 +91,11 @@ export class NoteController implements INoteController {
    * @returns A promise that resolves to void.
    */
   async createNote(
-    req: TypedRequest<Omit<CreateNoteDto, "userId">>,
+    req: TypedRequest<ICreateBodyDto<Note>>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-    const note = await this._noteService.createNote({ userId, ...req.body });
+    const note = await this._noteService.createNote({ userId, data: req.body });
 
     res.status(httpStatus.CREATED).json({
       success: true,
@@ -113,16 +112,17 @@ export class NoteController implements INoteController {
    * @returns A promise that resolves to void.
    */
   async updateNote(
-    req: TypedRequest<UpdateNoteDto, IdParamDto>,
+    req: TypedRequest<IUpdateBodyDto<Note>, IParamIdDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
     const { id } = req.params;
 
-    const updatedNote = await this._noteService.updateNote(
-      { noteId: id, userId },
-      req.body
-    );
+    const updatedNote = await this._noteService.updateNote({
+      id,
+      userId,
+      data: req.body,
+    });
 
     res.status(httpStatus.OK).json({
       success: true,
@@ -139,13 +139,13 @@ export class NoteController implements INoteController {
    * @returns A promise that resolves to void.
    */
   async deleteNote(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
     const { id } = req.params;
 
-    await this._noteService.deleteNote({ noteId: id, userId });
+    await this._noteService.deleteNote({ id, userId });
 
     res
       .status(httpStatus.OK)
@@ -160,13 +160,13 @@ export class NoteController implements INoteController {
    * @returns A promise that resolves to void.
    */
   async getNoteById(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
     const { id } = req.params;
 
-    const note = await this._noteService.findNote({ noteId: id, userId });
+    const note = await this._noteService.findNote({ id, userId });
 
     res.status(httpStatus.OK).json({
       success: true,
@@ -182,7 +182,7 @@ export class NoteController implements INoteController {
    * @returns A promise that resolves to void.
    */
   async getUserNotes(
-    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IQueryPaginationDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
@@ -204,7 +204,7 @@ export class NoteController implements INoteController {
    * @returns A promise that resolves to void.
    */
   async getUserRecentNotes(
-    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IQueryPaginationDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
@@ -226,7 +226,7 @@ export class NoteController implements INoteController {
    * @returns A promise that resolves to void.
    */
   async getRecentlyUpdatedNotes(
-    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IQueryPaginationDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
@@ -248,7 +248,7 @@ export class NoteController implements INoteController {
    * @returns A promise that resolves to void.
    */
   async getNotesByVideoId(
-    req: TypedRequest<EmptyRecord, IdParamDto, QueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto, IQueryPaginationDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
