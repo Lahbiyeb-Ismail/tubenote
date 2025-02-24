@@ -1,31 +1,26 @@
 import type { EmptyRecord, TypedRequest } from "@/types";
 import type { Response } from "express";
 
-import type {
-  CreateVideoDto,
-  FindVideoDto,
-  Video,
-  YoutubeVideoData,
-} from "@modules/video";
+import type { FindVideoDto, Video, YoutubeVideoData } from "@modules/video";
 
 import type { PaginatedItems } from "@/common/dtos/paginated-items.dto";
-import type { FindManyDto } from "@common/dtos/find-many.dto";
 import type { IdParamDto } from "@common/dtos/id-param.dto";
 import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
+import type { ICreateDto, IFindAllDto } from "@modules/shared";
 
 export interface IVideoRepository {
   transaction<T>(fn: (tx: IVideoRepository) => Promise<T>): Promise<T>;
   findByYoutubeId(youtubeId: string): Promise<Video | null>;
-  findMany(findManyDto: FindManyDto): Promise<Video[]>;
+  findMany(findAllDto: IFindAllDto): Promise<Video[]>;
   count(userId: string): Promise<number>;
-  create(createVideoDto: CreateVideoDto): Promise<Video>;
+  create(createVideoDto: ICreateDto<YoutubeVideoData>): Promise<Video>;
   connectVideoToUser(videoId: string, userId: string): Promise<Video>;
 }
 
 export interface IVideoService {
   getYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData>;
   findVideoOrCreate(findVideoDto: FindVideoDto): Promise<Video>;
-  getUserVideos(findManyDto: FindManyDto): Promise<PaginatedItems<Video>>;
+  getUserVideos(findAllDto: IFindAllDto): Promise<PaginatedItems<Video>>;
 }
 
 export interface IVideoController {
