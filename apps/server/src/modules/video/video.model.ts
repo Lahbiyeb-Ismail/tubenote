@@ -15,6 +15,7 @@ interface ThumbnailSize {
 }
 
 export interface YoutubeVideoData {
+  youtubeId: string;
   title: string;
   description: string;
   channelTitle: string;
@@ -25,9 +26,8 @@ export interface YoutubeVideoData {
 
 export interface Video extends YoutubeVideoData {
   id: string;
-  youtubeId: string;
   createdAt: Date;
   updatedAt: Date;
+  userIds: string[];
   notes?: Note[];
-  userIds?: string[];
 }
