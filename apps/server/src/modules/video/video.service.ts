@@ -3,15 +3,18 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import { BadRequestError, NotFoundError } from "@/errors";
 
-import type { IFindAllDto, IFindUniqueDto } from "@modules/shared";
+import type {
+  IFindAllDto,
+  IFindUniqueDto,
+  IPaginatedItems,
+} from "@modules/shared";
+
 import type {
   IVideoRepository,
   IVideoService,
   Video,
   YoutubeVideoData,
 } from "@modules/video";
-
-import type { PaginatedItems } from "@/common/dtos/paginated-items.dto";
 
 export class VideoService implements IVideoService {
   constructor(private readonly _videoRepository: IVideoRepository) {}
@@ -75,7 +78,9 @@ export class VideoService implements IVideoService {
     };
   }
 
-  async getUserVideos(findAllDto: IFindAllDto): Promise<PaginatedItems<Video>> {
+  async getUserVideos(
+    findAllDto: IFindAllDto
+  ): Promise<IPaginatedItems<Video>> {
     return this._videoRepository.transaction(async (tx) => {
       const [items, totalItems] = await Promise.all([
         tx.findMany(findAllDto),

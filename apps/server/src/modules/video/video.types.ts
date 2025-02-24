@@ -3,10 +3,14 @@ import type { Response } from "express";
 
 import type { Video, YoutubeVideoData } from "@modules/video";
 
-import type { PaginatedItems } from "@/common/dtos/paginated-items.dto";
 import type { IdParamDto } from "@common/dtos/id-param.dto";
 import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
-import type { ICreateDto, IFindAllDto, IFindUniqueDto } from "@modules/shared";
+import type {
+  ICreateDto,
+  IFindAllDto,
+  IFindUniqueDto,
+  IPaginatedItems,
+} from "@modules/shared";
 
 export interface IVideoRepository {
   transaction<T>(fn: (tx: IVideoRepository) => Promise<T>): Promise<T>;
@@ -20,7 +24,7 @@ export interface IVideoRepository {
 export interface IVideoService {
   getYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData>;
   findVideoOrCreate(findVideoDto: IFindUniqueDto): Promise<Video>;
-  getUserVideos(findAllDto: IFindAllDto): Promise<PaginatedItems<Video>>;
+  getUserVideos(findAllDto: IFindAllDto): Promise<IPaginatedItems<Video>>;
 }
 
 export interface IVideoController {
