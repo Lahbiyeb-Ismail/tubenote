@@ -7,12 +7,12 @@ import type { EmptyRecord, TypedRequest } from "@/types";
 import { BadRequestError, NotFoundError } from "@/errors";
 import { IVideoService, Video, VideoController } from "@modules/video";
 
-import type { IdParamDto } from "@/common/dtos/id-param.dto";
-import type { QueryPaginationDto } from "@/common/dtos/query-pagination.dto";
 import type {
   ApiResponse,
   IResponseFormatter,
 } from "@modules/utils/response-formatter";
+
+import type { IParamIdDto, IQueryPaginationDto } from "@/modules/shared";
 
 describe("VideoController", () => {
   const mockResponseFormatter = mock<IResponseFormatter>();
@@ -27,8 +27,8 @@ describe("VideoController", () => {
   const mockVideoId = "video_id_456";
 
   const mockRequest =
-    mock<TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>>();
-  const mockFindOrCreateReq = mock<TypedRequest<EmptyRecord, IdParamDto>>();
+    mock<TypedRequest<EmptyRecord, EmptyRecord, IQueryPaginationDto>>();
+  const mockFindOrCreateReq = mock<TypedRequest<EmptyRecord, IParamIdDto>>();
   const mockResponse = mock<Response>();
 
   const mockPaginatedVideos: ApiResponse<Video[]> = {
@@ -93,7 +93,7 @@ describe("VideoController", () => {
   });
 
   describe("VideoController - getUserVideos", () => {
-    const baseQuery: QueryPaginationDto = {
+    const baseQuery: IQueryPaginationDto = {
       page: "1",
       limit: "10",
       sortBy: "createdAt",
@@ -217,7 +217,7 @@ describe("VideoController", () => {
 
       expect(mockVideoService.findVideoOrCreate).toHaveBeenCalledWith({
         userId: mockUserId,
-        youtubeVideoId: mockVideoId,
+        id: mockVideoId,
       });
       expect(mockResponseFormatter.formatResponse).toHaveBeenCalledWith(
         mockVideo
@@ -301,7 +301,7 @@ describe("VideoController", () => {
 
       expect(mockVideoService.findVideoOrCreate).toHaveBeenCalledWith({
         userId: mockUserId,
-        youtubeVideoId: specialId,
+        id: specialId,
       });
     });
 
