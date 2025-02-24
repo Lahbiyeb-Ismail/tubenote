@@ -3,8 +3,8 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import { BadRequestError, NotFoundError } from "@/errors";
 
+import type { IFindAllDto, IFindUniqueDto } from "@modules/shared";
 import type {
-  FindVideoDto,
   IVideoRepository,
   IVideoService,
   Video,
@@ -12,7 +12,6 @@ import type {
 } from "@modules/video";
 
 import type { PaginatedItems } from "@/common/dtos/paginated-items.dto";
-import type { FindManyDto } from "@common/dtos/find-many.dto";
 
 export class VideoService implements IVideoService {
   constructor(private readonly _videoRepository: IVideoRepository) {}
@@ -33,8 +32,7 @@ export class VideoService implements IVideoService {
 
     return tx.create({
       userId,
-      youtubeVideoId,
-      videoData,
+      data: videoData,
     });
   }
 
@@ -67,6 +65,7 @@ export class VideoService implements IVideoService {
     const { embedHtml: embedHtmlPlayer } = data.items[0].player;
 
     return {
+      youtubeId: data.items[0].id,
       title,
       description,
       channelTitle,
@@ -76,22 +75,20 @@ export class VideoService implements IVideoService {
     };
   }
 
-  async getUserVideos(
-    findManyDto: FindManyDto
-  ): Promise<PaginatedItems<Video>> {
+  async getUserVideos(findAllDto: IFindAllDto): Promise<PaginatedItems<Video>> {
     return this._videoRepository.transaction(async (tx) => {
       const [items, totalItems] = await Promise.all([
-        tx.findMany(findManyDto),
-        tx.count(findManyDto.userId),
+        tx.findMany(findAllDto),
+        tx.count(findAllDto.userId),
       ]);
 
-      const totalPages = Math.ceil(totalItems / findManyDto.limit);
+      const totalPages = Math.ceil(totalItems / findAllDto.limit);
       return { items, totalItems, totalPages };
     });
   }
 
-  async findVideoOrCreate(findVideoDto: FindVideoDto): Promise<Video> {
-    const { userId, youtubeVideoId } = findVideoDto;
+  async findVideoOrCreate(findVideoDto: IFindUniqueDto): Promise<Video> {
+    const { userId, id: youtubeVideoId } = findVideoDto;
 
     if (!youtubeVideoId || !userId) {
       throw new BadRequestError(ERROR_MESSAGES.BAD_REQUEST);
