@@ -3,12 +3,13 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { BadRequestError, ConflictError, NotFoundError } from "@/errors";
 
 import type {
-  CreateUserDto,
-  GetUserDto,
+  ICreateUserDto,
+  IGetUserDto,
+  IResetPasswordDto,
+  IUpdatePasswordDto,
+  IUpdateUserDto,
   IUserRepository,
   IUserService,
-  UpdatePasswordDto,
-  UpdateUserDto,
   User,
 } from "@modules/user";
 
@@ -30,13 +31,19 @@ export class UserService implements IUserService {
    */
   private async _createUserWithinTransaction(
     tx: IUserRepository,
-    dto: CreateUserDto
+    dto: ICreateUserDto
   ): Promise<User> {
-    const hashedPassword = await this._cryptoService.hashPassword(dto.password);
+    const { data } = dto;
+
+    const hashedPassword = await this._cryptoService.hashPassword(
+      data.password
+    );
 
     return tx.createUser({
-      ...dto,
-      password: hashedPassword,
+      data: {
+        ...data,
+        password: hashedPassword,
+      },
     });
   }
 
@@ -85,51 +92,62 @@ export class UserService implements IUserService {
   /**
    * Creates a new user.
    *
-   * @param dto - The data transfer object containing user creation details.
+   * This method performs the following steps within a transaction:
+   * 1. Ensures the email is unique within the transaction.
+   * 2. Creates the user within the transaction.
+   *
+   * @param createUserDto - The data transfer object containing the user creation data.
    * @returns A promise that resolves to the created user.
    */
-  async createUser(dto: CreateUserDto): Promise<User> {
-    const { email } = dto;
+  async createUser(createUserDto: ICreateUserDto): Promise<User> {
+    const { email } = createUserDto.data;
 
     const user = await this._userRepository.transaction(async (tx) => {
       // 1. Ensure email is unique within the transaction
       await this._ensureEmailIsUniqueWithinTransaction(tx, email);
 
       // 2. Create user within the transaction
-      return await this._createUserWithinTransaction(tx, dto);
+      return await this._createUserWithinTransaction(tx, createUserDto);
     });
 
     return user;
   }
 
   /**
-   * Retrieves an existing user or creates a new one if not found.
+   * Retrieves an existing user by email or creates a new user if not found.
    *
-   * @param dto - The data transfer object containing user details.
-   * @returns A promise that resolves to the retrieved or created user.
+   * @param createUserDto - Data Transfer Object containing user creation data.
+   * @returns A promise that resolves to the user entity.
+   *
+   * The function performs the following steps:
+   * 1. Checks if a user with the given email exists within a transaction.
+   * 2. Returns the existing user if found.
+   * 3. Creates a new user within the transaction if not found.
    */
-  async getOrCreateUser(dto: CreateUserDto): Promise<User> {
+  async getOrCreateUser(createUserDto: ICreateUserDto): Promise<User> {
+    const { email } = createUserDto.data;
+
     return this._userRepository.transaction(async (tx) => {
       // 1. Check if user exists within the transaction
-      const user = await tx.getUserByEmail(dto.email);
+      const user = await tx.getUserByEmail(email);
 
       // 2. Return existing user if found
       if (user) return user;
 
       // 3. Create user if not found
-      return this._createUserWithinTransaction(tx, dto);
+      return this._createUserWithinTransaction(tx, createUserDto);
     });
   }
 
   /**
-   * Retrieves a user based on the provided criteria.
+   * Retrieves an existing user by the provided data transfer object.
    *
-   * @param dto - The data transfer object containing user retrieval details.
+   * @param getUserDto - The data transfer object containing user retrieval details.
    * @returns A promise that resolves to the retrieved user.
-   * @throws NotFoundError if the user is not found.
+   * @throws NotFoundError if the user is not found
    */
-  async getUser(dto: GetUserDto): Promise<User> {
-    const user = await this._userRepository.getUser(dto);
+  async getUser(getUserDto: IGetUserDto): Promise<User> {
+    const user = await this._userRepository.getUser(getUserDto);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -139,43 +157,45 @@ export class UserService implements IUserService {
   }
 
   /**
-   * Updates an existing user.
+   * Updates a user with the provided data.
    *
-   * @param id - The ID of the user to update.
-   * @param dto - The data transfer object containing user update details.
-   * @returns A promise that resolves to the updated user.
+   * @param {IUpdateUserDto} updateUserDto - The data transfer object containing the user ID and the data to update.
+   * @returns {Promise<User>} - A promise that resolves to the updated user.
+   *
+   * @throws {Error} - Throws an error if the user does not exist or if the email is not unique.
    */
-  async updateUser(id: string, dto: UpdateUserDto): Promise<User> {
+  async updateUser(updateUserDto: IUpdateUserDto): Promise<User> {
+    const { id, data } = updateUserDto;
+
     const updatedUser = await this._userRepository.transaction(async (tx) => {
       const user = await this._ensureUserExistsInTransaction(tx, id);
 
-      if (Object.keys(dto).length === 0) {
+      if (Object.keys(data).length === 0) {
         return user;
       }
 
-      if (dto.email && dto.email !== user.email) {
-        await this._ensureEmailIsUniqueWithinTransaction(tx, dto.email);
+      if (data.email && data.email !== user.email) {
+        await this._ensureEmailIsUniqueWithinTransaction(tx, data.email);
       }
 
-      return tx.updateUser(user.id, dto);
+      return tx.updateUser(updateUserDto);
     });
 
     return updatedUser;
   }
 
   /**
-   * Updates the password of an existing user.
+   * Updates the password of a user.
    *
-   * @param userId - The ID of the user whose password is to be updated.
-   * @param dto - The data transfer object containing password update details.
-   * @returns A promise that resolves to the updated user.
-   * @throws BadRequestError if the current password is invalid or the new password is the same as the current password.
+   * @param {IUpdatePasswordDto} updateUserDto - Data transfer object containing the user's ID, current password, and new password.
+   * @returns {Promise<User>} - A promise that resolves to the updated user.
+   * @throws {BadRequestError} - Throws an error if the current password is invalid or if the new password is the same as the current password.
    */
-  async updatePassword(userId: string, dto: UpdatePasswordDto): Promise<User> {
-    const { currentPassword, newPassword } = dto;
+  async updatePassword(updateUserDto: IUpdatePasswordDto): Promise<User> {
+    const { id, currentPassword, newPassword } = updateUserDto;
 
     const updatedUser = await this._userRepository.transaction(async (tx) => {
-      const user = await this._ensureUserExistsInTransaction(tx, userId);
+      const user = await this._ensureUserExistsInTransaction(tx, id);
 
       const isPasswordValid = await this._cryptoService.comparePasswords({
         plainText: currentPassword,
@@ -200,15 +220,19 @@ export class UserService implements IUserService {
   }
 
   /**
-   * Resets the password of an existing user.
+   * Resets the password for a user.
    *
-   * @param userId - The ID of the user whose password is to be reset.
-   * @param newPassword - The new password to set.
-   * @returns A promise that resolves to the updated user.
+   * @param {IResetPasswordDto} resetPasswordDto - The data transfer object containing the user's ID and the new password.
+   * @returns {Promise<User>} - A promise that resolves to the updated user.
+   *
+   * @throws {UserNotFoundException} - If the user with the given ID does not exist.
+   * @throws {HashingException} - If there is an error while hashing the new password.
    */
-  async resetPassword(userId: string, newPassword: string): Promise<User> {
+  async resetPassword(resetPasswordDto: IResetPasswordDto): Promise<User> {
+    const { id, newPassword } = resetPasswordDto;
+
     const updatedUser = await this._userRepository.transaction(async (tx) => {
-      const user = await this._ensureUserExistsInTransaction(tx, userId);
+      const user = await this._ensureUserExistsInTransaction(tx, id);
 
       const hashedPassword =
         await this._cryptoService.hashPassword(newPassword);

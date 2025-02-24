@@ -5,6 +5,7 @@ import type { TypedRequest } from "@/types";
 import type {
   ICreateUserDto,
   IGetUserDto,
+  IResetPasswordDto,
   IUpdatePasswordDto,
   IUpdateUserDto,
   User,
@@ -25,12 +26,9 @@ export interface IUserService {
   createUser(createUserDto: ICreateUserDto): Promise<User>;
   getOrCreateUser(createUserDto: ICreateUserDto): Promise<User>;
   getUser(getUserDto: IGetUserDto): Promise<User>;
-  updateUser(id: string, updateUserDto: IUpdateUserDto): Promise<User>;
-  updatePassword(
-    userId: string,
-    updatedPasswordDto: IUpdatePasswordDto
-  ): Promise<User>;
-  resetPassword(userId: string, newPassword: string): Promise<User>;
+  updateUser(updateUserDto: IUpdateUserDto): Promise<User>;
+  updatePassword(updatedPasswordDto: IUpdatePasswordDto): Promise<User>;
+  resetPassword(resetPasswordDto: IResetPasswordDto): Promise<User>;
   verifyUserEmail(userId: string): Promise<User>;
 }
 
