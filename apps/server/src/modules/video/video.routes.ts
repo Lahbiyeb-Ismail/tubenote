@@ -5,8 +5,7 @@ import validateRequest from "@middlewares/validate-request.middleware";
 
 import { videoController } from "@modules/video";
 
-import { idParamSchema } from "@common/schemas/id-param.schema";
-import { paginationSchema } from "@common/schemas/query-pagination.schema";
+import { paramIdSchema, querypaginationSchema } from "@modules/shared";
 
 const router = Router();
 
@@ -17,13 +16,13 @@ router.use(isAuthenticated);
 // - POST /: Create a new video (requires request body validation)
 router
   .route("/")
-  .get(validateRequest({ query: paginationSchema }), (req, res) =>
+  .get(validateRequest({ query: querypaginationSchema }), (req, res) =>
     videoController.getUserVideos(req, res)
   );
 
 router
   .route("/:id")
-  .get(validateRequest({ params: idParamSchema }), (req, res) =>
+  .get(validateRequest({ params: paramIdSchema }), (req, res) =>
     videoController.getVideoByIdOrCreate(req, res)
   );
 
