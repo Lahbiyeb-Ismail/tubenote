@@ -8,16 +8,12 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import { LocalAuthService } from "../local-auth.service";
 
-import type {
-  AuthResponseDto,
-  LoginDto,
-  RegisterDto,
-} from "@/modules/auth/dtos";
+import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
 import type { IRefreshTokenService } from "@/modules/auth/features/refresh-token/refresh-token.types";
 import type { IVerifyEmailService } from "@/modules/auth/features/verify-email/verify-email.types";
 import type { IJwtService } from "@/modules/auth/utils/services/jwt/jwt.types";
 import type { IMailSenderService } from "@/modules/mailSender/mail-sender.types";
-import type { IUserService, User } from "@/modules/user";
+import type { ICreateUserDto, IUserService, User } from "@/modules/user";
 import type { ICryptoService } from "@/modules/utils/crypto";
 
 describe("LocalAuthService", () => {
@@ -60,15 +56,18 @@ describe("LocalAuthService", () => {
     isEmailVerified: true,
   };
 
-  const mockTokens: AuthResponseDto = {
+  const mockTokens: IAuthResponseDto = {
     accessToken: "mock-access-token",
     refreshToken: "mock-refresh-token",
   };
 
-  const registerUserDto: RegisterDto = {
-    email: "test@example.com",
-    password: "password123",
-    username: "Test User",
+  const registerUserDto: ICreateUserDto = {
+    data: {
+      email: "test@example.com",
+      password: "password123",
+      username: "Test User",
+      isEmailVerified: false,
+    },
   };
 
   beforeEach(() => {
@@ -202,7 +201,7 @@ describe("LocalAuthService", () => {
   });
 
   describe("LocalAuthService - loginUser method", () => {
-    const loginDto: LoginDto = {
+    const loginDto: ILoginDto = {
       email: "test@example.com",
       password: "password123",
     };

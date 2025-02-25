@@ -8,12 +8,10 @@ import { LocalAuthController } from "../local-auth.controller";
 
 import type { TypedRequest } from "@/types";
 
-import type {
-  AuthResponseDto,
-  LoginDto,
-  RegisterDto,
-} from "@/modules/auth/dtos";
-import type { User } from "@/modules/user/user.model";
+import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
+
+import type { ICreateBodyDto } from "@/modules/shared";
+import type { User } from "@/modules/user";
 
 describe("LocalAuthController", () => {
   // Mock LocalAuthService
@@ -32,29 +30,30 @@ describe("LocalAuthController", () => {
     updatedAt: new Date(),
   };
 
-  const mockRegisterDto: RegisterDto = {
+  const mockRegisterDto: ICreateBodyDto<User> = {
     email: "test@example.com",
     password: "Password123!",
     username: "Test User",
+    isEmailVerified: false,
   };
 
-  const mockLoginDto: LoginDto = {
+  const mockLoginDto: ILoginDto = {
     email: "test@example.com",
     password: "Password123!",
   };
 
-  const mockAuthResponse: AuthResponseDto = {
+  const mockAuthResponse: IAuthResponseDto = {
     accessToken: "mock-access-token",
     refreshToken: "mock-refresh-token",
   };
 
   const mockRegisterRequest = {
     body: mockRegisterDto,
-  } as TypedRequest<RegisterDto>;
+  } as TypedRequest<ICreateBodyDto<User>>;
 
   const mockLoginRequest = {
     body: mockLoginDto,
-  } as TypedRequest<LoginDto>;
+  } as TypedRequest<ILoginDto>;
 
   // Mock response object
   const mockResponse = () => {
@@ -81,9 +80,9 @@ describe("LocalAuthController", () => {
 
       await localAuthController.register(mockRegisterRequest, res);
 
-      expect(mockLocalAuthService.registerUser).toHaveBeenCalledWith(
-        mockRegisterDto
-      );
+      expect(mockLocalAuthService.registerUser).toHaveBeenCalledWith({
+        data: mockRegisterDto,
+      });
       expect(res.status).toHaveBeenCalledWith(httpStatus.CREATED);
       expect(res.json).toHaveBeenCalledWith({
         message: "A verification email has been sent to your email.",

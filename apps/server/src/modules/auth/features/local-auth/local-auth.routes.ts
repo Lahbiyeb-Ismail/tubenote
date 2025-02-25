@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import validateRequest from "@middlewares/validate-request.middleware";
 
-import { loginSchema, registerSchema } from "@/modules/auth/schemas";
+import { loginSchema, registerSchema } from "@modules/shared";
 
 import { localAuthController } from "./local-auth.module";
 

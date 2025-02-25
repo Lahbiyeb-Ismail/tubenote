@@ -5,8 +5,10 @@ import type { TypedRequest } from "@/types";
 import { refreshTokenCookieConfig } from "@config/cookie.config";
 import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 
-import type { LoginDto, RegisterDto } from "@modules/auth/dtos";
+import type { ILoginDto } from "@modules/auth/dtos";
 
+import type { ICreateBodyDto } from "@/modules/shared";
+import type { User } from "@/modules/user";
 import type {
   ILocalAuthController,
   ILocalAuthService,
@@ -20,8 +22,8 @@ export class LocalAuthController implements ILocalAuthController {
    * @param req - The request object containing user registration credentials.
    * @param res - The response object.
    */
-  async register(req: TypedRequest<RegisterDto>, res: Response) {
-    const user = await this._localAuthService.registerUser(req.body);
+  async register(req: TypedRequest<ICreateBodyDto<User>>, res: Response) {
+    const user = await this._localAuthService.registerUser({ data: req.body });
 
     res.status(httpStatus.CREATED).json({
       message: "A verification email has been sent to your email.",
@@ -34,7 +36,7 @@ export class LocalAuthController implements ILocalAuthController {
    * @param req - The request object containing user login credentials.
    * @param res - The response object.
    */
-  async login(req: TypedRequest<LoginDto>, res: Response) {
+  async login(req: TypedRequest<ILoginDto>, res: Response) {
     const { accessToken, refreshToken } =
       await this._localAuthService.loginUser(req.body);
 
