@@ -13,7 +13,7 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { BadRequestError } from "@/errors";
 
 import type { JwtPayload } from "@/types";
-import type { AuthResponseDto } from "@modules/auth/dtos/auth.dto";
+import type { IAuthResponseDto } from "@modules/auth/dtos/auth.dto";
 import type { SignTokenDto } from "./dtos/sign-token.dto";
 import type { VerifyTokenDto } from "./dtos/verify-token.dto";
 import type { IJwtService } from "./jwt.types";
@@ -44,7 +44,7 @@ export class JwtService implements IJwtService {
     });
   }
 
-  generateAuthTokens(userId: string): AuthResponseDto {
+  generateAuthTokens(userId: string): IAuthResponseDto {
     const accessToken = this.sign({
       userId,
       secret: ACCESS_TOKEN_SECRET,
