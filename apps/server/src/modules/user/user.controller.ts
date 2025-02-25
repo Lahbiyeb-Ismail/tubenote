@@ -9,7 +9,8 @@ import type {
   IUserService,
   User,
 } from "@modules/user";
-import type { IUpdateBodyDto } from "../shared";
+
+import type { IUpdateBodyDto } from "@modules/shared";
 
 /**
  * Controller for handling user-related operations.
@@ -17,6 +18,12 @@ import type { IUpdateBodyDto } from "../shared";
 export class UserController implements IUserController {
   constructor(private readonly _userService: IUserService) {}
 
+  /**
+   * Maps a User object to a response object, omitting the password field.
+   *
+   * @param user - The User object to be mapped.
+   * @returns An object containing all properties of the User except the password.
+   */
   private _mapUserToResponse(user: User): Omit<User, "password"> {
     return {
       id: user.id,
@@ -70,6 +77,19 @@ export class UserController implements IUserController {
     });
   }
 
+  /**
+   * Updates the password of the authenticated user.
+   *
+   * @param req - The request object containing the user ID and the password update details.
+   * @param res - The response object used to send the status and result back to the client.
+   *
+   * @returns A promise that resolves to a response indicating the success of the password update.
+   *
+   * @remarks
+   * This method expects the request body to contain the current password and the new password.
+   * It uses the user ID from the request to identify the user whose password is to be updated.
+   * The response will include a success message and the updated user details.
+   */
   async updatePassword(
     req: TypedRequest<IUpdatePasswordBodyDto>,
     res: Response
