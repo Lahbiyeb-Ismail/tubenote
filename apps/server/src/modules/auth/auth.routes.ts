@@ -3,6 +3,8 @@ import { Router } from "express";
 import validateRequest from "@/middlewares/validate-request.middleware";
 import isAuthenticated from "@middlewares/auth.middleware";
 
+import { oauthCodeSchema } from "@modules/shared";
+
 import { authController } from "./auth.module";
 
 import localAuthRoutes from "./features/local-auth/local-auth.routes";
@@ -10,8 +12,6 @@ import googleAuthRoutes from "./features/oauth/google/google.routes";
 import refreshTokenRoutes from "./features/refresh-token/refresh-token.routes";
 import resetPasswordRoutes from "./features/reset-password/reset-password.routes";
 import verifyEmailRoutes from "./features/verify-email/verify-email.routes";
-
-import { oauthCodeSchema } from "@modules/shared";
 
 const router = Router();
 

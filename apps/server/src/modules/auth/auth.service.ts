@@ -3,9 +3,9 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { BadRequestError, UnauthorizedError } from "@/errors";
 import logger from "@/utils/logger";
 
-import type { IAuthService } from "./auth.types";
-
 import type { IRefreshTokenService } from "@modules/auth";
+
+import type { IAuthService } from "./auth.types";
 
 import type { ICacheService } from "../utils/cache/cache.types";
 import type { IAuthResponseDto, ILogoutDto, OAuthCodePayloadDto } from "./dtos";

@@ -1,10 +1,10 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
+import type { TypedRequest } from "@/types";
+
 import { clearRefreshTokenCookieConfig } from "@config/cookie.config";
 import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
-
-import type { TypedRequest } from "@/types";
 
 import type { IAuthController, IAuthService } from "./auth.types";
 import type { OAuthCodeDto } from "./dtos";
