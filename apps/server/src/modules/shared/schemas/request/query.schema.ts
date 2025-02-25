@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Schema for query pagination parameters.
+ * Schema for pagination query parameters.
  *
  * This schema validates and provides default values for pagination-related query parameters.
  *
@@ -10,7 +10,7 @@ import { z } from "zod";
  * @property {("createdAt" | "updatedAt")} sortBy - The field by which to sort the results. Can be either "createdAt" or "updatedAt". Defaults to "createdAt".
  * @property {("desc" | "asc")} order - The order in which to sort the results. Can be either "desc" for descending or "asc" for ascending. Defaults to "desc".
  */
-export const querypaginationSchema = z
+export const paginationQuerySchema = z
   .object({
     page: z.string().regex(/^\d+$/).optional().default("1"),
     limit: z.string().regex(/^\d+$/).optional().default("8"),
