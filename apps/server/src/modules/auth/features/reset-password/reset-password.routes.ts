@@ -4,9 +4,11 @@ import validateRequest from "@middlewares/validate-request.middleware";
 
 import { resetPasswordController } from "./reset-password.module";
 
-import { emailBodySchema } from "@common/schemas/email-body.schema";
-import { tokenParamSchema } from "@common/schemas/token-param.schema";
-import { passwordBodySchema } from "./schemas/password-body.schema";
+import {
+  emailBodySchema,
+  passwordBodySchema,
+  tokenParamSchema,
+} from "@/modules/shared";
 
 const router = Router();
 

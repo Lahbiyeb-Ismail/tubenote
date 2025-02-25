@@ -3,9 +3,11 @@ import request from "supertest";
 
 import app from "@/app";
 
-import type { EmailBodyDto } from "@/common/dtos/email-body.dto";
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
+
 import { resetPasswordController } from "../reset-password.module";
+
+import type { IEmailBodyDto } from "@modules/shared";
 
 jest.mock("../reset-password.module", () => ({
   resetPasswordController: {
@@ -18,11 +20,11 @@ jest.mock("../reset-password.module", () => ({
 describe("Reset password Routes", () => {
   const mockEmail = "user@test.com";
 
-  const mockValidEmailBody: EmailBodyDto = {
+  const mockValidEmailBody: IEmailBodyDto = {
     email: mockEmail,
   };
 
-  const mockInValidEmailBody: EmailBodyDto = {
+  const mockInValidEmailBody: IEmailBodyDto = {
     email: "invalidemail.com",
   };
 

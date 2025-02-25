@@ -3,15 +3,17 @@ import httpStatus from "http-status";
 
 import type { TypedRequest } from "@/types";
 
-import { ResetPasswordController } from "../reset-password.controller";
-
-import type { EmailBodyDto } from "@/common/dtos/email-body.dto";
-import type { TokenParamDto } from "@/common/dtos/token-param.dto";
-import type { PasswordBodyDto } from "../dtos/password-body.dto";
-import type {
+import {
   IResetPasswordController,
   IResetPasswordService,
-} from "../reset-password.types";
+  ResetPasswordController,
+} from "@modules/auth/features/reset-password";
+
+import type {
+  IEmailBodyDto,
+  IParamTokenDto,
+  IPasswordBodyDto,
+} from "@/modules/shared";
 
 describe("ResetPassowrdController", () => {
   let resetPasswordController: IResetPasswordController;
@@ -46,14 +48,14 @@ describe("ResetPassowrdController", () => {
       body: {
         email: mockEmail,
       },
-    } as TypedRequest<EmailBodyDto>;
+    } as TypedRequest<IEmailBodyDto>;
 
     it("should successfully send a forgot password email", async () => {
       mockResetPasswordService.sendResetToken.mockResolvedValue(undefined);
 
       // Act
       await resetPasswordController.forgotPassword(
-        mockRequest as TypedRequest<EmailBodyDto>,
+        mockRequest as TypedRequest<IEmailBodyDto>,
         mockResponse as Response
       );
 
@@ -75,7 +77,7 @@ describe("ResetPassowrdController", () => {
       // Act
       await expect(
         resetPasswordController.forgotPassword(
-          mockRequest as TypedRequest<EmailBodyDto>,
+          mockRequest as TypedRequest<IEmailBodyDto>,
           mockResponse as Response
         )
       ).rejects.toThrow(error);
@@ -90,14 +92,14 @@ describe("ResetPassowrdController", () => {
       params: {
         token: mockResetToken,
       },
-    } as TypedRequest<PasswordBodyDto, TokenParamDto>;
+    } as TypedRequest<IPasswordBodyDto, IParamTokenDto>;
 
     it("should successfully reset password", async () => {
       mockResetPasswordService.resetPassword.mockResolvedValue(undefined);
 
       // Act
       await resetPasswordController.resetPassword(
-        mockRequest as TypedRequest<PasswordBodyDto, TokenParamDto>,
+        mockRequest as TypedRequest<IPasswordBodyDto, IParamTokenDto>,
         mockResponse as Response
       );
 
@@ -120,7 +122,7 @@ describe("ResetPassowrdController", () => {
       // Act
       await expect(
         resetPasswordController.resetPassword(
-          mockRequest as TypedRequest<PasswordBodyDto, TokenParamDto>,
+          mockRequest as TypedRequest<IPasswordBodyDto, IParamTokenDto>,
           mockResponse as Response
         )
       ).rejects.toThrow(error);
@@ -132,7 +134,7 @@ describe("ResetPassowrdController", () => {
       params: {
         token: mockResetToken,
       },
-    } as TypedRequest<{}, TokenParamDto>;
+    } as TypedRequest<{}, IParamTokenDto>;
 
     it("should successfully verify the provided reset token", async () => {
       mockResetPasswordService.verifyResetToken.mockResolvedValue(
@@ -141,7 +143,7 @@ describe("ResetPassowrdController", () => {
 
       // Act
       await resetPasswordController.verifyResetToken(
-        mockRequest as TypedRequest<{}, TokenParamDto>,
+        mockRequest as TypedRequest<{}, IParamTokenDto>,
         mockResponse as Response
       );
 
@@ -163,7 +165,7 @@ describe("ResetPassowrdController", () => {
       // Act
       await expect(
         resetPasswordController.verifyResetToken(
-          mockRequest as TypedRequest<{}, TokenParamDto>,
+          mockRequest as TypedRequest<{}, IParamTokenDto>,
           mockResponse as Response
         )
       ).rejects.toThrow(error);
