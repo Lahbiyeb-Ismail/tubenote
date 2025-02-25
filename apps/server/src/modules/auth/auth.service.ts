@@ -5,7 +5,7 @@ import logger from "@/utils/logger";
 
 import type { IAuthService } from "./auth.types";
 
-import type { IRefreshTokenService } from "./features/refresh-token/refresh-token.types";
+import type { IRefreshTokenService } from "@modules/auth";
 
 import type { ICacheService } from "../utils/cache/cache.types";
 import type { IAuthResponseDto, ILogoutDto, OAuthCodePayloadDto } from "./dtos";
