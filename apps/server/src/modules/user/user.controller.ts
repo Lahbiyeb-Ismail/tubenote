@@ -4,12 +4,12 @@ import httpStatus from "http-status";
 import type { TypedRequest } from "@/types";
 
 import type {
+  IUpdatePasswordBodyDto,
   IUserController,
   IUserService,
-  UpdatePasswordDto,
-  UpdateUserDto,
   User,
 } from "@modules/user";
+import type { IUpdateBodyDto } from "../shared";
 
 /**
  * Controller for handling user-related operations.
@@ -54,12 +54,15 @@ export class UserController implements IUserController {
    * @param res - The response object to confirm the update.
    */
   async updateCurrentUser(
-    req: TypedRequest<UpdateUserDto>,
+    req: TypedRequest<IUpdateBodyDto<User>>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
 
-    const user = await this._userService.updateUser(userId, req.body);
+    const user = await this._userService.updateUser({
+      id: userId,
+      data: req.body,
+    });
 
     res.status(httpStatus.OK).json({
       message: "User updated successfully.",
@@ -67,10 +70,17 @@ export class UserController implements IUserController {
     });
   }
 
-  async updatePassword(req: TypedRequest<UpdatePasswordDto>, res: Response) {
+  async updatePassword(
+    req: TypedRequest<IUpdatePasswordBodyDto>,
+    res: Response
+  ) {
     const userId = req.userId;
 
-    const user = await this._userService.updatePassword(userId, req.body);
+    const user = await this._userService.updatePassword({
+      id: userId,
+      currentPassword: req.body.currentPassword,
+      newPassword: req.body.newPassword,
+    });
 
     res.status(httpStatus.OK).json({
       message: "User password updated successfully.",

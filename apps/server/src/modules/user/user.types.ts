@@ -6,10 +6,13 @@ import type {
   ICreateUserDto,
   IGetUserDto,
   IResetPasswordDto,
+  IUpdatePasswordBodyDto,
   IUpdatePasswordDto,
   IUpdateUserDto,
   User,
 } from "@modules/user";
+
+import type { IUpdateBodyDto } from "@modules/shared";
 
 export interface IUserRepository {
   transaction<T>(fn: (tx: IUserRepository) => Promise<T>): Promise<T>;
@@ -35,11 +38,11 @@ export interface IUserService {
 export interface IUserController {
   getCurrentUser(req: TypedRequest, res: Response): Promise<void>;
   updateCurrentUser(
-    req: TypedRequest<IUpdateUserDto>,
+    req: TypedRequest<IUpdateBodyDto<User>>,
     res: Response
   ): Promise<void>;
   updatePassword(
-    req: TypedRequest<IUpdatePasswordDto>,
+    req: TypedRequest<IUpdatePasswordBodyDto>,
     res: Response
   ): Promise<void>;
 }
