@@ -15,9 +15,9 @@ import type { VerifyEmailToken } from "../verify-email.model";
 
 import type { SignTokenDto } from "@/modules/auth/utils/services/jwt/dtos/sign-token.dto";
 import type { IJwtService } from "@/modules/auth/utils/services/jwt/jwt.types";
+import type { ICreateDto } from "@/modules/shared";
 import type { JwtPayload } from "@/types";
 import type { IUserService } from "@modules/user/user.types";
-import type { SaveTokenDto } from "../dtos/save-token.dto";
 import type { IVerifyEmailRepository } from "../verify-email.types";
 
 jest.mock("@utils/convert-string-to-date");
@@ -32,7 +32,7 @@ describe("VerifyEmailService methods test", () => {
   beforeEach(() => {
     mockVerifyEmailRepository = {
       findActiveToken: jest.fn(),
-      saveToken: jest.fn(),
+      createToken: jest.fn(),
       deleteMany: jest.fn(),
     };
 
@@ -87,10 +87,12 @@ describe("VerifyEmailService methods test", () => {
     expiresAt: expiresIn,
   };
 
-  const saveTokenDto: SaveTokenDto = {
+  const createTokenDto: ICreateDto<VerifyEmailToken> = {
     userId: mockUserId,
-    token: mockValidToken,
-    expiresAt: expiresIn,
+    data: {
+      token: mockValidToken,
+      expiresAt: expiresIn,
+    },
   };
 
   const signTokenDto: SignTokenDto = {
@@ -115,7 +117,7 @@ describe("VerifyEmailService methods test", () => {
 
       mockJwtService.sign.mockReturnValue(mockValidToken);
 
-      mockVerifyEmailRepository.saveToken.mockResolvedValue(
+      mockVerifyEmailRepository.createToken.mockResolvedValue(
         mockVerificationToken
       );
 
@@ -133,8 +135,8 @@ describe("VerifyEmailService methods test", () => {
 
       expect(mockJwtService.sign).toHaveBeenCalledWith(signTokenDto);
 
-      expect(mockVerifyEmailRepository.saveToken).toHaveBeenCalledWith(
-        saveTokenDto
+      expect(mockVerifyEmailRepository.createToken).toHaveBeenCalledWith(
+        createTokenDto
       );
     });
 
@@ -208,7 +210,7 @@ describe("VerifyEmailService methods test", () => {
 
       mockJwtService.sign.mockReturnValue(mockValidToken);
 
-      mockVerifyEmailRepository.saveToken.mockResolvedValue(
+      mockVerifyEmailRepository.createToken.mockResolvedValue(
         mockVerificationToken
       );
 

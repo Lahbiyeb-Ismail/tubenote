@@ -9,8 +9,8 @@ import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import type { VerifyEmailToken } from "./verify-email.model";
 import type { IVerifyEmailRepository } from "./verify-email.types";
 
+import type { ICreateDto } from "@/modules/shared";
 import type { FindActiveTokenDto } from "./dtos/find-active-token.dto";
-import type { SaveTokenDto } from "./dtos/save-token.dto";
 
 export class VerifyEmailRepository implements IVerifyEmailRepository {
   constructor(private readonly _db: PrismaClient) {}
@@ -47,12 +47,15 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
     );
   }
 
-  async saveToken(params: SaveTokenDto): Promise<VerifyEmailToken> {
+  async createToken(
+    createTokenDto: ICreateDto<VerifyEmailToken>
+  ): Promise<VerifyEmailToken> {
     return handleAsyncOperation(
       () =>
         this._db.emailVerificationToken.create({
           data: {
-            ...params,
+            userId: createTokenDto.userId,
+            ...createTokenDto.data,
           },
         }),
       { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }

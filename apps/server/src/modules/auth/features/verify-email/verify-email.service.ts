@@ -46,10 +46,12 @@ export class VerifyEmailService implements IVerifyEmailService {
       expiresIn,
     });
 
-    await this._verifyEmailRepository.saveToken({
+    await this._verifyEmailRepository.createToken({
       userId: user.id,
-      token,
-      expiresAt: stringToDate(expiresIn),
+      data: {
+        token,
+        expiresAt: stringToDate(expiresIn),
+      },
     });
 
     logger.info(`Verification email token generated for user ${user.id}`);

@@ -1,15 +1,20 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { TokenParamDto } from "@/common/dtos/token-param.dto";
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
+
 import { BadRequestError, NotFoundError } from "@/errors";
+
 import type { EmptyRecord, TypedRequest } from "@/types";
+
 import { VerifyEmailController } from "../verify-email.controller";
+
 import type {
   IVerifyEmailController,
   IVerifyEmailService,
 } from "../verify-email.types";
+
+import type { IParamTokenDto } from "@/modules/shared";
 
 describe("VerifyEmailController", () => {
   let mockResponse: Partial<Response>;
@@ -24,13 +29,13 @@ describe("VerifyEmailController", () => {
     params: {
       token: mockValidToken,
     },
-  } as TypedRequest<EmptyRecord, TokenParamDto>;
+  } as TypedRequest<EmptyRecord, IParamTokenDto>;
 
   const mockInvalidRequest = {
     params: {
       token: mockInvalidToken,
     },
-  } as TypedRequest<EmptyRecord, TokenParamDto>;
+  } as TypedRequest<EmptyRecord, IParamTokenDto>;
 
   beforeEach(() => {
     mockVerifyEmailService = {
@@ -104,7 +109,7 @@ describe("VerifyEmailController", () => {
     it("should throw a BadRequestError for an empty token", async () => {
       const mockEmptyTokenRequest = {
         params: { token: "" },
-      } as TypedRequest<EmptyRecord, TokenParamDto>;
+      } as TypedRequest<EmptyRecord, IParamTokenDto>;
 
       const error = new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
 
