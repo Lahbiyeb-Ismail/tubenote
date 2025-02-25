@@ -10,10 +10,13 @@ export interface IGetUserDto {
 
 export interface IUpdateUserDto extends Omit<IUpdateDto<User>, "userId"> {}
 
-export interface IUpdatePasswordDto {
-  id: string;
+export interface IUpdatePasswordBodyDto {
   currentPassword: string;
   newPassword: string;
+}
+
+export interface IUpdatePasswordDto extends IUpdatePasswordBodyDto {
+  id: string;
 }
 
 export interface IResetPasswordDto {
