@@ -6,16 +6,18 @@ import type { RefreshToken } from "./refresh-token.model";
 import type { IRefreshTokenRepository } from "./refresh-token.types";
 
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
-import type { SaveTokenDto } from "./dtos/save-token.dto";
+import type { ICreateDto } from "@/modules/shared";
 
 export class RefreshTokenRepository implements IRefreshTokenRepository {
   constructor(private readonly _db: PrismaClient) {}
 
-  async saveToken(saveTokenDto: SaveTokenDto): Promise<RefreshToken> {
+  async createToken(
+    createTokenDto: ICreateDto<RefreshToken>
+  ): Promise<RefreshToken> {
     return handleAsyncOperation(
       () =>
         this._db.refreshToken.create({
-          data: { ...saveTokenDto },
+          data: { userId: createTokenDto.userId, ...createTokenDto.data },
         }),
       { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
     );

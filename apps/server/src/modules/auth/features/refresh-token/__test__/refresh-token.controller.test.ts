@@ -10,7 +10,7 @@ import { BadRequestError, ForbiddenError, UnauthorizedError } from "@/errors";
 import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import type { AuthResponseDto } from "@/modules/auth/dtos";
+import type { IAuthResponseDto } from "@/modules/auth/dtos";
 
 import type { TypedRequest } from "@/types";
 
@@ -29,7 +29,7 @@ describe("RefreshTokenController", () => {
 
   // Mock the refresh token service
   const mockRefreshTokenService: jest.Mocked<IRefreshTokenService> = {
-    saveToken: jest.fn(),
+    createToken: jest.fn(),
     deleteAllTokens: jest.fn(),
     refreshToken: jest.fn(),
   };
@@ -37,7 +37,7 @@ describe("RefreshTokenController", () => {
   const mockUserId = "test-user-id";
   const mockRefreshToken = "valid-refresh-token";
 
-  const mockNewTokens: AuthResponseDto = {
+  const mockNewTokens: IAuthResponseDto = {
     accessToken: "new-access-token",
     refreshToken: "new-refresh-token",
   };

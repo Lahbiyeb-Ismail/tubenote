@@ -10,21 +10,23 @@ import logger from "@utils/logger";
 
 import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 
-import type { AuthResponseDto, RefreshDto } from "@modules/auth/dtos";
+import type { IAuthResponseDto, IRefreshDto } from "@modules/auth/dtos";
 
-import type { SaveTokenDto } from "./dtos/save-token.dto";
 import type { RefreshToken } from "./refresh-token.model";
 import type {
   IRefreshTokenRepository,
   IRefreshTokenService,
 } from "./refresh-token.types";
 
+import type { ICreateDto } from "@/modules/shared";
+
 export class RefreshTokenService implements IRefreshTokenService {
   constructor(
     private readonly _refreshTokenRepository: IRefreshTokenRepository,
     private readonly _jwtService: IJwtService
   ) {}
-  async refreshToken(refreshDto: RefreshDto): Promise<AuthResponseDto> {
+
+  async refreshToken(refreshDto: IRefreshDto): Promise<IAuthResponseDto> {
     const { userId, token } = refreshDto;
 
     const decodedToken = await this._jwtService.verify({
@@ -60,10 +62,12 @@ export class RefreshTokenService implements IRefreshTokenService {
     const { accessToken, refreshToken } =
       this._jwtService.generateAuthTokens(userId);
 
-    await this._refreshTokenRepository.saveToken({
+    await this._refreshTokenRepository.createToken({
       userId,
-      token: refreshToken,
-      expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+      data: {
+        token: refreshToken,
+        expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+      },
     });
 
     return { accessToken, refreshToken };
@@ -73,7 +77,9 @@ export class RefreshTokenService implements IRefreshTokenService {
     await this._refreshTokenRepository.deleteAll(userId);
   }
 
-  async saveToken(saveTokenDto: SaveTokenDto): Promise<RefreshToken> {
-    return await this._refreshTokenRepository.saveToken(saveTokenDto);
+  async createToken(
+    createTokenDto: ICreateDto<RefreshToken>
+  ): Promise<RefreshToken> {
+    return await this._refreshTokenRepository.createToken(createTokenDto);
   }
 }
