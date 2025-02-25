@@ -14,7 +14,7 @@ describe("AuthService", () => {
     mockRefreshTokenService = {
       deleteAllTokens: jest.fn(),
       refreshToken: jest.fn(),
-      saveToken: jest.fn(),
+      createToken: jest.fn(),
     };
 
     mockCacheService = {

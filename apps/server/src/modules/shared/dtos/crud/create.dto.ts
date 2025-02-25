@@ -10,7 +10,7 @@
  */
 export type ICreateBodyDto<T> = Omit<
   T,
-  "id" | "createdAt" | "updatedAt" | "userId"
+  "id" | "createdAt" | "updatedAt" | "userId" | "isEmailVerified"
 >;
 
 /**
