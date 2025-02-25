@@ -57,7 +57,7 @@ describe("GoogleAuthService", () => {
       verify: jest.fn(),
     };
     mockRefreshTokenService = {
-      saveToken: jest.fn(),
+      createToken: jest.fn(),
       refreshToken: jest.fn(),
       deleteAllTokens: jest.fn(),
     };
@@ -95,7 +95,7 @@ describe("GoogleAuthService", () => {
 
       mockJwtService.generateAuthTokens.mockReturnValue(mockOAuthResponse);
 
-      mockRefreshTokenService.saveToken.mockResolvedValue(mockRefreshToken);
+      mockRefreshTokenService.createToken.mockResolvedValue(mockRefreshToken);
 
       jest
         .spyOn(googleAuthService, "generateTemporaryCode")
@@ -106,10 +106,12 @@ describe("GoogleAuthService", () => {
       expect(mockJwtService.generateAuthTokens).toHaveBeenCalledWith(
         mockUser.id
       );
-      expect(mockRefreshTokenService.saveToken).toHaveBeenCalledWith({
+      expect(mockRefreshTokenService.createToken).toHaveBeenCalledWith({
         userId: mockUser.id,
-        token: mockOAuthResponse.refreshToken,
-        expiresAt: expect.any(Date), // Ensure the date is correctly parsed
+        data: {
+          token: mockOAuthResponse.refreshToken,
+          expiresAt: expect.any(Date), // Ensure the date is correctly parsed
+        },
       });
 
       expect(googleAuthService.generateTemporaryCode).toHaveBeenCalledWith({
@@ -147,7 +149,7 @@ describe("GoogleAuthService", () => {
         refreshToken: "refresh-token",
       };
       mockJwtService.generateAuthTokens.mockReturnValue(tokens);
-      mockRefreshTokenService.saveToken.mockRejectedValue(
+      mockRefreshTokenService.createToken.mockRejectedValue(
         new Error("Database error")
       );
 
@@ -164,7 +166,7 @@ describe("GoogleAuthService", () => {
 
       mockJwtService.generateAuthTokens.mockReturnValue(tokens);
 
-      mockRefreshTokenService.saveToken.mockResolvedValue(mockRefreshToken);
+      mockRefreshTokenService.createToken.mockResolvedValue(mockRefreshToken);
 
       jest
         .spyOn(googleAuthService, "generateTemporaryCode")

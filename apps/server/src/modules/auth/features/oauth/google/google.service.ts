@@ -26,7 +26,7 @@ export class GoogleAuthService implements IGoogleAuthService {
   /**
    * Authenticates a user using Google OAuth and generates access and refresh tokens.
    * @param user - The user object retrieved from Google OAuth.
-   * @returns A promise resolving to a AuthResponseDto containing access and refresh tokens.
+   * @returns A promise resolving to a IAuthResponseDto containing access and refresh tokens.
    * @throws NotFoundError if the user is not found.
    * @throws UnauthorizedError if the user's email is not verified.
    */
@@ -40,10 +40,12 @@ export class GoogleAuthService implements IGoogleAuthService {
     const { accessToken, refreshToken } =
       this._jwtService.generateAuthTokens(userId);
 
-    await this._refreshTokenService.saveToken({
+    await this._refreshTokenService.createToken({
       userId,
-      token: refreshToken,
-      expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+      data: {
+        token: refreshToken,
+        expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+      },
     });
 
     // Generate a short-lived, one-time use code
