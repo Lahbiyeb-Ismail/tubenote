@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { emailSchema, passwordSchema } from "@modules/shared";
+import { emailSchema, passwordSchema } from "../user";
 
 /**
  * Schema for validating the body of a request containing an email.

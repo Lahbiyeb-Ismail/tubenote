@@ -19,6 +19,7 @@ export const registerSchema = z
     username: usernameSchema,
     email: emailSchema,
     password: passwordSchema,
+    isEmailVerified: z.boolean().optional().default(false),
   })
   .strict();
 
