@@ -12,9 +12,11 @@ import { z } from "zod";
  * // Invalid token parameter (too short)
  * const invalidToken = { token: "abc" };
  */
-export const tokenParamSchema = z.object({
-  token: z.string().min(4),
-});
+export const tokenParamSchema = z
+  .object({
+    token: z.string().min(4),
+  })
+  .strict();
 
 /**
  * Schema for validating an ID parameter.
@@ -25,6 +27,8 @@ export const tokenParamSchema = z.object({
  * const validId = { id: "abcd" }; // Passes validation
  * const invalidId = { id: "abc" }; // Fails validation
  */
-export const idParamSchema = z.object({
-  id: z.string().min(4),
-});
+export const idParamSchema = z
+  .object({
+    id: z.string().min(4),
+  })
+  .strict();

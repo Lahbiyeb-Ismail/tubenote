@@ -8,9 +8,11 @@ import { emailSchema, passwordSchema } from "@modules/shared";
  * This schema ensures that the request body includes a valid email
  * as defined by the `emailSchema`.
  */
-export const emailBodySchema = z.object({
-  email: emailSchema,
-});
+export const emailBodySchema = z
+  .object({
+    email: emailSchema,
+  })
+  .strict();
 
 /**
  * Schema for validating the request body containing a password.
@@ -18,6 +20,8 @@ export const emailBodySchema = z.object({
  * This schema ensures that the request body includes a valid password
  * as defined by the `passwordSchema`.
  */
-export const passwordBodySchema = z.object({
-  password: passwordSchema,
-});
+export const passwordBodySchema = z
+  .object({
+    password: passwordSchema,
+  })
+  .strict();
