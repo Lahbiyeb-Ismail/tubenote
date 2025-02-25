@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { passwordSchema } from "@/common/schemas/user";
+import { passwordSchema } from "@modules/shared";
 
 export const updatePasswordSchema = z
   .object({
