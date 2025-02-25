@@ -1,13 +1,13 @@
 import { LocalAuthController } from "./local-auth.controller";
 import { LocalAuthService } from "./local-auth.service";
 
-import { refreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.module";
-import { verifyEmailService } from "@modules/auth/features/verify-email/verify-email.module";
+import { refreshTokenService, verifyEmailService } from "@modules/auth";
 import { jwtService } from "@modules/auth/utils/services/jwt/jwt.module";
-import { cryptoService } from "@modules/utils/crypto";
+
+import { userService } from "@modules/user";
 
 import { mailSenderService } from "@modules/mailSender/mail-sender.module";
-import { userService } from "@modules/user/user.module";
+import { cryptoService } from "@modules/utils/crypto";
 
 const localAuthService = new LocalAuthService(
   jwtService,

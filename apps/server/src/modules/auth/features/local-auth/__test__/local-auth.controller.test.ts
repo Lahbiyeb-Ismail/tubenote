@@ -8,7 +8,7 @@ import { LocalAuthController } from "../local-auth.controller";
 
 import type { TypedRequest } from "@/types";
 
-import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
+import type { IAuthResponseDto, ILoginDto } from "@/modules/auth";
 
 import type { ICreateBodyDto } from "@/modules/shared";
 import type { User } from "@/modules/user";

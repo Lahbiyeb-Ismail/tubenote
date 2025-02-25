@@ -5,7 +5,7 @@ import { localAuthController } from "../local-auth.module";
 
 import app from "@/app";
 
-import type { ILoginDto } from "@/modules/auth/dtos";
+import type { ILoginDto } from "@/modules/auth";
 import type { ICreateBodyDto } from "@/modules/shared";
 import type { User } from "@/modules/user";
 

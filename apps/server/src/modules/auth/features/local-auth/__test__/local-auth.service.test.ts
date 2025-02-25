@@ -8,12 +8,16 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import { LocalAuthService } from "../local-auth.service";
 
-import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
-import type { IRefreshTokenService } from "@/modules/auth/features/refresh-token/refresh-token.types";
-import type { IVerifyEmailService } from "@/modules/auth/features/verify-email/verify-email.types";
+import type {
+  IAuthResponseDto,
+  ILoginDto,
+  IRefreshTokenService,
+  IVerifyEmailService,
+} from "@/modules/auth";
+import type { ICreateUserDto, IUserService, User } from "@/modules/user";
+
 import type { IJwtService } from "@/modules/auth/utils/services/jwt/jwt.types";
 import type { IMailSenderService } from "@/modules/mailSender/mail-sender.types";
-import type { ICreateUserDto, IUserService, User } from "@/modules/user";
 import type { ICryptoService } from "@/modules/utils/crypto";
 
 describe("LocalAuthService", () => {

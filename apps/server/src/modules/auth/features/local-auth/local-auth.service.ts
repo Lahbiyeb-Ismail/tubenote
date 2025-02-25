@@ -11,14 +11,15 @@ import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 import { ICryptoService } from "@modules/utils/crypto";
 
 import { IMailSenderService } from "@modules/mailSender/mail-sender.types";
-import { type ICreateUserDto, IUserService } from "@modules/user";
 
-import { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
-import type { IVerifyEmailService } from "@modules/auth/features/verify-email/verify-email.types";
+import type { ICreateUserDto, IUserService, User } from "@modules/user";
 
-import type { User } from "@modules/user/user.model";
-
-import type { IAuthResponseDto, ILoginDto } from "@modules/auth/dtos";
+import type {
+  IAuthResponseDto,
+  ILoginDto,
+  IRefreshTokenService,
+  IVerifyEmailService,
+} from "@modules/auth";
 
 export class LocalAuthService implements ILocalAuthService {
   constructor(
