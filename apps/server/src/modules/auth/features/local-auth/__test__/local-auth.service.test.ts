@@ -36,7 +36,7 @@ describe("LocalAuthService", () => {
   };
 
   const mockRefreshTokenService: Partial<IRefreshTokenService> = {
-    saveToken: jest.fn(),
+    createToken: jest.fn(),
   };
 
   const mockMailSenderService: Partial<IMailSenderService> = {
@@ -210,7 +210,7 @@ describe("LocalAuthService", () => {
       (mockJwtService.generateAuthTokens as jest.Mock).mockReturnValue(
         mockTokens
       );
-      (mockRefreshTokenService.saveToken as jest.Mock).mockResolvedValue(
+      (mockRefreshTokenService.createToken as jest.Mock).mockResolvedValue(
         undefined
       );
     });
@@ -232,10 +232,12 @@ describe("LocalAuthService", () => {
       expect(mockJwtService.generateAuthTokens).toHaveBeenCalledWith(
         mockUser.id
       );
-      expect(mockRefreshTokenService.saveToken).toHaveBeenCalledWith({
+      expect(mockRefreshTokenService.createToken).toHaveBeenCalledWith({
         userId: mockUser.id,
-        token: mockTokens.refreshToken,
-        expiresAt: expect.any(Date),
+        data: {
+          token: mockTokens.refreshToken,
+          expiresAt: expect.any(Date),
+        },
       });
     });
 
@@ -278,7 +280,9 @@ describe("LocalAuthService", () => {
       (mockUserService.getUser as jest.Mock).mockResolvedValue(mockUser);
       (mockCryptoService.comparePasswords as jest.Mock).mockResolvedValue(true);
       const error = new Error("Token creation failed");
-      (mockRefreshTokenService.saveToken as jest.Mock).mockRejectedValue(error);
+      (mockRefreshTokenService.createToken as jest.Mock).mockRejectedValue(
+        error
+      );
 
       await expect(localAuthService.loginUser(loginDto)).rejects.toThrow(error);
     });
@@ -299,14 +303,16 @@ describe("LocalAuthService", () => {
       );
     });
 
-    it("should handle saveToken failure", async () => {
+    it("should handle createToken failure", async () => {
       (mockUserService.getUser as jest.Mock).mockResolvedValue(mockUser);
 
       (mockCryptoService.comparePasswords as jest.Mock).mockResolvedValue(true);
 
       const error = new Error("Database error");
 
-      (mockRefreshTokenService.saveToken as jest.Mock).mockRejectedValue(error);
+      (mockRefreshTokenService.createToken as jest.Mock).mockRejectedValue(
+        error
+      );
 
       await expect(localAuthService.loginUser(loginDto)).rejects.toThrow(error);
     });
@@ -361,7 +367,7 @@ describe("LocalAuthService", () => {
       (mockJwtService.generateAuthTokens as jest.Mock).mockReturnValue(
         mockTokens
       );
-      (mockRefreshTokenService.saveToken as jest.Mock).mockResolvedValue(
+      (mockRefreshTokenService.createToken as jest.Mock).mockResolvedValue(
         undefined
       );
 

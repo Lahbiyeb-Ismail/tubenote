@@ -67,10 +67,12 @@ export class LocalAuthService implements ILocalAuthService {
       user.id
     );
 
-    await this._refreshTokenService.saveToken({
+    await this._refreshTokenService.createToken({
       userId: user.id,
-      token: refreshToken,
-      expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+      data: {
+        token: refreshToken,
+        expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+      },
     });
 
     return { accessToken, refreshToken };
