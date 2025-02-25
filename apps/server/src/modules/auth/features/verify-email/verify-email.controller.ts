@@ -1,8 +1,10 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { IParamTokenDto } from "@/modules/shared";
 import type { EmptyRecord, TypedRequest } from "@/types";
+
+import type { IParamTokenDto } from "@/modules/shared";
+
 import type {
   IVerifyEmailController,
   IVerifyEmailService,

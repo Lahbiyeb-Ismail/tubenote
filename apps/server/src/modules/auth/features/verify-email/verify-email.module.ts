@@ -1,7 +1,7 @@
 import prismaClient from "@config/database.config";
 
 import { jwtService } from "@modules/auth/utils/services/jwt/jwt.module";
-import { userService } from "@modules/user/user.module";
+import { userService } from "@modules/user";
 
 import { VerifyEmailController } from "./verify-email.controller";
 import { VerifyEmailRepository } from "./verify-email.repository";

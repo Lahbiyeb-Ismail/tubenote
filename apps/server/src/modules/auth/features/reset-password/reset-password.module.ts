@@ -1,5 +1,5 @@
 import { mailSenderService } from "@modules/mailSender/mail-sender.module";
-import { userService } from "@modules/user/user.module";
+import { userService } from "@modules/user";
 
 import { cacheService } from "@/modules/utils/cache/cache.module";
 import { cryptoService } from "@/modules/utils/crypto";

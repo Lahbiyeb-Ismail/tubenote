@@ -1,20 +1,19 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
+import type { EmptyRecord, TypedRequest } from "@/types";
+
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 
 import { BadRequestError, NotFoundError } from "@/errors";
 
-import type { EmptyRecord, TypedRequest } from "@/types";
+import type { IParamTokenDto } from "@/modules/shared";
 
 import { VerifyEmailController } from "../verify-email.controller";
-
 import type {
   IVerifyEmailController,
   IVerifyEmailService,
 } from "../verify-email.types";
-
-import type { IParamTokenDto } from "@/modules/shared";
 
 describe("VerifyEmailController", () => {
   let mockResponse: Partial<Response>;

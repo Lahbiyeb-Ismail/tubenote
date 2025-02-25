@@ -2,10 +2,10 @@ import type { Response } from "express";
 
 import type { EmptyRecord, TypedRequest } from "@/types";
 
-import type { VerifyEmailToken } from "./verify-email.model";
-
 import type { ICreateDto, IParamTokenDto } from "@/modules/shared";
-import type { FindActiveTokenDto } from "./dtos/find-active-token.dto";
+
+import type { FindActiveTokenDto } from "./dtos";
+import type { VerifyEmailToken } from "./verify-email.model";
 
 export interface IVerifyEmailRepository {
   findActiveToken(dto: FindActiveTokenDto): Promise<VerifyEmailToken | null>;

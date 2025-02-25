@@ -6,11 +6,11 @@ import handleAsyncOperation from "@/utils/handle-async-operation";
 
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 
+import type { ICreateDto } from "@/modules/shared";
+
+import type { FindActiveTokenDto } from "./dtos";
 import type { VerifyEmailToken } from "./verify-email.model";
 import type { IVerifyEmailRepository } from "./verify-email.types";
-
-import type { ICreateDto } from "@/modules/shared";
-import type { FindActiveTokenDto } from "./dtos/find-active-token.dto";
 
 export class VerifyEmailRepository implements IVerifyEmailRepository {
   constructor(private readonly _db: PrismaClient) {}

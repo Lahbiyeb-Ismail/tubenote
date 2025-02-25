@@ -1,23 +1,24 @@
+import type { JwtPayload } from "@/types";
+
 import {
   VERIFY_EMAIL_TOKEN_EXPIRES_IN,
   VERIFY_EMAIL_TOKEN_SECRET,
 } from "@/constants/auth.contants";
-import { BadRequestError, DatabaseError, NotFoundError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+
+import { BadRequestError, DatabaseError, NotFoundError } from "@/errors";
 
 import logger from "@/utils/logger";
 import { stringToDate } from "@utils/convert-string-to-date";
 
-import { VerifyEmailService } from "../verify-email.service";
-
-import type { User } from "@modules/user/user.model";
-import type { VerifyEmailToken } from "../verify-email.model";
+import type { ICreateDto } from "@/modules/shared";
+import type { IUserService, User } from "@modules/user";
 
 import type { SignTokenDto } from "@/modules/auth/utils/services/jwt/dtos/sign-token.dto";
 import type { IJwtService } from "@/modules/auth/utils/services/jwt/jwt.types";
-import type { ICreateDto } from "@/modules/shared";
-import type { JwtPayload } from "@/types";
-import type { IUserService } from "@modules/user/user.types";
+
+import type { VerifyEmailToken } from "../verify-email.model";
+import { VerifyEmailService } from "../verify-email.service";
 import type { IVerifyEmailRepository } from "../verify-email.types";
 
 jest.mock("@utils/convert-string-to-date");
