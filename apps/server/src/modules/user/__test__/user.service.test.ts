@@ -1,12 +1,18 @@
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import { BadRequestError, ConflictError, NotFoundError } from "@/errors";
 
-import type { User } from "@/modules/user/user.model";
-import { UserService } from "@/modules/user/user.service";
-
 import type { ICryptoService } from "@/modules/utils/crypto";
-import type { CreateUserDto, UpdatePasswordDto, UpdateUserDto } from "../dtos";
-import type { IUserRepository, IUserService } from "../user.types";
+
+import {
+  ICreateUserDto,
+  IResetPasswordDto,
+  IUpdatePasswordDto,
+  IUpdateUserDto,
+  IUserRepository,
+  IUserService,
+  User,
+  UserService,
+} from "@modules/user";
 
 describe("UserService", () => {
   let userService: IUserService;
@@ -50,10 +56,13 @@ describe("UserService", () => {
   });
 
   describe("UserService - createUser", () => {
-    const createUserDto: CreateUserDto = {
-      email: "new@example.com",
-      password: "ValidPass123!",
-      username: "newuser",
+    const createUserDto: ICreateUserDto = {
+      data: {
+        email: "new@example.com",
+        password: "ValidPass123!",
+        username: "newuser",
+        isEmailVerified: false,
+      },
     };
 
     it("should create user with hashed password within transaction", async () => {
@@ -61,7 +70,7 @@ describe("UserService", () => {
       const txMock = {
         getUserByEmail: jest.fn().mockResolvedValue(null),
         createUser: jest.fn().mockResolvedValue({
-          ...createUserDto,
+          ...createUserDto.data,
           password: "hashed123",
         }),
       };
@@ -74,10 +83,14 @@ describe("UserService", () => {
 
       const result = await userService.createUser(createUserDto);
 
-      expect(txMock.getUserByEmail).toHaveBeenCalledWith(createUserDto.email);
+      expect(txMock.getUserByEmail).toHaveBeenCalledWith(
+        createUserDto.data.email
+      );
       expect(txMock.createUser).toHaveBeenCalledWith({
-        ...createUserDto,
-        password: "hashed123",
+        data: {
+          ...createUserDto.data,
+          password: "hashed123",
+        },
       });
       expect(result.password).toBe("hashed123");
     });
@@ -133,7 +146,9 @@ describe("UserService", () => {
   });
 
   describe("UserService - getOrCreateUser", () => {
-    const createUserDto: CreateUserDto = { ...mockUser, password: "password" };
+    const createUserDto: ICreateUserDto = {
+      data: { ...mockUser, password: "password" },
+    };
 
     it("should return existing user without creating", async () => {
       const txMock = {
@@ -230,9 +245,12 @@ describe("UserService", () => {
   });
 
   describe("UserService - updateUser", () => {
-    const updateUserDto: UpdateUserDto = {
-      username: "newuser",
-      email: "new@example.com",
+    const updateUserDto: IUpdateUserDto = {
+      id: mockUserId,
+      data: {
+        username: "newuser",
+        email: "new@example.com",
+      },
     };
 
     it("should update user within transaction", async () => {
@@ -241,16 +259,16 @@ describe("UserService", () => {
         getUserByEmail: jest.fn().mockResolvedValue(null),
         updateUser: jest
           .fn()
-          .mockResolvedValue({ ...mockUser, ...updateUserDto }),
+          .mockResolvedValue({ ...mockUser, ...updateUserDto.data }),
       };
       (mockUserRepository.transaction as jest.Mock).mockImplementation(
         async (fn) => fn(txMock)
       );
 
-      const result = await userService.updateUser(mockUserId, updateUserDto);
+      const result = await userService.updateUser(updateUserDto);
 
-      expect(txMock.updateUser).toHaveBeenCalledWith(mockUserId, updateUserDto);
-      expect(result).toEqual({ ...mockUser, ...updateUserDto });
+      expect(txMock.updateUser).toHaveBeenCalledWith(updateUserDto);
+      expect(result).toEqual({ ...mockUser, ...updateUserDto.data });
     });
 
     it("should return found user without update if dto is empty", async () => {
@@ -263,7 +281,7 @@ describe("UserService", () => {
         async (fn) => fn(txMock)
       );
 
-      const result = await userService.updateUser(mockUserId, {});
+      const result = await userService.updateUser({ id: mockUserId, data: {} });
 
       expect(result).toEqual(mockUser);
 
@@ -286,9 +304,9 @@ describe("UserService", () => {
         async (fn) => fn(txMock)
       );
 
-      await expect(
-        userService.updateUser(mockUserId, updateUserDto)
-      ).rejects.toThrow(new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS));
+      await expect(userService.updateUser(updateUserDto)).rejects.toThrow(
+        new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS)
+      );
     });
 
     it("should allow email update to current email", async () => {
@@ -301,8 +319,11 @@ describe("UserService", () => {
         async (fn) => fn(txMock)
       );
 
-      const result = await userService.updateUser(mockUserId, {
-        email: mockUserEmail,
+      const result = await userService.updateUser({
+        id: mockUserId,
+        data: {
+          email: mockUserEmail,
+        },
       });
       expect(txMock.updateUser).toHaveBeenCalled();
       expect(result).toEqual(mockUser);
@@ -318,14 +339,15 @@ describe("UserService", () => {
         async (fn) => fn(txMock)
       );
 
-      await expect(
-        userService.updateUser(mockUserId, updateUserDto)
-      ).rejects.toThrow("Update failed");
+      await expect(userService.updateUser(updateUserDto)).rejects.toThrow(
+        "Update failed"
+      );
     });
   });
 
   describe("UserService - updatePassword", () => {
-    const updatePassDto: UpdatePasswordDto = {
+    const updatePassDto: IUpdatePasswordDto = {
+      id: mockUserId,
       currentPassword: "oldPass123!",
       newPassword: "newPass123!",
     };
@@ -346,10 +368,7 @@ describe("UserService", () => {
         "newHashed"
       );
 
-      const result = await userService.updatePassword(
-        mockUserId,
-        updatePassDto
-      );
+      const result = await userService.updatePassword(updatePassDto);
       expect(result.password).toBe("newHashed");
     });
 
@@ -364,9 +383,7 @@ describe("UserService", () => {
         false
       );
 
-      await expect(
-        userService.updatePassword(mockUserId, updatePassDto)
-      ).rejects.toThrow(
+      await expect(userService.updatePassword(updatePassDto)).rejects.toThrow(
         new BadRequestError(ERROR_MESSAGES.INVALID_CREDENTIALS)
       );
     });
@@ -381,7 +398,8 @@ describe("UserService", () => {
       (mockCryptoService.comparePasswords as jest.Mock).mockResolvedValue(true);
 
       await expect(
-        userService.updatePassword(mockUserId, {
+        userService.updatePassword({
+          id: mockUserId,
           currentPassword: "pass",
           newPassword: "pass",
         })
@@ -401,9 +419,9 @@ describe("UserService", () => {
         new Error("Compare error")
       );
 
-      await expect(
-        userService.updatePassword(mockUserId, updatePassDto)
-      ).rejects.toThrow("Compare error");
+      await expect(userService.updatePassword(updatePassDto)).rejects.toThrow(
+        "Compare error"
+      );
     });
 
     it("should propagate error if crypto.hashPassword rejects during updatePassword", async () => {
@@ -419,9 +437,9 @@ describe("UserService", () => {
         new Error("Hash error")
       );
 
-      await expect(
-        userService.updatePassword(mockUserId, updatePassDto)
-      ).rejects.toThrow("Hash error");
+      await expect(userService.updatePassword(updatePassDto)).rejects.toThrow(
+        "Hash error"
+      );
     });
 
     it("should propagate error if tx.updatePassword rejects", async () => {
@@ -439,13 +457,18 @@ describe("UserService", () => {
         "newHashed"
       );
 
-      await expect(
-        userService.updatePassword(mockUserId, updatePassDto)
-      ).rejects.toThrow("UpdatePassword failed");
+      await expect(userService.updatePassword(updatePassDto)).rejects.toThrow(
+        "UpdatePassword failed"
+      );
     });
   });
 
   describe("UserService - resetPassword", () => {
+    const resetPasswordDto: IResetPasswordDto = {
+      id: mockUserId,
+      newPassword: "newPassword",
+    };
+
     it("should reset password within transaction", async () => {
       const txMock = {
         getUserById: jest.fn().mockResolvedValue(mockUser),
@@ -461,7 +484,7 @@ describe("UserService", () => {
         "newHashed"
       );
 
-      const result = await userService.resetPassword(mockUserId, "newPassword");
+      const result = await userService.resetPassword(resetPasswordDto);
       expect(result.password).toBe("newHashed");
     });
 
@@ -474,7 +497,10 @@ describe("UserService", () => {
       );
 
       await expect(
-        userService.resetPassword("invalid", "newPass")
+        userService.resetPassword({
+          id: "invalid_id",
+          newPassword: "newPassword",
+        })
       ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
     });
 
@@ -490,9 +516,9 @@ describe("UserService", () => {
         new Error("Hash reset error")
       );
 
-      await expect(
-        userService.resetPassword(mockUserId, "newPassword")
-      ).rejects.toThrow("Hash reset error");
+      await expect(userService.resetPassword(resetPasswordDto)).rejects.toThrow(
+        "Hash reset error"
+      );
     });
 
     it("should propagate error if tx.updatePassword rejects during resetPassword", async () => {
@@ -509,9 +535,9 @@ describe("UserService", () => {
         "newHashed"
       );
 
-      await expect(
-        userService.resetPassword(mockUserId, "newPassword")
-      ).rejects.toThrow("Tx update failed");
+      await expect(userService.resetPassword(resetPasswordDto)).rejects.toThrow(
+        "Tx update failed"
+      );
     });
   });
 
@@ -594,8 +620,8 @@ describe("UserService", () => {
       );
 
       const [result1, result2] = await Promise.all([
-        userService.getOrCreateUser(mockUser),
-        userService.getOrCreateUser(mockUser),
+        userService.getOrCreateUser({ data: mockUser }),
+        userService.getOrCreateUser({ data: mockUser }),
       ]);
 
       expect(result1).toEqual(mockUser);
