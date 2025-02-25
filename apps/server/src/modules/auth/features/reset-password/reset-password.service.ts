@@ -6,7 +6,8 @@ import logger from "@/utils/logger";
 import type { ICacheService } from "@/modules/utils/cache/cache.types";
 import type { ICryptoService } from "@/modules/utils/crypto";
 import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
-import type { IUserService } from "@modules/user/user.types";
+import type { IUserService } from "@modules/user";
+
 import type { IResetPasswordService } from "./reset-password.types";
 
 export class ResetPasswordService implements IResetPasswordService {
@@ -46,7 +47,11 @@ export class ResetPasswordService implements IResetPasswordService {
     const deleteResult = this._cacheService.del(token);
     logger.warn(`Remove reset token ${token} from cache: ${deleteResult}`);
 
-    await this._userService.resetPassword(userId, password);
+    await this._userService.resetPassword({
+      id: userId,
+      newPassword: password,
+    });
+
     logger.info(`Password reset for user ${userId}`);
   }
 
