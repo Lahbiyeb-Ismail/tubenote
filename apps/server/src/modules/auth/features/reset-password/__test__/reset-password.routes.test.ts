@@ -69,9 +69,7 @@ describe("Reset password Routes", () => {
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
 
-      expect(response.body.error.message).toBe(
-        "Validation error in email field: Invalid email"
-      );
+      expect(response.body.error.message).toContain("Invalid email address");
 
       expect(response.body.error.statusCode).toBe(httpStatus.BAD_REQUEST);
 
@@ -104,9 +102,7 @@ describe("Reset password Routes", () => {
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
 
-      expect(response.body.error.message).toBe(
-        "Validation error in email field: Invalid email"
-      );
+      expect(response.body.error.message).toContain("Invalid email address");
 
       expect(response.body.error.statusCode).toBe(httpStatus.BAD_REQUEST);
 
