@@ -10,7 +10,7 @@ import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 import { ICacheService } from "@modules/utils/cache/cache.types";
 import { IGoogleAuthService } from "./google.types";
 
-import type { User } from "@modules/user/user.model";
+import type { User } from "@modules/user";
 
 import type { OAuthCodePayloadDto, OAuthResponseDto } from "@modules/auth/dtos";
 import type { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";

@@ -1,7 +1,7 @@
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import type { Profile } from "passport-google-oauth20";
 
-import type { IUserService } from "@modules/user/user.types";
+import type { IUserService } from "@modules/user";
 
 export interface GoogleConfig {
   clientID: string;
@@ -44,12 +44,14 @@ export class GoogleAuthStrategy {
       }
 
       const user = await this.userService.getOrCreateUser({
-        email,
-        profilePicture,
-        username: displayName,
-        password: id,
-        googleId: id,
-        isEmailVerified: true,
+        data: {
+          email,
+          profilePicture,
+          username: displayName,
+          password: id,
+          googleId: id,
+          isEmailVerified: true,
+        },
       });
 
       if (!user) {
