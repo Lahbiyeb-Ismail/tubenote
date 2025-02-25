@@ -2,7 +2,7 @@ import { BadRequestError } from "@/errors";
 import { AuthService } from "../auth.service";
 
 import type { ICacheService } from "@modules/utils/cache/cache.types";
-import type { LogoutDto, OAuthCodePayloadDto } from "../dtos";
+import type { ILogoutDto, OAuthCodePayloadDto } from "../dtos";
 import type { IRefreshTokenService } from "../features/refresh-token/refresh-token.types";
 
 describe("AuthService", () => {
@@ -29,7 +29,7 @@ describe("AuthService", () => {
   });
 
   describe("AuthService - logoutUser", () => {
-    const validLogoutDto: LogoutDto = {
+    const validLogoutDto: ILogoutDto = {
       userId: "user-123",
       refreshToken: "refresh-token-123",
     };

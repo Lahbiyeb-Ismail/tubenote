@@ -2,11 +2,11 @@ import type { Response } from "express";
 
 import type { TypedRequest } from "@/types";
 
-import type { AuthResponseDto, LogoutDto, OAuthCodeDto } from "./dtos";
+import type { IAuthResponseDto, ILogoutDto, OAuthCodeDto } from "./dtos";
 
 export interface IAuthService {
-  logoutUser(logoutUserDto: LogoutDto): Promise<void>;
-  exchangeOauthCodeForTokens(code: string): Promise<AuthResponseDto>;
+  logoutUser(logoutDto: ILogoutDto): Promise<void>;
+  exchangeOauthCodeForTokens(code: string): Promise<IAuthResponseDto>;
 }
 
 export interface IAuthController {

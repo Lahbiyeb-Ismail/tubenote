@@ -9,7 +9,7 @@ import { AuthController } from "../auth.controller";
 import type { TypedRequest } from "@/types";
 
 import type { IAuthService } from "../auth.types";
-import type { AuthResponseDto, OAuthCodeDto } from "../dtos";
+import type { IAuthResponseDto, OAuthCodeDto } from "../dtos";
 
 describe("AuthController", () => {
   let authController: AuthController;
@@ -125,7 +125,7 @@ describe("AuthController", () => {
 
     const mockCode = "valid-code-123";
 
-    const mockAuthResponse: AuthResponseDto = {
+    const mockAuthResponse: IAuthResponseDto = {
       accessToken: "access-token-123",
       refreshToken: "refresh-token-123",
     };
