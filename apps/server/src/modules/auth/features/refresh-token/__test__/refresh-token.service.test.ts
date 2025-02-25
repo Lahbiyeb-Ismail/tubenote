@@ -5,17 +5,18 @@ import {
   UnauthorizedError,
 } from "@/errors";
 
+import type { JwtPayload } from "@/types";
+
 import { REFRESH_TOKEN_EXPIRES_IN } from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { stringToDate } from "@utils/convert-string-to-date";
 
-import { RefreshTokenService } from "../refresh-token.service";
-
-import type { IAuthResponseDto, IRefreshDto } from "@/modules/auth/dtos";
+import type { IAuthResponseDto, IRefreshDto } from "@/modules/auth";
 import type { IJwtService } from "@/modules/auth/utils/services/jwt/jwt.types";
 import type { ICreateDto } from "@/modules/shared";
-import type { JwtPayload } from "@/types";
+
 import type { RefreshToken } from "../refresh-token.model";
+import { RefreshTokenService } from "../refresh-token.service";
 import {
   type IRefreshTokenRepository,
   type IRefreshTokenService,

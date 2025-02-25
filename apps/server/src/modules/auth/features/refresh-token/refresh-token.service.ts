@@ -8,17 +8,16 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { stringToDate } from "@utils/convert-string-to-date";
 import logger from "@utils/logger";
 
+import type { IAuthResponseDto, IRefreshDto } from "@modules/auth";
 import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 
-import type { IAuthResponseDto, IRefreshDto } from "@modules/auth/dtos";
+import type { ICreateDto } from "@/modules/shared";
 
 import type { RefreshToken } from "./refresh-token.model";
 import type {
   IRefreshTokenRepository,
   IRefreshTokenService,
 } from "./refresh-token.types";
-
-import type { ICreateDto } from "@/modules/shared";
 
 export class RefreshTokenService implements IRefreshTokenService {
   constructor(

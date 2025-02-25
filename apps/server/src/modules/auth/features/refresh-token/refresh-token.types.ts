@@ -4,7 +4,7 @@ import type { TypedRequest } from "@/types";
 
 import type { RefreshToken } from "./refresh-token.model";
 
-import type { IAuthResponseDto, IRefreshDto } from "@modules/auth/dtos";
+import type { IAuthResponseDto, IRefreshDto } from "@modules/auth";
 
 import type { ICreateDto } from "@/modules/shared";
 
