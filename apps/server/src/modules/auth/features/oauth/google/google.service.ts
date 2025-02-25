@@ -8,12 +8,16 @@ import logger from "@utils/logger";
 import { ICryptoService } from "@/modules/utils/crypto";
 import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 import { ICacheService } from "@modules/utils/cache/cache.types";
+
 import { IGoogleAuthService } from "./google.types";
 
 import type { User } from "@modules/user";
 
-import type { OAuthCodePayloadDto, OAuthResponseDto } from "@modules/auth/dtos";
-import type { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
+import type {
+  IRefreshTokenService,
+  OAuthCodePayloadDto,
+  OAuthResponseDto,
+} from "@modules/auth";
 
 export class GoogleAuthService implements IGoogleAuthService {
   constructor(

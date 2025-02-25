@@ -12,7 +12,7 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import { IGoogleAuthController, IGoogleAuthService } from "./google.types";
 
-import type { User } from "@modules/user/user.model";
+import type { User } from "@modules/user";
 
 export class GoogleController implements IGoogleAuthController {
   constructor(private readonly _googleAuthService: IGoogleAuthService) {}

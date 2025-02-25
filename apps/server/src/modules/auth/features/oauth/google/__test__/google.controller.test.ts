@@ -1,5 +1,7 @@
 import { Response } from "express";
 
+import type { TypedRequest } from "@/types";
+
 import { refreshTokenCookieConfig } from "@/config/cookie.config";
 import envConfig from "@/config/env.config";
 
@@ -9,11 +11,10 @@ import { REFRESH_TOKEN_NAME } from "@/constants/auth.contants";
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 
 import { GoogleController } from "../google.controller";
-
-import type { OAuthResponseDto } from "@/modules/auth/dtos";
-import type { User } from "@/modules/user/user.model";
-import type { TypedRequest } from "@/types";
 import type { IGoogleAuthService } from "../google.types";
+
+import type { OAuthResponseDto } from "@/modules/auth";
+import type { User } from "@/modules/user";
 
 describe("GoogleController", () => {
   let googleController: GoogleController;

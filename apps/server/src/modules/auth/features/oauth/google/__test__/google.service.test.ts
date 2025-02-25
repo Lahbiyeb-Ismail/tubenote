@@ -3,17 +3,17 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import { GoogleAuthService } from "../google.service";
 
-import type { ICacheService } from "@/modules/utils/cache/cache.types";
-import type { ICryptoService } from "@/modules/utils/crypto";
-import type { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
-import type { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
-
 import type {
+  IRefreshTokenService,
   OAuthCodePayloadDto,
   OAuthResponseDto,
-} from "@/modules/auth/dtos";
-import type { RefreshToken } from "@/modules/auth/features/refresh-token/refresh-token.model";
-import type { User } from "@modules/user/user.model";
+  RefreshToken,
+} from "@modules/auth";
+import type { User } from "@modules/user";
+
+import type { ICacheService } from "@/modules/utils/cache/cache.types";
+import type { ICryptoService } from "@/modules/utils/crypto";
+import type { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
 
 describe("GoogleAuthService", () => {
   let googleAuthService: GoogleAuthService;

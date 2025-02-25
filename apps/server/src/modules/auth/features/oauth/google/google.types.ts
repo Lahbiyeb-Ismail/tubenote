@@ -4,7 +4,7 @@ import type { TypedRequest } from "@/types";
 
 import type { User } from "@modules/user";
 
-import type { OAuthCodePayloadDto, OAuthResponseDto } from "@modules/auth/dtos";
+import type { OAuthCodePayloadDto, OAuthResponseDto } from "@modules/auth";
 
 export interface IGoogleAuthService {
   googleLogin(user: User): Promise<OAuthResponseDto>;
