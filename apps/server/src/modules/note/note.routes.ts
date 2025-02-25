@@ -9,7 +9,7 @@ import {
   updateNoteSchema,
 } from "@modules/note";
 
-import { paramIdSchema, querypaginationSchema } from "@modules/shared";
+import { idParamSchema, paginationQuerySchema } from "@modules/shared";
 
 const router = Router();
 
@@ -20,7 +20,7 @@ router.use(isAuthenticated);
 // - POST /: Create a new note (requires request body validation).
 router
   .route("/")
-  .get(validateRequest({ query: querypaginationSchema }), (req, res) =>
+  .get(validateRequest({ query: paginationQuerySchema }), (req, res) =>
     noteController.getUserNotes(req, res)
   )
   .post(validateRequest({ body: createNoteSchema }), (req, res) =>
@@ -40,8 +40,8 @@ router
 // - GET /video/:id: Get all notes for a specific video (requires request params validation).
 router.route("/video/:id").get(
   validateRequest({
-    params: paramIdSchema,
-    query: querypaginationSchema,
+    params: idParamSchema,
+    query: paginationQuerySchema,
   }),
   (req, res) => noteController.getNotesByVideoId(req, res)
 );
@@ -51,7 +51,7 @@ router.route("/video/:id").get(
 // - DELETE /:id: Delete a specific note by its ID (requires request params validation).
 router
   .route("/:id")
-  .all(validateRequest({ params: paramIdSchema }))
+  .all(validateRequest({ params: idParamSchema }))
   .patch(validateRequest({ body: updateNoteSchema }), (req, res) =>
     noteController.updateNote(req, res)
   )
