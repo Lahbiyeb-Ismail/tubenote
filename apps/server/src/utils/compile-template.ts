@@ -1,7 +1,6 @@
 import Handlebars from "handlebars";
 
-import { LOGO_PATH } from "@constants/app.contants";
-import type { EmailContent } from "@modules/shared";
+import { type EmailContent, LOGO_PATH } from "@modules/shared";
 
 import readTemplate from "./read-template";
 

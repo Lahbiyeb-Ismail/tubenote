@@ -1,4 +1,4 @@
-import { YOUTUBE_API_KEY, YOUTUBE_API_URL } from "@constants/app.contants";
+import { YOUTUBE_API_KEY, YOUTUBE_API_URL } from "@modules/shared";
 import { ERROR_MESSAGES } from "@modules/shared";
 
 import { BadRequestError, NotFoundError } from "@modules/shared";
