@@ -1,7 +1,7 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 
-import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import handleAsyncOperation from "@/utils/handle-async-operation";
+import { ERROR_MESSAGES } from "@modules/shared";
 
 import type { INoteRepository, Note } from "@modules/note";
 
@@ -63,7 +63,7 @@ export class NoteRepository implements INoteRepository {
             userId,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
     );
   }
 
@@ -82,7 +82,7 @@ export class NoteRepository implements INoteRepository {
             userId: createNoteDto.userId,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
     );
   }
 
@@ -105,7 +105,7 @@ export class NoteRepository implements INoteRepository {
           },
           data,
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_UPDATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE }
     );
   }
 
@@ -123,7 +123,7 @@ export class NoteRepository implements INoteRepository {
         this._db.note.delete({
           where: { id, userId },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_DELETE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_DELETE }
     );
   }
 

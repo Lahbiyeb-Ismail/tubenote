@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
 
 import type {
   IAuthResponseDto,
@@ -191,9 +191,7 @@ describe("LocalAuthService", () => {
     });
 
     it("should handle concurrent user registration with same email", async () => {
-      const conflictError = new ConflictError(
-        ERROR_MESSAGES.EMAIL_ALREADY_EXISTS
-      );
+      const conflictError = new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS);
 
       (mockUserService.createUser as jest.Mock).mockRejectedValueOnce(
         conflictError
@@ -264,7 +262,7 @@ describe("LocalAuthService", () => {
       });
 
       await expect(localAuthService.loginUser(loginDto)).rejects.toThrow(
-        new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED)
+        new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED)
       );
       expect(mockCryptoService.comparePasswords).not.toHaveBeenCalled();
     });

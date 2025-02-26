@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
 
 import { stringToDate } from "@utils/convert-string-to-date";
 
@@ -53,7 +53,7 @@ export class LocalAuthService implements ILocalAuthService {
     const user = await this._userService.getUser({ email });
 
     if (!user.isEmailVerified) {
-      throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
+      throw new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED);
     }
 
     const isPasswordMatch = await this._cryptoService.comparePasswords({

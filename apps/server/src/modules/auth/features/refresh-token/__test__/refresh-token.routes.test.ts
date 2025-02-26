@@ -7,8 +7,8 @@ import isAuthenticated from "@/middlewares/auth.middleware";
 
 import { UnauthorizedError } from "@modules/shared";
 
-import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import { REFRESH_TOKEN_NAME } from "@modules/auth";
+import { ERROR_MESSAGES } from "@modules/shared";
 
 import { refreshTokenController } from "../refresh-token.module";
 

@@ -3,7 +3,7 @@ import httpStatus from "http-status";
 
 import type { EmptyRecord, TypedRequest } from "@/types";
 
-import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
 
 import { BadRequestError, NotFoundError } from "@modules/shared";
 
@@ -68,7 +68,7 @@ describe("VerifyEmailController", () => {
     });
 
     it("should throw a BadRequestError if email is already verified", async () => {
-      const error = new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
+      const error = new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED);
       mockVerifyEmailService.verifyUserEmail.mockRejectedValue(error);
 
       await expect(

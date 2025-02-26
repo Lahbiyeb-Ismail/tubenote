@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
 import { UnauthorizedError } from "@modules/shared";
 
 import type {
@@ -128,9 +128,7 @@ describe("GoogleAuthService", () => {
 
       await expect(
         googleAuthService.googleLogin(unverifiedUser)
-      ).rejects.toThrow(
-        new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED)
-      );
+      ).rejects.toThrow(new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED));
     });
 
     it("should propagate jwtService erros", async () => {

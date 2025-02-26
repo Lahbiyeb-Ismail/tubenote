@@ -1,10 +1,10 @@
 import type { JwtPayload } from "@/types";
 
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import {
   VERIFY_EMAIL_TOKEN_EXPIRES_IN,
   VERIFY_EMAIL_TOKEN_SECRET,
 } from "@modules/auth";
+import { ERROR_MESSAGES } from "@modules/shared";
 
 import { BadRequestError, DatabaseError, NotFoundError } from "@modules/shared";
 
@@ -163,7 +163,7 @@ describe("VerifyEmailService methods test", () => {
       });
 
       await expect(verifyEmailService.generateToken(mockEmail)).rejects.toThrow(
-        new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED)
+        new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED)
       );
 
       expect(mockUserService.getUser).toHaveBeenCalledWith({
@@ -293,14 +293,12 @@ describe("VerifyEmailService methods test", () => {
       );
 
       mockUserService.verifyUserEmail.mockRejectedValue(
-        new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED)
+        new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED)
       );
 
       await expect(
         verifyEmailService.verifyUserEmail(mockValidToken)
-      ).rejects.toThrow(
-        new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED)
-      );
+      ).rejects.toThrow(new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED));
     });
 
     it("should throw a BadRequestError if token is not found in the database", async () => {

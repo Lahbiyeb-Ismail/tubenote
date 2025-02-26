@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
 import {
   BadRequestError,
   ForbiddenError,
@@ -149,7 +149,7 @@ describe("ResetPasswordService test suites", () => {
 
       await expect(
         resetPasswordService.sendResetToken(mockEmail)
-      ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED));
+      ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.NOT_VERIFIED));
 
       expect(mockUserService.getUser).toHaveBeenCalledWith({
         email: mockEmail,

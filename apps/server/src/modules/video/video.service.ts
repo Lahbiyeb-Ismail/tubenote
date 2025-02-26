@@ -1,5 +1,5 @@
 import { YOUTUBE_API_KEY, YOUTUBE_API_URL } from "@constants/app.contants";
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
 
 import { BadRequestError, NotFoundError } from "@modules/shared";
 

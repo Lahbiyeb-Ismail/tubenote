@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
 import { BadRequestError, ConflictError, NotFoundError } from "@modules/shared";
 
 import type { ICryptoService } from "@modules/shared";
@@ -104,7 +104,7 @@ describe("UserService", () => {
       );
 
       await expect(userService.createUser(createUserDto)).rejects.toThrow(
-        new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS)
+        new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS)
       );
     });
 
@@ -305,7 +305,7 @@ describe("UserService", () => {
       );
 
       await expect(userService.updateUser(updateUserDto)).rejects.toThrow(
-        new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS)
+        new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS)
       );
     });
 
@@ -583,7 +583,7 @@ describe("UserService", () => {
       );
 
       await expect(userService.verifyUserEmail(mockUserId)).rejects.toThrow(
-        new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED)
+        new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED)
       );
     });
 

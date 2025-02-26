@@ -5,7 +5,7 @@ import type { TypedRequest } from "@/types";
 import { refreshTokenCookieConfig } from "@/config/cookie.config";
 import envConfig from "@/config/env.config";
 
-import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
 
 import { UnauthorizedError } from "@modules/shared";
 

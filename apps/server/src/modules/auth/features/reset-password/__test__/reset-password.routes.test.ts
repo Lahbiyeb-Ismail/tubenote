@@ -3,7 +3,7 @@ import request from "supertest";
 
 import app from "@/app";
 
-import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
 
 import type { IEmailBodyDto } from "@modules/shared";
 

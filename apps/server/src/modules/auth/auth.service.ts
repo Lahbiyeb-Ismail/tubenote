@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
 
 import logger from "@/utils/logger";
 import { BadRequestError, UnauthorizedError } from "@modules/shared";

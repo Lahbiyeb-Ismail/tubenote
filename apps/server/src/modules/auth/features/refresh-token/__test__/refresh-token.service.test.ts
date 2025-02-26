@@ -7,8 +7,8 @@ import {
 
 import type { JwtPayload } from "@/types";
 
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { REFRESH_TOKEN_EXPIRES_IN } from "@modules/auth";
+import { ERROR_MESSAGES } from "@modules/shared";
 import { stringToDate } from "@utils/convert-string-to-date";
 
 import type {
@@ -232,7 +232,7 @@ describe("RefreshTokenService", () => {
     });
 
     it("should handle deleteAllTokens repository failure", async () => {
-      const dbError = new DatabaseError(ERROR_MESSAGES.FAILD_TO_DELETE);
+      const dbError = new DatabaseError(ERROR_MESSAGES.FAILED_TO_DELETE);
 
       mockRefreshTokenRepository.deleteAll.mockRejectedValue(dbError);
 
@@ -269,7 +269,7 @@ describe("RefreshTokenService", () => {
     });
 
     it("should propagate refreshTokenRepository errors", async () => {
-      const dbError = new DatabaseError(ERROR_MESSAGES.FAILD_TO_CREATE);
+      const dbError = new DatabaseError(ERROR_MESSAGES.FAILED_TO_CREATE);
 
       mockRefreshTokenRepository.createToken.mockRejectedValue(dbError);
 

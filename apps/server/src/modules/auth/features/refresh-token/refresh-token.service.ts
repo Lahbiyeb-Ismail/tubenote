@@ -1,5 +1,5 @@
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { REFRESH_TOKEN_EXPIRES_IN, REFRESH_TOKEN_SECRET } from "@modules/auth";
+import { ERROR_MESSAGES } from "@modules/shared";
 import { ForbiddenError, UnauthorizedError } from "@modules/shared";
 
 import { stringToDate } from "@utils/convert-string-to-date";

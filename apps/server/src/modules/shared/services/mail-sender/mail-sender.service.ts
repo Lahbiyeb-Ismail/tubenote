@@ -2,7 +2,7 @@ import type { Transporter } from "nodemailer";
 
 import envConfig from "@config/env.config";
 
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
 import { BadRequestError } from "@modules/shared";
 
 import compileTemplate from "@utils/compile-template";

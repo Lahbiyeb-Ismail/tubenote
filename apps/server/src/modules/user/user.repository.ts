@@ -1,7 +1,7 @@
 import handleAsyncOperation from "@/utils/handle-async-operation";
 import type { Prisma, PrismaClient } from "@prisma/client";
 
-import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
 import { DatabaseError } from "@modules/shared";
 
 import type {
@@ -45,7 +45,7 @@ export class UserRepository implements IUserRepository {
         this._db.user.create({
           data: { ...createUserDto.data },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
     );
   }
 
@@ -65,7 +65,7 @@ export class UserRepository implements IUserRepository {
             email,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
     );
   }
 
@@ -75,7 +75,7 @@ export class UserRepository implements IUserRepository {
    * @param id - The unique identifier of the user.
    * @returns A promise that resolves to the user object if found, or null if not found.
    *
-   * @throws Will throw an error if the operation fails with a message defined in ERROR_MESSAGES.FAILD_TO_FIND.
+   * @throws Will throw an error if the operation fails with a message defined in ERROR_MESSAGES.FAILED_TO_FIND.
    */
   async getUserById(id: string): Promise<User | null> {
     return handleAsyncOperation(
@@ -85,7 +85,7 @@ export class UserRepository implements IUserRepository {
             id,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
     );
   }
 
@@ -120,7 +120,7 @@ export class UserRepository implements IUserRepository {
             OR: conditions,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
     );
   }
 
@@ -140,7 +140,7 @@ export class UserRepository implements IUserRepository {
           where: { id },
           data: { ...data },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_UPDATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE }
     );
   }
 
@@ -161,7 +161,7 @@ export class UserRepository implements IUserRepository {
             password: hashedPassword,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_UPDATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE }
     );
   }
 
@@ -182,7 +182,7 @@ export class UserRepository implements IUserRepository {
             isEmailVerified: true,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_UPDATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE }
     );
   }
 }

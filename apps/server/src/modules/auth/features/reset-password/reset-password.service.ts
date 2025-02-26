@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
 import { BadRequestError, ForbiddenError } from "@modules/shared";
 
 import logger from "@/utils/logger";
@@ -24,7 +24,7 @@ export class ResetPasswordService implements IResetPasswordService {
     const user = await this._userService.getUser({ email });
 
     if (!user.isEmailVerified) {
-      throw new ForbiddenError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
+      throw new ForbiddenError(ERROR_MESSAGES.NOT_VERIFIED);
     }
 
     const resetToken = this._cryptoService.generateRandomSecureToken();

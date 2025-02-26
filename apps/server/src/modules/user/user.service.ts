@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
 
 import { BadRequestError, ConflictError, NotFoundError } from "@modules/shared";
 
@@ -62,7 +62,7 @@ export class UserService implements IUserService {
     const existingUser = await tx.getUserByEmail(email);
 
     if (existingUser) {
-      throw new ConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
+      throw new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS);
     }
 
     return null;
@@ -267,7 +267,7 @@ export class UserService implements IUserService {
       }
 
       if (user.isEmailVerified) {
-        throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
+        throw new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED);
       }
 
       return await tx.verifyUserEmail(userId);

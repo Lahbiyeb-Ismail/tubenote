@@ -1,6 +1,6 @@
 import { UnauthorizedError } from "@modules/shared";
 
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
 
 import { stringToDate } from "@utils/convert-string-to-date";
 import logger from "@utils/logger";
@@ -38,7 +38,7 @@ export class GoogleAuthService implements IGoogleAuthService {
     const { isEmailVerified, id: userId } = user;
 
     if (!isEmailVerified) {
-      throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
+      throw new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED);
     }
 
     const { accessToken, refreshToken } =

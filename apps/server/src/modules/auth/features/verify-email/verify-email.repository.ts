@@ -4,7 +4,7 @@ import { DatabaseError } from "@modules/shared";
 
 import handleAsyncOperation from "@/utils/handle-async-operation";
 
-import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
 
 import type { ICreateDto } from "@/modules/shared";
 
@@ -43,7 +43,7 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
             expiresAt: { gte: new Date() },
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
     );
   }
 
@@ -58,7 +58,7 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
             ...createTokenDto.data,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
     );
   }
 
@@ -68,7 +68,7 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
         this._db.emailVerificationToken.deleteMany({
           where: { userId },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_DELETE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_DELETE }
     );
   }
 }

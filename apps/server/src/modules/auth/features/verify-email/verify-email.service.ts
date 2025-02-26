@@ -1,8 +1,8 @@
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import {
   VERIFY_EMAIL_TOKEN_EXPIRES_IN,
   VERIFY_EMAIL_TOKEN_SECRET,
 } from "@modules/auth";
+import { ERROR_MESSAGES } from "@modules/shared";
 
 import { BadRequestError } from "@modules/shared";
 
@@ -28,7 +28,7 @@ export class VerifyEmailService implements IVerifyEmailService {
     const user = await this._userService.getUser({ email });
 
     if (user.isEmailVerified) {
-      throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
+      throw new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED);
     }
 
     const existingVerificationToken =
