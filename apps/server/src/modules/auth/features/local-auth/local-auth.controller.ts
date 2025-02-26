@@ -3,12 +3,12 @@ import httpStatus from "http-status";
 
 import type { TypedRequest } from "@/types";
 import { refreshTokenCookieConfig } from "@config/cookie.config";
-import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 
-import type { ILoginDto } from "@modules/auth";
+import { type ILoginDto, REFRESH_TOKEN_NAME } from "@modules/auth";
 
 import type { ICreateBodyDto } from "@/modules/shared";
 import type { User } from "@/modules/user";
+
 import type {
   ILocalAuthController,
   ILocalAuthService,

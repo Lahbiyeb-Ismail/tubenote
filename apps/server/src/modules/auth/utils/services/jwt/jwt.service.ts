@@ -2,13 +2,13 @@ import jwt from "jsonwebtoken";
 
 import logger from "@utils/logger";
 
+import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import {
   ACCESS_TOKEN_EXPIRES_IN,
   ACCESS_TOKEN_SECRET,
   REFRESH_TOKEN_EXPIRES_IN,
   REFRESH_TOKEN_SECRET,
-} from "@constants/auth.contants";
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+} from "@modules/auth";
 
 import { BadRequestError } from "@modules/shared";
 

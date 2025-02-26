@@ -5,12 +5,12 @@ import type { TypedRequest } from "@/types";
 import { refreshTokenCookieConfig } from "@/config/cookie.config";
 import envConfig from "@/config/env.config";
 
-import { UnauthorizedError } from "@modules/shared";
-
-import { REFRESH_TOKEN_NAME } from "@/constants/auth.contants";
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 
-import type { OAuthResponseDto } from "@/modules/auth";
+import { UnauthorizedError } from "@modules/shared";
+
+import { type OAuthResponseDto, REFRESH_TOKEN_NAME } from "@modules/auth";
+
 import type { User } from "@/modules/user";
 
 import { GoogleController } from "../google.controller";

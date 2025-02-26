@@ -1,6 +1,3 @@
-import { LocalAuthController } from "./local-auth.controller";
-import { LocalAuthService } from "./local-auth.service";
-
 import {
   jwtService,
   refreshTokenService,
@@ -9,6 +6,9 @@ import {
 import { userService } from "@modules/user";
 
 import { cryptoService, mailSenderService } from "@modules/shared";
+
+import { LocalAuthController } from "./local-auth.controller";
+import { LocalAuthService } from "./local-auth.service";
 
 const localAuthService = new LocalAuthService(
   jwtService,

@@ -1,6 +1,5 @@
 import { UnauthorizedError } from "@modules/shared";
 
-import { REFRESH_TOKEN_EXPIRES_IN } from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import { stringToDate } from "@utils/convert-string-to-date";
@@ -17,6 +16,7 @@ import type {
   OAuthResponseDto,
 } from "@modules/auth";
 
+import { REFRESH_TOKEN_EXPIRES_IN } from "../../../constants";
 import { IGoogleAuthService } from "./google.types";
 
 export class GoogleAuthService implements IGoogleAuthService {

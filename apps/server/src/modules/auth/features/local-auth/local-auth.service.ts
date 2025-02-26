@@ -1,11 +1,13 @@
-import { ForbiddenError, UnauthorizedError } from "@modules/shared";
-
-import { REFRESH_TOKEN_EXPIRES_IN } from "@/constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import { stringToDate } from "@utils/convert-string-to-date";
 
-import { ICryptoService, IMailSenderService } from "@modules/shared";
+import {
+  ForbiddenError,
+  ICryptoService,
+  IMailSenderService,
+  UnauthorizedError,
+} from "@modules/shared";
 
 import type { ICreateUserDto, IUserService, User } from "@modules/user";
 
@@ -17,6 +19,8 @@ import type {
   IRefreshTokenService,
   IVerifyEmailService,
 } from "@modules/auth";
+
+import { REFRESH_TOKEN_EXPIRES_IN } from "../../constants";
 
 export class LocalAuthService implements ILocalAuthService {
   constructor(

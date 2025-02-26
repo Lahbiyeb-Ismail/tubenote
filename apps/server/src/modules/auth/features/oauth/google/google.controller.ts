@@ -7,8 +7,8 @@ import { UnauthorizedError } from "@modules/shared";
 import { refreshTokenCookieConfig } from "@config/cookie.config";
 import envConfig from "@config/env.config";
 
-import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { REFRESH_TOKEN_NAME } from "@modules/auth";
 
 import type { User } from "@modules/user";
 

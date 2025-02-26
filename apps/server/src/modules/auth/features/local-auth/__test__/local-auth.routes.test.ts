@@ -1,13 +1,13 @@
 import httpStatus from "http-status";
 import request from "supertest";
 
-import { localAuthController } from "../local-auth.module";
-
 import app from "@/app";
 
 import type { ILoginDto } from "@/modules/auth";
 import type { ICreateBodyDto } from "@/modules/shared";
 import type { User } from "@/modules/user";
+
+import { localAuthController } from "../local-auth.module";
 
 jest.mock("../local-auth.module", () => ({
   localAuthController: {

@@ -7,8 +7,8 @@ import {
 
 import type { JwtPayload } from "@/types";
 
-import { REFRESH_TOKEN_EXPIRES_IN } from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { REFRESH_TOKEN_EXPIRES_IN } from "@modules/auth";
 import { stringToDate } from "@utils/convert-string-to-date";
 
 import type {

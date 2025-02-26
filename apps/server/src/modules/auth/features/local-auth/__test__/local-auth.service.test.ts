@@ -1,12 +1,4 @@
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
-import {
-  ConflictError,
-  ForbiddenError,
-  NotFoundError,
-  UnauthorizedError,
-} from "@modules/shared";
-
-import { LocalAuthService } from "../local-auth.service";
 
 import type {
   IAuthResponseDto,
@@ -18,7 +10,16 @@ import type {
 
 import type { ICreateUserDto, IUserService, User } from "@modules/user";
 
-import type { ICryptoService, IMailSenderService } from "@modules/shared";
+import {
+  ConflictError,
+  ForbiddenError,
+  ICryptoService,
+  IMailSenderService,
+  NotFoundError,
+  UnauthorizedError,
+} from "@modules/shared";
+
+import { LocalAuthService } from "../local-auth.service";
 
 describe("LocalAuthService", () => {
   // Mock dependencies

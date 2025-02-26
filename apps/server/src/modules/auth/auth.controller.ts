@@ -4,7 +4,7 @@ import httpStatus from "http-status";
 import type { TypedRequest } from "@/types";
 
 import { clearRefreshTokenCookieConfig } from "@config/cookie.config";
-import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
+import { REFRESH_TOKEN_NAME } from "@modules/auth";
 
 import type {
   IAuthController,

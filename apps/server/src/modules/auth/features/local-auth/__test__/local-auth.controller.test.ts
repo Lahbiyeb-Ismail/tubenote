@@ -4,14 +4,17 @@ import httpStatus from "http-status";
 import type { TypedRequest } from "@/types";
 
 import { refreshTokenCookieConfig } from "@config/cookie.config";
-import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 
-import { LocalAuthController } from "../local-auth.controller";
-
-import type { IAuthResponseDto, ILoginDto } from "@/modules/auth";
+import {
+  IAuthResponseDto,
+  ILoginDto,
+  REFRESH_TOKEN_NAME,
+} from "@/modules/auth";
 
 import type { ICreateBodyDto } from "@/modules/shared";
 import type { User } from "@/modules/user";
+
+import { LocalAuthController } from "../local-auth.controller";
 
 describe("LocalAuthController", () => {
   // Mock LocalAuthService

@@ -1,10 +1,10 @@
 import type { JwtPayload } from "@/types";
 
+import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import {
   VERIFY_EMAIL_TOKEN_EXPIRES_IN,
   VERIFY_EMAIL_TOKEN_SECRET,
-} from "@/constants/auth.contants";
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+} from "@modules/auth";
 
 import { BadRequestError, DatabaseError, NotFoundError } from "@modules/shared";
 

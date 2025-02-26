@@ -9,8 +9,8 @@ import {
   refreshTokenCookieConfig,
 } from "@config/cookie.config";
 
-import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { REFRESH_TOKEN_NAME } from "@modules/auth";
 
 import type {
   IRefreshTokenController,
