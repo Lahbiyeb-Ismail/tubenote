@@ -1,4 +1,4 @@
-import transporter from "@config/node-mailer.config";
+import transporter from "./mail-sender.config";
 
 import { MailSenderService } from "./mail-sender.service";
 
