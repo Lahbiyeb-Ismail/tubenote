@@ -7,7 +7,7 @@ import {
   clearRefreshTokenCookieConfig,
   refreshTokenCookieConfig,
 } from "@/config/cookie.config";
-import envConfig from "@/config/env.config";
+import { envConfig } from "@modules/shared";
 
 import {
   BadRequestError,

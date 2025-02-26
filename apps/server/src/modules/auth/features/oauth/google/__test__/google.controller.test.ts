@@ -3,7 +3,7 @@ import { Response } from "express";
 import type { TypedRequest } from "@/types";
 
 import { refreshTokenCookieConfig } from "@/config/cookie.config";
-import envConfig from "@/config/env.config";
+import { envConfig } from "@modules/shared";
 
 import { ERROR_MESSAGES } from "@modules/shared";
 

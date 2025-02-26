@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 
-import envConfig from "@config/env.config";
+import { envConfig } from "@modules/shared";
 import { type BaseError, NotFoundError } from "@modules/shared";
 import logger from "@utils/logger";
 

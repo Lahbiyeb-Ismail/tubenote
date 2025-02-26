@@ -17,8 +17,8 @@ import noteRoutes from "@modules/note/note.routes";
 import userRoutes from "@modules/user/user.routes";
 import videoRoutes from "@modules/video/video.routes";
 
-import envConfig from "@config/env.config";
 import { errorHandler, notFoundRoute } from "@middlewares/error.middleware";
+import { envConfig } from "@modules/shared";
 import logger from "@utils/logger";
 
 const app: Express = express();

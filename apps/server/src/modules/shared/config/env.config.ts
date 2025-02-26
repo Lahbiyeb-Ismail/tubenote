@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 import { z } from "zod";
 
 dotenv.config({
-  path: path.resolve(__dirname, "../../.env"),
+  path: path.resolve(__dirname, "../../../../.env"),
 });
 
 const envSchema = z.object({
@@ -55,7 +55,7 @@ function validateEnv(env: NodeJS.ProcessEnv): EnvSchema {
 
 const validatedEnv = validateEnv(process.env);
 
-const envConfig = {
+export const envConfig = {
   node_env: validatedEnv.NODE_ENV,
   server: {
     port: validatedEnv.PORT,
@@ -108,5 +108,3 @@ const envConfig = {
     from: validatedEnv.EMAIL_FROM,
   },
 } as const;
-
-export default envConfig;

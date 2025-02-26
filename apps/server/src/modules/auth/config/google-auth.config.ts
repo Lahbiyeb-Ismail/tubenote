@@ -1,4 +1,4 @@
-import envConfig from "@config/env.config";
+import { envConfig } from "@modules/shared";
 
 import type { GoogleConfig } from "@/modules/auth";
 

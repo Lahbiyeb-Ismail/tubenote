@@ -1,7 +1,7 @@
 import { Router } from "express";
 import passport from "passport";
 
-import envConfig from "@config/env.config";
+import { envConfig } from "@modules/shared";
 
 import { googleAuthController, googleAuthStrategy } from "./google.module";
 

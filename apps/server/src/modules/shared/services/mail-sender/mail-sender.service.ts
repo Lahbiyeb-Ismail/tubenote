@@ -1,6 +1,6 @@
 import type { Transporter } from "nodemailer";
 
-import envConfig from "@config/env.config";
+import { envConfig } from "@modules/shared";
 
 import { ERROR_MESSAGES } from "@modules/shared";
 import { BadRequestError } from "@modules/shared";

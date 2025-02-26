@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 
 import app from "@/app";
-import envConfig from "@config/env.config";
+import { envConfig } from "@modules/shared";
 import logger from "@utils/logger";
 
 /**

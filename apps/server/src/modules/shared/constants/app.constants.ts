@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import envConfig from "@config/env.config";
+import { envConfig } from "@modules/shared";
 
 /**
  * The directory path where the template files are stored.
