@@ -1,4 +1,4 @@
-import { BadRequestError } from "@/errors";
+import { BadRequestError } from "@modules/shared";
 
 import type { ICacheService } from "@modules/shared";
 

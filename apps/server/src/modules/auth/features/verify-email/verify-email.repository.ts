@@ -1,6 +1,6 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 
-import { DatabaseError } from "@/errors";
+import { DatabaseError } from "@modules/shared";
 
 import handleAsyncOperation from "@/utils/handle-async-operation";
 

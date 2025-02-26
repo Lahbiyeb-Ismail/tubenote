@@ -1,10 +1,10 @@
+import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import {
   ConflictError,
   ForbiddenError,
   NotFoundError,
   UnauthorizedError,
-} from "@/errors";
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+} from "@modules/shared";
 
 import { LocalAuthService } from "../local-auth.service";
 

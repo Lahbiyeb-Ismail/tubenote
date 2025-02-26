@@ -5,7 +5,7 @@ import type { EmptyRecord, TypedRequest } from "@/types";
 
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 
-import { BadRequestError, NotFoundError } from "@/errors";
+import { BadRequestError, NotFoundError } from "@modules/shared";
 
 import type { IParamTokenDto } from "@/modules/shared";
 

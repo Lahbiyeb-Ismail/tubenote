@@ -6,7 +6,7 @@ import {
 } from "@/constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import { BadRequestError, DatabaseError, NotFoundError } from "@/errors";
+import { BadRequestError, DatabaseError, NotFoundError } from "@modules/shared";
 
 import logger from "@/utils/logger";
 import { stringToDate } from "@utils/convert-string-to-date";

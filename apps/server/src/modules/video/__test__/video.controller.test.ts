@@ -4,7 +4,7 @@ import { mock, mockReset } from "jest-mock-extended";
 
 import type { EmptyRecord, TypedRequest } from "@/types";
 
-import { BadRequestError, NotFoundError } from "@/errors";
+import { BadRequestError, NotFoundError } from "@modules/shared";
 import { IVideoService, Video, VideoController } from "@modules/video";
 
 import type {

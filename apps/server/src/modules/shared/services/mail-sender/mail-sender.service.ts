@@ -2,8 +2,8 @@ import type { Transporter } from "nodemailer";
 
 import envConfig from "@config/env.config";
 
-import { BadRequestError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { BadRequestError } from "@modules/shared";
 
 import compileTemplate from "@utils/compile-template";
 import logger from "@utils/logger";

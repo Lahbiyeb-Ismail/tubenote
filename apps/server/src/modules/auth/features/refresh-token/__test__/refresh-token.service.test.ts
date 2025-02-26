@@ -3,7 +3,7 @@ import {
   DatabaseError,
   ForbiddenError,
   UnauthorizedError,
-} from "@/errors";
+} from "@modules/shared";
 
 import type { JwtPayload } from "@/types";
 

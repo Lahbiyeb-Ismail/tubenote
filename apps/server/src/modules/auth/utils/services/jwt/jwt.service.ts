@@ -10,7 +10,7 @@ import {
 } from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import { BadRequestError } from "@/errors";
+import { BadRequestError } from "@modules/shared";
 
 import type { JwtPayload } from "@/types";
 import {

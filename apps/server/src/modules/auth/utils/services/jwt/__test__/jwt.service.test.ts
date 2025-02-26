@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 
-import { BadRequestError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { JwtService } from "@modules/auth";
+import { BadRequestError } from "@modules/shared";
 
 describe("JwtService", () => {
   let jwtService: JwtService;

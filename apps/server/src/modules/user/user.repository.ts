@@ -2,7 +2,7 @@ import handleAsyncOperation from "@/utils/handle-async-operation";
 import type { Prisma, PrismaClient } from "@prisma/client";
 
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
-import { DatabaseError } from "@/errors";
+import { DatabaseError } from "@modules/shared";
 
 import type {
   ICreateUserDto,

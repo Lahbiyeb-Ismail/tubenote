@@ -1,4 +1,4 @@
-import { ForbiddenError, UnauthorizedError } from "@/errors";
+import { ForbiddenError, UnauthorizedError } from "@modules/shared";
 
 import { REFRESH_TOKEN_EXPIRES_IN } from "@/constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";

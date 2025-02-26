@@ -9,7 +9,11 @@ import {
 } from "@/config/cookie.config";
 import envConfig from "@/config/env.config";
 
-import { BadRequestError, ForbiddenError, UnauthorizedError } from "@/errors";
+import {
+  BadRequestError,
+  ForbiddenError,
+  UnauthorizedError,
+} from "@modules/shared";
 
 import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";

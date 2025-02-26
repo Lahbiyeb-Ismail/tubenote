@@ -5,7 +5,7 @@ import app from "@/app";
 
 import isAuthenticated from "@/middlewares/auth.middleware";
 
-import { UnauthorizedError } from "@/errors";
+import { UnauthorizedError } from "@modules/shared";
 
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";

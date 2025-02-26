@@ -1,4 +1,4 @@
-import { DatabaseError } from "@/errors";
+import { DatabaseError } from "@modules/shared";
 import { Prisma } from "@prisma/client";
 import logger from "./logger";
 

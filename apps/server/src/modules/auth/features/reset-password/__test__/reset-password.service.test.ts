@@ -1,5 +1,9 @@
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
-import { BadRequestError, ForbiddenError, NotFoundError } from "@/errors";
+import {
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+} from "@modules/shared";
 
 import { IResetPasswordService, ResetPasswordService } from "@modules/auth";
 

@@ -1,8 +1,8 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import { UnauthorizedError } from "@/errors";
 import type { TypedRequest } from "@/types";
+import { UnauthorizedError } from "@modules/shared";
 
 import {
   clearRefreshTokenCookieConfig,

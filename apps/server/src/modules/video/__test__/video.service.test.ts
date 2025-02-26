@@ -6,8 +6,8 @@ import {
   type YoutubeVideoData,
 } from "@modules/video";
 
-import { BadRequestError, NotFoundError } from "@/errors";
 import type { ICreateDto, IFindAllDto, IFindUniqueDto } from "@/modules/shared";
+import { BadRequestError, NotFoundError } from "@modules/shared";
 
 describe("VideoService methods tests cases", () => {
   let videoService: IVideoService;

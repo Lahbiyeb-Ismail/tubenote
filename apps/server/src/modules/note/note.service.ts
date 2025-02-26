@@ -1,5 +1,5 @@
-import { NotFoundError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { NotFoundError } from "@modules/shared";
 
 import type { INoteRepository, INoteService, Note } from "@modules/note";
 

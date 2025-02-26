@@ -1,5 +1,5 @@
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
-import { BadRequestError, ConflictError, NotFoundError } from "@/errors";
+import { BadRequestError, ConflictError, NotFoundError } from "@modules/shared";
 
 import type { ICryptoService } from "@modules/shared";
 

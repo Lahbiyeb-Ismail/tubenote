@@ -1,5 +1,5 @@
-import { UnauthorizedError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { UnauthorizedError } from "@modules/shared";
 
 import type {
   IJwtService,

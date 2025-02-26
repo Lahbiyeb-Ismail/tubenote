@@ -1,7 +1,7 @@
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import { BadRequestError, UnauthorizedError } from "@/errors";
 import logger from "@/utils/logger";
+import { BadRequestError, UnauthorizedError } from "@modules/shared";
 
 import type { ICacheService } from "@modules/shared";
 
