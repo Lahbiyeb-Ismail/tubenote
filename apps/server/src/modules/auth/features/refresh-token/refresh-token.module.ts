@@ -1,4 +1,4 @@
-import prismaClient from "@config/database.config";
+import { prismaClient } from "@modules/shared";
 
 import { jwtService } from "@modules/auth";
 

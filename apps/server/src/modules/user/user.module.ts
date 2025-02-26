@@ -1,4 +1,4 @@
-import prismaClient from "@config/database.config";
+import { prismaClient } from "@modules/shared";
 
 import { cryptoService } from "@modules/shared";
 
