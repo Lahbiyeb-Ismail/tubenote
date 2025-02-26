@@ -7,7 +7,7 @@ import { UnauthorizedError } from "@modules/shared";
 import {
   clearRefreshTokenCookieConfig,
   refreshTokenCookieConfig,
-} from "@config/cookie.config";
+} from "@modules/auth";
 
 import { REFRESH_TOKEN_NAME } from "@modules/auth";
 import { ERROR_MESSAGES } from "@modules/shared";

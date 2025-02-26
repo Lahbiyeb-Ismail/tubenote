@@ -3,7 +3,7 @@ import httpStatus from "http-status";
 
 import type { TypedRequest } from "@/types";
 
-import { refreshTokenCookieConfig } from "@config/cookie.config";
+import { refreshTokenCookieConfig } from "@modules/auth";
 
 import {
   IAuthResponseDto,

@@ -3,7 +3,7 @@ import httpStatus from "http-status";
 
 import type { TypedRequest } from "@/types";
 
-import { clearRefreshTokenCookieConfig } from "@config/cookie.config";
+import { clearRefreshTokenCookieConfig } from "@modules/auth";
 import { REFRESH_TOKEN_NAME } from "@modules/auth";
 
 import type {

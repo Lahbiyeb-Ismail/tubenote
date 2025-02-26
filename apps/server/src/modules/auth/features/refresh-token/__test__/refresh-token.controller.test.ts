@@ -6,7 +6,7 @@ import type { TypedRequest } from "@/types";
 import {
   clearRefreshTokenCookieConfig,
   refreshTokenCookieConfig,
-} from "@/config/cookie.config";
+} from "@modules/auth";
 import { envConfig } from "@modules/shared";
 
 import {

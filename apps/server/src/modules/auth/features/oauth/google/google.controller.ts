@@ -4,7 +4,7 @@ import type { TypedRequest } from "@/types";
 
 import { UnauthorizedError } from "@modules/shared";
 
-import { refreshTokenCookieConfig } from "@config/cookie.config";
+import { refreshTokenCookieConfig } from "@modules/auth";
 import { envConfig } from "@modules/shared";
 
 import { REFRESH_TOKEN_NAME } from "@modules/auth";
