@@ -3,12 +3,15 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { BadRequestError, UnauthorizedError } from "@/errors";
 import logger from "@/utils/logger";
 
-import type { IRefreshTokenService } from "@modules/auth";
+import type { ICacheService } from "@modules/shared";
 
-import type { IAuthService } from "./auth.types";
-
-import type { ICacheService } from "../utils/cache/cache.types";
-import type { IAuthResponseDto, ILogoutDto, OAuthCodePayloadDto } from "./dtos";
+import type {
+  IAuthResponseDto,
+  IAuthService,
+  ILogoutDto,
+  IRefreshTokenService,
+  OAuthCodePayloadDto,
+} from "@modules/auth";
 
 export class AuthService implements IAuthService {
   constructor(

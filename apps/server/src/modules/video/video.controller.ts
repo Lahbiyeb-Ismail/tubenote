@@ -7,8 +7,8 @@ import type {
   IFindAllDto,
   IParamIdDto,
   IQueryPaginationDto,
+  IResponseFormatter,
 } from "@modules/shared";
-import type { IResponseFormatter } from "@modules/utils/response-formatter";
 import type { IVideoController, IVideoService } from "@modules/video";
 
 /**

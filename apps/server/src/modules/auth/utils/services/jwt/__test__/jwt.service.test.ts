@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 import { BadRequestError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
-import { JwtService } from "../jwt.service";
+import { JwtService } from "@modules/auth";
 
 describe("JwtService", () => {
   let jwtService: JwtService;

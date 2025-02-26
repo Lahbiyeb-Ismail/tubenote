@@ -13,7 +13,7 @@ import type {
   User,
 } from "@modules/user";
 
-import type { ICryptoService } from "@modules/utils/crypto";
+import type { ICryptoService } from "@modules/shared";
 
 export class UserService implements IUserService {
   constructor(

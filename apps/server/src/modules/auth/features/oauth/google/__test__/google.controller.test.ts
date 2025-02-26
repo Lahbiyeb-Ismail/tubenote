@@ -10,11 +10,11 @@ import { UnauthorizedError } from "@/errors";
 import { REFRESH_TOKEN_NAME } from "@/constants/auth.contants";
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 
-import { GoogleController } from "../google.controller";
-import type { IGoogleAuthService } from "../google.types";
-
 import type { OAuthResponseDto } from "@/modules/auth";
 import type { User } from "@/modules/user";
+
+import { GoogleController } from "../google.controller";
+import type { IGoogleAuthService } from "../google.types";
 
 describe("GoogleController", () => {
   let googleController: GoogleController;

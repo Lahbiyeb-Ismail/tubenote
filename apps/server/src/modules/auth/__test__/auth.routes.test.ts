@@ -1,9 +1,9 @@
+import httpStatus from "http-status";
 import request from "supertest";
 
 import app from "@/app";
 
-import httpStatus from "http-status";
-import { authController } from "../auth.module";
+import { authController } from "@modules/auth";
 
 describe("Auth Routes", () => {
   beforeEach(() => {

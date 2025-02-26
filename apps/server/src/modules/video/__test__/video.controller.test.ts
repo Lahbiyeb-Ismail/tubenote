@@ -9,10 +9,10 @@ import { IVideoService, Video, VideoController } from "@modules/video";
 
 import type {
   ApiResponse,
+  IParamIdDto,
+  IQueryPaginationDto,
   IResponseFormatter,
-} from "@modules/utils/response-formatter";
-
-import type { IParamIdDto, IQueryPaginationDto } from "@/modules/shared";
+} from "@modules/shared";
 
 describe("VideoController", () => {
   const mockResponseFormatter = mock<IResponseFormatter>();

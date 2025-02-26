@@ -5,7 +5,7 @@ import isAuthenticated from "@middlewares/auth.middleware";
 
 import { oauthCodeSchema } from "@modules/shared";
 
-import { authController } from "./auth.module";
+import { authController } from "@modules/auth";
 
 import localAuthRoutes from "./features/local-auth/local-auth.routes";
 import googleAuthRoutes from "./features/oauth/google/google.routes";

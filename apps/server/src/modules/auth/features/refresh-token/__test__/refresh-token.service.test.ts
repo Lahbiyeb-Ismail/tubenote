@@ -11,8 +11,11 @@ import { REFRESH_TOKEN_EXPIRES_IN } from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { stringToDate } from "@utils/convert-string-to-date";
 
-import type { IAuthResponseDto, IRefreshDto } from "@/modules/auth";
-import type { IJwtService } from "@/modules/auth/utils/services/jwt/jwt.types";
+import type {
+  IAuthResponseDto,
+  IJwtService,
+  IRefreshDto,
+} from "@/modules/auth";
 import type { ICreateDto } from "@/modules/shared";
 
 import type { RefreshToken } from "../refresh-token.model";

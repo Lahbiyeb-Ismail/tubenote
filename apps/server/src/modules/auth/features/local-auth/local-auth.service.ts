@@ -5,17 +5,14 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import { stringToDate } from "@utils/convert-string-to-date";
 
-import { ILocalAuthService } from "./local-auth.types";
-
-import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
-import { ICryptoService } from "@modules/utils/crypto";
-
-import { IMailSenderService } from "@modules/mailSender/mail-sender.types";
+import { ICryptoService, IMailSenderService } from "@modules/shared";
 
 import type { ICreateUserDto, IUserService, User } from "@modules/user";
 
 import type {
   IAuthResponseDto,
+  IJwtService,
+  ILocalAuthService,
   ILoginDto,
   IRefreshTokenService,
   IVerifyEmailService,

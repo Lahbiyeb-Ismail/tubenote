@@ -9,11 +9,11 @@ import { BadRequestError, NotFoundError } from "@/errors";
 
 import type { IParamTokenDto } from "@/modules/shared";
 
-import { VerifyEmailController } from "../verify-email.controller";
-import type {
+import {
   IVerifyEmailController,
   IVerifyEmailService,
-} from "../verify-email.types";
+  VerifyEmailController,
+} from "@modules/auth";
 
 describe("VerifyEmailController", () => {
   let mockResponse: Partial<Response>;

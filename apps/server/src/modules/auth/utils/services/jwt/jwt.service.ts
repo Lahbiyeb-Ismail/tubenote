@@ -13,13 +13,15 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 import { BadRequestError } from "@/errors";
 
 import type { JwtPayload } from "@/types";
-import type { IAuthResponseDto } from "@modules/auth/dtos/auth.dto";
-import type { SignTokenDto } from "./dtos/sign-token.dto";
-import type { VerifyTokenDto } from "./dtos/verify-token.dto";
-import type { IJwtService } from "./jwt.types";
+import {
+  IAuthResponseDto,
+  IJwtService,
+  ISignTokenDto,
+  IVerifyTokenDto,
+} from "@modules/auth";
 
 export class JwtService implements IJwtService {
-  async verify(verifyTokenDto: VerifyTokenDto): Promise<JwtPayload> {
+  async verify(verifyTokenDto: IVerifyTokenDto): Promise<JwtPayload> {
     const { token, secret } = verifyTokenDto;
     const payload = await new Promise<JwtPayload>((resolve, reject) => {
       jwt.verify(token, secret, (err, decoded) => {
@@ -36,7 +38,7 @@ export class JwtService implements IJwtService {
     return payload;
   }
 
-  sign(signTokenDto: SignTokenDto): string {
+  sign(signTokenDto: ISignTokenDto): string {
     const { userId, secret, expiresIn } = signTokenDto;
 
     return jwt.sign({ userId }, secret, {

@@ -10,15 +10,15 @@ import { LocalAuthService } from "../local-auth.service";
 
 import type {
   IAuthResponseDto,
+  IJwtService,
   ILoginDto,
   IRefreshTokenService,
   IVerifyEmailService,
-} from "@/modules/auth";
-import type { ICreateUserDto, IUserService, User } from "@/modules/user";
+} from "@modules/auth";
 
-import type { IJwtService } from "@/modules/auth/utils/services/jwt/jwt.types";
-import type { IMailSenderService } from "@/modules/mailSender/mail-sender.types";
-import type { ICryptoService } from "@/modules/utils/crypto";
+import type { ICreateUserDto, IUserService, User } from "@modules/user";
+
+import type { ICryptoService, IMailSenderService } from "@modules/shared";
 
 describe("LocalAuthService", () => {
   // Mock dependencies

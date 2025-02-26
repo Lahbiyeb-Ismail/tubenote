@@ -2,7 +2,7 @@ import type { Response } from "express";
 
 import type { TypedRequest } from "@/types";
 
-import type { IAuthResponseDto, ILogoutDto, OAuthCodeDto } from "./dtos";
+import type { IAuthResponseDto, ILogoutDto, OAuthCodeDto } from "@modules/auth";
 
 export interface IAuthService {
   logoutUser(logoutDto: ILogoutDto): Promise<void>;

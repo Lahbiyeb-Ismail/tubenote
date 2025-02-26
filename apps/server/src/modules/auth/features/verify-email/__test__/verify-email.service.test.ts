@@ -14,12 +14,13 @@ import { stringToDate } from "@utils/convert-string-to-date";
 import type { ICreateDto } from "@/modules/shared";
 import type { IUserService, User } from "@modules/user";
 
-import type { SignTokenDto } from "@/modules/auth/utils/services/jwt/dtos/sign-token.dto";
-import type { IJwtService } from "@/modules/auth/utils/services/jwt/jwt.types";
-
-import type { VerifyEmailToken } from "../verify-email.model";
-import { VerifyEmailService } from "../verify-email.service";
-import type { IVerifyEmailRepository } from "../verify-email.types";
+import {
+  IJwtService,
+  ISignTokenDto,
+  IVerifyEmailRepository,
+  VerifyEmailService,
+  VerifyEmailToken,
+} from "@/modules/auth";
 
 jest.mock("@utils/convert-string-to-date");
 jest.mock("@/utils/logger");
@@ -96,7 +97,7 @@ describe("VerifyEmailService methods test", () => {
     },
   };
 
-  const signTokenDto: SignTokenDto = {
+  const IsignTokenDto: ISignTokenDto = {
     userId: mockUserId,
     secret: VERIFY_EMAIL_TOKEN_SECRET,
     expiresIn: VERIFY_EMAIL_TOKEN_EXPIRES_IN,
@@ -134,7 +135,7 @@ describe("VerifyEmailService methods test", () => {
         userId: mockUnverifiedUser.id,
       });
 
-      expect(mockJwtService.sign).toHaveBeenCalledWith(signTokenDto);
+      expect(mockJwtService.sign).toHaveBeenCalledWith(IsignTokenDto);
 
       expect(mockVerifyEmailRepository.createToken).toHaveBeenCalledWith(
         createTokenDto

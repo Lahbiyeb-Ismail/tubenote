@@ -1,6 +1,6 @@
 import prismaClient from "@config/database.config";
 
-import { jwtService } from "@modules/auth/utils/services/jwt/jwt.module";
+import { jwtService } from "@modules/auth";
 
 import { RefreshTokenController } from "./refresh-token.controller";
 

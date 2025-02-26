@@ -4,15 +4,15 @@ import httpStatus from "http-status";
 import type { EmptyRecord, TypedRequest } from "@/types";
 
 import type {
-  IResetPasswordController,
-  IResetPasswordService,
-} from "./reset-password.types";
-
-import type {
   IEmailBodyDto,
   IParamTokenDto,
   IPasswordBodyDto,
 } from "@/modules/shared";
+
+import type {
+  IResetPasswordController,
+  IResetPasswordService,
+} from "./reset-password.types";
 
 /**
  * Controller for handling password reset operations.

@@ -3,7 +3,7 @@ import { AuthService } from "./auth.service";
 
 import { refreshTokenService } from "@modules/auth";
 
-import { cacheService } from "@modules/utils/cache/cache.module";
+import { cacheService } from "@modules/shared";
 
 const authService = new AuthService(refreshTokenService, cacheService);
 

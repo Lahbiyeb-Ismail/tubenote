@@ -1,19 +1,19 @@
 import { UnauthorizedError } from "@/errors";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import { GoogleAuthService } from "../google.service";
-
 import type {
+  IJwtService,
   IRefreshTokenService,
   OAuthCodePayloadDto,
   OAuthResponseDto,
   RefreshToken,
 } from "@modules/auth";
+
 import type { User } from "@modules/user";
 
-import type { ICacheService } from "@/modules/utils/cache/cache.types";
-import type { ICryptoService } from "@/modules/utils/crypto";
-import type { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
+import type { ICacheService, ICryptoService } from "@modules/shared";
+
+import { GoogleAuthService } from "../google.service";
 
 describe("GoogleAuthService", () => {
   let googleAuthService: GoogleAuthService;

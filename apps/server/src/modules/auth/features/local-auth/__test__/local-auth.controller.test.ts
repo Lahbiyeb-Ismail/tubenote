@@ -1,12 +1,12 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
+import type { TypedRequest } from "@/types";
+
 import { refreshTokenCookieConfig } from "@config/cookie.config";
 import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 
 import { LocalAuthController } from "../local-auth.controller";
-
-import type { TypedRequest } from "@/types";
 
 import type { IAuthResponseDto, ILoginDto } from "@/modules/auth";
 

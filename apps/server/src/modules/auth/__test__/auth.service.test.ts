@@ -1,9 +1,13 @@
 import { BadRequestError } from "@/errors";
-import { AuthService } from "../auth.service";
 
-import type { ICacheService } from "@modules/utils/cache/cache.types";
-import type { ILogoutDto, OAuthCodePayloadDto } from "../dtos";
-import type { IRefreshTokenService } from "../features/refresh-token/refresh-token.types";
+import type { ICacheService } from "@modules/shared";
+
+import {
+  AuthService,
+  ILogoutDto,
+  IRefreshTokenService,
+  OAuthCodePayloadDto,
+} from "@modules/auth";
 
 describe("AuthService", () => {
   let authService: AuthService;

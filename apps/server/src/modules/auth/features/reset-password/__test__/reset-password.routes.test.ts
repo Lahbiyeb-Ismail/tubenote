@@ -5,9 +5,9 @@ import app from "@/app";
 
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 
-import { resetPasswordController } from "../reset-password.module";
-
 import type { IEmailBodyDto } from "@modules/shared";
+
+import { resetPasswordController } from "../reset-password.module";
 
 jest.mock("../reset-password.module", () => ({
   resetPasswordController: {

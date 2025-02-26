@@ -10,9 +10,9 @@ import envConfig from "@config/env.config";
 import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
-import { IGoogleAuthController, IGoogleAuthService } from "./google.types";
-
 import type { User } from "@modules/user";
+
+import { IGoogleAuthController, IGoogleAuthService } from "./google.types";
 
 export class GoogleController implements IGoogleAuthController {
   constructor(private readonly _googleAuthService: IGoogleAuthService) {}

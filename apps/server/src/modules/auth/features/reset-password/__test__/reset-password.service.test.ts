@@ -1,17 +1,15 @@
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import { BadRequestError, ForbiddenError, NotFoundError } from "@/errors";
 
-import {
-  IResetPasswordService,
-  ResetPasswordService,
-} from "@modules/auth/features/reset-password";
+import { IResetPasswordService, ResetPasswordService } from "@modules/auth";
 
-import type { User } from "@modules/user";
+import type { IUserService, User } from "@modules/user";
 
-import type { ICacheService } from "@/modules/utils/cache/cache.types";
-import type { ICryptoService } from "@/modules/utils/crypto";
-import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
-import type { IUserService } from "@modules/user/user.types";
+import type {
+  ICacheService,
+  ICryptoService,
+  IMailSenderService,
+} from "@modules/shared";
 
 describe("ResetPasswordService test suites", () => {
   let resetPasswordService: IResetPasswordService;

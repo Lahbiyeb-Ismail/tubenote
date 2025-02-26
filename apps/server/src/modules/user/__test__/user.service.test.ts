@@ -1,7 +1,7 @@
 import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
 import { BadRequestError, ConflictError, NotFoundError } from "@/errors";
 
-import type { ICryptoService } from "@/modules/utils/crypto";
+import type { ICryptoService } from "@modules/shared";
 
 import {
   ICreateUserDto,

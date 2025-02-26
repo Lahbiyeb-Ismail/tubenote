@@ -1,6 +1,6 @@
 import prismaClient from "@config/database.config";
 
-import { cryptoService } from "@modules/utils/crypto";
+import { cryptoService } from "@modules/shared";
 
 import { UserController } from "./user.controller";
 import { UserRepository } from "./user.repository";

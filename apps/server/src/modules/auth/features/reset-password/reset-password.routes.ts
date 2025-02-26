@@ -2,13 +2,13 @@ import { Router } from "express";
 
 import validateRequest from "@middlewares/validate-request.middleware";
 
-import { resetPasswordController } from "./reset-password.module";
-
 import {
   emailBodySchema,
   passwordBodySchema,
   tokenParamSchema,
 } from "@/modules/shared";
+
+import { resetPasswordController } from "./reset-password.module";
 
 const router = Router();
 

@@ -1,15 +1,18 @@
 import { Response } from "express";
 import httpStatus from "http-status";
 
+import type { TypedRequest } from "@/types";
+
 import { clearRefreshTokenCookieConfig } from "@config/cookie.config";
 
 import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
-import { AuthController } from "../auth.controller";
 
-import type { TypedRequest } from "@/types";
-
-import type { IAuthService } from "../auth.types";
-import type { IAuthResponseDto, OAuthCodeDto } from "../dtos";
+import {
+  AuthController,
+  IAuthResponseDto,
+  IAuthService,
+  OAuthCodeDto,
+} from "@modules/auth";
 
 describe("AuthController", () => {
   let authController: AuthController;

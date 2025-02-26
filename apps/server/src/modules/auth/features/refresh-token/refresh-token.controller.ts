@@ -1,16 +1,16 @@
-import {
-  clearRefreshTokenCookieConfig,
-  refreshTokenCookieConfig,
-} from "@config/cookie.config";
 import type { Response } from "express";
 import httpStatus from "http-status";
 
 import { UnauthorizedError } from "@/errors";
+import type { TypedRequest } from "@/types";
+
+import {
+  clearRefreshTokenCookieConfig,
+  refreshTokenCookieConfig,
+} from "@config/cookie.config";
 
 import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
 import { ERROR_MESSAGES } from "@constants/error-messages.contants";
-
-import type { TypedRequest } from "@/types";
 
 import type {
   IRefreshTokenController,

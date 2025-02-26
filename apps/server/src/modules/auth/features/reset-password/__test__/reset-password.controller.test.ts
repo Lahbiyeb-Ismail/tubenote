@@ -7,7 +7,7 @@ import {
   IResetPasswordController,
   IResetPasswordService,
   ResetPasswordController,
-} from "@modules/auth/features/reset-password";
+} from "@modules/auth";
 
 import type {
   IEmailBodyDto,

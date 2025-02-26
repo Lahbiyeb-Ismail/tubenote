@@ -3,9 +3,11 @@ import { ERROR_MESSAGES } from "@constants/error-messages.contants";
 
 import logger from "@/utils/logger";
 
-import type { ICacheService } from "@/modules/utils/cache/cache.types";
-import type { ICryptoService } from "@/modules/utils/crypto";
-import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
+import type {
+  ICacheService,
+  ICryptoService,
+  IMailSenderService,
+} from "@modules/shared";
 import type { IUserService } from "@modules/user";
 
 import type { IResetPasswordService } from "./reset-password.types";

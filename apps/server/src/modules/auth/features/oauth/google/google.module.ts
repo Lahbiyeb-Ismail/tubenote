@@ -1,10 +1,10 @@
-import { googleAuthConfig } from "@/modules/auth/config/google-auth.config";
-
 import { userService } from "@/modules/user";
-import { cacheService } from "@/modules/utils/cache/cache.module";
-import { cryptoService } from "@/modules/utils/crypto";
-import { refreshTokenService } from "@modules/auth";
-import { jwtService } from "@modules/auth/utils/services/jwt/jwt.module";
+import {
+  googleAuthConfig,
+  jwtService,
+  refreshTokenService,
+} from "@modules/auth";
+import { cacheService, cryptoService } from "@modules/shared";
 
 import { GoogleController } from "./google.controller";
 import { GoogleAuthService } from "./google.service";

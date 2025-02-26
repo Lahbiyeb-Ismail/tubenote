@@ -9,7 +9,7 @@ import { BadRequestError } from "@/errors";
 import logger from "@/utils/logger";
 import { stringToDate } from "@utils/convert-string-to-date";
 
-import type { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
+import type { IJwtService } from "@modules/auth";
 import type { IUserService } from "@modules/user";
 
 import type {
