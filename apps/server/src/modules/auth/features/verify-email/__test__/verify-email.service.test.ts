@@ -1,4 +1,4 @@
-import type { JwtPayload } from "@/types";
+import type { JwtPayload } from "@modules/shared";
 
 import {
   VERIFY_EMAIL_TOKEN_EXPIRES_IN,

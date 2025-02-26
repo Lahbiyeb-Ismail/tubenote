@@ -1,4 +1,4 @@
-import type { TypedRequest } from "@/types";
+import type { TypedRequest } from "@modules/shared";
 import type { Response } from "express";
 
 import type { ICreateBodyDto } from "@/modules/shared";

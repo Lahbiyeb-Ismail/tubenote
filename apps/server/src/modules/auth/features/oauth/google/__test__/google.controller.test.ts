@@ -1,6 +1,6 @@
 import { Response } from "express";
 
-import type { TypedRequest } from "@/types";
+import type { TypedRequest } from "@modules/shared";
 
 import { refreshTokenCookieConfig } from "@modules/auth";
 import { envConfig } from "@modules/shared";

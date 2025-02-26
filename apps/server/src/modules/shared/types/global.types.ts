@@ -1,7 +1,5 @@
 import type { Request } from "express";
 
-import type { ResetPasswordToken } from "@modules/auth/features/reset-password/reset-password.model";
-
 /**
  * Represents the payload of a JSON Web Token (JWT).
  *
@@ -16,14 +14,11 @@ export type JwtPayload = {
 };
 
 /**
- * Extends the Express Request interface to include a `resetToken` property.
- *
- * @property {ResetPasswordToken} resetToken - The token used for resetting the password.
+ * Extends the Express Request interface to include the user ID.
  */
 declare global {
   namespace Express {
     interface Request {
-      resetToken: ResetPasswordToken;
       userId: string;
     }
   }

@@ -1,7 +1,7 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { EmptyRecord, TypedRequest } from "@/types";
+import type { EmptyRecord, TypedRequest } from "@modules/shared";
 
 import { ERROR_MESSAGES } from "@modules/shared";
 

@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { ACCESS_TOKEN_SECRET } from "@modules/auth";
 import { UnauthorizedError } from "@modules/shared";
 
-import type { JwtPayload } from "@/types";
+import type { JwtPayload } from "@modules/shared";
 import logger from "@utils/logger";
 
 const { verify } = jwt;

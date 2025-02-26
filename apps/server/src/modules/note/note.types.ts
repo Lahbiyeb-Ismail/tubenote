@@ -2,7 +2,7 @@ import type { Response } from "express";
 
 import type { Note } from "./note.model";
 
-import type { EmptyRecord, TypedRequest } from "@/types";
+import type { EmptyRecord, TypedRequest } from "@modules/shared";
 
 import type {
   ICreateBodyDto,

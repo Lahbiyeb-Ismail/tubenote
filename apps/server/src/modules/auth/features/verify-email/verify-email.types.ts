@@ -1,6 +1,6 @@
 import type { Response } from "express";
 
-import type { EmptyRecord, TypedRequest } from "@/types";
+import type { EmptyRecord, TypedRequest } from "@modules/shared";
 
 import type { ICreateDto, IParamTokenDto } from "@/modules/shared";
 

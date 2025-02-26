@@ -5,7 +5,7 @@ import {
   UnauthorizedError,
 } from "@modules/shared";
 
-import type { JwtPayload } from "@/types";
+import type { JwtPayload } from "@modules/shared";
 
 import { REFRESH_TOKEN_EXPIRES_IN } from "@modules/auth";
 import { ERROR_MESSAGES } from "@modules/shared";

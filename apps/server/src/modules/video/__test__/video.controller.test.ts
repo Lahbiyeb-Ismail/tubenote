@@ -2,7 +2,7 @@ import type { Response } from "express";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
-import type { EmptyRecord, TypedRequest } from "@/types";
+import type { EmptyRecord, TypedRequest } from "@modules/shared";
 
 import { BadRequestError, NotFoundError } from "@modules/shared";
 import { IVideoService, Video, VideoController } from "@modules/video";

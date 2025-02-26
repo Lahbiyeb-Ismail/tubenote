@@ -1,4 +1,4 @@
-import type { EmptyRecord, TypedRequest } from "@/types";
+import type { EmptyRecord, TypedRequest } from "@modules/shared";
 import type { Response } from "express";
 
 import type { Video, YoutubeVideoData } from "@modules/video";

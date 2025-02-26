@@ -12,13 +12,13 @@ import { ERROR_MESSAGES } from "@modules/shared";
 
 import { BadRequestError } from "@modules/shared";
 
-import type { JwtPayload } from "@/types";
 import {
   IAuthResponseDto,
   IJwtService,
   ISignTokenDto,
   IVerifyTokenDto,
 } from "@modules/auth";
+import type { JwtPayload } from "@modules/shared";
 
 export class JwtService implements IJwtService {
   async verify(verifyTokenDto: IVerifyTokenDto): Promise<JwtPayload> {

@@ -1,7 +1,7 @@
 import { Response } from "express";
 import httpStatus from "http-status";
 
-import type { TypedRequest } from "@/types";
+import type { TypedRequest } from "@modules/shared";
 
 import { clearRefreshTokenCookieConfig } from "@modules/auth";
 

@@ -1,8 +1,8 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { TypedRequest } from "@/types";
 import { refreshTokenCookieConfig } from "@modules/auth";
+import type { TypedRequest } from "@modules/shared";
 
 import { type ILoginDto, REFRESH_TOKEN_NAME } from "@modules/auth";
 
