@@ -3,9 +3,13 @@ import { AuthService } from "./auth.service";
 
 import { refreshTokenService } from "@modules/auth";
 
-import { cacheService } from "@modules/shared";
+import { cacheService, loggerService } from "@modules/shared";
 
-const authService = new AuthService(refreshTokenService, cacheService);
+const authService = new AuthService(
+  refreshTokenService,
+  cacheService,
+  loggerService
+);
 
 const authController = new AuthController(authService);
 

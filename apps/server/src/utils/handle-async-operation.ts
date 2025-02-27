@@ -1,6 +1,6 @@
-import { DatabaseError } from "@modules/shared";
 import { Prisma } from "@prisma/client";
-import logger from "./logger";
+
+import { DatabaseError, loggerService } from "@modules/shared";
 
 /**
  * Represents an asynchronous operation that returns a promise of type T.
@@ -65,13 +65,13 @@ async function handleAsyncOperation<T>(
 
     if (error instanceof Error) {
       // Log the unexpected error
-      logger.error(`Unexpected error: ${error}`);
+      loggerService.error(`Unexpected error: ${error}`);
 
       // Throw a generic error for the client
       throw new DatabaseError(`An unexpected error occurred: ${errorMessage}`);
     }
     // Log the unknown error
-    logger.error(`Unknown error: ${error}`);
+    loggerService.error(`Unknown error: ${error}`);
 
     throw new DatabaseError(`Unknow error: ${errorMessage}`);
   }

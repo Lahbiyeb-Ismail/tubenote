@@ -18,8 +18,7 @@ import userRoutes from "@modules/user/user.routes";
 import videoRoutes from "@modules/video/video.routes";
 
 import { errorHandler, notFoundRoute } from "@middlewares/error.middleware";
-import { envConfig } from "@modules/shared";
-import logger from "@utils/logger";
+import { envConfig, loggerService } from "@modules/shared";
 
 const app: Express = express();
 
@@ -66,7 +65,7 @@ passport.deserializeUser((user, done) => {
 
 // Middleware to log HTTP requests
 app.use((req: Request, _res: Response, next: NextFunction) => {
-  logger.http(`${req.method} ${req.url}`);
+  loggerService.http(`${req.method} ${req.url}`);
   next();
 });
 

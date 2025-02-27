@@ -1,6 +1,6 @@
 import { BadRequestError } from "@modules/shared";
 
-import type { ICacheService } from "@modules/shared";
+import type { ICacheService, ILoggerService } from "@modules/shared";
 
 import {
   AuthService,
@@ -13,6 +13,7 @@ describe("AuthService", () => {
   let authService: AuthService;
   let mockRefreshTokenService: jest.Mocked<IRefreshTokenService>;
   let mockCacheService: jest.Mocked<ICacheService>;
+  let mockLoggerService: jest.Mocked<ILoggerService>;
 
   beforeEach(() => {
     mockRefreshTokenService = {
@@ -29,7 +30,19 @@ describe("AuthService", () => {
       getStats: jest.fn(),
     };
 
-    authService = new AuthService(mockRefreshTokenService, mockCacheService);
+    mockLoggerService = {
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+      http: jest.fn(),
+    };
+
+    authService = new AuthService(
+      mockRefreshTokenService,
+      mockCacheService,
+      mockLoggerService
+    );
   });
 
   describe("AuthService - logoutUser", () => {

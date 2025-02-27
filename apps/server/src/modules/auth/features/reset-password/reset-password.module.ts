@@ -3,6 +3,7 @@ import { userService } from "@modules/user";
 import {
   cacheService,
   cryptoService,
+  loggerService,
   mailSenderService,
 } from "@modules/shared";
 
@@ -13,7 +14,8 @@ const resetPasswordService = new ResetPasswordService(
   userService,
   cryptoService,
   cacheService,
-  mailSenderService
+  mailSenderService,
+  loggerService
 );
 const resetPasswordController = new ResetPasswordController(
   resetPasswordService

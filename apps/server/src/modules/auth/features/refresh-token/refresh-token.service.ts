@@ -1,13 +1,14 @@
-import { REFRESH_TOKEN_EXPIRES_IN, REFRESH_TOKEN_SECRET } from "@modules/auth";
-import { ERROR_MESSAGES } from "@modules/shared";
-import { ForbiddenError, UnauthorizedError } from "@modules/shared";
-
 import { stringToDate } from "@utils/convert-string-to-date";
-import logger from "@utils/logger";
 
+import { REFRESH_TOKEN_EXPIRES_IN, REFRESH_TOKEN_SECRET } from "@modules/auth";
 import type { IAuthResponseDto, IJwtService, IRefreshDto } from "@modules/auth";
 
-import type { ICreateDto } from "@/modules/shared";
+import type { ICreateDto, ILoggerService } from "@/modules/shared";
+import {
+  ERROR_MESSAGES,
+  ForbiddenError,
+  UnauthorizedError,
+} from "@modules/shared";
 
 import type { RefreshToken } from "./refresh-token.model";
 import type {
@@ -18,7 +19,8 @@ import type {
 export class RefreshTokenService implements IRefreshTokenService {
   constructor(
     private readonly _refreshTokenRepository: IRefreshTokenRepository,
-    private readonly _jwtService: IJwtService
+    private readonly _jwtService: IJwtService,
+    private readonly _loggerService: ILoggerService
   ) {}
 
   async refreshToken(refreshDto: IRefreshDto): Promise<IAuthResponseDto> {
@@ -45,7 +47,9 @@ export class RefreshTokenService implements IRefreshTokenService {
 
     // Detected refresh token reuse!
     if (!refreshTokenFromDB) {
-      logger.warn(`Detected refresh token reuse for user ${userId}`);
+      this._loggerService.warn(
+        `Detected refresh token reuse for user ${userId}`
+      );
 
       await this._refreshTokenRepository.deleteAll(userId);
 

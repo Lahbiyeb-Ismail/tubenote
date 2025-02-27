@@ -1,5 +1,4 @@
-import { ERROR_MESSAGES } from "@modules/shared";
-import { UnauthorizedError } from "@modules/shared";
+import { ERROR_MESSAGES, UnauthorizedError } from "@modules/shared";
 
 import type {
   IJwtService,
@@ -11,7 +10,11 @@ import type {
 
 import type { User } from "@modules/user";
 
-import type { ICacheService, ICryptoService } from "@modules/shared";
+import type {
+  ICacheService,
+  ICryptoService,
+  ILoggerService,
+} from "@modules/shared";
 
 import { GoogleAuthService } from "../google.service";
 
@@ -21,6 +24,7 @@ describe("GoogleAuthService", () => {
   let mockRefreshTokenService: jest.Mocked<IRefreshTokenService>;
   let mockCryptoService: jest.Mocked<ICryptoService>;
   let mockCacheService: jest.Mocked<ICacheService>;
+  let mockLoggerService: jest.Mocked<ILoggerService>;
 
   const mockUser: User = {
     id: "user-id-123",
@@ -77,11 +81,20 @@ describe("GoogleAuthService", () => {
       getStats: jest.fn(),
     };
 
+    mockLoggerService = {
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+      http: jest.fn(),
+    };
+
     googleAuthService = new GoogleAuthService(
       mockJwtService,
       mockRefreshTokenService,
       mockCryptoService,
-      mockCacheService
+      mockCacheService,
+      mockLoggerService
     );
   });
 

@@ -1,6 +1,6 @@
-import { ERROR_MESSAGES } from "@modules/shared";
 import {
   BadRequestError,
+  ERROR_MESSAGES,
   ForbiddenError,
   NotFoundError,
 } from "@modules/shared";
@@ -12,6 +12,7 @@ import type { IUserService, User } from "@modules/user";
 import type {
   ICacheService,
   ICryptoService,
+  ILoggerService,
   IMailSenderService,
 } from "@modules/shared";
 
@@ -21,6 +22,7 @@ describe("ResetPasswordService test suites", () => {
   let mockCryptoService: ICryptoService;
   let mockCacheService: ICacheService;
   let mockMailSenderService: IMailSenderService;
+  let mockLoggerService: ILoggerService;
 
   beforeEach(() => {
     mockUserService = {
@@ -54,11 +56,20 @@ describe("ResetPasswordService test suites", () => {
       sendMail: jest.fn(),
     };
 
+    mockLoggerService = {
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+      http: jest.fn(),
+    };
+
     resetPasswordService = new ResetPasswordService(
       mockUserService,
       mockCryptoService,
       mockCacheService,
-      mockMailSenderService
+      mockMailSenderService,
+      mockLoggerService
     );
   });
 

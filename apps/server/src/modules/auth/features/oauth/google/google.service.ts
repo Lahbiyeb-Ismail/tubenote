@@ -1,11 +1,12 @@
-import { UnauthorizedError } from "@modules/shared";
-
-import { ERROR_MESSAGES } from "@modules/shared";
-
 import { stringToDate } from "@utils/convert-string-to-date";
-import logger from "@utils/logger";
 
-import { ICacheService, ICryptoService } from "@modules/shared";
+import {
+  ERROR_MESSAGES,
+  ICacheService,
+  ICryptoService,
+  ILoggerService,
+  UnauthorizedError,
+} from "@modules/shared";
 
 import type { User } from "@modules/user";
 
@@ -24,7 +25,8 @@ export class GoogleAuthService implements IGoogleAuthService {
     private readonly _jwtService: IJwtService,
     private readonly _refreshTokenService: IRefreshTokenService,
     private readonly _cryptoService: ICryptoService,
-    private readonly _cacheService: ICacheService
+    private readonly _cacheService: ICacheService,
+    private readonly _loggerService: ILoggerService
   ) {}
 
   /**
@@ -71,8 +73,10 @@ export class GoogleAuthService implements IGoogleAuthService {
       ...temporaryCodePayloadDto,
     });
 
-    logger.info(`Code ${code} set in cache: ${setResult}`);
-    logger.info(`Cache stats after set: ${this._cacheService.getStats()}`);
+    this._loggerService.info(`Code ${code} set in cache: ${setResult}`);
+    this._loggerService.info(
+      `Cache stats after set: ${this._cacheService.getStats()}`
+    );
 
     return code;
   }

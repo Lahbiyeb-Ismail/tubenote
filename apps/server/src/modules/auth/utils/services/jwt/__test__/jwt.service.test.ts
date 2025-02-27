@@ -1,18 +1,30 @@
 import jwt from "jsonwebtoken";
 
 import { JwtService } from "@modules/auth";
-import { ERROR_MESSAGES } from "@modules/shared";
-import { BadRequestError } from "@modules/shared";
+import {
+  BadRequestError,
+  ERROR_MESSAGES,
+  type ILoggerService,
+} from "@modules/shared";
 
 describe("JwtService", () => {
   let jwtService: JwtService;
+  let mockLoggerService: jest.Mocked<ILoggerService>;
 
   const mockUserId = "user-id-123";
   const mockValidTokenSecret = "valid-token-secret";
   const mockInvalidToken = "invalid-jwt-token";
 
   beforeEach(() => {
-    jwtService = new JwtService();
+    mockLoggerService = {
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+      http: jest.fn(),
+    };
+
+    jwtService = new JwtService(mockLoggerService);
   });
 
   describe("verify", () => {

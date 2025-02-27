@@ -1,8 +1,7 @@
 import dotenv from "dotenv";
 
 import app from "@/app";
-import { envConfig } from "@modules/shared";
-import logger from "@utils/logger";
+import { envConfig, loggerService } from "@modules/shared";
 
 /**
  * Event listener for uncaught exceptions.
@@ -27,7 +26,7 @@ const PORT = envConfig.server.port || 8080;
  * Logs a message indicating that the server is running.
  */
 const server = app.listen(PORT, () => {
-  logger.info(`Server is running on http://localhost:${PORT}`);
+  loggerService.info(`Server is running on http://localhost:${PORT}`);
 });
 
 /**

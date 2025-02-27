@@ -5,7 +5,7 @@ import {
   refreshTokenService,
 } from "@modules/auth";
 
-import { cacheService, cryptoService } from "@modules/shared";
+import { cacheService, cryptoService, loggerService } from "@modules/shared";
 
 import { GoogleController } from "./google.controller";
 import { GoogleAuthService } from "./google.service";
@@ -20,7 +20,8 @@ const googleAuthService = new GoogleAuthService(
   jwtService,
   refreshTokenService,
   cryptoService,
-  cacheService
+  cacheService,
+  loggerService
 );
 
 const googleAuthController = new GoogleController(googleAuthService);

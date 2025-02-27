@@ -1,17 +1,21 @@
 import type { Transporter } from "nodemailer";
 
-import { envConfig } from "@modules/shared";
-
-import { ERROR_MESSAGES } from "@modules/shared";
-import { BadRequestError } from "@modules/shared";
-
 import compileTemplate from "@utils/compile-template";
-import logger from "@utils/logger";
+
+import {
+  BadRequestError,
+  ERROR_MESSAGES,
+  type ILoggerService,
+  envConfig,
+} from "@modules/shared";
 
 import type { EmailContent, IMailSenderService, SendMailDto } from "./";
 
 export class MailSenderService implements IMailSenderService {
-  constructor(private readonly _transporter: Transporter) {}
+  constructor(
+    private readonly _transporter: Transporter,
+    private readonly _loggerService: ILoggerService
+  ) {}
 
   async sendMail(sendMailDto: SendMailDto): Promise<void> {
     const mailOptions = {
@@ -31,10 +35,12 @@ export class MailSenderService implements IMailSenderService {
 
     this._transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
-        logger.error(`Error sending email - ${error.name}: ${error.message}`);
+        this._loggerService.error(
+          `Error sending email - ${error.name}: ${error.message}`
+        );
         throw new BadRequestError(ERROR_MESSAGES.MAIL_SENDING_FAILED);
       } else {
-        logger.info(`Verify email sent: ${info.response}`);
+        this._loggerService.info(`Verify email sent: ${info.response}`);
       }
     });
   }

@@ -1,4 +1,4 @@
-import { prismaClient } from "@modules/shared";
+import { loggerService, prismaClient } from "@modules/shared";
 
 import { jwtService } from "@modules/auth";
 import { userService } from "@modules/user";
@@ -11,7 +11,8 @@ const verifyEmailRepository = new VerifyEmailRepository(prismaClient);
 const verifyEmailService = new VerifyEmailService(
   verifyEmailRepository,
   userService,
-  jwtService
+  jwtService,
+  loggerService
 );
 const verifyEmailController = new VerifyEmailController(verifyEmailService);
 

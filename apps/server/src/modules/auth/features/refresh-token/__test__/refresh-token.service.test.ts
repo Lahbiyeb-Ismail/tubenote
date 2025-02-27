@@ -1,22 +1,21 @@
+import { stringToDate } from "@utils/convert-string-to-date";
+
 import {
   BadRequestError,
   DatabaseError,
+  ERROR_MESSAGES,
   ForbiddenError,
   UnauthorizedError,
 } from "@modules/shared";
 
-import type { JwtPayload } from "@modules/shared";
-
 import { REFRESH_TOKEN_EXPIRES_IN } from "@modules/auth";
-import { ERROR_MESSAGES } from "@modules/shared";
-import { stringToDate } from "@utils/convert-string-to-date";
 
 import type {
   IAuthResponseDto,
   IJwtService,
   IRefreshDto,
 } from "@/modules/auth";
-import type { ICreateDto } from "@/modules/shared";
+import type { ICreateDto, ILoggerService, JwtPayload } from "@/modules/shared";
 
 import type { RefreshToken } from "../refresh-token.model";
 import { RefreshTokenService } from "../refresh-token.service";
@@ -43,6 +42,14 @@ describe("RefreshTokenService", () => {
     sign: jest.fn(),
   };
 
+  const mockLoggerService: jest.Mocked<ILoggerService> = {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+    http: jest.fn(),
+  };
+
   const mockUserId = "test-user-id";
   const mockToken = "test-refresh-token";
   const mockTokenId = "token-id-001";
@@ -66,7 +73,8 @@ describe("RefreshTokenService", () => {
   beforeEach(() => {
     refreshTokenService = new RefreshTokenService(
       mockRefreshTokenRepository,
-      mockJwtService
+      mockJwtService,
+      mockLoggerService
     );
 
     jest.clearAllMocks();

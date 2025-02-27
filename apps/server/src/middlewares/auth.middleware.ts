@@ -2,10 +2,9 @@ import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
 import { ACCESS_TOKEN_SECRET } from "@modules/auth";
-import { UnauthorizedError } from "@modules/shared";
+import { UnauthorizedError, loggerService } from "@modules/shared";
 
 import type { JwtPayload } from "@modules/shared";
-import logger from "@utils/logger";
 
 const { verify } = jwt;
 
@@ -34,7 +33,7 @@ async function isAuthenticated(
   const authHeader = req.headers?.authorization;
 
   if (!authHeader || !authHeader?.startsWith("Bearer ")) {
-    logger.error("Authorization header is missing or invalid.");
+    loggerService.error("Authorization header is missing or invalid.");
 
     throw new UnauthorizedError(
       "You need to be authenticated to access this route."
@@ -51,7 +50,7 @@ async function isAuthenticated(
 
   verify(token, ACCESS_TOKEN_SECRET, (err, payload) => {
     if (err) {
-      logger.error(`Error verifying token: ${err.message}`);
+      loggerService.error(`Error verifying token: ${err.message}`);
 
       throw new UnauthorizedError("Unauthorized access. Please try again.");
     }

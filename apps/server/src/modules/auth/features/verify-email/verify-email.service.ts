@@ -1,15 +1,14 @@
+import { stringToDate } from "@utils/convert-string-to-date";
+
 import {
   VERIFY_EMAIL_TOKEN_EXPIRES_IN,
   VERIFY_EMAIL_TOKEN_SECRET,
 } from "@modules/auth";
-import { ERROR_MESSAGES } from "@modules/shared";
 
-import { BadRequestError } from "@modules/shared";
-
-import logger from "@/utils/logger";
-import { stringToDate } from "@utils/convert-string-to-date";
+import { BadRequestError, ERROR_MESSAGES } from "@modules/shared";
 
 import type { IJwtService } from "@modules/auth";
+import type { ILoggerService } from "@modules/shared";
 import type { IUserService } from "@modules/user";
 
 import type {
@@ -21,7 +20,8 @@ export class VerifyEmailService implements IVerifyEmailService {
   constructor(
     private readonly _verifyEmailRepository: IVerifyEmailRepository,
     private readonly _userService: IUserService,
-    private readonly _jwtService: IJwtService
+    private readonly _jwtService: IJwtService,
+    private readonly _loggerService: ILoggerService
   ) {}
 
   async generateToken(email: string): Promise<string> {
@@ -54,7 +54,9 @@ export class VerifyEmailService implements IVerifyEmailService {
       },
     });
 
-    logger.info(`Verification email token generated for user ${user.id}`);
+    this._loggerService.info(
+      `Verification email token generated for user ${user.id}`
+    );
 
     return token;
   }
@@ -70,7 +72,9 @@ export class VerifyEmailService implements IVerifyEmailService {
     });
 
     if (!foundToken) {
-      logger.warn(`Token reuse attempt for user ${payload.userId}`);
+      this._loggerService.warn(
+        `Token reuse attempt for user ${payload.userId}`
+      );
 
       await this._verifyEmailRepository.deleteMany(payload.userId);
       throw new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
@@ -83,6 +87,8 @@ export class VerifyEmailService implements IVerifyEmailService {
       foundToken.userId
     );
 
-    logger.info(`Email verification successful for user ${verifiedUser.id}`);
+    this._loggerService.info(
+      `Email verification successful for user ${verifiedUser.id}`
+    );
   }
 }

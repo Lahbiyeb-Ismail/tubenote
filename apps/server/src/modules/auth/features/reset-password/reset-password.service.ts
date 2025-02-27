@@ -1,13 +1,16 @@
-import { ERROR_MESSAGES } from "@modules/shared";
-import { BadRequestError, ForbiddenError } from "@modules/shared";
-
-import logger from "@/utils/logger";
+import {
+  BadRequestError,
+  ERROR_MESSAGES,
+  ForbiddenError,
+} from "@modules/shared";
 
 import type {
   ICacheService,
   ICryptoService,
+  ILoggerService,
   IMailSenderService,
 } from "@modules/shared";
+
 import type { IUserService } from "@modules/user";
 
 import type { IResetPasswordService } from "./reset-password.types";
@@ -17,7 +20,8 @@ export class ResetPasswordService implements IResetPasswordService {
     private readonly _userService: IUserService,
     private readonly _cryptoService: ICryptoService,
     private readonly _cacheService: ICacheService,
-    private readonly _mailSenderService: IMailSenderService
+    private readonly _mailSenderService: IMailSenderService,
+    private readonly _loggerService: ILoggerService
   ) {}
 
   async sendResetToken(email: string): Promise<void> {
@@ -33,7 +37,7 @@ export class ResetPasswordService implements IResetPasswordService {
       userId: user.id,
     });
 
-    logger.info(
+    this._loggerService.info(
       `Reset token generated for user ${user.id} and set in cache: ${setResult}`
     );
 
@@ -47,14 +51,16 @@ export class ResetPasswordService implements IResetPasswordService {
     const userId = await this.verifyResetToken(token);
 
     const deleteResult = this._cacheService.del(token);
-    logger.warn(`Remove reset token ${token} from cache: ${deleteResult}`);
+    this._loggerService.warn(
+      `Remove reset token ${token} from cache: ${deleteResult}`
+    );
 
     await this._userService.resetPassword({
       id: userId,
       newPassword: password,
     });
 
-    logger.info(`Password reset for user ${userId}`);
+    this._loggerService.info(`Password reset for user ${userId}`);
   }
 
   async verifyResetToken(token: string): Promise<string> {
@@ -65,7 +71,7 @@ export class ResetPasswordService implements IResetPasswordService {
       !tokenData.userId ||
       typeof tokenData.userId !== "string"
     ) {
-      logger.error(`Invalid reset token: ${token}`);
+      this._loggerService.error(`Invalid reset token: ${token}`);
       throw new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
     }
 

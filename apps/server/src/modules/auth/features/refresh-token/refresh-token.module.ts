@@ -1,4 +1,4 @@
-import { prismaClient } from "@modules/shared";
+import { loggerService, prismaClient } from "@modules/shared";
 
 import { jwtService } from "@modules/auth";
 
@@ -10,7 +10,8 @@ import { RefreshTokenService } from "./refresh-token.service";
 const refreshTokenRepository = new RefreshTokenRepository(prismaClient);
 const refreshTokenService = new RefreshTokenService(
   refreshTokenRepository,
-  jwtService
+  jwtService,
+  loggerService
 );
 const refreshTokenController = new RefreshTokenController(refreshTokenService);
 
