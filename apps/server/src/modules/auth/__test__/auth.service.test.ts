@@ -1,20 +1,25 @@
-import { BadRequestError } from "@/errors";
-import { AuthService } from "../auth.service";
+import { BadRequestError } from "@modules/shared";
 
-import type { ICacheService } from "@modules/utils/cache/cache.types";
-import type { LogoutDto, OAuthCodePayloadDto } from "../dtos";
-import type { IRefreshTokenService } from "../features/refresh-token/refresh-token.types";
+import type { ICacheService, ILoggerService } from "@modules/shared";
+
+import {
+  AuthService,
+  ILogoutDto,
+  IRefreshTokenService,
+  OAuthCodePayloadDto,
+} from "@modules/auth";
 
 describe("AuthService", () => {
   let authService: AuthService;
   let mockRefreshTokenService: jest.Mocked<IRefreshTokenService>;
   let mockCacheService: jest.Mocked<ICacheService>;
+  let mockLoggerService: jest.Mocked<ILoggerService>;
 
   beforeEach(() => {
     mockRefreshTokenService = {
       deleteAllTokens: jest.fn(),
       refreshToken: jest.fn(),
-      saveToken: jest.fn(),
+      createToken: jest.fn(),
     };
 
     mockCacheService = {
@@ -25,11 +30,23 @@ describe("AuthService", () => {
       getStats: jest.fn(),
     };
 
-    authService = new AuthService(mockRefreshTokenService, mockCacheService);
+    mockLoggerService = {
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+      http: jest.fn(),
+    };
+
+    authService = new AuthService(
+      mockRefreshTokenService,
+      mockCacheService,
+      mockLoggerService
+    );
   });
 
   describe("AuthService - logoutUser", () => {
-    const validLogoutDto: LogoutDto = {
+    const validLogoutDto: ILogoutDto = {
       userId: "user-123",
       refreshToken: "refresh-token-123",
     };

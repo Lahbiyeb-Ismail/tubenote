@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { ZodError, type ZodSchema } from "zod";
 
-import { BadRequestError, InternalServerError } from "@/errors";
+import { BadRequestError, InternalServerError } from "@modules/shared";
 
 /**
  * Defines the schema for validating different parts of an HTTP request.

@@ -3,12 +3,7 @@ import request from "supertest";
 
 import app from "@/app";
 
-import {
-  type CreateVideoDto,
-  type Video,
-  type YoutubeVideoData,
-  videoController,
-} from "@modules/video";
+import { type Video, videoController } from "@modules/video";
 
 // **********************************************
 // MOCK THE JSONWEBTOKEN MODULE TO SIMULATE TOKEN VERIFICATION
@@ -72,21 +67,6 @@ describe("Video routes tests", () => {
       updatedAt: new Date(),
     },
   ];
-
-  const mockYoutubeVideoData: YoutubeVideoData = {
-    title: "Video 3",
-    description: "Video description",
-    channelTitle: "Channel 1",
-    thumbnails,
-    tags: ["tag1", "tag2"],
-    embedHtmlPlayer: "embed_html",
-  };
-
-  const _createVideoDto: CreateVideoDto = {
-    userId: mockUserOneId,
-    youtubeVideoId: "youtube_id_03",
-    videoData: mockYoutubeVideoData,
-  };
 
   beforeAll(() => {
     // Mock GET /videos for the authenticated user.

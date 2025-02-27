@@ -1,30 +1,32 @@
 import jwt from "jsonwebtoken";
 
-import logger from "@utils/logger";
-
 import {
   ACCESS_TOKEN_EXPIRES_IN,
   ACCESS_TOKEN_SECRET,
   REFRESH_TOKEN_EXPIRES_IN,
   REFRESH_TOKEN_SECRET,
-} from "@constants/auth.contants";
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+} from "@modules/auth";
 
-import { BadRequestError } from "@/errors";
+import { BadRequestError, ERROR_MESSAGES } from "@modules/shared";
 
-import type { JwtPayload } from "@/types";
-import type { AuthResponseDto } from "@modules/auth/dtos/auth.dto";
-import type { SignTokenDto } from "./dtos/sign-token.dto";
-import type { VerifyTokenDto } from "./dtos/verify-token.dto";
-import type { IJwtService } from "./jwt.types";
+import type {
+  IAuthResponseDto,
+  IJwtService,
+  ISignTokenDto,
+  IVerifyTokenDto,
+} from "@modules/auth";
+
+import type { ILoggerService, JwtPayload } from "@modules/shared";
 
 export class JwtService implements IJwtService {
-  async verify(verifyTokenDto: VerifyTokenDto): Promise<JwtPayload> {
+  constructor(private readonly _loggerService: ILoggerService) {}
+
+  async verify(verifyTokenDto: IVerifyTokenDto): Promise<JwtPayload> {
     const { token, secret } = verifyTokenDto;
     const payload = await new Promise<JwtPayload>((resolve, reject) => {
       jwt.verify(token, secret, (err, decoded) => {
         if (err) {
-          logger.error(`Error verifying token: ${err.message}`);
+          this._loggerService.error(`Error verifying token: ${err.message}`);
 
           reject(new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN));
         } else {
@@ -36,7 +38,7 @@ export class JwtService implements IJwtService {
     return payload;
   }
 
-  sign(signTokenDto: SignTokenDto): string {
+  sign(signTokenDto: ISignTokenDto): string {
     const { userId, secret, expiresIn } = signTokenDto;
 
     return jwt.sign({ userId }, secret, {
@@ -44,7 +46,7 @@ export class JwtService implements IJwtService {
     });
   }
 
-  generateAuthTokens(userId: string): AuthResponseDto {
+  generateAuthTokens(userId: string): IAuthResponseDto {
     const accessToken = this.sign({
       userId,
       secret: ACCESS_TOKEN_SECRET,

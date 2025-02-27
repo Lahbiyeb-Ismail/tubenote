@@ -1,16 +1,18 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { EmptyRecord, TypedRequest } from "@/types";
+import type { EmptyRecord, TypedRequest } from "@modules/shared";
+
+import type {
+  IEmailBodyDto,
+  IParamTokenDto,
+  IPasswordBodyDto,
+} from "@/modules/shared";
 
 import type {
   IResetPasswordController,
   IResetPasswordService,
 } from "./reset-password.types";
-
-import type { EmailBodyDto } from "@common/dtos/email-body.dto";
-import type { TokenParamDto } from "@common/dtos/token-param.dto";
-import type { PasswordBodyDto } from "./dtos/password-body.dto";
 
 /**
  * Controller for handling password reset operations.
@@ -26,7 +28,7 @@ export class ResetPasswordController implements IResetPasswordController {
    * @returns A promise that resolves to void.
    */
   async forgotPassword(
-    req: TypedRequest<EmailBodyDto>,
+    req: TypedRequest<IEmailBodyDto>,
     res: Response
   ): Promise<void> {
     const { email } = req.body;
@@ -46,7 +48,7 @@ export class ResetPasswordController implements IResetPasswordController {
    * @returns A promise that resolves to void.
    */
   async resetPassword(
-    req: TypedRequest<PasswordBodyDto, TokenParamDto>,
+    req: TypedRequest<IPasswordBodyDto, IParamTokenDto>,
     res: Response
   ): Promise<void> {
     const { password } = req.body;
@@ -65,7 +67,7 @@ export class ResetPasswordController implements IResetPasswordController {
    * @returns A promise that resolves to void.
    */
   async verifyResetToken(
-    req: TypedRequest<EmptyRecord, TokenParamDto>,
+    req: TypedRequest<EmptyRecord, IParamTokenDto>,
     res: Response
   ): Promise<void> {
     const { token } = req.params;

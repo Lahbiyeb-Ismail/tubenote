@@ -3,12 +3,9 @@ import request from "supertest";
 
 import app from "@/app";
 
-import {
-  type CreateNoteDto,
-  type Note,
-  type UpdateNoteDto,
-  noteController,
-} from "@modules/note";
+import { type Note, noteController } from "@modules/note";
+
+import type { ICreateBodyDto, IUpdateBodyDto } from "@/modules/shared";
 
 // **********************************************
 // MOCK THE JSONWEBTOKEN MODULE TO SIMULATE TOKEN VERIFICATION
@@ -338,7 +335,7 @@ describe("Note Routes Tests", () => {
   // POST /api/v1/notes
   // **********************************************
   describe("POST /api/v1/notes", () => {
-    const newNoteBody: Omit<CreateNoteDto, "userId"> = {
+    const newNoteBody: ICreateBodyDto<Note> = {
       title: "Note 1",
       content: "Note Content 001",
       videoTitle: "Video Title",
@@ -542,7 +539,7 @@ describe("Note Routes Tests", () => {
     const noteId = "note_id_001";
 
     it("should update a note with a valid id and request body", async () => {
-      const updatedNoteBody: UpdateNoteDto = {
+      const updatedNoteBody: IUpdateBodyDto<Note> = {
         title: "Updated Title",
         content: "Updated Content",
       };

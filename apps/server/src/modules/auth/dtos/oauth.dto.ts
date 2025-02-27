@@ -1,4 +1,4 @@
-import type { AuthResponseDto } from "./auth.dto";
+import type { IAuthResponseDto } from "@modules/auth";
 
 export interface OAuthCodeDto {
   code: string;
@@ -10,6 +10,6 @@ export interface OAuthCodePayloadDto {
   refreshToken: string;
 }
 
-export interface OAuthResponseDto extends AuthResponseDto {
+export interface OAuthResponseDto extends IAuthResponseDto {
   temporaryCode: string;
 }

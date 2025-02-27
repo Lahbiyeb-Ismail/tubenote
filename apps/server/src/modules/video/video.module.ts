@@ -1,6 +1,6 @@
-import prismaClient from "@config/database.config";
+import { prismaClient } from "@modules/shared";
 
-import { responseFormatter } from "@modules/utils/response-formatter";
+import { responseFormatter } from "@modules/shared";
 import { VideoController } from "./video.controller";
 import { VideoRepository } from "./video.repository";
 import { VideoService } from "./video.service";

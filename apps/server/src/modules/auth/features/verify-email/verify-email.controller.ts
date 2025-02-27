@@ -1,8 +1,10 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { EmptyRecord, TypedRequest } from "@/types";
-import type { TokenParamDto } from "@common/dtos/token-param.dto";
+import type { EmptyRecord, TypedRequest } from "@modules/shared";
+
+import type { IParamTokenDto } from "@/modules/shared";
+
 import type {
   IVerifyEmailController,
   IVerifyEmailService,
@@ -20,7 +22,7 @@ export class VerifyEmailController implements IVerifyEmailController {
    * @param res - The response object to confirm the email was verified.
    */
   async verifyEmail(
-    req: TypedRequest<EmptyRecord, TokenParamDto>,
+    req: TypedRequest<EmptyRecord, IParamTokenDto>,
     res: Response
   ): Promise<void> {
     const { token } = req.params;

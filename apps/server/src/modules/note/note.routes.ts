@@ -3,13 +3,13 @@ import { Router } from "express";
 import isAuthenticated from "@middlewares/auth.middleware";
 import validateRequest from "@middlewares/validate-request.middleware";
 
-import { noteController } from "./note.module";
+import {
+  createNoteSchema,
+  noteController,
+  updateNoteSchema,
+} from "@modules/note";
 
-import { idParamSchema } from "@common/schemas/id-param.schema";
-import { paginationSchema } from "@common/schemas/query-pagination.schema";
-
-import { createNoteSchema } from "./schemas/create-note.schema";
-import { updateNoteSchema } from "./schemas/update-note.schema";
+import { idParamSchema, paginationQuerySchema } from "@modules/shared";
 
 const router = Router();
 
@@ -20,7 +20,7 @@ router.use(isAuthenticated);
 // - POST /: Create a new note (requires request body validation).
 router
   .route("/")
-  .get(validateRequest({ query: paginationSchema }), (req, res) =>
+  .get(validateRequest({ query: paginationQuerySchema }), (req, res) =>
     noteController.getUserNotes(req, res)
   )
   .post(validateRequest({ body: createNoteSchema }), (req, res) =>
@@ -41,7 +41,7 @@ router
 router.route("/video/:id").get(
   validateRequest({
     params: idParamSchema,
-    query: paginationSchema,
+    query: paginationQuerySchema,
   }),
   (req, res) => noteController.getNotesByVideoId(req, res)
 );

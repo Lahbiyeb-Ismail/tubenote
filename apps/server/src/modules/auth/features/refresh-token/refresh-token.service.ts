@@ -1,18 +1,15 @@
-import { ForbiddenError, UnauthorizedError } from "@/errors";
+import { stringToDate } from "@modules/shared";
+
+import { REFRESH_TOKEN_EXPIRES_IN, REFRESH_TOKEN_SECRET } from "@modules/auth";
+import type { IAuthResponseDto, IJwtService, IRefreshDto } from "@modules/auth";
+
+import type { ICreateDto, ILoggerService } from "@/modules/shared";
 import {
-  REFRESH_TOKEN_EXPIRES_IN,
-  REFRESH_TOKEN_SECRET,
-} from "@constants/auth.contants";
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+  ERROR_MESSAGES,
+  ForbiddenError,
+  UnauthorizedError,
+} from "@modules/shared";
 
-import { stringToDate } from "@utils/convert-string-to-date";
-import logger from "@utils/logger";
-
-import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
-
-import type { AuthResponseDto, RefreshDto } from "@modules/auth/dtos";
-
-import type { SaveTokenDto } from "./dtos/save-token.dto";
 import type { RefreshToken } from "./refresh-token.model";
 import type {
   IRefreshTokenRepository,
@@ -22,9 +19,11 @@ import type {
 export class RefreshTokenService implements IRefreshTokenService {
   constructor(
     private readonly _refreshTokenRepository: IRefreshTokenRepository,
-    private readonly _jwtService: IJwtService
+    private readonly _jwtService: IJwtService,
+    private readonly _loggerService: ILoggerService
   ) {}
-  async refreshToken(refreshDto: RefreshDto): Promise<AuthResponseDto> {
+
+  async refreshToken(refreshDto: IRefreshDto): Promise<IAuthResponseDto> {
     const { userId, token } = refreshDto;
 
     const decodedToken = await this._jwtService.verify({
@@ -48,7 +47,9 @@ export class RefreshTokenService implements IRefreshTokenService {
 
     // Detected refresh token reuse!
     if (!refreshTokenFromDB) {
-      logger.warn(`Detected refresh token reuse for user ${userId}`);
+      this._loggerService.warn(
+        `Detected refresh token reuse for user ${userId}`
+      );
 
       await this._refreshTokenRepository.deleteAll(userId);
 
@@ -60,10 +61,12 @@ export class RefreshTokenService implements IRefreshTokenService {
     const { accessToken, refreshToken } =
       this._jwtService.generateAuthTokens(userId);
 
-    await this._refreshTokenRepository.saveToken({
+    await this._refreshTokenRepository.createToken({
       userId,
-      token: refreshToken,
-      expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+      data: {
+        token: refreshToken,
+        expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+      },
     });
 
     return { accessToken, refreshToken };
@@ -73,7 +76,9 @@ export class RefreshTokenService implements IRefreshTokenService {
     await this._refreshTokenRepository.deleteAll(userId);
   }
 
-  async saveToken(saveTokenDto: SaveTokenDto): Promise<RefreshToken> {
-    return await this._refreshTokenRepository.saveToken(saveTokenDto);
+  async createToken(
+    createTokenDto: ICreateDto<RefreshToken>
+  ): Promise<RefreshToken> {
+    return await this._refreshTokenRepository.createToken(createTokenDto);
   }
 }

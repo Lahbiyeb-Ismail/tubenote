@@ -1,9 +1,12 @@
 import type { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 
-import { type BaseError, NotFoundError } from "@/errors";
-import envConfig from "@config/env.config";
-import logger from "@utils/logger";
+import {
+  type BaseError,
+  NotFoundError,
+  envConfig,
+  loggerService,
+} from "@modules/shared";
 
 /**
  * Middleware function to handle errors in the application.
@@ -28,10 +31,10 @@ function errorHandler(
     ? err.httpCode
     : httpStatus.INTERNAL_SERVER_ERROR;
 
-  logger.error(`${err.name} - ${statusCode}: ${err.message}.`);
+  loggerService.error(`${err.name} - ${statusCode}: ${err.message}.`);
 
   if (envConfig.node_env === "development") {
-    logger.debug(`Error Stack: ${err.stack}`);
+    loggerService.debug(`Error Stack: ${err.stack}`);
   }
 
   res.status(statusCode).json({

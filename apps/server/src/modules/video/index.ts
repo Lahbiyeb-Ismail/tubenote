@@ -1,6 +1,5 @@
 export * from "./video.types";
 export * from "./video.model";
-export * from "./dtos";
 
 export * from "./video.repository";
 export * from "./video.service";

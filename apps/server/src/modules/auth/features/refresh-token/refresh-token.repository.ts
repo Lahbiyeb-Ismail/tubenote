@@ -1,23 +1,25 @@
 import type { PrismaClient } from "@prisma/client";
 
-import handleAsyncOperation from "@/utils/handle-async-operation";
+import { handleAsyncOperation } from "@modules/shared";
+import { ERROR_MESSAGES } from "@modules/shared";
 
 import type { RefreshToken } from "./refresh-token.model";
 import type { IRefreshTokenRepository } from "./refresh-token.types";
 
-import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
-import type { SaveTokenDto } from "./dtos/save-token.dto";
+import type { ICreateDto } from "@/modules/shared";
 
 export class RefreshTokenRepository implements IRefreshTokenRepository {
   constructor(private readonly _db: PrismaClient) {}
 
-  async saveToken(saveTokenDto: SaveTokenDto): Promise<RefreshToken> {
+  async createToken(
+    createTokenDto: ICreateDto<RefreshToken>
+  ): Promise<RefreshToken> {
     return handleAsyncOperation(
       () =>
         this._db.refreshToken.create({
-          data: { ...saveTokenDto },
+          data: { userId: createTokenDto.userId, ...createTokenDto.data },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_CREATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
     );
   }
 
@@ -30,7 +32,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
             expiresAt: { gt: new Date() },
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
     );
   }
   async delete(token: string): Promise<void> {
@@ -41,7 +43,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
             token,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_DELETE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_DELETE }
     );
   }
   async deleteAll(userId: string): Promise<void> {
@@ -52,7 +54,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
             userId,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILD_TO_DELETE_ALL }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_DELETE_ALL }
     );
   }
 }

@@ -1,13 +1,14 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { EmptyRecord, TypedRequest } from "@/types";
+import type { EmptyRecord, TypedRequest } from "@modules/shared";
 
-import type { FindManyDto } from "@common/dtos/find-many.dto";
-import type { IdParamDto } from "@common/dtos/id-param.dto";
-import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
-
-import type { IResponseFormatter } from "@modules/utils/response-formatter";
+import type {
+  IFindAllDto,
+  IParamIdDto,
+  IQueryPaginationDto,
+  IResponseFormatter,
+} from "@modules/shared";
 import type { IVideoController, IVideoService } from "@modules/video";
 
 /**
@@ -28,7 +29,7 @@ export class VideoController implements IVideoController {
    * @returns A JSON response with the list of videos and pagination details.
    */
   async getUserVideos(
-    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IQueryPaginationDto>,
     res: Response
   ) {
     const userId = req.userId;
@@ -40,14 +41,14 @@ export class VideoController implements IVideoController {
 
     const skip = (page - 1) * limit;
 
-    const findManyDto: FindManyDto = {
+    const findAllDto: IFindAllDto = {
       userId,
       limit,
       skip,
       sort: { by: sortBy, order },
     };
 
-    const paginatedItems = await this._videoService.getUserVideos(findManyDto);
+    const paginatedItems = await this._videoService.getUserVideos(findAllDto);
 
     const formattedResponse = this._responseFormatter.formatPaginatedResponse(
       req.query,
@@ -66,7 +67,7 @@ export class VideoController implements IVideoController {
    * @returns A JSON response with the video details.
    */
   async getVideoByIdOrCreate(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ) {
     const { id } = req.params;
@@ -74,7 +75,7 @@ export class VideoController implements IVideoController {
 
     const video = await this._videoService.findVideoOrCreate({
       userId,
-      youtubeVideoId: id,
+      id,
     });
 
     const formattedResponse = this._responseFormatter.formatResponse(video);

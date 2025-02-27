@@ -1,11 +1,13 @@
-import type { JwtPayload } from "@/types";
+import type { JwtPayload } from "@modules/shared";
 
-import type { AuthResponseDto } from "@modules/auth/dtos/auth.dto";
-import type { SignTokenDto } from "./dtos/sign-token.dto";
-import type { VerifyTokenDto } from "./dtos/verify-token.dto";
+import type {
+  IAuthResponseDto,
+  ISignTokenDto,
+  IVerifyTokenDto,
+} from "@modules/auth";
 
 export interface IJwtService {
-  verify(verifyTokenDto: VerifyTokenDto): Promise<JwtPayload>;
-  sign(signTokenDto: SignTokenDto): string;
-  generateAuthTokens(userId: string): AuthResponseDto;
+  verify(verifyTokenDto: IVerifyTokenDto): Promise<JwtPayload>;
+  sign(signTokenDto: ISignTokenDto): string;
+  generateAuthTokens(userId: string): IAuthResponseDto;
 }

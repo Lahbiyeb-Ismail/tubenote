@@ -1,10 +1,12 @@
 import type { Response } from "express";
 
-import type { EmptyRecord, TypedRequest } from "@/types";
+import type { EmptyRecord, TypedRequest } from "@modules/shared";
 
-import type { EmailBodyDto } from "@common/dtos/email-body.dto";
-import type { TokenParamDto } from "@common/dtos/token-param.dto";
-import type { PasswordBodyDto } from "./dtos/password-body.dto";
+import type {
+  IEmailBodyDto,
+  IParamTokenDto,
+  IPasswordBodyDto,
+} from "@/modules/shared";
 
 export interface IResetPasswordService {
   sendResetToken(email: string): Promise<void>;
@@ -12,13 +14,16 @@ export interface IResetPasswordService {
   verifyResetToken(token: string): Promise<string>;
 }
 export interface IResetPasswordController {
-  forgotPassword(req: TypedRequest<EmailBodyDto>, res: Response): Promise<void>;
+  forgotPassword(
+    req: TypedRequest<IEmailBodyDto>,
+    res: Response
+  ): Promise<void>;
   resetPassword(
-    req: TypedRequest<PasswordBodyDto, TokenParamDto>,
+    req: TypedRequest<IPasswordBodyDto, IParamTokenDto>,
     res: Response
   ): Promise<void>;
   verifyResetToken(
-    req: TypedRequest<EmptyRecord, TokenParamDto>,
+    req: TypedRequest<EmptyRecord, IParamTokenDto>,
     res: Response
   ): Promise<void>;
 }

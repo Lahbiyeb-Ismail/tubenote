@@ -2,37 +2,20 @@ import type { Response } from "express";
 
 import type { Note } from "./note.model";
 
-import type { EmptyRecord, TypedRequest } from "@/types";
-
-import type { FindManyDto } from "@common/dtos/find-many.dto";
-import type { IdParamDto } from "@common/dtos/id-param.dto";
-import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
+import type { EmptyRecord, TypedRequest } from "@modules/shared";
 
 import type {
-  CreateNoteDto,
-  DeleteNoteDto,
-  FindNoteDto,
-  FindNotesByVideoIdDto,
-  UpdateNoteDto,
-} from "@modules/note";
-
-/**
- * Represents paginated notes data for a user.
- */
-export interface PaginatedNotes {
-  /**
-   * The list of notes.
-   */
-  notes: Note[];
-  /**
-   * The total count of notes.
-   */
-  notesCount: number;
-  /**
-   * The total number of pages available based on the notes count and pagination limit.
-   */
-  totalPages: number;
-}
+  ICreateBodyDto,
+  ICreateDto,
+  IDeleteDto,
+  IFindAllDto,
+  IFindUniqueDto,
+  IPaginatedItems,
+  IParamIdDto,
+  IQueryPaginationDto,
+  IUpdateBodyDto,
+  IUpdateDto,
+} from "@modules/shared";
 
 /**
  * Interface defining the repository methods for interacting with note data.
@@ -53,7 +36,7 @@ export interface INoteRepository {
    * @param findNoteDto - Data transfer object containing the note ID and user ID.
    * @returns A promise that resolves to the found note or null if no note is found.
    */
-  find(findNoteDto: FindNoteDto): Promise<Note | null>;
+  find(findNoteDto: IFindUniqueDto): Promise<Note | null>;
 
   /**
    * Creates a new note.
@@ -61,16 +44,16 @@ export interface INoteRepository {
    * @param createNoteDto - Data transfer object containing the note details.
    * @returns A promise that resolves to the newly created note.
    */
-  create(createNoteDto: CreateNoteDto): Promise<Note>;
+  create(createNoteDto: ICreateDto<Note>): Promise<Note>;
 
   /**
    * Updates an existing note.
    *
-   * @param findNoteDto - Data transfer object containing the note ID and user ID.
-   * @param updateNoteDto - Data transfer object containing the updated note data.
+   * @param {IUpdateDto<Note>} updateNoteDto - The data transfer object containing the note's ID, user ID, and the data to update.
    * @returns A promise that resolves to the updated note.
+   * @throws {Error} - Throws an error if the update operation fails.
    */
-  update(findNoteDto: FindNoteDto, updateNoteDto: UpdateNoteDto): Promise<Note>;
+  update(updateNoteDto: IUpdateDto<Note>): Promise<Note>;
 
   /**
    * Deletes a note.
@@ -78,7 +61,7 @@ export interface INoteRepository {
    * @param deleteNoteDto - Data transfer object containing the note ID and user ID.
    * @returns A promise that resolves to the deleted note.
    */
-  delete(deleteNoteDto: DeleteNoteDto): Promise<Note>;
+  delete(deleteNoteDto: IDeleteDto): Promise<Note>;
 
   /**
    * Retrieves multiple notes with pagination.
@@ -86,7 +69,7 @@ export interface INoteRepository {
    * @param findManyDto - Data transfer object containing pagination and sorting parameters.
    * @returns A promise that resolves to an array of notes.
    */
-  findMany(findManyDto: FindManyDto): Promise<Note[]>;
+  findMany(findManyDto: IFindAllDto): Promise<Note[]>;
 
   /**
    * Retrieves multiple notes associated with a specific video.
@@ -94,7 +77,7 @@ export interface INoteRepository {
    * @param dto - Data transfer object containing the video ID along with pagination parameters.
    * @returns A promise that resolves to an array of notes.
    */
-  findManyByVideoId(dto: FindNotesByVideoIdDto): Promise<Note[]>;
+  findManyByVideoId(dto: IFindAllDto & { videoId: string }): Promise<Note[]>;
 
   /**
    * Counts the total number of notes for a specific user.
@@ -115,7 +98,7 @@ export interface INoteService {
    * @param findNoteDto - Data transfer object containing the note ID and user ID.
    * @returns A promise that resolves to the found note.
    */
-  findNote(findNoteDto: FindNoteDto): Promise<Note>;
+  findNote(findNoteDto: IFindUniqueDto): Promise<Note>;
 
   /**
    * Creates a new note.
@@ -123,7 +106,7 @@ export interface INoteService {
    * @param createNoteDto - Data transfer object containing the note details.
    * @returns A promise that resolves to the newly created note.
    */
-  createNote(createNoteDto: CreateNoteDto): Promise<Note>;
+  createNote(createNoteDto: ICreateDto<Note>): Promise<Note>;
 
   /**
    * Updates an existing note.
@@ -132,10 +115,7 @@ export interface INoteService {
    * @param updateNoteDto - Data transfer object containing the updated note data.
    * @returns A promise that resolves to the updated note.
    */
-  updateNote(
-    findNoteDto: FindNoteDto,
-    updateNoteDto: UpdateNoteDto
-  ): Promise<Note>;
+  updateNote(updateNoteDto: IUpdateDto<Note>): Promise<Note>;
 
   /**
    * Deletes a note.
@@ -143,7 +123,7 @@ export interface INoteService {
    * @param deleteNoteDto - Data transfer object containing the note ID and user ID.
    * @returns A promise that resolves to the deleted note.
    */
-  deleteNote(deleteNoteDto: DeleteNoteDto): Promise<Note>;
+  deleteNote(deleteNoteDto: IDeleteDto): Promise<Note>;
 
   /**
    * Fetches paginated notes for a user.
@@ -151,7 +131,7 @@ export interface INoteService {
    * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
    * @returns A promise that resolves to the paginated notes information.
    */
-  fetchUserNotes(findManyDto: FindManyDto): Promise<PaginatedNotes>;
+  fetchUserNotes(findManyDto: IFindAllDto): Promise<IPaginatedItems<Note>>;
 
   /**
    * Fetches recent notes for a user.
@@ -159,7 +139,7 @@ export interface INoteService {
    * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
    * @returns A promise that resolves to an array of recent notes.
    */
-  fetchRecentNotes(findManyDto: FindManyDto): Promise<Note[]>;
+  fetchRecentNotes(findManyDto: IFindAllDto): Promise<Note[]>;
 
   /**
    * Fetches recently updated notes for a user.
@@ -167,7 +147,7 @@ export interface INoteService {
    * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
    * @returns A promise that resolves to an array of recently updated notes.
    */
-  fetchRecentlyUpdatedNotes(findManyDto: FindManyDto): Promise<Note[]>;
+  fetchRecentlyUpdatedNotes(findManyDto: IFindAllDto): Promise<Note[]>;
 
   /**
    * Fetches notes associated with a specific video with pagination.
@@ -175,7 +155,9 @@ export interface INoteService {
    * @param dto - Data transfer object containing the video ID and pagination parameters.
    * @returns A promise that resolves to the paginated notes information.
    */
-  fetchNotesByVideoId(dto: FindNotesByVideoIdDto): Promise<PaginatedNotes>;
+  fetchNotesByVideoId(
+    dto: IFindAllDto & { videoId: string }
+  ): Promise<IPaginatedItems<Note>>;
 }
 
 /**
@@ -189,7 +171,10 @@ export interface INoteController {
    * @param res - The response object used to send the HTTP response.
    * @returns A promise that resolves when the note is created.
    */
-  createNote(req: TypedRequest<CreateNoteDto>, res: Response): Promise<void>;
+  createNote(
+    req: TypedRequest<ICreateBodyDto<Note>>,
+    res: Response
+  ): Promise<void>;
 
   /**
    * Handles updating an existing note.
@@ -199,7 +184,7 @@ export interface INoteController {
    * @returns A promise that resolves when the note is updated.
    */
   updateNote(
-    req: TypedRequest<UpdateNoteDto, IdParamDto>,
+    req: TypedRequest<IUpdateBodyDto<Note>, IParamIdDto>,
     res: Response
   ): Promise<void>;
 
@@ -211,7 +196,7 @@ export interface INoteController {
    * @returns A promise that resolves when the note is deleted.
    */
   deleteNote(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ): Promise<void>;
 
@@ -223,7 +208,7 @@ export interface INoteController {
    * @returns A promise that resolves when the note is retrieved.
    */
   getNoteById(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ): Promise<void>;
 
@@ -235,7 +220,7 @@ export interface INoteController {
    * @returns A promise that resolves when the notes are retrieved.
    */
   getUserNotes(
-    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IQueryPaginationDto>,
     res: Response
   ): Promise<void>;
 
@@ -265,7 +250,7 @@ export interface INoteController {
    * @returns A promise that resolves when the notes are retrieved.
    */
   getNotesByVideoId(
-    req: TypedRequest<EmptyRecord, IdParamDto, QueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto, IQueryPaginationDto>,
     res: Response
   ): Promise<void>;
 }

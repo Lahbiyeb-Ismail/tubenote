@@ -1,19 +1,22 @@
-import { UnauthorizedError } from "@/errors";
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
-
-import { GoogleAuthService } from "../google.service";
-
-import type { ICacheService } from "@/modules/utils/cache/cache.types";
-import type { ICryptoService } from "@/modules/utils/crypto";
-import type { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
-import type { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
+import { ERROR_MESSAGES, UnauthorizedError } from "@modules/shared";
 
 import type {
+  IJwtService,
+  IRefreshTokenService,
   OAuthCodePayloadDto,
   OAuthResponseDto,
-} from "@/modules/auth/dtos";
-import type { RefreshToken } from "@/modules/auth/features/refresh-token/refresh-token.model";
-import type { User } from "@modules/user/user.model";
+  RefreshToken,
+} from "@modules/auth";
+
+import type { User } from "@modules/user";
+
+import type {
+  ICacheService,
+  ICryptoService,
+  ILoggerService,
+} from "@modules/shared";
+
+import { GoogleAuthService } from "../google.service";
 
 describe("GoogleAuthService", () => {
   let googleAuthService: GoogleAuthService;
@@ -21,6 +24,7 @@ describe("GoogleAuthService", () => {
   let mockRefreshTokenService: jest.Mocked<IRefreshTokenService>;
   let mockCryptoService: jest.Mocked<ICryptoService>;
   let mockCacheService: jest.Mocked<ICacheService>;
+  let mockLoggerService: jest.Mocked<ILoggerService>;
 
   const mockUser: User = {
     id: "user-id-123",
@@ -57,7 +61,7 @@ describe("GoogleAuthService", () => {
       verify: jest.fn(),
     };
     mockRefreshTokenService = {
-      saveToken: jest.fn(),
+      createToken: jest.fn(),
       refreshToken: jest.fn(),
       deleteAllTokens: jest.fn(),
     };
@@ -77,11 +81,20 @@ describe("GoogleAuthService", () => {
       getStats: jest.fn(),
     };
 
+    mockLoggerService = {
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+      http: jest.fn(),
+    };
+
     googleAuthService = new GoogleAuthService(
       mockJwtService,
       mockRefreshTokenService,
       mockCryptoService,
-      mockCacheService
+      mockCacheService,
+      mockLoggerService
     );
   });
 
@@ -95,7 +108,7 @@ describe("GoogleAuthService", () => {
 
       mockJwtService.generateAuthTokens.mockReturnValue(mockOAuthResponse);
 
-      mockRefreshTokenService.saveToken.mockResolvedValue(mockRefreshToken);
+      mockRefreshTokenService.createToken.mockResolvedValue(mockRefreshToken);
 
       jest
         .spyOn(googleAuthService, "generateTemporaryCode")
@@ -106,10 +119,12 @@ describe("GoogleAuthService", () => {
       expect(mockJwtService.generateAuthTokens).toHaveBeenCalledWith(
         mockUser.id
       );
-      expect(mockRefreshTokenService.saveToken).toHaveBeenCalledWith({
+      expect(mockRefreshTokenService.createToken).toHaveBeenCalledWith({
         userId: mockUser.id,
-        token: mockOAuthResponse.refreshToken,
-        expiresAt: expect.any(Date), // Ensure the date is correctly parsed
+        data: {
+          token: mockOAuthResponse.refreshToken,
+          expiresAt: expect.any(Date), // Ensure the date is correctly parsed
+        },
       });
 
       expect(googleAuthService.generateTemporaryCode).toHaveBeenCalledWith({
@@ -126,9 +141,7 @@ describe("GoogleAuthService", () => {
 
       await expect(
         googleAuthService.googleLogin(unverifiedUser)
-      ).rejects.toThrow(
-        new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED)
-      );
+      ).rejects.toThrow(new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED));
     });
 
     it("should propagate jwtService erros", async () => {
@@ -147,7 +160,7 @@ describe("GoogleAuthService", () => {
         refreshToken: "refresh-token",
       };
       mockJwtService.generateAuthTokens.mockReturnValue(tokens);
-      mockRefreshTokenService.saveToken.mockRejectedValue(
+      mockRefreshTokenService.createToken.mockRejectedValue(
         new Error("Database error")
       );
 
@@ -164,7 +177,7 @@ describe("GoogleAuthService", () => {
 
       mockJwtService.generateAuthTokens.mockReturnValue(tokens);
 
-      mockRefreshTokenService.saveToken.mockResolvedValue(mockRefreshToken);
+      mockRefreshTokenService.createToken.mockResolvedValue(mockRefreshToken);
 
       jest
         .spyOn(googleAuthService, "generateTemporaryCode")

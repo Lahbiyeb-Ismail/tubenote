@@ -1,15 +1,18 @@
 import { Response } from "express";
 import httpStatus from "http-status";
 
-import { clearRefreshTokenCookieConfig } from "@config/cookie.config";
+import type { TypedRequest } from "@modules/shared";
 
-import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
-import { AuthController } from "../auth.controller";
+import { clearRefreshTokenCookieConfig } from "@modules/auth";
 
-import type { TypedRequest } from "@/types";
+import { REFRESH_TOKEN_NAME } from "@modules/auth";
 
-import type { IAuthService } from "../auth.types";
-import type { AuthResponseDto, OAuthCodeDto } from "../dtos";
+import {
+  AuthController,
+  IAuthResponseDto,
+  IAuthService,
+  OAuthCodeDto,
+} from "@modules/auth";
 
 describe("AuthController", () => {
   let authController: AuthController;
@@ -125,7 +128,7 @@ describe("AuthController", () => {
 
     const mockCode = "valid-code-123";
 
-    const mockAuthResponse: AuthResponseDto = {
+    const mockAuthResponse: IAuthResponseDto = {
       accessToken: "access-token-123",
       refreshToken: "refresh-token-123",
     };

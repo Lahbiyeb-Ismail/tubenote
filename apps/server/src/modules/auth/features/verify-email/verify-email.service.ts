@@ -1,16 +1,15 @@
+import { stringToDate } from "@modules/shared";
+
 import {
   VERIFY_EMAIL_TOKEN_EXPIRES_IN,
   VERIFY_EMAIL_TOKEN_SECRET,
-} from "@/constants/auth.contants";
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+} from "@modules/auth";
 
-import { BadRequestError } from "@/errors";
+import { BadRequestError, ERROR_MESSAGES } from "@modules/shared";
 
-import logger from "@/utils/logger";
-import { stringToDate } from "@utils/convert-string-to-date";
-
-import type { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
-import type { IUserService } from "@modules/user/user.types";
+import type { IJwtService } from "@modules/auth";
+import type { ILoggerService } from "@modules/shared";
+import type { IUserService } from "@modules/user";
 
 import type {
   IVerifyEmailRepository,
@@ -21,14 +20,15 @@ export class VerifyEmailService implements IVerifyEmailService {
   constructor(
     private readonly _verifyEmailRepository: IVerifyEmailRepository,
     private readonly _userService: IUserService,
-    private readonly _jwtService: IJwtService
+    private readonly _jwtService: IJwtService,
+    private readonly _loggerService: ILoggerService
   ) {}
 
   async generateToken(email: string): Promise<string> {
     const user = await this._userService.getUser({ email });
 
     if (user.isEmailVerified) {
-      throw new BadRequestError(ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
+      throw new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED);
     }
 
     const existingVerificationToken =
@@ -46,13 +46,17 @@ export class VerifyEmailService implements IVerifyEmailService {
       expiresIn,
     });
 
-    await this._verifyEmailRepository.saveToken({
+    await this._verifyEmailRepository.createToken({
       userId: user.id,
-      token,
-      expiresAt: stringToDate(expiresIn),
+      data: {
+        token,
+        expiresAt: stringToDate(expiresIn),
+      },
     });
 
-    logger.info(`Verification email token generated for user ${user.id}`);
+    this._loggerService.info(
+      `Verification email token generated for user ${user.id}`
+    );
 
     return token;
   }
@@ -68,7 +72,9 @@ export class VerifyEmailService implements IVerifyEmailService {
     });
 
     if (!foundToken) {
-      logger.warn(`Token reuse attempt for user ${payload.userId}`);
+      this._loggerService.warn(
+        `Token reuse attempt for user ${payload.userId}`
+      );
 
       await this._verifyEmailRepository.deleteMany(payload.userId);
       throw new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
@@ -81,6 +87,8 @@ export class VerifyEmailService implements IVerifyEmailService {
       foundToken.userId
     );
 
-    logger.info(`Email verification successful for user ${verifiedUser.id}`);
+    this._loggerService.info(
+      `Email verification successful for user ${verifiedUser.id}`
+    );
   }
 }

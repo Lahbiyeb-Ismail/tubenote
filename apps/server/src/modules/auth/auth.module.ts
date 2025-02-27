@@ -1,10 +1,15 @@
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 
-import { refreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.module";
-import { cacheService } from "@modules/utils/cache/cache.module";
+import { refreshTokenService } from "@modules/auth";
 
-const authService = new AuthService(refreshTokenService, cacheService);
+import { cacheService, loggerService } from "@modules/shared";
+
+const authService = new AuthService(
+  refreshTokenService,
+  cacheService,
+  loggerService
+);
 
 const authController = new AuthController(authService);
 

@@ -1,6 +1,6 @@
-import prismaClient from "@config/database.config";
+import { loggerService, prismaClient } from "@modules/shared";
 
-import { jwtService } from "@modules/auth/utils/services/jwt/jwt.module";
+import { jwtService } from "@modules/auth";
 
 import { RefreshTokenController } from "./refresh-token.controller";
 
@@ -10,7 +10,8 @@ import { RefreshTokenService } from "./refresh-token.service";
 const refreshTokenRepository = new RefreshTokenRepository(prismaClient);
 const refreshTokenService = new RefreshTokenService(
   refreshTokenRepository,
-  jwtService
+  jwtService,
+  loggerService
 );
 const refreshTokenController = new RefreshTokenController(refreshTokenService);
 

@@ -1,28 +1,26 @@
-import { ForbiddenError, UnauthorizedError } from "@/errors";
+import { ERROR_MESSAGES } from "@modules/shared";
 
-import { REFRESH_TOKEN_EXPIRES_IN } from "@/constants/auth.contants";
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { stringToDate } from "@modules/shared";
 
-import { stringToDate } from "@utils/convert-string-to-date";
+import {
+  ForbiddenError,
+  ICryptoService,
+  IMailSenderService,
+  UnauthorizedError,
+} from "@modules/shared";
 
-import { ILocalAuthService } from "./local-auth.types";
-
-import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
-import { ICryptoService } from "@modules/utils/crypto";
-
-import { IMailSenderService } from "@modules/mailSender/mail-sender.types";
-import { IUserService } from "@modules/user";
-
-import { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
-import type { IVerifyEmailService } from "@modules/auth/features/verify-email/verify-email.types";
-
-import type { User } from "@modules/user/user.model";
+import type { ICreateUserDto, IUserService, User } from "@modules/user";
 
 import type {
-  AuthResponseDto,
-  LoginDto,
-  RegisterDto,
-} from "@modules/auth/dtos";
+  IAuthResponseDto,
+  IJwtService,
+  ILocalAuthService,
+  ILoginDto,
+  IRefreshTokenService,
+  IVerifyEmailService,
+} from "@modules/auth";
+
+import { REFRESH_TOKEN_EXPIRES_IN } from "../../constants";
 
 export class LocalAuthService implements ILocalAuthService {
   constructor(
@@ -34,8 +32,8 @@ export class LocalAuthService implements ILocalAuthService {
     private readonly _mailSenderService: IMailSenderService
   ) {}
 
-  async registerUser(registerUserDto: RegisterDto): Promise<User> {
-    const newUser = await this._userService.createUser(registerUserDto);
+  async registerUser(createUserDto: ICreateUserDto): Promise<User> {
+    const newUser = await this._userService.createUser(createUserDto);
 
     const verifyEmailToken = await this._verifyEmailService.generateToken(
       newUser.email
@@ -49,13 +47,13 @@ export class LocalAuthService implements ILocalAuthService {
     return newUser;
   }
 
-  async loginUser(LoginDto: LoginDto): Promise<AuthResponseDto> {
-    const { email, password } = LoginDto;
+  async loginUser(loginDto: ILoginDto): Promise<IAuthResponseDto> {
+    const { email, password } = loginDto;
 
     const user = await this._userService.getUser({ email });
 
     if (!user.isEmailVerified) {
-      throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
+      throw new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED);
     }
 
     const isPasswordMatch = await this._cryptoService.comparePasswords({
@@ -71,10 +69,12 @@ export class LocalAuthService implements ILocalAuthService {
       user.id
     );
 
-    await this._refreshTokenService.saveToken({
+    await this._refreshTokenService.createToken({
       userId: user.id,
-      token: refreshToken,
-      expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+      data: {
+        token: refreshToken,
+        expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+      },
     });
 
     return { accessToken, refreshToken };

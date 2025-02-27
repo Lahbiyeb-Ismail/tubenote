@@ -1,32 +1,38 @@
-import { UnauthorizedError } from "@/errors";
-import { REFRESH_TOKEN_EXPIRES_IN } from "@constants/auth.contants";
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { stringToDate } from "@modules/shared";
 
-import { stringToDate } from "@utils/convert-string-to-date";
-import logger from "@utils/logger";
+import {
+  ERROR_MESSAGES,
+  ICacheService,
+  ICryptoService,
+  ILoggerService,
+  UnauthorizedError,
+} from "@modules/shared";
 
-import { ICryptoService } from "@/modules/utils/crypto";
-import { IJwtService } from "@modules/auth/utils/services/jwt/jwt.types";
-import { ICacheService } from "@modules/utils/cache/cache.types";
+import type { User } from "@modules/user";
+
+import type {
+  IJwtService,
+  IRefreshTokenService,
+  OAuthCodePayloadDto,
+  OAuthResponseDto,
+} from "@modules/auth";
+
+import { REFRESH_TOKEN_EXPIRES_IN } from "../../../constants";
 import { IGoogleAuthService } from "./google.types";
-
-import type { User } from "@modules/user/user.model";
-
-import type { OAuthCodePayloadDto, OAuthResponseDto } from "@modules/auth/dtos";
-import type { IRefreshTokenService } from "@modules/auth/features/refresh-token/refresh-token.types";
 
 export class GoogleAuthService implements IGoogleAuthService {
   constructor(
     private readonly _jwtService: IJwtService,
     private readonly _refreshTokenService: IRefreshTokenService,
     private readonly _cryptoService: ICryptoService,
-    private readonly _cacheService: ICacheService
+    private readonly _cacheService: ICacheService,
+    private readonly _loggerService: ILoggerService
   ) {}
 
   /**
    * Authenticates a user using Google OAuth and generates access and refresh tokens.
    * @param user - The user object retrieved from Google OAuth.
-   * @returns A promise resolving to a AuthResponseDto containing access and refresh tokens.
+   * @returns A promise resolving to a IAuthResponseDto containing access and refresh tokens.
    * @throws NotFoundError if the user is not found.
    * @throws UnauthorizedError if the user's email is not verified.
    */
@@ -34,16 +40,18 @@ export class GoogleAuthService implements IGoogleAuthService {
     const { isEmailVerified, id: userId } = user;
 
     if (!isEmailVerified) {
-      throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
+      throw new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED);
     }
 
     const { accessToken, refreshToken } =
       this._jwtService.generateAuthTokens(userId);
 
-    await this._refreshTokenService.saveToken({
+    await this._refreshTokenService.createToken({
       userId,
-      token: refreshToken,
-      expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+      data: {
+        token: refreshToken,
+        expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+      },
     });
 
     // Generate a short-lived, one-time use code
@@ -65,8 +73,10 @@ export class GoogleAuthService implements IGoogleAuthService {
       ...temporaryCodePayloadDto,
     });
 
-    logger.info(`Code ${code} set in cache: ${setResult}`);
-    logger.info(`Cache stats after set: ${this._cacheService.getStats()}`);
+    this._loggerService.info(`Code ${code} set in cache: ${setResult}`);
+    this._loggerService.info(
+      `Cache stats after set: ${this._cacheService.getStats()}`
+    );
 
     return code;
   }

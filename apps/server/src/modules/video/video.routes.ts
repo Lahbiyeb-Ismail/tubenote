@@ -5,8 +5,7 @@ import validateRequest from "@middlewares/validate-request.middleware";
 
 import { videoController } from "@modules/video";
 
-import { idParamSchema } from "@common/schemas/id-param.schema";
-import { paginationSchema } from "@common/schemas/query-pagination.schema";
+import { idParamSchema, paginationQuerySchema } from "@modules/shared";
 
 const router = Router();
 
@@ -17,7 +16,7 @@ router.use(isAuthenticated);
 // - POST /: Create a new video (requires request body validation)
 router
   .route("/")
-  .get(validateRequest({ query: paginationSchema }), (req, res) =>
+  .get(validateRequest({ query: paginationQuerySchema }), (req, res) =>
     videoController.getUserVideos(req, res)
   );
 

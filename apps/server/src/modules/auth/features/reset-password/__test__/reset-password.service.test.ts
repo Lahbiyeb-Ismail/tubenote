@@ -1,15 +1,20 @@
-import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
-import { BadRequestError, ForbiddenError, NotFoundError } from "@/errors";
+import {
+  BadRequestError,
+  ERROR_MESSAGES,
+  ForbiddenError,
+  NotFoundError,
+} from "@modules/shared";
 
-import { ResetPasswordService } from "@modules/auth/features/reset-password/reset-password.service";
+import { IResetPasswordService, ResetPasswordService } from "@modules/auth";
 
-import type { User } from "@modules/user/user.model";
+import type { IUserService, User } from "@modules/user";
 
-import type { ICacheService } from "@/modules/utils/cache/cache.types";
-import type { ICryptoService } from "@/modules/utils/crypto";
-import type { IResetPasswordService } from "@modules/auth/features/reset-password/reset-password.types";
-import type { IMailSenderService } from "@modules/mailSender/mail-sender.types";
-import type { IUserService } from "@modules/user/user.types";
+import type {
+  ICacheService,
+  ICryptoService,
+  ILoggerService,
+  IMailSenderService,
+} from "@modules/shared";
 
 describe("ResetPasswordService test suites", () => {
   let resetPasswordService: IResetPasswordService;
@@ -17,6 +22,7 @@ describe("ResetPasswordService test suites", () => {
   let mockCryptoService: ICryptoService;
   let mockCacheService: ICacheService;
   let mockMailSenderService: IMailSenderService;
+  let mockLoggerService: ILoggerService;
 
   beforeEach(() => {
     mockUserService = {
@@ -50,11 +56,20 @@ describe("ResetPasswordService test suites", () => {
       sendMail: jest.fn(),
     };
 
+    mockLoggerService = {
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+      http: jest.fn(),
+    };
+
     resetPasswordService = new ResetPasswordService(
       mockUserService,
       mockCryptoService,
       mockCacheService,
-      mockMailSenderService
+      mockMailSenderService,
+      mockLoggerService
     );
   });
 
@@ -145,7 +160,7 @@ describe("ResetPasswordService test suites", () => {
 
       await expect(
         resetPasswordService.sendResetToken(mockEmail)
-      ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED));
+      ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.NOT_VERIFIED));
 
       expect(mockUserService.getUser).toHaveBeenCalledWith({
         email: mockEmail,
@@ -215,10 +230,10 @@ describe("ResetPasswordService test suites", () => {
 
       expect(mockCacheService.del).toHaveBeenCalledWith(mockValidToken);
 
-      expect(mockUserService.resetPassword).toHaveBeenCalledWith(
-        mockUserId,
-        newPassword
-      );
+      expect(mockUserService.resetPassword).toHaveBeenCalledWith({
+        id: mockUserId,
+        newPassword,
+      });
     });
 
     it("should throw BadRequestError for invalid or expired token", async () => {

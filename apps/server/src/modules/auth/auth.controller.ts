@@ -1,13 +1,16 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import { clearRefreshTokenCookieConfig } from "@config/cookie.config";
-import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
+import type { TypedRequest } from "@modules/shared";
 
-import type { TypedRequest } from "@/types";
+import { clearRefreshTokenCookieConfig } from "@modules/auth";
+import { REFRESH_TOKEN_NAME } from "@modules/auth";
 
-import type { IAuthController, IAuthService } from "./auth.types";
-import type { OAuthCodeDto } from "./dtos";
+import type {
+  IAuthController,
+  IAuthService,
+  OAuthCodeDto,
+} from "@modules/auth";
 
 /**
  * Controller for handling authentication-related operations.

@@ -1,40 +1,39 @@
-import type { EmptyRecord, TypedRequest } from "@/types";
+import type { EmptyRecord, TypedRequest } from "@modules/shared";
 import type { Response } from "express";
 
-import type {
-  CreateVideoDto,
-  FindVideoDto,
-  Video,
-  YoutubeVideoData,
-} from "@modules/video";
+import type { Video, YoutubeVideoData } from "@modules/video";
 
-import type { PaginatedItems } from "@/common/dtos/paginated-items.dto";
-import type { FindManyDto } from "@common/dtos/find-many.dto";
-import type { IdParamDto } from "@common/dtos/id-param.dto";
-import type { QueryPaginationDto } from "@common/dtos/query-pagination.dto";
+import type {
+  ICreateDto,
+  IFindAllDto,
+  IFindUniqueDto,
+  IPaginatedItems,
+  IParamIdDto,
+  IQueryPaginationDto,
+} from "@modules/shared";
 
 export interface IVideoRepository {
   transaction<T>(fn: (tx: IVideoRepository) => Promise<T>): Promise<T>;
   findByYoutubeId(youtubeId: string): Promise<Video | null>;
-  findMany(findManyDto: FindManyDto): Promise<Video[]>;
+  findMany(findAllDto: IFindAllDto): Promise<Video[]>;
   count(userId: string): Promise<number>;
-  create(createVideoDto: CreateVideoDto): Promise<Video>;
+  create(createVideoDto: ICreateDto<YoutubeVideoData>): Promise<Video>;
   connectVideoToUser(videoId: string, userId: string): Promise<Video>;
 }
 
 export interface IVideoService {
   getYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData>;
-  findVideoOrCreate(findVideoDto: FindVideoDto): Promise<Video>;
-  getUserVideos(findManyDto: FindManyDto): Promise<PaginatedItems<Video>>;
+  findVideoOrCreate(findVideoDto: IFindUniqueDto): Promise<Video>;
+  getUserVideos(findAllDto: IFindAllDto): Promise<IPaginatedItems<Video>>;
 }
 
 export interface IVideoController {
   getUserVideos(
-    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IQueryPaginationDto>,
     res: Response
   ): Promise<void>;
   getVideoByIdOrCreate(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ): Promise<void>;
 }

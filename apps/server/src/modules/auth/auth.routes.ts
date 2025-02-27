@@ -3,9 +3,9 @@ import { Router } from "express";
 import validateRequest from "@/middlewares/validate-request.middleware";
 import isAuthenticated from "@middlewares/auth.middleware";
 
-import { authController } from "./auth.module";
+import { oauthCodeSchema } from "@modules/shared";
 
-import { oauthCodeSchema } from "./schemas";
+import { authController } from "@modules/auth";
 
 import localAuthRoutes from "./features/local-auth/local-auth.routes";
 import googleAuthRoutes from "./features/oauth/google/google.routes";

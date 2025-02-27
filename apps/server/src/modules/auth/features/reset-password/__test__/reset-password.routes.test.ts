@@ -3,8 +3,10 @@ import request from "supertest";
 
 import app from "@/app";
 
-import type { EmailBodyDto } from "@/common/dtos/email-body.dto";
-import { ERROR_MESSAGES } from "@/constants/error-messages.contants";
+import { ERROR_MESSAGES } from "@modules/shared";
+
+import type { IEmailBodyDto } from "@modules/shared";
+
 import { resetPasswordController } from "../reset-password.module";
 
 jest.mock("../reset-password.module", () => ({
@@ -18,11 +20,11 @@ jest.mock("../reset-password.module", () => ({
 describe("Reset password Routes", () => {
   const mockEmail = "user@test.com";
 
-  const mockValidEmailBody: EmailBodyDto = {
+  const mockValidEmailBody: IEmailBodyDto = {
     email: mockEmail,
   };
 
-  const mockInValidEmailBody: EmailBodyDto = {
+  const mockInValidEmailBody: IEmailBodyDto = {
     email: "invalidemail.com",
   };
 
@@ -67,9 +69,7 @@ describe("Reset password Routes", () => {
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
 
-      expect(response.body.error.message).toBe(
-        "Validation error in email field: Invalid email"
-      );
+      expect(response.body.error.message).toContain("Invalid email address");
 
       expect(response.body.error.statusCode).toBe(httpStatus.BAD_REQUEST);
 
@@ -102,9 +102,7 @@ describe("Reset password Routes", () => {
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
 
-      expect(response.body.error.message).toBe(
-        "Validation error in email field: Invalid email"
-      );
+      expect(response.body.error.message).toContain("Invalid email address");
 
       expect(response.body.error.statusCode).toBe(httpStatus.BAD_REQUEST);
 

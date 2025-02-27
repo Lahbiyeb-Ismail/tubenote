@@ -1,24 +1,25 @@
+import { ERROR_MESSAGES } from "@modules/shared";
+
+import type {
+  IAuthResponseDto,
+  IJwtService,
+  ILoginDto,
+  IRefreshTokenService,
+  IVerifyEmailService,
+} from "@modules/auth";
+
+import type { ICreateUserDto, IUserService, User } from "@modules/user";
+
 import {
   ConflictError,
   ForbiddenError,
+  ICryptoService,
+  IMailSenderService,
   NotFoundError,
   UnauthorizedError,
-} from "@/errors";
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+} from "@modules/shared";
 
 import { LocalAuthService } from "../local-auth.service";
-
-import type {
-  AuthResponseDto,
-  LoginDto,
-  RegisterDto,
-} from "@/modules/auth/dtos";
-import type { IRefreshTokenService } from "@/modules/auth/features/refresh-token/refresh-token.types";
-import type { IVerifyEmailService } from "@/modules/auth/features/verify-email/verify-email.types";
-import type { IJwtService } from "@/modules/auth/utils/services/jwt/jwt.types";
-import type { IMailSenderService } from "@/modules/mailSender/mail-sender.types";
-import type { IUserService, User } from "@/modules/user";
-import type { ICryptoService } from "@/modules/utils/crypto";
 
 describe("LocalAuthService", () => {
   // Mock dependencies
@@ -40,7 +41,7 @@ describe("LocalAuthService", () => {
   };
 
   const mockRefreshTokenService: Partial<IRefreshTokenService> = {
-    saveToken: jest.fn(),
+    createToken: jest.fn(),
   };
 
   const mockMailSenderService: Partial<IMailSenderService> = {
@@ -60,15 +61,18 @@ describe("LocalAuthService", () => {
     isEmailVerified: true,
   };
 
-  const mockTokens: AuthResponseDto = {
+  const mockTokens: IAuthResponseDto = {
     accessToken: "mock-access-token",
     refreshToken: "mock-refresh-token",
   };
 
-  const registerUserDto: RegisterDto = {
-    email: "test@example.com",
-    password: "password123",
-    username: "Test User",
+  const registerUserDto: ICreateUserDto = {
+    data: {
+      email: "test@example.com",
+      password: "password123",
+      username: "Test User",
+      isEmailVerified: false,
+    },
   };
 
   beforeEach(() => {
@@ -187,9 +191,7 @@ describe("LocalAuthService", () => {
     });
 
     it("should handle concurrent user registration with same email", async () => {
-      const conflictError = new ConflictError(
-        ERROR_MESSAGES.EMAIL_ALREADY_EXISTS
-      );
+      const conflictError = new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS);
 
       (mockUserService.createUser as jest.Mock).mockRejectedValueOnce(
         conflictError
@@ -202,7 +204,7 @@ describe("LocalAuthService", () => {
   });
 
   describe("LocalAuthService - loginUser method", () => {
-    const loginDto: LoginDto = {
+    const loginDto: ILoginDto = {
       email: "test@example.com",
       password: "password123",
     };
@@ -211,7 +213,7 @@ describe("LocalAuthService", () => {
       (mockJwtService.generateAuthTokens as jest.Mock).mockReturnValue(
         mockTokens
       );
-      (mockRefreshTokenService.saveToken as jest.Mock).mockResolvedValue(
+      (mockRefreshTokenService.createToken as jest.Mock).mockResolvedValue(
         undefined
       );
     });
@@ -233,10 +235,12 @@ describe("LocalAuthService", () => {
       expect(mockJwtService.generateAuthTokens).toHaveBeenCalledWith(
         mockUser.id
       );
-      expect(mockRefreshTokenService.saveToken).toHaveBeenCalledWith({
+      expect(mockRefreshTokenService.createToken).toHaveBeenCalledWith({
         userId: mockUser.id,
-        token: mockTokens.refreshToken,
-        expiresAt: expect.any(Date),
+        data: {
+          token: mockTokens.refreshToken,
+          expiresAt: expect.any(Date),
+        },
       });
     });
 
@@ -258,7 +262,7 @@ describe("LocalAuthService", () => {
       });
 
       await expect(localAuthService.loginUser(loginDto)).rejects.toThrow(
-        new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED)
+        new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED)
       );
       expect(mockCryptoService.comparePasswords).not.toHaveBeenCalled();
     });
@@ -279,7 +283,9 @@ describe("LocalAuthService", () => {
       (mockUserService.getUser as jest.Mock).mockResolvedValue(mockUser);
       (mockCryptoService.comparePasswords as jest.Mock).mockResolvedValue(true);
       const error = new Error("Token creation failed");
-      (mockRefreshTokenService.saveToken as jest.Mock).mockRejectedValue(error);
+      (mockRefreshTokenService.createToken as jest.Mock).mockRejectedValue(
+        error
+      );
 
       await expect(localAuthService.loginUser(loginDto)).rejects.toThrow(error);
     });
@@ -300,14 +306,16 @@ describe("LocalAuthService", () => {
       );
     });
 
-    it("should handle saveToken failure", async () => {
+    it("should handle createToken failure", async () => {
       (mockUserService.getUser as jest.Mock).mockResolvedValue(mockUser);
 
       (mockCryptoService.comparePasswords as jest.Mock).mockResolvedValue(true);
 
       const error = new Error("Database error");
 
-      (mockRefreshTokenService.saveToken as jest.Mock).mockRejectedValue(error);
+      (mockRefreshTokenService.createToken as jest.Mock).mockRejectedValue(
+        error
+      );
 
       await expect(localAuthService.loginUser(loginDto)).rejects.toThrow(error);
     });
@@ -362,7 +370,7 @@ describe("LocalAuthService", () => {
       (mockJwtService.generateAuthTokens as jest.Mock).mockReturnValue(
         mockTokens
       );
-      (mockRefreshTokenService.saveToken as jest.Mock).mockResolvedValue(
+      (mockRefreshTokenService.createToken as jest.Mock).mockResolvedValue(
         undefined
       );
 

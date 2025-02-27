@@ -1,22 +1,26 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
+import type { TypedRequest } from "@modules/shared";
+
 import {
   clearRefreshTokenCookieConfig,
   refreshTokenCookieConfig,
-} from "@/config/cookie.config";
+} from "@modules/auth";
+import { envConfig } from "@modules/shared";
 
-import { BadRequestError, ForbiddenError, UnauthorizedError } from "@/errors";
-import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import {
+  BadRequestError,
+  ForbiddenError,
+  UnauthorizedError,
+} from "@modules/shared";
 
-import type { AuthResponseDto } from "@/modules/auth/dtos";
+import { REFRESH_TOKEN_NAME } from "@modules/auth";
+import { ERROR_MESSAGES } from "@modules/shared";
 
-import type { TypedRequest } from "@/types";
+import type { IAuthResponseDto } from "@/modules/auth";
 
 import { RefreshTokenController } from "../refresh-token.controller";
-
-import envConfig from "@/config/env.config";
 import type {
   IRefreshTokenController,
   IRefreshTokenService,
@@ -29,7 +33,7 @@ describe("RefreshTokenController", () => {
 
   // Mock the refresh token service
   const mockRefreshTokenService: jest.Mocked<IRefreshTokenService> = {
-    saveToken: jest.fn(),
+    createToken: jest.fn(),
     deleteAllTokens: jest.fn(),
     refreshToken: jest.fn(),
   };
@@ -37,7 +41,7 @@ describe("RefreshTokenController", () => {
   const mockUserId = "test-user-id";
   const mockRefreshToken = "valid-refresh-token";
 
-  const mockNewTokens: AuthResponseDto = {
+  const mockNewTokens: IAuthResponseDto = {
     accessToken: "new-access-token",
     refreshToken: "new-refresh-token",
   };

@@ -1,24 +1,24 @@
 import type { Response } from "express";
 
-import type { TypedRequest } from "@/types";
+import type { TypedRequest } from "@modules/shared";
 
 import type { RefreshToken } from "./refresh-token.model";
 
-import type { AuthResponseDto, RefreshDto } from "@modules/auth/dtos";
+import type { IAuthResponseDto, IRefreshDto } from "@modules/auth";
 
-import type { SaveTokenDto } from "./dtos/save-token.dto";
+import type { ICreateDto } from "@/modules/shared";
 
 export interface IRefreshTokenRepository {
-  saveToken(saveTokenDto: SaveTokenDto): Promise<RefreshToken>;
+  createToken(createTokenDto: ICreateDto<RefreshToken>): Promise<RefreshToken>;
   findValidToken(token: string): Promise<RefreshToken | null>;
   delete(token: string): Promise<void>;
   deleteAll(userId: string): Promise<void>;
 }
 
 export interface IRefreshTokenService {
-  refreshToken(refreshDto: RefreshDto): Promise<AuthResponseDto>;
+  refreshToken(refreshDto: IRefreshDto): Promise<IAuthResponseDto>;
   deleteAllTokens(userId: string): Promise<void>;
-  saveToken(saveTokenDto: SaveTokenDto): Promise<RefreshToken>;
+  createToken(createTokenDto: ICreateDto<RefreshToken>): Promise<RefreshToken>;
 }
 
 export interface IRefreshTokenController {

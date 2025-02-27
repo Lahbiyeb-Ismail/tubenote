@@ -1,18 +1,18 @@
 import type { Response } from "express";
 
-import type { TypedRequest } from "@/types";
+import type { TypedRequest } from "@modules/shared";
 
-import { UnauthorizedError } from "@/errors";
+import { UnauthorizedError } from "@modules/shared";
 
-import { refreshTokenCookieConfig } from "@config/cookie.config";
-import envConfig from "@config/env.config";
+import { refreshTokenCookieConfig } from "@modules/auth";
+import { envConfig } from "@modules/shared";
 
-import { REFRESH_TOKEN_NAME } from "@constants/auth.contants";
-import { ERROR_MESSAGES } from "@constants/error-messages.contants";
+import { REFRESH_TOKEN_NAME } from "@modules/auth";
+import { ERROR_MESSAGES } from "@modules/shared";
+
+import type { User } from "@modules/user";
 
 import { IGoogleAuthController, IGoogleAuthService } from "./google.types";
-
-import type { User } from "@modules/user/user.model";
 
 export class GoogleController implements IGoogleAuthController {
   constructor(private readonly _googleAuthService: IGoogleAuthService) {}
