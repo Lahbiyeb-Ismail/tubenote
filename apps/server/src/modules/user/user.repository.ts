@@ -1,4 +1,4 @@
-import handleAsyncOperation from "@/utils/handle-async-operation";
+import { handleAsyncOperation } from "@modules/shared";
 import type { Prisma, PrismaClient } from "@prisma/client";
 
 import { ERROR_MESSAGES } from "@modules/shared";

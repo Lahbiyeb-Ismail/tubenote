@@ -2,7 +2,7 @@ import Handlebars from "handlebars";
 
 import { type EmailContent, LOGO_PATH } from "@modules/shared";
 
-import readTemplate from "./read-template";
+import { readTemplate } from "./read-template";
 
 type TemplateData = {
   [key: string]: string;
@@ -16,7 +16,7 @@ type TemplateData = {
  * @returns A promise that resolves to an object containing the compiled HTML and text content, along with the logo path.
  * @throws Will throw an error if the templates cannot be compiled.
  */
-async function compileTemplate(
+export async function compileTemplate(
   templateName: string,
   data: TemplateData
 ): Promise<EmailContent> {
@@ -39,5 +39,3 @@ async function compileTemplate(
     throw new Error(`Failed to compile templates for ${templateName}`);
   }
 }
-
-export default compileTemplate;

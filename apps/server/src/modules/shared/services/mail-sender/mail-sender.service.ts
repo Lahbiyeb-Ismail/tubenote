@@ -1,6 +1,6 @@
 import type { Transporter } from "nodemailer";
 
-import compileTemplate from "@utils/compile-template";
+import { compileTemplate } from "@modules/shared";
 
 import {
   BadRequestError,

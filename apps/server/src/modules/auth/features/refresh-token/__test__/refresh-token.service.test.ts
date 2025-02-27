@@ -1,11 +1,10 @@
-import { stringToDate } from "@utils/convert-string-to-date";
-
 import {
   BadRequestError,
   DatabaseError,
   ERROR_MESSAGES,
   ForbiddenError,
   UnauthorizedError,
+  stringToDate,
 } from "@modules/shared";
 
 import { REFRESH_TOKEN_EXPIRES_IN } from "@modules/auth";
@@ -24,7 +23,10 @@ import {
   type IRefreshTokenService,
 } from "../refresh-token.types";
 
-jest.mock("@utils/convert-string-to-date");
+jest.mock("@modules/shared", () => ({
+  ...jest.requireActual("@modules/shared"),
+  stringToDate: jest.fn(),
+}));
 
 describe("RefreshTokenService", () => {
   let refreshTokenService: IRefreshTokenService;

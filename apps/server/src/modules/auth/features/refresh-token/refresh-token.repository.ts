@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 
-import handleAsyncOperation from "@/utils/handle-async-operation";
+import { handleAsyncOperation } from "@modules/shared";
 import { ERROR_MESSAGES } from "@modules/shared";
 
 import type { RefreshToken } from "./refresh-token.model";

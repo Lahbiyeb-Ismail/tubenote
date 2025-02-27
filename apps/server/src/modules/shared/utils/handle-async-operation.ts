@@ -26,7 +26,7 @@ interface ErrorHandlerOptions {
  *   - `Unexpected Error` for unexpected errors.
  *   - `Unknown Error` for unknown errors.
  */
-async function handleAsyncOperation<T>(
+export async function handleAsyncOperation<T>(
   operation: AsyncOperation<T>,
   options: ErrorHandlerOptions
 ): Promise<T> {
@@ -76,5 +76,3 @@ async function handleAsyncOperation<T>(
     throw new DatabaseError(`Unknow error: ${errorMessage}`);
   }
 }
-
-export default handleAsyncOperation;

@@ -1,4 +1,4 @@
-import { stringToDate } from "@utils/convert-string-to-date";
+import { stringToDate } from "@modules/shared";
 
 import { REFRESH_TOKEN_EXPIRES_IN, REFRESH_TOKEN_SECRET } from "@modules/auth";
 import type { IAuthResponseDto, IJwtService, IRefreshDto } from "@modules/auth";

@@ -1,6 +1,6 @@
 import { ERROR_MESSAGES } from "@modules/shared";
 
-import { stringToDate } from "@utils/convert-string-to-date";
+import { stringToDate } from "@modules/shared";
 
 import {
   ForbiddenError,

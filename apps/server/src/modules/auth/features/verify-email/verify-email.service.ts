@@ -1,4 +1,4 @@
-import { stringToDate } from "@utils/convert-string-to-date";
+import { stringToDate } from "@modules/shared";
 
 import {
   VERIFY_EMAIL_TOKEN_EXPIRES_IN,

@@ -8,12 +8,10 @@ import {
   DatabaseError,
   ERROR_MESSAGES,
   NotFoundError,
+  stringToDate,
 } from "@modules/shared";
-import type { ILoggerService, JwtPayload } from "@modules/shared";
+import type { ICreateDto, ILoggerService, JwtPayload } from "@modules/shared";
 
-import { stringToDate } from "@utils/convert-string-to-date";
-
-import type { ICreateDto } from "@/modules/shared";
 import type { IUserService, User } from "@modules/user";
 
 import {
@@ -24,7 +22,10 @@ import {
   VerifyEmailToken,
 } from "@/modules/auth";
 
-jest.mock("@utils/convert-string-to-date");
+jest.mock("@modules/shared", () => ({
+  ...jest.requireActual("@modules/shared"),
+  stringToDate: jest.fn(),
+}));
 
 describe("VerifyEmailService methods test", () => {
   let verifyEmailService: VerifyEmailService;

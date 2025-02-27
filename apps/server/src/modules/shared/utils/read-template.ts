@@ -11,7 +11,7 @@ import { TEMPLATES_DIR } from "@modules/shared";
  * @returns A promise that resolves to the content of the template file as a string.
  * @throws Will throw an error if the template file cannot be read.
  */
-async function readTemplate(
+export async function readTemplate(
   templateName: string,
   format: "html" | "txt"
 ): Promise<string> {
@@ -27,5 +27,3 @@ async function readTemplate(
     throw new Error(`Failed to read ${format} template for ${templateName}`);
   }
 }
-
-export default readTemplate;
