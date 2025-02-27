@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-import {
-  emailSchema,
-  passwordSchema,
-  usernameSchema,
-} from "@/common/schemas/user";
+import { emailSchema, passwordSchema, usernameSchema } from "../user";
 
 /**
  * Schema for user registration.
