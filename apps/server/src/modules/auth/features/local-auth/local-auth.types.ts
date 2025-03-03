@@ -1,9 +1,11 @@
-import type { TypedRequest } from "@modules/shared";
 import type { Response } from "express";
 
-import type { ICreateBodyDto } from "@/modules/shared";
-import type { IAuthResponseDto, ILoginDto } from "@modules/auth";
-import type { ICreateUserDto, User } from "@modules/user";
+import type { TypedRequest } from "@/modules/shared/types";
+
+import type { ICreateBodyDto } from "@/modules/shared/dtos";
+import type { ICreateUserDto, User } from "@/modules/user";
+
+import type { IAuthResponseDto, ILoginDto } from "../../dtos";
 
 export interface ILocalAuthService {
   registerUser: (createUserDto: ICreateUserDto) => Promise<User>;

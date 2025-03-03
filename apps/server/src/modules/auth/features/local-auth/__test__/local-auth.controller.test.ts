@@ -1,17 +1,16 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { TypedRequest } from "@modules/shared";
-
-import { refreshTokenCookieConfig } from "@modules/auth";
+import type { TypedRequest } from "@/modules/shared/types";
 
 import {
   IAuthResponseDto,
   ILoginDto,
   REFRESH_TOKEN_NAME,
+  refreshTokenCookieConfig,
 } from "@/modules/auth";
 
-import type { ICreateBodyDto } from "@/modules/shared";
+import type { ICreateBodyDto } from "@/modules/shared/dtos";
 import type { User } from "@/modules/user";
 
 import { LocalAuthController } from "../local-auth.controller";

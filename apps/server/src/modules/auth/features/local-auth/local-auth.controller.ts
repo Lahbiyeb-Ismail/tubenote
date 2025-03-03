@@ -1,18 +1,19 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import { refreshTokenCookieConfig } from "@modules/auth";
-import type { TypedRequest } from "@modules/shared";
-
-import { type ILoginDto, REFRESH_TOKEN_NAME } from "@modules/auth";
-
-import type { ICreateBodyDto } from "@/modules/shared";
-import type { User } from "@/modules/user";
-
 import type {
   ILocalAuthController,
   ILocalAuthService,
 } from "./local-auth.types";
+
+import type { ICreateBodyDto } from "@/modules/shared/dtos";
+import type { TypedRequest } from "@/modules/shared/types";
+import type { User } from "@/modules/user";
+
+import type { ILoginDto } from "../../dtos";
+
+import { refreshTokenCookieConfig } from "../../config";
+import { REFRESH_TOKEN_NAME } from "../../constants";
 
 export class LocalAuthController implements ILocalAuthController {
   constructor(private readonly _localAuthService: ILocalAuthService) {}

@@ -1,4 +1,13 @@
-import { ERROR_MESSAGES } from "@modules/shared";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+
+import {
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+} from "@/modules/shared/api-errors";
+
+import { ICryptoService, IMailSenderService } from "@/modules/shared/services";
 
 import type {
   IAuthResponseDto,
@@ -6,18 +15,9 @@ import type {
   ILoginDto,
   IRefreshTokenService,
   IVerifyEmailService,
-} from "@modules/auth";
+} from "@/modules/auth";
 
-import type { ICreateUserDto, IUserService, User } from "@modules/user";
-
-import {
-  ConflictError,
-  ForbiddenError,
-  ICryptoService,
-  IMailSenderService,
-  NotFoundError,
-  UnauthorizedError,
-} from "@modules/shared";
+import type { ICreateUserDto, IUserService, User } from "@/modules/user";
 
 import { LocalAuthService } from "../local-auth.service";
 

@@ -1,26 +1,24 @@
-import { ERROR_MESSAGES } from "@modules/shared";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import { stringToDate } from "@modules/shared";
+import { ForbiddenError, UnauthorizedError } from "@/modules/shared/api-errors";
+import { stringToDate } from "@/modules/shared/utils";
 
-import {
-  ForbiddenError,
-  ICryptoService,
-  IMailSenderService,
-  UnauthorizedError,
-} from "@modules/shared";
-
-import type { ICreateUserDto, IUserService, User } from "@modules/user";
+import type { ICreateUserDto, IUserService, User } from "@/modules/user";
 
 import type {
-  IAuthResponseDto,
-  IJwtService,
-  ILocalAuthService,
-  ILoginDto,
-  IRefreshTokenService,
-  IVerifyEmailService,
-} from "@modules/auth";
+  ICryptoService,
+  IMailSenderService,
+} from "@/modules/shared/services";
+
+import type { IRefreshTokenService } from "../refresh-token";
+import type { IVerifyEmailService } from "../verify-email";
 
 import { REFRESH_TOKEN_EXPIRES_IN } from "../../constants";
+
+import type { IAuthResponseDto, ILoginDto } from "../../dtos";
+import type { IJwtService } from "../../utils";
+
+import type { ILocalAuthService } from "./local-auth.types";
 
 export class LocalAuthService implements ILocalAuthService {
   constructor(
