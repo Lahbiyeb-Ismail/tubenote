@@ -1,17 +1,17 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 
-import { handleAsyncOperation } from "@modules/shared";
-import { ERROR_MESSAGES } from "@modules/shared";
-
-import type { INoteRepository, Note } from "@modules/note";
-
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import type {
   ICreateDto,
   IDeleteDto,
   IFindAllDto,
   IFindUniqueDto,
   IUpdateDto,
-} from "@modules/shared";
+} from "@/modules/shared/dtos";
+import { handleAsyncOperation } from "@/modules/shared/utils";
+
+import type { Note } from "./note.model";
+import type { INoteRepository } from "./note.types";
 
 /**
  * Repository for performing CRUD operations on Notes.

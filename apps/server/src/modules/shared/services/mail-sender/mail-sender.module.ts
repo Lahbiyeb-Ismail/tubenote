@@ -1,5 +1,6 @@
-import { loggerService } from "../logger";
 import transporter from "./mail-sender.config";
+
+import { loggerService } from "../logger";
 
 import { MailSenderService } from "./mail-sender.service";
 

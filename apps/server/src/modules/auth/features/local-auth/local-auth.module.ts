@@ -1,11 +1,10 @@
-import {
-  jwtService,
-  refreshTokenService,
-  verifyEmailService,
-} from "@modules/auth";
-import { userService } from "@modules/user";
+import { userService } from "@/modules/user";
 
-import { cryptoService, mailSenderService } from "@modules/shared";
+import { cryptoService, mailSenderService } from "@/modules/shared/services";
+
+import { jwtService } from "../../utils";
+import { refreshTokenService } from "../refresh-token";
+import { verifyEmailService } from "../verify-email";
 
 import { LocalAuthController } from "./local-auth.controller";
 import { LocalAuthService } from "./local-auth.service";

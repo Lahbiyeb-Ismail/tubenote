@@ -1,10 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-import { ACCESS_TOKEN_SECRET } from "@modules/auth";
-import { UnauthorizedError, loggerService } from "@modules/shared";
+import { ACCESS_TOKEN_SECRET } from "@/modules/auth";
 
-import type { JwtPayload } from "@modules/shared";
+import { UnauthorizedError } from "@/modules/shared/api-errors";
+import { loggerService } from "@/modules/shared/services";
+import type { JwtPayload } from "@/modules/shared/types";
 
 const { verify } = jwt;
 
@@ -25,7 +26,7 @@ const { verify } = jwt;
  *
  * @throws {Error} If the token is invalid or missing.
  */
-async function isAuthenticated(
+export async function isAuthenticated(
   req: Request,
   _res: Response,
   next: NextFunction
@@ -48,19 +49,21 @@ async function isAuthenticated(
     );
   }
 
-  verify(token, ACCESS_TOKEN_SECRET, (err, payload) => {
+  verify(token, ACCESS_TOKEN_SECRET, (err, payload: unknown) => {
     if (err) {
       loggerService.error(`Error verifying token: ${err.message}`);
 
       throw new UnauthorizedError("Unauthorized access. Please try again.");
     }
 
-    const userId = (payload as JwtPayload).userId;
+    if (typeof payload === "object" && payload !== null) {
+      const userId = (payload as JwtPayload).userId;
 
-    req.userId = userId;
+      req.userId = userId;
+    } else {
+      throw new UnauthorizedError("Invalid token payload.");
+    }
 
     next();
   });
 }
-
-export default isAuthenticated;

@@ -1,6 +1,6 @@
-import { envConfig } from "@modules/shared";
+import { envConfig } from "@/modules/shared/config";
 
-import type { GoogleConfig } from "@/modules/auth";
+import type { GoogleConfig } from "../features";
 
 export const googleAuthConfig: GoogleConfig = {
   clientID: envConfig.google.client_id,

@@ -3,8 +3,8 @@ import request from "supertest";
 
 import app from "@/app";
 
-import type { ILoginDto } from "@/modules/auth";
-import type { ICreateBodyDto } from "@/modules/shared";
+import type { ILoginDto } from "@/modules/auth/dtos";
+import type { ICreateBodyDto } from "@/modules/shared/dtos";
 import type { User } from "@/modules/user";
 
 import { localAuthController } from "../local-auth.module";

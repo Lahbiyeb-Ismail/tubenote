@@ -1,15 +1,15 @@
-import { stringToDate } from "@modules/shared";
+import { BadRequestError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type { ILoggerService } from "@/modules/shared/services";
+import { stringToDate } from "@/modules/shared/utils";
+
+import type { IUserService } from "@/modules/user";
 
 import {
   VERIFY_EMAIL_TOKEN_EXPIRES_IN,
   VERIFY_EMAIL_TOKEN_SECRET,
-} from "@modules/auth";
-
-import { BadRequestError, ERROR_MESSAGES } from "@modules/shared";
-
-import type { IJwtService } from "@modules/auth";
-import type { ILoggerService } from "@modules/shared";
-import type { IUserService } from "@modules/user";
+} from "@/modules/auth/constants";
+import type { IJwtService } from "@/modules/auth/utils";
 
 import type {
   IVerifyEmailRepository,

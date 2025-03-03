@@ -1,7 +1,10 @@
 import type { NextFunction, Request, Response } from "express";
 import { ZodError, type ZodSchema } from "zod";
 
-import { BadRequestError, InternalServerError } from "@modules/shared";
+import {
+  BadRequestError,
+  InternalServerError,
+} from "@/modules/shared/api-errors";
 
 /**
  * Defines the schema for validating different parts of an HTTP request.
@@ -37,7 +40,7 @@ type RequestSchema<
  * @throws {ZodError} If validation fails, responds with a 400 status and a list of validation errors.
  * @throws {Error} If an unexpected error occurs, responds with a 500 status and an error message.
  */
-function validateRequest<
+export function validateRequest<
   B extends ZodSchema,
   P extends ZodSchema,
   Q extends ZodSchema,
@@ -74,5 +77,3 @@ function validateRequest<
     }
   };
 }
-
-export default validateRequest;

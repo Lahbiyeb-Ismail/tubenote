@@ -1,14 +1,7 @@
 import { Response } from "express";
 import httpStatus from "http-status";
 
-import type { TypedRequest } from "@modules/shared";
-
-import {
-  INoteController,
-  INoteService,
-  Note,
-  NoteController,
-} from "@modules/note";
+import type { TypedRequest } from "@/modules/shared/types";
 
 import type {
   ICreateBodyDto,
@@ -20,7 +13,12 @@ import type {
   IQueryPaginationDto,
   IUpdateBodyDto,
   IUpdateDto,
-} from "@/modules/shared";
+} from "@/modules/shared/dtos";
+
+import { NoteController } from "../note.controller";
+
+import type { Note } from "../note.model";
+import type { INoteController, INoteService } from "../note.types";
 
 describe("NoteController Tests", () => {
   let noteController: INoteController;

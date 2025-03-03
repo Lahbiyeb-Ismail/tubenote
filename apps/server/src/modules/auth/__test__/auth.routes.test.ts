@@ -2,8 +2,7 @@ import httpStatus from "http-status";
 import request from "supertest";
 
 import app from "@/app";
-
-import { authController } from "@modules/auth";
+import { authController } from "../auth.module";
 
 describe("Auth Routes", () => {
   beforeEach(() => {

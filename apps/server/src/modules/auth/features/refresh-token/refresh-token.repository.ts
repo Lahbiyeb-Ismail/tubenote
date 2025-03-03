@@ -1,12 +1,11 @@
 import type { PrismaClient } from "@prisma/client";
 
-import { handleAsyncOperation } from "@modules/shared";
-import { ERROR_MESSAGES } from "@modules/shared";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type { ICreateDto } from "@/modules/shared/dtos";
+import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import type { RefreshToken } from "./refresh-token.model";
 import type { IRefreshTokenRepository } from "./refresh-token.types";
-
-import type { ICreateDto } from "@/modules/shared";
 
 export class RefreshTokenRepository implements IRefreshTokenRepository {
   constructor(private readonly _db: PrismaClient) {}

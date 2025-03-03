@@ -1,4 +1,4 @@
-import { envConfig } from "@modules/shared";
+import { envConfig } from "@/modules/shared/config";
 
 /**
  * The name of the refresh token cookie.

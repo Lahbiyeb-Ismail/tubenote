@@ -1,15 +1,13 @@
 import type { Transporter } from "nodemailer";
 
-import { compileTemplate } from "@modules/shared";
+import { BadRequestError } from "../../api-errors";
+import { envConfig } from "../../config";
+import { ERROR_MESSAGES } from "../../constants";
+import { compileTemplate } from "../../utils";
 
-import {
-  BadRequestError,
-  ERROR_MESSAGES,
-  type ILoggerService,
-  envConfig,
-} from "@modules/shared";
-
-import type { EmailContent, IMailSenderService, SendMailDto } from "./";
+import type { ILoggerService } from "../logger";
+import type { SendMailDto } from "./dtos";
+import type { EmailContent, IMailSenderService } from "./mail-sender.types";
 
 export class MailSenderService implements IMailSenderService {
   constructor(

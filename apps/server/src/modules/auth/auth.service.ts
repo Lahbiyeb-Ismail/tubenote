@@ -1,18 +1,14 @@
 import {
   BadRequestError,
-  ERROR_MESSAGES,
-  ICacheService,
-  ILoggerService,
   UnauthorizedError,
-} from "@modules/shared";
+} from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import type {
-  IAuthResponseDto,
-  IAuthService,
-  ILogoutDto,
-  IRefreshTokenService,
-  OAuthCodePayloadDto,
-} from "@modules/auth";
+import type { ICacheService, ILoggerService } from "@/modules/shared/services";
+
+import type { IAuthService } from "./auth.types";
+import type { IAuthResponseDto, ILogoutDto, OAuthCodePayloadDto } from "./dtos";
+import type { IRefreshTokenService } from "./features";
 
 export class AuthService implements IAuthService {
   constructor(

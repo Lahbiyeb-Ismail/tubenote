@@ -1,9 +1,9 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { EmptyRecord, TypedRequest } from "@modules/shared";
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
-import type { IParamTokenDto } from "@/modules/shared";
+import type { IParamTokenDto } from "@/modules/shared/dtos";
 
 import type {
   IVerifyEmailController,

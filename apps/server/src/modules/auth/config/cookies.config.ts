@@ -1,6 +1,6 @@
 import type { CookieOptions } from "express";
 
-import { envConfig } from "@modules/shared";
+import { envConfig } from "@/modules/shared/config";
 
 /**
  * Configuration options for the refresh token cookie.

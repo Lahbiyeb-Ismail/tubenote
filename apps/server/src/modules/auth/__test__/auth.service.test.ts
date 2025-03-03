@@ -1,13 +1,13 @@
-import { BadRequestError } from "@modules/shared";
+import { BadRequestError } from "@/modules/shared/api-errors";
 
-import type { ICacheService, ILoggerService } from "@modules/shared";
+import type { ICacheService, ILoggerService } from "@/modules/shared/services";
 
 import {
   AuthService,
   ILogoutDto,
   IRefreshTokenService,
   OAuthCodePayloadDto,
-} from "@modules/auth";
+} from "@/modules/auth";
 
 describe("AuthService", () => {
   let authService: AuthService;

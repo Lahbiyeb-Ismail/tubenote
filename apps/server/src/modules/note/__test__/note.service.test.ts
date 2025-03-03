@@ -1,12 +1,5 @@
-import { ERROR_MESSAGES } from "@modules/shared";
-import { NotFoundError } from "@modules/shared";
-
-import {
-  INoteRepository,
-  INoteService,
-  Note,
-  NoteService,
-} from "@/modules/note";
+import { NotFoundError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import type {
   ICreateDto,
@@ -14,7 +7,11 @@ import type {
   IFindAllDto,
   IFindUniqueDto,
   IUpdateDto,
-} from "@/modules/shared";
+} from "@/modules/shared/dtos";
+
+import type { Note } from "../note.model";
+import { NoteService } from "../note.service";
+import type { INoteRepository, INoteService } from "../note.types";
 
 describe("NoteService methods test", () => {
   let noteService: INoteService;

@@ -1,17 +1,13 @@
-import {
-  BadRequestError,
-  ERROR_MESSAGES,
-  ForbiddenError,
-} from "@modules/shared";
+import type { IUserService } from "@/modules/user";
 
+import { BadRequestError, ForbiddenError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import type {
   ICacheService,
   ICryptoService,
   ILoggerService,
   IMailSenderService,
-} from "@modules/shared";
-
-import type { IUserService } from "@modules/user";
+} from "@/modules/shared/services";
 
 import type { IResetPasswordService } from "./reset-password.types";
 

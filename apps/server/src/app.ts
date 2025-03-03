@@ -12,13 +12,15 @@ import session from "express-session";
 import helmet from "helmet";
 import passport from "passport";
 
-import authRoutes from "@modules/auth/auth.routes";
-import noteRoutes from "@modules/note/note.routes";
-import userRoutes from "@modules/user/user.routes";
-import videoRoutes from "@modules/video/video.routes";
+import authRoutes from "@/modules/auth/auth.routes";
+import noteRoutes from "@/modules/note/note.routes";
+import userRoutes from "@/modules/user/user.routes";
+import videoRoutes from "@/modules/video/video.routes";
 
-import { errorHandler, notFoundRoute } from "@middlewares/error.middleware";
-import { envConfig, loggerService } from "@modules/shared";
+import { errorHandler, notFoundRoute } from "@/middlewares";
+
+import { envConfig } from "@/modules/shared/config";
+import { loggerService } from "@/modules/shared/services";
 
 const app: Express = express();
 

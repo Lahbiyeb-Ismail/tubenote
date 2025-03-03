@@ -1,4 +1,4 @@
-import type { IFindAllDto, IQueryPaginationDto } from "@modules/shared";
+import type { IFindAllDto, IQueryPaginationDto } from "@/modules/shared/dtos";
 
 import type {
   ApiResponse,
@@ -6,7 +6,7 @@ import type {
   IResponseFormatter,
   PaginatedResult,
   PaginationInfo,
-} from "./";
+} from "./response-formatter.types";
 
 /**
  * API response formatter.

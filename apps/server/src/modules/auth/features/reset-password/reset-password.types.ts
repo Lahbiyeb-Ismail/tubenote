@@ -1,12 +1,12 @@
 import type { Response } from "express";
 
-import type { EmptyRecord, TypedRequest } from "@modules/shared";
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type {
   IEmailBodyDto,
   IParamTokenDto,
   IPasswordBodyDto,
-} from "@/modules/shared";
+} from "@/modules/shared/dtos";
 
 export interface IResetPasswordService {
   sendResetToken(email: string): Promise<void>;

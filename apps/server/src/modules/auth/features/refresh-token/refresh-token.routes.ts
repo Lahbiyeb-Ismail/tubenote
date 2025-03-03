@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import isAuthenticated from "@/middlewares/auth.middleware";
+import { isAuthenticated } from "@/middlewares";
 import { refreshTokenController } from "./refresh-token.module";
 
 const router = Router();

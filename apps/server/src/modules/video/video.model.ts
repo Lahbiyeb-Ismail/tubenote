@@ -1,4 +1,4 @@
-import type { Note } from "@modules/note";
+import type { Note } from "@/modules/note";
 
 interface Thumbnails {
   default: ThumbnailSize;

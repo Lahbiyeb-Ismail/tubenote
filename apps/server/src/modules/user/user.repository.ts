@@ -1,16 +1,12 @@
-import { handleAsyncOperation } from "@modules/shared";
 import type { Prisma, PrismaClient } from "@prisma/client";
 
-import { ERROR_MESSAGES } from "@modules/shared";
-import { DatabaseError } from "@modules/shared";
+import { DatabaseError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import { handleAsyncOperation } from "@/modules/shared/utils";
 
-import type {
-  ICreateUserDto,
-  IGetUserDto,
-  IUpdateUserDto,
-  IUserRepository,
-  User,
-} from "@modules/user";
+import type { ICreateUserDto, IGetUserDto, IUpdateUserDto } from "./dtos";
+import type { User } from "./user.model";
+import type { IUserRepository } from "./user.types";
 
 export class UserRepository implements IUserRepository {
   constructor(private readonly _db: PrismaClient) {}

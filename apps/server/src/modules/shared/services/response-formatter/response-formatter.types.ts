@@ -1,16 +1,4 @@
-import type { IFindAllDto, IQueryPaginationDto } from "@modules/shared";
-
-export interface IResponseFormatter {
-  formatResponse<T>(data: T, options?: ApiResponseOptions): ApiResponse<T>;
-  formatPaginatedResponse<T>(
-    paginationQuery: IQueryPaginationDto,
-    result: PaginatedResult<T>
-  ): ApiResponse<T[]>;
-  getPaginationQueries(
-    queries: IQueryPaginationDto,
-    defaultLimit: number
-  ): Omit<IFindAllDto, "userId">;
-}
+import type { IFindAllDto, IQueryPaginationDto } from "@/modules/shared/dtos";
 
 /**
  * Interface representing the pagination metadata.
@@ -53,4 +41,16 @@ export interface ApiResponseOptions {
 export interface ApiResponse<T> extends ApiResponseOptions {
   success: boolean;
   data: T;
+}
+
+export interface IResponseFormatter {
+  formatResponse<T>(data: T, options?: ApiResponseOptions): ApiResponse<T>;
+  formatPaginatedResponse<T>(
+    paginationQuery: IQueryPaginationDto,
+    result: PaginatedResult<T>
+  ): ApiResponse<T[]>;
+  getPaginationQueries(
+    queries: IQueryPaginationDto,
+    defaultLimit: number
+  ): Omit<IFindAllDto, "userId">;
 }

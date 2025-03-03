@@ -11,13 +11,20 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@common/*": ["src/common/*"],
-      "@config/*": ["src/config/*"],
-      "@constants/*": ["src/constants/*"],
-      "@middlewares/*": ["src/middlewares/*"],
-      "@modules/*": ["src/modules/*"],
-      "@templates/*": ["src/templates/*"],
-      "@utils/*": ["src/utils/*"]
+      "@/middlewares/*": ["src/middlewares/*"],
+      "@/modules/auth/*": ["src/modules/auth/*"],
+      "@/modules/note/*": ["src/modules/note/*"],
+      "@/modules/user/*": ["src/modules/user/*"],
+      "@/modules/video/*": ["src/modules/video/*"],
+      "@/modules/shared/api-errors/*": ["src/modules/shared/api-errors/*"],
+      "@/modules/shared/config/*": ["src/modules/shared/config/*"],
+      "@/modules/shared/constants/*": ["src/modules/shared/constants/*"],
+      "@/modules/shared/dtos/*": ["src/modules/shared/dtos/*"],
+      "@/modules/shared/schemas/*": ["src/modules/shared/schemas/*"],
+      "@/modules/shared/services/*": ["src/modules/shared/services/*"],
+      "@/modules/shared/types/*": ["src/modules/shared/types/*"],
+      "@/modules/shared/utils/*": ["src/modules/shared/utils/*"],
+      "@/templates/*": ["src/templates/*"]
     }
   },
   "include": ["src/**/*"],

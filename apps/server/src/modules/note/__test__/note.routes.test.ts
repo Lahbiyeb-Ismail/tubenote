@@ -3,9 +3,10 @@ import request from "supertest";
 
 import app from "@/app";
 
-import { type Note, noteController } from "@modules/note";
+import type { ICreateBodyDto, IUpdateBodyDto } from "@/modules/shared/dtos";
+import type { Note } from "../note.model";
 
-import type { ICreateBodyDto, IUpdateBodyDto } from "@/modules/shared";
+import { noteController } from "../note.module";
 
 // **********************************************
 // MOCK THE JSONWEBTOKEN MODULE TO SIMULATE TOKEN VERIFICATION

@@ -1,8 +1,8 @@
 import type { Response } from "express";
 
-import type { EmptyRecord, TypedRequest } from "@modules/shared";
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
-import type { ICreateDto, IParamTokenDto } from "@/modules/shared";
+import type { ICreateDto, IParamTokenDto } from "@/modules/shared/dtos";
 
 import type { FindActiveTokenDto } from "./dtos";
 import type { VerifyEmailToken } from "./verify-email.model";

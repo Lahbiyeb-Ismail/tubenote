@@ -1,19 +1,19 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { TypedRequest } from "@modules/shared";
-
-import {
-  IResetPasswordController,
-  IResetPasswordService,
-  ResetPasswordController,
-} from "@modules/auth";
+import type { TypedRequest } from "@/modules/shared/types";
 
 import type {
   IEmailBodyDto,
   IParamTokenDto,
   IPasswordBodyDto,
-} from "@/modules/shared";
+} from "@/modules/shared/dtos";
+
+import {
+  IResetPasswordController,
+  IResetPasswordService,
+  ResetPasswordController,
+} from "@/modules/auth/features";
 
 describe("ResetPassowrdController", () => {
   let resetPasswordController: IResetPasswordController;

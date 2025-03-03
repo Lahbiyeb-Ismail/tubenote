@@ -1,11 +1,10 @@
 import jwt from "jsonwebtoken";
 
-import { JwtService } from "@modules/auth";
-import {
-  BadRequestError,
-  ERROR_MESSAGES,
-  type ILoggerService,
-} from "@modules/shared";
+import { BadRequestError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type { ILoggerService } from "@/modules/shared/services";
+
+import { JwtService } from "../jwt.service";
 
 describe("JwtService", () => {
   let jwtService: JwtService;

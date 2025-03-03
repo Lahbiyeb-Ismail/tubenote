@@ -1,13 +1,15 @@
-import {
-  IVideoRepository,
-  IVideoService,
-  Video,
-  VideoService,
-  type YoutubeVideoData,
-} from "@modules/video";
+import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
 
-import type { ICreateDto, IFindAllDto, IFindUniqueDto } from "@/modules/shared";
-import { BadRequestError, NotFoundError } from "@modules/shared";
+import type {
+  ICreateDto,
+  IFindAllDto,
+  IFindUniqueDto,
+} from "@/modules/shared/dtos";
+
+import { VideoService } from "../video.service";
+
+import type { Video, YoutubeVideoData } from "../video.model";
+import type { IVideoRepository, IVideoService } from "../video.types";
 
 describe("VideoService methods tests cases", () => {
   let videoService: IVideoService;

@@ -1,6 +1,6 @@
 import nodemailer, { type Transporter } from "nodemailer";
 
-import { envConfig } from "@modules/shared";
+import { envConfig } from "../../config";
 
 const transporter: Transporter = nodemailer.createTransport({
   host: envConfig.email.smtp.host,

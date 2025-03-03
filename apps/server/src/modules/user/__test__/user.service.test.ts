@@ -1,18 +1,22 @@
-import { ERROR_MESSAGES } from "@modules/shared";
-import { BadRequestError, ConflictError, NotFoundError } from "@modules/shared";
-
-import type { ICryptoService } from "@modules/shared";
-
 import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+} from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+
+import type { ICryptoService } from "@/modules/shared/services";
+
+import { UserService } from "../user.service";
+
+import type {
   ICreateUserDto,
   IResetPasswordDto,
   IUpdatePasswordDto,
   IUpdateUserDto,
-  IUserRepository,
-  IUserService,
-  User,
-  UserService,
-} from "@modules/user";
+} from "../dtos";
+import type { User } from "../user.model";
+import type { IUserRepository, IUserService } from "../user.types";
 
 describe("UserService", () => {
   let userService: IUserService;
