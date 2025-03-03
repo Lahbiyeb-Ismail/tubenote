@@ -1,7 +1,8 @@
 import dotenv from "dotenv";
 
 import app from "@/app";
-import { envConfig, loggerService } from "@modules/shared";
+import { envConfig } from "@/modules/shared/config";
+import { loggerService } from "@/modules/shared/services";
 
 /**
  * Event listener for uncaught exceptions.
