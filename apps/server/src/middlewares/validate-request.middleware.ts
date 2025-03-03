@@ -40,7 +40,7 @@ type RequestSchema<
  * @throws {ZodError} If validation fails, responds with a 400 status and a list of validation errors.
  * @throws {Error} If an unexpected error occurs, responds with a 500 status and an error message.
  */
-function validateRequest<
+export function validateRequest<
   B extends ZodSchema,
   P extends ZodSchema,
   Q extends ZodSchema,
@@ -77,5 +77,3 @@ function validateRequest<
     }
   };
 }
-
-export default validateRequest;

@@ -26,7 +26,7 @@ const { verify } = jwt;
  *
  * @throws {Error} If the token is invalid or missing.
  */
-async function isAuthenticated(
+export async function isAuthenticated(
   req: Request,
   _res: Response,
   next: NextFunction
@@ -63,5 +63,3 @@ async function isAuthenticated(
     next();
   });
 }
-
-export default isAuthenticated;
