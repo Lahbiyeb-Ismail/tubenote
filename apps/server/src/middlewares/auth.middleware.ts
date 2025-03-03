@@ -1,10 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-import { ACCESS_TOKEN_SECRET } from "@modules/auth";
-import { UnauthorizedError, loggerService } from "@modules/shared";
+import { ACCESS_TOKEN_SECRET } from "@/modules/auth";
 
-import type { JwtPayload } from "@modules/shared";
+import { UnauthorizedError } from "@/modules/shared/api-errors";
+import { loggerService } from "@/modules/shared/services";
+import type { JwtPayload } from "@/modules/shared/types";
 
 const { verify } = jwt;
 

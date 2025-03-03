@@ -1,12 +1,10 @@
 import type { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 
-import {
-  type BaseError,
-  NotFoundError,
-  envConfig,
-  loggerService,
-} from "@modules/shared";
+import { type BaseError, NotFoundError } from "@/modules/shared/api-errors";
+
+import { envConfig } from "@/modules/shared/config";
+import { loggerService } from "@/modules/shared/services";
 
 /**
  * Middleware function to handle errors in the application.
