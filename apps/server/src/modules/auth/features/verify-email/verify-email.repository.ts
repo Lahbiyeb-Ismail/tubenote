@@ -1,12 +1,9 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 
-import { DatabaseError } from "@modules/shared";
-
-import { handleAsyncOperation } from "@modules/shared";
-
-import { ERROR_MESSAGES } from "@modules/shared";
-
-import type { ICreateDto } from "@/modules/shared";
+import { DatabaseError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type { ICreateDto } from "@/modules/shared/dtos";
+import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import type { FindActiveTokenDto } from "./dtos";
 import type { VerifyEmailToken } from "./verify-email.model";

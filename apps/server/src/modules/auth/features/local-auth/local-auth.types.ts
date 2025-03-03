@@ -5,7 +5,7 @@ import type { TypedRequest } from "@/modules/shared/types";
 import type { ICreateBodyDto } from "@/modules/shared/dtos";
 import type { ICreateUserDto, User } from "@/modules/user";
 
-import type { IAuthResponseDto, ILoginDto } from "../../dtos";
+import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
 
 export interface ILocalAuthService {
   registerUser: (createUserDto: ICreateUserDto) => Promise<User>;

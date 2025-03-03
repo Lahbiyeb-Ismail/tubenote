@@ -1,6 +1,6 @@
-import { prismaClient } from "@modules/shared";
+import { prismaClient } from "@/modules/shared/config";
+import { responseFormatter } from "@/modules/shared/services";
 
-import { responseFormatter } from "@modules/shared";
 import { VideoController } from "./video.controller";
 import { VideoRepository } from "./video.repository";
 import { VideoService } from "./video.service";

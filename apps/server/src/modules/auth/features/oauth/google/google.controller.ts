@@ -1,16 +1,15 @@
 import type { Response } from "express";
 
-import type { TypedRequest } from "@modules/shared";
+import type { TypedRequest } from "@/modules/shared/types";
 
-import { UnauthorizedError } from "@modules/shared";
+import { UnauthorizedError } from "@/modules/shared/api-errors";
+import { envConfig } from "@/modules/shared/config";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import { refreshTokenCookieConfig } from "@modules/auth";
-import { envConfig } from "@modules/shared";
+import type { User } from "@/modules/user";
 
-import { REFRESH_TOKEN_NAME } from "@modules/auth";
-import { ERROR_MESSAGES } from "@modules/shared";
-
-import type { User } from "@modules/user";
+import { refreshTokenCookieConfig } from "@/modules/auth/config";
+import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 
 import { IGoogleAuthController, IGoogleAuthService } from "./google.types";
 

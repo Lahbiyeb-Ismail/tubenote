@@ -1,6 +1,5 @@
-import { prismaClient } from "@modules/shared";
-
-import { cryptoService } from "@modules/shared";
+import { prismaClient } from "@/modules/shared/config";
+import { cryptoService } from "@/modules/shared/services";
 
 import { UserController } from "./user.controller";
 import { UserRepository } from "./user.repository";

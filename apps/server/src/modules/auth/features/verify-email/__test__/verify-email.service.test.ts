@@ -1,29 +1,29 @@
 import {
   VERIFY_EMAIL_TOKEN_EXPIRES_IN,
   VERIFY_EMAIL_TOKEN_SECRET,
-} from "@modules/auth";
+} from "@/modules/auth/constants";
+import type { IJwtService, ISignTokenDto } from "@/modules/auth/utils";
+
+import type { IUserService, User } from "@/modules/user";
 
 import {
   BadRequestError,
   DatabaseError,
-  ERROR_MESSAGES,
   NotFoundError,
-  stringToDate,
-} from "@modules/shared";
-import type { ICreateDto, ILoggerService, JwtPayload } from "@modules/shared";
+} from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import { stringToDate } from "@/modules/shared/utils";
 
-import type { IUserService, User } from "@modules/user";
+import type { ICreateDto } from "@/modules/shared/dtos";
+import type { ILoggerService } from "@/modules/shared/services";
+import type { JwtPayload } from "@/modules/shared/types";
 
-import {
-  IJwtService,
-  ISignTokenDto,
-  IVerifyEmailRepository,
-  VerifyEmailService,
-  VerifyEmailToken,
-} from "@/modules/auth";
+import type { VerifyEmailToken } from "../verify-email.model";
+import { VerifyEmailService } from "../verify-email.service";
+import type { IVerifyEmailRepository } from "../verify-email.types";
 
-jest.mock("@modules/shared", () => ({
-  ...jest.requireActual("@modules/shared"),
+jest.mock("@/modules/shared/utils", () => ({
+  ...jest.requireActual("@/modules/shared/utils"),
   stringToDate: jest.fn(),
 }));
 

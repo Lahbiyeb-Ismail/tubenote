@@ -1,30 +1,28 @@
+import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
+import type { IAuthResponseDto, IRefreshDto } from "@/modules/auth/dtos";
+import type { IJwtService } from "@/modules/auth/utils";
+
 import {
   BadRequestError,
   DatabaseError,
-  ERROR_MESSAGES,
   ForbiddenError,
   UnauthorizedError,
-  stringToDate,
-} from "@modules/shared";
-
-import { REFRESH_TOKEN_EXPIRES_IN } from "@modules/auth";
-
-import type {
-  IAuthResponseDto,
-  IJwtService,
-  IRefreshDto,
-} from "@/modules/auth";
-import type { ICreateDto, ILoggerService, JwtPayload } from "@/modules/shared";
+} from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type { ICreateDto } from "@/modules/shared/dtos";
+import type { ILoggerService } from "@/modules/shared/services";
+import type { JwtPayload } from "@/modules/shared/types";
+import { stringToDate } from "@/modules/shared/utils";
 
 import type { RefreshToken } from "../refresh-token.model";
 import { RefreshTokenService } from "../refresh-token.service";
-import {
-  type IRefreshTokenRepository,
-  type IRefreshTokenService,
+import type {
+  IRefreshTokenRepository,
+  IRefreshTokenService,
 } from "../refresh-token.types";
 
-jest.mock("@modules/shared", () => ({
-  ...jest.requireActual("@modules/shared"),
+jest.mock("@/modules/shared/utils", () => ({
+  ...jest.requireActual("@/modules/shared/utils"),
   stringToDate: jest.fn(),
 }));
 

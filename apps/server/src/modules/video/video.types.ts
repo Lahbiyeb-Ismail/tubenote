@@ -1,7 +1,6 @@
-import type { EmptyRecord, TypedRequest } from "@modules/shared";
 import type { Response } from "express";
 
-import type { Video, YoutubeVideoData } from "@modules/video";
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type {
   ICreateDto,
@@ -10,7 +9,9 @@ import type {
   IPaginatedItems,
   IParamIdDto,
   IQueryPaginationDto,
-} from "@modules/shared";
+} from "@/modules/shared/dtos";
+
+import type { Video, YoutubeVideoData } from "./video.model";
 
 export interface IVideoRepository {
   transaction<T>(fn: (tx: IVideoRepository) => Promise<T>): Promise<T>;

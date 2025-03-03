@@ -1,8 +1,9 @@
 import { Router } from "express";
 
-import validateRequest from "@middlewares/validate-request.middleware";
+import { validateRequest } from "@/middlewares";
 
-import { tokenParamSchema } from "@/modules/shared";
+import { tokenParamSchema } from "@/modules/shared/schemas";
+
 import { verifyEmailController } from "./verify-email.module";
 
 const router = Router();

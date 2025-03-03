@@ -1,16 +1,11 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { TypedRequest } from "@modules/shared";
-
-import type {
-  IUpdatePasswordBodyDto,
-  IUserController,
-  IUserService,
-  User,
-} from "@modules/user";
-
-import type { IUpdateBodyDto } from "@modules/shared";
+import type { IUpdateBodyDto } from "@/modules/shared/dtos";
+import type { TypedRequest } from "@/modules/shared/types";
+import type { IUpdatePasswordBodyDto } from "./dtos";
+import type { User } from "./user.model";
+import type { IUserController, IUserService } from "./user.types";
 
 /**
  * Controller for handling user-related operations.

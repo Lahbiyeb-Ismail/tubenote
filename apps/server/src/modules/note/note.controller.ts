@@ -1,9 +1,7 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { EmptyRecord, TypedRequest } from "@modules/shared";
-
-import type { INoteController, INoteService, Note } from "@modules/note";
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type {
   ICreateBodyDto,
@@ -12,7 +10,10 @@ import type {
   IParamIdDto,
   IQueryPaginationDto,
   IUpdateBodyDto,
-} from "@modules/shared";
+} from "@/modules/shared/dtos";
+
+import type { Note } from "./note.model";
+import type { INoteController, INoteService } from "./note.types";
 
 /**
  * Controller for handling note-related operations.

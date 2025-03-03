@@ -7,17 +7,21 @@ import {
   UnauthorizedError,
 } from "@/modules/shared/api-errors";
 
-import { ICryptoService, IMailSenderService } from "@/modules/shared/services";
-
 import type {
-  IAuthResponseDto,
-  IJwtService,
-  ILoginDto,
-  IRefreshTokenService,
-  IVerifyEmailService,
-} from "@/modules/auth";
+  ICryptoService,
+  IMailSenderService,
+} from "@/modules/shared/services";
 
 import type { ICreateUserDto, IUserService, User } from "@/modules/user";
+
+import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
+
+import type {
+  IRefreshTokenService,
+  IVerifyEmailService,
+} from "@/modules/auth/features";
+
+import type { IJwtService } from "@/modules/auth/utils";
 
 import { LocalAuthService } from "../local-auth.service";
 

@@ -2,7 +2,7 @@ import type { Response } from "express";
 
 import type { Note } from "./note.model";
 
-import type { EmptyRecord, TypedRequest } from "@modules/shared";
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type {
   ICreateBodyDto,
@@ -15,7 +15,7 @@ import type {
   IQueryPaginationDto,
   IUpdateBodyDto,
   IUpdateDto,
-} from "@modules/shared";
+} from "@/modules/shared/dtos";
 
 /**
  * Interface defining the repository methods for interacting with note data.

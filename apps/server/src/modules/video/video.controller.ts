@@ -1,15 +1,16 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { EmptyRecord, TypedRequest } from "@modules/shared";
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type {
   IFindAllDto,
   IParamIdDto,
   IQueryPaginationDto,
-  IResponseFormatter,
-} from "@modules/shared";
-import type { IVideoController, IVideoService } from "@modules/video";
+} from "@/modules/shared/dtos";
+import type { IResponseFormatter } from "@/modules/shared/services";
+
+import type { IVideoController, IVideoService } from "./video.types";
 
 /**
  * Controller for handling video-related operations.

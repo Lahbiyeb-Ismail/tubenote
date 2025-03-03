@@ -49,16 +49,20 @@ export async function isAuthenticated(
     );
   }
 
-  verify(token, ACCESS_TOKEN_SECRET, (err, payload) => {
+  verify(token, ACCESS_TOKEN_SECRET, (err, payload: unknown) => {
     if (err) {
       loggerService.error(`Error verifying token: ${err.message}`);
 
       throw new UnauthorizedError("Unauthorized access. Please try again.");
     }
 
-    const userId = (payload as JwtPayload).userId;
+    if (typeof payload === "object" && payload !== null) {
+      const userId = (payload as JwtPayload).userId;
 
-    req.userId = userId;
+      req.userId = userId;
+    } else {
+      throw new UnauthorizedError("Invalid token payload.");
+    }
 
     next();
   });

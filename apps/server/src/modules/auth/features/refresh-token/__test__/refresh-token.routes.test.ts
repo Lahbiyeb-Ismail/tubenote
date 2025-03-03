@@ -3,54 +3,70 @@ import request from "supertest";
 
 import app from "@/app";
 
-import isAuthenticated from "@/middlewares/auth.middleware";
+import { UnauthorizedError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import { UnauthorizedError } from "@modules/shared";
-
-import { REFRESH_TOKEN_NAME } from "@modules/auth";
-import { ERROR_MESSAGES } from "@modules/shared";
+import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 
 import { refreshTokenController } from "../refresh-token.module";
 
-jest.mock("../refresh-token.module", () => ({
-  refreshTokenController: {
-    refreshToken: jest.fn(),
-  },
-}));
+const MOCK_USER_ID = "user_id_001";
+const MOCK_ACCESS_TOKEN = "new-access-token";
 
-jest.mock("@/middlewares/auth.middleware", () => jest.fn());
+// **********************************************
+// MOCK THE JSONWEBTOKEN MODULE TO SIMULATE TOKEN VERIFICATION
+// **********************************************
+jest.mock("jsonwebtoken", () => {
+  // Get the actual module to spread the rest of its exports.
+  const actualJwt = jest.requireActual("jsonwebtoken");
+  return {
+    ...actualJwt,
+    verify: jest.fn(
+      (
+        token: string,
+        _secret: string,
+        callback: (err: Error | null, payload?: any) => void
+      ) => {
+        if (token === "valid-token") {
+          // Simulate a successful verification with a payload.
+          callback(null, { userId: MOCK_USER_ID });
+        } else {
+          // Simulate an error during verification.
+          callback(new Error("Invalid token"), null);
+        }
+      }
+    ),
+  };
+});
 
 describe("Refresh Token Routes", () => {
-  const mockUserId = "user-id-001";
   const validRefreshToken = "valid-refresh-token";
 
+  beforeAll(() => {
+    (refreshTokenController.refreshToken as jest.Mock) = jest.fn();
+
+    (refreshTokenController.refreshToken as jest.Mock).mockImplementation(
+      (_req, res) => {
+        res.status(httpStatus.OK).json({ accessToken: MOCK_ACCESS_TOKEN });
+      }
+    );
+  });
+
+  // Clear mocks between tests
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe("POST /api/v1/auth/refresh", () => {
     it("should successfully refresh token when valid refresh token is provided", async () => {
-      // Arrange
-      const mockAccessToken = "new-access-token";
-
-      (isAuthenticated as jest.Mock).mockImplementation((req, _res, next) => {
-        req.userId = mockUserId;
-        next();
-      });
-
-      (refreshTokenController.refreshToken as jest.Mock).mockImplementation(
-        (_req, res) => {
-          res.status(httpStatus.OK).json({ accessToken: mockAccessToken });
-        }
-      );
-
       // Act & Assert
       const response = await request(app)
         .post("/api/v1/auth/refresh")
+        .set("Authorization", "Bearer valid-token")
         .set("Cookie", [`${REFRESH_TOKEN_NAME}=${validRefreshToken}`]);
 
       expect(response.statusCode).toBe(httpStatus.OK);
-      expect(response.body).toEqual({ accessToken: mockAccessToken });
+      expect(response.body).toEqual({ accessToken: MOCK_ACCESS_TOKEN });
 
       expect(refreshTokenController.refreshToken).toHaveBeenCalled();
     });
@@ -66,6 +82,7 @@ describe("Refresh Token Routes", () => {
       // Act & Assert
       await request(app)
         .post("/api/v1/auth/refresh")
+        .set("Authorization", "Bearer valid-token")
         .expect(httpStatus.UNAUTHORIZED);
 
       expect(refreshTokenController.refreshToken).toHaveBeenCalled();
@@ -82,6 +99,7 @@ describe("Refresh Token Routes", () => {
       // Act & Assert
       await request(app)
         .post("/api/v1/auth/refresh")
+        .set("Authorization", "Bearer valid-token")
         .set("Cookie", [`${REFRESH_TOKEN_NAME}=valid-refresh-token`])
         .expect(httpStatus.INTERNAL_SERVER_ERROR);
 
@@ -120,6 +138,7 @@ describe("Refresh Token Routes", () => {
       // Act & Assert
       await request(app)
         .post("/api/v1/auth/refresh")
+        .set("Authorization", "Bearer valid-token")
         .set("Cookie", ["malformed-cookie-format"])
         .expect(httpStatus.INTERNAL_SERVER_ERROR);
 
@@ -128,41 +147,41 @@ describe("Refresh Token Routes", () => {
 
     it("should preserve headers set by the controller", async () => {
       // Arrange
-      const mockAccessToken = "new-access-token";
       (refreshTokenController.refreshToken as jest.Mock).mockImplementation(
         (_req, res) => {
           res
             .set("Custom-Header", "test-value")
             .status(httpStatus.OK)
-            .json({ accessToken: mockAccessToken });
+            .json({ accessToken: MOCK_ACCESS_TOKEN });
         }
       );
 
       // Act & Assert
       await request(app)
         .post("/api/v1/auth/refresh")
+        .set("Authorization", "Bearer valid-token")
         .set("Cookie", [`${REFRESH_TOKEN_NAME}=valid-refresh-token`])
         .expect(httpStatus.OK)
         .expect("Custom-Header", "test-value")
         .expect((res) => {
           expect(res.body).toEqual({
-            accessToken: mockAccessToken,
+            accessToken: MOCK_ACCESS_TOKEN,
           });
         });
     });
 
     it("should handle multiple cookies correctly", async () => {
       // Arrange
-      const mockAccessToken = "new-access-token";
       (refreshTokenController.refreshToken as jest.Mock).mockImplementation(
         (_req, res) => {
-          res.status(httpStatus.OK).json({ accessToken: mockAccessToken });
+          res.status(httpStatus.OK).json({ accessToken: MOCK_ACCESS_TOKEN });
         }
       );
 
       // Act & Assert
       await request(app)
         .post("/api/v1/auth/refresh")
+        .set("Authorization", "Bearer valid-token")
         .set("Cookie", [
           `${REFRESH_TOKEN_NAME}=valid-refresh-token`,
           "other-cookie=some-value",
@@ -170,7 +189,7 @@ describe("Refresh Token Routes", () => {
         .expect(httpStatus.OK)
         .expect((res) => {
           expect(res.body).toEqual({
-            accessToken: mockAccessToken,
+            accessToken: MOCK_ACCESS_TOKEN,
           });
         });
 
@@ -183,6 +202,7 @@ describe("Refresh Token Routes", () => {
         .map(() =>
           request(app)
             .post("/api/v1/auth/refresh")
+            .set("Authorization", "Bearer valid-token")
             .set("Cookie", `${REFRESH_TOKEN_NAME}=valid-token`)
         );
 

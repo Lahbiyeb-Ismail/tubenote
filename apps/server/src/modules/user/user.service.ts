@@ -1,6 +1,11 @@
-import { ERROR_MESSAGES } from "@modules/shared";
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+} from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import { BadRequestError, ConflictError, NotFoundError } from "@modules/shared";
+import type { ICryptoService } from "@/modules/shared/services";
 
 import type {
   ICreateUserDto,
@@ -8,12 +13,9 @@ import type {
   IResetPasswordDto,
   IUpdatePasswordDto,
   IUpdateUserDto,
-  IUserRepository,
-  IUserService,
-  User,
-} from "@modules/user";
-
-import type { ICryptoService } from "@modules/shared";
+} from "./dtos";
+import type { User } from "./user.model";
+import type { IUserRepository, IUserService } from "./user.types";
 
 export class UserService implements IUserService {
   constructor(

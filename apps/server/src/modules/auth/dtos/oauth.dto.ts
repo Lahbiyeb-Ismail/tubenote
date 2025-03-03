@@ -1,4 +1,4 @@
-import type { IAuthResponseDto } from "@modules/auth";
+import type { IAuthResponseDto } from "./auth.dto";
 
 export interface OAuthCodeDto {
   code: string;

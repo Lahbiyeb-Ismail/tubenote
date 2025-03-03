@@ -17,7 +17,7 @@ import noteRoutes from "@/modules/note/note.routes";
 import userRoutes from "@/modules/user/user.routes";
 import videoRoutes from "@/modules/video/video.routes";
 
-import { errorHandler, notFoundRoute } from "@/middlewares/error.middleware";
+import { errorHandler, notFoundRoute } from "@/middlewares";
 
 import { envConfig } from "@/modules/shared/config";
 import { loggerService } from "@/modules/shared/services";

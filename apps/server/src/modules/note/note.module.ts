@@ -1,4 +1,4 @@
-import { prismaClient } from "@modules/shared";
+import { prismaClient } from "@/modules/shared/config";
 
 import { NoteController } from "./note.controller";
 import { NoteRepository } from "./note.repository";

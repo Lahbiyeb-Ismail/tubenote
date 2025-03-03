@@ -1,12 +1,10 @@
 import type { Response } from "express";
 
-import type { TypedRequest } from "@modules/shared";
+import type { ICreateDto } from "@/modules/shared/dtos";
+import type { TypedRequest } from "@/modules/shared/types";
 
+import type { IAuthResponseDto, IRefreshDto } from "@/modules/auth/dtos";
 import type { RefreshToken } from "./refresh-token.model";
-
-import type { IAuthResponseDto, IRefreshDto } from "@modules/auth";
-
-import type { ICreateDto } from "@/modules/shared";
 
 export interface IRefreshTokenRepository {
   createToken(createTokenDto: ICreateDto<RefreshToken>): Promise<RefreshToken>;

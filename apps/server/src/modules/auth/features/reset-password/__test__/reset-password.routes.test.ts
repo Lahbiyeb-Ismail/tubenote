@@ -3,9 +3,9 @@ import request from "supertest";
 
 import app from "@/app";
 
-import { ERROR_MESSAGES } from "@modules/shared";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import type { IEmailBodyDto } from "@modules/shared";
+import type { IEmailBodyDto } from "@/modules/shared/dtos";
 
 import { resetPasswordController } from "../reset-password.module";
 

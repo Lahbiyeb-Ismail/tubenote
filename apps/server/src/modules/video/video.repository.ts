@@ -1,11 +1,11 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 
-import { handleAsyncOperation } from "@modules/shared";
-import { ERROR_MESSAGES } from "@modules/shared";
+import type { Video, YoutubeVideoData } from "./video.model";
+import type { IVideoRepository } from "./video.types";
 
-import type { IVideoRepository, Video, YoutubeVideoData } from "@modules/video";
-
-import type { ICreateDto, IFindAllDto } from "@modules/shared";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type { ICreateDto, IFindAllDto } from "@/modules/shared/dtos";
+import { handleAsyncOperation } from "@/modules/shared/utils";
 
 export class VideoRepository implements IVideoRepository {
   constructor(private readonly _db: PrismaClient) {}

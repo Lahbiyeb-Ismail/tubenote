@@ -1,12 +1,12 @@
 import { Router } from "express";
 
-import validateRequest from "@middlewares/validate-request.middleware";
+import { validateRequest } from "@/middlewares";
 
 import {
   emailBodySchema,
   passwordBodySchema,
   tokenParamSchema,
-} from "@/modules/shared";
+} from "@/modules/shared/schemas";
 
 import { resetPasswordController } from "./reset-password.module";
 

@@ -2,17 +2,18 @@ import type { Response } from "express";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
-import type { EmptyRecord, TypedRequest } from "@modules/shared";
+import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
 
-import { BadRequestError, NotFoundError } from "@modules/shared";
-import { IVideoService, Video, VideoController } from "@modules/video";
-
+import type { IParamIdDto, IQueryPaginationDto } from "@/modules/shared/dtos";
 import type {
   ApiResponse,
-  IParamIdDto,
-  IQueryPaginationDto,
   IResponseFormatter,
-} from "@modules/shared";
+} from "@/modules/shared/services";
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
+
+import { VideoController } from "../video.controller";
+import type { Video } from "../video.model";
+import type { IVideoService } from "../video.types";
 
 describe("VideoController", () => {
   const mockResponseFormatter = mock<IResponseFormatter>();

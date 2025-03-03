@@ -1,16 +1,20 @@
-import { stringToDate } from "@modules/shared";
+import { ForbiddenError, UnauthorizedError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import { stringToDate } from "@/modules/shared/utils";
 
-import { REFRESH_TOKEN_EXPIRES_IN, REFRESH_TOKEN_SECRET } from "@modules/auth";
-import type { IAuthResponseDto, IJwtService, IRefreshDto } from "@modules/auth";
+import type { ICreateDto } from "@/modules/shared/dtos";
+import type { ILoggerService } from "@/modules/shared/services";
 
-import type { ICreateDto, ILoggerService } from "@/modules/shared";
 import {
-  ERROR_MESSAGES,
-  ForbiddenError,
-  UnauthorizedError,
-} from "@modules/shared";
+  REFRESH_TOKEN_EXPIRES_IN,
+  REFRESH_TOKEN_SECRET,
+} from "@/modules/auth/constants";
+
+import type { IAuthResponseDto, IRefreshDto } from "@/modules/auth/dtos";
+import type { IJwtService } from "@/modules/auth/utils";
 
 import type { RefreshToken } from "./refresh-token.model";
+
 import type {
   IRefreshTokenRepository,
   IRefreshTokenService,

@@ -1,11 +1,11 @@
-import { userService } from "@modules/user";
+import { userService } from "@/modules/user";
 
 import {
   cacheService,
   cryptoService,
   loggerService,
   mailSenderService,
-} from "@modules/shared";
+} from "@/modules/shared/services";
 
 import { ResetPasswordController } from "./reset-password.controller";
 import { ResetPasswordService } from "./reset-password.service";

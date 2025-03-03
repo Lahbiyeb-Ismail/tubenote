@@ -1,7 +1,9 @@
-import { loggerService, prismaClient } from "@modules/shared";
+import { prismaClient } from "@/modules/shared/config";
+import { loggerService } from "@/modules/shared/services";
 
-import { jwtService } from "@modules/auth";
-import { userService } from "@modules/user";
+import { userService } from "@/modules/user";
+
+import { jwtService } from "../../utils";
 
 import { VerifyEmailController } from "./verify-email.controller";
 import { VerifyEmailRepository } from "./verify-email.repository";

@@ -1,26 +1,25 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { TypedRequest } from "@modules/shared";
-
-import {
-  clearRefreshTokenCookieConfig,
-  refreshTokenCookieConfig,
-} from "@modules/auth";
-import { envConfig } from "@modules/shared";
-
 import {
   BadRequestError,
   ForbiddenError,
   UnauthorizedError,
-} from "@modules/shared";
+} from "@/modules/shared/api-errors";
+import { envConfig } from "@/modules/shared/config";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type { TypedRequest } from "@/modules/shared/types";
 
-import { REFRESH_TOKEN_NAME } from "@modules/auth";
-import { ERROR_MESSAGES } from "@modules/shared";
+import {
+  clearRefreshTokenCookieConfig,
+  refreshTokenCookieConfig,
+} from "@/modules/auth/config";
 
-import type { IAuthResponseDto } from "@/modules/auth";
+import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
+import type { IAuthResponseDto } from "@/modules/auth/dtos";
 
 import { RefreshTokenController } from "../refresh-token.controller";
+
 import type {
   IRefreshTokenController,
   IRefreshTokenService,

@@ -1,16 +1,15 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { TypedRequest } from "@modules/shared";
-import { UnauthorizedError } from "@modules/shared";
+import { UnauthorizedError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type { TypedRequest } from "@/modules/shared/types";
 
 import {
   clearRefreshTokenCookieConfig,
   refreshTokenCookieConfig,
-} from "@modules/auth";
-
-import { REFRESH_TOKEN_NAME } from "@modules/auth";
-import { ERROR_MESSAGES } from "@modules/shared";
+} from "@/modules/auth/config";
+import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 
 import type {
   IRefreshTokenController,

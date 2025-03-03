@@ -10,13 +10,15 @@ import type {
   IMailSenderService,
 } from "@/modules/shared/services";
 
-import type { IRefreshTokenService } from "../refresh-token";
-import type { IVerifyEmailService } from "../verify-email";
+import type {
+  IRefreshTokenService,
+  IVerifyEmailService,
+} from "@/modules/auth/features";
 
-import { REFRESH_TOKEN_EXPIRES_IN } from "../../constants";
+import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
 
-import type { IAuthResponseDto, ILoginDto } from "../../dtos";
-import type { IJwtService } from "../../utils";
+import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
+import type { IJwtService } from "@/modules/auth/utils";
 
 import type { ILocalAuthService } from "./local-auth.types";
 

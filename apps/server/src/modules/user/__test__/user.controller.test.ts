@@ -1,19 +1,18 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { TypedRequest } from "@modules/shared";
+import type { IUpdateBodyDto } from "@/modules/shared/dtos";
+import type { TypedRequest } from "@/modules/shared/types";
 
-import {
-  type IUpdatePasswordBodyDto,
-  type IUpdatePasswordDto,
-  type IUpdateUserDto,
-  type IUserController,
-  type IUserService,
-  type User,
-  UserController,
-} from "@/modules/user";
+import { UserController } from "../user.controller";
 
-import type { IUpdateBodyDto } from "@/modules/shared";
+import type {
+  IUpdatePasswordBodyDto,
+  IUpdatePasswordDto,
+  IUpdateUserDto,
+} from "../dtos";
+import type { User } from "../user.model";
+import type { IUserController, IUserService } from "../user.types";
 
 describe("UserController tests", () => {
   let userController: IUserController;

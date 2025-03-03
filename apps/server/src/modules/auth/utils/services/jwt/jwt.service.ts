@@ -1,22 +1,20 @@
 import jwt from "jsonwebtoken";
 
+import { BadRequestError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type { ILoggerService } from "@/modules/shared/services";
+import type { JwtPayload } from "@/modules/shared/types";
+
 import {
   ACCESS_TOKEN_EXPIRES_IN,
   ACCESS_TOKEN_SECRET,
   REFRESH_TOKEN_EXPIRES_IN,
   REFRESH_TOKEN_SECRET,
-} from "@modules/auth";
+} from "@/modules/auth/constants";
+import type { IAuthResponseDto } from "@/modules/auth/dtos";
 
-import { BadRequestError, ERROR_MESSAGES } from "@modules/shared";
-
-import type {
-  IAuthResponseDto,
-  IJwtService,
-  ISignTokenDto,
-  IVerifyTokenDto,
-} from "@modules/auth";
-
-import type { ILoggerService, JwtPayload } from "@modules/shared";
+import type { ISignTokenDto, IVerifyTokenDto } from "./dtos";
+import type { IJwtService } from "./jwt.types";
 
 export class JwtService implements IJwtService {
   constructor(private readonly _loggerService: ILoggerService) {}

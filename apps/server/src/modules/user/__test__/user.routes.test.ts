@@ -3,48 +3,14 @@ import request from "supertest";
 
 import app from "@/app";
 
-import { type User, userController } from "@modules/user";
+import type { User } from "../user.model";
+import { userController } from "../user.module";
 
-const mockUser: Omit<User, "password"> = {
-  id: "user_id_001",
-  username: "testuser",
-  email: "test@example.com",
-  profilePicture: "https://example.com/profile.jpg",
-  isEmailVerified: true,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
+const MOCK_USER_ID = "user_id_001";
 
-// ---
-// Mock the user controller functions so we can check if they were called.
-jest.mock("@modules/user", () => {
-  // Require the original module so we can still use its schemas.
-  const originalModule = jest.requireActual("@modules/user");
-  return {
-    ...originalModule,
-    userController: {
-      getCurrentUser: jest.fn((_req, res) => {
-        return res
-          .status(httpStatus.OK)
-          .json({ message: "User retrieved successfully.", user: mockUser });
-      }),
-      updateCurrentUser: jest.fn((req, res) => {
-        return res.status(httpStatus.OK).json({
-          message: "User updated successfully.",
-          user: { ...mockUser, ...req.body },
-        });
-      }),
-      updatePassword: jest.fn((_req, res) => {
-        return res
-          .status(httpStatus.OK)
-          .json({ message: "User password updated successfully." });
-      }),
-    },
-  };
-});
-
-// ---
-// Mock the JWT verify function so we can simulate valid and invalid tokens.
+// **********************************************
+// MOCK THE JSONWEBTOKEN MODULE TO SIMULATE TOKEN VERIFICATION
+// **********************************************
 jest.mock("jsonwebtoken", () => {
   // Get the actual module to spread the rest of its exports.
   const actualJwt = jest.requireActual("jsonwebtoken");
@@ -58,7 +24,7 @@ jest.mock("jsonwebtoken", () => {
       ) => {
         if (token === "valid-token") {
           // Simulate a successful verification with a payload.
-          callback(null, { userId: "12345" });
+          callback(null, { userId: MOCK_USER_ID });
         } else {
           // Simulate an error during verification.
           callback(new Error("Invalid token"), null);
@@ -69,6 +35,51 @@ jest.mock("jsonwebtoken", () => {
 });
 
 describe("User Routes", () => {
+  const MOCK_USER: Omit<User, "password"> = {
+    id: "user_id_001",
+    username: "testuser",
+    email: "test@example.com",
+    profilePicture: "https://example.com/profile.jpg",
+    isEmailVerified: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  beforeAll(() => {
+    // Mock the getCurrentUser function to return a mock user.
+    (userController.getCurrentUser as jest.Mock) = jest.fn();
+
+    (userController.getCurrentUser as jest.Mock).mockImplementation(
+      (_req, res) => {
+        return res
+          .status(httpStatus.OK)
+          .json({ message: "User retrieved successfully.", user: MOCK_USER });
+      }
+    );
+
+    // Mock the updateCurrentUser function to return a mock user with updated data.
+    (userController.updateCurrentUser as jest.Mock) = jest.fn();
+    (userController.updateCurrentUser as jest.Mock).mockImplementation(
+      (req, res) => {
+        return res.status(httpStatus.OK).json({
+          message: "User updated successfully.",
+          user: { ...MOCK_USER, ...req.body },
+        });
+      }
+    );
+
+    // Mock the updatePassword function to return a success message.
+    (userController.updatePassword as jest.Mock) = jest.fn();
+
+    (userController.updatePassword as jest.Mock).mockImplementation(
+      (_req, res) => {
+        return res
+          .status(httpStatus.OK)
+          .json({ message: "User password updated successfully." });
+      }
+    );
+  });
+
   // Clear mocks between tests
   beforeEach(() => {
     jest.clearAllMocks();

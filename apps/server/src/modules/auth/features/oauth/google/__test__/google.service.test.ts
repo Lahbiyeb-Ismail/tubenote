@@ -1,21 +1,24 @@
-import { ERROR_MESSAGES, UnauthorizedError } from "@modules/shared";
+import { UnauthorizedError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import type {
-  IJwtService,
-  IRefreshTokenService,
-  OAuthCodePayloadDto,
-  OAuthResponseDto,
-  RefreshToken,
-} from "@modules/auth";
-
-import type { User } from "@modules/user";
+import type { User } from "@/modules/user";
 
 import type {
   ICacheService,
   ICryptoService,
   ILoggerService,
-} from "@modules/shared";
+} from "@/modules/shared/services";
 
+import type {
+  OAuthCodePayloadDto,
+  OAuthResponseDto,
+} from "@/modules/auth/dtos";
+import type { IJwtService } from "@/modules/auth/utils";
+
+import type {
+  IRefreshTokenService,
+  RefreshToken,
+} from "@/modules/auth/features";
 import { GoogleAuthService } from "../google.service";
 
 describe("GoogleAuthService", () => {

@@ -1,15 +1,13 @@
 import { Response } from "express";
 
-import type { TypedRequest } from "@modules/shared";
+import { UnauthorizedError } from "@/modules/shared/api-errors";
+import { envConfig } from "@/modules/shared/config";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type { TypedRequest } from "@/modules/shared/types";
 
-import { refreshTokenCookieConfig } from "@modules/auth";
-import { envConfig } from "@modules/shared";
-
-import { ERROR_MESSAGES } from "@modules/shared";
-
-import { UnauthorizedError } from "@modules/shared";
-
-import { type OAuthResponseDto, REFRESH_TOKEN_NAME } from "@modules/auth";
+import { refreshTokenCookieConfig } from "@/modules/auth/config";
+import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
+import type { OAuthResponseDto } from "@/modules/auth/dtos";
 
 import type { User } from "@/modules/user";
 

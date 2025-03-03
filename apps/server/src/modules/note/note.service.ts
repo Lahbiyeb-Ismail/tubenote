@@ -1,7 +1,5 @@
-import { ERROR_MESSAGES } from "@modules/shared";
-import { NotFoundError } from "@modules/shared";
-
-import type { INoteRepository, INoteService, Note } from "@modules/note";
+import { NotFoundError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import type {
   ICreateDto,
@@ -10,7 +8,10 @@ import type {
   IFindUniqueDto,
   IPaginatedItems,
   IUpdateDto,
-} from "@modules/shared";
+} from "@/modules/shared/dtos";
+
+import type { Note } from "./note.model";
+import type { INoteRepository, INoteService } from "./note.types";
 
 /**
  * Service class for handling business logic related to Notes.

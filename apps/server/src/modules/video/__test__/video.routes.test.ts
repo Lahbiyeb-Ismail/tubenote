@@ -3,7 +3,8 @@ import request from "supertest";
 
 import app from "@/app";
 
-import { type Video, videoController } from "@modules/video";
+import type { Video } from "../video.model";
+import { videoController } from "../video.module";
 
 // **********************************************
 // MOCK THE JSONWEBTOKEN MODULE TO SIMULATE TOKEN VERIFICATION

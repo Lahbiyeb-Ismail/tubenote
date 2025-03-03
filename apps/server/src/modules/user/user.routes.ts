@@ -1,13 +1,9 @@
 import { Router } from "express";
 
-import isAuthenticated from "@middlewares/auth.middleware";
-import validateRequest from "@middlewares/validate-request.middleware";
+import { isAuthenticated, validateRequest } from "@/middlewares";
 
-import {
-  updatePasswordSchema,
-  updateUserSchema,
-  userController,
-} from "@modules/user";
+import { updatePasswordSchema, updateUserSchema } from "./schemas";
+import { userController } from "./user.module";
 
 const router = Router();
 

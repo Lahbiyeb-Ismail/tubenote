@@ -1,6 +1,9 @@
 import type { Response } from "express";
 
-import type { TypedRequest } from "@modules/shared";
+import type { IUpdateBodyDto } from "@/modules/shared/dtos";
+import type { TypedRequest } from "@/modules/shared/types";
+
+import type { User } from "./user.model";
 
 import type {
   ICreateUserDto,
@@ -9,10 +12,7 @@ import type {
   IUpdatePasswordBodyDto,
   IUpdatePasswordDto,
   IUpdateUserDto,
-  User,
-} from "@modules/user";
-
-import type { IUpdateBodyDto } from "@modules/shared";
+} from "./dtos";
 
 /**
  * Interface representing a user repository.

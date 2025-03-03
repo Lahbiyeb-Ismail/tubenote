@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 
-import { DatabaseError, loggerService } from "@modules/shared";
+import { DatabaseError } from "../api-errors";
+import { loggerService } from "../services";
 
 /**
  * Represents an asynchronous operation that returns a promise of type T.
@@ -76,9 +77,6 @@ export async function handleAsyncOperation<T>(
     throw new DatabaseError(`Unknow error: ${errorMessage}`);
   }
 }
-
-// import { Prisma } from "@prisma/client";
-// import { loggerService } from "@modules/shared";
 
 // /**
 //  * Base error class for all application errors

@@ -1,5 +1,5 @@
-import type { ICreateDto, IUpdateDto } from "@/modules/shared";
-import type { User } from "@modules/user";
+import type { ICreateDto, IUpdateDto } from "@/modules/shared/dtos";
+import type { User } from "../user.model";
 
 /**
  * Data Transfer Object (DTO) for creating a user.

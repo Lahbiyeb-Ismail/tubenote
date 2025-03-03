@@ -1,15 +1,11 @@
 import { Router } from "express";
 
-import isAuthenticated from "@middlewares/auth.middleware";
-import validateRequest from "@middlewares/validate-request.middleware";
+import { isAuthenticated, validateRequest } from "@/middlewares";
 
-import {
-  createNoteSchema,
-  noteController,
-  updateNoteSchema,
-} from "@modules/note";
+import { idParamSchema, paginationQuerySchema } from "@/modules/shared/schemas";
 
-import { idParamSchema, paginationQuerySchema } from "@modules/shared";
+import { noteController } from "./note.module";
+import { createNoteSchema, updateNoteSchema } from "./schemas";
 
 const router = Router();
 

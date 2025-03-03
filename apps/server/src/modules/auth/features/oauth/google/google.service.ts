@@ -1,24 +1,23 @@
-import { stringToDate } from "@modules/shared";
+import { UnauthorizedError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import { stringToDate } from "@/modules/shared/utils";
 
-import {
-  ERROR_MESSAGES,
+import type { IJwtService } from "@/modules/auth/utils";
+import type {
   ICacheService,
   ICryptoService,
   ILoggerService,
-  UnauthorizedError,
-} from "@modules/shared";
+} from "@/modules/shared/services";
+import type { User } from "@/modules/user";
 
-import type { User } from "@modules/user";
-
+import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
 import type {
-  IJwtService,
-  IRefreshTokenService,
   OAuthCodePayloadDto,
   OAuthResponseDto,
-} from "@modules/auth";
+} from "@/modules/auth/dtos";
+import type { IRefreshTokenService } from "@/modules/auth/features";
 
-import { REFRESH_TOKEN_EXPIRES_IN } from "../../../constants";
-import { IGoogleAuthService } from "./google.types";
+import type { IGoogleAuthService } from "./google.types";
 
 export class GoogleAuthService implements IGoogleAuthService {
   constructor(

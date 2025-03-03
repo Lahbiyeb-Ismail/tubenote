@@ -1,20 +1,19 @@
-import { YOUTUBE_API_KEY, YOUTUBE_API_URL } from "@modules/shared";
-import { ERROR_MESSAGES } from "@modules/shared";
+import {
+  ERROR_MESSAGES,
+  YOUTUBE_API_KEY,
+  YOUTUBE_API_URL,
+} from "@/modules/shared/constants";
 
-import { BadRequestError, NotFoundError } from "@modules/shared";
+import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
 
 import type {
   IFindAllDto,
   IFindUniqueDto,
   IPaginatedItems,
-} from "@modules/shared";
+} from "@/modules/shared/dtos";
 
-import type {
-  IVideoRepository,
-  IVideoService,
-  Video,
-  YoutubeVideoData,
-} from "@modules/video";
+import type { Video, YoutubeVideoData } from "./video.model";
+import type { IVideoRepository, IVideoService } from "./video.types";
 
 export class VideoService implements IVideoService {
   constructor(private readonly _videoRepository: IVideoRepository) {}
