@@ -1,10 +1,9 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 
-import { DatabaseError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
-import type { ICreateUserDto, IGetUserDto, IUpdateUserDto } from "./dtos";
+import type { ICreateUserDto, IUpdateUserDto } from "./dtos";
 import type { User } from "./user.model";
 import type { IUserRepository } from "./user.types";
 
@@ -19,12 +18,12 @@ export class UserRepository implements IUserRepository {
    * @returns {Promise<T>} - A promise that resolves to the result of the function executed within the transaction.
    *
    */
-  async transaction<T>(fn: (tx: IUserRepository) => Promise<T>): Promise<T> {
+  async transaction<T>(
+    fn: (tx: Prisma.TransactionClient) => Promise<T>
+  ): Promise<T> {
     // Use Prisma's transaction system
     return this._db.$transaction(async (prismaTx: Prisma.TransactionClient) => {
-      // Create a new repository instance with the transactional client
-      const txRepository = new UserRepository(prismaTx as PrismaClient);
-      return await fn(txRepository);
+      return await fn(prismaTx);
     });
   }
 
@@ -35,10 +34,13 @@ export class UserRepository implements IUserRepository {
    * @returns {Promise<User>} A promise that resolves to the created user.
    * @throws Will throw an error if the user creation fails.
    */
-  async createUser(createUserDto: ICreateUserDto): Promise<User> {
+  async create(
+    tx: Prisma.TransactionClient,
+    createUserDto: ICreateUserDto
+  ): Promise<User> {
     return handleAsyncOperation(
       () =>
-        this._db.user.create({
+        tx.user.create({
           data: { ...createUserDto.data },
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
@@ -53,10 +55,15 @@ export class UserRepository implements IUserRepository {
    *
    * @throws Will throw an error if the operation fails.
    */
-  async getUserByEmail(email: string): Promise<User | null> {
+  async getByEmail(
+    email: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<User | null> {
+    const client = tx ?? this._db;
+
     return handleAsyncOperation(
       () =>
-        this._db.user.findUnique({
+        client.user.findUnique({
           where: {
             email,
           },
@@ -73,47 +80,17 @@ export class UserRepository implements IUserRepository {
    *
    * @throws Will throw an error if the operation fails with a message defined in ERROR_MESSAGES.FAILED_TO_FIND.
    */
-  async getUserById(id: string): Promise<User | null> {
+  async getById(
+    id: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<User | null> {
+    const client = tx ?? this._db;
+
     return handleAsyncOperation(
       () =>
-        this._db.user.findUnique({
+        client.user.findUnique({
           where: {
             id,
-          },
-        }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
-    );
-  }
-
-  /**
-   * Retrieves a user based on the provided parameters.
-   *
-   * @param {GetUserDto} getUserDto - The parameters to find the user by. Must include either an `id` or `email`.
-   * @returns {Promise<User | null>} - A promise that resolves to the user if found, otherwise null.
-   * @throws {DatabaseError} - Throws an error if neither `id` nor `email` is provided.
-   */
-  async getUser(getUserDto: IGetUserDto): Promise<User | null> {
-    const { id, email } = getUserDto;
-
-    if (!id && !email) {
-      throw new DatabaseError("Id or email must be provided.");
-    }
-
-    const conditions: Prisma.UserWhereInput[] = [];
-
-    if (id) {
-      conditions.push({ id });
-    }
-
-    if (email) {
-      conditions.push({ email });
-    }
-
-    return handleAsyncOperation(
-      () =>
-        this._db.user.findFirst({
-          where: {
-            OR: conditions,
           },
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
@@ -127,12 +104,15 @@ export class UserRepository implements IUserRepository {
    * @returns A promise that resolves to the updated user.
    * @throws Will throw an error if the update operation fails.
    */
-  async updateUser(updatedUserDto: IUpdateUserDto): Promise<User> {
+  async update(
+    tx: Prisma.TransactionClient,
+    updatedUserDto: IUpdateUserDto
+  ): Promise<User> {
     const { id, data } = updatedUserDto;
 
     return handleAsyncOperation(
       () =>
-        this._db.user.update({
+        tx.user.update({
           where: { id },
           data: { ...data },
         }),
@@ -148,10 +128,14 @@ export class UserRepository implements IUserRepository {
    * @returns A promise that resolves to the updated User object.
    * @throws Will throw an error if the update operation fails.
    */
-  async updatePassword(userId: string, hashedPassword: string): Promise<User> {
+  async updatePassword(
+    tx: Prisma.TransactionClient,
+    userId: string,
+    hashedPassword: string
+  ): Promise<User> {
     return handleAsyncOperation(
       () =>
-        this._db.user.update({
+        tx.user.update({
           where: { id: userId },
           data: {
             password: hashedPassword,
@@ -169,10 +153,13 @@ export class UserRepository implements IUserRepository {
    *
    * @throws {Error} - Throws an error if the email verification process fails.
    */
-  async verifyUserEmail(userId: string): Promise<User> {
+  async verifyEmail(
+    tx: Prisma.TransactionClient,
+    userId: string
+  ): Promise<User> {
     return handleAsyncOperation(
       () =>
-        this._db.user.update({
+        tx.user.update({
           where: { id: userId },
           data: {
             isEmailVerified: true,
