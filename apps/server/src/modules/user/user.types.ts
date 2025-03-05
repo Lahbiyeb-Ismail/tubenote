@@ -5,6 +5,7 @@ import type { TypedRequest } from "@/modules/shared/types";
 
 import type { User } from "./user.model";
 
+import type { Prisma } from "@prisma/client";
 import type {
   ICreateUserDto,
   IGetUserDto,
@@ -13,6 +14,7 @@ import type {
   IUpdatePasswordDto,
   IUpdateUserDto,
 } from "./dtos";
+import type { ICreateAccountDto } from "./features/account/dtos";
 
 /**
  * Interface representing a user repository.
@@ -24,69 +26,74 @@ export interface IUserRepository {
    * @param fn The function to execute within the transaction.
    * @returns A promise that resolves to the result of the function.
    */
-  transaction<T>(fn: (tx: IUserRepository) => Promise<T>): Promise<T>;
+  transaction<T>(fn: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T>;
 
   /**
    * Creates a new user.
    * @param createUserDto The data transfer object containing user creation details.
    * @returns A promise that resolves to the created user.
    */
-  createUser(createUserDto: ICreateUserDto): Promise<User>;
+  create(
+    tx: Prisma.TransactionClient,
+    createUserDto: ICreateUserDto
+  ): Promise<User>;
 
   /**
    * Retrieves a user by their email.
    * @param email The email of the user to retrieve.
    * @returns A promise that resolves to the user, or null if no user is found.
    */
-  getUserByEmail(email: string): Promise<User | null>;
+  getByEmail(
+    email: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<User | null>;
 
   /**
    * Retrieves a user by their ID.
    * @param id The ID of the user to retrieve.
    * @returns A promise that resolves to the user, or null if no user is found.
    */
-  getUserById(id: string): Promise<User | null>;
-
-  /**
-   * Retrieves a user based on the provided criteria.
-   * @param getUserDto The data transfer object containing user retrieval criteria.
-   * @returns A promise that resolves to the user, or null if no user is found.
-   */
-  getUser(getUserDto: IGetUserDto): Promise<User | null>;
+  getById(id: string, tx?: Prisma.TransactionClient): Promise<User | null>;
 
   /**
    * Updates an existing user.
    * @param updateUserDto The data transfer object containing user update details.
    * @returns A promise that resolves to the updated user.
    */
-  updateUser(updateUserDto: IUpdateUserDto): Promise<User>;
+  update(
+    tx: Prisma.TransactionClient,
+    updateUserDto: IUpdateUserDto
+  ): Promise<User>;
 
   /**
    * Updates the password of a user.
+   * @param tx The transaction client to use for the update.
    * @param userId The ID of the user whose password is to be updated.
    * @param hashedPassword The new hashed password.
    * @returns A promise that resolves to the updated user.
    */
-  updatePassword(userId: string, hashedPassword: string): Promise<User>;
+  updatePassword(
+    tx: Prisma.TransactionClient,
+    userId: string,
+    hashedPassword: string
+  ): Promise<User>;
 
   /**
    * Verifies the email of a user.
    * @param userId The ID of the user whose email is to be verified.
    * @returns A promise that resolves to the verified user.
    */
-  verifyUserEmail(userId: string): Promise<User>;
+  verifyEmail(tx: Prisma.TransactionClient, userId: string): Promise<User>;
 }
 
 /**
  * Interface representing the user service.
  */
 export interface IUserService {
-  /**
-   * Creates a new user.
-   * @param createUserDto - Data transfer object containing user creation details.
-   * @returns A promise that resolves to the created user.
-   */
-  createUser(createUserDto: ICreateUserDto): Promise<User>;
+  createUserWithAccount(
+    createUserDto: ICreateUserDto,
+    createAccountDto: ICreateAccountDto
+  ): Promise<User>;
 
   /**
    * Retrieves an existing user or creates a new one if not found.
@@ -100,7 +107,7 @@ export interface IUserService {
    * @param getUserDto - Data transfer object containing user retrieval details.
    * @returns A promise that resolves to the retrieved user.
    */
-  getUser(getUserDto: IGetUserDto): Promise<User>;
+  getUserByIdOrEmail(getUserDto: IGetUserDto): Promise<User>;
 
   /**
    * Updates an existing user.
@@ -114,14 +121,14 @@ export interface IUserService {
    * @param updatedPasswordDto - Data transfer object containing updated password details.
    * @returns A promise that resolves to the user with the updated password.
    */
-  updatePassword(updatedPasswordDto: IUpdatePasswordDto): Promise<User>;
+  updateUserPassword(updatedPasswordDto: IUpdatePasswordDto): Promise<User>;
 
   /**
    * Resets the password of an existing user.
    * @param resetPasswordDto - Data transfer object containing reset password details.
    * @returns A promise that resolves to the user with the reset password.
    */
-  resetPassword(resetPasswordDto: IResetPasswordDto): Promise<User>;
+  resetUserPassword(resetPasswordDto: IResetPasswordDto): Promise<User>;
 
   /**
    * Verifies the email of a user.
