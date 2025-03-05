@@ -25,7 +25,7 @@ export class VerifyEmailService implements IVerifyEmailService {
   ) {}
 
   async generateToken(email: string): Promise<string> {
-    const user = await this._userService.getUser({ email });
+    const user = await this._userService.getUserByIdOrEmail({ email });
 
     if (user.isEmailVerified) {
       throw new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED);

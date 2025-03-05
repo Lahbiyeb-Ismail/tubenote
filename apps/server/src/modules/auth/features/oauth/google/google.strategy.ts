@@ -37,7 +37,7 @@ export class GoogleAuthStrategy {
     try {
       const { id, emails, displayName, photos } = profile;
       const email = emails?.[0].value;
-      const profilePicture = photos?.[0].value;
+      const profilePicture = photos?.[0].value || null;
 
       if (!email) {
         return done(new Error("No email provided from Google"));
@@ -49,7 +49,6 @@ export class GoogleAuthStrategy {
           profilePicture,
           username: displayName,
           password: id,
-          googleId: id,
           isEmailVerified: true,
         },
       });

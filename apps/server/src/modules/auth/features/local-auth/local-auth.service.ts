@@ -33,7 +33,16 @@ export class LocalAuthService implements ILocalAuthService {
   ) {}
 
   async registerUser(createUserDto: ICreateUserDto): Promise<User> {
-    const newUser = await this._userService.createUser(createUserDto);
+    const newUser = await this._userService.createUserWithAccount(
+      createUserDto,
+      {
+        data: {
+          provider: "credentials",
+          providerAccountId: createUserDto.data.email,
+          type: "email",
+        },
+      }
+    );
 
     const verifyEmailToken = await this._verifyEmailService.generateToken(
       newUser.email
@@ -50,7 +59,7 @@ export class LocalAuthService implements ILocalAuthService {
   async loginUser(loginDto: ILoginDto): Promise<IAuthResponseDto> {
     const { email, password } = loginDto;
 
-    const user = await this._userService.getUser({ email });
+    const user = await this._userService.getUserByIdOrEmail({ email });
 
     if (!user.isEmailVerified) {
       throw new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED);
