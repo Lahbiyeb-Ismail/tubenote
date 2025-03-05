@@ -17,7 +17,7 @@ model User {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   username        String
   email           String   @unique
-  password        String? // Made optional since users might sign in with OAuth only
+  password        String
   profilePicture  String?
   isEmailVerified Boolean  @default(false)
   createdAt       DateTime @default(now())
@@ -46,12 +46,12 @@ model Account {
   id                String   @id @default(auto()) @map("_id") @db.ObjectId
   userId            String   @db.ObjectId
   providerAccountId String // The account ID from the provider
-  refreshToken      String? // OAuth refresh token
-  accessToken       String? // OAuth access token
-  expiresAt         Int? // OAuth token expiry date
-  tokenType         String? // OAuth token type
-  scope             String? // OAuth scopes
-  idToken           String? // OAuth ID token
+  // refreshToken      String? // OAuth refresh token
+  // accessToken       String? // OAuth access token
+  // expiresAt         Int? // OAuth token expiry date
+  // tokenType         String? // OAuth token type
+  // scope             String? // OAuth scopes
+  // idToken           String? // OAuth ID token
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
