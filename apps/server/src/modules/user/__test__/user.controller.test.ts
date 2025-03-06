@@ -25,12 +25,12 @@ describe("UserController tests", () => {
 
   beforeEach(() => {
     mockUserService = {
-      createUser: jest.fn(),
-      getUser: jest.fn(),
+      createUserWithAccount: jest.fn(),
+      getUserByIdOrEmail: jest.fn(),
       getOrCreateUser: jest.fn(),
       updateUser: jest.fn(),
-      updatePassword: jest.fn(),
-      resetPassword: jest.fn(),
+      updateUserPassword: jest.fn(),
+      resetUserPassword: jest.fn(),
       verifyUserEmail: jest.fn(),
     };
 
@@ -55,7 +55,7 @@ describe("UserController tests", () => {
     id: mockUserId,
     username: "test_user",
     email: "testuser@example.com",
-    profilePicture: "",
+    profilePicture: null,
     isEmailVerified: true,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -73,14 +73,18 @@ describe("UserController tests", () => {
     });
 
     it("should send the current user's information and remove sensitive data", async () => {
-      (mockUserService.getUser as jest.Mock).mockResolvedValue(mockUser);
+      (mockUserService.getUserByIdOrEmail as jest.Mock).mockResolvedValue(
+        mockUser
+      );
 
       await userController.getCurrentUser(
         mockRequest as TypedRequest,
         mockResponse as Response
       );
 
-      expect(mockUserService.getUser).toHaveBeenCalledWith({ id: mockUserId });
+      expect(mockUserService.getUserByIdOrEmail).toHaveBeenCalledWith({
+        id: mockUserId,
+      });
 
       expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
 
@@ -93,7 +97,7 @@ describe("UserController tests", () => {
 
     it("should propagate user service errors", async () => {
       const errorMessage = "Error fetching user data";
-      (mockUserService.getUser as jest.Mock).mockRejectedValue(
+      (mockUserService.getUserByIdOrEmail as jest.Mock).mockRejectedValue(
         new Error(errorMessage)
       );
 
@@ -214,7 +218,7 @@ describe("UserController tests", () => {
     });
 
     it("should update the current user's password", async () => {
-      (mockUserService.updatePassword as jest.Mock).mockResolvedValue({
+      (mockUserService.updateUserPassword as jest.Mock).mockResolvedValue({
         ...mockUser,
         password: "new_hashed_password",
       });
@@ -224,7 +228,7 @@ describe("UserController tests", () => {
         mockResponse as Response
       );
 
-      expect(mockUserService.updatePassword).toHaveBeenCalledWith(
+      expect(mockUserService.updateUserPassword).toHaveBeenCalledWith(
         updatePasswordDto
       );
 
@@ -238,7 +242,7 @@ describe("UserController tests", () => {
 
     it("should propagate Userservice errors", async () => {
       const errorMessage = "Error updating user data";
-      (mockUserService.updatePassword as jest.Mock).mockRejectedValue(
+      (mockUserService.updateUserPassword as jest.Mock).mockRejectedValue(
         new Error(errorMessage)
       );
 

@@ -22,6 +22,7 @@ describe("Local Auth Routes", () => {
     password: "Password123!",
     username: "testuser",
     isEmailVerified: false,
+    profilePicture: null,
   };
 
   const validLoginPayload: ILoginDto = {
