@@ -7,7 +7,7 @@ import {
 } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import type { ICryptoService } from "@/modules/shared/services";
+import type { ICryptoService, PrismaService } from "@/modules/shared/services";
 
 import type {
   ICreateUserDto,
@@ -26,6 +26,7 @@ export class UserService implements IUserService {
   constructor(
     private readonly _userRepository: IUserRepository,
     private readonly _accountService: IAccountService,
+    private readonly _prismaService: PrismaService,
     private readonly _cryptoService: ICryptoService
   ) {}
 
@@ -100,15 +101,18 @@ export class UserService implements IUserService {
   ): Promise<User> {
     const { email } = createUserDto.data;
 
-    return this._userRepository.transaction(async (tx) => {
-      await this._ensureEmailIsUnique(email, tx);
+    return this._prismaService.transaction(
+      async (tx) => {
+        await this._ensureEmailIsUnique(email, tx);
 
-      const user = await this._createUser(tx, createUserDto);
+        const user = await this._createUser(tx, createUserDto);
 
-      await this._accountService.createAccount(tx, user.id, createAccountDto);
+        await this._accountService.createAccount(tx, user.id, createAccountDto);
 
-      return user;
-    });
+        return user;
+      },
+      { maxRetries: 3 }
+    );
   }
 
   /**
