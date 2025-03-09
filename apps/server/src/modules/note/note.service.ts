@@ -10,6 +10,8 @@ import type {
   IUpdateDto,
 } from "@/modules/shared/dtos";
 
+import type { Prisma } from "@prisma/client";
+import type { IPrismaService } from "../shared/services";
 import type { Note } from "./note.model";
 import type { INoteRepository, INoteService } from "./note.types";
 
@@ -26,18 +28,23 @@ export class NoteService implements INoteService {
    *
    * @param _noteRepository - An instance of the note repository to delegate data operations.
    */
-  constructor(private readonly _noteRepository: INoteRepository) {}
+  constructor(
+    private readonly _noteRepository: INoteRepository,
+    private readonly _prismaService: IPrismaService
+  ) {}
 
   /**
-   * Finds a note by the provided criteria or throws an error if not found.
+   * Retrieves a note based on the given criteria.
    *
-   * @private
    * @param {FindNoteDto} findNoteDto - Data transfer object containing note identification details.
    * @returns {Promise<Note>} A promise that resolves to the found note.
    * @throws {NotFoundError} If no note is found matching the criteria.
    */
-  private async _findNoteOrFail(findNoteDto: IFindUniqueDto): Promise<Note> {
-    const note = await this._noteRepository.find(findNoteDto);
+  async findNote(
+    findNoteDto: IFindUniqueDto,
+    tx?: Prisma.TransactionClient
+  ): Promise<Note> {
+    const note = await this._noteRepository.find(findNoteDto, tx);
 
     if (!note) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -47,24 +54,16 @@ export class NoteService implements INoteService {
   }
 
   /**
-   * Retrieves a note based on the given criteria.
-   *
-   * @param {FindNoteDto} findNoteDto - Data transfer object containing note identification details.
-   * @returns {Promise<Note>} A promise that resolves to the found note.
-   * @throws {NotFoundError} If no note is found matching the criteria.
-   */
-  async findNote(findNoteDto: IFindUniqueDto): Promise<Note> {
-    return await this._findNoteOrFail(findNoteDto);
-  }
-
-  /**
    * Creates a new note.
    *
    * @param {CreateNoteDto} createNoteDto - Data transfer object containing the details of the note to create.
    * @returns {Promise<Note>} A promise that resolves to the newly created note.
    */
-  async createNote(createNoteDto: ICreateDto<Note>): Promise<Note> {
-    return await this._noteRepository.create(createNoteDto);
+  async createNote(
+    createNoteDto: ICreateDto<Note>,
+    tx?: Prisma.TransactionClient
+  ): Promise<Note> {
+    return await this._noteRepository.create(createNoteDto, tx);
   }
 
   /**
@@ -75,13 +74,16 @@ export class NoteService implements INoteService {
    * @throws {Error} - Throws an error if the note is not found.
    */
   async updateNote(updateNoteDto: IUpdateDto<Note>): Promise<Note> {
-    return await this._noteRepository.transaction(async (tx) => {
-      await this._findNoteOrFail({
-        id: updateNoteDto.id,
-        userId: updateNoteDto.userId,
-      });
+    return await this._prismaService.transaction(async (tx) => {
+      await this.findNote(
+        {
+          id: updateNoteDto.id,
+          userId: updateNoteDto.userId,
+        },
+        tx
+      );
 
-      return tx.update(updateNoteDto);
+      return this._noteRepository.update(updateNoteDto, tx);
     });
   }
 
@@ -96,10 +98,10 @@ export class NoteService implements INoteService {
    * @throws {NotFoundError} If the note is not found.
    */
   async deleteNote(deleteNoteDto: IDeleteDto): Promise<Note> {
-    return await this._noteRepository.transaction(async (tx) => {
-      await this._findNoteOrFail(deleteNoteDto);
+    return await this._prismaService.transaction(async (tx) => {
+      await this.findNote(deleteNoteDto, tx);
 
-      return tx.delete(deleteNoteDto);
+      return this._noteRepository.delete(deleteNoteDto, tx);
     });
   }
 
@@ -112,11 +114,13 @@ export class NoteService implements INoteService {
   async fetchUserNotes(
     findManyDto: IFindAllDto
   ): Promise<IPaginatedItems<Note>> {
-    return await this._noteRepository.transaction(async (tx) => {
-      const [items, totalItems] = await Promise.all([
-        tx.findMany(findManyDto),
-        tx.count(findManyDto.userId),
-      ]);
+    return await this._prismaService.transaction(async (tx) => {
+      const items = await this._noteRepository.findMany(findManyDto, tx);
+
+      const totalItems = await this._noteRepository.count(
+        findManyDto.userId,
+        tx
+      );
 
       const totalPages = Math.ceil(totalItems / findManyDto.limit);
 
@@ -159,11 +163,10 @@ export class NoteService implements INoteService {
   async fetchNotesByVideoId(
     dto: IFindAllDto & { videoId: string }
   ): Promise<IPaginatedItems<Note>> {
-    return await this._noteRepository.transaction(async (tx) => {
-      const [items, totalItems] = await Promise.all([
-        tx.findManyByVideoId(dto),
-        tx.count(dto.userId),
-      ]);
+    return await this._prismaService.transaction(async (tx) => {
+      const items = await this._noteRepository.findManyByVideoId(dto, tx);
+
+      const totalItems = await this._noteRepository.count(dto.userId, tx);
 
       const totalPages = Math.ceil(totalItems / dto.limit);
 
