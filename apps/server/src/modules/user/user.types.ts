@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
 import type { IUpdateBodyDto } from "@/modules/shared/dtos";
@@ -5,7 +6,6 @@ import type { TypedRequest } from "@/modules/shared/types";
 
 import type { User } from "./user.model";
 
-import type { Prisma } from "@prisma/client";
 import type {
   ICreateUserDto,
   IGetUserDto,
@@ -20,14 +20,6 @@ import type { ICreateAccountDto } from "./features/account/dtos";
  * Interface representing a user repository.
  */
 export interface IUserRepository {
-  /**
-   * Executes a function within a transaction.
-   * @template T The type of the result.
-   * @param fn The function to execute within the transaction.
-   * @returns A promise that resolves to the result of the function.
-   */
-  transaction<T>(fn: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T>;
-
   /**
    * Creates a new user.
    * @param createUserDto The data transfer object containing user creation details.
