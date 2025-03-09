@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
@@ -8,11 +9,15 @@ import type { FindActiveTokenDto } from "./dtos";
 import type { VerifyEmailToken } from "./verify-email.model";
 
 export interface IVerifyEmailRepository {
-  findActiveToken(dto: FindActiveTokenDto): Promise<VerifyEmailToken | null>;
+  findActiveToken(
+    dto: FindActiveTokenDto,
+    tx?: Prisma.TransactionClient
+  ): Promise<VerifyEmailToken | null>;
   createToken(
-    createTokenDto: ICreateDto<VerifyEmailToken>
+    createTokenDto: ICreateDto<VerifyEmailToken>,
+    tx?: Prisma.TransactionClient
   ): Promise<VerifyEmailToken>;
-  deleteMany(userId: string): Promise<void>;
+  deleteMany(userId: string, tx?: Prisma.TransactionClient): Promise<void>;
 }
 
 export interface IVerifyEmailService {
