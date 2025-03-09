@@ -138,12 +138,14 @@ export class UserRepository implements IUserRepository {
    * @throws {Error} - Throws an error if the email verification process fails.
    */
   async verifyEmail(
-    tx: Prisma.TransactionClient,
-    userId: string
+    userId: string,
+    tx?: Prisma.TransactionClient
   ): Promise<User> {
+    const client = tx ?? this._db;
+
     return handleAsyncOperation(
       () =>
-        tx.user.update({
+        client.user.update({
           where: { id: userId },
           data: {
             isEmailVerified: true,
