@@ -11,39 +11,47 @@ import type {
   IFindUniqueDto,
   IPaginatedItems,
 } from "@/modules/shared/dtos";
+import type { IPrismaService } from "@/modules/shared/services";
 
+import type { Prisma } from "@prisma/client";
 import type { Video, YoutubeVideoData } from "./video.model";
 import type { IVideoRepository, IVideoService } from "./video.types";
 
 export class VideoService implements IVideoService {
-  constructor(private readonly _videoRepository: IVideoRepository) {}
+  constructor(
+    private readonly _videoRepository: IVideoRepository,
+    private readonly _prismaService: IPrismaService
+  ) {}
 
   private async _findVideoByYoutubeId(
-    tx: IVideoRepository,
+    tx: Prisma.TransactionClient,
     youtubeId: string
   ): Promise<Video | null> {
-    return tx.findByYoutubeId(youtubeId);
+    return this._videoRepository.findByYoutubeId(youtubeId, tx);
   }
 
   private async _createVideo(
-    tx: IVideoRepository,
+    tx: Prisma.TransactionClient,
     userId: string,
     youtubeVideoId: string
   ): Promise<Video> {
     const videoData = await this.getYoutubeVideoData(youtubeVideoId);
 
-    return tx.create({
-      userId,
-      data: videoData,
-    });
+    return this._videoRepository.create(
+      {
+        userId,
+        data: videoData,
+      },
+      tx
+    );
   }
 
   private async _linkVideoToUser(
-    tx: IVideoRepository,
+    tx: Prisma.TransactionClient,
     video: Video,
     userId: string
   ): Promise<Video> {
-    return tx.connectVideoToUser(video.id, userId);
+    return this._videoRepository.connectVideoToUser(video.id, userId, tx);
   }
 
   async getYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData> {
@@ -80,11 +88,13 @@ export class VideoService implements IVideoService {
   async getUserVideos(
     findAllDto: IFindAllDto
   ): Promise<IPaginatedItems<Video>> {
-    return this._videoRepository.transaction(async (tx) => {
-      const [items, totalItems] = await Promise.all([
-        tx.findMany(findAllDto),
-        tx.count(findAllDto.userId),
-      ]);
+    return this._prismaService.transaction(async (tx) => {
+      const items = await this._videoRepository.findMany(findAllDto, tx);
+
+      const totalItems = await this._videoRepository.count(
+        findAllDto.userId,
+        tx
+      );
 
       const totalPages = Math.ceil(totalItems / findAllDto.limit);
       return { items, totalItems, totalPages };
@@ -98,7 +108,7 @@ export class VideoService implements IVideoService {
       throw new BadRequestError(ERROR_MESSAGES.BAD_REQUEST);
     }
 
-    return this._videoRepository.transaction(async (tx) => {
+    return this._prismaService.transaction(async (tx) => {
       const existingVideo = await this._findVideoByYoutubeId(
         tx,
         youtubeVideoId
