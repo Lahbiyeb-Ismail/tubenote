@@ -7,7 +7,7 @@ import {
 } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import type { ICryptoService, PrismaService } from "@/modules/shared/services";
+import type { ICryptoService, IPrismaService } from "@/modules/shared/services";
 
 import type {
   ICreateUserDto,
@@ -26,7 +26,7 @@ export class UserService implements IUserService {
   constructor(
     private readonly _userRepository: IUserRepository,
     private readonly _accountService: IAccountService,
-    private readonly _prismaService: PrismaService,
+    private readonly _prismaService: IPrismaService,
     private readonly _cryptoService: ICryptoService
   ) {}
 
@@ -129,7 +129,7 @@ export class UserService implements IUserService {
   async getOrCreateUser(createUserDto: ICreateUserDto): Promise<User> {
     const { email } = createUserDto.data;
 
-    return this._userRepository.transaction(async (tx) => {
+    return this._prismaService.transaction(async (tx) => {
       // 1. Check if user exists within the transaction
       const user = await this._userRepository.getByEmail(email, tx);
 
@@ -179,7 +179,7 @@ export class UserService implements IUserService {
   async updateUser(updateUserDto: IUpdateUserDto): Promise<User> {
     const { id, data } = updateUserDto;
 
-    const updatedUser = await this._userRepository.transaction(async (tx) => {
+    const updatedUser = await this._prismaService.transaction(async (tx) => {
       const user = await this._ensureUserExists(id, tx);
 
       if (Object.keys(data).length === 0) {
@@ -206,7 +206,7 @@ export class UserService implements IUserService {
   async updateUserPassword(updateUserDto: IUpdatePasswordDto): Promise<User> {
     const { id, currentPassword, newPassword } = updateUserDto;
 
-    const updatedUser = await this._userRepository.transaction(async (tx) => {
+    const updatedUser = await this._prismaService.transaction(async (tx) => {
       const user = await this._ensureUserExists(id, tx);
 
       const isPasswordValid = await this._cryptoService.comparePasswords({
@@ -243,7 +243,7 @@ export class UserService implements IUserService {
   async resetUserPassword(resetPasswordDto: IResetPasswordDto): Promise<User> {
     const { id, newPassword } = resetPasswordDto;
 
-    const updatedUser = await this._userRepository.transaction(async (tx) => {
+    const updatedUser = await this._prismaService.transaction(async (tx) => {
       const user = await this._ensureUserExists(id, tx);
 
       const hashedPassword =
@@ -271,7 +271,7 @@ export class UserService implements IUserService {
    * @throws `BadRequestError` if the user's email is already verified.
    */
   async verifyUserEmail(userId: string): Promise<User> {
-    const updatedUser = await this._userRepository.transaction(async (tx) => {
+    const updatedUser = await this._prismaService.transaction(async (tx) => {
       const user = await this._ensureUserExists(userId, tx);
 
       if (user.isEmailVerified) {
