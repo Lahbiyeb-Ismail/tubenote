@@ -75,7 +75,7 @@ export interface IUserRepository {
    * @param userId The ID of the user whose email is to be verified.
    * @returns A promise that resolves to the verified user.
    */
-  verifyEmail(tx: Prisma.TransactionClient, userId: string): Promise<User>;
+  verifyEmail(userId: string, tx?: Prisma.TransactionClient): Promise<User>;
 }
 
 /**
@@ -99,7 +99,10 @@ export interface IUserService {
    * @param getUserDto - Data transfer object containing user retrieval details.
    * @returns A promise that resolves to the retrieved user.
    */
-  getUserByIdOrEmail(getUserDto: IGetUserDto): Promise<User>;
+  getUserByIdOrEmail(
+    getUserDto: IGetUserDto,
+    tx?: Prisma.TransactionClient
+  ): Promise<User>;
 
   /**
    * Updates an existing user.
@@ -127,7 +130,7 @@ export interface IUserService {
    * @param userId - The ID of the user whose email is to be verified.
    * @returns A promise that resolves to the user with the verified email.
    */
-  verifyUserEmail(userId: string): Promise<User>;
+  verifyUserEmail(userId: string, tx?: Prisma.TransactionClient): Promise<User>;
 }
 
 /**
