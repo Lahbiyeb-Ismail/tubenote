@@ -1,6 +1,6 @@
-import type { Prisma, PrismaClient } from "@prisma/client";
-
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import { handleAsyncOperation } from "@/modules/shared/utils";
+
 import type {
   ICreateDto,
   IDeleteDto,
@@ -8,8 +8,9 @@ import type {
   IFindUniqueDto,
   IUpdateDto,
 } from "@/modules/shared/dtos";
-import { handleAsyncOperation } from "@/modules/shared/utils";
+import type { IPrismaService } from "@/modules/shared/services";
 
+import type { Prisma } from "@prisma/client";
 import type { Note } from "./note.model";
 import type { INoteRepository } from "./note.types";
 
@@ -26,25 +27,7 @@ export class NoteRepository implements INoteRepository {
    *
    * @param _db - An instance of PrismaClient for database operations.
    */
-  constructor(private readonly _db: PrismaClient) {}
-
-  /**
-   * Executes a set of operations within a transaction.
-   *
-   * This method uses Prisma's transaction API to run the provided function within a transactional scope.
-   * A new instance of the repository is created with the transactional client to ensure that all operations
-   * participate in the transaction.
-   *
-   * @template T - The type of the return value from the transactional operation.
-   * @param fn - A function that takes an INoteRepository (transactional instance) and returns a Promise.
-   * @returns A Promise that resolves with the result of the transactional function.
-   */
-  async transaction<T>(fn: (tx: INoteRepository) => Promise<T>): Promise<T> {
-    return this._db.$transaction(async (prismaTx: Prisma.TransactionClient) => {
-      const txRepository = new NoteRepository(prismaTx as PrismaClient);
-      return await fn(txRepository);
-    });
-  }
+  constructor(private readonly _db: IPrismaService) {}
 
   /**
    * Finds a single note based on the provided criteria.
@@ -52,12 +35,17 @@ export class NoteRepository implements INoteRepository {
    * @param findNoteDto - The DTO containing noteId and userId to locate the note.
    * @returns A Promise that resolves with the found Note or null if no note matches the criteria.
    */
-  async find(findNoteDto: IFindUniqueDto): Promise<Note | null> {
+  async find(
+    findNoteDto: IFindUniqueDto,
+    tx?: Prisma.TransactionClient
+  ): Promise<Note | null> {
+    const client = tx ?? this._db;
+
     const { id, userId } = findNoteDto;
 
     return handleAsyncOperation(
       () =>
-        this._db.note.findUnique({
+        client.note.findUnique({
           where: {
             id,
             userId,
@@ -73,10 +61,15 @@ export class NoteRepository implements INoteRepository {
    * @param createNoteDto - The DTO containing the data required to create a note.
    * @returns A Promise that resolves with the created Note.
    */
-  async create(createNoteDto: ICreateDto<Note>): Promise<Note> {
+  async create(
+    createNoteDto: ICreateDto<Note>,
+    tx?: Prisma.TransactionClient
+  ): Promise<Note> {
+    const client = tx ?? this._db;
+
     return handleAsyncOperation(
       () =>
-        this._db.note.create({
+        client.note.create({
           data: {
             ...createNoteDto.data,
             userId: createNoteDto.userId,
@@ -93,12 +86,17 @@ export class NoteRepository implements INoteRepository {
    * @returns {Promise<Note>} - A promise that resolves to the updated note.
    * @throws {Error} - Throws an error if the update operation fails.
    */
-  async update(updateNoteDto: IUpdateDto<Note>): Promise<Note> {
+  async update(
+    updateNoteDto: IUpdateDto<Note>,
+    tx?: Prisma.TransactionClient
+  ): Promise<Note> {
+    const client = tx ?? this._db;
+
     const { id, userId, data } = updateNoteDto;
 
     return handleAsyncOperation(
       () =>
-        this._db.note.update({
+        client.note.update({
           where: {
             id,
             userId,
@@ -115,12 +113,17 @@ export class NoteRepository implements INoteRepository {
    * @param deleteNoteDto - The DTO containing noteId and userId to locate the note.
    * @returns A Promise that resolves with the deleted Note.
    */
-  async delete(deleteNoteDto: IDeleteDto): Promise<Note> {
+  async delete(
+    deleteNoteDto: IDeleteDto,
+    tx?: Prisma.TransactionClient
+  ): Promise<Note> {
+    const client = tx ?? this._db;
+
     const { id, userId } = deleteNoteDto;
 
     return handleAsyncOperation(
       () =>
-        this._db.note.delete({
+        client.note.delete({
           where: { id, userId },
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_DELETE }
@@ -133,12 +136,17 @@ export class NoteRepository implements INoteRepository {
    * @param findManyDto - The DTO containing userId, limit, sort options, and skip value.
    * @returns A Promise that resolves with an array of Notes.
    */
-  async findMany(findManyDto: IFindAllDto): Promise<Note[]> {
+  async findMany(
+    findManyDto: IFindAllDto,
+    tx?: Prisma.TransactionClient
+  ): Promise<Note[]> {
+    const client = tx ?? this._db;
+
     const { userId, limit, sort, skip = 0 } = findManyDto;
 
     return handleAsyncOperation(
       () =>
-        this._db.note.findMany({
+        client.note.findMany({
           where: {
             userId,
           },
@@ -159,13 +167,16 @@ export class NoteRepository implements INoteRepository {
    * @returns A Promise that resolves with an array of Notes associated with the given video ID.
    */
   async findManyByVideoId(
-    dto: IFindAllDto & { videoId: string }
+    dto: IFindAllDto & { videoId: string },
+    tx?: Prisma.TransactionClient
   ): Promise<Note[]> {
+    const client = tx ?? this._db;
+
     const { videoId, userId, limit, sort, skip = 0 } = dto;
 
     return handleAsyncOperation(
       () =>
-        this._db.note.findMany({
+        client.note.findMany({
           where: {
             userId,
             youtubeId: videoId,
@@ -186,10 +197,12 @@ export class NoteRepository implements INoteRepository {
    * @param userId - The ID of the user whose notes are to be counted.
    * @returns A Promise that resolves with the count of notes.
    */
-  async count(userId: string): Promise<number> {
+  async count(userId: string, tx?: Prisma.TransactionClient): Promise<number> {
+    const client = tx ?? this._db;
+
     return handleAsyncOperation(
       () =>
-        this._db.note.count({
+        client.note.count({
           where: {
             userId,
           },
