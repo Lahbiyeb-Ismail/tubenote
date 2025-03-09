@@ -1,6 +1,7 @@
-import { type Prisma, PrismaClient } from "@prisma/client";
+import { type Prisma } from "@prisma/client";
 
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type { IPrismaService } from "@/modules/shared/services";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import type { Account, AccountProviders } from "./account.model";
@@ -8,16 +9,7 @@ import type { IAccountRepository } from "./account.types";
 import type { ICreateAccountDto } from "./dtos";
 
 export class AccountRepository implements IAccountRepository {
-  constructor(private readonly _db: PrismaClient) {}
-
-  async transaction<T>(
-    fn: (tx: Prisma.TransactionClient) => Promise<T>
-  ): Promise<T> {
-    // Use Prisma's transaction system
-    return this._db.$transaction(async (prismaTx: Prisma.TransactionClient) => {
-      return await fn(prismaTx);
-    });
-  }
+  constructor(private readonly _db: IPrismaService) {}
 
   async create(
     tx: Prisma.TransactionClient,

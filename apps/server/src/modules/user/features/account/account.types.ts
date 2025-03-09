@@ -4,7 +4,6 @@ import type { Account, AccountProviders } from "./account.model";
 import type { ICreateAccountDto } from "./dtos";
 
 export interface IAccountRepository {
-  transaction<T>(fn: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T>;
   create(
     tx: Prisma.TransactionClient,
     userId: string,

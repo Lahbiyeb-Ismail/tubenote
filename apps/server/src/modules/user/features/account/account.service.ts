@@ -1,12 +1,17 @@
-import { ForbiddenError, NotFoundError } from "@/modules/shared/api-errors";
-
 import type { Prisma } from "@prisma/client";
+
+import { ForbiddenError, NotFoundError } from "@/modules/shared/api-errors";
+import type { IPrismaService } from "@/modules/shared/services";
+
 import type { Account, AccountProviders } from "./account.model";
 import type { IAccountRepository, IAccountService } from "./account.types";
 import type { ICreateAccountDto } from "./dtos";
 
 export class AccountService implements IAccountService {
-  constructor(private readonly _accountRepository: IAccountRepository) {}
+  constructor(
+    private readonly _accountRepository: IAccountRepository,
+    private readonly _prismaService: IPrismaService
+  ) {}
 
   async createAccount(
     tx: Prisma.TransactionClient,
@@ -50,7 +55,7 @@ export class AccountService implements IAccountService {
   ): Promise<Account> {
     const { data } = createAccountDto;
 
-    return this._accountRepository.transaction(async (tx) => {
+    return this._prismaService.transaction(async (tx) => {
       // Verify that this provider account isn't already linked to another user
       const existingAccount = await this._accountRepository.findByProvider(
         data.provider,
