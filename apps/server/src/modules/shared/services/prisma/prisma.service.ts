@@ -1,24 +1,15 @@
 import { Prisma, PrismaClient } from "@prisma/client";
+
 import type { ILoggerService } from "../logger";
+import type { IPrismaService, PrismaServiceOptions } from "./prisma.types";
 
-type PrismaServiceOptions = {
-  maxRetries?: number;
-  retryDelay?: number;
-  logger?: ILoggerService;
-  prismaOptions?: Prisma.PrismaClientOptions;
-};
-
-// interface ILogger {
-//   info?: (message: string, meta?: unknown) => void;
-//   error?: (message: string, meta?: unknown) => void;
-//   warn?: (message: string, meta?: unknown) => void;
-//   debug?: (message: string, meta?: unknown) => void;
-// }
-
-export class PrismaService extends PrismaClient<
-  Prisma.PrismaClientOptions,
-  "query" | "error"
-> {
+export class PrismaService
+  extends PrismaClient<
+    Prisma.PrismaClientOptions,
+    "query" | "error" | "info" | "warn"
+  >
+  implements IPrismaService
+{
   private static instance: PrismaService;
   private retryCount = 0;
   private isConnected = false;
@@ -54,6 +45,18 @@ export class PrismaService extends PrismaClient<
 
     this.$on("error", (e) => {
       this.logger?.error?.(`Error: ${e.message}`, {
+        target: e.target,
+      });
+    });
+
+    this.$on("info", (e) => {
+      this.logger?.info?.(`Info: ${e.message}`, {
+        target: e.target,
+      });
+    });
+
+    this.$on("warn", (e) => {
+      this.logger?.warn?.(`Warning: ${e.message}`, {
         target: e.target,
       });
     });
