@@ -83,6 +83,7 @@ export interface IUserRepository {
  */
 export interface IUserService {
   createUserWithAccount(
+    tx: Prisma.TransactionClient,
     createUserDto: ICreateUserDto,
     createAccountDto: ICreateAccountDto
   ): Promise<User>;
