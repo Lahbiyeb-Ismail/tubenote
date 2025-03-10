@@ -21,7 +21,7 @@ export interface IVerifyEmailRepository {
 }
 
 export interface IVerifyEmailService {
-  generateToken(email: string): Promise<string>;
+  createToken(tx: Prisma.TransactionClient, email: string): Promise<string>;
   verifyUserEmail(token: string): Promise<void>;
 }
 
