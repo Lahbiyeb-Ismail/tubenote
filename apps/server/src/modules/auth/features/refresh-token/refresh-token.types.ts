@@ -4,13 +4,20 @@ import type { ICreateDto } from "@/modules/shared/dtos";
 import type { TypedRequest } from "@/modules/shared/types";
 
 import type { IAuthResponseDto, IRefreshDto } from "@/modules/auth/dtos";
+import type { Prisma } from "@prisma/client";
 import type { RefreshToken } from "./refresh-token.model";
 
 export interface IRefreshTokenRepository {
-  createToken(createTokenDto: ICreateDto<RefreshToken>): Promise<RefreshToken>;
-  findValidToken(token: string): Promise<RefreshToken | null>;
-  delete(token: string): Promise<void>;
-  deleteAll(userId: string): Promise<void>;
+  create(
+    createTokenDto: ICreateDto<RefreshToken>,
+    tx?: Prisma.TransactionClient
+  ): Promise<RefreshToken>;
+  findValid(
+    token: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<RefreshToken | null>;
+  delete(token: string, tx?: Prisma.TransactionClient): Promise<void>;
+  deleteAll(userId: string, tx?: Prisma.TransactionClient): Promise<void>;
 }
 
 export interface IRefreshTokenService {
