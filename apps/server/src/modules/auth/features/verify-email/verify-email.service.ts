@@ -1,3 +1,5 @@
+import type { Prisma } from "@prisma/client";
+
 import { BadRequestError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { stringToDate } from "@/modules/shared/utils";
@@ -26,49 +28,50 @@ export class VerifyEmailService implements IVerifyEmailService {
     private readonly _loggerService: ILoggerService
   ) {}
 
-  async generateToken(email: string): Promise<string> {
-    return this._prismaService.transaction(async (tx) => {
-      const user = await this._userService.getUserByIdOrEmail({ email }, tx);
+  async createToken(
+    tx: Prisma.TransactionClient,
+    email: string
+  ): Promise<string> {
+    const user = await this._userService.getUserByIdOrEmail({ email }, tx);
 
-      if (user.isEmailVerified) {
-        throw new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED);
-      }
+    if (user.isEmailVerified) {
+      throw new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED);
+    }
 
-      const existingVerificationToken =
-        await this._verifyEmailRepository.findActiveToken(
-          { userId: user.id },
-          tx
-        );
-
-      if (existingVerificationToken) {
-        throw new BadRequestError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
-      }
-
-      const expiresIn = VERIFY_EMAIL_TOKEN_EXPIRES_IN;
-
-      const token = this._jwtService.sign({
-        userId: user.id,
-        secret: VERIFY_EMAIL_TOKEN_SECRET,
-        expiresIn,
-      });
-
-      await this._verifyEmailRepository.createToken(
-        {
-          userId: user.id,
-          data: {
-            token,
-            expiresAt: stringToDate(expiresIn),
-          },
-        },
+    const existingVerificationToken =
+      await this._verifyEmailRepository.findActiveToken(
+        { userId: user.id },
         tx
       );
 
-      this._loggerService.info(
-        `Verification email token generated for user ${user.id}`
-      );
+    if (existingVerificationToken) {
+      throw new BadRequestError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
+    }
 
-      return token;
+    const expiresIn = VERIFY_EMAIL_TOKEN_EXPIRES_IN;
+
+    const token = this._jwtService.sign({
+      userId: user.id,
+      secret: VERIFY_EMAIL_TOKEN_SECRET,
+      expiresIn,
     });
+
+    await this._verifyEmailRepository.createToken(
+      {
+        userId: user.id,
+        data: {
+          token,
+          expiresAt: stringToDate(expiresIn),
+        },
+      },
+      tx
+    );
+
+    this._loggerService.info(
+      `Verification email token generated for user ${user.id}`
+    );
+
+    return token;
   }
 
   async verifyUserEmail(token: string): Promise<void> {
