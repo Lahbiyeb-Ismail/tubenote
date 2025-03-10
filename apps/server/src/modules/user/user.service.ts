@@ -96,23 +96,19 @@ export class UserService implements IUserService {
   }
 
   async createUserWithAccount(
+    tx: Prisma.TransactionClient,
     createUserDto: ICreateUserDto,
     createAccountDto: ICreateAccountDto
   ): Promise<User> {
-    const { email } = createUserDto.data;
+    // const { email } = createUserDto.data;
 
-    return this._prismaService.transaction(
-      async (tx) => {
-        await this._ensureEmailIsUnique(email, tx);
+    // await this._ensureEmailIsUnique(email, tx);
 
-        const user = await this._createUser(tx, createUserDto);
+    const user = await this._createUser(tx, createUserDto);
 
-        await this._accountService.createAccount(tx, user.id, createAccountDto);
+    await this._accountService.createAccount(tx, user.id, createAccountDto);
 
-        return user;
-      },
-      { maxRetries: 3 }
-    );
+    return user;
   }
 
   /**
