@@ -1,6 +1,10 @@
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import { ForbiddenError, UnauthorizedError } from "@/modules/shared/api-errors";
+import {
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+} from "@/modules/shared/api-errors";
 import { stringToDate } from "@/modules/shared/utils";
 
 import type { ICreateUserDto, IUserService, User } from "@/modules/user";
@@ -8,6 +12,7 @@ import type { ICreateUserDto, IUserService, User } from "@/modules/user";
 import type {
   ICryptoService,
   IMailSenderService,
+  IPrismaService,
 } from "@/modules/shared/services";
 
 import type {
@@ -25,6 +30,7 @@ import type { ILocalAuthService } from "./local-auth.types";
 export class LocalAuthService implements ILocalAuthService {
   constructor(
     private readonly _jwtService: IJwtService,
+    private readonly _prismaService: IPrismaService,
     private readonly _userService: IUserService,
     private readonly _verifyEmailService: IVerifyEmailService,
     private readonly _cryptoService: ICryptoService,
@@ -32,26 +38,52 @@ export class LocalAuthService implements ILocalAuthService {
     private readonly _mailSenderService: IMailSenderService
   ) {}
 
-  async registerUser(createUserDto: ICreateUserDto): Promise<User> {
-    const newUser = await this._userService.createUserWithAccount(
-      createUserDto,
-      {
-        data: {
-          provider: "credentials",
-          providerAccountId: createUserDto.data.email,
-          type: "email",
-        },
+  async registerUser(createUserDto: ICreateUserDto): Promise<User | undefined> {
+    let newUser: User | undefined;
+    let verifyEmailToken: string | undefined;
+
+    await this._prismaService.transaction(async (tx) => {
+      // Check if the email already exists
+      const existingUser = await tx.user.findUnique({
+        where: { email: createUserDto.data.email },
+      });
+
+      if (existingUser) {
+        throw new ForbiddenError(ERROR_MESSAGES.ALREADY_EXISTS);
       }
-    );
 
-    const verifyEmailToken = await this._verifyEmailService.generateToken(
-      newUser.email
-    );
+      newUser = await this._userService.createUserWithAccount(
+        tx,
+        createUserDto,
+        {
+          data: {
+            provider: "credentials",
+            providerAccountId: createUserDto.data.email,
+            type: "email",
+          },
+        }
+      );
 
-    await this._mailSenderService.sendVerificationEmail(
-      newUser.email,
-      verifyEmailToken
-    );
+      verifyEmailToken = await this._verifyEmailService.createToken(
+        tx,
+        newUser.email
+      );
+
+      // await this._mailSenderService.sendVerificationEmail(
+      //   newUser.email,
+      //   verifyEmailToken
+      // );
+
+      // return newUser;
+    });
+
+    // Only send the email **after** the transaction is committed
+    if (newUser && verifyEmailToken) {
+      await this._mailSenderService.sendVerificationEmail(
+        newUser.email,
+        verifyEmailToken
+      );
+    }
 
     return newUser;
   }
@@ -60,6 +92,10 @@ export class LocalAuthService implements ILocalAuthService {
     const { email, password } = loginDto;
 
     const user = await this._userService.getUserByIdOrEmail({ email });
+
+    if (!user) {
+      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
+    }
 
     if (!user.isEmailVerified) {
       throw new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED);
