@@ -5,7 +5,7 @@ import {
 } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import type { ICryptoService } from "@/modules/shared/services";
+import type { ICryptoService, IPrismaService } from "@/modules/shared/services";
 
 import { UserService } from "../user.service";
 
@@ -26,6 +26,8 @@ describe("UserService", () => {
   let mockAccountService: IAccountService;
   let mockCryptoService: ICryptoService;
 
+  let mockPrismaService: Partial<IPrismaService>;
+
   const mockUserId = "user_id_001";
   const mockUserEmail = "test@example.com";
 
@@ -42,13 +44,16 @@ describe("UserService", () => {
 
   beforeEach(() => {
     mockUserRepository = {
-      transaction: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
       getByEmail: jest.fn(),
       getById: jest.fn(),
       updatePassword: jest.fn(),
       verifyEmail: jest.fn(),
+    };
+
+    mockPrismaService = {
+      transaction: jest.fn(),
     };
 
     mockAccountService = {
@@ -70,6 +75,7 @@ describe("UserService", () => {
     userService = new UserService(
       mockUserRepository,
       mockAccountService,
+      mockPrismaService as IPrismaService,
       mockCryptoService
     );
     jest.clearAllMocks();
