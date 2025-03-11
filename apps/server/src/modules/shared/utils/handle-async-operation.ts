@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 
-import { DatabaseError } from "../api-errors";
+import { ConflictError, DatabaseError } from "../api-errors";
+import { ERROR_MESSAGES } from "../constants";
 import { loggerService } from "../services";
 
 /**
@@ -36,6 +37,15 @@ export async function handleAsyncOperation<T>(
   try {
     return await operation();
   } catch (error) {
+    if (error instanceof ConflictError) throw error;
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      (error.code === "P2002" || error.code === "P2034") // Unique constraint violation
+    ) {
+      throw new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS);
+    }
+
     if (
       error instanceof Prisma.PrismaClientKnownRequestError ||
       error instanceof Prisma.PrismaClientValidationError ||
