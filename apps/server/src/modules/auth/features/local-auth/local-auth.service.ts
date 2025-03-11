@@ -43,15 +43,6 @@ export class LocalAuthService implements ILocalAuthService {
     let verifyEmailToken: string | undefined;
 
     await this._prismaService.transaction(async (tx) => {
-      // Check if the email already exists
-      const existingUser = await tx.user.findUnique({
-        where: { email: createUserDto.data.email },
-      });
-
-      if (existingUser) {
-        throw new ForbiddenError(ERROR_MESSAGES.ALREADY_EXISTS);
-      }
-
       newUser = await this._userService.createUserWithAccount(
         tx,
         createUserDto,
@@ -68,13 +59,6 @@ export class LocalAuthService implements ILocalAuthService {
         tx,
         newUser.email
       );
-
-      // await this._mailSenderService.sendVerificationEmail(
-      //   newUser.email,
-      //   verifyEmailToken
-      // );
-
-      // return newUser;
     });
 
     // Only send the email **after** the transaction is committed
