@@ -31,6 +31,26 @@ export class UserService implements IUserService {
   ) {}
 
   /**
+   * Ensures that the provided email is unique.
+   *
+   * @param email - The email address to check for uniqueness.
+   * @returns A promise that resolves to null if the email is unique.
+   * @throws {ConflictError} If the email already exists in the repository.
+   */
+  private async _ensureEmailIsUnique(
+    email: string,
+    tx: Prisma.TransactionClient
+  ): Promise<null> {
+    const existingUser = await this._userRepository.getByEmail(email, tx);
+
+    if (existingUser) {
+      throw new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS);
+    }
+
+    return null;
+  }
+
+  /**
    * Creates a new user.
    *
    * @param dto - The data transfer object containing user creation details.
@@ -53,26 +73,6 @@ export class UserService implements IUserService {
         password: hashedPassword,
       },
     });
-  }
-
-  /**
-   * Ensures that the provided email is unique.
-   *
-   * @param email - The email address to check for uniqueness.
-   * @returns A promise that resolves to null if the email is unique.
-   * @throws {ConflictError} If the email already exists in the repository.
-   */
-  private async _ensureEmailIsUnique(
-    email: string,
-    tx: Prisma.TransactionClient
-  ): Promise<null> {
-    const existingUser = await this._userRepository.getByEmail(email, tx);
-
-    if (existingUser) {
-      throw new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS);
-    }
-
-    return null;
   }
 
   /**
@@ -100,10 +100,6 @@ export class UserService implements IUserService {
     createUserDto: ICreateUserDto,
     createAccountDto: ICreateAccountDto
   ): Promise<User> {
-    // const { email } = createUserDto.data;
-
-    // await this._ensureEmailIsUnique(email, tx);
-
     const user = await this._createUser(tx, createUserDto);
 
     await this._accountService.createAccount(tx, user.id, createAccountDto);
