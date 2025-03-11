@@ -1,8 +1,10 @@
 import type { Prisma } from "@prisma/client";
 
+import { ConflictError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import type { IPrismaService } from "@/modules/shared/services";
 import { handleAsyncOperation } from "@/modules/shared/utils";
+
+import type { IPrismaService } from "@/modules/shared/services";
 
 import type { ICreateUserDto, IUpdateUserDto } from "./dtos";
 import type { User } from "./user.model";
@@ -23,10 +25,23 @@ export class UserRepository implements IUserRepository {
     createUserDto: ICreateUserDto
   ): Promise<User> {
     return handleAsyncOperation(
-      () =>
-        tx.user.create({
+      async () => {
+        const isEmailAlreadyRegistered = await tx.user.findUnique({
+          where: {
+            email: createUserDto.data.email,
+          },
+          select: { id: true },
+        });
+
+        if (isEmailAlreadyRegistered)
+          throw new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS);
+
+        const user = await tx.user.create({
           data: { ...createUserDto.data },
-        }),
+        });
+
+        return user;
+      },
       { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
     );
   }
