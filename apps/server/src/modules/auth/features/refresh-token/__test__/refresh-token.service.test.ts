@@ -10,7 +10,7 @@ import {
 } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import type { ICreateDto } from "@/modules/shared/dtos";
-import type { ILoggerService } from "@/modules/shared/services";
+import type { ILoggerService, IPrismaService } from "@/modules/shared/services";
 import type { JwtPayload } from "@/modules/shared/types";
 import { stringToDate } from "@/modules/shared/utils";
 
@@ -30,10 +30,14 @@ describe("RefreshTokenService", () => {
   let refreshTokenService: IRefreshTokenService;
 
   const mockRefreshTokenRepository: jest.Mocked<IRefreshTokenRepository> = {
-    createToken: jest.fn(),
-    findValidToken: jest.fn(),
+    create: jest.fn(),
+    findValid: jest.fn(),
     delete: jest.fn(),
     deleteAll: jest.fn(),
+  };
+
+  const mockPrismaService: Partial<IPrismaService> = {
+    transaction: jest.fn(),
   };
 
   const mockJwtService: jest.Mocked<IJwtService> = {
@@ -73,6 +77,7 @@ describe("RefreshTokenService", () => {
   beforeEach(() => {
     refreshTokenService = new RefreshTokenService(
       mockRefreshTokenRepository,
+      mockPrismaService as IPrismaService,
       mockJwtService,
       mockLoggerService
     );
@@ -89,18 +94,29 @@ describe("RefreshTokenService", () => {
       iat: 4445787,
     };
 
+    const mockTransaction = jest.fn();
+
+    beforeEach(() => {
+      // Set up transaction mock for proper testing
+      (mockPrismaService.transaction as jest.Mock).mockImplementation(
+        (callback) => {
+          return callback(mockTransaction);
+        }
+      );
+    });
+
     it("should successfully return new auth tokens for a valid refresh token", async () => {
       mockJwtService.verify.mockResolvedValue(decodedToken);
 
-      mockRefreshTokenRepository.findValidToken.mockResolvedValue(
-        mockRefreshToken
+      mockRefreshTokenRepository.findValid.mockResolvedValue(mockRefreshToken);
+
+      (mockRefreshTokenRepository.delete as jest.Mock).mockResolvedValue(
+        undefined
       );
 
       mockJwtService.generateAuthTokens.mockReturnValue(mockLoginResponse);
 
-      mockRefreshTokenRepository.createToken.mockResolvedValue(
-        mockRefreshToken
-      );
+      mockRefreshTokenRepository.create.mockResolvedValue(mockRefreshToken);
 
       const result = await refreshTokenService.refreshToken(IrefreshDto);
 
@@ -108,19 +124,27 @@ describe("RefreshTokenService", () => {
 
       expect(mockJwtService.verify).toHaveBeenCalled();
 
-      expect(mockRefreshTokenRepository.delete).toHaveBeenCalledWith(mockToken);
+      expect(mockPrismaService.transaction).toHaveBeenCalled();
+
+      expect(mockRefreshTokenRepository.delete).toHaveBeenCalledWith(
+        mockToken,
+        mockTransaction
+      );
 
       expect(mockJwtService.generateAuthTokens).toHaveBeenCalledWith(
         mockUserId
       );
 
-      expect(mockRefreshTokenRepository.createToken).toHaveBeenCalledWith({
-        userId: mockUserId,
-        data: {
-          token: mockNewRefreshToken,
-          expiresAt: expiresIn,
+      expect(mockRefreshTokenRepository.create).toHaveBeenCalledWith(
+        {
+          userId: mockUserId,
+          data: {
+            token: mockNewRefreshToken,
+            expiresAt: expiresIn,
+          },
         },
-      });
+        mockTransaction
+      );
     });
 
     it("should throw BadRequestError for an invalid refresh token", async () => {
@@ -134,7 +158,7 @@ describe("RefreshTokenService", () => {
 
       expect(mockJwtService.verify).toHaveBeenCalled();
 
-      expect(mockRefreshTokenRepository.findValidToken).not.toHaveBeenCalled();
+      expect(mockRefreshTokenRepository.findValid).not.toHaveBeenCalled();
 
       expect(mockRefreshTokenRepository.delete).not.toHaveBeenCalled();
 
@@ -159,14 +183,22 @@ describe("RefreshTokenService", () => {
     it("should throw ForbiddenError and delete all tokens when refresh token reuse is detected", async () => {
       mockJwtService.verify.mockResolvedValue(decodedToken);
 
-      mockRefreshTokenRepository.findValidToken.mockResolvedValue(null);
+      mockRefreshTokenRepository.findValid.mockResolvedValue(null);
 
       await expect(
         refreshTokenService.refreshToken(IrefreshDto)
       ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.FORBIDDEN));
 
+      expect(mockPrismaService.transaction).toHaveBeenCalled();
+
+      expect(mockRefreshTokenRepository.findValid).toHaveBeenCalledWith(
+        mockToken,
+        mockTransaction
+      );
+
       expect(mockRefreshTokenRepository.deleteAll).toHaveBeenCalledWith(
-        mockUserId
+        mockUserId,
+        mockTransaction
       );
     });
 
@@ -175,9 +207,7 @@ describe("RefreshTokenService", () => {
 
       mockJwtService.verify.mockResolvedValue(decodedToken);
 
-      mockRefreshTokenRepository.findValidToken.mockResolvedValue(
-        mockRefreshToken
-      );
+      mockRefreshTokenRepository.findValid.mockResolvedValue(mockRefreshToken);
 
       mockRefreshTokenRepository.delete.mockRejectedValue(databaseError);
 
@@ -207,16 +237,14 @@ describe("RefreshTokenService", () => {
       expect(mockRefreshTokenRepository.deleteAll).toHaveBeenCalled();
     });
 
-    it("should handle createToken failure after token deletion", async () => {
+    it("should handle create failure after token deletion", async () => {
       mockJwtService.verify.mockResolvedValue(decodedToken);
 
-      mockRefreshTokenRepository.findValidToken.mockResolvedValue(
-        mockRefreshToken
-      );
+      mockRefreshTokenRepository.findValid.mockResolvedValue(mockRefreshToken);
 
       mockRefreshTokenRepository.delete.mockResolvedValue();
 
-      mockRefreshTokenRepository.createToken.mockRejectedValue(
+      mockRefreshTokenRepository.create.mockRejectedValue(
         new DatabaseError("Save failed")
       );
 
@@ -226,7 +254,7 @@ describe("RefreshTokenService", () => {
 
       // Verify old token was deleted but new token wasn't saved
       expect(mockRefreshTokenRepository.delete).toHaveBeenCalled();
-      expect(mockRefreshTokenRepository.createToken).toHaveBeenCalled();
+      expect(mockRefreshTokenRepository.create).toHaveBeenCalled();
     });
   });
 
@@ -250,7 +278,7 @@ describe("RefreshTokenService", () => {
     });
   });
 
-  describe("RefreshTokenService - createToken", () => {
+  describe("RefreshTokenService - create", () => {
     const createTokenDto: ICreateDto<RefreshToken> = {
       userId: mockUserId,
       data: {
@@ -260,7 +288,7 @@ describe("RefreshTokenService", () => {
     };
 
     it("should create a new refresh token", async () => {
-      mockRefreshTokenRepository.createToken.mockResolvedValue({
+      mockRefreshTokenRepository.create.mockResolvedValue({
         ...createTokenDto.data,
         id: "new-id",
         userId: mockUserId,
@@ -279,7 +307,7 @@ describe("RefreshTokenService", () => {
     it("should propagate refreshTokenRepository errors", async () => {
       const dbError = new DatabaseError(ERROR_MESSAGES.FAILED_TO_CREATE);
 
-      mockRefreshTokenRepository.createToken.mockRejectedValue(dbError);
+      mockRefreshTokenRepository.create.mockRejectedValue(dbError);
 
       await expect(
         refreshTokenService.createToken(createTokenDto)
