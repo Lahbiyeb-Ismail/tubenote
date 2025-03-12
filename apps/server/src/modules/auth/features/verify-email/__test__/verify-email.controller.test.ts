@@ -36,7 +36,7 @@ describe("VerifyEmailController", () => {
   beforeEach(() => {
     mockVerifyEmailService = {
       verifyUserEmail: jest.fn(),
-      generateToken: jest.fn(),
+      createToken: jest.fn(),
     };
 
     mockResponse = {
