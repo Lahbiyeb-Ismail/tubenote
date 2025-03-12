@@ -3,9 +3,8 @@ export interface User {
   username: string;
   email: string;
   password: string;
+  profilePicture: string | null;
   isEmailVerified: boolean;
-  googleId?: string;
-  profilePicture?: string;
   videoIds?: string[];
   createdAt: Date;
   updatedAt: Date;

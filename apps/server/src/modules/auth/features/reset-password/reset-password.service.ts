@@ -21,7 +21,7 @@ export class ResetPasswordService implements IResetPasswordService {
   ) {}
 
   async sendResetToken(email: string): Promise<void> {
-    const user = await this._userService.getUser({ email });
+    const user = await this._userService.getUserByIdOrEmail({ email });
 
     if (!user.isEmailVerified) {
       throw new ForbiddenError(ERROR_MESSAGES.NOT_VERIFIED);
@@ -51,7 +51,7 @@ export class ResetPasswordService implements IResetPasswordService {
       `Remove reset token ${token} from cache: ${deleteResult}`
     );
 
-    await this._userService.resetPassword({
+    await this._userService.resetUserPassword({
       id: userId,
       newPassword: password,
     });

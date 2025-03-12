@@ -15,7 +15,7 @@ import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { stringToDate } from "@/modules/shared/utils";
 
 import type { ICreateDto } from "@/modules/shared/dtos";
-import type { ILoggerService } from "@/modules/shared/services";
+import type { ILoggerService, IPrismaService } from "@/modules/shared/services";
 import type { JwtPayload } from "@/modules/shared/types";
 
 import type { VerifyEmailToken } from "../verify-email.model";
@@ -34,6 +34,8 @@ describe("VerifyEmailService methods test", () => {
   let mockJwtService: jest.Mocked<IJwtService>;
   let mockLoggerService: jest.Mocked<ILoggerService>;
 
+  let mockPrismaService: Partial<IPrismaService>;
+
   beforeEach(() => {
     mockVerifyEmailRepository = {
       findActiveToken: jest.fn(),
@@ -41,13 +43,17 @@ describe("VerifyEmailService methods test", () => {
       deleteMany: jest.fn(),
     };
 
+    mockPrismaService = {
+      transaction: jest.fn(),
+    };
+
     mockUserService = {
-      getUser: jest.fn(),
+      getUserByIdOrEmail: jest.fn(),
       updateUser: jest.fn(),
-      createUser: jest.fn(),
+      createUserWithAccount: jest.fn(),
       getOrCreateUser: jest.fn(),
-      resetPassword: jest.fn(),
-      updatePassword: jest.fn(),
+      resetUserPassword: jest.fn(),
+      updateUserPassword: jest.fn(),
       verifyUserEmail: jest.fn(),
     };
 
@@ -67,6 +73,7 @@ describe("VerifyEmailService methods test", () => {
 
     verifyEmailService = new VerifyEmailService(
       mockVerifyEmailRepository,
+      mockPrismaService as IPrismaService,
       mockUserService,
       mockJwtService,
       mockLoggerService
@@ -84,11 +91,9 @@ describe("VerifyEmailService methods test", () => {
     username: "testuser",
     password: "hashedpassword",
     isEmailVerified: false,
-    googleId: "",
-    profilePicture: "",
+    profilePicture: null,
     createdAt: new Date(),
     updatedAt: new Date(),
-    videoIds: [],
   };
 
   const expiresIn = stringToDate(VERIFY_EMAIL_TOKEN_EXPIRES_IN);
@@ -119,13 +124,22 @@ describe("VerifyEmailService methods test", () => {
     jest.clearAllMocks();
   });
 
-  describe("VerifyEmailService - generateToken", () => {
+  describe("VerifyEmailService - createToken", () => {
+    const mockTx = jest.fn();
+
     beforeEach(() => {
+      // Set up transaction mock for proper testing
+      (mockPrismaService.transaction as jest.Mock).mockImplementation(
+        (callback) => {
+          return callback(mockTx);
+        }
+      );
+
       jest.clearAllMocks();
     });
 
-    it("should successfully generate a verification token for an unverified email and save it to the database", async () => {
-      mockUserService.getUser.mockResolvedValue(mockUnverifiedUser);
+    it("should successfully create a verification token for an unverified email and save it to the database", async () => {
+      mockUserService.getUserByIdOrEmail.mockResolvedValue(mockUnverifiedUser);
 
       mockVerifyEmailRepository.findActiveToken.mockResolvedValue(null);
 
@@ -135,76 +149,100 @@ describe("VerifyEmailService methods test", () => {
         mockVerificationToken
       );
 
-      const result = await verifyEmailService.generateToken(mockEmail);
+      const result = await verifyEmailService.createToken(
+        mockTx as any,
+        mockEmail
+      );
 
       expect(result).toBe(mockValidToken);
 
-      expect(mockUserService.getUser).toHaveBeenCalledWith({
-        email: mockEmail,
-      });
+      expect(mockUserService.getUserByIdOrEmail).toHaveBeenCalledWith(
+        {
+          email: mockEmail,
+        },
+        mockTx
+      );
 
-      expect(mockVerifyEmailRepository.findActiveToken).toHaveBeenCalledWith({
-        userId: mockUnverifiedUser.id,
-      });
+      expect(mockVerifyEmailRepository.findActiveToken).toHaveBeenCalledWith(
+        {
+          userId: mockUnverifiedUser.id,
+        },
+        mockTx
+      );
 
       expect(mockJwtService.sign).toHaveBeenCalledWith(IsignTokenDto);
 
       expect(mockVerifyEmailRepository.createToken).toHaveBeenCalledWith(
-        createTokenDto
+        createTokenDto,
+        mockTx
       );
     });
 
     it("should throw a NotFoundError if the user is not found", async () => {
-      mockUserService.getUser.mockRejectedValue(
+      mockUserService.getUserByIdOrEmail.mockRejectedValue(
         new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
       );
 
-      await expect(verifyEmailService.generateToken(mockEmail)).rejects.toThrow(
-        new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
-      );
+      await expect(
+        verifyEmailService.createToken(mockTx as any, mockEmail)
+      ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
 
-      expect(mockUserService.getUser).toHaveBeenCalledWith({
-        email: mockEmail,
-      });
+      expect(mockUserService.getUserByIdOrEmail).toHaveBeenCalledWith(
+        {
+          email: mockEmail,
+        },
+        mockTx
+      );
     });
 
     it("should throw a BadRequestError if the user's email is already verified", async () => {
-      mockUserService.getUser.mockResolvedValue({
+      mockUserService.getUserByIdOrEmail.mockResolvedValue({
         ...mockUnverifiedUser,
         isEmailVerified: true,
       });
 
-      await expect(verifyEmailService.generateToken(mockEmail)).rejects.toThrow(
-        new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED)
-      );
+      await expect(
+        verifyEmailService.createToken(mockTx as any, mockEmail)
+      ).rejects.toThrow(new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED));
 
-      expect(mockUserService.getUser).toHaveBeenCalledWith({
-        email: mockEmail,
-      });
+      expect(mockUserService.getUserByIdOrEmail).toHaveBeenCalledWith(
+        {
+          email: mockEmail,
+        },
+        mockTx
+      );
     });
 
     it("should throw a BadRequestError if a verification link was already sent", async () => {
-      mockUserService.getUser.mockResolvedValue(mockUnverifiedUser);
+      mockUserService.getUserByIdOrEmail.mockResolvedValue(mockUnverifiedUser);
 
       mockVerifyEmailRepository.findActiveToken.mockResolvedValue(
         mockVerificationToken
       );
 
-      await expect(verifyEmailService.generateToken(mockEmail)).rejects.toThrow(
+      await expect(
+        verifyEmailService.createToken(mockTx as any, mockEmail)
+      ).rejects.toThrow(
         new BadRequestError(ERROR_MESSAGES.VERIFICATION_LINK_SENT)
       );
 
-      expect(mockUserService.getUser).toHaveBeenCalledWith({
-        email: mockEmail,
-      });
+      expect(mockUserService.getUserByIdOrEmail).toHaveBeenCalledWith(
+        {
+          email: mockEmail,
+        },
+        mockTx
+      );
 
-      expect(mockVerifyEmailRepository.findActiveToken).toHaveBeenCalledWith({
-        userId: mockUnverifiedUser.id,
-      });
+      expect(mockVerifyEmailRepository.findActiveToken).toHaveBeenCalledWith(
+        {
+          userId: mockUnverifiedUser.id,
+        },
+        mockTx
+      );
     });
 
-    it("should throw an Error if token generation fails", async () => {
-      mockUserService.getUser.mockResolvedValue(mockUnverifiedUser);
+    it("should throw an Error if token creation fails", async () => {
+      mockUserService.getUserByIdOrEmail.mockResolvedValue(mockUnverifiedUser);
 
       mockVerifyEmailRepository.findActiveToken.mockResolvedValue(null);
 
@@ -212,13 +250,13 @@ describe("VerifyEmailService methods test", () => {
         throw new Error("Token generation failed");
       });
 
-      await expect(verifyEmailService.generateToken(mockEmail)).rejects.toThrow(
-        new Error("Token generation failed")
-      );
+      await expect(
+        verifyEmailService.createToken(mockTx as any, mockEmail)
+      ).rejects.toThrow(new Error("Token generation failed"));
     });
 
-    it("should log an info message when a verification token is generated", async () => {
-      mockUserService.getUser.mockResolvedValue(mockUnverifiedUser);
+    it("should log an info message when a verification token is created", async () => {
+      mockUserService.getUserByIdOrEmail.mockResolvedValue(mockUnverifiedUser);
 
       mockVerifyEmailRepository.findActiveToken.mockResolvedValue(null);
 
@@ -230,7 +268,7 @@ describe("VerifyEmailService methods test", () => {
 
       // const loggerSpy = jest.spyOn(logger, "info");
 
-      await verifyEmailService.generateToken(mockEmail);
+      await verifyEmailService.createToken(mockTx as any, mockEmail);
 
       // expect(loggerSpy).toHaveBeenCalledWith(
       //   `Verification email token generated for user ${mockUnverifiedUser.id}`
@@ -245,7 +283,16 @@ describe("VerifyEmailService methods test", () => {
       exp: 1234567890,
     };
 
+    const mockTx = jest.fn();
+
     beforeEach(() => {
+      // Set up transaction mock for proper testing
+      (mockPrismaService.transaction as jest.Mock).mockImplementation(
+        (callback) => {
+          return callback(mockTx);
+        }
+      );
+
       jest.clearAllMocks();
     });
 
@@ -263,11 +310,22 @@ describe("VerifyEmailService methods test", () => {
 
       await verifyEmailService.verifyUserEmail(mockValidToken);
 
-      expect(mockVerifyEmailRepository.deleteMany).toHaveBeenCalledWith(
-        mockUserId
+      expect(mockPrismaService.transaction).toHaveBeenCalled();
+
+      expect(mockVerifyEmailRepository.findActiveToken).toHaveBeenCalledWith(
+        { token: mockValidToken },
+        mockTx
       );
 
-      expect(mockUserService.verifyUserEmail).toHaveBeenCalledWith(mockUserId);
+      expect(mockVerifyEmailRepository.deleteMany).toHaveBeenCalledWith(
+        mockUserId,
+        mockTx
+      );
+
+      expect(mockUserService.verifyUserEmail).toHaveBeenCalledWith(
+        mockUserId,
+        mockTx
+      );
     });
 
     it("should throw a BadRequestError for an invalid token", async () => {
@@ -316,7 +374,7 @@ describe("VerifyEmailService methods test", () => {
     it("should throw a BadRequestError if token is not found in the database", async () => {
       mockJwtService.verify.mockResolvedValue(decodedToken);
 
-      mockUserService.getUser.mockResolvedValue(mockUnverifiedUser);
+      mockUserService.getUserByIdOrEmail.mockResolvedValue(mockUnverifiedUser);
 
       mockVerifyEmailRepository.findActiveToken.mockResolvedValue(null);
 
@@ -377,7 +435,7 @@ describe("VerifyEmailService methods test", () => {
 
       mockJwtService.verify.mockResolvedValue(decodedToken);
 
-      mockUserService.getUser.mockResolvedValue(mockUnverifiedUser);
+      mockUserService.getUserByIdOrEmail.mockResolvedValue(mockUnverifiedUser);
 
       mockVerifyEmailRepository.findActiveToken.mockResolvedValue(
         mockVerificationToken

@@ -7,6 +7,8 @@ import type { ILoginDto } from "@/modules/auth/dtos";
 import type { ICreateBodyDto } from "@/modules/shared/dtos";
 import type { User } from "@/modules/user";
 
+import { ConflictError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { localAuthController } from "../local-auth.module";
 
 jest.mock("../local-auth.module", () => ({
@@ -22,6 +24,7 @@ describe("Local Auth Routes", () => {
     password: "Password123!",
     username: "testuser",
     isEmailVerified: false,
+    profilePicture: null,
   };
 
   const validLoginPayload: ILoginDto = {
@@ -113,6 +116,38 @@ describe("Local Auth Routes", () => {
 
       expect(response.body).toHaveProperty("error");
       expect(localAuthController.register).not.toHaveBeenCalled();
+    });
+
+    it("should handle concurrent registration requests and prevent duplicate accounts", async () => {
+      const mockResponse = {
+        email: validRegisterPayload.email,
+        message: "A verification email has been sent to your email.",
+      };
+
+      (localAuthController.register as jest.Mock).mockImplementation(
+        (req, res) => {
+          if (req.body.email === validRegisterPayload.email) {
+            throw new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS);
+          }
+          res.status(httpStatus.CREATED).json(mockResponse);
+        }
+      );
+
+      const concurrentRequests = Array.from({ length: 5 }).map(() =>
+        request(app).post("/api/v1/auth/register").send(validRegisterPayload)
+      );
+
+      const responses = await Promise.all(concurrentRequests);
+      const successResponses = responses.filter(
+        (res) => res.status === httpStatus.CREATED
+      );
+      const conflictResponses = responses.filter(
+        (res) => res.status === httpStatus.CONFLICT
+      );
+
+      expect(successResponses.length).toBeLessThanOrEqual(1); // Only one should succeed
+      expect(conflictResponses.length).toBeGreaterThanOrEqual(4); // The rest should fail
+      expect(localAuthController.register).toHaveBeenCalledTimes(5);
     });
   });
 

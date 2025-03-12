@@ -25,6 +25,7 @@ describe("LocalAuthController", () => {
     username: "Test User",
     password: "hashed-password",
     isEmailVerified: false,
+    profilePicture: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -34,6 +35,7 @@ describe("LocalAuthController", () => {
     password: "Password123!",
     username: "Test User",
     isEmailVerified: false,
+    profilePicture: null,
   };
 
   const mockLoginDto: ILoginDto = {

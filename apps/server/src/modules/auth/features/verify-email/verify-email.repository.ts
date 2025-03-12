@@ -1,19 +1,24 @@
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 import { DatabaseError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import type { ICreateDto } from "@/modules/shared/dtos";
 import { handleAsyncOperation } from "@/modules/shared/utils";
+
+import type { ICreateDto } from "@/modules/shared/dtos";
+import type { IPrismaService } from "@/modules/shared/services";
 
 import type { FindActiveTokenDto } from "./dtos";
 import type { VerifyEmailToken } from "./verify-email.model";
 import type { IVerifyEmailRepository } from "./verify-email.types";
 
 export class VerifyEmailRepository implements IVerifyEmailRepository {
-  constructor(private readonly _db: PrismaClient) {}
+  constructor(private readonly _db: IPrismaService) {}
   async findActiveToken(
-    params: FindActiveTokenDto
+    params: FindActiveTokenDto,
+    tx?: Prisma.TransactionClient
   ): Promise<VerifyEmailToken | null> {
+    const client = tx ?? this._db;
+
     const { userId, token } = params;
 
     // Validate input: At least one parameter must be provided
@@ -34,7 +39,7 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
 
     return handleAsyncOperation(
       () =>
-        this._db.emailVerificationToken.findFirst({
+        client.emailVerificationToken.findFirst({
           where: {
             OR: conditions,
             expiresAt: { gte: new Date() },
@@ -45,11 +50,14 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
   }
 
   async createToken(
-    createTokenDto: ICreateDto<VerifyEmailToken>
+    createTokenDto: ICreateDto<VerifyEmailToken>,
+    tx?: Prisma.TransactionClient
   ): Promise<VerifyEmailToken> {
+    const client = tx ?? this._db;
+
     return handleAsyncOperation(
       () =>
-        this._db.emailVerificationToken.create({
+        client.emailVerificationToken.create({
           data: {
             userId: createTokenDto.userId,
             ...createTokenDto.data,
@@ -59,10 +67,15 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
     );
   }
 
-  async deleteMany(userId: string): Promise<void> {
+  async deleteMany(
+    userId: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<void> {
+    const client = tx ?? this._db;
+
     handleAsyncOperation(
       () =>
-        this._db.emailVerificationToken.deleteMany({
+        client.emailVerificationToken.deleteMany({
           where: { userId },
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_DELETE }

@@ -9,6 +9,7 @@ import type {
   IUpdateDto,
 } from "@/modules/shared/dtos";
 
+import type { IPrismaService } from "@/modules/shared/services";
 import type { Note } from "../note.model";
 import { NoteService } from "../note.service";
 import type { INoteRepository, INoteService } from "../note.types";
@@ -17,9 +18,10 @@ describe("NoteService methods test", () => {
   let noteService: INoteService;
   let mockNoteRepository: jest.Mocked<INoteRepository>;
 
+  let mockPrismaService: Partial<IPrismaService>;
+
   beforeEach(() => {
     mockNoteRepository = {
-      transaction: jest.fn(),
       find: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
@@ -29,7 +31,14 @@ describe("NoteService methods test", () => {
       count: jest.fn(),
     };
 
-    noteService = new NoteService(mockNoteRepository);
+    mockPrismaService = {
+      transaction: jest.fn(),
+    };
+
+    noteService = new NoteService(
+      mockNoteRepository,
+      mockPrismaService as IPrismaService
+    );
   });
 
   const mockUserId = "user_id_001";
@@ -107,7 +116,10 @@ describe("NoteService methods test", () => {
       const result = await noteService.findNote(findNoteDto);
 
       expect(result).toBe(mockNote);
-      expect(mockNoteRepository.find).toHaveBeenCalledWith(findNoteDto);
+      expect(mockNoteRepository.find).toHaveBeenCalledWith(
+        findNoteDto,
+        undefined
+      );
     });
 
     it("should throw NotFoundError if the note is not found", async () => {
@@ -117,7 +129,10 @@ describe("NoteService methods test", () => {
         new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
       );
 
-      expect(mockNoteRepository.find).toHaveBeenCalledWith(findNoteDto);
+      expect(mockNoteRepository.find).toHaveBeenCalledWith(
+        findNoteDto,
+        undefined
+      );
     });
 
     it("should propagate any errors thrown by the repository", async () => {
@@ -129,7 +144,10 @@ describe("NoteService methods test", () => {
         mockError
       );
 
-      expect(mockNoteRepository.find).toHaveBeenCalledWith(findNoteDto);
+      expect(mockNoteRepository.find).toHaveBeenCalledWith(
+        findNoteDto,
+        undefined
+      );
     });
   });
 
@@ -166,7 +184,10 @@ describe("NoteService methods test", () => {
 
       expect(result).toBe(mockNewNote);
 
-      expect(mockNoteRepository.create).toHaveBeenCalledWith(createNoteDto);
+      expect(mockNoteRepository.create).toHaveBeenCalledWith(
+        createNoteDto,
+        undefined
+      );
     });
 
     it("should propagate any errors thrown by the repository", async () => {
@@ -178,7 +199,10 @@ describe("NoteService methods test", () => {
         mockError
       );
 
-      expect(mockNoteRepository.create).toHaveBeenCalledWith(createNoteDto);
+      expect(mockNoteRepository.create).toHaveBeenCalledWith(
+        createNoteDto,
+        undefined
+      );
     });
   });
 
@@ -189,12 +213,14 @@ describe("NoteService methods test", () => {
       updatedAt: new Date(),
     };
 
+    const mockTx = jest.fn();
+
     beforeEach(() => {
       jest.clearAllMocks();
       // Simulate transaction: call the callback with the mock repository.
-      (mockNoteRepository.transaction as jest.Mock).mockImplementation(
+      (mockPrismaService.transaction as jest.Mock).mockImplementation(
         async (cb) => {
-          return await cb(mockNoteRepository);
+          return await cb(mockTx);
         }
       );
     });
@@ -208,11 +234,16 @@ describe("NoteService methods test", () => {
 
       const result = await noteService.updateNote(updateNoteDto);
 
+      expect(mockPrismaService.transaction).toHaveBeenCalled();
+
       expect(result).toBe(mockUpdatedNote);
 
-      expect(mockNoteRepository.find).toHaveBeenCalledWith(findNoteDto);
+      expect(mockNoteRepository.find).toHaveBeenCalledWith(findNoteDto, mockTx);
 
-      expect(mockNoteRepository.update).toHaveBeenCalledWith(updateNoteDto);
+      expect(mockNoteRepository.update).toHaveBeenCalledWith(
+        updateNoteDto,
+        mockTx
+      );
     });
 
     it("should throw NotFoundError if the note is not found", async () => {
@@ -222,7 +253,10 @@ describe("NoteService methods test", () => {
         new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
       );
 
-      expect(mockNoteRepository.find).toHaveBeenCalledWith(findNoteDto);
+      expect(mockPrismaService.transaction).toHaveBeenCalled();
+
+      expect(mockNoteRepository.find).toHaveBeenCalledWith(findNoteDto, mockTx);
+
       expect(mockNoteRepository.update).not.toHaveBeenCalled();
     });
 
@@ -237,9 +271,14 @@ describe("NoteService methods test", () => {
         mockError
       );
 
-      expect(mockNoteRepository.find).toHaveBeenCalledWith(findNoteDto);
+      expect(mockPrismaService.transaction).toHaveBeenCalled();
 
-      expect(mockNoteRepository.update).toHaveBeenCalledWith(updateNoteDto);
+      expect(mockNoteRepository.find).toHaveBeenCalledWith(findNoteDto, mockTx);
+
+      expect(mockNoteRepository.update).toHaveBeenCalledWith(
+        updateNoteDto,
+        mockTx
+      );
     });
   });
 
@@ -249,11 +288,13 @@ describe("NoteService methods test", () => {
       userId: mockUserId,
     };
 
+    const mockTx = jest.fn();
+
     beforeEach(() => {
       jest.clearAllMocks();
-      (mockNoteRepository.transaction as jest.Mock).mockImplementation(
+      (mockPrismaService.transaction as jest.Mock).mockImplementation(
         async (cb) => {
-          return await cb(mockNoteRepository);
+          return await cb(mockTx);
         }
       );
     });
@@ -264,9 +305,19 @@ describe("NoteService methods test", () => {
 
       const result = await noteService.deleteNote(deleteNoteDto);
 
+      expect(mockPrismaService.transaction).toHaveBeenCalled();
+
       expect(result).toBe(mockNote);
-      expect(mockNoteRepository.find).toHaveBeenCalledWith(deleteNoteDto);
-      expect(mockNoteRepository.delete).toHaveBeenCalledWith(deleteNoteDto);
+
+      expect(mockNoteRepository.find).toHaveBeenCalledWith(
+        deleteNoteDto,
+        mockTx
+      );
+
+      expect(mockNoteRepository.delete).toHaveBeenCalledWith(
+        deleteNoteDto,
+        mockTx
+      );
     });
 
     it("should throw NotFoundError if the note is not found", async () => {
@@ -276,7 +327,13 @@ describe("NoteService methods test", () => {
         new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
       );
 
-      expect(mockNoteRepository.find).toHaveBeenCalledWith(deleteNoteDto);
+      expect(mockPrismaService.transaction).toHaveBeenCalled();
+
+      expect(mockNoteRepository.find).toHaveBeenCalledWith(
+        deleteNoteDto,
+        mockTx
+      );
+
       expect(mockNoteRepository.delete).not.toHaveBeenCalled();
     });
 
@@ -284,14 +341,24 @@ describe("NoteService methods test", () => {
       const mockError = new Error("Test error");
 
       (mockNoteRepository.find as jest.Mock).mockResolvedValue(mockNote);
+
       (mockNoteRepository.delete as jest.Mock).mockRejectedValue(mockError);
 
       await expect(noteService.deleteNote(deleteNoteDto)).rejects.toThrow(
         mockError
       );
 
-      expect(mockNoteRepository.find).toHaveBeenCalledWith(deleteNoteDto);
-      expect(mockNoteRepository.delete).toHaveBeenCalledWith(deleteNoteDto);
+      expect(mockPrismaService.transaction).toHaveBeenCalled();
+
+      expect(mockNoteRepository.find).toHaveBeenCalledWith(
+        deleteNoteDto,
+        mockTx
+      );
+
+      expect(mockNoteRepository.delete).toHaveBeenCalledWith(
+        deleteNoteDto,
+        mockTx
+      );
     });
   });
 
@@ -304,41 +371,61 @@ describe("NoteService methods test", () => {
       sort: { by: "createdAt", order: "desc" },
     };
 
+    const mockTx = jest.fn();
+
     beforeEach(() => {
       jest.clearAllMocks();
-      (mockNoteRepository.transaction as jest.Mock).mockImplementation(
+      (mockPrismaService.transaction as jest.Mock).mockImplementation(
         async (cb) => {
-          return await cb(mockNoteRepository);
+          return await cb(mockTx);
         }
       );
     });
 
     it("should return user notes, notes count and total pages", async () => {
       (mockNoteRepository.findMany as jest.Mock).mockResolvedValue(mockNotes);
+
       (mockNoteRepository.count as jest.Mock).mockResolvedValue(mockNotesCount);
 
       const result = await noteService.fetchUserNotes(findManyDto);
 
+      expect(mockPrismaService.transaction).toHaveBeenCalled();
+
       expect(result.items).toEqual(mockNotes);
+
       expect(result.totalItems).toBe(mockNotesCount);
+
       expect(result.totalPages).toBe(
         Math.ceil(mockNotesCount / findManyDto.limit)
       );
-      expect(mockNoteRepository.findMany).toHaveBeenCalledWith(findManyDto);
-      expect(mockNoteRepository.count).toHaveBeenCalledWith(mockUserId);
+
+      expect(mockNoteRepository.findMany).toHaveBeenCalledWith(
+        findManyDto,
+        mockTx
+      );
+
+      expect(mockNoteRepository.count).toHaveBeenCalledWith(mockUserId, mockTx);
     });
 
     it("should return empty notes and total pages as 0 when no notes are found", async () => {
       (mockNoteRepository.findMany as jest.Mock).mockResolvedValue([]);
+
       (mockNoteRepository.count as jest.Mock).mockResolvedValue(0);
 
       const result = await noteService.fetchUserNotes(findManyDto);
 
+      expect(mockPrismaService.transaction).toHaveBeenCalled();
+
       expect(result.items).toEqual([]);
       expect(result.totalItems).toBe(0);
       expect(result.totalPages).toBe(0);
-      expect(mockNoteRepository.findMany).toHaveBeenCalledWith(findManyDto);
-      expect(mockNoteRepository.count).toHaveBeenCalledWith(mockUserId);
+
+      expect(mockNoteRepository.findMany).toHaveBeenCalledWith(
+        findManyDto,
+        mockTx
+      );
+
+      expect(mockNoteRepository.count).toHaveBeenCalledWith(mockUserId, mockTx);
     });
   });
 
@@ -423,11 +510,13 @@ describe("NoteService methods test", () => {
       videoId: "video123",
     };
 
+    const mockTx = jest.fn();
+
     beforeEach(() => {
       jest.clearAllMocks();
-      (mockNoteRepository.transaction as jest.Mock).mockImplementation(
+      (mockPrismaService.transaction as jest.Mock).mockImplementation(
         async (cb) => {
-          return await cb(mockNoteRepository);
+          return await cb(mockTx);
         }
       );
     });
@@ -436,11 +525,14 @@ describe("NoteService methods test", () => {
       (mockNoteRepository.findManyByVideoId as jest.Mock).mockResolvedValue(
         mockNotes
       );
+
       (mockNoteRepository.count as jest.Mock).mockResolvedValue(mockNotesCount);
 
       const result = await noteService.fetchNotesByVideoId(
         findNotesByVideoIdDto
       );
+
+      expect(mockPrismaService.transaction).toHaveBeenCalled();
 
       expect(result.items).toEqual(mockNotes);
       expect(result.totalItems).toBe(mockNotesCount);
@@ -448,9 +540,11 @@ describe("NoteService methods test", () => {
         Math.ceil(mockNotesCount / baseFindManyDto.limit)
       );
       expect(mockNoteRepository.findManyByVideoId).toHaveBeenCalledWith(
-        findNotesByVideoIdDto
+        findNotesByVideoIdDto,
+        mockTx
       );
-      expect(mockNoteRepository.count).toHaveBeenCalledWith(mockUserId);
+
+      expect(mockNoteRepository.count).toHaveBeenCalledWith(mockUserId, mockTx);
     });
 
     it("should return empty notes and total pages as 0 when no notes are found", async () => {
@@ -461,26 +555,33 @@ describe("NoteService methods test", () => {
         findNotesByVideoIdDto
       );
 
+      expect(mockPrismaService.transaction).toHaveBeenCalled();
+
       expect(result.items).toEqual([]);
       expect(result.totalItems).toBe(0);
       expect(result.totalPages).toBe(0);
+
       expect(mockNoteRepository.findManyByVideoId).toHaveBeenCalledWith(
-        findNotesByVideoIdDto
+        findNotesByVideoIdDto,
+        mockTx
       );
-      expect(mockNoteRepository.count).toHaveBeenCalledWith(mockUserId);
+
+      expect(mockNoteRepository.count).toHaveBeenCalledWith(mockUserId, mockTx);
     });
   });
 
   describe("NoteService - Edge Cases", () => {
     describe("Transaction Safety", () => {
       it("should roll back transactions on update failure", async () => {
-        mockNoteRepository.transaction.mockImplementation(async (cb) => {
-          try {
-            await cb(mockNoteRepository);
-          } catch (error) {
-            return Promise.reject(error);
+        (mockPrismaService.transaction as jest.Mock).mockImplementation(
+          async (cb) => {
+            try {
+              await cb(mockNoteRepository);
+            } catch (error) {
+              return Promise.reject(error);
+            }
           }
-        });
+        );
 
         mockNoteRepository.find.mockResolvedValue(mockNote);
         mockNoteRepository.update.mockRejectedValue(new Error("DB Failure"));

@@ -34,7 +34,6 @@ describe("GoogleAuthService", () => {
     username: "test user",
     email: "user@test.com",
     password: "password123!",
-    googleId: "google-id-123",
     profilePicture: "google-profile-picture",
     isEmailVerified: true,
     createdAt: new Date(),

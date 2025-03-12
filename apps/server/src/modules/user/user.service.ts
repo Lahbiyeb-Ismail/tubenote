@@ -1,3 +1,5 @@
+import type { Prisma } from "@prisma/client";
+
 import {
   BadRequestError,
   ConflictError,
@@ -5,7 +7,7 @@ import {
 } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import type { ICryptoService } from "@/modules/shared/services";
+import type { ICryptoService, IPrismaService } from "@/modules/shared/services";
 
 import type {
   ICreateUserDto,
@@ -17,51 +19,29 @@ import type {
 import type { User } from "./user.model";
 import type { IUserRepository, IUserService } from "./user.types";
 
+import type { IAccountService } from "./features/account/account.types";
+import type { ICreateAccountDto } from "./features/account/dtos";
+
 export class UserService implements IUserService {
   constructor(
     private readonly _userRepository: IUserRepository,
+    private readonly _accountService: IAccountService,
+    private readonly _prismaService: IPrismaService,
     private readonly _cryptoService: ICryptoService
   ) {}
 
   /**
-   * Creates a new user within a transaction.
+   * Ensures that the provided email is unique.
    *
-   * @param tx - The user repository transaction object.
-   * @param dto - The data transfer object containing user creation details.
-   * @returns A promise that resolves to the created user.
-   * @private
-   */
-  private async _createUserWithinTransaction(
-    tx: IUserRepository,
-    dto: ICreateUserDto
-  ): Promise<User> {
-    const { data } = dto;
-
-    const hashedPassword = await this._cryptoService.hashPassword(
-      data.password
-    );
-
-    return tx.createUser({
-      data: {
-        ...data,
-        password: hashedPassword,
-      },
-    });
-  }
-
-  /**
-   * Ensures that the provided email is unique within the context of a transaction.
-   *
-   * @param tx - The user repository transaction object.
    * @param email - The email address to check for uniqueness.
    * @returns A promise that resolves to null if the email is unique.
    * @throws {ConflictError} If the email already exists in the repository.
    */
-  private async _ensureEmailIsUniqueWithinTransaction(
-    tx: IUserRepository,
-    email: string
+  private async _ensureEmailIsUnique(
+    email: string,
+    tx: Prisma.TransactionClient
   ): Promise<null> {
-    const existingUser = await tx.getUserByEmail(email);
+    const existingUser = await this._userRepository.getByEmail(email, tx);
 
     if (existingUser) {
       throw new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS);
@@ -71,18 +51,42 @@ export class UserService implements IUserService {
   }
 
   /**
-   * Ensures that a user exists within a transaction.
+   * Creates a new user.
    *
-   * @param tx - The transaction repository to use for fetching the user.
+   * @param dto - The data transfer object containing user creation details.
+   * @returns A promise that resolves to the created user.
+   * @private
+   */
+  private async _createUser(
+    tx: Prisma.TransactionClient,
+    dto: ICreateUserDto
+  ): Promise<User> {
+    const { data } = dto;
+
+    const hashedPassword = await this._cryptoService.hashPassword(
+      data.password
+    );
+
+    return this._userRepository.create(tx, {
+      data: {
+        ...data,
+        password: hashedPassword,
+      },
+    });
+  }
+
+  /**
+   * Ensures that a user exists.
+   *
    * @param id - The ID of the user to check for existence.
    * @returns A promise that resolves to the user if found.
    * @throws NotFoundError if the user does not exist.
    */
-  private async _ensureUserExistsInTransaction(
-    tx: IUserRepository,
-    id: string
+  private async _ensureUserExists(
+    id: string,
+    tx?: Prisma.TransactionClient
   ): Promise<User> {
-    const user = await tx.getUserById(id);
+    const user = await this._userRepository.getById(id, tx);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -91,26 +95,14 @@ export class UserService implements IUserService {
     return user;
   }
 
-  /**
-   * Creates a new user.
-   *
-   * This method performs the following steps within a transaction:
-   * 1. Ensures the email is unique within the transaction.
-   * 2. Creates the user within the transaction.
-   *
-   * @param createUserDto - The data transfer object containing the user creation data.
-   * @returns A promise that resolves to the created user.
-   */
-  async createUser(createUserDto: ICreateUserDto): Promise<User> {
-    const { email } = createUserDto.data;
+  async createUserWithAccount(
+    tx: Prisma.TransactionClient,
+    createUserDto: ICreateUserDto,
+    createAccountDto: ICreateAccountDto
+  ): Promise<User> {
+    const user = await this._createUser(tx, createUserDto);
 
-    const user = await this._userRepository.transaction(async (tx) => {
-      // 1. Ensure email is unique within the transaction
-      await this._ensureEmailIsUniqueWithinTransaction(tx, email);
-
-      // 2. Create user within the transaction
-      return await this._createUserWithinTransaction(tx, createUserDto);
-    });
+    await this._accountService.createAccount(tx, user.id, createAccountDto);
 
     return user;
   }
@@ -129,15 +121,15 @@ export class UserService implements IUserService {
   async getOrCreateUser(createUserDto: ICreateUserDto): Promise<User> {
     const { email } = createUserDto.data;
 
-    return this._userRepository.transaction(async (tx) => {
+    return this._prismaService.transaction(async (tx) => {
       // 1. Check if user exists within the transaction
-      const user = await tx.getUserByEmail(email);
+      const user = await this._userRepository.getByEmail(email, tx);
 
       // 2. Return existing user if found
       if (user) return user;
 
       // 3. Create user if not found
-      return this._createUserWithinTransaction(tx, createUserDto);
+      return this._createUser(tx, createUserDto);
     });
   }
 
@@ -148,8 +140,21 @@ export class UserService implements IUserService {
    * @returns A promise that resolves to the retrieved user.
    * @throws NotFoundError if the user is not found
    */
-  async getUser(getUserDto: IGetUserDto): Promise<User> {
-    const user = await this._userRepository.getUser(getUserDto);
+  async getUserByIdOrEmail(
+    getUserDto: IGetUserDto,
+    tx?: Prisma.TransactionClient
+  ): Promise<User> {
+    const { id, email } = getUserDto;
+
+    let user: User | null = null;
+
+    if (id) {
+      user = await this._userRepository.getById(id, tx);
+    }
+
+    if (email) {
+      user = await this._userRepository.getByEmail(email, tx);
+    }
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -169,18 +174,18 @@ export class UserService implements IUserService {
   async updateUser(updateUserDto: IUpdateUserDto): Promise<User> {
     const { id, data } = updateUserDto;
 
-    const updatedUser = await this._userRepository.transaction(async (tx) => {
-      const user = await this._ensureUserExistsInTransaction(tx, id);
+    const updatedUser = await this._prismaService.transaction(async (tx) => {
+      const user = await this._ensureUserExists(id, tx);
 
       if (Object.keys(data).length === 0) {
         return user;
       }
 
       if (data.email && data.email !== user.email) {
-        await this._ensureEmailIsUniqueWithinTransaction(tx, data.email);
+        await this._ensureEmailIsUnique(data.email, tx);
       }
 
-      return tx.updateUser(updateUserDto);
+      return this._userRepository.update(tx, updateUserDto);
     });
 
     return updatedUser;
@@ -193,11 +198,11 @@ export class UserService implements IUserService {
    * @returns {Promise<User>} - A promise that resolves to the updated user.
    * @throws {BadRequestError} - Throws an error if the current password is invalid or if the new password is the same as the current password.
    */
-  async updatePassword(updateUserDto: IUpdatePasswordDto): Promise<User> {
+  async updateUserPassword(updateUserDto: IUpdatePasswordDto): Promise<User> {
     const { id, currentPassword, newPassword } = updateUserDto;
 
-    const updatedUser = await this._userRepository.transaction(async (tx) => {
-      const user = await this._ensureUserExistsInTransaction(tx, id);
+    const updatedUser = await this._prismaService.transaction(async (tx) => {
+      const user = await this._ensureUserExists(id, tx);
 
       const isPasswordValid = await this._cryptoService.comparePasswords({
         plainText: currentPassword,
@@ -215,7 +220,7 @@ export class UserService implements IUserService {
       const hashedPassword =
         await this._cryptoService.hashPassword(newPassword);
 
-      return tx.updatePassword(user.id, hashedPassword);
+      return this._userRepository.updatePassword(tx, user.id, hashedPassword);
     });
 
     return updatedUser;
@@ -230,16 +235,16 @@ export class UserService implements IUserService {
    * @throws {UserNotFoundException} - If the user with the given ID does not exist.
    * @throws {HashingException} - If there is an error while hashing the new password.
    */
-  async resetPassword(resetPasswordDto: IResetPasswordDto): Promise<User> {
+  async resetUserPassword(resetPasswordDto: IResetPasswordDto): Promise<User> {
     const { id, newPassword } = resetPasswordDto;
 
-    const updatedUser = await this._userRepository.transaction(async (tx) => {
-      const user = await this._ensureUserExistsInTransaction(tx, id);
+    const updatedUser = await this._prismaService.transaction(async (tx) => {
+      const user = await this._ensureUserExists(id, tx);
 
       const hashedPassword =
         await this._cryptoService.hashPassword(newPassword);
 
-      return tx.updatePassword(user.id, hashedPassword);
+      return this._userRepository.updatePassword(tx, user.id, hashedPassword);
     });
 
     return updatedUser;
@@ -260,21 +265,16 @@ export class UserService implements IUserService {
    * @throws `NotFoundError` if the user is not found.
    * @throws `BadRequestError` if the user's email is already verified.
    */
-  async verifyUserEmail(userId: string): Promise<User> {
-    const updatedUser = await this._userRepository.transaction(async (tx) => {
-      const user = await tx.getUserById(userId);
+  async verifyUserEmail(
+    userId: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<User> {
+    const user = await this._ensureUserExists(userId, tx);
 
-      if (!user) {
-        throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
-      }
+    if (user.isEmailVerified) {
+      throw new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED);
+    }
 
-      if (user.isEmailVerified) {
-        throw new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED);
-      }
-
-      return await tx.verifyUserEmail(userId);
-    });
-
-    return updatedUser;
+    return await this._userRepository.verifyEmail(user.id, tx);
   }
 }

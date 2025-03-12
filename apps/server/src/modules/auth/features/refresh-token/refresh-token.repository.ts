@@ -1,31 +1,40 @@
-import type { PrismaClient } from "@prisma/client";
-
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import type { ICreateDto } from "@/modules/shared/dtos";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
+import type { ICreateDto } from "@/modules/shared/dtos";
+import type { IPrismaService } from "@/modules/shared/services";
+
+import type { Prisma } from "@prisma/client";
 import type { RefreshToken } from "./refresh-token.model";
 import type { IRefreshTokenRepository } from "./refresh-token.types";
 
 export class RefreshTokenRepository implements IRefreshTokenRepository {
-  constructor(private readonly _db: PrismaClient) {}
+  constructor(private readonly _db: IPrismaService) {}
 
-  async createToken(
-    createTokenDto: ICreateDto<RefreshToken>
+  async create(
+    createTokenDto: ICreateDto<RefreshToken>,
+    tx?: Prisma.TransactionClient
   ): Promise<RefreshToken> {
+    const client = tx ?? this._db;
+
     return handleAsyncOperation(
       () =>
-        this._db.refreshToken.create({
+        client.refreshToken.create({
           data: { userId: createTokenDto.userId, ...createTokenDto.data },
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
     );
   }
 
-  async findValidToken(token: string): Promise<RefreshToken | null> {
+  async findValid(
+    token: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<RefreshToken | null> {
+    const client = tx ?? this._db;
+
     return handleAsyncOperation(
       () =>
-        this._db.refreshToken.findUnique({
+        client.refreshToken.findUnique({
           where: {
             token,
             expiresAt: { gt: new Date() },
@@ -34,10 +43,13 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
       { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
     );
   }
-  async delete(token: string): Promise<void> {
+
+  async delete(token: string, tx?: Prisma.TransactionClient): Promise<void> {
+    const client = tx ?? this._db;
+
     await handleAsyncOperation(
       () =>
-        this._db.refreshToken.delete({
+        client.refreshToken.delete({
           where: {
             token,
           },
@@ -45,10 +57,16 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
       { errorMessage: ERROR_MESSAGES.FAILED_TO_DELETE }
     );
   }
-  async deleteAll(userId: string): Promise<void> {
+
+  async deleteAll(
+    userId: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<void> {
+    const client = tx ?? this._db;
+
     await handleAsyncOperation(
       () =>
-        this._db.refreshToken.deleteMany({
+        client.refreshToken.deleteMany({
           where: {
             userId,
           },

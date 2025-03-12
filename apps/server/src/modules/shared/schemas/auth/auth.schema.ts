@@ -16,6 +16,7 @@ export const registerSchema = z
     email: emailSchema,
     password: passwordSchema,
     isEmailVerified: z.boolean().optional().default(false),
+    profilePicture: z.string().nullable().optional().default(null),
   })
   .strict();
 

@@ -1,40 +1,43 @@
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import { handleAsyncOperation } from "@/modules/shared/utils";
+
+import type { ICreateDto, IFindAllDto } from "@/modules/shared/dtos";
+import type { IPrismaService } from "@/modules/shared/services";
 
 import type { Video, YoutubeVideoData } from "./video.model";
 import type { IVideoRepository } from "./video.types";
 
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import type { ICreateDto, IFindAllDto } from "@/modules/shared/dtos";
-import { handleAsyncOperation } from "@/modules/shared/utils";
-
 export class VideoRepository implements IVideoRepository {
-  constructor(private readonly _db: PrismaClient) {}
+  constructor(private readonly _db: IPrismaService) {}
 
-  async transaction<T>(fn: (tx: IVideoRepository) => Promise<T>): Promise<T> {
-    // Use Prisma's transaction system
-    return this._db.$transaction(async (prismaTx: Prisma.TransactionClient) => {
-      // Create a new repository instance with the transactional client
-      const txRepository = new VideoRepository(prismaTx as PrismaClient);
-      return await fn(txRepository);
-    });
-  }
+  async findByYoutubeId(
+    youtubeId: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<Video | null> {
+    const client = tx ?? this._db;
 
-  async findByYoutubeId(youtubeId: string): Promise<Video | null> {
     return handleAsyncOperation(
       () =>
-        this._db.video.findUnique({
+        client.video.findUnique({
           where: { youtubeId },
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
     );
   }
 
-  async findMany(findAllDto: IFindAllDto): Promise<Video[]> {
+  async findMany(
+    findAllDto: IFindAllDto,
+    tx?: Prisma.TransactionClient
+  ): Promise<Video[]> {
+    const client = tx ?? this._db;
+
     const { userId, limit, skip, sort } = findAllDto;
 
     return handleAsyncOperation(
       () =>
-        this._db.video.findMany({
+        client.video.findMany({
           where: { users: { every: { id: userId } } },
           take: limit,
           skip,
@@ -46,10 +49,12 @@ export class VideoRepository implements IVideoRepository {
     );
   }
 
-  async count(userId: string): Promise<number> {
+  async count(userId: string, tx?: Prisma.TransactionClient): Promise<number> {
+    const client = tx ?? this._db;
+
     return handleAsyncOperation(
       () =>
-        this._db.video.count({
+        client.video.count({
           where: {
             userIds: { has: userId },
           },
@@ -58,26 +63,36 @@ export class VideoRepository implements IVideoRepository {
     );
   }
 
-  async create(createVideoDto: ICreateDto<YoutubeVideoData>): Promise<Video> {
-    return handleAsyncOperation(
-      async () => {
-        const { userId, data } = createVideoDto;
+  async create(
+    createVideoDto: ICreateDto<YoutubeVideoData>,
+    tx?: Prisma.TransactionClient
+  ): Promise<Video> {
+    const client = tx ?? this._db;
 
-        return await this._db.video.create({
+    const { userId, data } = createVideoDto;
+
+    return handleAsyncOperation(
+      async () =>
+        client.video.create({
           data: {
             userIds: [userId],
             ...data,
           },
-        });
-      },
+        }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
     );
   }
 
-  async connectVideoToUser(videoId: string, userId: string): Promise<Video> {
+  async connectVideoToUser(
+    videoId: string,
+    userId: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<Video> {
+    const client = tx ?? this._db;
+
     return handleAsyncOperation(
       () =>
-        this._db.video.update({
+        client.video.update({
           where: { id: videoId },
           data: {
             userIds: {

@@ -41,7 +41,7 @@ export class UserController implements IUserController {
   async getCurrentUser(req: TypedRequest, res: Response): Promise<void> {
     const userId = req.userId;
 
-    const user = await this._userService.getUser({ id: userId });
+    const user = await this._userService.getUserByIdOrEmail({ id: userId });
 
     res.status(httpStatus.OK).json({
       message: "User retrieved successfully.",
@@ -91,7 +91,7 @@ export class UserController implements IUserController {
   ) {
     const userId = req.userId;
 
-    const user = await this._userService.updatePassword({
+    const user = await this._userService.updateUserPassword({
       id: userId,
       currentPassword: req.body.currentPassword,
       newPassword: req.body.newPassword,
