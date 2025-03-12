@@ -4,6 +4,8 @@ import httpStatus from "http-status";
 import { refreshTokenCookieConfig } from "@/modules/auth/config";
 import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 
+import { BadRequestError } from "@/modules/shared/api-errors";
+
 import type { ICreateBodyDto } from "@/modules/shared/dtos";
 import type { TypedRequest } from "@/modules/shared/types";
 import type { User } from "@/modules/user";
@@ -25,6 +27,8 @@ export class LocalAuthController implements ILocalAuthController {
    */
   async register(req: TypedRequest<ICreateBodyDto<User>>, res: Response) {
     const user = await this._localAuthService.registerUser({ data: req.body });
+
+    if (!user) throw new BadRequestError("User registration failed.");
 
     res.status(httpStatus.CREATED).json({
       message: "A verification email has been sent to your email.",

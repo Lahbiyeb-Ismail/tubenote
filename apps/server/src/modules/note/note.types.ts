@@ -16,27 +16,22 @@ import type {
   IUpdateBodyDto,
   IUpdateDto,
 } from "@/modules/shared/dtos";
+import type { Prisma } from "@prisma/client";
 
 /**
  * Interface defining the repository methods for interacting with note data.
  */
 export interface INoteRepository {
   /**
-   * Executes a series of operations within a database transaction.
-   *
-   * @template T - The type of the result returned from the transaction.
-   * @param fn - A function that receives a transactional note repository and returns a promise.
-   * @returns A promise that resolves with the result of the transactional operations.
-   */
-  transaction<T>(fn: (tx: INoteRepository) => Promise<T>): Promise<T>;
-
-  /**
    * Finds a note using the specified criteria.
    *
    * @param findNoteDto - Data transfer object containing the note ID and user ID.
    * @returns A promise that resolves to the found note or null if no note is found.
    */
-  find(findNoteDto: IFindUniqueDto): Promise<Note | null>;
+  find(
+    findNoteDto: IFindUniqueDto,
+    tx?: Prisma.TransactionClient
+  ): Promise<Note | null>;
 
   /**
    * Creates a new note.
@@ -44,7 +39,10 @@ export interface INoteRepository {
    * @param createNoteDto - Data transfer object containing the note details.
    * @returns A promise that resolves to the newly created note.
    */
-  create(createNoteDto: ICreateDto<Note>): Promise<Note>;
+  create(
+    createNoteDto: ICreateDto<Note>,
+    tx?: Prisma.TransactionClient
+  ): Promise<Note>;
 
   /**
    * Updates an existing note.
@@ -53,7 +51,10 @@ export interface INoteRepository {
    * @returns A promise that resolves to the updated note.
    * @throws {Error} - Throws an error if the update operation fails.
    */
-  update(updateNoteDto: IUpdateDto<Note>): Promise<Note>;
+  update(
+    updateNoteDto: IUpdateDto<Note>,
+    tx?: Prisma.TransactionClient
+  ): Promise<Note>;
 
   /**
    * Deletes a note.
@@ -61,7 +62,10 @@ export interface INoteRepository {
    * @param deleteNoteDto - Data transfer object containing the note ID and user ID.
    * @returns A promise that resolves to the deleted note.
    */
-  delete(deleteNoteDto: IDeleteDto): Promise<Note>;
+  delete(
+    deleteNoteDto: IDeleteDto,
+    tx?: Prisma.TransactionClient
+  ): Promise<Note>;
 
   /**
    * Retrieves multiple notes with pagination.
@@ -69,7 +73,10 @@ export interface INoteRepository {
    * @param findManyDto - Data transfer object containing pagination and sorting parameters.
    * @returns A promise that resolves to an array of notes.
    */
-  findMany(findManyDto: IFindAllDto): Promise<Note[]>;
+  findMany(
+    findManyDto: IFindAllDto,
+    tx?: Prisma.TransactionClient
+  ): Promise<Note[]>;
 
   /**
    * Retrieves multiple notes associated with a specific video.
@@ -77,7 +84,10 @@ export interface INoteRepository {
    * @param dto - Data transfer object containing the video ID along with pagination parameters.
    * @returns A promise that resolves to an array of notes.
    */
-  findManyByVideoId(dto: IFindAllDto & { videoId: string }): Promise<Note[]>;
+  findManyByVideoId(
+    dto: IFindAllDto & { videoId: string },
+    tx?: Prisma.TransactionClient
+  ): Promise<Note[]>;
 
   /**
    * Counts the total number of notes for a specific user.
@@ -85,7 +95,7 @@ export interface INoteRepository {
    * @param userId - The unique identifier of the user.
    * @returns A promise that resolves to the number of notes.
    */
-  count(userId: string): Promise<number>;
+  count(userId: string, tx?: Prisma.TransactionClient): Promise<number>;
 }
 
 /**
@@ -98,7 +108,10 @@ export interface INoteService {
    * @param findNoteDto - Data transfer object containing the note ID and user ID.
    * @returns A promise that resolves to the found note.
    */
-  findNote(findNoteDto: IFindUniqueDto): Promise<Note>;
+  findNote(
+    findNoteDto: IFindUniqueDto,
+    tx?: Prisma.TransactionClient
+  ): Promise<Note>;
 
   /**
    * Creates a new note.
@@ -106,7 +119,10 @@ export interface INoteService {
    * @param createNoteDto - Data transfer object containing the note details.
    * @returns A promise that resolves to the newly created note.
    */
-  createNote(createNoteDto: ICreateDto<Note>): Promise<Note>;
+  createNote(
+    createNoteDto: ICreateDto<Note>,
+    tx?: Prisma.TransactionClient
+  ): Promise<Note>;
 
   /**
    * Updates an existing note.

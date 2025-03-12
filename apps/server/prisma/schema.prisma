@@ -44,8 +44,8 @@ enum Providers {
 
 model Account {
   id                String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String   @db.ObjectId
-  providerAccountId String // The account ID from the provider
+  userId            String   @unique @db.ObjectId
+  providerAccountId String   @unique // The account ID from the provider
   // refreshToken      String? // OAuth refresh token
   // accessToken       String? // OAuth access token
   // expiresAt         Int? // OAuth token expiry date

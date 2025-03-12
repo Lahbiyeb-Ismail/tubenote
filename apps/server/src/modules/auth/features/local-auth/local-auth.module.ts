@@ -1,6 +1,10 @@
 import { userService } from "@/modules/user";
 
-import { cryptoService, mailSenderService } from "@/modules/shared/services";
+import {
+  cryptoService,
+  mailSenderService,
+  prismaService,
+} from "@/modules/shared/services";
 
 import { jwtService } from "../../utils";
 import { refreshTokenService } from "../refresh-token";
@@ -11,6 +15,7 @@ import { LocalAuthService } from "./local-auth.service";
 
 const localAuthService = new LocalAuthService(
   jwtService,
+  prismaService,
   userService,
   verifyEmailService,
   cryptoService,

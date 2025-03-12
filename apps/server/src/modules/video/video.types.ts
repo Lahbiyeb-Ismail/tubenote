@@ -11,15 +11,28 @@ import type {
   IQueryPaginationDto,
 } from "@/modules/shared/dtos";
 
+import type { Prisma } from "@prisma/client";
 import type { Video, YoutubeVideoData } from "./video.model";
 
 export interface IVideoRepository {
-  transaction<T>(fn: (tx: IVideoRepository) => Promise<T>): Promise<T>;
-  findByYoutubeId(youtubeId: string): Promise<Video | null>;
-  findMany(findAllDto: IFindAllDto): Promise<Video[]>;
-  count(userId: string): Promise<number>;
-  create(createVideoDto: ICreateDto<YoutubeVideoData>): Promise<Video>;
-  connectVideoToUser(videoId: string, userId: string): Promise<Video>;
+  findByYoutubeId(
+    youtubeId: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<Video | null>;
+  findMany(
+    findAllDto: IFindAllDto,
+    tx?: Prisma.TransactionClient
+  ): Promise<Video[]>;
+  count(userId: string, tx?: Prisma.TransactionClient): Promise<number>;
+  create(
+    createVideoDto: ICreateDto<YoutubeVideoData>,
+    tx?: Prisma.TransactionClient
+  ): Promise<Video>;
+  connectVideoToUser(
+    videoId: string,
+    userId: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<Video>;
 }
 
 export interface IVideoService {

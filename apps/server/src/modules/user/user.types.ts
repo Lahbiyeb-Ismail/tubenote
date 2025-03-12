@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
 import type { IUpdateBodyDto } from "@/modules/shared/dtos";
@@ -5,7 +6,6 @@ import type { TypedRequest } from "@/modules/shared/types";
 
 import type { User } from "./user.model";
 
-import type { Prisma } from "@prisma/client";
 import type {
   ICreateUserDto,
   IGetUserDto,
@@ -20,14 +20,6 @@ import type { ICreateAccountDto } from "./features/account/dtos";
  * Interface representing a user repository.
  */
 export interface IUserRepository {
-  /**
-   * Executes a function within a transaction.
-   * @template T The type of the result.
-   * @param fn The function to execute within the transaction.
-   * @returns A promise that resolves to the result of the function.
-   */
-  transaction<T>(fn: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T>;
-
   /**
    * Creates a new user.
    * @param createUserDto The data transfer object containing user creation details.
@@ -83,7 +75,7 @@ export interface IUserRepository {
    * @param userId The ID of the user whose email is to be verified.
    * @returns A promise that resolves to the verified user.
    */
-  verifyEmail(tx: Prisma.TransactionClient, userId: string): Promise<User>;
+  verifyEmail(userId: string, tx?: Prisma.TransactionClient): Promise<User>;
 }
 
 /**
@@ -91,6 +83,7 @@ export interface IUserRepository {
  */
 export interface IUserService {
   createUserWithAccount(
+    tx: Prisma.TransactionClient,
     createUserDto: ICreateUserDto,
     createAccountDto: ICreateAccountDto
   ): Promise<User>;
@@ -107,7 +100,10 @@ export interface IUserService {
    * @param getUserDto - Data transfer object containing user retrieval details.
    * @returns A promise that resolves to the retrieved user.
    */
-  getUserByIdOrEmail(getUserDto: IGetUserDto): Promise<User>;
+  getUserByIdOrEmail(
+    getUserDto: IGetUserDto,
+    tx?: Prisma.TransactionClient
+  ): Promise<User>;
 
   /**
    * Updates an existing user.
@@ -135,7 +131,7 @@ export interface IUserService {
    * @param userId - The ID of the user whose email is to be verified.
    * @returns A promise that resolves to the user with the verified email.
    */
-  verifyUserEmail(userId: string): Promise<User>;
+  verifyUserEmail(userId: string, tx?: Prisma.TransactionClient): Promise<User>;
 }
 
 /**

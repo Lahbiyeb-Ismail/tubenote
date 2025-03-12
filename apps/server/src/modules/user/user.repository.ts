@@ -1,31 +1,17 @@
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
+import { ConflictError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";
+
+import type { IPrismaService } from "@/modules/shared/services";
 
 import type { ICreateUserDto, IUpdateUserDto } from "./dtos";
 import type { User } from "./user.model";
 import type { IUserRepository } from "./user.types";
 
 export class UserRepository implements IUserRepository {
-  constructor(private readonly _db: PrismaClient) {}
-
-  /**
-   * Executes a function within a database transaction.
-   *
-   * @template T - The return type of the function to be executed within the transaction.
-   * @param {function(IUserRepository): Promise<T>} fn - A function that takes a transactional repository instance and returns a promise.
-   * @returns {Promise<T>} - A promise that resolves to the result of the function executed within the transaction.
-   *
-   */
-  async transaction<T>(
-    fn: (tx: Prisma.TransactionClient) => Promise<T>
-  ): Promise<T> {
-    // Use Prisma's transaction system
-    return this._db.$transaction(async (prismaTx: Prisma.TransactionClient) => {
-      return await fn(prismaTx);
-    });
-  }
+  constructor(private readonly _db: IPrismaService) {}
 
   /**
    * Creates a new user in the database.
@@ -39,10 +25,23 @@ export class UserRepository implements IUserRepository {
     createUserDto: ICreateUserDto
   ): Promise<User> {
     return handleAsyncOperation(
-      () =>
-        tx.user.create({
+      async () => {
+        const isEmailAlreadyRegistered = await tx.user.findUnique({
+          where: {
+            email: createUserDto.data.email,
+          },
+          select: { id: true },
+        });
+
+        if (isEmailAlreadyRegistered)
+          throw new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS);
+
+        const user = await tx.user.create({
           data: { ...createUserDto.data },
-        }),
+        });
+
+        return user;
+      },
       { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
     );
   }
@@ -154,12 +153,14 @@ export class UserRepository implements IUserRepository {
    * @throws {Error} - Throws an error if the email verification process fails.
    */
   async verifyEmail(
-    tx: Prisma.TransactionClient,
-    userId: string
+    userId: string,
+    tx?: Prisma.TransactionClient
   ): Promise<User> {
+    const client = tx ?? this._db;
+
     return handleAsyncOperation(
       () =>
-        tx.user.update({
+        client.user.update({
           where: { id: userId },
           data: {
             isEmailVerified: true,
