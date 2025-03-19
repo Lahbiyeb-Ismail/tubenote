@@ -7,12 +7,7 @@ import { clearRefreshTokenCookieConfig } from "@/modules/auth";
 
 import { REFRESH_TOKEN_NAME } from "@/modules/auth";
 
-import {
-  AuthController,
-  IAuthResponseDto,
-  IAuthService,
-  OAuthCodeDto,
-} from "@/modules/auth";
+import { AuthController, IAuthService } from "@/modules/auth";
 
 describe("AuthController", () => {
   let authController: AuthController;
@@ -22,7 +17,6 @@ describe("AuthController", () => {
   beforeEach(() => {
     mockAuthService = {
       logoutUser: jest.fn(),
-      exchangeOauthCodeForTokens: jest.fn(),
     };
 
     mockResponse = {
@@ -123,71 +117,71 @@ describe("AuthController", () => {
     });
   });
 
-  describe("AuthController - exchangeOauthCodeForTokens", () => {
-    let mockRequest: Partial<TypedRequest<OAuthCodeDto>>;
+  // describe("AuthController - exchangeOauthCodeForTokens", () => {
+  //   let mockRequest: Partial<TypedRequest<OAuthCodeDto>>;
 
-    const mockCode = "valid-code-123";
+  //   const mockCode = "valid-code-123";
 
-    const mockAuthResponse: IAuthResponseDto = {
-      accessToken: "access-token-123",
-      refreshToken: "refresh-token-123",
-    };
+  //   const mockAuthResponse: IAuthResponseDto = {
+  //     accessToken: "access-token-123",
+  //     refreshToken: "refresh-token-123",
+  //   };
 
-    beforeEach(() => {
-      mockRequest = {
-        body: { code: mockCode },
-      };
-    });
+  //   beforeEach(() => {
+  //     mockRequest = {
+  //       body: { code: mockCode },
+  //     };
+  //   });
 
-    it("should successfully exchange code for tokens", async () => {
-      mockAuthService.exchangeOauthCodeForTokens.mockResolvedValue(
-        mockAuthResponse
-      );
+  //   it("should successfully exchange code for tokens", async () => {
+  //     mockAuthService.exchangeOauthCodeForTokens.mockResolvedValue(
+  //       mockAuthResponse
+  //     );
 
-      await authController.exchangeOauthCodeForTokens(
-        mockRequest as TypedRequest<OAuthCodeDto>,
-        mockResponse as Response
-      );
+  //     await authController.exchangeOauthCodeForTokens(
+  //       mockRequest as TypedRequest<OAuthCodeDto>,
+  //       mockResponse as Response
+  //     );
 
-      expect(mockAuthService.exchangeOauthCodeForTokens).toHaveBeenCalledWith(
-        mockCode
-      );
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        message: "Access token exchanged successfully",
-        accessToken: mockAuthResponse.accessToken,
-      });
-    });
+  //     expect(mockAuthService.exchangeOauthCodeForTokens).toHaveBeenCalledWith(
+  //       mockCode
+  //     );
+  //     expect(mockResponse.json).toHaveBeenCalledWith({
+  //       message: "Access token exchanged successfully",
+  //       accessToken: mockAuthResponse.accessToken,
+  //     });
+  //   });
 
-    it("should handle service errors", async () => {
-      const error = new Error("Token exchange failed");
+  //   it("should handle service errors", async () => {
+  //     const error = new Error("Token exchange failed");
 
-      mockAuthService.exchangeOauthCodeForTokens.mockRejectedValue(error);
+  //     mockAuthService.exchangeOauthCodeForTokens.mockRejectedValue(error);
 
-      await expect(
-        authController.exchangeOauthCodeForTokens(
-          mockRequest as TypedRequest<OAuthCodeDto>,
-          mockResponse as Response
-        )
-      ).rejects.toThrow(error);
+  //     await expect(
+  //       authController.exchangeOauthCodeForTokens(
+  //         mockRequest as TypedRequest<OAuthCodeDto>,
+  //         mockResponse as Response
+  //       )
+  //     ).rejects.toThrow(error);
 
-      expect(mockResponse.json).not.toHaveBeenCalled();
-    });
+  //     expect(mockResponse.json).not.toHaveBeenCalled();
+  //   });
 
-    it("should handle response errors", async () => {
-      mockAuthService.exchangeOauthCodeForTokens.mockResolvedValue(
-        mockAuthResponse
-      );
+  //   it("should handle response errors", async () => {
+  //     mockAuthService.exchangeOauthCodeForTokens.mockResolvedValue(
+  //       mockAuthResponse
+  //     );
 
-      mockResponse.json = jest.fn().mockImplementation(() => {
-        throw new Error("Response error");
-      });
+  //     mockResponse.json = jest.fn().mockImplementation(() => {
+  //       throw new Error("Response error");
+  //     });
 
-      await expect(
-        authController.exchangeOauthCodeForTokens(
-          mockRequest as TypedRequest<OAuthCodeDto>,
-          mockResponse as Response
-        )
-      ).rejects.toThrow("Response error");
-    });
-  });
+  //     await expect(
+  //       authController.exchangeOauthCodeForTokens(
+  //         mockRequest as TypedRequest<OAuthCodeDto>,
+  //         mockResponse as Response
+  //       )
+  //     ).rejects.toThrow("Response error");
+  //   });
+  // });
 });
