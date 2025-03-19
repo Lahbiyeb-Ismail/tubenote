@@ -2,6 +2,8 @@ import { stringToDate } from "@/modules/shared/utils";
 import { REFRESH_TOKEN_EXPIRES_IN } from "../../constants";
 
 import {
+  type ICacheService,
+  type ICryptoService,
   type ILoggerService,
   type IPrismaService,
 } from "@/modules/shared/services";
@@ -10,9 +12,14 @@ import type { IAccountService } from "@/modules/user/features/account/account.ty
 import type { IJwtService } from "../../utils";
 import type { IRefreshTokenService } from "../refresh-token";
 
-import type { IAuthResponseDto } from "../../dtos";
+import type {
+  IAuthResponseDto,
+  OAuthCodePayloadDto,
+  OAuthResponseDto,
+} from "../../dtos";
 import type { IOauthLoginDto } from "./dtos";
 
+import { BadRequestError } from "@/modules/shared/api-errors";
 import type { IOAuthService, IOAuthServiceOptions } from "./oauth.types";
 
 export class OAuthService implements IOAuthService {
@@ -22,6 +29,8 @@ export class OAuthService implements IOAuthService {
   private readonly _accountService: IAccountService;
   private readonly _refreshTokenService: IRefreshTokenService;
   private readonly _jwtService: IJwtService;
+  private readonly _cryptoService: ICryptoService;
+  private readonly _cacheService: ICacheService;
   private readonly _loggerService: ILoggerService;
 
   constructor(options: IOAuthServiceOptions) {
@@ -30,6 +39,8 @@ export class OAuthService implements IOAuthService {
     this._accountService = options.accountService;
     this._refreshTokenService = options.refreshTokenService;
     this._jwtService = options.jwtService;
+    this._cryptoService = options.cryptoService;
+    this._cacheService = options.cacheService;
     this._loggerService = options.loggerService;
   }
 
@@ -41,14 +52,31 @@ export class OAuthService implements IOAuthService {
     return OAuthService.instance;
   }
 
+  async generateTemporaryOAuthCode(
+    temporaryOAuthCodeDto: OAuthCodePayloadDto
+  ): Promise<string> {
+    const code = this._cryptoService.generateRandomSecureToken();
+
+    const setResult = this._cacheService.set<OAuthCodePayloadDto>(code, {
+      ...temporaryOAuthCodeDto,
+    });
+
+    this._loggerService.info(`Code ${code} set in cache: ${setResult}`);
+    this._loggerService.info(
+      `Cache stats after set: ${this._cacheService.getStats()}`
+    );
+
+    return code;
+  }
+
   // New method for OAuth login/signup
   async handleOAuthLogin(
     oauthLoginDto: IOauthLoginDto
-  ): Promise<IAuthResponseDto> {
+  ): Promise<OAuthResponseDto> {
     const { createAccountDto, createUserDto } = oauthLoginDto;
 
-    const authResponse =
-      await this._prismaService.transaction<IAuthResponseDto>(async (tx) => {
+    const oauthResponse =
+      await this._prismaService.transaction<OAuthResponseDto>(async (tx) => {
         let userId: string;
 
         // Try to find existing account for this OAuth provider
@@ -100,9 +128,35 @@ export class OAuthService implements IOAuthService {
           },
         });
 
-        return { accessToken, refreshToken };
+        const temporaryCode = await this.generateTemporaryOAuthCode({
+          accessToken,
+          refreshToken,
+          userId,
+        });
+
+        return { accessToken, refreshToken, temporaryCode };
       });
 
-    return authResponse;
+    return oauthResponse;
+  }
+
+  async exchangeOauthCodeForTokens(code: string): Promise<IAuthResponseDto> {
+    const codeData = this._cacheService.get<OAuthCodePayloadDto>(code);
+
+    this._loggerService.info(`Retrieved codeData: ${codeData}`);
+
+    if (!codeData) {
+      this._loggerService.error(`Code ${code} not found in cache`);
+      throw new BadRequestError("Invalid or expired code");
+    }
+
+    const deleteResult = this._cacheService.del(code);
+
+    this._loggerService.warn(`Deleted ${deleteResult} items from cache`);
+
+    return {
+      accessToken: codeData.accessToken,
+      refreshToken: codeData.refreshToken,
+    };
   }
 }
