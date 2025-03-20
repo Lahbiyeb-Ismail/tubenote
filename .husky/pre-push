@@ -1,11 +1,16 @@
-echo "Running tests before push..."
-pnpm run test
+# If FORCE_PUSH is set to true, skip the test execution.
+if [ "$FORCE_PUSH" = "true" ]; then
+  echo "FORCE_PUSH is true. Skipping tests."
+else
+  echo "Running tests before push..."
+  pnpm run test
+  TEST_EXIT_CODE=$?
 
-# Check the exit status of the npm test command
-if [ $? -ne 0 ]; then
-  echo "Tests failed. Push aborted."
-  exit 1
+  # Check the exit status of the test command.
+  if [ $TEST_EXIT_CODE -ne 0 ]; then
+    echo "Tests failed. Push aborted."
+    exit 1
+  fi
 fi
 
-echo "Tests passed. Proceeding with push."
-
+echo "Proceeding with push."
