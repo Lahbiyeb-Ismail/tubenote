@@ -7,3 +7,5 @@ export * from "./verify-email.service";
 export * from "./verify-email.controller";
 
 export * from "./verify-email.module";
+
+export * from "./verify-email.routes";

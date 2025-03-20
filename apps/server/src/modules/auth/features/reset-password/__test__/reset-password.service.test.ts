@@ -22,11 +22,11 @@ import type {
 
 describe("ResetPasswordService test suites", () => {
   let resetPasswordService: IResetPasswordService;
-  let mockUserService: IUserService;
-  let mockCryptoService: ICryptoService;
-  let mockCacheService: ICacheService;
-  let mockMailSenderService: IMailSenderService;
-  let mockLoggerService: ILoggerService;
+  let mockUserService: jest.Mocked<IUserService>;
+  let mockCryptoService: jest.Mocked<ICryptoService>;
+  let mockCacheService: jest.Mocked<ICacheService>;
+  let mockMailSenderService: jest.Mocked<IMailSenderService>;
+  let mockLoggerService: jest.Mocked<ILoggerService>;
 
   beforeEach(() => {
     mockUserService = {
