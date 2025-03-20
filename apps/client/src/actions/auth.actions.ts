@@ -89,7 +89,7 @@ export async function exchangeOauthCodeForAuthTokens(
   code: string
 ): Promise<string> {
   const response = await axios.post(
-    `${API_URL}/auth/exchange-oauth-code`,
+    `${API_URL}/oauth/exchange-oauth-code`,
     { code },
     { withCredentials: true }
   );

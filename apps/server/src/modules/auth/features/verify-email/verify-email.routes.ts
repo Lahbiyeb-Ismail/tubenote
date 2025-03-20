@@ -6,13 +6,13 @@ import { tokenParamSchema } from "@/modules/shared/schemas";
 
 import { verifyEmailController } from "./verify-email.module";
 
-const router = Router();
+const verifyEmailRoutes = Router();
 
 // - GET /verify-email/:token: Verify the user's email using the provided token (requires request params validation)
-router
+verifyEmailRoutes
   .route("/verify-email/:token")
   .get(validateRequest({ params: tokenParamSchema }), (req, res) =>
     verifyEmailController.verifyEmail(req, res)
   );
 
-export default router;
+export { verifyEmailRoutes };

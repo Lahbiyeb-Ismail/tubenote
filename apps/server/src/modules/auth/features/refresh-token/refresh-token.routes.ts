@@ -3,13 +3,13 @@ import { Router } from "express";
 import { isAuthenticated } from "@/middlewares";
 import { refreshTokenController } from "./refresh-token.module";
 
-const router = Router();
+const refreshTokenRoutes = Router();
 
 // - POST /refresh: Refresh the user's access token.
-router
+refreshTokenRoutes
   .route("/refresh")
   .post(isAuthenticated, (req, res) =>
     refreshTokenController.refreshToken(req, res)
   );
 
-export default router;
+export { refreshTokenRoutes };

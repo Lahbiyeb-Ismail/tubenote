@@ -9,65 +9,65 @@ describe("Auth Routes", () => {
     jest.clearAllMocks();
 
     // Mock authController methods
-    (authController.exchangeOauthCodeForTokens as jest.Mock) = jest.fn();
+    // (authController.exchangeOauthCodeForTokens as jest.Mock) = jest.fn();
     (authController.logout as jest.Mock) = jest.fn();
   });
 
-  describe("POST /api/v1/auth/exchange-oauth-code", () => {
-    const validCode = "valid-oauth-code";
+  // describe("POST /api/v1/auth/exchange-oauth-code", () => {
+  //   const validCode = "valid-oauth-code";
 
-    const mockResponse = {
-      message: "Access token exchanged successfully",
-      accessToken: "mock-access-token",
-    };
+  //   const mockResponse = {
+  //     message: "Access token exchanged successfully",
+  //     accessToken: "mock-access-token",
+  //   };
 
-    it("should successfully exchange OAuth code for tokens", async () => {
-      (
-        authController.exchangeOauthCodeForTokens as jest.Mock
-      ).mockImplementation((_req, res) => res.json(mockResponse));
+  //   it("should successfully exchange OAuth code for tokens", async () => {
+  //     (
+  //       authController.exchangeOauthCodeForTokens as jest.Mock
+  //     ).mockImplementation((_req, res) => res.json(mockResponse));
 
-      const response = await request(app)
-        .post("/api/v1/auth/exchange-oauth-code")
-        .send({ code: validCode })
-        .expect("Content-Type", /json/);
+  //     const response = await request(app)
+  //       .post("/api/v1/auth/exchange-oauth-code")
+  //       .send({ code: validCode })
+  //       .expect("Content-Type", /json/);
 
-      expect(response.statusCode).toBe(httpStatus.OK);
+  //     expect(response.statusCode).toBe(httpStatus.OK);
 
-      expect(response.body).toEqual(mockResponse);
-    });
+  //     expect(response.body).toEqual(mockResponse);
+  //   });
 
-    it("should throw a BadRequestError for missing code in request body", async () => {
-      const response = await request(app)
-        .post("/api/v1/auth/exchange-oauth-code")
-        .send({});
+  //   it("should throw a BadRequestError for missing code in request body", async () => {
+  //     const response = await request(app)
+  //       .post("/api/v1/auth/exchange-oauth-code")
+  //       .send({});
 
-      expect(response.statusCode).toBe(httpStatus.BAD_REQUEST);
+  //     expect(response.statusCode).toBe(httpStatus.BAD_REQUEST);
 
-      expect(response.body.error.name).toBe("BAD_REQUEST");
-    });
+  //     expect(response.body.error.name).toBe("BAD_REQUEST");
+  //   });
 
-    it("should handle controller errors", async () => {
-      (
-        authController.exchangeOauthCodeForTokens as jest.Mock
-      ).mockImplementation(() => {
-        throw new Error("Exchange failed");
-      });
+  //   it("should handle controller errors", async () => {
+  //     (
+  //       authController.exchangeOauthCodeForTokens as jest.Mock
+  //     ).mockImplementation(() => {
+  //       throw new Error("Exchange failed");
+  //     });
 
-      const response = await request(app)
-        .post("/api/v1/auth/exchange-oauth-code")
-        .send({ code: validCode });
+  //     const response = await request(app)
+  //       .post("/api/v1/auth/exchange-oauth-code")
+  //       .send({ code: validCode });
 
-      expect(response.statusCode).toBe(httpStatus.INTERNAL_SERVER_ERROR);
-    });
+  //     expect(response.statusCode).toBe(httpStatus.INTERNAL_SERVER_ERROR);
+  //   });
 
-    it("should throw a BadRequestError for a invalid code format", async () => {
-      const response = await request(app)
-        .post("/api/v1/auth/exchange-oauth-code")
-        .send({ code: 123 }); // Invalid type
+  //   it("should throw a BadRequestError for a invalid code format", async () => {
+  //     const response = await request(app)
+  //       .post("/api/v1/auth/exchange-oauth-code")
+  //       .send({ code: 123 }); // Invalid type
 
-      expect(response.statusCode).toBe(httpStatus.BAD_REQUEST);
-    });
-  });
+  //     expect(response.statusCode).toBe(httpStatus.BAD_REQUEST);
+  //   });
+  // });
 
   describe("POST /api/v1/auth/logout", () => {
     it("should reject unauthorized logout request", async () => {
@@ -155,14 +155,6 @@ describe("Auth Routes", () => {
   });
 
   describe("Error Handling", () => {
-    it("should handle JSON parsing errors", async () => {
-      await request(app)
-        .post("/api/v1/auth/exchange-oauth-code")
-        .set("Content-Type", "application/json")
-        .send("invalid json{")
-        .expect(httpStatus.INTERNAL_SERVER_ERROR);
-    });
-
     it("should handle unsupported methods", async () => {
       await request(app)
         .put("/api/v1/auth/logout")

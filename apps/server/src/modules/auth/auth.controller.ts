@@ -3,7 +3,6 @@ import httpStatus from "http-status";
 
 import type { TypedRequest } from "@/modules/shared/types";
 import type { IAuthController, IAuthService } from "./auth.types";
-import type { OAuthCodeDto } from "./dtos";
 
 import { clearRefreshTokenCookieConfig } from "./config";
 import { REFRESH_TOKEN_NAME } from "./constants";
@@ -30,19 +29,5 @@ export class AuthController implements IAuthController {
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
     res.sendStatus(httpStatus.NO_CONTENT);
-  }
-
-  async exchangeOauthCodeForTokens(
-    req: TypedRequest<OAuthCodeDto>,
-    res: Response
-  ): Promise<void> {
-    const { code } = req.body;
-
-    const tokens = await this._authService.exchangeOauthCodeForTokens(code);
-
-    res.json({
-      message: "Access token exchanged successfully",
-      accessToken: tokens.accessToken,
-    });
   }
 }

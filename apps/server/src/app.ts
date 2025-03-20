@@ -12,7 +12,7 @@ import session from "express-session";
 import helmet from "helmet";
 import passport from "passport";
 
-import authRoutes from "@/modules/auth/auth.routes";
+import { authRoutes, oauthRoutes } from "@/modules/auth";
 import noteRoutes from "@/modules/note/note.routes";
 import userRoutes from "@/modules/user/user.routes";
 import videoRoutes from "@/modules/video/video.routes";
@@ -76,6 +76,7 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/oauth", oauthRoutes);
 app.use("/api/v1/videos", videoRoutes);
 app.use("/api/v1/notes", noteRoutes);
 app.use("/api/v1/users", userRoutes);

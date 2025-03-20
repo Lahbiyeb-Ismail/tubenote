@@ -1,19 +1,13 @@
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import type { Profile } from "passport-google-oauth20";
 
-import type { IUserService } from "@/modules/user";
+import type { IOauthLoginDto } from "../../dtos";
+import type { GoogleConfig } from "./google.types";
 
-export interface GoogleConfig {
-  clientID: string;
-  clientSecret: string;
-  callbackURL: string;
-}
-
-export class GoogleAuthStrategy {
+export class GoogleOAuthStrategy {
   private strategy: GoogleStrategy;
-  private userService: IUserService;
 
-  constructor(config: GoogleConfig, userService: IUserService) {
+  constructor(config: GoogleConfig) {
     this.strategy = new GoogleStrategy(
       {
         clientID: config.clientID,
@@ -24,15 +18,13 @@ export class GoogleAuthStrategy {
       },
       this.validate.bind(this)
     );
-
-    this.userService = userService;
   }
 
   private async validate(
     _accessToken: string,
     _refreshToken: string,
     profile: Profile,
-    done: (error: any, user?: any) => void
+    done: (error: any, user?: IOauthLoginDto) => void
   ) {
     try {
       const { id, emails, displayName, photos } = profile;
@@ -43,21 +35,24 @@ export class GoogleAuthStrategy {
         return done(new Error("No email provided from Google"));
       }
 
-      const user = await this.userService.getOrCreateUser({
-        data: {
-          email,
-          profilePicture,
-          username: displayName,
-          password: id,
-          isEmailVerified: true,
+      const user: IOauthLoginDto = {
+        createAccountDto: {
+          data: {
+            type: "oauth",
+            provider: "google",
+            providerAccountId: id,
+          },
         },
-      });
-
-      if (!user) {
-        return done(new Error("Failed to create user from Google profile"));
-      }
-
-      user.password = "";
+        createUserDto: {
+          data: {
+            email,
+            profilePicture,
+            username: displayName,
+            password: id,
+            isEmailVerified: true,
+          },
+        },
+      };
 
       done(null, user);
     } catch (error) {

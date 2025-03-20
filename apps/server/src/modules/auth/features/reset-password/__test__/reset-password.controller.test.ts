@@ -20,17 +20,19 @@ describe("ResetPassowrdController", () => {
   let mockResponse: Partial<Response>;
 
   // Mock the refresh token service
-  const mockResetPasswordService: jest.Mocked<IResetPasswordService> = {
-    resetPassword: jest.fn(),
-    sendResetToken: jest.fn(),
-    verifyResetToken: jest.fn(),
-  };
+  let mockResetPasswordService: jest.Mocked<IResetPasswordService>;
 
   const mockEmail = "user@test.com";
   const mockNewPassword = "newpassword";
   const mockResetToken = "reset-password-token";
 
   beforeEach(() => {
+    mockResetPasswordService = {
+      resetPassword: jest.fn(),
+      sendResetToken: jest.fn(),
+      verifyResetToken: jest.fn(),
+    };
+
     // Create controller instance
     resetPasswordController = new ResetPasswordController(
       mockResetPasswordService

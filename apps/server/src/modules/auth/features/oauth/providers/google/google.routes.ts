@@ -3,23 +3,24 @@ import passport from "passport";
 
 import { envConfig } from "@/modules/shared/config";
 
-import { googleAuthController, googleAuthStrategy } from "./google.module";
+import { oauthController } from "../../oauth.module";
+import { googleOAuthStrategy } from "./google.module";
 
-passport.use(googleAuthStrategy.getStrategy());
+passport.use(googleOAuthStrategy.getStrategy());
 
-const router = Router();
+const googleOAuthRoutes = Router();
 
 // - GET /google: Initiate Google OAuth authentication.
-router
+googleOAuthRoutes
   .route("/google")
   .get(passport.authenticate("google", { scope: ["profile", "email"] }));
 
 // - GET /google/callback: Handle the Google OAuth callback.
-router.route("/google/callback").get(
+googleOAuthRoutes.route("/google/callback").get(
   passport.authenticate("google", {
     failureRedirect: `${envConfig.client.url}/login`,
   }),
-  (req, res) => googleAuthController.googleLogin(req, res)
+  (req, res) => oauthController.oauthLogin(req, res)
 );
 
-export default router;
+export { googleOAuthRoutes };
