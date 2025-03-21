@@ -4,7 +4,9 @@ import type { ICreateDto } from "@/modules/shared/dtos";
 import type { TypedRequest } from "@/modules/shared/types";
 
 import type { IAuthResponseDto, IRefreshDto } from "@/modules/auth/dtos";
+import type { ILoggerService, IPrismaService } from "@/modules/shared/services";
 import type { Prisma } from "@prisma/client";
+import type { IJwtService } from "../../utils";
 import type { RefreshToken } from "./refresh-token.model";
 
 export interface IRefreshTokenRepository {
@@ -28,4 +30,19 @@ export interface IRefreshTokenService {
 
 export interface IRefreshTokenController {
   refreshToken(req: TypedRequest, res: Response): Promise<void>;
+}
+
+export interface IRefreshTokenRepositoryOptions {
+  db: IPrismaService;
+}
+
+export interface IRefreshTokenServiceOptions {
+  refreshTokenRepository: IRefreshTokenRepository;
+  prismaService: IPrismaService;
+  jwtService: IJwtService;
+  loggerService: ILoggerService;
+}
+
+export interface IRefreshTokenControllerOptions {
+  refreshTokenService: IRefreshTokenService;
 }
