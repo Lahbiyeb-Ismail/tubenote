@@ -22,14 +22,14 @@ export class CacheService implements ICacheService {
    *                     This determines how long an item remains in the cache
    *                     before it is automatically removed.
    */
-  constructor(ttlSeconds: number) {
+  private constructor(ttlSeconds: number) {
     this.cache = new NodeCache({
       stdTTL: ttlSeconds,
       checkperiod: ttlSeconds * 0.2,
     });
   }
 
-  static getInstance(options: ICacheServiceOptions): CacheService {
+  public static getInstance(options: ICacheServiceOptions): CacheService {
     if (!this._instance) {
       this._instance = new CacheService(options.ttlSeconds);
     }

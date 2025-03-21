@@ -16,12 +16,14 @@ import type {
 export class MailSenderService implements IMailSenderService {
   private static _instance: MailSenderService;
 
-  constructor(
+  private constructor(
     private readonly _transporter: Transporter,
     private readonly _loggerService: ILoggerService
   ) {}
 
-  static getInstance(options: IMailSenderServiceOptions): MailSenderService {
+  public static getInstance(
+    options: IMailSenderServiceOptions
+  ): MailSenderService {
     if (!this._instance) {
       this._instance = new MailSenderService(
         options.transporter,
