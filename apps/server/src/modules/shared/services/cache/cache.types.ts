@@ -7,3 +7,10 @@ export interface ICacheService {
   flush(): void;
   getStats(): NodeCache.Stats;
 }
+
+/**
+ * Options for configuring the cache service.
+ */
+export interface ICacheServiceOptions {
+  ttlSeconds: number;
+}
