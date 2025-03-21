@@ -25,18 +25,38 @@ import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
 import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
 import type { IJwtService } from "@/modules/auth/utils";
 
-import type { ILocalAuthService } from "./local-auth.types";
+import type {
+  ILocalAuthService,
+  ILocalAuthServiceOptions,
+} from "./local-auth.types";
 
 export class LocalAuthService implements ILocalAuthService {
+  private static instance: LocalAuthService;
+
   constructor(
-    private readonly _jwtService: IJwtService,
     private readonly _prismaService: IPrismaService,
     private readonly _userService: IUserService,
     private readonly _verifyEmailService: IVerifyEmailService,
-    private readonly _cryptoService: ICryptoService,
     private readonly _refreshTokenService: IRefreshTokenService,
+    private readonly _jwtService: IJwtService,
+    private readonly _cryptoService: ICryptoService,
     private readonly _mailSenderService: IMailSenderService
   ) {}
+
+  static getInstance(options: ILocalAuthServiceOptions): LocalAuthService {
+    if (!LocalAuthService.instance) {
+      LocalAuthService.instance = new LocalAuthService(
+        options.prismaService,
+        options.userService,
+        options.verifyEmailService,
+        options.refreshTokenService,
+        options.jwtService,
+        options.cryptoService,
+        options.mailSenderService
+      );
+    }
+    return LocalAuthService.instance;
+  }
 
   async registerUser(createUserDto: ICreateUserDto): Promise<User | undefined> {
     let newUser: User | undefined;
