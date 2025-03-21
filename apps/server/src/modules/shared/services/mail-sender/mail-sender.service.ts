@@ -7,13 +7,30 @@ import { compileTemplate } from "../../utils";
 
 import type { ILoggerService } from "../logger";
 import type { SendMailDto } from "./dtos";
-import type { EmailContent, IMailSenderService } from "./mail-sender.types";
+import type {
+  EmailContent,
+  IMailSenderService,
+  IMailSenderServiceOptions,
+} from "./mail-sender.types";
 
 export class MailSenderService implements IMailSenderService {
+  private static _instance: MailSenderService;
+
   constructor(
     private readonly _transporter: Transporter,
     private readonly _loggerService: ILoggerService
   ) {}
+
+  static getInstance(options: IMailSenderServiceOptions): MailSenderService {
+    if (!this._instance) {
+      this._instance = new MailSenderService(
+        options.transporter,
+        options.loggerService
+      );
+    }
+
+    return this._instance;
+  }
 
   async sendMail(sendMailDto: SendMailDto): Promise<void> {
     const mailOptions = {

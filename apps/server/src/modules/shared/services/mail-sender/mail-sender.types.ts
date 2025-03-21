@@ -1,3 +1,5 @@
+import type { Transporter } from "nodemailer";
+import type { ILoggerService } from "../logger";
 import type { SendMailDto } from "./dtos/send-mail.dto";
 
 export interface IMailSenderService {
@@ -14,3 +16,8 @@ export type EmailContent = {
   textContent: string;
   logoPath: string;
 };
+
+export interface IMailSenderServiceOptions {
+  transporter: Transporter;
+  loggerService: ILoggerService;
+}
