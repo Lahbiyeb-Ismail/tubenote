@@ -23,9 +23,9 @@ import { BadRequestError } from "@/modules/shared/api-errors";
 import type { IOAuthService, IOAuthServiceOptions } from "./oauth.types";
 
 export class OAuthService implements IOAuthService {
-  private static instance: OAuthService;
+  private static _instance: OAuthService;
 
-  constructor(
+  private constructor(
     private readonly _prismaService: IPrismaService,
     private readonly _userService: IUserService,
     private readonly _accountService: IAccountService,
@@ -36,9 +36,9 @@ export class OAuthService implements IOAuthService {
     private readonly _loggerService: ILoggerService
   ) {}
 
-  static getInstance(options: IOAuthServiceOptions): OAuthService {
-    if (!OAuthService.instance) {
-      this.instance = new OAuthService(
+  public static getInstance(options: IOAuthServiceOptions): OAuthService {
+    if (!this._instance) {
+      this._instance = new OAuthService(
         options.prismaService,
         options.userService,
         options.accountService,
@@ -50,7 +50,7 @@ export class OAuthService implements IOAuthService {
       );
     }
 
-    return OAuthService.instance;
+    return this._instance;
   }
 
   async generateTemporaryOAuthCode(

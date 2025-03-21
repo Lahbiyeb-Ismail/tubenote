@@ -15,9 +15,9 @@ import type {
 } from "./reset-password.types";
 
 export class ResetPasswordService implements IResetPasswordService {
-  private static instance: ResetPasswordService;
+  private static _instance: ResetPasswordService;
 
-  constructor(
+  private constructor(
     private readonly _userService: IUserService,
     private readonly _cryptoService: ICryptoService,
     private readonly _cacheService: ICacheService,
@@ -25,11 +25,11 @@ export class ResetPasswordService implements IResetPasswordService {
     private readonly _loggerService: ILoggerService
   ) {}
 
-  static getInstance(
+  public static getInstance(
     options: IResetPasswordServiceOptions
   ): ResetPasswordService {
-    if (!this.instance) {
-      this.instance = new ResetPasswordService(
+    if (!this._instance) {
+      this._instance = new ResetPasswordService(
         options.userService,
         options.cryptoService,
         options.cacheService,
@@ -38,7 +38,7 @@ export class ResetPasswordService implements IResetPasswordService {
       );
     }
 
-    return this.instance;
+    return this._instance;
   }
 
   async sendResetToken(email: string): Promise<void> {

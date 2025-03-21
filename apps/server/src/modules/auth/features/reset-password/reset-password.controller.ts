@@ -19,18 +19,22 @@ import type {
  * Controller for handling password reset operations.
  */
 export class ResetPasswordController implements IResetPasswordController {
-  private static instance: ResetPasswordController;
+  private static _instance: ResetPasswordController;
 
-  constructor(private readonly _resetPasswordService: IResetPasswordService) {}
+  private constructor(
+    private readonly _resetPasswordService: IResetPasswordService
+  ) {}
 
-  static getInstance(
+  public static getInstance(
     options: IResetPasswordControllerOptions
   ): ResetPasswordController {
-    if (!this.instance) {
-      this.instance = new ResetPasswordController(options.resetPasswordService);
+    if (!this._instance) {
+      this._instance = new ResetPasswordController(
+        options.resetPasswordService
+      );
     }
 
-    return this.instance;
+    return this._instance;
   }
 
   /**

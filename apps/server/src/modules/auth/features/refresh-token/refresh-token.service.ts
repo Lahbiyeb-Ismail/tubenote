@@ -22,20 +22,20 @@ import type {
 } from "./refresh-token.types";
 
 export class RefreshTokenService implements IRefreshTokenService {
-  private static instance: RefreshTokenService;
+  private static _instance: RefreshTokenService;
 
-  constructor(
+  private constructor(
     private readonly _refreshTokenRepository: IRefreshTokenRepository,
     private readonly _prismaService: IPrismaService,
     private readonly _jwtService: IJwtService,
     private readonly _loggerService: ILoggerService
   ) {}
 
-  static getInstance(
+  public static getInstance(
     options: IRefreshTokenServiceOptions
   ): RefreshTokenService {
-    if (!RefreshTokenService.instance) {
-      RefreshTokenService.instance = new RefreshTokenService(
+    if (!this._instance) {
+      this._instance = new RefreshTokenService(
         options.refreshTokenRepository,
         options.prismaService,
         options.jwtService,
@@ -43,7 +43,7 @@ export class RefreshTokenService implements IRefreshTokenService {
       );
     }
 
-    return RefreshTokenService.instance;
+    return this._instance;
   }
 
   async refreshToken(refreshDto: IRefreshDto): Promise<IAuthResponseDto> {

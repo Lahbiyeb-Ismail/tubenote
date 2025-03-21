@@ -18,20 +18,20 @@ import type {
 } from "./refresh-token.types";
 
 export class RefreshTokenController implements IRefreshTokenController {
-  private static instance: RefreshTokenController;
+  private static _instance: RefreshTokenController;
 
-  constructor(private readonly _refreshTokenService: IRefreshTokenService) {}
+  private constructor(
+    private readonly _refreshTokenService: IRefreshTokenService
+  ) {}
 
-  static getInstance(
+  public static getInstance(
     options: IRefreshTokenControllerOptions
   ): RefreshTokenController {
-    if (!RefreshTokenController.instance) {
-      RefreshTokenController.instance = new RefreshTokenController(
-        options.refreshTokenService
-      );
+    if (!this._instance) {
+      this._instance = new RefreshTokenController(options.refreshTokenService);
     }
 
-    return RefreshTokenController.instance;
+    return this._instance;
   }
 
   /**

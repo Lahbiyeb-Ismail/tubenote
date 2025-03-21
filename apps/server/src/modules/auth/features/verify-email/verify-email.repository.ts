@@ -15,17 +15,17 @@ import type {
 } from "./verify-email.types";
 
 export class VerifyEmailRepository implements IVerifyEmailRepository {
-  private static instance: VerifyEmailRepository;
+  private static _instance: VerifyEmailRepository;
 
-  constructor(private readonly _db: IPrismaService) {}
+  private constructor(private readonly _db: IPrismaService) {}
 
-  static getInstance(
+  public static getInstance(
     options: IVerifyEmailRepositoryOptions
   ): VerifyEmailRepository {
-    if (!this.instance) {
-      this.instance = new VerifyEmailRepository(options.db);
+    if (!this._instance) {
+      this._instance = new VerifyEmailRepository(options.db);
     }
-    return this.instance;
+    return this._instance;
   }
 
   async findActiveToken(

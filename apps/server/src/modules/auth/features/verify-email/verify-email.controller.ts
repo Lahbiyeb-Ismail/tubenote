@@ -15,17 +15,19 @@ import type {
  * Controller for handling email verification operations.
  */
 export class VerifyEmailController implements IVerifyEmailController {
-  private static instance: VerifyEmailController;
+  private static _instance: VerifyEmailController;
 
-  constructor(private readonly _verifyEmailService: IVerifyEmailService) {}
+  private constructor(
+    private readonly _verifyEmailService: IVerifyEmailService
+  ) {}
 
-  static getInstance(
+  public static getInstance(
     options: IVerifyEmailControllerOptions
   ): VerifyEmailController {
-    if (!this.instance) {
-      this.instance = new VerifyEmailController(options.verifyEmailService);
+    if (!this._instance) {
+      this._instance = new VerifyEmailController(options.verifyEmailService);
     }
-    return this.instance;
+    return this._instance;
   }
 
   /**

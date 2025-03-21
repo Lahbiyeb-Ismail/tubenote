@@ -31,9 +31,9 @@ import type {
 } from "./local-auth.types";
 
 export class LocalAuthService implements ILocalAuthService {
-  private static instance: LocalAuthService;
+  private static _instance: LocalAuthService;
 
-  constructor(
+  private constructor(
     private readonly _prismaService: IPrismaService,
     private readonly _userService: IUserService,
     private readonly _verifyEmailService: IVerifyEmailService,
@@ -43,9 +43,11 @@ export class LocalAuthService implements ILocalAuthService {
     private readonly _mailSenderService: IMailSenderService
   ) {}
 
-  static getInstance(options: ILocalAuthServiceOptions): LocalAuthService {
-    if (!LocalAuthService.instance) {
-      LocalAuthService.instance = new LocalAuthService(
+  public static getInstance(
+    options: ILocalAuthServiceOptions
+  ): LocalAuthService {
+    if (!this._instance) {
+      this._instance = new LocalAuthService(
         options.prismaService,
         options.userService,
         options.verifyEmailService,
@@ -55,7 +57,7 @@ export class LocalAuthService implements ILocalAuthService {
         options.mailSenderService
       );
     }
-    return LocalAuthService.instance;
+    return this._instance;
   }
 
   async registerUser(createUserDto: ICreateUserDto): Promise<User | undefined> {

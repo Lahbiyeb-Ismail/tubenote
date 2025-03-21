@@ -6,12 +6,11 @@ import type { ILogoutDto } from "./dtos";
 import type { IRefreshTokenService } from "./features";
 
 export class AuthService implements IAuthService {
-  private static instance: AuthService;
-  private readonly _refreshTokenService: IRefreshTokenService;
+  private static _instance: AuthService;
 
-  constructor(options: IAuthServiceOptions) {
-    this._refreshTokenService = options.refreshTokenService;
-  }
+  private constructor(
+    private readonly _refreshTokenService: IRefreshTokenService
+  ) {}
 
   /**
    * Retrieves the singleton instance of the `AuthService` class.
@@ -21,11 +20,11 @@ export class AuthService implements IAuthService {
    * @param options - Configuration options required to initialize the `AuthService`.
    * @returns The singleton instance of the `AuthService`.
    */
-  static getInstance(options: IAuthServiceOptions): AuthService {
-    if (!AuthService.instance) {
-      AuthService.instance = new AuthService(options);
+  public static getInstance(options: IAuthServiceOptions): AuthService {
+    if (!this._instance) {
+      this._instance = new AuthService(options.refreshTokenService);
     }
-    return AuthService.instance;
+    return this._instance;
   }
 
   async logoutUser(logoutDto: ILogoutDto): Promise<void> {

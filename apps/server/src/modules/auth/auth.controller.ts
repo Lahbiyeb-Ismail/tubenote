@@ -15,12 +15,9 @@ import { REFRESH_TOKEN_NAME } from "./constants";
  * Controller for handling authentication-related operations.
  */
 export class AuthController implements IAuthController {
-  private static instance: AuthController;
-  private readonly _authService: IAuthService;
+  private static _instance: AuthController;
 
-  constructor(options: IAuthControllerOptions) {
-    this._authService = options.authService;
-  }
+  private constructor(private readonly _authService: IAuthService) {}
 
   /**
    * Retrieves the singleton instance of the `AuthController` class.
@@ -29,12 +26,12 @@ export class AuthController implements IAuthController {
    * @param options - Configuration options for initializing the `AuthController` instance.
    * @returns The singleton instance of the `AuthController`.
    */
-  static getInstance(options: IAuthControllerOptions): AuthController {
-    if (!AuthController.instance) {
-      AuthController.instance = new AuthController(options);
+  public static getInstance(options: IAuthControllerOptions): AuthController {
+    if (!this._instance) {
+      this._instance = new AuthController(options.authService);
     }
 
-    return AuthController.instance;
+    return this._instance;
   }
 
   /**

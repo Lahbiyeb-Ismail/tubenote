@@ -21,9 +21,9 @@ import type {
 } from "./verify-email.types";
 
 export class VerifyEmailService implements IVerifyEmailService {
-  private static instance: VerifyEmailService;
+  private static _instance: VerifyEmailService;
 
-  constructor(
+  private constructor(
     private readonly _verifyEmailRepository: IVerifyEmailRepository,
     private readonly _prismaService: IPrismaService,
     private readonly _userService: IUserService,
@@ -31,9 +31,11 @@ export class VerifyEmailService implements IVerifyEmailService {
     private readonly _loggerService: ILoggerService
   ) {}
 
-  static getInstance(options: IVerifyEmailServiceOptions): VerifyEmailService {
-    if (!this.instance) {
-      this.instance = new VerifyEmailService(
+  public static getInstance(
+    options: IVerifyEmailServiceOptions
+  ): VerifyEmailService {
+    if (!this._instance) {
+      this._instance = new VerifyEmailService(
         options.verifyEmailRepository,
         options.prismaService,
         options.userService,
@@ -41,7 +43,7 @@ export class VerifyEmailService implements IVerifyEmailService {
         options.loggerService
       );
     }
-    return this.instance;
+    return this._instance;
   }
 
   async createToken(

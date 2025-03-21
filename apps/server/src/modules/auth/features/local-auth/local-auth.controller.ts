@@ -19,20 +19,18 @@ import type {
 } from "./local-auth.types";
 
 export class LocalAuthController implements ILocalAuthController {
-  private static instance: LocalAuthController;
+  private static _instance: LocalAuthController;
 
-  constructor(private readonly _localAuthService: ILocalAuthService) {}
+  private constructor(private readonly _localAuthService: ILocalAuthService) {}
 
-  static getInstance(
+  public static getInstance(
     options: ILocalAuthControllerOptions
   ): LocalAuthController {
-    if (!LocalAuthController.instance) {
-      LocalAuthController.instance = new LocalAuthController(
-        options.localAuthService
-      );
+    if (!this._instance) {
+      this._instance = new LocalAuthController(options.localAuthService);
     }
 
-    return LocalAuthController.instance;
+    return this._instance;
   }
 
   /**

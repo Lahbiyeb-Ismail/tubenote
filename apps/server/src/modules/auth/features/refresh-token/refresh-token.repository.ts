@@ -12,18 +12,18 @@ import type {
 } from "./refresh-token.types";
 
 export class RefreshTokenRepository implements IRefreshTokenRepository {
-  private static instance: RefreshTokenRepository;
+  private static _instance: RefreshTokenRepository;
 
-  constructor(private readonly _db: IPrismaService) {}
+  private constructor(private readonly _db: IPrismaService) {}
 
-  static getInstance(
+  public static getInstance(
     options: IRefreshTokenRepositoryOptions
   ): RefreshTokenRepository {
-    if (!RefreshTokenRepository.instance) {
-      RefreshTokenRepository.instance = new RefreshTokenRepository(options.db);
+    if (!this._instance) {
+      this._instance = new RefreshTokenRepository(options.db);
     }
 
-    return RefreshTokenRepository.instance;
+    return this._instance;
   }
 
   async create(
