@@ -10,16 +10,33 @@ import type {
 } from "@/modules/shared/dtos";
 import type { IResponseFormatter } from "@/modules/shared/services";
 
-import type { IVideoController, IVideoService } from "./video.types";
+import type {
+  IVideoController,
+  IVideoControllerOptions,
+  IVideoService,
+} from "./video.types";
 
 /**
  * Controller for handling video-related operations.
  */
 export class VideoController implements IVideoController {
-  constructor(
+  private static _instance: VideoController;
+
+  private constructor(
     private readonly _responseFormatter: IResponseFormatter,
     private readonly _videoService: IVideoService
   ) {}
+
+  public static getInstance(options: IVideoControllerOptions): VideoController {
+    if (!this._instance) {
+      this._instance = new VideoController(
+        options.responseFormatter,
+        options.videoService
+      );
+    }
+
+    return this._instance;
+  }
 
   /**
    * Retrieves a paginated list of videos for a specific user.

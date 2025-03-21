@@ -7,10 +7,20 @@ import type { ICreateDto, IFindAllDto } from "@/modules/shared/dtos";
 import type { IPrismaService } from "@/modules/shared/services";
 
 import type { Video, YoutubeVideoData } from "./video.model";
-import type { IVideoRepository } from "./video.types";
+import type { IVideoRepository, IVideoRepositoryOptions } from "./video.types";
 
 export class VideoRepository implements IVideoRepository {
-  constructor(private readonly _db: IPrismaService) {}
+  private static _instance: VideoRepository;
+
+  private constructor(private readonly _db: IPrismaService) {}
+
+  public static getInstance(options: IVideoRepositoryOptions): VideoRepository {
+    if (!this._instance) {
+      this._instance = new VideoRepository(options.db);
+    }
+
+    return this._instance;
+  }
 
   async findByYoutubeId(
     youtubeId: string,

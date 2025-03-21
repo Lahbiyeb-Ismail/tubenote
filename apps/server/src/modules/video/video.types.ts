@@ -12,6 +12,7 @@ import type {
 } from "@/modules/shared/dtos";
 
 import type { Prisma } from "@prisma/client";
+import type { IPrismaService, IResponseFormatter } from "../shared/services";
 import type { Video, YoutubeVideoData } from "./video.model";
 
 export interface IVideoRepository {
@@ -50,4 +51,18 @@ export interface IVideoController {
     req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ): Promise<void>;
+}
+
+export interface IVideoRepositoryOptions {
+  db: IPrismaService;
+}
+
+export interface IVideoServiceOptions {
+  videoRepository: IVideoRepository;
+  prismaService: IPrismaService;
+}
+
+export interface IVideoControllerOptions {
+  responseFormatter: IResponseFormatter;
+  videoService: IVideoService;
 }
