@@ -1,5 +1,5 @@
 import { ResponseFormatter } from "./response-formatter.service";
 
-const responseFormatter = new ResponseFormatter();
+const responseFormatter = ResponseFormatter.getInstance();
 
 export { responseFormatter };
