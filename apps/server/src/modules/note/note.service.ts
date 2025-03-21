@@ -13,7 +13,11 @@ import type {
 import type { Prisma } from "@prisma/client";
 import type { IPrismaService } from "../shared/services";
 import type { Note } from "./note.model";
-import type { INoteRepository, INoteService } from "./note.types";
+import type {
+  INoteRepository,
+  INoteService,
+  INoteServiceOptions,
+} from "./note.types";
 
 /**
  * Service class for handling business logic related to Notes.
@@ -23,6 +27,8 @@ import type { INoteRepository, INoteService } from "./note.types";
  * additional logic such as error handling and transaction management.
  */
 export class NoteService implements INoteService {
+  private static _instance: NoteService;
+
   /**
    * Creates an instance of NoteService.
    *
@@ -32,6 +38,16 @@ export class NoteService implements INoteService {
     private readonly _noteRepository: INoteRepository,
     private readonly _prismaService: IPrismaService
   ) {}
+
+  static getInstance(options: INoteServiceOptions): NoteService {
+    if (!this._instance) {
+      this._instance = new NoteService(
+        options.noteRepository,
+        options.prismaService
+      );
+    }
+    return this._instance;
+  }
 
   /**
    * Retrieves a note based on the given criteria.
