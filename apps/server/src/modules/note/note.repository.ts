@@ -37,7 +37,7 @@ export class NoteRepository implements INoteRepository {
    * @param db - An instance of PrismaClient for database operations.
    * @returns The singleton instance of NoteRepository.
    */
-  static getInstance(options: INoteRepositoryOptions): NoteRepository {
+  public static getInstance(options: INoteRepositoryOptions): NoteRepository {
     if (!this._instance) {
       this._instance = new NoteRepository(options.db);
     }

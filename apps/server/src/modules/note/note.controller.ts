@@ -34,7 +34,7 @@ export class NoteController implements INoteController {
    *
    * @param _noteService - An instance of the note service that handles business logic.
    */
-  constructor(private readonly _noteService: INoteService) {}
+  private constructor(private readonly _noteService: INoteService) {}
 
   /**
    * Gets the singleton instance of NoteController.
@@ -42,7 +42,7 @@ export class NoteController implements INoteController {
    * @param noteService - An instance of the note service that handles business logic.
    * @returns The singleton instance of NoteController.
    */
-  static getInstance(options: INoteControllerOptions): NoteController {
+  public static getInstance(options: INoteControllerOptions): NoteController {
     if (!this._instance) {
       this._instance = new NoteController(options.noteService);
     }

@@ -34,12 +34,12 @@ export class NoteService implements INoteService {
    *
    * @param _noteRepository - An instance of the note repository to delegate data operations.
    */
-  constructor(
+  private constructor(
     private readonly _noteRepository: INoteRepository,
     private readonly _prismaService: IPrismaService
   ) {}
 
-  static getInstance(options: INoteServiceOptions): NoteService {
+  public static getInstance(options: INoteServiceOptions): NoteService {
     if (!this._instance) {
       this._instance = new NoteService(
         options.noteRepository,
