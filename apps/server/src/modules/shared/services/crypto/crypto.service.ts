@@ -5,8 +5,17 @@ import type { ICryptoService } from "./crypto.types";
 import type { ComparePasswordDto } from "./dtos";
 
 export class CryptoService implements ICryptoService {
+  private static _instance: CryptoService;
+
   private readonly SALT_ROUNDS = 12;
   private readonly TOKEN_BYTES = 32;
+
+  static getInstance(): CryptoService {
+    if (!this._instance) {
+      this._instance = new CryptoService();
+    }
+    return this._instance;
+  }
 
   /**
    * Hashes a plain-text password.
