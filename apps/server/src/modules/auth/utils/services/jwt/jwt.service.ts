@@ -14,10 +14,19 @@ import {
 import type { IAuthResponseDto } from "@/modules/auth/dtos";
 
 import type { ISignTokenDto, IVerifyTokenDto } from "./dtos";
-import type { IJwtService } from "./jwt.types";
+import type { IJwtService, IJwtServiceOptions } from "./jwt.types";
 
 export class JwtService implements IJwtService {
+  private static instance: JwtService;
+
   constructor(private readonly _loggerService: ILoggerService) {}
+
+  static getInstance(options: IJwtServiceOptions): JwtService {
+    if (!this.instance) {
+      this.instance = new JwtService(options.loggerService);
+    }
+    return this.instance;
+  }
 
   async verify(verifyTokenDto: IVerifyTokenDto): Promise<JwtPayload> {
     const { token, secret } = verifyTokenDto;
