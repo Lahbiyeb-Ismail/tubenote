@@ -9,9 +9,14 @@ import type {
   IMailSenderService,
 } from "@/modules/shared/services";
 
-import type { IResetPasswordService } from "./reset-password.types";
+import type {
+  IResetPasswordService,
+  IResetPasswordServiceOptions,
+} from "./reset-password.types";
 
 export class ResetPasswordService implements IResetPasswordService {
+  private static instance: ResetPasswordService;
+
   constructor(
     private readonly _userService: IUserService,
     private readonly _cryptoService: ICryptoService,
@@ -19,6 +24,22 @@ export class ResetPasswordService implements IResetPasswordService {
     private readonly _mailSenderService: IMailSenderService,
     private readonly _loggerService: ILoggerService
   ) {}
+
+  static getInstance(
+    options: IResetPasswordServiceOptions
+  ): ResetPasswordService {
+    if (!this.instance) {
+      this.instance = new ResetPasswordService(
+        options.userService,
+        options.cryptoService,
+        options.cacheService,
+        options.mailSenderService,
+        options.loggerService
+      );
+    }
+
+    return this.instance;
+  }
 
   async sendResetToken(email: string): Promise<void> {
     const user = await this._userService.getUserByIdOrEmail({ email });
