@@ -24,29 +24,30 @@ import type { IOAuthService, IOAuthServiceOptions } from "./oauth.types";
 
 export class OAuthService implements IOAuthService {
   private static instance: OAuthService;
-  private readonly _prismaService: IPrismaService;
-  private readonly _userService: IUserService;
-  private readonly _accountService: IAccountService;
-  private readonly _refreshTokenService: IRefreshTokenService;
-  private readonly _jwtService: IJwtService;
-  private readonly _cryptoService: ICryptoService;
-  private readonly _cacheService: ICacheService;
-  private readonly _loggerService: ILoggerService;
 
-  constructor(options: IOAuthServiceOptions) {
-    this._prismaService = options.prismaService;
-    this._userService = options.userService;
-    this._accountService = options.accountService;
-    this._refreshTokenService = options.refreshTokenService;
-    this._jwtService = options.jwtService;
-    this._cryptoService = options.cryptoService;
-    this._cacheService = options.cacheService;
-    this._loggerService = options.loggerService;
-  }
+  constructor(
+    private readonly _prismaService: IPrismaService,
+    private readonly _userService: IUserService,
+    private readonly _accountService: IAccountService,
+    private readonly _refreshTokenService: IRefreshTokenService,
+    private readonly _jwtService: IJwtService,
+    private readonly _cryptoService: ICryptoService,
+    private readonly _cacheService: ICacheService,
+    private readonly _loggerService: ILoggerService
+  ) {}
 
   static getInstance(options: IOAuthServiceOptions): OAuthService {
     if (!OAuthService.instance) {
-      this.instance = new OAuthService(options);
+      this.instance = new OAuthService(
+        options.prismaService,
+        options.userService,
+        options.accountService,
+        options.refreshTokenService,
+        options.jwtService,
+        options.cryptoService,
+        options.cacheService,
+        options.loggerService
+      );
     }
 
     return OAuthService.instance;

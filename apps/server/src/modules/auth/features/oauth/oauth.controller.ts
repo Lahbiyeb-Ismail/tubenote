@@ -18,11 +18,8 @@ import type {
 
 export class OAuthController implements IOAuthController {
   private static instance: OAuthController;
-  private readonly _oauthService: IOAuthService;
 
-  constructor(options: IOAuthControllerOptions) {
-    this._oauthService = options.oauthService;
-  }
+  constructor(private readonly _oauthService: IOAuthService) {}
 
   private setRefreshTokenCookie(res: Response, refreshToken: string) {
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
@@ -36,7 +33,7 @@ export class OAuthController implements IOAuthController {
 
   static getInstance(options: IOAuthControllerOptions): OAuthController {
     if (!OAuthController.instance) {
-      this.instance = new OAuthController(options);
+      this.instance = new OAuthController(options.oauthService);
     }
 
     return OAuthController.instance;
