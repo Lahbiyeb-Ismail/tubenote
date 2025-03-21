@@ -7,6 +7,7 @@ import type { IParamTokenDto } from "@/modules/shared/dtos";
 
 import type {
   IVerifyEmailController,
+  IVerifyEmailControllerOptions,
   IVerifyEmailService,
 } from "./verify-email.types";
 
@@ -14,7 +15,18 @@ import type {
  * Controller for handling email verification operations.
  */
 export class VerifyEmailController implements IVerifyEmailController {
+  private static instance: VerifyEmailController;
+
   constructor(private readonly _verifyEmailService: IVerifyEmailService) {}
+
+  static getInstance(
+    options: IVerifyEmailControllerOptions
+  ): VerifyEmailController {
+    if (!this.instance) {
+      this.instance = new VerifyEmailController(options.verifyEmailService);
+    }
+    return this.instance;
+  }
 
   /**
    * Verify the user's email using the token.

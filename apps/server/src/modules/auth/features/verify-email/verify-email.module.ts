@@ -8,16 +8,20 @@ import { VerifyEmailController } from "./verify-email.controller";
 import { VerifyEmailRepository } from "./verify-email.repository";
 import { VerifyEmailService } from "./verify-email.service";
 
-const verifyEmailRepository = new VerifyEmailRepository(prismaService);
+const verifyEmailRepository = VerifyEmailRepository.getInstance({
+  db: prismaService,
+});
 
-const verifyEmailService = new VerifyEmailService(
+const verifyEmailService = VerifyEmailService.getInstance({
   verifyEmailRepository,
   prismaService,
   userService,
   jwtService,
-  loggerService
-);
+  loggerService,
+});
 
-const verifyEmailController = new VerifyEmailController(verifyEmailService);
+const verifyEmailController = VerifyEmailController.getInstance({
+  verifyEmailService,
+});
 
 export { verifyEmailController, verifyEmailService };

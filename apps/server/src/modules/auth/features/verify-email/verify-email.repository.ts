@@ -9,10 +9,25 @@ import type { IPrismaService } from "@/modules/shared/services";
 
 import type { FindActiveTokenDto } from "./dtos";
 import type { VerifyEmailToken } from "./verify-email.model";
-import type { IVerifyEmailRepository } from "./verify-email.types";
+import type {
+  IVerifyEmailRepository,
+  IVerifyEmailRepositoryOptions,
+} from "./verify-email.types";
 
 export class VerifyEmailRepository implements IVerifyEmailRepository {
+  private static instance: VerifyEmailRepository;
+
   constructor(private readonly _db: IPrismaService) {}
+
+  static getInstance(
+    options: IVerifyEmailRepositoryOptions
+  ): VerifyEmailRepository {
+    if (!this.instance) {
+      this.instance = new VerifyEmailRepository(options.db);
+    }
+    return this.instance;
+  }
+
   async findActiveToken(
     params: FindActiveTokenDto,
     tx?: Prisma.TransactionClient
