@@ -12,6 +12,8 @@ import {
 } from "./logger.constants";
 
 export class LoggerService implements ILoggerService {
+  private static _instance: LoggerService;
+
   private logger: winston.Logger;
 
   constructor(config: LoggerConfig = {}) {
@@ -60,6 +62,13 @@ export class LoggerService implements ILoggerService {
         }),
       ],
     });
+  }
+
+  static getInstance(config?: LoggerConfig): LoggerService {
+    if (!this._instance) {
+      this._instance = new LoggerService(config);
+    }
+    return this._instance;
   }
 
   // Log methods

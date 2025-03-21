@@ -1,5 +1,5 @@
 import { LoggerService } from "./logger.service";
 
-const loggerService = new LoggerService();
+const loggerService = LoggerService.getInstance();
 
 export { loggerService };
