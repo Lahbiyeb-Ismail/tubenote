@@ -5,13 +5,26 @@ import type { IUpdateBodyDto } from "@/modules/shared/dtos";
 import type { TypedRequest } from "@/modules/shared/types";
 import type { IUpdatePasswordBodyDto } from "./dtos";
 import type { User } from "./user.model";
-import type { IUserController, IUserService } from "./user.types";
+import type {
+  IUserController,
+  IUserControllerOptions,
+  IUserService,
+} from "./user.types";
 
 /**
  * Controller for handling user-related operations.
  */
 export class UserController implements IUserController {
-  constructor(private readonly _userService: IUserService) {}
+  private static _instance: UserController;
+
+  private constructor(private readonly _userService: IUserService) {}
+
+  public static getInstance(options: IUserControllerOptions): UserController {
+    if (!this._instance) {
+      this._instance = new UserController(options.userService);
+    }
+    return this._instance;
+  }
 
   /**
    * Maps a User object to a response object, omitting the password field.

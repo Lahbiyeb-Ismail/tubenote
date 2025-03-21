@@ -5,13 +5,15 @@ import { UserController } from "./user.controller";
 import { UserRepository } from "./user.repository";
 import { UserService } from "./user.service";
 
-const userRepository = new UserRepository(prismaService);
-const userService = new UserService(
+const userRepository = UserRepository.getInstance({ db: prismaService });
+
+const userService = UserService.getInstance({
   userRepository,
   accountService,
   prismaService,
-  cryptoService
-);
-const userController = new UserController(userService);
+  cryptoService,
+});
+
+const userController = UserController.getInstance({ userService });
 
 export { userController, userService, userRepository };
