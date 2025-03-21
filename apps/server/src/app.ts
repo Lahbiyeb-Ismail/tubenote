@@ -14,7 +14,7 @@ import passport from "passport";
 
 import { authRoutes, oauthRoutes } from "@/modules/auth";
 import noteRoutes from "@/modules/note/note.routes";
-import userRoutes from "@/modules/user/user.routes";
+import { userRoutes } from "@/modules/user";
 import videoRoutes from "@/modules/video/video.routes";
 
 import { errorHandler, notFoundRoute } from "@/middlewares";
