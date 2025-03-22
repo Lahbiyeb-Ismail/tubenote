@@ -17,15 +17,15 @@ import type { ISignTokenDto, IVerifyTokenDto } from "./dtos";
 import type { IJwtService, IJwtServiceOptions } from "./jwt.types";
 
 export class JwtService implements IJwtService {
-  private static instance: JwtService;
+  private static _instance: JwtService;
 
-  constructor(private readonly _loggerService: ILoggerService) {}
+  private constructor(private readonly _loggerService: ILoggerService) {}
 
-  static getInstance(options: IJwtServiceOptions): JwtService {
-    if (!this.instance) {
-      this.instance = new JwtService(options.loggerService);
+  public static getInstance(options: IJwtServiceOptions): JwtService {
+    if (!this._instance) {
+      this._instance = new JwtService(options.loggerService);
     }
-    return this.instance;
+    return this._instance;
   }
 
   async verify(verifyTokenDto: IVerifyTokenDto): Promise<JwtPayload> {

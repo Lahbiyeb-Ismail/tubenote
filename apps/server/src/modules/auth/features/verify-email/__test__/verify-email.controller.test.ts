@@ -7,99 +7,79 @@ import type { IParamTokenDto } from "@/modules/shared/dtos";
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import {
-  IVerifyEmailController,
   IVerifyEmailService,
   VerifyEmailController,
 } from "@/modules/auth/features";
+import { mock, mockReset } from "jest-mock-extended";
 
 describe("VerifyEmailController", () => {
-  let mockResponse: Partial<Response>;
+  const verifyEmailService = mock<IVerifyEmailService>();
+  const verifyEmailController = VerifyEmailController.getInstance({
+    verifyEmailService,
+  });
 
-  let verifyEmailController: IVerifyEmailController;
-  let mockVerifyEmailService: jest.Mocked<IVerifyEmailService>;
+  const res = mock<Response>();
 
   const mockValidToken = "valid-verification-token";
   const mockInvalidToken = "invalid-verification-token";
 
-  const mockValidRequest = {
-    params: {
-      token: mockValidToken,
-    },
-  } as TypedRequest<EmptyRecord, IParamTokenDto>;
-
-  const mockInvalidRequest = {
-    params: {
-      token: mockInvalidToken,
-    },
-  } as TypedRequest<EmptyRecord, IParamTokenDto>;
+  const validReq = mock<TypedRequest<EmptyRecord, IParamTokenDto>>();
+  const inValidReq = mock<TypedRequest<EmptyRecord, IParamTokenDto>>();
 
   beforeEach(() => {
-    mockVerifyEmailService = {
-      verifyUserEmail: jest.fn(),
-      createToken: jest.fn(),
-    };
+    mockReset(verifyEmailService);
 
-    mockResponse = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn().mockReturnThis(),
-    };
+    validReq.params.token = mockValidToken;
+    inValidReq.params.token = mockInvalidToken;
 
-    verifyEmailController = new VerifyEmailController(mockVerifyEmailService);
+    res.status.mockReturnThis();
+    res.json.mockReturnThis();
   });
 
   describe("VerifyEmailController - verifyEmail", () => {
     it("should verify email with a valid token", async () => {
-      await verifyEmailController.verifyEmail(
-        mockValidRequest,
-        mockResponse as Response
-      );
+      await verifyEmailController.verifyEmail(validReq, res);
 
-      expect(mockVerifyEmailService.verifyUserEmail).toHaveBeenCalledWith(
-        mockValidRequest.params.token
+      expect(verifyEmailService.verifyUserEmail).toHaveBeenCalledWith(
+        validReq.params.token
       );
-      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
 
-      expect(mockResponse.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith({
         message: "Email verified successfully.",
       });
     });
 
     it("should throw a BadRequestError if email is already verified", async () => {
       const error = new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED);
-      mockVerifyEmailService.verifyUserEmail.mockRejectedValue(error);
+      verifyEmailService.verifyUserEmail.mockRejectedValue(error);
 
       await expect(
-        verifyEmailController.verifyEmail(
-          mockValidRequest,
-          mockResponse as Response
-        )
+        verifyEmailController.verifyEmail(validReq, res)
       ).rejects.toThrow(error);
 
-      expect(mockVerifyEmailService.verifyUserEmail).toHaveBeenCalledWith(
+      expect(verifyEmailService.verifyUserEmail).toHaveBeenCalledWith(
         mockValidToken
       );
-      expect(mockResponse.status).not.toHaveBeenCalled();
-      expect(mockResponse.json).not.toHaveBeenCalled();
+      expect(res.status).not.toHaveBeenCalled();
+      expect(res.json).not.toHaveBeenCalled();
     });
 
     it("should throw a BadRequestError for an invalid token", async () => {
       const error = new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
 
-      mockVerifyEmailService.verifyUserEmail.mockRejectedValue(error);
+      verifyEmailService.verifyUserEmail.mockRejectedValue(error);
 
       await expect(
-        verifyEmailController.verifyEmail(
-          mockInvalidRequest,
-          mockResponse as Response
-        )
+        verifyEmailController.verifyEmail(inValidReq, res)
       ).rejects.toThrow(error);
 
-      expect(mockVerifyEmailService.verifyUserEmail).toHaveBeenCalledWith(
-        mockInvalidRequest.params.token
+      expect(verifyEmailService.verifyUserEmail).toHaveBeenCalledWith(
+        inValidReq.params.token
       );
 
-      expect(mockResponse.status).not.toHaveBeenCalled();
-      expect(mockResponse.json).not.toHaveBeenCalled();
+      expect(res.status).not.toHaveBeenCalled();
+      expect(res.json).not.toHaveBeenCalled();
     });
 
     it("should throw a BadRequestError for an empty token", async () => {
@@ -109,70 +89,58 @@ describe("VerifyEmailController", () => {
 
       const error = new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
 
-      mockVerifyEmailService.verifyUserEmail.mockRejectedValue(error);
+      verifyEmailService.verifyUserEmail.mockRejectedValue(error);
 
       await expect(
-        verifyEmailController.verifyEmail(
-          mockEmptyTokenRequest,
-          mockResponse as Response
-        )
+        verifyEmailController.verifyEmail(mockEmptyTokenRequest, res)
       ).rejects.toThrow(error);
 
-      expect(mockVerifyEmailService.verifyUserEmail).toHaveBeenCalledWith("");
-      expect(mockResponse.status).not.toHaveBeenCalled();
-      expect(mockResponse.json).not.toHaveBeenCalled();
+      expect(verifyEmailService.verifyUserEmail).toHaveBeenCalledWith("");
+      expect(res.status).not.toHaveBeenCalled();
+      expect(res.json).not.toHaveBeenCalled();
     });
 
     it("should throw a NotFoundError if user is not found", async () => {
       const error = new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
 
-      mockVerifyEmailService.verifyUserEmail.mockRejectedValue(error);
+      verifyEmailService.verifyUserEmail.mockRejectedValue(error);
 
       await expect(
-        verifyEmailController.verifyEmail(
-          mockValidRequest,
-          mockResponse as Response
-        )
+        verifyEmailController.verifyEmail(validReq, res)
       ).rejects.toThrow(error);
 
-      expect(mockVerifyEmailService.verifyUserEmail).toHaveBeenCalledWith(
-        mockValidRequest.params.token
+      expect(verifyEmailService.verifyUserEmail).toHaveBeenCalledWith(
+        validReq.params.token
       );
     });
 
     it("should throw a BadRequestError if token is not found in the database", async () => {
       const error = new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
 
-      mockVerifyEmailService.verifyUserEmail.mockRejectedValue(error);
+      verifyEmailService.verifyUserEmail.mockRejectedValue(error);
 
       await expect(
-        verifyEmailController.verifyEmail(
-          mockInvalidRequest,
-          mockResponse as Response
-        )
+        verifyEmailController.verifyEmail(inValidReq, res)
       ).rejects.toThrow(error);
 
-      expect(mockVerifyEmailService.verifyUserEmail).toHaveBeenCalledWith(
-        mockInvalidRequest.params.token
+      expect(verifyEmailService.verifyUserEmail).toHaveBeenCalledWith(
+        inValidReq.params.token
       );
     });
 
     it("should propagate unexpected errors", async () => {
       const error = new Error("Unexpected error");
-      mockVerifyEmailService.verifyUserEmail.mockRejectedValue(error);
+      verifyEmailService.verifyUserEmail.mockRejectedValue(error);
 
       await expect(
-        verifyEmailController.verifyEmail(
-          mockValidRequest,
-          mockResponse as Response
-        )
+        verifyEmailController.verifyEmail(validReq, res)
       ).rejects.toThrow(error);
 
-      expect(mockVerifyEmailService.verifyUserEmail).toHaveBeenCalledWith(
+      expect(verifyEmailService.verifyUserEmail).toHaveBeenCalledWith(
         mockValidToken
       );
-      expect(mockResponse.status).not.toHaveBeenCalled();
-      expect(mockResponse.json).not.toHaveBeenCalled();
+      expect(res.status).not.toHaveBeenCalled();
+      expect(res.json).not.toHaveBeenCalled();
     });
   });
 });

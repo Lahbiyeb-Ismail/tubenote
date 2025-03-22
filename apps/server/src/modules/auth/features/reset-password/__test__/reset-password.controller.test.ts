@@ -1,5 +1,6 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
+import { mock, mockReset } from "jest-mock-extended";
 
 import type { TypedRequest } from "@/modules/shared/types";
 
@@ -10,166 +11,124 @@ import type {
 } from "@/modules/shared/dtos";
 
 import {
-  IResetPasswordController,
   IResetPasswordService,
   ResetPasswordController,
 } from "@/modules/auth/features";
 
-describe("ResetPassowrdController", () => {
-  let resetPasswordController: IResetPasswordController;
-  let mockResponse: Partial<Response>;
+describe("ResetPasswordController", () => {
+  // Mock the reset password service
+  const resetPasswordService = mock<IResetPasswordService>();
 
-  // Mock the refresh token service
-  let mockResetPasswordService: jest.Mocked<IResetPasswordService>;
+  const resetPasswordController = ResetPasswordController.getInstance({
+    resetPasswordService,
+  });
+
+  const forgotReq = mock<TypedRequest<IEmailBodyDto>>();
+  const resetReq = mock<TypedRequest<IPasswordBodyDto, IParamTokenDto>>();
+  const verifyReq = mock<TypedRequest<{}, IParamTokenDto>>();
+
+  const res = mock<Response>();
 
   const mockEmail = "user@test.com";
   const mockNewPassword = "newpassword";
   const mockResetToken = "reset-password-token";
 
   beforeEach(() => {
-    mockResetPasswordService = {
-      resetPassword: jest.fn(),
-      sendResetToken: jest.fn(),
-      verifyResetToken: jest.fn(),
-    };
+    mockReset(resetPasswordService);
 
-    // Create controller instance
-    resetPasswordController = new ResetPasswordController(
-      mockResetPasswordService
-    );
+    forgotReq.body = { email: mockEmail };
+    resetReq.body = { password: mockNewPassword };
+    resetReq.params = { token: mockResetToken };
+    verifyReq.params = { token: mockResetToken };
 
-    // Mock response object
-    mockResponse = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn().mockReturnThis(),
-    };
+    res.status.mockReturnThis();
+    res.json.mockReturnThis();
   });
 
   describe("ResetPasswordController - forgotPassword", () => {
-    const mockRequest = {
-      body: {
-        email: mockEmail,
-      },
-    } as TypedRequest<IEmailBodyDto>;
-
     it("should successfully send a forgot password email", async () => {
-      mockResetPasswordService.sendResetToken.mockResolvedValue(undefined);
+      resetPasswordService.sendResetToken.mockResolvedValue(undefined);
 
       // Act
-      await resetPasswordController.forgotPassword(
-        mockRequest as TypedRequest<IEmailBodyDto>,
-        mockResponse as Response
-      );
+      await resetPasswordController.forgotPassword(forgotReq, res);
 
       // Assert
-      expect(mockResetPasswordService.sendResetToken).toHaveBeenCalledWith(
+      expect(resetPasswordService.sendResetToken).toHaveBeenCalledWith(
         mockEmail
       );
 
-      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
 
-      expect(mockResponse.json).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalled();
     });
 
     it("should propagate sendResetToken service errors", async () => {
       const error = new Error("Something went wrong");
 
-      mockResetPasswordService.sendResetToken.mockRejectedValue(error);
+      resetPasswordService.sendResetToken.mockRejectedValue(error);
 
       // Act
       await expect(
-        resetPasswordController.forgotPassword(
-          mockRequest as TypedRequest<IEmailBodyDto>,
-          mockResponse as Response
-        )
+        resetPasswordController.forgotPassword(forgotReq, res)
       ).rejects.toThrow(error);
     });
   });
 
   describe("ResetPasswordController - resetPassword", () => {
-    const mockRequest = {
-      body: {
-        password: mockNewPassword,
-      },
-      params: {
-        token: mockResetToken,
-      },
-    } as TypedRequest<IPasswordBodyDto, IParamTokenDto>;
-
     it("should successfully reset password", async () => {
-      mockResetPasswordService.resetPassword.mockResolvedValue(undefined);
+      resetPasswordService.resetPassword.mockResolvedValue(undefined);
 
       // Act
-      await resetPasswordController.resetPassword(
-        mockRequest as TypedRequest<IPasswordBodyDto, IParamTokenDto>,
-        mockResponse as Response
-      );
+      await resetPasswordController.resetPassword(resetReq, res);
 
       // Assert
-      expect(mockResetPasswordService.resetPassword).toHaveBeenCalledWith(
-        mockResetToken,
-        mockNewPassword
+      expect(resetPasswordService.resetPassword).toHaveBeenCalledWith(
+        resetReq.params.token,
+        resetReq.body.password
       );
 
-      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
 
-      expect(mockResponse.json).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalled();
     });
 
     it("should handle error if the resetPassword service method fails", async () => {
       const error = new Error("Something went wrong");
 
-      mockResetPasswordService.resetPassword.mockRejectedValue(error);
+      resetPasswordService.resetPassword.mockRejectedValue(error);
 
       // Act
       await expect(
-        resetPasswordController.resetPassword(
-          mockRequest as TypedRequest<IPasswordBodyDto, IParamTokenDto>,
-          mockResponse as Response
-        )
+        resetPasswordController.resetPassword(resetReq, res)
       ).rejects.toThrow(error);
     });
   });
 
   describe("ResetPasswordController - verifyResetToken", () => {
-    const mockRequest = {
-      params: {
-        token: mockResetToken,
-      },
-    } as TypedRequest<{}, IParamTokenDto>;
-
     it("should successfully verify the provided reset token", async () => {
-      mockResetPasswordService.verifyResetToken.mockResolvedValue(
-        mockResetToken
-      );
+      resetPasswordService.verifyResetToken.mockResolvedValue(mockResetToken);
 
       // Act
-      await resetPasswordController.verifyResetToken(
-        mockRequest as TypedRequest<{}, IParamTokenDto>,
-        mockResponse as Response
-      );
+      await resetPasswordController.verifyResetToken(verifyReq, res);
 
       // Assert
-      expect(mockResetPasswordService.verifyResetToken).toHaveBeenCalledWith(
-        mockResetToken
+      expect(resetPasswordService.verifyResetToken).toHaveBeenCalledWith(
+        verifyReq.params.token
       );
 
-      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
 
-      expect(mockResponse.json).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalled();
     });
 
     it("should handle error if the verifyResetToken service method fails", async () => {
       const error = new Error("Something went wrong");
 
-      mockResetPasswordService.verifyResetToken.mockRejectedValue(error);
+      resetPasswordService.verifyResetToken.mockRejectedValue(error);
 
       // Act
       await expect(
-        resetPasswordController.verifyResetToken(
-          mockRequest as TypedRequest<{}, IParamTokenDto>,
-          mockResponse as Response
-        )
+        resetPasswordController.verifyResetToken(verifyReq, res)
       ).rejects.toThrow(error);
     });
   });

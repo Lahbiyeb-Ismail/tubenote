@@ -1,37 +1,40 @@
+import { mock, mockReset } from "jest-mock-extended";
+
 import { AuthService, ILogoutDto, IRefreshTokenService } from "@/modules/auth";
 
 describe("AuthService", () => {
-  let authService: AuthService;
-  let mockRefreshTokenService: jest.Mocked<IRefreshTokenService>;
+  const refreshTokenService = mock<IRefreshTokenService>();
+
+  const authService = AuthService.getInstance({
+    refreshTokenService,
+  });
 
   beforeEach(() => {
-    mockRefreshTokenService = {
-      deleteAllTokens: jest.fn(),
-      refreshToken: jest.fn(),
-      createToken: jest.fn(),
-    };
-
-    authService = new AuthService(mockRefreshTokenService);
+    mockReset(refreshTokenService);
   });
 
   describe("AuthService - logoutUser", () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
     const validLogoutDto: ILogoutDto = {
       userId: "user-123",
       refreshToken: "refresh-token-123",
     };
 
     it("should successfully logout user and delete all refresh tokens", async () => {
-      mockRefreshTokenService.deleteAllTokens.mockResolvedValue();
+      refreshTokenService.deleteAllTokens.mockResolvedValue(undefined);
 
       await authService.logoutUser(validLogoutDto);
 
-      expect(mockRefreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
+      expect(refreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
         validLogoutDto.userId
       );
     });
 
     it("should handle errors from refresh token service", async () => {
-      mockRefreshTokenService.deleteAllTokens.mockRejectedValue(
+      refreshTokenService.deleteAllTokens.mockRejectedValue(
         new Error("Database error")
       );
 

@@ -5,11 +5,11 @@ import { refreshTokenController } from "./refresh-token.module";
 
 const refreshTokenRoutes = Router();
 
+refreshTokenRoutes.use(isAuthenticated);
+
 // - POST /refresh: Refresh the user's access token.
 refreshTokenRoutes
   .route("/refresh")
-  .post(isAuthenticated, (req, res) =>
-    refreshTokenController.refreshToken(req, res)
-  );
+  .post((req, res) => refreshTokenController.refreshToken(req, res));
 
 export { refreshTokenRoutes };

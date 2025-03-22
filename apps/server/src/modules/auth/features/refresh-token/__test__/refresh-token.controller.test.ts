@@ -20,22 +20,19 @@ import type { IAuthResponseDto } from "@/modules/auth/dtos";
 
 import { RefreshTokenController } from "../refresh-token.controller";
 
-import type {
-  IRefreshTokenController,
-  IRefreshTokenService,
-} from "../refresh-token.types";
+import { mock, mockReset } from "jest-mock-extended";
+import type { IRefreshTokenService } from "../refresh-token.types";
 
 describe("RefreshTokenController", () => {
-  let refreshTokenController: IRefreshTokenController;
-  let mockRequest: Partial<TypedRequest>;
-  let mockResponse: Partial<Response>;
-
   // Mock the refresh token service
-  const mockRefreshTokenService: jest.Mocked<IRefreshTokenService> = {
-    createToken: jest.fn(),
-    deleteAllTokens: jest.fn(),
-    refreshToken: jest.fn(),
-  };
+  const refreshTokenService = mock<IRefreshTokenService>();
+
+  const refreshTokenController = RefreshTokenController.getInstance({
+    refreshTokenService,
+  });
+
+  const req = mock<TypedRequest>();
+  const res = mock<Response>();
 
   const mockUserId = "test-user-id";
   const mockRefreshToken = "valid-refresh-token";
@@ -46,61 +43,51 @@ describe("RefreshTokenController", () => {
   };
 
   beforeEach(() => {
-    // Create controller instance
-    refreshTokenController = new RefreshTokenController(
-      mockRefreshTokenService
-    );
+    mockReset(refreshTokenService);
 
     // Mock request object
-    mockRequest = {
-      cookies: {},
-      userId: mockUserId,
-    };
+    req.cookies = {};
+    req.userId = mockUserId;
 
     // Mock response object
-    mockResponse = {
-      clearCookie: jest.fn().mockReturnThis(),
-      cookie: jest.fn().mockReturnThis(),
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn().mockReturnThis(),
-      header: jest.fn().mockReturnThis(),
-    };
+    res.clearCookie.mockReturnThis();
+    res.cookie.mockReturnThis();
+    res.status.mockReturnThis();
+    res.json.mockReturnThis();
+    res.header.mockReturnThis();
   });
 
   describe("RefreshTokenController - refreshToken", () => {
     it("should successfully refresh tokens when valid refresh token is provided", async () => {
-      mockRequest.cookies = {
+      req.cookies = {
         [REFRESH_TOKEN_NAME]: mockRefreshToken,
       };
 
-      mockRefreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
+      refreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
 
       // Act
-      await refreshTokenController.refreshToken(
-        mockRequest as TypedRequest,
-        mockResponse as Response
-      );
+      await refreshTokenController.refreshToken(req, res);
 
       // Assert
-      expect(mockRefreshTokenService.refreshToken).toHaveBeenCalledWith({
+      expect(refreshTokenService.refreshToken).toHaveBeenCalledWith({
         token: mockRefreshToken,
         userId: mockUserId,
       });
 
-      expect(mockResponse.clearCookie).toHaveBeenCalledWith(
+      expect(res.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
         clearRefreshTokenCookieConfig
       );
 
-      expect(mockResponse.cookie).toHaveBeenCalledWith(
+      expect(res.cookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
         mockNewTokens.refreshToken,
         refreshTokenCookieConfig
       );
 
-      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
 
-      expect(mockResponse.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith({
         accessToken: mockNewTokens.accessToken,
       });
     });
@@ -112,13 +99,10 @@ describe("RefreshTokenController", () => {
         cookies: { [REFRESH_TOKEN_NAME]: "" },
       },
     ])("should throw UnauthorizedError when $scenario", async ({ cookies }) => {
-      mockRequest.cookies = cookies;
+      req.cookies = cookies;
 
       await expect(
-        refreshTokenController.refreshToken(
-          mockRequest as TypedRequest,
-          mockResponse as Response
-        )
+        refreshTokenController.refreshToken(req, res)
       ).rejects.toThrow(new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED));
     });
 
@@ -127,62 +111,50 @@ describe("RefreshTokenController", () => {
       const mockRefreshToken = "valid-refresh-token";
       const mockError = new Error("Service error");
 
-      mockRequest.cookies = {
+      req.cookies = {
         [REFRESH_TOKEN_NAME]: mockRefreshToken,
       };
 
-      mockRefreshTokenService.refreshToken.mockRejectedValue(mockError);
+      refreshTokenService.refreshToken.mockRejectedValue(mockError);
 
       // Act
       await expect(
-        refreshTokenController.refreshToken(
-          mockRequest as TypedRequest,
-          mockResponse as Response
-        )
+        refreshTokenController.refreshToken(req, res)
       ).rejects.toThrow(mockError);
 
       // Assert
-      expect(mockResponse.clearCookie).toHaveBeenCalledWith(
+      expect(res.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
         clearRefreshTokenCookieConfig
       );
     });
 
     it("should handle non-string refresh token values", async () => {
-      mockRequest.cookies = {
+      req.cookies = {
         [REFRESH_TOKEN_NAME]: [123, "invalid"] as unknown as string,
       };
 
       await expect(
-        refreshTokenController.refreshToken(
-          mockRequest as TypedRequest,
-          mockResponse as Response
-        )
+        refreshTokenController.refreshToken(req, res)
       ).rejects.toThrow(UnauthorizedError);
 
-      expect(mockResponse.clearCookie).toHaveBeenCalled();
+      expect(res.clearCookie).toHaveBeenCalled();
     });
 
     it("should handle multiple concurrent refresh attempts", async () => {
-      mockRequest.cookies = { [REFRESH_TOKEN_NAME]: mockRefreshToken };
+      req.cookies = { [REFRESH_TOKEN_NAME]: mockRefreshToken };
 
       // First attempt
-      mockRefreshTokenService.refreshToken.mockResolvedValueOnce(mockNewTokens);
+      refreshTokenService.refreshToken.mockResolvedValueOnce(mockNewTokens);
 
-      await refreshTokenController.refreshToken(
-        mockRequest as TypedRequest,
-        mockResponse as Response
-      );
+      await refreshTokenController.refreshToken(req, res);
 
       // Second concurrent attempt with same token
-      mockRefreshTokenService.refreshToken.mockRejectedValueOnce(
+      refreshTokenService.refreshToken.mockRejectedValueOnce(
         new ForbiddenError(ERROR_MESSAGES.FORBIDDEN)
       );
       await expect(
-        refreshTokenController.refreshToken(
-          mockRequest as TypedRequest,
-          mockResponse as Response
-        )
+        refreshTokenController.refreshToken(req, res)
       ).rejects.toThrow(ForbiddenError);
     });
 
@@ -194,60 +166,48 @@ describe("RefreshTokenController", () => {
       ];
 
       for (const token of malformedTokens) {
-        mockRequest.cookies = { [REFRESH_TOKEN_NAME]: token };
-        mockRefreshTokenService.refreshToken.mockRejectedValue(
+        req.cookies = { [REFRESH_TOKEN_NAME]: token };
+        refreshTokenService.refreshToken.mockRejectedValue(
           new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN)
         );
 
         await expect(
-          refreshTokenController.refreshToken(
-            mockRequest as TypedRequest,
-            mockResponse as Response
-          )
+          refreshTokenController.refreshToken(req, res)
         ).rejects.toThrow(BadRequestError);
       }
     });
 
     it("should maintain cookie consistency after multiple operations", async () => {
       // First successful refresh
-      mockRequest.cookies = { [REFRESH_TOKEN_NAME]: mockRefreshToken };
+      req.cookies = { [REFRESH_TOKEN_NAME]: mockRefreshToken };
 
-      mockRefreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
+      refreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
 
-      await refreshTokenController.refreshToken(
-        mockRequest as TypedRequest,
-        mockResponse as Response
-      );
+      await refreshTokenController.refreshToken(req, res);
 
       // Subsequent request with new token
-      mockRequest.cookies = {
+      req.cookies = {
         [REFRESH_TOKEN_NAME]: mockNewTokens.refreshToken,
       };
 
-      mockRefreshTokenService.refreshToken.mockResolvedValue({
+      refreshTokenService.refreshToken.mockResolvedValue({
         accessToken: "another-access-token",
         refreshToken: "another-refresh-token",
       });
 
-      await refreshTokenController.refreshToken(
-        mockRequest as TypedRequest,
-        mockResponse as Response
-      );
+      await refreshTokenController.refreshToken(req, res);
 
-      expect(mockResponse.clearCookie).toHaveBeenCalledTimes(4);
-      expect(mockResponse.cookie).toHaveBeenCalledTimes(2);
+      expect(res.clearCookie).toHaveBeenCalledTimes(4);
+      expect(res.cookie).toHaveBeenCalledTimes(2);
     });
 
     it("should validate cookie security configurations", async () => {
-      mockRequest.cookies = { [REFRESH_TOKEN_NAME]: mockRefreshToken };
-      mockRefreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
+      req.cookies = { [REFRESH_TOKEN_NAME]: mockRefreshToken };
+      refreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
 
-      await refreshTokenController.refreshToken(
-        mockRequest as TypedRequest,
-        mockResponse as Response
-      );
+      await refreshTokenController.refreshToken(req, res);
 
-      expect(mockResponse.cookie).toHaveBeenCalledWith(
+      expect(res.cookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
         mockNewTokens.refreshToken,
         expect.objectContaining({

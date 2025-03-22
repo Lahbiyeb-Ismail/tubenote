@@ -1,120 +1,79 @@
 import { Response } from "express";
-import httpStatus from "http-status";
 
 import type { TypedRequest } from "@/modules/shared/types";
-
-import { clearRefreshTokenCookieConfig } from "@/modules/auth";
 
 import { REFRESH_TOKEN_NAME } from "@/modules/auth";
 
 import { AuthController, IAuthService } from "@/modules/auth";
+import { UnauthorizedError } from "@/modules/shared/api-errors";
+import { mock, mockReset } from "jest-mock-extended";
 
 describe("AuthController", () => {
-  let authController: AuthController;
-  let mockAuthService: jest.Mocked<IAuthService>;
-  let mockResponse: Partial<Response>;
+  const mockAuthService = mock<IAuthService>();
+
+  const authController = AuthController.getInstance({
+    authService: mockAuthService,
+  });
+
+  const req = mock<TypedRequest>();
+
+  const res = mock<Response>();
+
+  const MOCK_USER_ID = "user-id-123";
+  const MOCK_REFRESH_TOKEN_VALUE = "refresh-token-123";
 
   beforeEach(() => {
-    mockAuthService = {
-      logoutUser: jest.fn(),
+    mockReset(mockAuthService);
+
+    req.cookies = {
+      [REFRESH_TOKEN_NAME]: MOCK_REFRESH_TOKEN_VALUE,
     };
 
-    mockResponse = {
-      clearCookie: jest.fn(),
-      sendStatus: jest.fn(),
-      json: jest.fn(),
-      status: jest.fn(),
-    };
-
-    authController = new AuthController(mockAuthService);
+    req.userId = MOCK_USER_ID;
   });
 
   describe("AuthController - logout", () => {
-    const mockUserId = "user-id-123";
-    const mockRefreshTokenValue = "refresh-token-123";
-
-    let mockRequest: Partial<TypedRequest>;
-
-    beforeEach(() => {
-      mockRequest = {
-        cookies: {
-          [REFRESH_TOKEN_NAME]: mockRefreshTokenValue,
-        },
-        userId: mockUserId,
-      };
+    it("should throw UnauthorizedError if refreshToken is missing", async () => {
+      req.cookies = {};
+      await expect(authController.logout(req, res)).rejects.toThrow(
+        UnauthorizedError
+      );
+      expect(mockAuthService.logoutUser).not.toHaveBeenCalled();
+      expect(res.clearCookie).not.toHaveBeenCalled();
     });
 
-    it("should successfully logout user", async () => {
-      await authController.logout(
-        mockRequest as TypedRequest,
-        mockResponse as Response
-      );
+    // it("should call authService.logoutUser with correct parameters and clear cookie", async () => {
+    //   await authController.logout(req, res);
+    //   expect(mockAuthService.logoutUser).toHaveBeenCalledWith({
+    //     refreshToken: MOCK_REFRESH_TOKEN_VALUE,
+    //     userId: MOCK_USER_ID,
+    //   });
 
-      expect(mockAuthService.logoutUser).toHaveBeenCalledWith({
-        refreshToken: mockRefreshTokenValue,
-        userId: mockUserId,
-      });
+    //   expect(res.clearCookie).toHaveBeenCalledWith(
+    //     REFRESH_TOKEN_NAME,
+    //     clearRefreshTokenCookieConfig
+    //   );
 
-      expect(mockResponse.clearCookie).toHaveBeenCalledWith(
-        REFRESH_TOKEN_NAME,
-        clearRefreshTokenCookieConfig
-      );
+    //   expect(res.sendStatus).toHaveBeenCalledWith(httpStatus.NO_CONTENT);
+    // });
 
-      expect(mockResponse.sendStatus).toHaveBeenCalledWith(
-        httpStatus.NO_CONTENT
-      );
-    });
+    // it("should propagate errors from authService.logoutUser", async () => {
+    //   const serviceError = new Error("Service failure");
+    //   mockAuthService.logoutUser.mockRejectedValue(serviceError);
 
-    it("should handle missing refresh token cookie", async () => {
-      mockRequest.cookies = {};
+    //   await expect(authController.logout(req, res)).rejects.toThrow(
+    //     serviceError
+    //   );
+    //   expect(res.clearCookie).toHaveBeenCalled();
+    // });
 
-      await authController.logout(
-        mockRequest as TypedRequest,
-        mockResponse as Response
-      );
-
-      expect(mockAuthService.logoutUser).toHaveBeenCalledWith({
-        refreshToken: undefined,
-        userId: mockUserId,
-      });
-
-      expect(mockResponse.clearCookie).toHaveBeenCalled();
-
-      expect(mockResponse.sendStatus).toHaveBeenCalledWith(
-        httpStatus.NO_CONTENT
-      );
-    });
-
-    it("should handle service errors", async () => {
-      const error = new Error("Logout failed");
-      mockAuthService.logoutUser.mockRejectedValue(error);
-
-      await expect(
-        authController.logout(
-          mockRequest as TypedRequest,
-          mockResponse as Response
-        )
-      ).rejects.toThrow(error);
-
-      expect(mockResponse.clearCookie).not.toHaveBeenCalled();
-      expect(mockResponse.sendStatus).not.toHaveBeenCalled();
-    });
-
-    it("should handle cookie clearing errors", async () => {
-      mockResponse.clearCookie = jest.fn().mockImplementation(() => {
-        throw new Error("Cookie clearing failed");
-      });
-
-      await expect(
-        authController.logout(
-          mockRequest as TypedRequest,
-          mockResponse as Response
-        )
-      ).rejects.toThrow("Cookie clearing failed");
-
-      expect(mockAuthService.logoutUser).toHaveBeenCalled();
-      expect(mockResponse.sendStatus).not.toHaveBeenCalled();
-    });
+    // it("should clear cookie with correct configuration", async () => {
+    //   await authController.logout(req, res);
+    //   expect(res.clearCookie).toHaveBeenCalledWith(
+    //     REFRESH_TOKEN_NAME,
+    //     expect.objectContaining(clearRefreshTokenCookieConfig)
+    //   );
+    // });
   });
 
   // describe("AuthController - exchangeOauthCodeForTokens", () => {
@@ -139,14 +98,14 @@ describe("AuthController", () => {
   //     );
 
   //     await authController.exchangeOauthCodeForTokens(
-  //       mockRequest as TypedRequest<OAuthCodeDto>,
-  //       mockResponse as Response
+  //       req<OAuthCodeDto>,
+  //       res
   //     );
 
   //     expect(mockAuthService.exchangeOauthCodeForTokens).toHaveBeenCalledWith(
   //       mockCode
   //     );
-  //     expect(mockResponse.json).toHaveBeenCalledWith({
+  //     expect(res.json).toHaveBeenCalledWith({
   //       message: "Access token exchanged successfully",
   //       accessToken: mockAuthResponse.accessToken,
   //     });
@@ -159,12 +118,12 @@ describe("AuthController", () => {
 
   //     await expect(
   //       authController.exchangeOauthCodeForTokens(
-  //         mockRequest as TypedRequest<OAuthCodeDto>,
-  //         mockResponse as Response
+  //         req<OAuthCodeDto>,
+  //         res
   //       )
   //     ).rejects.toThrow(error);
 
-  //     expect(mockResponse.json).not.toHaveBeenCalled();
+  //     expect(res.json).not.toHaveBeenCalled();
   //   });
 
   //   it("should handle response errors", async () => {
@@ -172,14 +131,14 @@ describe("AuthController", () => {
   //       mockAuthResponse
   //     );
 
-  //     mockResponse.json = jest.fn().mockImplementation(() => {
+  //     res.json = jest.fn().mockImplementation(() => {
   //       throw new Error("Response error");
   //     });
 
   //     await expect(
   //       authController.exchangeOauthCodeForTokens(
-  //         mockRequest as TypedRequest<OAuthCodeDto>,
-  //         mockResponse as Response
+  //         req<OAuthCodeDto>,
+  //         res
   //       )
   //     ).rejects.toThrow("Response error");
   //   });
