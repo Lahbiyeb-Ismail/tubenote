@@ -1,3 +1,5 @@
+import { mock, mockReset } from "jest-mock-extended";
+
 import {
   // BadRequestError,
   // ConflictError,
@@ -17,16 +19,21 @@ import type {
 } from "../dtos";
 import type { IAccountService } from "../features/account/account.types";
 import type { User } from "../user.model";
-import type { IUserRepository, IUserService } from "../user.types";
+import type { IUserRepository } from "../user.types";
 // import type { ICreateAccountDto } from "../features/account/dtos";
 
 describe("UserService", () => {
-  let userService: IUserService;
-  let mockUserRepository: IUserRepository;
-  let mockAccountService: IAccountService;
-  let mockCryptoService: ICryptoService;
+  const mockUserRepository = mock<IUserRepository>();
+  const mockAccountService = mock<IAccountService>();
+  const mockCryptoService = mock<ICryptoService>();
+  const mockPrismaService = mock<IPrismaService>();
 
-  let mockPrismaService: Partial<IPrismaService>;
+  const userService = UserService.getInstance({
+    userRepository: mockUserRepository,
+    accountService: mockAccountService,
+    prismaService: mockPrismaService,
+    cryptoService: mockCryptoService,
+  });
 
   const mockUserId = "user_id_001";
   const mockUserEmail = "test@example.com";
@@ -43,42 +50,10 @@ describe("UserService", () => {
   };
 
   beforeEach(() => {
-    mockUserRepository = {
-      create: jest.fn(),
-      update: jest.fn(),
-      getByEmail: jest.fn(),
-      getById: jest.fn(),
-      updatePassword: jest.fn(),
-      verifyEmail: jest.fn(),
-    };
-
-    mockPrismaService = {
-      transaction: jest.fn(),
-    };
-
-    mockAccountService = {
-      createAccount: jest.fn(),
-      deleteAccount: jest.fn(),
-      findAccountById: jest.fn(),
-      findAccountByProvider: jest.fn(),
-      findAccountsByUserId: jest.fn(),
-      linkAccountToUser: jest.fn(),
-    };
-
-    mockCryptoService = {
-      hashPassword: jest.fn(),
-      comparePasswords: jest.fn(),
-      generateRandomSecureToken: jest.fn(),
-      hashToken: jest.fn(),
-    };
-
-    userService = new UserService(
-      mockUserRepository,
-      mockAccountService,
-      mockPrismaService as IPrismaService,
-      mockCryptoService
-    );
-    jest.clearAllMocks();
+    mockReset(mockUserRepository);
+    mockReset(mockAccountService);
+    mockReset(mockCryptoService);
+    mockReset(mockPrismaService);
   });
 
   // describe("UserService - createUser", () => {
@@ -250,6 +225,8 @@ describe("UserService", () => {
   // });
 
   describe("UserService - getUserByIdOrEmail", () => {
+    afterEach(() => jest.clearAllMocks());
+
     it("should return user by ID", async () => {
       (mockUserRepository.getById as jest.Mock).mockResolvedValue(mockUser);
 
