@@ -1,3 +1,5 @@
+import { mock, mockReset } from "jest-mock-extended";
+
 import { NotFoundError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
@@ -12,33 +14,20 @@ import type {
 import type { IPrismaService } from "@/modules/shared/services";
 import type { Note } from "../note.model";
 import { NoteService } from "../note.service";
-import type { INoteRepository, INoteService } from "../note.types";
+import type { INoteRepository } from "../note.types";
 
 describe("NoteService methods test", () => {
-  let noteService: INoteService;
-  let mockNoteRepository: jest.Mocked<INoteRepository>;
+  const mockNoteRepository = mock<INoteRepository>();
+  const mockPrismaService = mock<IPrismaService>();
 
-  let mockPrismaService: Partial<IPrismaService>;
+  const noteService = NoteService.getInstance({
+    noteRepository: mockNoteRepository,
+    prismaService: mockPrismaService,
+  });
 
   beforeEach(() => {
-    mockNoteRepository = {
-      find: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      findMany: jest.fn(),
-      findManyByVideoId: jest.fn(),
-      count: jest.fn(),
-    };
-
-    mockPrismaService = {
-      transaction: jest.fn(),
-    };
-
-    noteService = new NoteService(
-      mockNoteRepository,
-      mockPrismaService as IPrismaService
-    );
+    mockReset(mockNoteRepository);
+    mockReset(mockPrismaService);
   });
 
   const mockUserId = "user_id_001";
@@ -100,10 +89,6 @@ describe("NoteService methods test", () => {
       content: "This is an updated note.",
     },
   };
-
-  beforeAll(() => {
-    jest.clearAllMocks();
-  });
 
   describe("NoteService - findNote", () => {
     beforeEach(() => {
