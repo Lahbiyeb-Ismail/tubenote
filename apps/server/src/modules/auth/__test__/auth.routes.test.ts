@@ -4,6 +4,34 @@ import request from "supertest";
 import app from "@/app";
 import { authController } from "../auth.module";
 
+const MOCK_USER_ID = "user_id_001";
+
+// **********************************************
+// MOCK THE JSONWEBTOKEN MODULE TO SIMULATE TOKEN VERIFICATION
+// **********************************************
+jest.mock("jsonwebtoken", () => {
+  // Get the actual module to spread the rest of its exports.
+  const actualJwt = jest.requireActual("jsonwebtoken");
+  return {
+    ...actualJwt,
+    verify: jest.fn(
+      (
+        token: string,
+        _secret: string,
+        callback: (err: Error | null, payload?: any) => void
+      ) => {
+        if (token === "valid-token") {
+          // Simulate a successful verification with a payload.
+          callback(null, { userId: MOCK_USER_ID });
+        } else {
+          // Simulate an error during verification.
+          callback(new Error("Invalid token"), null);
+        }
+      }
+    ),
+  };
+});
+
 describe("Auth Routes", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -165,6 +193,7 @@ describe("Auth Routes", () => {
     it("should handle non-existent routes", async () => {
       await request(app)
         .post("/api/v1/auth/non-existent-route")
+        .set("Authorization", "Bearer valid-token")
         .expect(httpStatus.NOT_FOUND);
     });
   });
