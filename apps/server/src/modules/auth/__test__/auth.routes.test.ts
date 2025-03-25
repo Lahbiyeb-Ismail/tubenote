@@ -1,8 +1,10 @@
+import type { Request, Response } from "express";
 import httpStatus from "http-status";
 import request from "supertest";
 
 import app from "@/app";
 import { authController } from "../auth.module";
+import { REFRESH_TOKEN_NAME } from "../constants";
 
 const MOCK_USER_ID = "user_id_001";
 
@@ -37,83 +39,80 @@ describe("Auth Routes", () => {
     jest.clearAllMocks();
 
     // Mock authController methods
-    // (authController.exchangeOauthCodeForTokens as jest.Mock) = jest.fn();
     (authController.logout as jest.Mock) = jest.fn();
   });
 
-  // describe("POST /api/v1/auth/exchange-oauth-code", () => {
-  //   const validCode = "valid-oauth-code";
-
-  //   const mockResponse = {
-  //     message: "Access token exchanged successfully",
-  //     accessToken: "mock-access-token",
-  //   };
-
-  //   it("should successfully exchange OAuth code for tokens", async () => {
-  //     (
-  //       authController.exchangeOauthCodeForTokens as jest.Mock
-  //     ).mockImplementation((_req, res) => res.json(mockResponse));
-
-  //     const response = await request(app)
-  //       .post("/api/v1/auth/exchange-oauth-code")
-  //       .send({ code: validCode })
-  //       .expect("Content-Type", /json/);
-
-  //     expect(response.statusCode).toBe(httpStatus.OK);
-
-  //     expect(response.body).toEqual(mockResponse);
-  //   });
-
-  //   it("should throw a BadRequestError for missing code in request body", async () => {
-  //     const response = await request(app)
-  //       .post("/api/v1/auth/exchange-oauth-code")
-  //       .send({});
-
-  //     expect(response.statusCode).toBe(httpStatus.BAD_REQUEST);
-
-  //     expect(response.body.error.name).toBe("BAD_REQUEST");
-  //   });
-
-  //   it("should handle controller errors", async () => {
-  //     (
-  //       authController.exchangeOauthCodeForTokens as jest.Mock
-  //     ).mockImplementation(() => {
-  //       throw new Error("Exchange failed");
-  //     });
-
-  //     const response = await request(app)
-  //       .post("/api/v1/auth/exchange-oauth-code")
-  //       .send({ code: validCode });
-
-  //     expect(response.statusCode).toBe(httpStatus.INTERNAL_SERVER_ERROR);
-  //   });
-
-  //   it("should throw a BadRequestError for a invalid code format", async () => {
-  //     const response = await request(app)
-  //       .post("/api/v1/auth/exchange-oauth-code")
-  //       .send({ code: 123 }); // Invalid type
-
-  //     expect(response.statusCode).toBe(httpStatus.BAD_REQUEST);
-  //   });
-  // });
-
   describe("POST /api/v1/auth/logout", () => {
-    it("should reject unauthorized logout request", async () => {
+    it("should log out the user if authenticated", async () => {
+      (authController.logout as jest.Mock).mockImplementation(
+        async (_req, res: Response) => {
+          res.clearCookie(REFRESH_TOKEN_NAME);
+          res.sendStatus(httpStatus.NO_CONTENT);
+        }
+      );
+
+      // Arrange: provide a valid Authorization header and cookie.
+      const res = await request(app)
+        .post("/api/v1/auth/logout")
+        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${REFRESH_TOKEN_NAME}=valid-refresh-token`]);
+
+      // Assert: authController.logout should have been called and the response should be 204.
+      expect(authController.logout).toHaveBeenCalled();
+      expect(res.status).toBe(httpStatus.NO_CONTENT);
+    });
+
+    it("should return 401 Unauthorized if not authenticated", async () => {
       await request(app)
         .post("/api/v1/auth/logout")
         .expect(httpStatus.UNAUTHORIZED);
+    });
+
+    it("should propagate errors from authController.logout", async () => {
+      // Arrange: force authController.logout to throw an error.
+      (authController.logout as jest.Mock).mockImplementationOnce(
+        async (_req: Request, _res: Response) => {
+          throw new Error("Logout error");
+        }
+      );
+
+      const res = await request(app)
+        .post("/api/v1/auth/logout")
+        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${REFRESH_TOKEN_NAME}=valid-refresh-token`]);
+
+      expect(res.status).toBe(httpStatus.INTERNAL_SERVER_ERROR);
+      expect(res.body.error).toHaveProperty("message", "Logout error");
+    });
+
+    it("should use the isAuthenticated middleware to attach userId", async () => {
+      (authController.logout as jest.Mock).mockImplementation(
+        async (req: Request, res: Response) => {
+          // Assert: the userId should be attached to the request.
+          expect(req.userId).toBe(MOCK_USER_ID);
+
+          res.clearCookie(REFRESH_TOKEN_NAME);
+          res.sendStatus(httpStatus.NO_CONTENT);
+        }
+      );
+
+      // Arrange: send a request with a valid token and check that the logout
+      // function receives a userId (mocked via our isAuthenticated).
+      // We simulate this by checking that authController.logout is called with a request having userId.
+      await request(app)
+        .post("/api/v1/auth/logout")
+        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${REFRESH_TOKEN_NAME}=valid-refresh-token`]);
+
+      // Access the first call's first argument to authController.logout.
+      const calledReq = (authController.logout as jest.Mock).mock.calls[0][0];
+      expect(calledReq.userId).toBe(MOCK_USER_ID);
     });
 
     it("should reject request with invalid token", async () => {
       await request(app)
         .post("/api/v1/auth/logout")
         .set("Authorization", "Bearer invalid-token")
-        .expect(httpStatus.UNAUTHORIZED);
-    });
-
-    it("should handle missing authorization header", async () => {
-      await request(app)
-        .post("/api/v1/auth/logout")
         .expect(httpStatus.UNAUTHORIZED);
     });
 
@@ -125,76 +124,26 @@ describe("Auth Routes", () => {
     });
   });
 
-  describe("Route Integration", () => {
-    it("should mount local auth routes", async () => {
-      // Test that local auth routes are mounted
-      expect(app._router.stack).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            name: "router",
-          }),
-        ])
-      );
+  describe("Route Method Restrictions", () => {
+    it("should not accept GET method on /api/v1/auth/logout", async () => {
+      const res = await request(app)
+        .get("/api/v1/auth/logout")
+        .set("Authorization", "Bearer valid-token");
+      expect(res.status).toBe(httpStatus.NOT_FOUND);
     });
 
-    it("should mount Google auth routes", async () => {
-      // Test that Google auth routes are mounted
-      expect(app._router.stack).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            name: "router",
-          }),
-        ])
-      );
-    });
-
-    it("should mount refresh token routes", async () => {
-      // Test that refresh token routes are mounted
-      expect(app._router.stack).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            name: "router",
-          }),
-        ])
-      );
-    });
-
-    it("should mount reset password routes", async () => {
-      // Test that reset password routes are mounted
-      expect(app._router.stack).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            name: "router",
-          }),
-        ])
-      );
-    });
-
-    it("should mount verify email routes", async () => {
-      // Test that verify email routes are mounted
-      expect(app._router.stack).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            name: "router",
-          }),
-        ])
-      );
-    });
-  });
-
-  describe("Error Handling", () => {
-    it("should handle unsupported methods", async () => {
-      await request(app)
+    it("should not accept PUT method on /api/v1/auth/logout", async () => {
+      const res = await request(app)
         .put("/api/v1/auth/logout")
-        .set("Authorization", "Bearer valid-token")
-        .expect(httpStatus.NOT_FOUND);
+        .set("Authorization", "Bearer valid-token");
+      expect(res.status).toBe(httpStatus.NOT_FOUND);
     });
 
-    it("should handle non-existent routes", async () => {
-      await request(app)
-        .post("/api/v1/auth/non-existent-route")
-        .set("Authorization", "Bearer valid-token")
-        .expect(httpStatus.NOT_FOUND);
+    it("should not accept DELETE method on /api/v1/auth/logout", async () => {
+      const res = await request(app)
+        .delete("/api/v1/auth/logout")
+        .set("Authorization", "Bearer valid-token");
+      expect(res.status).toBe(httpStatus.NOT_FOUND);
     });
   });
 });
