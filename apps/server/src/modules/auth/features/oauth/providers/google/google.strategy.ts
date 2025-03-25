@@ -5,9 +5,11 @@ import type { IOauthLoginDto } from "../../dtos";
 import type { GoogleConfig } from "./google.types";
 
 export class GoogleOAuthStrategy {
+  private static _instance: GoogleOAuthStrategy;
   private strategy: GoogleStrategy;
 
-  constructor(config: GoogleConfig) {
+  // Private constructor to prevent direct instantiation.
+  private constructor(config: GoogleConfig) {
     this.strategy = new GoogleStrategy(
       {
         clientID: config.clientID,
@@ -18,6 +20,14 @@ export class GoogleOAuthStrategy {
       },
       this.validate.bind(this)
     );
+  }
+
+  // Public static method to get the single instance.
+  public static getInstance(config: GoogleConfig): GoogleOAuthStrategy {
+    if (!this._instance) {
+      this._instance = new GoogleOAuthStrategy(config);
+    }
+    return this._instance;
   }
 
   private async validate(
@@ -60,7 +70,7 @@ export class GoogleOAuthStrategy {
     }
   }
 
-  getStrategy() {
+  public getStrategy() {
     return this.strategy;
   }
 }

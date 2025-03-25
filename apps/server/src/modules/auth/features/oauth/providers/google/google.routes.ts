@@ -6,7 +6,7 @@ import { envConfig } from "@/modules/shared/config";
 import { oauthController } from "../../oauth.module";
 import { googleOAuthStrategy } from "./google.module";
 
-passport.use(googleOAuthStrategy.getStrategy());
+passport.use(googleOAuthStrategy);
 
 const googleOAuthRoutes = Router();
 
