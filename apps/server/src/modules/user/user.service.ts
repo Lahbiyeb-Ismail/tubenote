@@ -17,18 +17,36 @@ import type {
   IUpdateUserDto,
 } from "./dtos";
 import type { User } from "./user.model";
-import type { IUserRepository, IUserService } from "./user.types";
+import type {
+  IUserRepository,
+  IUserService,
+  IUserServiceOptions,
+} from "./user.types";
 
 import type { IAccountService } from "./features/account/account.types";
 import type { ICreateAccountDto } from "./features/account/dtos";
 
 export class UserService implements IUserService {
-  constructor(
+  private static _instance: UserService;
+
+  private constructor(
     private readonly _userRepository: IUserRepository,
     private readonly _accountService: IAccountService,
     private readonly _prismaService: IPrismaService,
     private readonly _cryptoService: ICryptoService
   ) {}
+
+  public static getInstance(options: IUserServiceOptions): UserService {
+    if (!this._instance) {
+      this._instance = new UserService(
+        options.userRepository,
+        options.accountService,
+        options.prismaService,
+        options.cryptoService
+      );
+    }
+    return this._instance;
+  }
 
   /**
    * Ensures that the provided email is unique.

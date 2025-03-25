@@ -19,10 +19,10 @@ describe("VideoController", () => {
   const mockResponseFormatter = mock<IResponseFormatter>();
   const mockVideoService = mock<IVideoService>();
 
-  const videoController = new VideoController(
-    mockResponseFormatter,
-    mockVideoService
-  );
+  const videoController = VideoController.getInstance({
+    responseFormatter: mockResponseFormatter,
+    videoService: mockVideoService,
+  });
 
   const mockUserId = "user_id_123";
   const mockVideoId = "video_id_456";

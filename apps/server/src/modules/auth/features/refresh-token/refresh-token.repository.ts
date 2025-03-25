@@ -6,10 +6,25 @@ import type { IPrismaService } from "@/modules/shared/services";
 
 import type { Prisma } from "@prisma/client";
 import type { RefreshToken } from "./refresh-token.model";
-import type { IRefreshTokenRepository } from "./refresh-token.types";
+import type {
+  IRefreshTokenRepository,
+  IRefreshTokenRepositoryOptions,
+} from "./refresh-token.types";
 
 export class RefreshTokenRepository implements IRefreshTokenRepository {
-  constructor(private readonly _db: IPrismaService) {}
+  private static _instance: RefreshTokenRepository;
+
+  private constructor(private readonly _db: IPrismaService) {}
+
+  public static getInstance(
+    options: IRefreshTokenRepositoryOptions
+  ): RefreshTokenRepository {
+    if (!this._instance) {
+      this._instance = new RefreshTokenRepository(options.db);
+    }
+
+    return this._instance;
+  }
 
   async create(
     createTokenDto: ICreateDto<RefreshToken>,

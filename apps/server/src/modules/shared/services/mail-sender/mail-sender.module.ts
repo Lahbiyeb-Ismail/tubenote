@@ -4,7 +4,7 @@ import { loggerService } from "../logger";
 
 import { MailSenderService } from "./mail-sender.service";
 
-export const mailSenderService = new MailSenderService(
+export const mailSenderService = MailSenderService.getInstance({
   transporter,
-  loggerService
-);
+  loggerService,
+});

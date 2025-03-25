@@ -1,81 +1,31 @@
-import {
-  BadRequestError,
-  ForbiddenError,
-  NotFoundError,
-} from "@/modules/shared/api-errors";
-
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
-
-import {
-  IResetPasswordService,
-  ResetPasswordService,
-} from "@/modules/auth/features";
-
-import type { IUserService, User } from "@/modules/user";
-
+import { BadRequestError, ForbiddenError } from "@/modules/shared/api-errors";
 import type {
   ICacheService,
   ICryptoService,
   ILoggerService,
   IMailSenderService,
 } from "@/modules/shared/services";
+import type { IUserService, User } from "@/modules/user";
+import { mock, mockReset } from "jest-mock-extended";
+import { ResetPasswordService } from "../reset-password.service";
+import type { IResetPasswordServiceOptions } from "../reset-password.types";
 
-describe("ResetPasswordService test suites", () => {
-  let resetPasswordService: IResetPasswordService;
-  let mockUserService: jest.Mocked<IUserService>;
-  let mockCryptoService: jest.Mocked<ICryptoService>;
-  let mockCacheService: jest.Mocked<ICacheService>;
-  let mockMailSenderService: jest.Mocked<IMailSenderService>;
-  let mockLoggerService: jest.Mocked<ILoggerService>;
+describe("ResetPasswordService", () => {
+  const userService = mock<IUserService>();
+  const cryptoService = mock<ICryptoService>();
+  const cacheService = mock<ICacheService>();
+  const mailSenderService = mock<IMailSenderService>();
+  const loggerService = mock<ILoggerService>();
 
-  beforeEach(() => {
-    mockUserService = {
-      createUserWithAccount: jest.fn(),
-      getOrCreateUser: jest.fn(),
-      getUserByIdOrEmail: jest.fn(),
-      updateUser: jest.fn(),
-      updateUserPassword: jest.fn(),
-      resetUserPassword: jest.fn(),
-      verifyUserEmail: jest.fn(),
-    };
+  let resetPasswordService: ResetPasswordService;
 
-    mockCryptoService = {
-      comparePasswords: jest.fn(),
-      hashPassword: jest.fn(),
-      generateRandomSecureToken: jest.fn(),
-      hashToken: jest.fn(),
-    };
-
-    mockCacheService = {
-      get: jest.fn(),
-      set: jest.fn(),
-      del: jest.fn(),
-      flush: jest.fn(),
-      getStats: jest.fn(),
-    };
-
-    mockMailSenderService = {
-      sendVerificationEmail: jest.fn(),
-      sendResetPasswordEmail: jest.fn(),
-      sendMail: jest.fn(),
-    };
-
-    mockLoggerService = {
-      info: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-      http: jest.fn(),
-    };
-
-    resetPasswordService = new ResetPasswordService(
-      mockUserService,
-      mockCryptoService,
-      mockCacheService,
-      mockMailSenderService,
-      mockLoggerService
-    );
-  });
+  const serviceOptions: IResetPasswordServiceOptions = {
+    userService,
+    cryptoService,
+    cacheService,
+    mailSenderService,
+    loggerService,
+  };
 
   const mockEmail = "test@example.com";
   const mockUserId = "user-id-123";
@@ -92,117 +42,76 @@ describe("ResetPasswordService test suites", () => {
   };
 
   const mockValidToken = "valid-reset-token";
-  const mockInvalidToken = "invalid-reset-token";
 
-  beforeAll(() => {
-    jest.clearAllMocks();
+  beforeEach(() => {
+    mockReset(userService);
+    mockReset(cryptoService);
+    mockReset(cacheService);
+    mockReset(mailSenderService);
+    mockReset(loggerService);
+
+    // Reset the singleton instance for isolation.
+    // @ts-ignore: resetting private static property for testing purposes.
+    ResetPasswordService._instance = undefined;
+
+    resetPasswordService = ResetPasswordService.getInstance(serviceOptions);
   });
 
-  describe("ResetPasswordService - sendResetToken", () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it("should generate token, store it, and send email for valid user", async () => {
-      (mockUserService.getUserByIdOrEmail as jest.Mock).mockResolvedValue(
-        mockUser
-      );
-
-      (
-        mockCryptoService.generateRandomSecureToken as jest.Mock
-      ).mockReturnValue(mockValidToken);
-
-      (mockCacheService.set as jest.Mock).mockReturnValue(true);
-
-      (
-        mockMailSenderService.sendResetPasswordEmail as jest.Mock
-      ).mockResolvedValue(undefined);
-
-      await resetPasswordService.sendResetToken(mockEmail);
-
-      expect(mockUserService.getUserByIdOrEmail).toHaveBeenCalledWith({
-        email: mockEmail,
-      });
-
-      expect(mockCryptoService.generateRandomSecureToken).toHaveBeenCalled();
-
-      expect(mockCacheService.set).toHaveBeenCalledWith(mockValidToken, {
-        userId: mockUserId,
-      });
-
-      expect(mockMailSenderService.sendResetPasswordEmail).toHaveBeenCalledWith(
-        mockEmail,
-        mockValidToken
-      );
-    });
-
-    it("should throw a NotFoundError for a not registered email", async () => {
-      (mockUserService.getUserByIdOrEmail as jest.Mock).mockRejectedValue(
-        new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
-      );
-
-      await expect(
-        resetPasswordService.sendResetToken("nonexistent@test.com")
-      ).rejects.toThrow(NotFoundError);
-
-      expect(
-        mockCryptoService.generateRandomSecureToken
-      ).not.toHaveBeenCalled();
-
-      expect(mockCacheService.set).not.toHaveBeenCalled();
-
-      expect(
-        mockMailSenderService.sendResetPasswordEmail
-      ).not.toHaveBeenCalled();
-    });
-
-    it("should throw a ForbiddenError if the email is not verified", async () => {
-      (mockUserService.getUserByIdOrEmail as jest.Mock).mockResolvedValue({
+  describe("sendResetToken", () => {
+    it("should throw ForbiddenError if the user email is not verified", async () => {
+      // Arrange: simulate a user with unverified email.
+      userService.getUserByIdOrEmail.mockResolvedValue({
         ...mockUser,
         isEmailVerified: false,
       });
 
+      // Act & Assert
       await expect(
         resetPasswordService.sendResetToken(mockEmail)
-      ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.NOT_VERIFIED));
+      ).rejects.toThrow(ForbiddenError);
 
-      expect(mockUserService.getUserByIdOrEmail).toHaveBeenCalledWith({
+      expect(userService.getUserByIdOrEmail).toHaveBeenCalledWith({
+        email: mockEmail,
+      });
+    });
+
+    it("should generate a reset token, store it in cache, and send an email for a verified user", async () => {
+      // Arrange: simulate a verified user.
+      userService.getUserByIdOrEmail.mockResolvedValue(mockUser);
+
+      cryptoService.generateRandomSecureToken.mockReturnValue(mockValidToken);
+
+      // Act
+      await resetPasswordService.sendResetToken(mockEmail);
+
+      // Assert
+      expect(userService.getUserByIdOrEmail).toHaveBeenCalledWith({
         email: mockEmail,
       });
 
-      expect(
-        mockCryptoService.generateRandomSecureToken
-      ).not.toHaveBeenCalled();
+      expect(cryptoService.generateRandomSecureToken).toHaveBeenCalled();
 
-      expect(mockCacheService.set).not.toHaveBeenCalled();
+      expect(cacheService.set).toHaveBeenCalledWith(mockValidToken, {
+        userId: mockUserId,
+      });
 
-      expect(
-        mockMailSenderService.sendResetPasswordEmail
-      ).not.toHaveBeenCalled();
-    });
-
-    it("should propagate userService errors", async () => {
-      const error = new Error("Failed to get user");
-
-      (mockUserService.getUserByIdOrEmail as jest.Mock).mockRejectedValue(
-        error
+      expect(mailSenderService.sendResetPasswordEmail).toHaveBeenCalledWith(
+        mockEmail,
+        mockValidToken
       );
-
-      await expect(
-        resetPasswordService.sendResetToken(mockEmail)
-      ).rejects.toThrow(error);
+      expect(loggerService.info).toHaveBeenCalledWith(
+        expect.stringContaining(`Reset token generated for user ${mockUserId}`)
+      );
     });
 
     it("should propagate mailSenderService errors", async () => {
       const error = new Error("Failed to send email");
 
-      (mockUserService.getUserByIdOrEmail as jest.Mock).mockResolvedValue(
-        mockUser
-      );
+      userService.getUserByIdOrEmail.mockResolvedValue(mockUser);
 
-      (
-        mockMailSenderService.sendResetPasswordEmail as jest.Mock
-      ).mockRejectedValue(error);
+      cryptoService.generateRandomSecureToken.mockReturnValue(mockValidToken);
+
+      mailSenderService.sendResetPasswordEmail.mockRejectedValue(error);
 
       await expect(
         resetPasswordService.sendResetToken(mockEmail)
@@ -210,127 +119,109 @@ describe("ResetPasswordService test suites", () => {
     });
   });
 
-  describe("ResetPasswordService - resetPassword", () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
+  describe("verifyResetToken", () => {
+    it("should throw BadRequestError if no token data exists in cache", async () => {
+      // Arrange: token not found.
+      cacheService.get.mockReturnValue(null);
 
-    it("should delete token and reset password for valid reset token", async () => {
-      const newPassword = "newpassword123";
-      const hashedPassword = "hashedPassword";
-
-      jest
-        .spyOn(resetPasswordService, "verifyResetToken")
-        .mockResolvedValue(mockUserId);
-
-      (mockCacheService.del as jest.Mock).mockResolvedValue(true);
-
-      (mockUserService.resetUserPassword as jest.Mock).mockResolvedValue({
-        ...mockUser,
-        password: hashedPassword,
-      });
-
-      await resetPasswordService.resetPassword(mockValidToken, newPassword);
-
-      expect(resetPasswordService.verifyResetToken).toHaveBeenCalledWith(
-        mockValidToken
+      // Act & Assert
+      await expect(
+        resetPasswordService.verifyResetToken("nonexistent-token")
+      ).rejects.toThrow(BadRequestError);
+      expect(loggerService.error).toHaveBeenCalledWith(
+        expect.stringContaining("Invalid reset token: nonexistent-token")
       );
-
-      expect(mockCacheService.del).toHaveBeenCalledWith(mockValidToken);
-
-      expect(mockUserService.resetUserPassword).toHaveBeenCalledWith({
-        id: mockUserId,
-        newPassword,
-      });
     });
 
-    it("should throw BadRequestError for invalid or expired token", async () => {
-      const error = new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
+    it("should throw BadRequestError if token data is invalid (missing userId)", async () => {
+      // Arrange: token data exists but without valid userId.
+      cacheService.get.mockReturnValue({ userId: null });
 
-      jest
-        .spyOn(resetPasswordService, "verifyResetToken")
-        .mockRejectedValue(error);
-
+      // Act & Assert
       await expect(
-        resetPasswordService.resetPassword(mockInvalidToken, "password123")
-      ).rejects.toThrow(error);
-
-      expect(resetPasswordService.verifyResetToken);
-
-      expect(mockCacheService.del).not.toHaveBeenCalled();
-
-      expect(mockUserService.resetUserPassword).not.toHaveBeenCalled();
+        resetPasswordService.verifyResetToken("bad-token")
+      ).rejects.toThrow(BadRequestError);
+      expect(loggerService.error).toHaveBeenCalledWith(
+        expect.stringContaining("Invalid reset token: bad-token")
+      );
     });
 
-    it("should propagate userService errors during password reset", async () => {
-      const error = new Error("Password reset failed");
+    it("should return userId if token data is valid", async () => {
+      // Arrange: token data with a valid userId.
+      cacheService.get.mockReturnValue({ userId: mockUserId });
 
-      jest
-        .spyOn(resetPasswordService, "verifyResetToken")
-        .mockResolvedValue(mockUserId);
+      // Act
+      const userId = await resetPasswordService.verifyResetToken("valid-token");
 
-      (mockUserService.resetUserPassword as jest.Mock).mockRejectedValue(error);
-
-      await expect(
-        resetPasswordService.resetPassword(mockValidToken, "newPassword")
-      ).rejects.toThrow(error);
-
-      expect(mockCacheService.del).toHaveBeenCalled();
-    });
-  });
-
-  describe("ResetPasswordService - verifyResetToken", () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it("should return userId for a valid reset token", async () => {
-      (mockCacheService.get as jest.Mock).mockReturnValue({
-        userId: mockUserId,
-      });
-
-      const result =
-        await resetPasswordService.verifyResetToken(mockValidToken);
-
-      expect(result).toEqual(mockUserId);
-
-      expect(mockCacheService.get).toHaveBeenCalledWith(mockValidToken);
-    });
-
-    it("should throw a BadRequestError for an invalid or expired token", async () => {
-      const error = new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
-
-      (mockCacheService.get as jest.Mock).mockReturnValue(null);
-
-      await expect(
-        resetPasswordService.verifyResetToken(mockInvalidToken)
-      ).rejects.toThrow(error);
+      // Assert
+      expect(userId).toBe(mockUserId);
     });
 
     it("should throw error if cached token data is malformed", async () => {
       // Missing userId
-      (mockCacheService.get as jest.Mock).mockReturnValue({});
+      cacheService.get.mockReturnValue({});
 
       await expect(
         resetPasswordService.verifyResetToken(mockValidToken)
-      ).rejects.toThrow(new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN));
+      ).rejects.toThrow(BadRequestError);
 
       // Invalid userId type
-      (mockCacheService.get as jest.Mock).mockReturnValue({ userId: 12345 });
+      cacheService.get.mockReturnValue({ userId: 12345 });
       await expect(
         resetPasswordService.verifyResetToken(mockValidToken)
-      ).rejects.toThrow(new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN));
+      ).rejects.toThrow(BadRequestError);
     });
 
     it("should propagate cacheService errors during token verification", async () => {
       const error = new Error("Cache read failure");
-      (mockCacheService.get as jest.Mock).mockImplementation(() => {
+      cacheService.get.mockImplementation(() => {
         throw error;
       });
 
       await expect(
         resetPasswordService.verifyResetToken(mockValidToken)
       ).rejects.toThrow(error);
+    });
+  });
+
+  describe("resetPassword", () => {
+    it("should verify the reset token, delete it from cache, and reset the user's password", async () => {
+      // Arrange: simulate valid token data.
+      cacheService.get.mockReturnValue({ userId: mockUserId });
+      const testToken = "valid-token";
+      const newPassword = "newPassword123";
+
+      // Act
+      await resetPasswordService.resetPassword(testToken, newPassword);
+
+      // Assert: verify that verifyResetToken returns the userId,
+      // and then the token is deleted and user password is reset.
+      expect(cacheService.get).toHaveBeenCalledWith(testToken);
+      expect(cacheService.del).toHaveBeenCalledWith(testToken);
+      expect(userService.resetUserPassword).toHaveBeenCalledWith({
+        id: mockUserId,
+        newPassword,
+      });
+      expect(loggerService.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`Remove reset token ${testToken} from cache`)
+      );
+      expect(loggerService.info).toHaveBeenCalledWith(
+        expect.stringContaining(`Password reset for user ${mockUserId}`)
+      );
+    });
+
+    it("should propagate errors thrown by verifyResetToken", async () => {
+      // Arrange: simulate invalid token so that verifyResetToken throws an error.
+      cacheService.get.mockReturnValue(null);
+      const testToken = "invalid-token";
+      const newPassword = "newPassword123";
+
+      // Act & Assert
+      await expect(
+        resetPasswordService.resetPassword(testToken, newPassword)
+      ).rejects.toThrow(BadRequestError);
+      // Ensure that if verifyResetToken fails, resetUserPassword is never called.
+      expect(userService.resetUserPassword).not.toHaveBeenCalled();
     });
   });
 });

@@ -6,15 +6,19 @@ import { RefreshTokenService } from "./refresh-token.service";
 
 import { jwtService } from "../../utils";
 
-const refreshTokenRepository = new RefreshTokenRepository(prismaService);
+const refreshTokenRepository = RefreshTokenRepository.getInstance({
+  db: prismaService,
+});
 
-const refreshTokenService = new RefreshTokenService(
+const refreshTokenService = RefreshTokenService.getInstance({
   refreshTokenRepository,
   prismaService,
   jwtService,
-  loggerService
-);
+  loggerService,
+});
 
-const refreshTokenController = new RefreshTokenController(refreshTokenService);
+const refreshTokenController = RefreshTokenController.getInstance({
+  refreshTokenService,
+});
 
 export { refreshTokenService, refreshTokenController };

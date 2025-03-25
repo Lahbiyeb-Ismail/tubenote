@@ -2,7 +2,11 @@ import type { Response } from "express";
 import httpStatus from "http-status";
 
 import type { TypedRequest } from "@/modules/shared/types";
-import type { IAuthController, IAuthService } from "./auth.types";
+import type {
+  IAuthController,
+  IAuthControllerOptions,
+  IAuthService,
+} from "./auth.types";
 
 import { clearRefreshTokenCookieConfig } from "./config";
 import { REFRESH_TOKEN_NAME } from "./constants";
@@ -11,7 +15,24 @@ import { REFRESH_TOKEN_NAME } from "./constants";
  * Controller for handling authentication-related operations.
  */
 export class AuthController implements IAuthController {
-  constructor(private readonly _authService: IAuthService) {}
+  private static _instance: AuthController;
+
+  private constructor(private readonly _authService: IAuthService) {}
+
+  /**
+   * Retrieves the singleton instance of the `AuthController` class.
+   * If the instance does not already exist, it creates a new one using the provided options.
+   *
+   * @param options - Configuration options for initializing the `AuthController` instance.
+   * @returns The singleton instance of the `AuthController`.
+   */
+  public static getInstance(options: IAuthControllerOptions): AuthController {
+    if (!this._instance) {
+      this._instance = new AuthController(options.authService);
+    }
+
+    return this._instance;
+  }
 
   /**
    * Logs out a user.

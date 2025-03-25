@@ -1,6 +1,6 @@
 import NodeCache from "node-cache";
 
-import type { ICacheService } from "./cache.types";
+import type { ICacheService, ICacheServiceOptions } from "./cache.types";
 
 /**
  * Service for managing a cache using NodeCache.
@@ -11,13 +11,29 @@ import type { ICacheService } from "./cache.types";
  * @implements {ICacheService}
  */
 export class CacheService implements ICacheService {
+  private static _instance: CacheService;
+
   private cache: NodeCache;
 
-  constructor(ttlSeconds: number) {
+  /**
+   * Initializes a new instance of the cache service.
+   *
+   * @param ttlSeconds - The time-to-live (TTL) for cached items in seconds.
+   *                     This determines how long an item remains in the cache
+   *                     before it is automatically removed.
+   */
+  private constructor(ttlSeconds: number) {
     this.cache = new NodeCache({
       stdTTL: ttlSeconds,
       checkperiod: ttlSeconds * 0.2,
     });
+  }
+
+  public static getInstance(options: ICacheServiceOptions): CacheService {
+    if (!this._instance) {
+      this._instance = new CacheService(options.ttlSeconds);
+    }
+    return this._instance;
   }
 
   /**

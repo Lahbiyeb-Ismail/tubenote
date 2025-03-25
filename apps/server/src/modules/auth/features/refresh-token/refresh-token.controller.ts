@@ -13,11 +13,26 @@ import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 
 import type {
   IRefreshTokenController,
+  IRefreshTokenControllerOptions,
   IRefreshTokenService,
 } from "./refresh-token.types";
 
 export class RefreshTokenController implements IRefreshTokenController {
-  constructor(private readonly _refreshTokenService: IRefreshTokenService) {}
+  private static _instance: RefreshTokenController;
+
+  private constructor(
+    private readonly _refreshTokenService: IRefreshTokenService
+  ) {}
+
+  public static getInstance(
+    options: IRefreshTokenControllerOptions
+  ): RefreshTokenController {
+    if (!this._instance) {
+      this._instance = new RefreshTokenController(options.refreshTokenService);
+    }
+
+    return this._instance;
+  }
 
   /**
    * Refreshes the access token using the refresh token.

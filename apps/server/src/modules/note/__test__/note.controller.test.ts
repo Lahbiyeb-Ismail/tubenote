@@ -1,5 +1,6 @@
 import { Response } from "express";
 import httpStatus from "http-status";
+import { mock, mockReset } from "jest-mock-extended";
 
 import type { TypedRequest } from "@/modules/shared/types";
 
@@ -18,15 +19,29 @@ import type {
 import { NoteController } from "../note.controller";
 
 import type { Note } from "../note.model";
-import type { INoteController, INoteService } from "../note.types";
+import type { INoteService } from "../note.types";
 
 describe("NoteController Tests", () => {
-  let noteController: INoteController;
-  let mockNoteService: INoteService;
-  let mockRequest: Partial<TypedRequest>;
-  let mockResponse: Partial<Response>;
-  let mockJson: jest.Mock;
-  let mockStatus: jest.Mock;
+  const mockNoteService = mock<INoteService>();
+
+  const noteController = NoteController.getInstance({
+    noteService: mockNoteService,
+  });
+
+  const mockRequest = mock<TypedRequest>();
+  const mockResponse = mock<Response>();
+
+  const mockCreateReq = mock<TypedRequest<ICreateBodyDto<Note>>>();
+
+  const mockGetNoteReq = mock<TypedRequest<{}, IParamIdDto>>();
+
+  const mockUpdateNoteReq =
+    mock<TypedRequest<IUpdateBodyDto<Note>, IParamIdDto>>();
+
+  const mockDeleteNoteReq = mock<TypedRequest<{}, IParamIdDto>>();
+
+  const mockGetNotesByVideoIdReq =
+    mock<TypedRequest<{}, IParamIdDto, IQueryPaginationDto>>();
 
   const mockUserId = "user_id_001";
   const mockNoteId = "note_id_001";
@@ -79,66 +94,71 @@ describe("NoteController Tests", () => {
     userId: mockUserId,
   };
 
+  const createNoteDto: ICreateDto<Note> = {
+    userId: mockUserId,
+    data: {
+      title: "Test Note",
+      content: "Test Content",
+      videoId: "video_id_001",
+      thumbnail: "thumbnail_url",
+      timestamp: 12,
+      videoTitle: "Video Title",
+      youtubeId: "youtube_id_001",
+    },
+  };
+
+  const updateNoteDto: IUpdateDto<Note> = {
+    ...findNoteDto,
+    data: {
+      title: "Updated Note",
+      content: "Updated Content",
+    },
+  };
+
+  const deleteNoteDto: IDeleteDto = {
+    id: mockNoteId,
+    userId: mockUserId,
+  };
+
   beforeEach(() => {
-    mockNoteService = {
-      createNote: jest.fn(),
-      updateNote: jest.fn(),
-      deleteNote: jest.fn(),
-      findNote: jest.fn(),
-      fetchUserNotes: jest.fn(),
-      fetchRecentNotes: jest.fn(),
-      fetchNotesByVideoId: jest.fn(),
-      fetchRecentlyUpdatedNotes: jest.fn(),
+    mockReset(mockNoteService);
+
+    mockResponse.status.mockReturnThis();
+    mockResponse.json.mockReturnThis();
+
+    mockRequest.userId = mockUserId;
+
+    mockCreateReq.userId = createNoteDto.userId;
+    mockCreateReq.body = createNoteDto.data;
+
+    mockGetNoteReq.userId = findNoteDto.userId;
+    mockGetNoteReq.params = { id: findNoteDto.id };
+
+    mockUpdateNoteReq.userId = updateNoteDto.userId;
+    mockUpdateNoteReq.body = updateNoteDto.data;
+    mockUpdateNoteReq.params = { id: updateNoteDto.id };
+
+    mockDeleteNoteReq.userId = deleteNoteDto.userId;
+    mockDeleteNoteReq.params = { id: deleteNoteDto.id };
+
+    mockGetNotesByVideoIdReq.userId = mockUserId;
+    mockGetNotesByVideoIdReq.query = {
+      page: "1",
+      limit: "8",
+      order: "desc",
+      sortBy: "createdAt",
     };
 
-    noteController = new NoteController(mockNoteService);
-
-    mockJson = jest.fn();
-    mockStatus = jest.fn().mockReturnValue({ json: mockJson });
-    mockResponse = {
-      status: mockStatus,
-      json: mockJson,
+    mockGetNotesByVideoIdReq.params = {
+      id: "video_id_001",
     };
-  });
-
-  beforeAll(() => {
-    jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   describe("NoteController - createNote", () => {
-    let mockCreateReq: Partial<TypedRequest<ICreateBodyDto<Note>>>;
-
-    const createNoteDto: ICreateDto<Note> = {
-      userId: mockUserId,
-      data: {
-        title: "Test Note",
-        content: "Test Content",
-        videoId: "video_id_001",
-        thumbnail: "thumbnail_url",
-        timestamp: 12,
-        videoTitle: "Video Title",
-        youtubeId: "youtube_id_001",
-      },
-    };
-
-    beforeEach(() => {
-      mockCreateReq = {
-        userId: mockUserId,
-        body: createNoteDto.data,
-      };
-    });
-
     it("should add a new note successfully", async () => {
       (mockNoteService.createNote as jest.Mock).mockResolvedValue(mockNote);
 
-      await noteController.createNote(
-        mockCreateReq as TypedRequest<ICreateBodyDto<Note>>,
-        mockResponse as Response
-      );
+      await noteController.createNote(mockCreateReq, mockResponse);
 
       expect(mockNoteService.createNote).toHaveBeenCalledWith(createNoteDto);
       expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.CREATED);
@@ -154,35 +174,23 @@ describe("NoteController Tests", () => {
       (mockNoteService.createNote as jest.Mock).mockRejectedValue(error);
 
       await expect(
-        noteController.createNote(
-          mockCreateReq as TypedRequest<ICreateBodyDto<Note>>,
-          mockResponse as Response
-        )
+        noteController.createNote(mockCreateReq, mockResponse)
       ).rejects.toThrow(error);
     });
   });
 
   describe("NoteController - getNoteById", () => {
-    let mockGetReq: Partial<TypedRequest<{}, IParamIdDto>>;
-
-    beforeEach(() => {
-      mockGetReq = {
-        userId: mockUserId,
-        params: { id: mockNoteId },
-      };
-    });
-
     it("should get a note by id successfully", async () => {
       (mockNoteService.findNote as jest.Mock).mockResolvedValue(mockNote);
 
-      await noteController.getNoteById(
-        mockGetReq as TypedRequest<{}, IParamIdDto>,
-        mockResponse as Response
-      );
+      await noteController.getNoteById(mockGetNoteReq, mockResponse);
 
       expect(mockNoteService.findNote).toHaveBeenCalledWith(findNoteDto);
-      expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
-      expect(mockJson).toHaveBeenCalledWith({ success: true, data: mockNote });
+      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        success: true,
+        data: mockNote,
+      });
     });
 
     it("should handle errors when getting a note by id", async () => {
@@ -190,36 +198,12 @@ describe("NoteController Tests", () => {
       (mockNoteService.findNote as jest.Mock).mockRejectedValue(error);
 
       await expect(
-        noteController.getNoteById(
-          mockGetReq as TypedRequest<{}, IParamIdDto>,
-          mockResponse as Response
-        )
+        noteController.getNoteById(mockGetNoteReq, mockResponse)
       ).rejects.toThrow("Failed to find note");
     });
   });
 
   describe("NoteController - updateNote", () => {
-    let mockUpdateReq: Partial<TypedRequest<IUpdateBodyDto<Note>, IParamIdDto>>;
-
-    const mockUserId = "user_id_001";
-    const mockNoteId = "note_id_001";
-
-    const updateNoteDto: IUpdateDto<Note> = {
-      ...findNoteDto,
-      data: {
-        title: "Updated Note",
-        content: "Updated Content",
-      },
-    };
-
-    beforeEach(() => {
-      mockUpdateReq = {
-        userId: mockUserId,
-        body: updateNoteDto.data,
-        params: { id: mockNoteId },
-      };
-    });
-
     it("should update a note successfully", async () => {
       const mockUpdatedNote = {
         _id: "noteId",
@@ -231,14 +215,11 @@ describe("NoteController Tests", () => {
         mockUpdatedNote
       );
 
-      await noteController.updateNote(
-        mockUpdateReq as TypedRequest<IUpdateBodyDto<Note>, IParamIdDto>,
-        mockResponse as Response
-      );
+      await noteController.updateNote(mockUpdateNoteReq, mockResponse);
 
       expect(mockNoteService.updateNote).toHaveBeenCalledWith(updateNoteDto);
-      expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
-      expect(mockJson).toHaveBeenCalledWith({
+      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
         message: "Note updated successfully.",
         data: mockUpdatedNote,
@@ -250,43 +231,20 @@ describe("NoteController Tests", () => {
       (mockNoteService.updateNote as jest.Mock).mockRejectedValue(error);
 
       await expect(
-        noteController.updateNote(
-          mockUpdateReq as TypedRequest<IUpdateBodyDto<Note>, IParamIdDto>,
-          mockResponse as Response
-        )
+        noteController.updateNote(mockUpdateNoteReq, mockResponse)
       ).rejects.toThrow("Failed to update note");
     });
   });
 
   describe("NoteController - deleteNote", () => {
-    let mockDeleteReq: Partial<TypedRequest<{}, IParamIdDto>>;
-
-    const mockUserId = "user_id_001";
-    const mockNoteId = "note_id_001";
-
-    const deleteNoteDto: IDeleteDto = {
-      id: mockNoteId,
-      userId: mockUserId,
-    };
-
-    beforeEach(() => {
-      mockDeleteReq = {
-        userId: mockUserId,
-        params: { id: mockNoteId },
-      };
-    });
-
     it("should delete a note successfully", async () => {
       (mockNoteService.deleteNote as jest.Mock).mockResolvedValue(undefined);
 
-      await noteController.deleteNote(
-        mockDeleteReq as TypedRequest<{}, IParamIdDto>,
-        mockResponse as Response
-      );
+      await noteController.deleteNote(mockDeleteNoteReq, mockResponse);
 
       expect(mockNoteService.deleteNote).toHaveBeenCalledWith(deleteNoteDto);
-      expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
-      expect(mockJson).toHaveBeenCalledWith({
+      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
         message: "Note deleted successfully.",
       });
@@ -297,24 +255,18 @@ describe("NoteController Tests", () => {
       (mockNoteService.deleteNote as jest.Mock).mockRejectedValue(error);
 
       await expect(
-        noteController.deleteNote(
-          mockDeleteReq as TypedRequest<{}, IParamIdDto>,
-          mockResponse as Response
-        )
+        noteController.deleteNote(mockDeleteNoteReq, mockResponse)
       ).rejects.toThrow("Failed to delete note");
     });
   });
 
   describe("NoteController - getUserNotes", () => {
     beforeEach(() => {
-      mockRequest = {
-        userId: "mockUserId",
-        query: {
-          page: "1",
-          limit: "10",
-          order: "desc",
-          sortBy: "createdAt",
-        },
+      mockRequest.query = {
+        page: "1",
+        limit: "10",
+        order: "desc",
+        sortBy: "createdAt",
       };
     });
 
@@ -331,18 +283,18 @@ describe("NoteController Tests", () => {
 
       await noteController.getUserNotes(
         mockRequest as TypedRequest<{}, {}, IQueryPaginationDto>,
-        mockResponse as Response
+        mockResponse
       );
 
       expect(mockNoteService.fetchUserNotes).toHaveBeenCalledWith({
-        userId: "mockUserId",
+        userId: mockUserId,
         skip: 0,
         limit: 10,
         sort: { by: "createdAt", order: "desc" },
       });
 
-      expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
-      expect(mockJson).toHaveBeenCalledWith({
+      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
         data: mockNotes,
         pagination: {
@@ -356,10 +308,7 @@ describe("NoteController Tests", () => {
     });
 
     it("should get user notes successfully with default pagination values", async () => {
-      mockRequest = {
-        userId: "mockUserId",
-        query: {}, // Empty query to use default values
-      };
+      mockRequest.query = {}; // Empty query to use default values
 
       (mockNoteService.fetchUserNotes as jest.Mock).mockResolvedValue(
         mockResult
@@ -367,18 +316,18 @@ describe("NoteController Tests", () => {
 
       await noteController.getUserNotes(
         mockRequest as TypedRequest<{}, {}, IQueryPaginationDto>,
-        mockResponse as Response
+        mockResponse
       );
 
       expect(mockNoteService.fetchUserNotes).toHaveBeenCalledWith({
-        userId: "mockUserId",
+        userId: mockUserId,
         skip: 0,
         limit: 8, // Default limit
         sort: { by: "createdAt", order: "desc" }, // Default sort
       });
 
-      expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
-      expect(mockJson).toHaveBeenCalledWith({
+      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
         data: mockNotes,
         pagination: {
@@ -392,14 +341,11 @@ describe("NoteController Tests", () => {
     });
 
     it("should handle different page numbers correctly", async () => {
-      mockRequest = {
-        userId: "mockUserId",
-        query: {
-          page: "2",
-          limit: "10",
-          order: "desc",
-          sortBy: "createdAt",
-        },
+      mockRequest.query = {
+        page: "2",
+        limit: "10",
+        order: "desc",
+        sortBy: "createdAt",
       };
 
       (mockNoteService.fetchUserNotes as jest.Mock).mockResolvedValue(
@@ -408,18 +354,18 @@ describe("NoteController Tests", () => {
 
       await noteController.getUserNotes(
         mockRequest as TypedRequest<{}, {}, IQueryPaginationDto>,
-        mockResponse as Response
+        mockResponse
       );
 
       expect(mockNoteService.fetchUserNotes).toHaveBeenCalledWith({
-        userId: "mockUserId",
+        userId: mockUserId,
         skip: 10, // Skip should be (page - 1) * limit = (2 - 1) * 10 = 10
         limit: 10,
         sort: { by: "createdAt", order: "desc" },
       });
 
-      expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
-      expect(mockJson).toHaveBeenCalledWith({
+      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
         data: mockNotes,
         pagination: {
@@ -439,7 +385,7 @@ describe("NoteController Tests", () => {
       await expect(
         noteController.getUserNotes(
           mockRequest as TypedRequest<{}, {}, IQueryPaginationDto>,
-          mockResponse as Response
+          mockResponse
         )
       ).rejects.toThrow("Failed to fetch user notes");
     });
@@ -452,14 +398,11 @@ describe("NoteController Tests", () => {
     ];
 
     beforeEach(() => {
-      mockRequest = {
-        userId: "mockUserId",
-        query: {
-          page: "1",
-          limit: "2",
-          order: "desc",
-          sortBy: "createdAt",
-        },
+      mockRequest.query = {
+        page: "1",
+        limit: "2",
+        order: "desc",
+        sortBy: "createdAt",
       };
     });
 
@@ -468,47 +411,38 @@ describe("NoteController Tests", () => {
         mockRecentNotes
       );
 
-      await noteController.getUserRecentNotes(
-        mockRequest as TypedRequest,
-        mockResponse as Response
-      );
+      await noteController.getUserRecentNotes(mockRequest, mockResponse);
 
       expect(mockNoteService.fetchRecentNotes).toHaveBeenCalledWith({
-        userId: "mockUserId",
+        userId: mockUserId,
         limit: 2,
         skip: 0,
         sort: { by: "createdAt", order: "desc" },
       });
-      expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
-      expect(mockJson).toHaveBeenCalledWith({
+      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
         data: mockRecentNotes,
       });
     });
 
     it("should get user recent notes successfully with default pagination values", async () => {
-      mockRequest = {
-        userId: "mockUserId",
-        query: {}, // Empty query to use default values
-      };
+      mockRequest.query = {}; // Empty query to use default values
 
       (mockNoteService.fetchRecentNotes as jest.Mock).mockResolvedValue(
         mockRecentNotes
       );
 
-      await noteController.getUserRecentNotes(
-        mockRequest as TypedRequest,
-        mockResponse as Response
-      );
+      await noteController.getUserRecentNotes(mockRequest, mockResponse);
 
       expect(mockNoteService.fetchRecentNotes).toHaveBeenCalledWith({
-        userId: "mockUserId",
+        userId: mockUserId,
         limit: 2, // Default limit for recent notes
         skip: 0,
         sort: { by: "createdAt", order: "desc" }, // Default sort
       });
-      expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
-      expect(mockJson).toHaveBeenCalledWith({
+      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
         data: mockRecentNotes,
       });
@@ -519,10 +453,7 @@ describe("NoteController Tests", () => {
       (mockNoteService.fetchRecentNotes as jest.Mock).mockRejectedValue(error);
 
       await expect(
-        noteController.getUserRecentNotes(
-          mockRequest as TypedRequest,
-          mockResponse as Response
-        )
+        noteController.getUserRecentNotes(mockRequest, mockResponse)
       ).rejects.toThrow("Failed to fetch recent notes");
     });
   });
@@ -534,14 +465,11 @@ describe("NoteController Tests", () => {
     ];
 
     beforeEach(() => {
-      mockRequest = {
-        userId: "mockUserId",
-        query: {
-          page: "1",
-          limit: "2",
-          order: "desc",
-          sortBy: "updatedAt",
-        },
+      mockRequest.query = {
+        page: "1",
+        limit: "2",
+        order: "desc",
+        sortBy: "updatedAt",
       };
     });
 
@@ -550,19 +478,16 @@ describe("NoteController Tests", () => {
         mockRecentlyUpdatedNotes
       );
 
-      await noteController.getRecentlyUpdatedNotes(
-        mockRequest as TypedRequest,
-        mockResponse as Response
-      );
+      await noteController.getRecentlyUpdatedNotes(mockRequest, mockResponse);
 
       expect(mockNoteService.fetchRecentNotes).toHaveBeenCalledWith({
-        userId: "mockUserId",
+        userId: mockUserId,
         limit: 2,
         skip: 0,
         sort: { by: "updatedAt", order: "desc" },
       });
-      expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
-      expect(mockJson).toHaveBeenCalledWith({
+      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
         data: mockRecentlyUpdatedNotes,
       });
@@ -573,34 +498,12 @@ describe("NoteController Tests", () => {
       (mockNoteService.fetchRecentNotes as jest.Mock).mockRejectedValue(error);
 
       await expect(
-        noteController.getRecentlyUpdatedNotes(
-          mockRequest as TypedRequest,
-          mockResponse as Response
-        )
+        noteController.getRecentlyUpdatedNotes(mockRequest, mockResponse)
       ).rejects.toThrow("Failed to fetch recently updated notes");
     });
   });
 
   describe("NoteController - getNotesByVideoId", () => {
-    let mockGetNotesByVideoIdReq: Partial<
-      TypedRequest<{}, IParamIdDto, IQueryPaginationDto>
-    >;
-
-    beforeEach(() => {
-      mockGetNotesByVideoIdReq = {
-        userId: "mockUserId",
-        query: {
-          page: "1",
-          limit: "8",
-          order: "desc",
-          sortBy: "createdAt",
-        },
-        params: {
-          id: "mockVideoId",
-        },
-      };
-    });
-
     const mockResult: IPaginatedItems<Note> = {
       items: mockNotes,
       totalItems: mockNotes.length,
@@ -613,12 +516,8 @@ describe("NoteController Tests", () => {
       );
 
       await noteController.getNotesByVideoId(
-        mockGetNotesByVideoIdReq as TypedRequest<
-          {},
-          IParamIdDto,
-          IQueryPaginationDto
-        >,
-        mockResponse as Response
+        mockGetNotesByVideoIdReq,
+        mockResponse
       );
 
       expect(mockNoteService.fetchNotesByVideoId).toHaveBeenCalledWith({
@@ -629,8 +528,8 @@ describe("NoteController Tests", () => {
         sort: { by: "createdAt", order: "desc" },
       });
 
-      expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
-      expect(mockJson).toHaveBeenCalledWith({
+      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
         data: mockNotes,
         pagination: {
@@ -644,25 +543,15 @@ describe("NoteController Tests", () => {
     });
 
     it("should get notes by video id successfully with default pagination", async () => {
-      mockGetNotesByVideoIdReq = {
-        userId: "mockUserId",
-        query: {}, // Empty query to use default values
-        params: {
-          id: "mockVideoId",
-        },
-      };
+      mockGetNotesByVideoIdReq.query = {};
 
       (mockNoteService.fetchNotesByVideoId as jest.Mock).mockResolvedValue(
         mockResult
       );
 
       await noteController.getNotesByVideoId(
-        mockGetNotesByVideoIdReq as TypedRequest<
-          {},
-          IParamIdDto,
-          IQueryPaginationDto
-        >,
-        mockResponse as Response
+        mockGetNotesByVideoIdReq,
+        mockResponse
       );
 
       expect(mockNoteService.fetchNotesByVideoId).toHaveBeenCalledWith({
@@ -672,8 +561,8 @@ describe("NoteController Tests", () => {
         skip: 0,
         sort: { by: "createdAt", order: "desc" }, // Default sort
       });
-      expect(mockStatus).toHaveBeenCalledWith(httpStatus.OK);
-      expect(mockJson).toHaveBeenCalledWith({
+      expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
         data: mockNotes,
         pagination: {
@@ -699,7 +588,7 @@ describe("NoteController Tests", () => {
             IParamIdDto,
             IQueryPaginationDto
           >,
-          mockResponse as Response
+          mockResponse
         )
       ).rejects.toThrow("Failed to fetch notes by video id");
     });

@@ -7,14 +7,14 @@ import { idParamSchema, paginationQuerySchema } from "@/modules/shared/schemas";
 import { noteController } from "./note.module";
 import { createNoteSchema, updateNoteSchema } from "./schemas";
 
-const router = Router();
+const noteRoutes = Router();
 
 // - isAuthenticated: Ensures the user is authenticated before accessing any note routes.
-router.use(isAuthenticated);
+noteRoutes.use(isAuthenticated);
 
 // - GET /: Get all notes for the authenticated user.
 // - POST /: Create a new note (requires request body validation).
-router
+noteRoutes
   .route("/")
   .get(validateRequest({ query: paginationQuerySchema }), (req, res) =>
     noteController.getUserNotes(req, res)
@@ -24,17 +24,17 @@ router
   );
 
 // - GET /recent: Get the most recent notes for the authenticated user.
-router
+noteRoutes
   .route("/recent")
   .get((req, res) => noteController.getUserRecentNotes(req, res));
 
 // - GET /recently-updated: Get the recently updated notes for the authenticated user.
-router
+noteRoutes
   .route("/recently-updated")
   .get((req, res) => noteController.getRecentlyUpdatedNotes(req, res));
 
 // - GET /video/:id: Get all notes for a specific video (requires request params validation).
-router.route("/video/:id").get(
+noteRoutes.route("/video/:id").get(
   validateRequest({
     params: idParamSchema,
     query: paginationQuerySchema,
@@ -45,7 +45,7 @@ router.route("/video/:id").get(
 // - GET /:id: Get a specific note by its ID (requires request params validation).
 // - PATCH /:id: Update a specific note by its ID (requires request params validation).
 // - DELETE /:id: Delete a specific note by its ID (requires request params validation).
-router
+noteRoutes
   .route("/:id")
   .all(validateRequest({ params: idParamSchema }))
   .patch(validateRequest({ body: updateNoteSchema }), (req, res) =>
@@ -54,4 +54,4 @@ router
   .get((req, res) => noteController.getNoteById(req, res))
   .delete((req, res) => noteController.deleteNote(req, res));
 
-export default router;
+export { noteRoutes };

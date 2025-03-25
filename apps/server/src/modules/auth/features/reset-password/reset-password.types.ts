@@ -7,6 +7,13 @@ import type {
   IParamTokenDto,
   IPasswordBodyDto,
 } from "@/modules/shared/dtos";
+import type {
+  ICacheService,
+  ICryptoService,
+  ILoggerService,
+  IMailSenderService,
+} from "@/modules/shared/services";
+import type { IUserService } from "@/modules/user";
 
 export interface IResetPasswordService {
   sendResetToken(email: string): Promise<void>;
@@ -26,4 +33,16 @@ export interface IResetPasswordController {
     req: TypedRequest<EmptyRecord, IParamTokenDto>,
     res: Response
   ): Promise<void>;
+}
+
+export interface IResetPasswordServiceOptions {
+  userService: IUserService;
+  cryptoService: ICryptoService;
+  cacheService: ICacheService;
+  mailSenderService: IMailSenderService;
+  loggerService: ILoggerService;
+}
+
+export interface IResetPasswordControllerOptions {
+  resetPasswordService: IResetPasswordService;
 }

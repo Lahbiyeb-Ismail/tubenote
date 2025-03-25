@@ -166,10 +166,10 @@ describe("VideoService methods tests cases", () => {
       transaction: jest.fn(),
     };
 
-    videoService = new VideoService(
-      mockVideoRepository,
-      mockPrismaService as IPrismaService
-    );
+    videoService = VideoService.getInstance({
+      videoRepository: mockVideoRepository,
+      prismaService: mockPrismaService as IPrismaService,
+    });
   });
 
   beforeAll(() => {

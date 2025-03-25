@@ -58,6 +58,8 @@ describe("Refresh Token Routes", () => {
   });
 
   describe("POST /api/v1/auth/refresh", () => {
+    const disallowedMethods = ["get", "put", "delete"];
+
     it("should successfully refresh token when valid refresh token is provided", async () => {
       // Act & Assert
       const response = await request(app)
@@ -104,27 +106,6 @@ describe("Refresh Token Routes", () => {
         .expect(httpStatus.INTERNAL_SERVER_ERROR);
 
       expect(refreshTokenController.refreshToken).toHaveBeenCalled();
-    });
-
-    it("should not accept GET method", async () => {
-      // Act & Assert
-      await request(app)
-        .get("/api/v1/auth/refresh")
-        .expect(httpStatus.NOT_FOUND);
-    });
-
-    it("should not accept PUT method", async () => {
-      // Act & Assert
-      await request(app)
-        .put("/api/v1/auth/refresh")
-        .expect(httpStatus.NOT_FOUND);
-    });
-
-    it("should not accept DELETE method", async () => {
-      // Act & Assert
-      await request(app)
-        .delete("/api/v1/auth/refresh")
-        .expect(httpStatus.NOT_FOUND);
     });
 
     it("should handle malformed cookies", async () => {
@@ -211,5 +192,15 @@ describe("Refresh Token Routes", () => {
         expect(response.status).toBe(httpStatus.OK);
       });
     });
+
+    it.each(disallowedMethods)(
+      "should not accept %s method",
+      async (method) => {
+        await (request(app) as any)
+          [method]("/api/v1/auth/refresh")
+          .set("Authorization", "Bearer valid-token")
+          .expect(httpStatus.NOT_FOUND);
+      }
+    );
   });
 });

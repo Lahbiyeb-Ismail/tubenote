@@ -13,7 +13,11 @@ import type {
 } from "@/modules/shared/dtos";
 
 import type { Note } from "./note.model";
-import type { INoteController, INoteService } from "./note.types";
+import type {
+  INoteController,
+  INoteControllerOptions,
+  INoteService,
+} from "./note.types";
 
 /**
  * Controller for handling note-related operations.
@@ -23,12 +27,27 @@ import type { INoteController, INoteService } from "./note.types";
  * It also supports pagination for list endpoints.
  */
 export class NoteController implements INoteController {
+  private static _instance: NoteController;
+
   /**
    * Creates an instance of NoteController.
    *
    * @param _noteService - An instance of the note service that handles business logic.
    */
-  constructor(private readonly _noteService: INoteService) {}
+  private constructor(private readonly _noteService: INoteService) {}
+
+  /**
+   * Gets the singleton instance of NoteController.
+   *
+   * @param noteService - An instance of the note service that handles business logic.
+   * @returns The singleton instance of NoteController.
+   */
+  public static getInstance(options: INoteControllerOptions): NoteController {
+    if (!this._instance) {
+      this._instance = new NoteController(options.noteService);
+    }
+    return this._instance;
+  }
 
   /**
    * Sends a standardized paginated response.

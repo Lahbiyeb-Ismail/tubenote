@@ -1,5 +1,5 @@
 import { CryptoService } from "./crypto.service";
 
-const cryptoService = new CryptoService();
+const cryptoService = CryptoService.getInstance();
 
 export { cryptoService };

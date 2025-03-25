@@ -11,6 +11,7 @@ import type {
 
 import type {
   IResetPasswordController,
+  IResetPasswordControllerOptions,
   IResetPasswordService,
 } from "./reset-password.types";
 
@@ -18,7 +19,23 @@ import type {
  * Controller for handling password reset operations.
  */
 export class ResetPasswordController implements IResetPasswordController {
-  constructor(private readonly _resetPasswordService: IResetPasswordService) {}
+  private static _instance: ResetPasswordController;
+
+  private constructor(
+    private readonly _resetPasswordService: IResetPasswordService
+  ) {}
+
+  public static getInstance(
+    options: IResetPasswordControllerOptions
+  ): ResetPasswordController {
+    if (!this._instance) {
+      this._instance = new ResetPasswordController(
+        options.resetPasswordService
+      );
+    }
+
+    return this._instance;
+  }
 
   /**
    * Handles the forgot password request by sending a reset token to the user's email.

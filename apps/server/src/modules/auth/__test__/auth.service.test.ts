@@ -1,145 +1,127 @@
-import { AuthService, ILogoutDto, IRefreshTokenService } from "@/modules/auth";
+import { mock, mockReset } from "jest-mock-extended";
+
+import {
+  AuthService,
+  type ILogoutDto,
+  type IRefreshTokenService,
+} from "@/modules/auth";
+import { UnauthorizedError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 describe("AuthService", () => {
-  let authService: AuthService;
-  let mockRefreshTokenService: jest.Mocked<IRefreshTokenService>;
+  const refreshTokenService = mock<IRefreshTokenService>();
+
+  const options = { refreshTokenService };
 
   beforeEach(() => {
-    mockRefreshTokenService = {
-      deleteAllTokens: jest.fn(),
-      refreshToken: jest.fn(),
-      createToken: jest.fn(),
-    };
+    mockReset(refreshTokenService);
 
-    authService = new AuthService(mockRefreshTokenService);
+    // Reset singleton instance before each test to ensure a clean state.
+    // @ts-ignore: resetting the private _instance for testing purposes
+    AuthService._instance = undefined;
   });
 
-  describe("AuthService - logoutUser", () => {
+  describe("Singleton behavior", () => {
+    it("should create a new instance if none exists", () => {
+      const instance = AuthService.getInstance(options);
+      expect(instance).toBeInstanceOf(AuthService);
+    });
+
+    it("should return the same instance on subsequent calls", () => {
+      const instance1 = AuthService.getInstance(options);
+      const instance2 = AuthService.getInstance(options);
+      expect(instance1).toBe(instance2);
+    });
+  });
+
+  describe("logoutUser", () => {
+    let authService: AuthService;
+
     const validLogoutDto: ILogoutDto = {
-      userId: "user-123",
-      refreshToken: "refresh-token-123",
+      userId: "user_id_001",
+      refreshToken: "valid_refresh_token",
     };
 
-    it("should successfully logout user and delete all refresh tokens", async () => {
-      mockRefreshTokenService.deleteAllTokens.mockResolvedValue();
+    beforeEach(() => {
+      authService = AuthService.getInstance(options);
+    });
+
+    it("should successfully logout a user when valid userId and refreshToken are provided", async () => {
+      refreshTokenService.deleteAllTokens.mockResolvedValue(undefined);
 
       await authService.logoutUser(validLogoutDto);
 
-      expect(mockRefreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
+      expect(refreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
         validLogoutDto.userId
       );
+
+      expect(refreshTokenService.deleteAllTokens).toHaveBeenCalledTimes(1);
     });
 
-    it("should handle errors from refresh token service", async () => {
-      mockRefreshTokenService.deleteAllTokens.mockRejectedValue(
-        new Error("Database error")
+    it("should throw an UnauthorizedError if refreshToken is missing", async () => {
+      const logoutDto = {
+        userId: "user_id_001",
+        refreshToken: "",
+      };
+
+      await expect(authService.logoutUser(logoutDto)).rejects.toThrow(
+        UnauthorizedError
+      );
+
+      await expect(authService.logoutUser(logoutDto)).rejects.toThrow(
+        ERROR_MESSAGES.UNAUTHORIZED
+      );
+
+      expect(refreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
+    });
+
+    it("should throw an UnauthorizedError if userId is missing", async () => {
+      const logoutDto = {
+        userId: "",
+        refreshToken: "valid_refresh_token",
+      };
+
+      await expect(authService.logoutUser(logoutDto)).rejects.toThrow(
+        UnauthorizedError
+      );
+
+      await expect(authService.logoutUser(logoutDto)).rejects.toThrow(
+        ERROR_MESSAGES.UNAUTHORIZED
+      );
+
+      expect(refreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
+    });
+
+    it("should throw an UnauthorizedError if both userId and refreshToken are missing", async () => {
+      const logoutDto = {
+        userId: "",
+        refreshToken: "",
+      };
+
+      await expect(authService.logoutUser(logoutDto)).rejects.toThrow(
+        UnauthorizedError
+      );
+
+      await expect(authService.logoutUser(logoutDto)).rejects.toThrow(
+        ERROR_MESSAGES.UNAUTHORIZED
+      );
+
+      expect(refreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
+    });
+
+    it("should propagate errors thrown by refreshTokenService.deleteAllTokens", async () => {
+      const errorMessage = "Delete tokens failure";
+
+      refreshTokenService.deleteAllTokens.mockRejectedValue(
+        new Error(errorMessage)
       );
 
       await expect(authService.logoutUser(validLogoutDto)).rejects.toThrow(
-        "Database error"
+        errorMessage
+      );
+      expect(refreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
+        validLogoutDto.userId
       );
     });
   });
-
-  // describe("AuthService - exchangeOauthCodeForTokens", () => {
-  //   const mockCode = "valid-code-123";
-
-  //   const mockCodeData: OAuthCodePayloadDto = {
-  //     userId: "user-123",
-  //     accessToken: "access-token-123",
-  //     refreshToken: "refresh-token-123",
-  //   };
-
-  //   it("should successfully exchange code for tokens and delete the code from cache", async () => {
-  //     mockCacheService.get.mockReturnValue(mockCodeData);
-  //     mockCacheService.del.mockReturnValue(1);
-
-  //     const result = await authService.exchangeOauthCodeForTokens(mockCode);
-
-  //     expect(result).toEqual({
-  //       accessToken: mockCodeData.accessToken,
-  //       refreshToken: mockCodeData.refreshToken,
-  //     });
-
-  //     expect(mockCacheService.get).toHaveBeenCalledWith(mockCode);
-
-  //     expect(mockCacheService.del).toHaveBeenCalledWith(mockCode);
-  //   });
-
-  //   it("should throw BadRequestError if code is not found in cache", async () => {
-  //     mockCacheService.get.mockReturnValue(null);
-
-  //     await expect(
-  //       authService.exchangeOauthCodeForTokens(mockCode)
-  //     ).rejects.toThrow(new BadRequestError("Invalid or expired code"));
-
-  //     expect(mockCacheService.del).not.toHaveBeenCalled();
-  //   });
-
-  //   it("should throw BadRequestError if code data is undefined", async () => {
-  //     mockCacheService.get.mockReturnValue(undefined);
-
-  //     await expect(
-  //       authService.exchangeOauthCodeForTokens(mockCode)
-  //     ).rejects.toThrow(new BadRequestError("Invalid or expired code"));
-
-  //     expect(mockCacheService.del).not.toHaveBeenCalled();
-  //   });
-
-  //   it("should handle cache deletion failure", async () => {
-  //     mockCacheService.get.mockReturnValue(mockCodeData);
-  //     mockCacheService.del.mockImplementation(() => {
-  //       throw new Error("Cache deletion failed");
-  //     });
-
-  //     await expect(
-  //       authService.exchangeOauthCodeForTokens(mockCode)
-  //     ).rejects.toThrow("Cache deletion failed");
-  //   });
-
-  //   it("should handle cache retrieval errors", async () => {
-  //     mockCacheService.get.mockImplementation(() => {
-  //       throw new Error("Cache retrieval failed");
-  //     });
-
-  //     await expect(
-  //       authService.exchangeOauthCodeForTokens(mockCode)
-  //     ).rejects.toThrow("Cache retrieval failed");
-  //   });
-
-  //   it("should handle empty code parameter", async () => {
-  //     await expect(authService.exchangeOauthCodeForTokens("")).rejects.toThrow(
-  //       new BadRequestError("Invalid or expired code")
-  //     );
-
-  //     expect(mockCacheService.get).toHaveBeenCalledWith("");
-  //     expect(mockCacheService.del).not.toHaveBeenCalled();
-  //   });
-
-  //   it("should handle malformed code data in cache", async () => {
-  //     mockCacheService.get.mockReturnValue({
-  //       invalidData: "malformed",
-  //     } as any);
-
-  //     const result = await authService.exchangeOauthCodeForTokens(mockCode);
-
-  //     expect(result).toEqual({
-  //       accessToken: undefined,
-  //       refreshToken: undefined,
-  //     });
-  //     expect(mockCacheService.del).toHaveBeenCalledWith(mockCode);
-  //   });
-
-  //   it("should handle zero deletion count", async () => {
-  //     mockCacheService.get.mockReturnValue(mockCodeData);
-  //     mockCacheService.del.mockReturnValue(0);
-
-  //     const result = await authService.exchangeOauthCodeForTokens(mockCode);
-
-  //     expect(result).toEqual({
-  //       accessToken: mockCodeData.accessToken,
-  //       refreshToken: mockCodeData.refreshToken,
-  //     });
-  //   });
-  // });
 });

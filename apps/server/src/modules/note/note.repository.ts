@@ -12,7 +12,7 @@ import type { IPrismaService } from "@/modules/shared/services";
 
 import type { Prisma } from "@prisma/client";
 import type { Note } from "./note.model";
-import type { INoteRepository } from "./note.types";
+import type { INoteRepository, INoteRepositoryOptions } from "./note.types";
 
 /**
  * Repository for performing CRUD operations on Notes.
@@ -22,12 +22,27 @@ import type { INoteRepository } from "./note.types";
  * error messaging.
  */
 export class NoteRepository implements INoteRepository {
+  private static _instance: NoteRepository;
+
   /**
    * Creates an instance of NoteRepository.
    *
    * @param _db - An instance of PrismaClient for database operations.
    */
-  constructor(private readonly _db: IPrismaService) {}
+  private constructor(private readonly _db: IPrismaService) {}
+
+  /**
+   * Gets the singleton instance of NoteRepository.
+   *
+   * @param db - An instance of PrismaClient for database operations.
+   * @returns The singleton instance of NoteRepository.
+   */
+  public static getInstance(options: INoteRepositoryOptions): NoteRepository {
+    if (!this._instance) {
+      this._instance = new NoteRepository(options.db);
+    }
+    return this._instance;
+  }
 
   /**
    * Finds a single note based on the provided criteria.

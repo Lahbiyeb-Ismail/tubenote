@@ -12,6 +12,17 @@ import type {
  * API response formatter.
  */
 export class ResponseFormatter implements IResponseFormatter {
+  private static _instance: ResponseFormatter;
+
+  private constructor() {}
+
+  public static getInstance(): ResponseFormatter {
+    if (!this._instance) {
+      this._instance = new ResponseFormatter();
+    }
+    return this._instance;
+  }
+
   /**
    * Returns a standardized API response object.
    *

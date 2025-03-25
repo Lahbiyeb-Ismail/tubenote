@@ -14,11 +14,24 @@ import type { ILoginDto } from "@/modules/auth/dtos";
 
 import type {
   ILocalAuthController,
+  ILocalAuthControllerOptions,
   ILocalAuthService,
 } from "./local-auth.types";
 
 export class LocalAuthController implements ILocalAuthController {
-  constructor(private readonly _localAuthService: ILocalAuthService) {}
+  private static _instance: LocalAuthController;
+
+  private constructor(private readonly _localAuthService: ILocalAuthService) {}
+
+  public static getInstance(
+    options: ILocalAuthControllerOptions
+  ): LocalAuthController {
+    if (!this._instance) {
+      this._instance = new LocalAuthController(options.localAuthService);
+    }
+
+    return this._instance;
+  }
 
   /**
    * Registers a new user.

@@ -10,15 +10,15 @@ import {
 import { ResetPasswordController } from "./reset-password.controller";
 import { ResetPasswordService } from "./reset-password.service";
 
-const resetPasswordService = new ResetPasswordService(
+const resetPasswordService = ResetPasswordService.getInstance({
   userService,
   cryptoService,
   cacheService,
   mailSenderService,
-  loggerService
-);
-const resetPasswordController = new ResetPasswordController(
-  resetPasswordService
-);
+  loggerService,
+});
+const resetPasswordController = ResetPasswordController.getInstance({
+  resetPasswordService,
+});
 
 export { resetPasswordController, resetPasswordService };

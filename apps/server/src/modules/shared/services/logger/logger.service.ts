@@ -12,9 +12,11 @@ import {
 } from "./logger.constants";
 
 export class LoggerService implements ILoggerService {
+  private static _instance: LoggerService;
+
   private logger: winston.Logger;
 
-  constructor(config: LoggerConfig = {}) {
+  private constructor(config: LoggerConfig = {}) {
     const {
       level = DEFAULT_LOG_LEVEL,
       errorLogPath = DEFAULT_ERROR_LOG_PATH,
@@ -60,6 +62,13 @@ export class LoggerService implements ILoggerService {
         }),
       ],
     });
+  }
+
+  public static getInstance(config?: LoggerConfig): LoggerService {
+    if (!this._instance) {
+      this._instance = new LoggerService(config);
+    }
+    return this._instance;
   }
 
   // Log methods

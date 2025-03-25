@@ -5,14 +5,14 @@ import { isAuthenticated, validateRequest } from "@/middlewares";
 import { updatePasswordSchema, updateUserSchema } from "./schemas";
 import { userController } from "./user.module";
 
-const router = Router();
+const userRoutes = Router();
 
 // - isAuthenticated: Ensures the user is authenticated before accessing any user routes.
-router.use(isAuthenticated);
+userRoutes.use(isAuthenticated);
 
 // - GET /me: Get the current user's information
 // - PATCH /me: Update the current user's information (requires request body validation)
-router
+userRoutes
   .route("/me")
   .get((req, res) => userController.getCurrentUser(req, res))
   .patch(validateRequest({ body: updateUserSchema }), (req, res) =>
@@ -20,10 +20,10 @@ router
   );
 
 // - PATCH /update-password: Update the current user's password (requires request body validation)
-router
+userRoutes
   .route("/update-password")
   .patch(validateRequest({ body: updatePasswordSchema }), (req, res) =>
     userController.updatePassword(req, res)
   );
 
-export default router;
+export { userRoutes };

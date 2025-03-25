@@ -17,12 +17,9 @@ import type {
 } from "./oauth.types";
 
 export class OAuthController implements IOAuthController {
-  private static instance: OAuthController;
-  private readonly _oauthService: IOAuthService;
+  private static _instance: OAuthController;
 
-  constructor(options: IOAuthControllerOptions) {
-    this._oauthService = options.oauthService;
-  }
+  private constructor(private readonly _oauthService: IOAuthService) {}
 
   private setRefreshTokenCookie(res: Response, refreshToken: string) {
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
@@ -34,12 +31,12 @@ export class OAuthController implements IOAuthController {
     );
   }
 
-  static getInstance(options: IOAuthControllerOptions): OAuthController {
-    if (!OAuthController.instance) {
-      this.instance = new OAuthController(options);
+  public static getInstance(options: IOAuthControllerOptions): OAuthController {
+    if (!this._instance) {
+      this._instance = new OAuthController(options.oauthService);
     }
 
-    return OAuthController.instance;
+    return this._instance;
   }
 
   async oauthLogin(req: TypedRequest, res: Response) {

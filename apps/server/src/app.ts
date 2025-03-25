@@ -13,9 +13,9 @@ import helmet from "helmet";
 import passport from "passport";
 
 import { authRoutes, oauthRoutes } from "@/modules/auth";
-import noteRoutes from "@/modules/note/note.routes";
-import userRoutes from "@/modules/user/user.routes";
-import videoRoutes from "@/modules/video/video.routes";
+import { noteRoutes } from "@/modules/note";
+import { userRoutes } from "@/modules/user";
+import { videoRoutes } from "@/modules/video";
 
 import { errorHandler, notFoundRoute } from "@/middlewares";
 

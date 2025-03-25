@@ -15,13 +15,30 @@ import type { IPrismaService } from "@/modules/shared/services";
 
 import type { Prisma } from "@prisma/client";
 import type { Video, YoutubeVideoData } from "./video.model";
-import type { IVideoRepository, IVideoService } from "./video.types";
+import type {
+  IVideoRepository,
+  IVideoService,
+  IVideoServiceOptions,
+} from "./video.types";
 
 export class VideoService implements IVideoService {
-  constructor(
+  private static _instance: VideoService;
+
+  private constructor(
     private readonly _videoRepository: IVideoRepository,
     private readonly _prismaService: IPrismaService
   ) {}
+
+  public static getInstance(options: IVideoServiceOptions): VideoService {
+    if (!this._instance) {
+      this._instance = new VideoService(
+        options.videoRepository,
+        options.prismaService
+      );
+    }
+
+    return this._instance;
+  }
 
   private async _findVideoByYoutubeId(
     tx: Prisma.TransactionClient,

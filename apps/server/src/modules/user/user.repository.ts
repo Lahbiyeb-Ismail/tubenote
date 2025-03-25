@@ -8,10 +8,19 @@ import type { IPrismaService } from "@/modules/shared/services";
 
 import type { ICreateUserDto, IUpdateUserDto } from "./dtos";
 import type { User } from "./user.model";
-import type { IUserRepository } from "./user.types";
+import type { IUserRepository, IUserRepositoryOptions } from "./user.types";
 
 export class UserRepository implements IUserRepository {
-  constructor(private readonly _db: IPrismaService) {}
+  private static _instance: UserRepository;
+
+  private constructor(private readonly _db: IPrismaService) {}
+
+  public static getInstance(options: IUserRepositoryOptions): UserRepository {
+    if (!this._instance) {
+      this._instance = new UserRepository(options.db);
+    }
+    return this._instance;
+  }
 
   /**
    * Creates a new user in the database.

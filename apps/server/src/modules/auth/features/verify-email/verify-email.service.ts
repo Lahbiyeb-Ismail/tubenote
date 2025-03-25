@@ -17,16 +17,34 @@ import type { IJwtService } from "@/modules/auth/utils";
 import type {
   IVerifyEmailRepository,
   IVerifyEmailService,
+  IVerifyEmailServiceOptions,
 } from "./verify-email.types";
 
 export class VerifyEmailService implements IVerifyEmailService {
-  constructor(
+  private static _instance: VerifyEmailService;
+
+  private constructor(
     private readonly _verifyEmailRepository: IVerifyEmailRepository,
     private readonly _prismaService: IPrismaService,
     private readonly _userService: IUserService,
     private readonly _jwtService: IJwtService,
     private readonly _loggerService: ILoggerService
   ) {}
+
+  public static getInstance(
+    options: IVerifyEmailServiceOptions
+  ): VerifyEmailService {
+    if (!this._instance) {
+      this._instance = new VerifyEmailService(
+        options.verifyEmailRepository,
+        options.prismaService,
+        options.userService,
+        options.jwtService,
+        options.loggerService
+      );
+    }
+    return this._instance;
+  }
 
   async createToken(
     tx: Prisma.TransactionClient,

@@ -4,10 +4,10 @@ import { NoteController } from "./note.controller";
 import { NoteRepository } from "./note.repository";
 import { NoteService } from "./note.service";
 
-const noteRepository = new NoteRepository(prismaService);
+const noteRepository = NoteRepository.getInstance({ db: prismaService });
 
-const noteService = new NoteService(noteRepository, prismaService);
+const noteService = NoteService.getInstance({ noteRepository, prismaService });
 
-const noteController = new NoteController(noteService);
+const noteController = NoteController.getInstance({ noteService });
 
 export { noteController };

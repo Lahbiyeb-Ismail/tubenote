@@ -18,15 +18,33 @@ import type { RefreshToken } from "./refresh-token.model";
 import type {
   IRefreshTokenRepository,
   IRefreshTokenService,
+  IRefreshTokenServiceOptions,
 } from "./refresh-token.types";
 
 export class RefreshTokenService implements IRefreshTokenService {
-  constructor(
+  private static _instance: RefreshTokenService;
+
+  private constructor(
     private readonly _refreshTokenRepository: IRefreshTokenRepository,
     private readonly _prismaService: IPrismaService,
     private readonly _jwtService: IJwtService,
     private readonly _loggerService: ILoggerService
   ) {}
+
+  public static getInstance(
+    options: IRefreshTokenServiceOptions
+  ): RefreshTokenService {
+    if (!this._instance) {
+      this._instance = new RefreshTokenService(
+        options.refreshTokenRepository,
+        options.prismaService,
+        options.jwtService,
+        options.loggerService
+      );
+    }
+
+    return this._instance;
+  }
 
   async refreshToken(refreshDto: IRefreshDto): Promise<IAuthResponseDto> {
     const { userId, token } = refreshDto;

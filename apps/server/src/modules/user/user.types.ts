@@ -6,6 +6,7 @@ import type { TypedRequest } from "@/modules/shared/types";
 
 import type { User } from "./user.model";
 
+import type { ICryptoService, IPrismaService } from "../shared/services";
 import type {
   ICreateUserDto,
   IGetUserDto,
@@ -14,6 +15,7 @@ import type {
   IUpdatePasswordDto,
   IUpdateUserDto,
 } from "./dtos";
+import type { IAccountService } from "./features/account/account.types";
 import type { ICreateAccountDto } from "./features/account/dtos";
 
 /**
@@ -167,4 +169,19 @@ export interface IUserController {
     req: TypedRequest<IUpdatePasswordBodyDto>,
     res: Response
   ): Promise<void>;
+}
+
+export interface IUserRepositoryOptions {
+  db: IPrismaService;
+}
+
+export interface IUserServiceOptions {
+  userRepository: IUserRepository;
+  accountService: IAccountService;
+  prismaService: IPrismaService;
+  cryptoService: ICryptoService;
+}
+
+export interface IUserControllerOptions {
+  userService: IUserService;
 }

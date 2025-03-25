@@ -13,16 +13,18 @@ import { verifyEmailService } from "../verify-email";
 import { LocalAuthController } from "./local-auth.controller";
 import { LocalAuthService } from "./local-auth.service";
 
-const localAuthService = new LocalAuthService(
-  jwtService,
+const localAuthService = LocalAuthService.getInstance({
   prismaService,
   userService,
   verifyEmailService,
-  cryptoService,
   refreshTokenService,
-  mailSenderService
-);
+  jwtService,
+  cryptoService,
+  mailSenderService,
+});
 
-const localAuthController = new LocalAuthController(localAuthService);
+const localAuthController = LocalAuthController.getInstance({
+  localAuthService,
+});
 
 export { localAuthService, localAuthController };

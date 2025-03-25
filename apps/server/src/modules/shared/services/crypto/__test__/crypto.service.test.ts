@@ -11,7 +11,7 @@ describe("CryptoService", () => {
   const mockSalt = "test-salt";
 
   beforeEach(() => {
-    cryptoService = new CryptoService();
+    cryptoService = CryptoService.getInstance();
     jest.clearAllMocks();
 
     // Setup default mock implementations

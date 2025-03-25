@@ -6,23 +6,23 @@ import { idParamSchema, paginationQuerySchema } from "@/modules/shared/schemas";
 
 import { videoController } from "./video.module";
 
-const router = Router();
+const videoRoutes = Router();
 
 // - isAuthenticated: Ensures the user is authenticated before accessing any video routes.
-router.use(isAuthenticated);
+videoRoutes.use(isAuthenticated);
 
 // - GET /: Get all videos for the authenticated user
 // - POST /: Create a new video (requires request body validation)
-router
+videoRoutes
   .route("/")
   .get(validateRequest({ query: paginationQuerySchema }), (req, res) =>
     videoController.getUserVideos(req, res)
   );
 
-router
+videoRoutes
   .route("/:id")
   .get(validateRequest({ params: idParamSchema }), (req, res) =>
     videoController.getVideoByIdOrCreate(req, res)
   );
 
-export default router;
+export { videoRoutes };

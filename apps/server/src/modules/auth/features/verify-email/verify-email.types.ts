@@ -5,6 +5,9 @@ import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type { ICreateDto, IParamTokenDto } from "@/modules/shared/dtos";
 
+import type { ILoggerService, IPrismaService } from "@/modules/shared/services";
+import type { IUserService } from "@/modules/user";
+import type { IJwtService } from "../../utils";
 import type { FindActiveTokenDto } from "./dtos";
 import type { VerifyEmailToken } from "./verify-email.model";
 
@@ -30,4 +33,20 @@ export interface IVerifyEmailController {
     req: TypedRequest<EmptyRecord, IParamTokenDto>,
     res: Response
   ): Promise<void>;
+}
+
+export interface IVerifyEmailRepositoryOptions {
+  db: IPrismaService;
+}
+
+export interface IVerifyEmailServiceOptions {
+  verifyEmailRepository: IVerifyEmailRepository;
+  prismaService: IPrismaService;
+  userService: IUserService;
+  jwtService: IJwtService;
+  loggerService: ILoggerService;
+}
+
+export interface IVerifyEmailControllerOptions {
+  verifyEmailService: IVerifyEmailService;
 }

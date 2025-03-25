@@ -17,6 +17,7 @@ import type {
   IUpdateDto,
 } from "@/modules/shared/dtos";
 import type { Prisma } from "@prisma/client";
+import type { IPrismaService } from "../shared/services";
 
 /**
  * Interface defining the repository methods for interacting with note data.
@@ -269,4 +270,17 @@ export interface INoteController {
     req: TypedRequest<EmptyRecord, IParamIdDto, IQueryPaginationDto>,
     res: Response
   ): Promise<void>;
+}
+
+export interface INoteRepositoryOptions {
+  db: IPrismaService;
+}
+
+export interface INoteServiceOptions {
+  noteRepository: INoteRepository;
+  prismaService: IPrismaService;
+}
+
+export interface INoteControllerOptions {
+  noteService: INoteService;
 }
