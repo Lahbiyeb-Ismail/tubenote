@@ -1,4 +1,4 @@
-import { prismaService } from "@/modules/shared/services";
+import { prismaService, responseFormatter } from "@/modules/shared/services";
 
 import { NoteController } from "./note.controller";
 import { NoteRepository } from "./note.repository";
@@ -8,6 +8,9 @@ const noteRepository = NoteRepository.getInstance({ db: prismaService });
 
 const noteService = NoteService.getInstance({ noteRepository, prismaService });
 
-const noteController = NoteController.getInstance({ noteService });
+const noteController = NoteController.getInstance({
+  noteService,
+  responseFormatter,
+});
 
 export { noteController };
