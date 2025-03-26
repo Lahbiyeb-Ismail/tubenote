@@ -2,7 +2,9 @@ import type { Response } from "express";
 import httpStatus from "http-status";
 
 import type { IUpdateBodyDto } from "@/modules/shared/dtos";
+import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
+
 import type { IUpdatePasswordBodyDto } from "./dtos";
 import type { User } from "./user.model";
 import type {
@@ -17,32 +19,19 @@ import type {
 export class UserController implements IUserController {
   private static _instance: UserController;
 
-  private constructor(private readonly _userService: IUserService) {}
+  private constructor(
+    private readonly _userService: IUserService,
+    private readonly _responseFormatter: IResponseFormatter
+  ) {}
 
   public static getInstance(options: IUserControllerOptions): UserController {
     if (!this._instance) {
-      this._instance = new UserController(options.userService);
+      this._instance = new UserController(
+        options.userService,
+        options.responseFormatter
+      );
     }
     return this._instance;
-  }
-
-  /**
-   * Maps a User object to a response object, omitting the password field.
-   *
-   * @param user - The User object to be mapped.
-   * @returns An object containing all properties of the User except the password.
-   */
-  private _mapUserToResponse(user: User): Omit<User, "password"> {
-    return {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      profilePicture: user.profilePicture,
-      isEmailVerified: user.isEmailVerified,
-      videoIds: user.videoIds,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
   }
 
   /**
@@ -56,10 +45,13 @@ export class UserController implements IUserController {
 
     const user = await this._userService.getUserByIdOrEmail({ id: userId });
 
-    res.status(httpStatus.OK).json({
+    const formatedResponse = this._responseFormatter.formatResponse<User>({
+      data: user,
+      status: httpStatus.OK,
       message: "User retrieved successfully.",
-      user: this._mapUserToResponse(user),
     });
+
+    res.status(httpStatus.OK).json(formatedResponse);
   }
 
   /**
@@ -79,10 +71,13 @@ export class UserController implements IUserController {
       data: req.body,
     });
 
-    res.status(httpStatus.OK).json({
+    const formatedResponse = this._responseFormatter.formatResponse<User>({
+      data: user,
+      status: httpStatus.OK,
       message: "User updated successfully.",
-      user: this._mapUserToResponse(user),
     });
+
+    res.status(httpStatus.OK).json(formatedResponse);
   }
 
   /**
@@ -110,9 +105,12 @@ export class UserController implements IUserController {
       newPassword: req.body.newPassword,
     });
 
-    res.status(httpStatus.OK).json({
+    const formatedResponse = this._responseFormatter.formatResponse<User>({
+      data: user,
+      status: httpStatus.OK,
       message: "User password updated successfully.",
-      user: this._mapUserToResponse(user),
     });
+
+    res.status(httpStatus.OK).json(formatedResponse);
   }
 }

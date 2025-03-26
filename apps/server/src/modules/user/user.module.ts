@@ -1,4 +1,8 @@
-import { cryptoService, prismaService } from "@/modules/shared/services";
+import {
+  cryptoService,
+  prismaService,
+  responseFormatter,
+} from "@/modules/shared/services";
 
 import { accountService } from "./features/account/account.module";
 import { UserController } from "./user.controller";
@@ -14,6 +18,9 @@ const userService = UserService.getInstance({
   cryptoService,
 });
 
-const userController = UserController.getInstance({ userService });
+const userController = UserController.getInstance({
+  userService,
+  responseFormatter,
+});
 
 export { userController, userService, userRepository };
