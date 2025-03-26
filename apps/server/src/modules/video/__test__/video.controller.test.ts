@@ -96,7 +96,7 @@ describe("VideoController", () => {
   describe("VideoController - getUserVideos", () => {
     const baseQuery: IQueryPaginationDto = {
       page: "1",
-      limit: "10",
+      limit: 10,
       sortBy: "createdAt",
       order: "desc",
     };
@@ -106,7 +106,7 @@ describe("VideoController", () => {
       mockRequest.userId = mockUserId;
 
       mockVideoService.getUserVideos.mockResolvedValue({
-        items: [mockVideo],
+        data: [mockVideo],
         totalItems: 1,
         totalPages: 1,
       });
@@ -144,7 +144,7 @@ describe("VideoController", () => {
     });
 
     it("should handle invalid numeric parameters by converting to NaN", async () => {
-      mockRequest.query = { page: "invalid", limit: "not-a-number" };
+      mockRequest.query = { page: "invalid", limit: "not-a-number" } as any;
       mockRequest.userId = mockUserId;
 
       await videoController.getUserVideos(mockRequest, mockResponse);
@@ -184,7 +184,7 @@ describe("VideoController", () => {
     });
 
     it("should handle maximum limit values", async () => {
-      mockRequest.query = { ...baseQuery, limit: "1000" };
+      mockRequest.query = { ...baseQuery, limit: 1000 };
       mockRequest.userId = mockUserId;
 
       await videoController.getUserVideos(mockRequest, mockResponse);
@@ -220,13 +220,17 @@ describe("VideoController", () => {
         userId: mockUserId,
         id: mockVideoId,
       });
-      expect(mockResponseFormatter.formatResponse).toHaveBeenCalledWith(
-        mockVideo
-      );
+      expect(mockResponseFormatter.formatResponse).toHaveBeenCalledWith({
+        data: mockVideo,
+        message: "Video retrieved successfully.",
+        status: 200,
+      });
       expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        data: mockVideo,
         success: true,
+        data: mockVideo,
+        message: "Video retrieved successfully.",
+        status: 200,
       });
     });
 
@@ -259,7 +263,7 @@ describe("VideoController", () => {
     it("should handle extremely large numeric values", async () => {
       mockRequest.query = {
         page: "9999999999",
-        limit: "9999999999",
+        limit: 9999999999,
       };
       mockRequest.userId = mockUserId;
 
@@ -277,7 +281,7 @@ describe("VideoController", () => {
       // Simulate non-string values coming from query params
       mockRequest.query = {
         page: 123 as unknown as string,
-        limit: true as unknown as string,
+        limit: true as unknown as number,
       };
       mockRequest.userId = mockUserId;
 

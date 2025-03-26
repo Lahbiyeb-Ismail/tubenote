@@ -6,7 +6,7 @@ import type {
   ICreateDto,
   IFindAllDto,
   IFindUniqueDto,
-  IPaginatedItems,
+  IPaginatedData,
   IParamIdDto,
   IQueryPaginationDto,
 } from "@/modules/shared/dtos";
@@ -39,7 +39,7 @@ export interface IVideoRepository {
 export interface IVideoService {
   getYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData>;
   findVideoOrCreate(findVideoDto: IFindUniqueDto): Promise<Video>;
-  getUserVideos(findAllDto: IFindAllDto): Promise<IPaginatedItems<Video>>;
+  getUserVideos(findAllDto: IFindAllDto): Promise<IPaginatedData<Video>>;
 }
 
 export interface IVideoController {

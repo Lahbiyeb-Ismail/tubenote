@@ -10,6 +10,7 @@ import type {
 } from "@/modules/shared/dtos";
 import type { IResponseFormatter } from "@/modules/shared/services";
 
+import type { Video } from "./video.model";
 import type {
   IVideoController,
   IVideoControllerOptions,
@@ -52,25 +53,21 @@ export class VideoController implements IVideoController {
   ) {
     const userId = req.userId;
 
-    const page = Number(req.query.page);
-    const limit = Number(req.query.limit);
-    const order = String(req.query.order);
-    const sortBy = String(req.query.sortBy);
-
-    const skip = (page - 1) * limit;
+    const paginationQueries = this._responseFormatter.getPaginationQueries({
+      reqQuery: req.query,
+      itemsPerPage: 8,
+    });
 
     const findAllDto: IFindAllDto = {
       userId,
-      limit,
-      skip,
-      sort: { by: sortBy, order },
+      ...paginationQueries,
     };
 
-    const paginatedItems = await this._videoService.getUserVideos(findAllDto);
+    const paginatedData = await this._videoService.getUserVideos(findAllDto);
 
     const formattedResponse = this._responseFormatter.formatPaginatedResponse(
-      req.query,
-      paginatedItems
+      paginationQueries,
+      paginatedData
     );
 
     res.status(httpStatus.OK).json(formattedResponse);
@@ -96,7 +93,11 @@ export class VideoController implements IVideoController {
       id,
     });
 
-    const formattedResponse = this._responseFormatter.formatResponse(video);
+    const formattedResponse = this._responseFormatter.formatResponse<Video>({
+      data: video,
+      status: httpStatus.OK,
+      message: "Video retrieved successfully.",
+    });
 
     res.status(httpStatus.OK).json(formattedResponse);
   }
