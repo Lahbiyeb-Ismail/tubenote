@@ -12,6 +12,7 @@ import type { User } from "@/modules/user";
 
 import type { ILoginDto } from "@/modules/auth/dtos";
 
+import type { IResponseFormatter } from "@/modules/shared/services";
 import type {
   ILocalAuthController,
   ILocalAuthControllerOptions,
@@ -21,13 +22,19 @@ import type {
 export class LocalAuthController implements ILocalAuthController {
   private static _instance: LocalAuthController;
 
-  private constructor(private readonly _localAuthService: ILocalAuthService) {}
+  private constructor(
+    private readonly _localAuthService: ILocalAuthService,
+    private readonly _responseFormatter: IResponseFormatter
+  ) {}
 
   public static getInstance(
     options: ILocalAuthControllerOptions
   ): LocalAuthController {
     if (!this._instance) {
-      this._instance = new LocalAuthController(options.localAuthService);
+      this._instance = new LocalAuthController(
+        options.localAuthService,
+        options.responseFormatter
+      );
     }
 
     return this._instance;
@@ -43,10 +50,13 @@ export class LocalAuthController implements ILocalAuthController {
 
     if (!user) throw new BadRequestError("User registration failed.");
 
-    res.status(httpStatus.CREATED).json({
+    const formattedResponse = this._responseFormatter.formatResponse({
+      status: httpStatus.CREATED,
       message: "A verification email has been sent to your email.",
-      email: user.email,
+      data: { email: user.email },
     });
+
+    res.status(httpStatus.CREATED).json(formattedResponse);
   }
 
   /**
@@ -58,11 +68,14 @@ export class LocalAuthController implements ILocalAuthController {
     const { accessToken, refreshToken } =
       await this._localAuthService.loginUser(req.body);
 
+    const formattedResponse = this._responseFormatter.formatResponse({
+      status: httpStatus.OK,
+      message: "Login successful",
+      data: { accessToken },
+    });
+
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
-    res.status(httpStatus.OK).json({
-      message: "Login successful",
-      accessToken,
-    });
+    res.status(httpStatus.OK).json(formattedResponse);
   }
 }

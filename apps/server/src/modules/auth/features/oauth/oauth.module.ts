@@ -3,6 +3,7 @@ import {
   cryptoService,
   loggerService,
   prismaService,
+  responseFormatter,
 } from "@/modules/shared/services";
 
 import { userService } from "@/modules/user";
@@ -25,6 +26,9 @@ const oauthService = OAuthService.getInstance({
   loggerService,
 });
 
-const oauthController = OAuthController.getInstance({ oauthService });
+const oauthController = OAuthController.getInstance({
+  oauthService,
+  responseFormatter,
+});
 
 export { oauthService, oauthController };

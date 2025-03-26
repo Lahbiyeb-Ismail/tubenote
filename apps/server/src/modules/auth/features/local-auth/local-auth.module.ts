@@ -4,6 +4,7 @@ import {
   cryptoService,
   mailSenderService,
   prismaService,
+  responseFormatter,
 } from "@/modules/shared/services";
 
 import { jwtService } from "../../utils";
@@ -25,6 +26,7 @@ const localAuthService = LocalAuthService.getInstance({
 
 const localAuthController = LocalAuthController.getInstance({
   localAuthService,
+  responseFormatter,
 });
 
 export { localAuthService, localAuthController };

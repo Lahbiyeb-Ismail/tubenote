@@ -1,7 +1,9 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
+import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
+
 import type {
   IAuthController,
   IAuthControllerOptions,
@@ -17,7 +19,10 @@ import { REFRESH_TOKEN_NAME } from "./constants";
 export class AuthController implements IAuthController {
   private static _instance: AuthController;
 
-  private constructor(private readonly _authService: IAuthService) {}
+  private constructor(
+    private readonly _authService: IAuthService,
+    private readonly _responseFormatter: IResponseFormatter
+  ) {}
 
   /**
    * Retrieves the singleton instance of the `AuthController` class.
@@ -28,7 +33,10 @@ export class AuthController implements IAuthController {
    */
   public static getInstance(options: IAuthControllerOptions): AuthController {
     if (!this._instance) {
-      this._instance = new AuthController(options.authService);
+      this._instance = new AuthController(
+        options.authService,
+        options.responseFormatter
+      );
     }
 
     return this._instance;
@@ -47,8 +55,13 @@ export class AuthController implements IAuthController {
 
     await this._authService.logoutUser({ refreshToken, userId });
 
+    const formattedResponse = this._responseFormatter.formatResponse({
+      status: httpStatus.NO_CONTENT,
+      message: "User logged out successfully.",
+    });
+
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
-    res.sendStatus(httpStatus.NO_CONTENT);
+    res.status(httpStatus.NO_CONTENT).json(formattedResponse);
   }
 }

@@ -5,6 +5,7 @@ import {
   cryptoService,
   loggerService,
   mailSenderService,
+  responseFormatter,
 } from "@/modules/shared/services";
 
 import { ResetPasswordController } from "./reset-password.controller";
@@ -19,6 +20,7 @@ const resetPasswordService = ResetPasswordService.getInstance({
 });
 const resetPasswordController = ResetPasswordController.getInstance({
   resetPasswordService,
+  responseFormatter,
 });
 
 export { resetPasswordController, resetPasswordService };
