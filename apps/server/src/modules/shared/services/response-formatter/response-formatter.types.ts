@@ -1,4 +1,8 @@
-import type { IFindAllDto, IQueryPaginationDto } from "@/modules/shared/dtos";
+import type {
+  IFindAllDto,
+  IPaginatedData,
+  IQueryPaginationDto,
+} from "@/modules/shared/dtos";
 
 /**
  * Interface representing the pagination metadata.
@@ -11,19 +15,16 @@ export interface PaginationInfo {
   hasPrevPage: boolean;
 }
 
-/**
- * Generic interface representing a paginated result.
- */
-export interface PaginatedResult<T> {
-  items: T[];
-  totalItems: number;
-  totalPages: number;
+export interface GetPaginationQueriesOptions {
+  reqQuery: IQueryPaginationDto;
+  itemsPerPage: number;
 }
 
 /**
  * Options to customize the API response.
  */
-export interface ApiResponseOptions {
+export interface ApiResponseOptions<T> {
+  data?: T;
   status?: number;
   message?: string;
   pagination?: PaginationInfo;
@@ -38,19 +39,17 @@ export interface ApiResponseOptions {
  * @property {boolean} success - Indicates whether the API request was successful.
  * @property {T} data - The data returned by the API.
  */
-export interface ApiResponse<T> extends ApiResponseOptions {
+export interface ApiResponse<T> extends ApiResponseOptions<T> {
   success: boolean;
-  data: T;
 }
 
 export interface IResponseFormatter {
-  formatResponse<T>(data: T, options?: ApiResponseOptions): ApiResponse<T>;
+  formatResponse<T>(options?: ApiResponseOptions<T>): ApiResponse<T>;
   formatPaginatedResponse<T>(
     paginationQuery: IQueryPaginationDto,
-    result: PaginatedResult<T>
+    paginatedData: IPaginatedData<T>
   ): ApiResponse<T[]>;
   getPaginationQueries(
-    queries: IQueryPaginationDto,
-    defaultLimit: number
+    options: GetPaginationQueriesOptions
   ): Omit<IFindAllDto, "userId">;
 }

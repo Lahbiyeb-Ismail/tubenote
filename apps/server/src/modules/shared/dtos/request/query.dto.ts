@@ -10,7 +10,7 @@
  */
 export interface IQueryPaginationDto {
   page?: string;
-  limit?: string;
+  limit?: number;
   sortBy?: string;
   order?: string;
 }

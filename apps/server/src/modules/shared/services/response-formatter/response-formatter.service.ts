@@ -1,10 +1,14 @@
-import type { IFindAllDto, IQueryPaginationDto } from "@/modules/shared/dtos";
+import type {
+  IFindAllDto,
+  IPaginatedData,
+  IQueryPaginationDto,
+} from "@/modules/shared/dtos";
 
 import type {
   ApiResponse,
   ApiResponseOptions,
+  GetPaginationQueriesOptions,
   IResponseFormatter,
-  PaginatedResult,
   PaginationInfo,
 } from "./response-formatter.types";
 
@@ -30,16 +34,19 @@ export class ResponseFormatter implements IResponseFormatter {
    * @param options - Optional settings (status, message, pagination info).
    * @returns A standardized response object.
    */
-  formatResponse<T>(data: T, options?: ApiResponseOptions): ApiResponse<T> {
-    const { status, message, pagination } = options || {};
+  formatResponse<T>(options?: ApiResponseOptions<T>): ApiResponse<T> {
+    const { status, message, pagination, data } = options || {};
 
     const response: ApiResponse<T> = {
       success: true,
-      data,
     };
 
     if (message) {
       response.message = message;
+    }
+
+    if (data) {
+      response.data = data;
     }
 
     if (pagination) {
@@ -62,19 +69,21 @@ export class ResponseFormatter implements IResponseFormatter {
    */
   formatPaginatedResponse<T>(
     paginationQuery: IQueryPaginationDto,
-    result: PaginatedResult<T>
+    paginatedData: IPaginatedData<T>
   ): ApiResponse<T[]> {
+    const { totalPages, totalItems, data } = paginatedData;
+
     const currentPage = Number(paginationQuery.page) || 1;
 
     const pagination: PaginationInfo = {
-      totalPages: result.totalPages,
+      totalPages,
+      totalItems,
       currentPage,
-      totalItems: result.totalItems,
-      hasNextPage: currentPage < result.totalPages,
+      hasNextPage: currentPage < totalPages,
       hasPrevPage: currentPage > 1,
     };
 
-    return this.formatResponse<T[]>(result.items, { pagination });
+    return this.formatResponse<T[]>({ data, pagination });
   }
 
   /**
@@ -85,19 +94,19 @@ export class ResponseFormatter implements IResponseFormatter {
    * @returns An object with pagination parameters (skip, limit, and sort options) excluding the userId.
    */
   getPaginationQueries(
-    queries: IQueryPaginationDto,
-    defaultLimit = 8
+    options: GetPaginationQueriesOptions
   ): Omit<IFindAllDto, "userId"> {
-    const page = Math.max(Number(queries.page) || 1, 1);
-    const limit = Math.max(Number(queries.limit) || defaultLimit, 1);
+    const { reqQuery, itemsPerPage } = options;
+    const page = Math.max(Number(reqQuery.page) || 1, 1);
+    const limit = Math.max(Number(reqQuery.limit) || itemsPerPage, 1);
     const skip = (page - 1) * limit;
 
     return {
       skip,
       limit,
       sort: {
-        by: queries.sortBy || "createdAt",
-        order: queries.order || "desc",
+        by: reqQuery.sortBy || "createdAt",
+        order: reqQuery.order || "desc",
       },
     };
   }

@@ -3,8 +3,8 @@
  *
  * @template T - The type of items in the paginated collection.
  */
-export interface IPaginatedItems<T> {
-  items: T[];
+export interface IPaginatedData<T> {
+  data: T[];
   totalItems: number;
   totalPages: number;
 }
