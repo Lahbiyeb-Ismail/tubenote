@@ -21,7 +21,7 @@ import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import { RefreshTokenController } from "../refresh-token.controller";
 
 import type {
-  ApiResponse,
+  IApiResponse,
   IResponseFormatter,
 } from "@/modules/shared/services";
 import { mock, mockReset } from "jest-mock-extended";
@@ -65,7 +65,7 @@ describe("RefreshTokenController", () => {
   });
 
   describe("RefreshTokenController - refreshToken", () => {
-    const formattedResponse: ApiResponse<{ accessToken: string }> = {
+    const formattedResponse: IApiResponse<{ accessToken: string }> = {
       success: true,
       status: httpStatus.OK,
       data: { accessToken: mockNewTokens.accessToken },

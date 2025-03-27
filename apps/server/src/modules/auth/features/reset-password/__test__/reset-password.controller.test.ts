@@ -8,7 +8,7 @@ import type {
   IPasswordBodyDto,
 } from "@/modules/shared/dtos";
 import type {
-  ApiResponse,
+  IApiResponse,
   IResponseFormatter,
 } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
@@ -73,7 +73,7 @@ describe("ResetPasswordController", () => {
   });
 
   describe("forgotPassword", () => {
-    const formattedForgotRes: ApiResponse<unknown> = {
+    const formattedForgotRes: IApiResponse<unknown> = {
       success: true,
       status: httpStatus.OK,
       message: "Password reset link sent to your email.",
@@ -109,7 +109,7 @@ describe("ResetPasswordController", () => {
   });
 
   describe("resetPassword", () => {
-    const formattedResetRes: ApiResponse<unknown> = {
+    const formattedResetRes: IApiResponse<unknown> = {
       success: true,
       status: httpStatus.OK,
       message: "Password reset successfully.",
@@ -143,7 +143,7 @@ describe("ResetPasswordController", () => {
   });
 
   describe("verifyResetToken", () => {
-    const formattedVerifyRes: ApiResponse<unknown> = {
+    const formattedVerifyRes: IApiResponse<unknown> = {
       success: true,
       status: httpStatus.OK,
       message: "Reset password token is valid.",

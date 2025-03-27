@@ -4,7 +4,7 @@ import { mock, mockReset } from "jest-mock-extended";
 
 import type { IParamTokenDto } from "@/modules/shared/dtos";
 import type {
-  ApiResponse,
+  IApiResponse,
   IResponseFormatter,
 } from "@/modules/shared/services";
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
@@ -66,7 +66,7 @@ describe("VerifyEmailController", () => {
   });
 
   describe("verifyEmail", () => {
-    const formattedRes: ApiResponse<unknown> = {
+    const formattedRes: IApiResponse<unknown> = {
       success: true,
       status: httpStatus.OK,
       message: "Email verified successfully.",

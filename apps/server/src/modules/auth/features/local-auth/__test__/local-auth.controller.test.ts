@@ -4,7 +4,7 @@ import { mock, mockReset } from "jest-mock-extended";
 
 import type { ICreateBodyDto } from "@/modules/shared/dtos";
 import type {
-  ApiResponse,
+  IApiResponse,
   IResponseFormatter,
 } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
@@ -79,7 +79,7 @@ describe("LocalAuthController", () => {
   });
 
   describe("LocalAuthController - register", () => {
-    const formattedRegisterRes: ApiResponse<{ email: string }> = {
+    const formattedRegisterRes: IApiResponse<{ email: string }> = {
       success: true,
       status: httpStatus.CREATED,
       message: "A verification email has been sent to your email.",
@@ -112,7 +112,7 @@ describe("LocalAuthController", () => {
   });
 
   describe("LocalAuthController - login", () => {
-    const formattedLoginRes: ApiResponse<{ accessToken: string }> = {
+    const formattedLoginRes: IApiResponse<{ accessToken: string }> = {
       success: true,
       status: httpStatus.OK,
       message: "Login successful",

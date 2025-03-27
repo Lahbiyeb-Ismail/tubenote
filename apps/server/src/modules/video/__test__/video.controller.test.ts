@@ -10,7 +10,7 @@ import type {
   IQueryPaginationDto,
 } from "@/modules/shared/dtos";
 import type {
-  ApiResponse,
+  IApiResponse,
   IResponseFormatter,
 } from "@/modules/shared/services";
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
@@ -36,8 +36,10 @@ describe("VideoController", () => {
   const mockFindOrCreateReq = mock<TypedRequest<EmptyRecord, IParamIdDto>>();
   const mockResponse = mock<Response>();
 
-  const mockPaginatedVideos: ApiResponse<Video[]> = {
+  const mockPaginatedVideos: IApiResponse<Video[]> = {
     success: true,
+    status: httpStatus.OK,
+    message: "Videos retrieved successfully.",
     data: [],
     pagination: {
       currentPage: 1,
@@ -211,7 +213,7 @@ describe("VideoController", () => {
   });
 
   describe("VideoController - getVideoByIdOrCreate", () => {
-    const formattedRes: ApiResponse<Video> = {
+    const formattedRes: IApiResponse<Video> = {
       success: true,
       data: mockVideo,
       message: "Video retrieved successfully.",

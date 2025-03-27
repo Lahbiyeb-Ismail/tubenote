@@ -20,7 +20,7 @@ import type {
 import { NoteController } from "../note.controller";
 
 import type {
-  ApiResponse,
+  IApiResponse,
   IResponseFormatter,
 } from "@/modules/shared/services";
 import type { Note } from "../note.model";
@@ -172,7 +172,7 @@ describe("NoteController Tests", () => {
   });
 
   describe("NoteController - createNote", () => {
-    const formattedCreateRes: ApiResponse<Note> = {
+    const formattedCreateRes: IApiResponse<Note> = {
       success: true,
       status: httpStatus.CREATED,
       data: mockNote,
@@ -206,7 +206,7 @@ describe("NoteController Tests", () => {
   });
 
   describe("NoteController - getNoteById", () => {
-    const formattedGetRes: ApiResponse<Note> = {
+    const formattedGetRes: IApiResponse<Note> = {
       success: true,
       data: mockNote,
       message: "Note retrieved successfully.",
@@ -243,7 +243,7 @@ describe("NoteController Tests", () => {
       ...updateNoteDto.data,
     };
 
-    const formattedUpdateRes: ApiResponse<Note> = {
+    const formattedUpdateRes: IApiResponse<Note> = {
       success: true,
       data: mockUpdatedNote,
       message: "Note updated successfully.",
@@ -276,7 +276,7 @@ describe("NoteController Tests", () => {
   });
 
   describe("NoteController - deleteNote", () => {
-    const formattedDeleteRes: ApiResponse<Note> = {
+    const formattedDeleteRes: IApiResponse<Note> = {
       success: true,
       message: "Note deleted successfully.",
       status: httpStatus.OK,
@@ -320,7 +320,7 @@ describe("NoteController Tests", () => {
       sort: { by: "createdAt", order: "desc" },
     };
 
-    const formattedPaginateRes: ApiResponse<Note[]> = {
+    const formattedPaginateRes: IApiResponse<Note[]> = {
       success: true,
       data: mockNotes,
       message: "Notes retrieved successfully.",
@@ -430,7 +430,7 @@ describe("NoteController Tests", () => {
       sort: { by: "createdAt", order: "desc" },
     };
 
-    const formattedRes: ApiResponse<Note[]> = {
+    const formattedRes: IApiResponse<Note[]> = {
       success: true,
       data: mockNotes,
       message: "Recent notes retrieved successfully.",
@@ -507,7 +507,7 @@ describe("NoteController Tests", () => {
       sort: { by: "updatedAt", order: "desc" },
     };
 
-    const formattedRes: ApiResponse<Note[]> = {
+    const formattedRes: IApiResponse<Note[]> = {
       success: true,
       data: mockNotes,
       message: "Recent updated notes retrieved successfully.",
@@ -567,7 +567,7 @@ describe("NoteController Tests", () => {
       sort: { by: "createdAt", order: "desc" },
     };
 
-    const formattedPaginateRes: ApiResponse<Note[]> = {
+    const formattedPaginateRes: IApiResponse<Note[]> = {
       success: true,
       data: mockNotes,
       message: "Notes retrieved successfully.",

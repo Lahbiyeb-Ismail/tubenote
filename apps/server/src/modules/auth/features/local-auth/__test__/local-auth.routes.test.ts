@@ -9,7 +9,7 @@ import type { User } from "@/modules/user";
 
 import { ConflictError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import type { ApiResponse } from "@/modules/shared/services";
+import type { IApiResponse } from "@/modules/shared/services";
 import { localAuthController } from "../local-auth.module";
 
 jest.mock("../local-auth.module", () => ({
@@ -38,7 +38,7 @@ describe("Local Auth Routes", () => {
   });
 
   describe("POST api/v1/auth/register", () => {
-    const registerRes: ApiResponse<{ email: string }> = {
+    const registerRes: IApiResponse<{ email: string }> = {
       success: true,
       status: httpStatus.CREATED,
       data: { email: validRegisterPayload.email },
@@ -151,7 +151,7 @@ describe("Local Auth Routes", () => {
 
   describe("POST api/v1/auth/login", () => {
     it("should successfully login user with valid credentials", async () => {
-      const loginRes: ApiResponse<Record<string, string>> = {
+      const loginRes: IApiResponse<Record<string, string>> = {
         success: true,
         status: httpStatus.OK,
         message: "Login successful",

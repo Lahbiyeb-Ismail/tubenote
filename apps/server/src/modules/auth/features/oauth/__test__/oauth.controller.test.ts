@@ -133,7 +133,7 @@ describe("OAuthController", () => {
   });
 
   describe("exchangeOauthCodeForTokens", () => {
-    // const formattedResponse: ApiResponse<{ accessToken: string }> = {
+    // const formattedResponse: IApiResponse<{ accessToken: string }> = {
     //   success: true,
     //   status: httpStatus.OK,
     //   message: "Access token exchanged successfully.",

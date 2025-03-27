@@ -12,7 +12,7 @@ import {
 
 import { AuthController, IAuthService } from "@/modules/auth";
 import type {
-  ApiResponse,
+  IApiResponse,
   IResponseFormatter,
 } from "@/modules/shared/services";
 
@@ -72,7 +72,7 @@ describe("AuthController", () => {
   });
 
   describe("logout", () => {
-    const formattedResponse: ApiResponse<unknown> = {
+    const formattedResponse: IApiResponse<unknown> = {
       success: true,
       status: httpStatus.NO_CONTENT,
       message: "User logged out successfully.",
