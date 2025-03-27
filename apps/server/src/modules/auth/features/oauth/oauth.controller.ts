@@ -72,11 +72,13 @@ export class OAuthController implements IOAuthController {
     const { accessToken } =
       await this._oauthService.exchangeOauthCodeForTokens(code);
 
-    const formattedResponse = this._responseFormatter.formatResponse({
+    const formattedResponse = this._responseFormatter.formatResponse<{
+      accessToken: string;
+    }>({
+      status: httpStatus.OK,
+      message: "Access token exchanged successfully.",
       data: {
         accessToken,
-        status: httpStatus.OK,
-        message: "Access token exchanged successfully.",
       },
     });
 
