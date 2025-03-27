@@ -1,15 +1,13 @@
-import type {
-  IFindAllDto,
-  IPaginatedData,
-  IQueryPaginationDto,
-} from "@/modules/shared/dtos";
+import type { IFindAllDto, IPaginatedData } from "@/modules/shared/dtos";
 
 import type {
-  ApiResponse,
-  ApiResponseOptions,
-  GetPaginationQueriesOptions,
+  IApiResponse,
+  IGetPaginationQueriesOptions,
+  IPaginationInfo,
   IResponseFormatter,
-  PaginationInfo,
+  IResponseOptions,
+  ISanitizationOptions,
+  ISanitizationRule,
 } from "./response-formatter.types";
 
 /**
@@ -17,8 +15,29 @@ import type {
  */
 export class ResponseFormatter implements IResponseFormatter {
   private static _instance: ResponseFormatter;
+  private readonly _defaultSanitizationOptions: ISanitizationOptions = {
+    sanitize: true,
+    sanitizationRules: [],
+  };
+  private readonly _defaultSanitizationRules: ISanitizationRule[] = [
+    { fieldPattern: /password/i },
+    { fieldPattern: /token|api[_-]?key|secret/i },
+    { fieldPattern: /credit[_-]?card|card[_-]?number/i },
+    { fieldPattern: /ssn|social[_-]?security/i },
+    { fieldPattern: /auth|authorization/i },
+    { fieldPattern: /private[_-]?key/i },
+    { fieldPattern: /access[_-]?key/i },
+    { fieldPattern: /secret[_-]?key/i },
+  ];
 
-  private constructor() {}
+  private constructor(
+    private readonly _sanitizationOptions: ISanitizationOptions = {}
+  ) {
+    this._sanitizationOptions = {
+      ...this._defaultSanitizationOptions,
+      ..._sanitizationOptions,
+    };
+  }
 
   public static getInstance(): ResponseFormatter {
     if (!this._instance) {
@@ -28,33 +47,90 @@ export class ResponseFormatter implements IResponseFormatter {
   }
 
   /**
+   * Sanitize data by removing sensitive fields based on provided rules
+   */
+  sanitizeData<T>(
+    data: T,
+    rules: ISanitizationRule[] = this._defaultSanitizationRules
+  ): T {
+    if (!data) return data;
+
+    // Handle arrays
+    if (Array.isArray(data)) {
+      return data.map((item) => this.sanitizeData(item, rules)) as unknown as T;
+    }
+
+    // Handle objects
+    if (typeof data === "object" && data !== null) {
+      const sanitized = { ...data };
+
+      for (const key in sanitized) {
+        // Check if the current field matches any sensitive data pattern
+        if (this.isFieldSensitive(key, rules)) {
+          delete (sanitized as any)[key];
+        } else if (
+          typeof (sanitized as any)[key] === "object" &&
+          (sanitized as any)[key] !== null
+        ) {
+          // Recursively sanitize nested objects
+          (sanitized as any)[key] = this.sanitizeData(
+            (sanitized as any)[key],
+            rules
+          );
+        }
+      }
+
+      return sanitized;
+    }
+
+    return data;
+  }
+
+  /**
+   * Check if a field name matches any of the sensitive data patterns
+   */
+  isFieldSensitive(fieldName: string, rules: ISanitizationRule[]): boolean {
+    return rules.some((rule) => {
+      if (rule.fieldPattern instanceof RegExp) {
+        return rule.fieldPattern.test(fieldName);
+      }
+      return rule.fieldPattern === fieldName;
+    });
+  }
+
+  /**
    * Returns a standardized API response object.
    *
    * @param data - The response data of any type.
    * @param options - Optional settings (status, message, pagination info).
    * @returns A standardized response object.
    */
-  formatResponse<T>(options?: ApiResponseOptions<T>): ApiResponse<T> {
-    const { status, message, pagination, data } = options || {};
-
-    const response: ApiResponse<T> = {
-      success: true,
+  formatResponse<T>(
+    responseOptions: IResponseOptions<T>,
+    IsanitizationOptions?: ISanitizationOptions
+  ): IApiResponse<T> {
+    const { status, message, pagination, data } = responseOptions;
+    const sanitization = {
+      ...this._sanitizationOptions,
+      ...IsanitizationOptions,
     };
 
-    if (message) {
-      response.message = message;
-    }
+    const response: IApiResponse<T> = {
+      success: true,
+      message,
+      status,
+    };
 
     if (data) {
-      response.data = data;
+      const sanitizedData = sanitization.sanitize
+        ? this.sanitizeData(data, sanitization.sanitizationRules)
+        : data;
+
+      response.data = sanitizedData;
     }
 
     if (pagination) {
       response.pagination = pagination;
-    }
-
-    if (status) {
-      response.status = status;
     }
 
     return response;
@@ -68,14 +144,21 @@ export class ResponseFormatter implements IResponseFormatter {
    * @returns A standardized response object with pagination metadata.
    */
   formatPaginatedResponse<T>(
-    paginationQuery: IQueryPaginationDto,
-    paginatedData: IPaginatedData<T>
-  ): ApiResponse<T[]> {
+    page: number,
+    paginatedData: IPaginatedData<T>,
+    responseOptions: IResponseOptions<T>,
+    IsanitizationOptions?: ISanitizationOptions
+  ): IApiResponse<T[]> {
     const { totalPages, totalItems, data } = paginatedData;
+    const { status, message } = responseOptions;
+    const sanitization = {
+      ...this._sanitizationOptions,
+      ...IsanitizationOptions,
+    };
 
-    const currentPage = Number(paginationQuery.page) || 1;
+    const currentPage = page || 1;
 
-    const pagination: PaginationInfo = {
+    const pagination: IPaginationInfo = {
       totalPages,
       totalItems,
       currentPage,
@@ -83,7 +166,10 @@ export class ResponseFormatter implements IResponseFormatter {
       hasPrevPage: currentPage > 1,
     };
 
-    return this.formatResponse<T[]>({ data, pagination });
+    return this.formatResponse<T[]>(
+      { data, pagination, status, message },
+      sanitization
+    );
   }
 
   /**
@@ -94,7 +180,7 @@ export class ResponseFormatter implements IResponseFormatter {
    * @returns An object with pagination parameters (skip, limit, and sort options) excluding the userId.
    */
   getPaginationQueries(
-    options: GetPaginationQueriesOptions
+    options: IGetPaginationQueriesOptions
   ): Omit<IFindAllDto, "userId"> {
     const { reqQuery, itemsPerPage } = options;
     const page = Math.max(Number(reqQuery.page) || 1, 1);

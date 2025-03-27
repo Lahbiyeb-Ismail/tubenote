@@ -7,7 +7,7 @@ import type {
 /**
  * Interface representing the pagination metadata.
  */
-export interface PaginationInfo {
+export interface IPaginationInfo {
   totalPages: number;
   currentPage: number;
   totalItems: number;
@@ -15,7 +15,7 @@ export interface PaginationInfo {
   hasPrevPage: boolean;
 }
 
-export interface GetPaginationQueriesOptions {
+export interface IGetPaginationQueriesOptions {
   reqQuery: IQueryPaginationDto;
   itemsPerPage: number;
 }
@@ -23,33 +23,53 @@ export interface GetPaginationQueriesOptions {
 /**
  * Options to customize the API response.
  */
-export interface ApiResponseOptions<T> {
+export interface IResponseOptions<T> {
+  status: number;
+  message: string;
   data?: T;
-  status?: number;
-  message?: string;
-  pagination?: PaginationInfo;
+  pagination?: IPaginationInfo;
 }
 
 /**
  * Represents a standardized API response.
  *
  * @template T - The type of the data being returned in the response.
- * @extends ApiResponseOptions
+ * @extends IResponseOptions
  *
  * @property {boolean} success - Indicates whether the API request was successful.
  * @property {T} data - The data returned by the API.
  */
-export interface ApiResponse<T> extends ApiResponseOptions<T> {
+export interface IApiResponse<T> extends IResponseOptions<T> {
   success: boolean;
 }
 
+/**
+ * Sanitization rule for data processing - simplified to only remove sensitive fields
+ */
+export interface ISanitizationRule {
+  fieldPattern: RegExp | string;
+}
+
+/**
+ * Response formatter options
+ */
+export interface ISanitizationOptions {
+  sanitize?: boolean;
+  sanitizationRules?: ISanitizationRule[];
+}
+
 export interface IResponseFormatter {
-  formatResponse<T>(options?: ApiResponseOptions<T>): ApiResponse<T>;
+  formatResponse<T>(
+    responseOptions?: IResponseOptions<T>,
+    sanitizationOptions?: ISanitizationOptions
+  ): IApiResponse<T>;
   formatPaginatedResponse<T>(
-    paginationQuery: IQueryPaginationDto,
-    paginatedData: IPaginatedData<T>
-  ): ApiResponse<T[]>;
+    page: number,
+    paginatedData: IPaginatedData<T>,
+    responseOptions: IResponseOptions<T>,
+    sanitizationOptions?: ISanitizationOptions
+  ): IApiResponse<T[]>;
   getPaginationQueries(
-    options: GetPaginationQueriesOptions
+    options: IGetPaginationQueriesOptions
   ): Omit<IFindAllDto, "userId">;
 }
