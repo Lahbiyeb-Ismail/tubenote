@@ -65,7 +65,9 @@ export class RefreshTokenController implements IRefreshTokenController {
         userId,
       });
 
-    const formattedResponse = this._responseFormatter.formatResponse({
+    const formattedResponse = this._responseFormatter.formatResponse<{
+      accessToken: string;
+    }>({
       data: { accessToken },
       status: httpStatus.OK,
       message: "Access token refreshed successfully.",
