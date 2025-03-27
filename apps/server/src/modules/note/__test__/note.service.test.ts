@@ -2,6 +2,7 @@ import { mock, mockReset } from "jest-mock-extended";
 
 import { NotFoundError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type { IPrismaService } from "@/modules/shared/services";
 
 import type {
   ICreateDto,
@@ -11,7 +12,6 @@ import type {
   IUpdateDto,
 } from "@/modules/shared/dtos";
 
-import type { IPrismaService } from "@/modules/shared/services";
 import type { Note } from "../note.model";
 import { NoteService } from "../note.service";
 import type { INoteRepository } from "../note.types";
@@ -376,7 +376,7 @@ describe("NoteService methods test", () => {
 
       expect(mockPrismaService.transaction).toHaveBeenCalled();
 
-      expect(result.items).toEqual(mockNotes);
+      expect(result.data).toEqual(mockNotes);
 
       expect(result.totalItems).toBe(mockNotesCount);
 
@@ -401,7 +401,7 @@ describe("NoteService methods test", () => {
 
       expect(mockPrismaService.transaction).toHaveBeenCalled();
 
-      expect(result.items).toEqual([]);
+      expect(result.data).toEqual([]);
       expect(result.totalItems).toBe(0);
       expect(result.totalPages).toBe(0);
 
@@ -519,7 +519,7 @@ describe("NoteService methods test", () => {
 
       expect(mockPrismaService.transaction).toHaveBeenCalled();
 
-      expect(result.items).toEqual(mockNotes);
+      expect(result.data).toEqual(mockNotes);
       expect(result.totalItems).toBe(mockNotesCount);
       expect(result.totalPages).toBe(
         Math.ceil(mockNotesCount / baseFindManyDto.limit)
@@ -542,7 +542,7 @@ describe("NoteService methods test", () => {
 
       expect(mockPrismaService.transaction).toHaveBeenCalled();
 
-      expect(result.items).toEqual([]);
+      expect(result.data).toEqual([]);
       expect(result.totalItems).toBe(0);
       expect(result.totalPages).toBe(0);
 
