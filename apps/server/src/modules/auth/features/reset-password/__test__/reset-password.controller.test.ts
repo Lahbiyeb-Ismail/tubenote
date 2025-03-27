@@ -7,6 +7,10 @@ import type {
   IParamTokenDto,
   IPasswordBodyDto,
 } from "@/modules/shared/dtos";
+import type {
+  ApiResponse,
+  IResponseFormatter,
+} from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
 import { ResetPasswordController } from "../reset-password.controller";
@@ -18,9 +22,11 @@ import type {
 describe("ResetPasswordController", () => {
   let controller: ResetPasswordController;
   const resetPasswordService = mock<IResetPasswordService>();
+  const responseFormatter = mock<IResponseFormatter>();
 
   const options: IResetPasswordControllerOptions = {
     resetPasswordService,
+    responseFormatter,
   };
 
   const forgotReq = mock<TypedRequest<IEmailBodyDto>>();
@@ -31,6 +37,7 @@ describe("ResetPasswordController", () => {
 
   beforeEach(() => {
     mockReset(resetPasswordService);
+    mockReset(responseFormatter);
 
     resetPasswordService.sendResetToken.mockResolvedValue(undefined);
     resetPasswordService.resetPassword.mockResolvedValue(undefined);
@@ -66,7 +73,16 @@ describe("ResetPasswordController", () => {
   });
 
   describe("forgotPassword", () => {
+    const formattedForgotRes: ApiResponse<unknown> = {
+      success: true,
+      status: httpStatus.OK,
+      message: "Password reset link sent to your email.",
+    };
+
     it("should call sendResetToken with the provided email and respond with a success message", async () => {
+      // Arrange
+      responseFormatter.formatResponse.mockReturnValue(formattedForgotRes);
+
       // Act
       await controller.forgotPassword(forgotReq, res);
 
@@ -74,10 +90,10 @@ describe("ResetPasswordController", () => {
       expect(resetPasswordService.sendResetToken).toHaveBeenCalledWith(
         forgotReq.body.email
       );
+
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Password reset link sent to your email.",
-      });
+
+      expect(res.json).toHaveBeenCalledWith(formattedForgotRes);
     });
 
     it("should propagate errors if sendResetToken fails", async () => {
@@ -93,7 +109,16 @@ describe("ResetPasswordController", () => {
   });
 
   describe("resetPassword", () => {
+    const formattedResetRes: ApiResponse<unknown> = {
+      success: true,
+      status: httpStatus.OK,
+      message: "Password reset successfully.",
+    };
+
     it("should call resetPassword with the provided token and new password, then respond with a success message", async () => {
+      // Arrange
+      responseFormatter.formatResponse.mockReturnValue(formattedResetRes);
+
       // Act
       await controller.resetPassword(resetReq, res);
 
@@ -103,9 +128,7 @@ describe("ResetPasswordController", () => {
         resetReq.body.password
       );
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Password reset successful.",
-      });
+      expect(res.json).toHaveBeenCalledWith(formattedResetRes);
     });
 
     it("should propagate errors if resetPassword fails", async () => {
@@ -120,7 +143,16 @@ describe("ResetPasswordController", () => {
   });
 
   describe("verifyResetToken", () => {
+    const formattedVerifyRes: ApiResponse<unknown> = {
+      success: true,
+      status: httpStatus.OK,
+      message: "Reset password token is valid.",
+    };
+
     it("should call verifyResetToken with the provided token and respond with a verification message", async () => {
+      // Arrange
+      responseFormatter.formatResponse.mockReturnValue(formattedVerifyRes);
+
       // Act
       await controller.verifyResetToken(verifyReq, res);
 
@@ -129,9 +161,7 @@ describe("ResetPasswordController", () => {
         verifyReq.params.token
       );
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Reset token verified.",
-      });
+      expect(res.json).toHaveBeenCalledWith(formattedVerifyRes);
     });
 
     it("should propagate errors if verifyResetToken fails", async () => {
