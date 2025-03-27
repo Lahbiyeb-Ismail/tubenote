@@ -9,6 +9,7 @@ import type { User } from "@/modules/user";
 
 import { ConflictError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type { ApiResponse } from "@/modules/shared/services";
 import { localAuthController } from "../local-auth.module";
 
 jest.mock("../local-auth.module", () => ({
@@ -37,15 +38,17 @@ describe("Local Auth Routes", () => {
   });
 
   describe("POST api/v1/auth/register", () => {
-    it("should successfully register a new user with valid data", async () => {
-      const mockResponse = {
-        email: validRegisterPayload.email,
-        message: "A verification email has been sent to your email.",
-      };
+    const registerRes: ApiResponse<{ email: string }> = {
+      success: true,
+      status: httpStatus.CREATED,
+      data: { email: validRegisterPayload.email },
+      message: "A verification email has been sent to your email.",
+    };
 
+    it("should successfully register a new user with valid data", async () => {
       (localAuthController.register as jest.Mock).mockImplementation(
         (_req, res) => {
-          res.status(httpStatus.CREATED).json(mockResponse);
+          res.status(httpStatus.CREATED).json(registerRes);
         }
       );
 
@@ -55,7 +58,7 @@ describe("Local Auth Routes", () => {
         .expect("Content-Type", /json/)
         .expect(httpStatus.CREATED);
 
-      expect(response.body).toEqual(mockResponse);
+      expect(response.body).toEqual(registerRes);
       expect(localAuthController.register).toHaveBeenCalled();
     });
 
@@ -119,17 +122,12 @@ describe("Local Auth Routes", () => {
     });
 
     it("should handle concurrent registration requests and prevent duplicate accounts", async () => {
-      const mockResponse = {
-        email: validRegisterPayload.email,
-        message: "A verification email has been sent to your email.",
-      };
-
       (localAuthController.register as jest.Mock).mockImplementation(
         (req, res) => {
           if (req.body.email === validRegisterPayload.email) {
             throw new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS);
           }
-          res.status(httpStatus.CREATED).json(mockResponse);
+          res.status(httpStatus.CREATED).json(registerRes);
         }
       );
 
@@ -153,9 +151,11 @@ describe("Local Auth Routes", () => {
 
   describe("POST api/v1/auth/login", () => {
     it("should successfully login user with valid credentials", async () => {
-      const mockResponse = {
+      const loginRes: ApiResponse<Record<string, string>> = {
+        success: true,
+        status: httpStatus.OK,
         message: "Login successful",
-        accessToken: "mock-access-token",
+        data: { accessToken: "mock-access-token" },
       };
 
       (localAuthController.login as jest.Mock).mockImplementation(
@@ -166,7 +166,7 @@ describe("Local Auth Routes", () => {
               httpOnly: true,
               secure: true,
             })
-            .json(mockResponse);
+            .json(loginRes);
         }
       );
 
@@ -176,7 +176,7 @@ describe("Local Auth Routes", () => {
         .expect("Content-Type", /json/)
         .expect(httpStatus.OK);
 
-      expect(response.body).toEqual(mockResponse);
+      expect(response.body).toEqual(loginRes);
       expect(response.headers["set-cookie"]).toBeDefined();
       expect(localAuthController.login).toHaveBeenCalled();
     });

@@ -50,7 +50,9 @@ export class LocalAuthController implements ILocalAuthController {
 
     if (!user) throw new BadRequestError("User registration failed.");
 
-    const formattedResponse = this._responseFormatter.formatResponse({
+    const formattedResponse = this._responseFormatter.formatResponse<{
+      email: string;
+    }>({
       status: httpStatus.CREATED,
       message: "A verification email has been sent to your email.",
       data: { email: user.email },
@@ -68,7 +70,9 @@ export class LocalAuthController implements ILocalAuthController {
     const { accessToken, refreshToken } =
       await this._localAuthService.loginUser(req.body);
 
-    const formattedResponse = this._responseFormatter.formatResponse({
+    const formattedResponse = this._responseFormatter.formatResponse<{
+      accessToken: string;
+    }>({
       status: httpStatus.OK,
       message: "Login successful",
       data: { accessToken },

@@ -79,7 +79,7 @@ describe("LocalAuthController", () => {
   });
 
   describe("LocalAuthController - register", () => {
-    const formattedRegisterRes: ApiResponse<Record<string, string>> = {
+    const formattedRegisterRes: ApiResponse<{ email: string }> = {
       success: true,
       status: httpStatus.CREATED,
       message: "A verification email has been sent to your email.",
@@ -112,7 +112,7 @@ describe("LocalAuthController", () => {
   });
 
   describe("LocalAuthController - login", () => {
-    const formattedLoginRes: ApiResponse<Record<string, string>> = {
+    const formattedLoginRes: ApiResponse<{ accessToken: string }> = {
       success: true,
       status: httpStatus.OK,
       message: "Login successful",
