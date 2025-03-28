@@ -15,10 +15,10 @@ import type {
  */
 export class ResponseFormatter implements IResponseFormatter {
   private static _instance: ResponseFormatter;
-  private readonly _defaultSanitizationOptions: ISanitizationOptions = {
-    sanitize: true,
-    sanitizationRules: [],
-  };
+
+  /**
+   * Default sanitization rules for common sensitive data
+   */
   private readonly _defaultSanitizationRules: ISanitizationRule[] = [
     { fieldPattern: /password/i },
     { fieldPattern: /token|api[_-]?key|secret/i },
@@ -30,11 +30,19 @@ export class ResponseFormatter implements IResponseFormatter {
     { fieldPattern: /secret[_-]?key/i },
   ];
 
+  /**
+   * Default sanitization options
+   */
+  private readonly _defaultOptions: ISanitizationOptions = {
+    sanitize: true,
+    sanitizationRules: [...this._defaultSanitizationRules],
+  };
+
   private constructor(
     private readonly _sanitizationOptions: ISanitizationOptions = {}
   ) {
     this._sanitizationOptions = {
-      ...this._defaultSanitizationOptions,
+      ...this._defaultOptions,
       ..._sanitizationOptions,
     };
   }
@@ -107,12 +115,12 @@ export class ResponseFormatter implements IResponseFormatter {
    */
   formatResponse<T>(
     responseOptions: IResponseOptions<T>,
-    IsanitizationOptions?: ISanitizationOptions
+    sanitizationOptions?: ISanitizationOptions
   ): IApiResponse<T> {
     const { status, message, pagination, data } = responseOptions;
     const sanitization = {
       ...this._sanitizationOptions,
-      ...IsanitizationOptions,
+      ...sanitizationOptions,
     };
 
     const response: IApiResponse<T> = {
