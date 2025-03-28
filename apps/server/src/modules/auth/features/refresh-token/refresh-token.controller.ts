@@ -68,9 +68,11 @@ export class RefreshTokenController implements IRefreshTokenController {
     const formattedResponse = this._responseFormatter.formatResponse<{
       accessToken: string;
     }>({
-      data: { accessToken },
-      status: httpStatus.OK,
-      message: "Access token refreshed successfully.",
+      responseOptions: {
+        data: { accessToken },
+        status: httpStatus.OK,
+        message: "Access token refreshed successfully.",
+      },
     });
 
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);

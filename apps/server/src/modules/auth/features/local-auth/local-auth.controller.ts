@@ -53,9 +53,11 @@ export class LocalAuthController implements ILocalAuthController {
     const formattedResponse = this._responseFormatter.formatResponse<{
       email: string;
     }>({
-      status: httpStatus.CREATED,
-      message: "A verification email has been sent to your email.",
-      data: { email: user.email },
+      responseOptions: {
+        status: httpStatus.CREATED,
+        message: "A verification email has been sent to your email.",
+        data: { email: user.email },
+      },
     });
 
     res.status(httpStatus.CREATED).json(formattedResponse);
@@ -73,9 +75,11 @@ export class LocalAuthController implements ILocalAuthController {
     const formattedResponse = this._responseFormatter.formatResponse<{
       accessToken: string;
     }>({
-      status: httpStatus.OK,
-      message: "Login successful",
-      data: { accessToken },
+      responseOptions: {
+        status: httpStatus.OK,
+        message: "Login successful",
+        data: { accessToken },
+      },
     });
 
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);

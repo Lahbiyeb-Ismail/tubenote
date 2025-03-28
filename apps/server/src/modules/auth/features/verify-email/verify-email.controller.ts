@@ -49,8 +49,10 @@ export class VerifyEmailController implements IVerifyEmailController {
     await this._verifyEmailService.verifyUserEmail(token);
 
     const formattedResponse = this._responseFormatter.formatResponse({
-      status: httpStatus.OK,
-      message: "Email verified successfully.",
+      responseOptions: {
+        status: httpStatus.OK,
+        message: "Email verified successfully.",
+      },
     });
 
     res.status(httpStatus.OK).json(formattedResponse);

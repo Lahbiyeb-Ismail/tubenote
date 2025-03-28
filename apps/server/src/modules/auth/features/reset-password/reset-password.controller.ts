@@ -56,8 +56,10 @@ export class ResetPasswordController implements IResetPasswordController {
     await this._resetPasswordService.sendResetToken(email);
 
     const formattedResponse = this._responseFormatter.formatResponse({
-      status: httpStatus.OK,
-      message: "Password reset link sent to your email.",
+      responseOptions: {
+        status: httpStatus.OK,
+        message: "Password reset link sent to your email.",
+      },
     });
 
     res.status(httpStatus.OK).json(formattedResponse);
@@ -80,8 +82,10 @@ export class ResetPasswordController implements IResetPasswordController {
     await this._resetPasswordService.resetPassword(token, password);
 
     const formattedResponse = this._responseFormatter.formatResponse({
-      status: httpStatus.OK,
-      message: "Password reset successfully.",
+      responseOptions: {
+        status: httpStatus.OK,
+        message: "Password reset successfully.",
+      },
     });
 
     res.status(httpStatus.OK).json(formattedResponse);
@@ -103,8 +107,10 @@ export class ResetPasswordController implements IResetPasswordController {
     await this._resetPasswordService.verifyResetToken(token);
 
     const formattedResponse = this._responseFormatter.formatResponse({
-      status: httpStatus.OK,
-      message: "Reset password token is valid.",
+      responseOptions: {
+        status: httpStatus.OK,
+        message: "Reset password token is valid.",
+      },
     });
 
     res.status(httpStatus.OK).json(formattedResponse);
