@@ -176,7 +176,7 @@ describe("ResponseFormatter", () => {
         message: "Success",
       };
 
-      const response = responseFormatter.formatResponse(responseOptions);
+      const response = responseFormatter.formatResponse({ responseOptions });
 
       expect(response).toEqual({
         success: true,
@@ -202,7 +202,7 @@ describe("ResponseFormatter", () => {
         pagination,
       };
 
-      const response = responseFormatter.formatResponse(responseOptions);
+      const response = responseFormatter.formatResponse({ responseOptions });
 
       expect(response).toEqual({
         success: true,
@@ -219,7 +219,7 @@ describe("ResponseFormatter", () => {
         message: "No Content",
       };
 
-      const response = responseFormatter.formatResponse(responseOptions);
+      const response = responseFormatter.formatResponse({ responseOptions });
 
       expect(response).toEqual({
         success: true,
@@ -235,7 +235,7 @@ describe("ResponseFormatter", () => {
         message: "Success",
       };
 
-      const response = responseFormatter.formatResponse(responseOptions);
+      const response = responseFormatter.formatResponse({ responseOptions });
 
       expect(response.data).toEqual({ id: 1, name: "Test" });
       expect(response.data?.password).toBeUndefined();
@@ -252,10 +252,10 @@ describe("ResponseFormatter", () => {
         sanitize: false,
       };
 
-      const response = responseFormatter.formatResponse(
+      const response = responseFormatter.formatResponse({
         responseOptions,
-        sanitizationOptions
-      );
+        sanitizationOptions,
+      });
 
       expect(response.data).toEqual({
         id: 1,
@@ -281,10 +281,10 @@ describe("ResponseFormatter", () => {
         sanitizationRules: [{ fieldPattern: /customField/ }],
       };
 
-      const response = responseFormatter.formatResponse(
+      const response = responseFormatter.formatResponse({
         responseOptions,
-        sanitizationOptions
-      );
+        sanitizationOptions,
+      });
 
       expect(response.data).toEqual({
         id: 1,
@@ -309,11 +309,11 @@ describe("ResponseFormatter", () => {
         message: "Success",
       };
 
-      const response = responseFormatter.formatPaginatedResponse(
+      const response = responseFormatter.formatPaginatedResponse({
         page,
         paginatedData,
-        responseOptions
-      );
+        responseOptions,
+      });
 
       expect(response).toEqual({
         success: true,
@@ -343,11 +343,11 @@ describe("ResponseFormatter", () => {
         message: "Success",
       };
 
-      const response = responseFormatter.formatPaginatedResponse(
+      const response = responseFormatter.formatPaginatedResponse({
         page,
         paginatedData,
-        responseOptions
-      );
+        responseOptions,
+      });
 
       expect(response.pagination).toEqual({
         totalPages: 5,
@@ -371,11 +371,11 @@ describe("ResponseFormatter", () => {
         message: "Success",
       };
 
-      const response = responseFormatter.formatPaginatedResponse(
+      const response = responseFormatter.formatPaginatedResponse({
         page,
         paginatedData,
-        responseOptions
-      );
+        responseOptions,
+      });
 
       expect(response.pagination).toEqual({
         totalPages: 5,
@@ -399,11 +399,11 @@ describe("ResponseFormatter", () => {
         message: "Success",
       };
 
-      const response = responseFormatter.formatPaginatedResponse(
+      const response = responseFormatter.formatPaginatedResponse({
         page,
         paginatedData,
-        responseOptions
-      );
+        responseOptions,
+      });
 
       expect(response.pagination?.currentPage).toBe(1);
     });
@@ -424,11 +424,11 @@ describe("ResponseFormatter", () => {
         message: "Success",
       };
 
-      const response = responseFormatter.formatPaginatedResponse(
+      const response = responseFormatter.formatPaginatedResponse({
         page,
         paginatedData,
-        responseOptions
-      );
+        responseOptions,
+      });
 
       expect(response.data).toEqual([{ id: 1 }, { id: 2 }]);
     });
@@ -579,14 +579,14 @@ describe("ResponseFormatter", () => {
       };
 
       // Format the response
-      const response = responseFormatter.formatPaginatedResponse(
+      const response = responseFormatter.formatPaginatedResponse({
         page,
         paginatedData,
-        {
+        responseOptions: {
           status: 200,
           message: "Success",
-        }
-      );
+        },
+      });
 
       // Verify the response structure and sanitization
       expect(response).toEqual({
@@ -652,14 +652,14 @@ describe("ResponseFormatter", () => {
       };
 
       // Format the response
-      const response = responseFormatter.formatPaginatedResponse(
-        reqQuery.page,
+      const response = responseFormatter.formatPaginatedResponse({
+        page: reqQuery.page,
         paginatedData,
-        {
+        responseOptions: {
           status: 200,
           message: "Success",
-        }
-      );
+        },
+      });
 
       // Verify the complete response
       expect(response).toEqual({

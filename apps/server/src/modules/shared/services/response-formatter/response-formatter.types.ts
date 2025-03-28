@@ -58,16 +58,22 @@ export interface ISanitizationOptions {
   sanitizationRules?: ISanitizationRule[];
 }
 
+export interface IFormatResponseOptions<T> {
+  responseOptions: IResponseOptions<T>;
+  sanitizationOptions?: ISanitizationOptions;
+}
+
+export interface IFormatPaginatedResponseOptions<T> {
+  page: number;
+  paginatedData: IPaginatedData<T>;
+  responseOptions: IResponseOptions<T>;
+  sanitizationOptions?: ISanitizationOptions;
+}
+
 export interface IResponseFormatter {
-  formatResponse<T>(
-    responseOptions?: IResponseOptions<T>,
-    sanitizationOptions?: ISanitizationOptions
-  ): IApiResponse<T>;
+  formatResponse<T>(formatOptions: IFormatResponseOptions<T>): IApiResponse<T>;
   formatPaginatedResponse<T>(
-    page: number,
-    paginatedData: IPaginatedData<T>,
-    responseOptions: IResponseOptions<T>,
-    sanitizationOptions?: ISanitizationOptions
+    formatOptions: IFormatPaginatedResponseOptions<T>
   ): IApiResponse<T[]>;
   getPaginationQueries(
     options: IGetPaginationQueriesOptions

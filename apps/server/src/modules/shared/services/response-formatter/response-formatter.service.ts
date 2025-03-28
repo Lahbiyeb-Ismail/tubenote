@@ -1,11 +1,12 @@
-import type { IFindAllDto, IPaginatedData } from "@/modules/shared/dtos";
+import type { IFindAllDto } from "@/modules/shared/dtos";
 
 import type {
   IApiResponse,
+  IFormatPaginatedResponseOptions,
+  IFormatResponseOptions,
   IGetPaginationQueriesOptions,
   IPaginationInfo,
   IResponseFormatter,
-  IResponseOptions,
   ISanitizationOptions,
   ISanitizationRule,
 } from "./response-formatter.types";
@@ -113,11 +114,11 @@ export class ResponseFormatter implements IResponseFormatter {
    * @param options - Optional settings (status, message, pagination info).
    * @returns A standardized response object.
    */
-  formatResponse<T>(
-    responseOptions: IResponseOptions<T>,
-    sanitizationOptions?: ISanitizationOptions
-  ): IApiResponse<T> {
-    const { status, message, pagination, data } = responseOptions;
+  formatResponse<T>(formatOptions: IFormatResponseOptions<T>): IApiResponse<T> {
+    const { responseOptions, sanitizationOptions } = formatOptions;
+
+    const { status, message, data, pagination } = responseOptions;
+
     const sanitization = {
       ...this._sanitizationOptions,
       ...sanitizationOptions,
@@ -152,16 +153,17 @@ export class ResponseFormatter implements IResponseFormatter {
    * @returns A standardized response object with pagination metadata.
    */
   formatPaginatedResponse<T>(
-    page: number,
-    paginatedData: IPaginatedData<T>,
-    responseOptions: IResponseOptions<T>,
-    IsanitizationOptions?: ISanitizationOptions
+    formatOptions: IFormatPaginatedResponseOptions<T>
   ): IApiResponse<T[]> {
+    const { page, paginatedData, responseOptions, sanitizationOptions } =
+      formatOptions;
+
     const { totalPages, totalItems, data } = paginatedData;
     const { status, message } = responseOptions;
+
     const sanitization = {
       ...this._sanitizationOptions,
-      ...IsanitizationOptions,
+      ...sanitizationOptions,
     };
 
     const currentPage = page || 1;
@@ -174,10 +176,10 @@ export class ResponseFormatter implements IResponseFormatter {
       hasPrevPage: currentPage > 1,
     };
 
-    return this.formatResponse<T[]>(
-      { data, pagination, status, message },
-      sanitization
-    );
+    return this.formatResponse<T[]>({
+      responseOptions: { status, message, pagination, data },
+      sanitizationOptions: sanitization,
+    });
   }
 
   /**
