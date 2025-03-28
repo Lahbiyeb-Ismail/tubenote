@@ -64,6 +64,6 @@ export class AuthController implements IAuthController {
 
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
-    res.status(httpStatus.NO_CONTENT).json(formattedResponse);
+    res.status(httpStatus.OK).json(formattedResponse);
   }
 }
