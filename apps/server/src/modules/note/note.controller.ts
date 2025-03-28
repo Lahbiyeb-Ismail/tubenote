@@ -72,9 +72,11 @@ export class NoteController implements INoteController {
     const note = await this._noteService.createNote({ userId, data: req.body });
 
     const formattedResponse = this._responseFormatter.formatResponse<Note>({
-      data: note,
-      status: httpStatus.CREATED,
-      message: "Note created successfully.",
+      responseOptions: {
+        data: note,
+        status: httpStatus.CREATED,
+        message: "Note created successfully.",
+      },
     });
 
     res.status(httpStatus.CREATED).json(formattedResponse);
@@ -101,9 +103,11 @@ export class NoteController implements INoteController {
     });
 
     const formattedResponse = this._responseFormatter.formatResponse<Note>({
-      data: updatedNote,
-      status: httpStatus.OK,
-      message: "Note updated successfully.",
+      responseOptions: {
+        data: updatedNote,
+        status: httpStatus.OK,
+        message: "Note updated successfully.",
+      },
     });
 
     res.status(httpStatus.OK).json(formattedResponse);
@@ -126,8 +130,10 @@ export class NoteController implements INoteController {
     await this._noteService.deleteNote({ id, userId });
 
     const formattedResponse = this._responseFormatter.formatResponse({
-      status: httpStatus.OK,
-      message: "Note deleted successfully.",
+      responseOptions: {
+        status: httpStatus.OK,
+        message: "Note deleted successfully.",
+      },
     });
 
     res.status(httpStatus.OK).json(formattedResponse);
@@ -150,9 +156,11 @@ export class NoteController implements INoteController {
     const note = await this._noteService.findNote({ id, userId });
 
     const formattedResponse = this._responseFormatter.formatResponse<Note>({
-      data: note,
-      status: httpStatus.OK,
-      message: "Note retrieved successfully.",
+      responseOptions: {
+        data: note,
+        status: httpStatus.OK,
+        message: "Note retrieved successfully.",
+      },
     });
 
     res.status(httpStatus.OK).json(formattedResponse);
@@ -180,11 +188,14 @@ export class NoteController implements INoteController {
       ...paginationQueries,
     });
 
-    const formattedResponse = this._responseFormatter.formatPaginatedResponse(
-      1,
+    const formattedResponse = this._responseFormatter.formatPaginatedResponse({
+      page: req.query.page ?? 1,
       paginatedData,
-      { status: httpStatus.OK, message: "User notes retrieved successfully." }
-    );
+      responseOptions: {
+        status: httpStatus.OK,
+        message: "User notes retrieved successfully.",
+      },
+    });
 
     res.status(httpStatus.OK).json(formattedResponse);
   }
@@ -212,9 +223,11 @@ export class NoteController implements INoteController {
     });
 
     const formattedResponse = this._responseFormatter.formatResponse<Note[]>({
-      data: notes,
-      status: httpStatus.OK,
-      message: "Recent notes retrieved successfully.",
+      responseOptions: {
+        data: notes,
+        status: httpStatus.OK,
+        message: "Recent notes retrieved successfully.",
+      },
     });
 
     res.status(httpStatus.OK).json(formattedResponse);
@@ -243,9 +256,11 @@ export class NoteController implements INoteController {
     });
 
     const formattedResponse = this._responseFormatter.formatResponse<Note[]>({
-      data: notes,
-      status: httpStatus.OK,
-      message: "Recent updated notes retrieved successfully.",
+      responseOptions: {
+        data: notes,
+        status: httpStatus.OK,
+        message: "Recent updated notes retrieved successfully.",
+      },
     });
 
     res.status(httpStatus.OK).json(formattedResponse);
@@ -276,11 +291,14 @@ export class NoteController implements INoteController {
       ...paginationQueries,
     });
 
-    const formattedResponse = this._responseFormatter.formatPaginatedResponse(
-      req.query.page ?? 1,
+    const formattedResponse = this._responseFormatter.formatPaginatedResponse({
+      page: req.query.page ?? 1,
       paginatedData,
-      { status: httpStatus.OK, message: "Notes retrieved successfully." }
-    );
+      responseOptions: {
+        status: httpStatus.OK,
+        message: "Notes retrieved successfully.",
+      },
+    });
 
     res.status(httpStatus.OK).json(formattedResponse);
   }
