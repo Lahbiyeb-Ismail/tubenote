@@ -12,22 +12,34 @@ import type {
 } from "./response-formatter.types";
 
 /**
- * API response formatter.
+ * @class ResponseFormatter
+ * @description A utility class for standardizing API responses and sanitizing sensitive data.
+ *
+ * The ResponseFormatter provides a consistent structure for API responses, including success/error
+ * status, HTTP status codes, messages, and properly sanitized data. It automatically removes
+ * sensitive information from response data to prevent accidental exposure of confidential information.
  */
 export class ResponseFormatter implements IResponseFormatter {
+  /**
+   * Singleton instance of the ResponseFormatter
+   * @private
+   */
   private static _instance: ResponseFormatter;
 
   /**
    * Default sanitization rules for common sensitive data
+   * These rules define patterns for fields that should be removed from responses
+   * @private
+   * @readonly
    */
   private readonly _defaultSanitizationRules: ISanitizationRule[] = [
     { fieldPattern: /password/i },
-    { fieldPattern: /token|api[_-]?key|secret/i },
+    // { fieldPattern: /token|api[_-]?key|secret/i },
     { fieldPattern: /credit[_-]?card|card[_-]?number/i },
     { fieldPattern: /ssn|social[_-]?security/i },
     { fieldPattern: /auth|authorization/i },
+    { fieldPattern: /key/i },
     { fieldPattern: /private[_-]?key/i },
-    { fieldPattern: /access[_-]?key/i },
     { fieldPattern: /secret[_-]?key/i },
   ];
 
@@ -39,6 +51,13 @@ export class ResponseFormatter implements IResponseFormatter {
     sanitizationRules: [...this._defaultSanitizationRules],
   };
 
+  /**
+   * Constructs a new instance of the ResponseFormatterService.
+   *
+   * @param _sanitizationOptions - An optional object containing sanitization options.
+   *                               Defaults to an empty object. These options are merged
+   *                               with the default options to configure the sanitization behavior.
+   */
   private constructor(
     private readonly _sanitizationOptions: ISanitizationOptions = {}
   ) {
@@ -48,6 +67,12 @@ export class ResponseFormatter implements IResponseFormatter {
     };
   }
 
+  /**
+   * Retrieves the singleton instance of the `ResponseFormatter` class.
+   * If the instance does not already exist, it creates a new one.
+   *
+   * @returns {ResponseFormatter} The singleton instance of `ResponseFormatter`.
+   */
   public static getInstance(): ResponseFormatter {
     if (!this._instance) {
       this._instance = new ResponseFormatter();
@@ -56,7 +81,11 @@ export class ResponseFormatter implements IResponseFormatter {
   }
 
   /**
-   * Sanitize data by removing sensitive fields based on provided rules
+   * Sanitizes sensitive data in the provided object or array.
+   *
+   * @param data - The data to be sanitized (can be an object, array, or primitive).
+   * @param rules - An optional array of sanitization rules to override default rules.
+   * @returns The sanitized data with sensitive fields removed.
    */
   sanitizeData<T>(
     data: T,
@@ -96,7 +125,11 @@ export class ResponseFormatter implements IResponseFormatter {
   }
 
   /**
-   * Check if a field name matches any of the sensitive data patterns
+   * Checks if a field name matches any of the sensitive data patterns.
+   *
+   * @param fieldName - The name of the field to check.
+   * @param rules - An array of sanitization rules to check against.
+   * @returns A boolean indicating whether the field is sensitive.
    */
   isFieldSensitive(fieldName: string, rules: ISanitizationRule[]): boolean {
     return rules.some((rule) => {
@@ -110,9 +143,9 @@ export class ResponseFormatter implements IResponseFormatter {
   /**
    * Returns a standardized API response object.
    *
-   * @param data - The response data of any type.
-   * @param options - Optional settings (status, message, pagination info).
-   * @returns A standardized response object.
+   * @param responseOptions - The response options including status, message, data, and pagination.
+   * @param sanitizationOptions - Optional sanitization options to override default settings.
+   * @returns A standardized response object with the provided options.
    */
   formatResponse<T>(formatOptions: IFormatResponseOptions<T>): IApiResponse<T> {
     const { responseOptions, sanitizationOptions } = formatOptions;
@@ -146,11 +179,10 @@ export class ResponseFormatter implements IResponseFormatter {
   }
 
   /**
-   * Returns a standardized paginated API response object.
+   * Formats a paginated response with pagination information.
    *
-   * @param paginationQuery - Query parameters including pagination details.
-   * @param result - The paginated result data.
-   * @returns A standardized response object with pagination metadata.
+   * @param formatOptions - The options for formatting the paginated response.
+   * @returns A formatted API response with pagination information.
    */
   formatPaginatedResponse<T>(
     formatOptions: IFormatPaginatedResponseOptions<T>
@@ -183,11 +215,10 @@ export class ResponseFormatter implements IResponseFormatter {
   }
 
   /**
-   * Extracts and calculates pagination parameters from the query.
+   * Generates pagination queries for database queries.
    *
-   * @param queries - Query parameters containing pagination and sorting details.
-   * @param defaultLimit - Default items per page (default is 8).
-   * @returns An object with pagination parameters (skip, limit, and sort options) excluding the userId.
+   * @param options - The options for generating pagination queries.
+   * @returns An object containing the skip, limit, and sort options for pagination.
    */
   getPaginationQueries(
     options: IGetPaginationQueriesOptions
