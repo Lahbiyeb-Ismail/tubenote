@@ -3,6 +3,7 @@ import type {
   ICryptoService,
   ILoggerService,
   IPrismaService,
+  IResponseFormatter,
 } from "@/modules/shared/services";
 import type { IUserService } from "@/modules/user";
 import type { IAccountService } from "@/modules/user/features/account/account.types";
@@ -32,6 +33,7 @@ export interface IOAuthServiceOptions {
 
 export interface IOAuthControllerOptions {
   oauthService: IOAuthService;
+  responseFormatter: IResponseFormatter;
 }
 
 export interface IOAuthService {

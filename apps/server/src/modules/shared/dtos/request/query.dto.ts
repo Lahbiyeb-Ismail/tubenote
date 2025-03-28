@@ -9,8 +9,8 @@
  * @property {string} [order] - The order of sorting (e.g., 'asc' for ascending, 'desc' for descending).
  */
 export interface IQueryPaginationDto {
-  page?: string;
-  limit?: string;
+  page?: number;
+  limit?: number;
   sortBy?: string;
   order?: string;
 }

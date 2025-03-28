@@ -12,6 +12,7 @@ import type {
   ICryptoService,
   ILoggerService,
   IMailSenderService,
+  IResponseFormatter,
 } from "@/modules/shared/services";
 import type { IUserService } from "@/modules/user";
 
@@ -45,4 +46,5 @@ export interface IResetPasswordServiceOptions {
 
 export interface IResetPasswordControllerOptions {
   resetPasswordService: IResetPasswordService;
+  responseFormatter: IResponseFormatter;
 }

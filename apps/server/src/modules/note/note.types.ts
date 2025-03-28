@@ -10,14 +10,14 @@ import type {
   IDeleteDto,
   IFindAllDto,
   IFindUniqueDto,
-  IPaginatedItems,
+  IPaginatedData,
   IParamIdDto,
   IQueryPaginationDto,
   IUpdateBodyDto,
   IUpdateDto,
 } from "@/modules/shared/dtos";
 import type { Prisma } from "@prisma/client";
-import type { IPrismaService } from "../shared/services";
+import type { IPrismaService, IResponseFormatter } from "../shared/services";
 
 /**
  * Interface defining the repository methods for interacting with note data.
@@ -148,7 +148,7 @@ export interface INoteService {
    * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
    * @returns A promise that resolves to the paginated notes information.
    */
-  fetchUserNotes(findManyDto: IFindAllDto): Promise<IPaginatedItems<Note>>;
+  fetchUserNotes(findManyDto: IFindAllDto): Promise<IPaginatedData<Note>>;
 
   /**
    * Fetches recent notes for a user.
@@ -174,7 +174,7 @@ export interface INoteService {
    */
   fetchNotesByVideoId(
     dto: IFindAllDto & { videoId: string }
-  ): Promise<IPaginatedItems<Note>>;
+  ): Promise<IPaginatedData<Note>>;
 }
 
 /**
@@ -283,4 +283,5 @@ export interface INoteServiceOptions {
 
 export interface INoteControllerOptions {
   noteService: INoteService;
+  responseFormatter: IResponseFormatter;
 }

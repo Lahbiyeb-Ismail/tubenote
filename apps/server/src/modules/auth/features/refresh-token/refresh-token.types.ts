@@ -4,7 +4,11 @@ import type { ICreateDto } from "@/modules/shared/dtos";
 import type { TypedRequest } from "@/modules/shared/types";
 
 import type { IAuthResponseDto, IRefreshDto } from "@/modules/auth/dtos";
-import type { ILoggerService, IPrismaService } from "@/modules/shared/services";
+import type {
+  ILoggerService,
+  IPrismaService,
+  IResponseFormatter,
+} from "@/modules/shared/services";
 import type { Prisma } from "@prisma/client";
 import type { IJwtService } from "../../utils";
 import type { RefreshToken } from "./refresh-token.model";
@@ -45,4 +49,5 @@ export interface IRefreshTokenServiceOptions {
 
 export interface IRefreshTokenControllerOptions {
   refreshTokenService: IRefreshTokenService;
+  responseFormatter: IResponseFormatter;
 }

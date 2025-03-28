@@ -6,7 +6,11 @@ import type { TypedRequest } from "@/modules/shared/types";
 
 import type { User } from "./user.model";
 
-import type { ICryptoService, IPrismaService } from "../shared/services";
+import type {
+  ICryptoService,
+  IPrismaService,
+  IResponseFormatter,
+} from "../shared/services";
 import type {
   ICreateUserDto,
   IGetUserDto,
@@ -184,4 +188,5 @@ export interface IUserServiceOptions {
 
 export interface IUserControllerOptions {
   userService: IUserService;
+  responseFormatter: IResponseFormatter;
 }

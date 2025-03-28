@@ -9,6 +9,7 @@ import type {
   IPasswordBodyDto,
 } from "@/modules/shared/dtos";
 
+import type { IResponseFormatter } from "@/modules/shared/services";
 import type {
   IResetPasswordController,
   IResetPasswordControllerOptions,
@@ -22,7 +23,8 @@ export class ResetPasswordController implements IResetPasswordController {
   private static _instance: ResetPasswordController;
 
   private constructor(
-    private readonly _resetPasswordService: IResetPasswordService
+    private readonly _resetPasswordService: IResetPasswordService,
+    private readonly _responseFormatter: IResponseFormatter
   ) {}
 
   public static getInstance(
@@ -30,7 +32,8 @@ export class ResetPasswordController implements IResetPasswordController {
   ): ResetPasswordController {
     if (!this._instance) {
       this._instance = new ResetPasswordController(
-        options.resetPasswordService
+        options.resetPasswordService,
+        options.responseFormatter
       );
     }
 
@@ -52,9 +55,14 @@ export class ResetPasswordController implements IResetPasswordController {
 
     await this._resetPasswordService.sendResetToken(email);
 
-    res
-      .status(httpStatus.OK)
-      .json({ message: "Password reset link sent to your email." });
+    const formattedResponse = this._responseFormatter.formatResponse({
+      responseOptions: {
+        status: httpStatus.OK,
+        message: "Password reset link sent to your email.",
+      },
+    });
+
+    res.status(httpStatus.OK).json(formattedResponse);
   }
 
   /**
@@ -73,7 +81,14 @@ export class ResetPasswordController implements IResetPasswordController {
 
     await this._resetPasswordService.resetPassword(token, password);
 
-    res.status(httpStatus.OK).json({ message: "Password reset successful." });
+    const formattedResponse = this._responseFormatter.formatResponse({
+      responseOptions: {
+        status: httpStatus.OK,
+        message: "Password reset successfully.",
+      },
+    });
+
+    res.status(httpStatus.OK).json(formattedResponse);
   }
 
   /**
@@ -91,6 +106,13 @@ export class ResetPasswordController implements IResetPasswordController {
 
     await this._resetPasswordService.verifyResetToken(token);
 
-    res.status(httpStatus.OK).json({ message: "Reset token verified." });
+    const formattedResponse = this._responseFormatter.formatResponse({
+      responseOptions: {
+        status: httpStatus.OK,
+        message: "Reset password token is valid.",
+      },
+    });
+
+    res.status(httpStatus.OK).json(formattedResponse);
   }
 }

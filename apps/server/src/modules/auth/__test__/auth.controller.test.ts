@@ -11,21 +11,30 @@ import {
 } from "@/modules/auth";
 
 import { AuthController, IAuthService } from "@/modules/auth";
+import type {
+  IApiResponse,
+  IResponseFormatter,
+} from "@/modules/shared/services";
 
 describe("AuthController", () => {
   let controller: AuthController;
   const authService = mock<IAuthService>();
+  const responseFormatter = mock<IResponseFormatter>();
 
   const req = mock<TypedRequest>();
   const res = mock<Response>();
 
-  const controllerOptions: IAuthControllerOptions = { authService };
+  const controllerOptions: IAuthControllerOptions = {
+    authService,
+    responseFormatter,
+  };
 
   const MOCK_USER_ID = "user-id-123";
   const MOCK_REFRESH_TOKEN_VALUE = "refresh-token-123";
 
   beforeEach(() => {
     mockReset(authService);
+    mockReset(responseFormatter);
 
     // Create a fresh mock for authService.logoutUser.
     authService.logoutUser.mockResolvedValue(undefined);
@@ -45,6 +54,8 @@ describe("AuthController", () => {
 
     res.clearCookie.mockReturnThis();
     res.sendStatus.mockReturnThis();
+    res.json.mockReturnThis();
+    res.status.mockReturnThis();
   });
 
   describe("Singleton Behavior", () => {
@@ -61,7 +72,16 @@ describe("AuthController", () => {
   });
 
   describe("logout", () => {
+    const formattedResponse: IApiResponse<unknown> = {
+      success: true,
+      status: httpStatus.NO_CONTENT,
+      message: "User logged out successfully.",
+    };
+
     it("should call logoutUser with correct parameters, clear the refresh token cookie, and send NO_CONTENT status", async () => {
+      // Arrange: mock the response formatter to return the expected response.
+      responseFormatter.formatResponse.mockReturnValue(formattedResponse);
+
       // Act
       await controller.logout(req, res);
 
@@ -74,7 +94,7 @@ describe("AuthController", () => {
         REFRESH_TOKEN_NAME,
         clearRefreshTokenCookieConfig
       );
-      expect(res.sendStatus).toHaveBeenCalledWith(httpStatus.NO_CONTENT);
+      expect(res.json).toHaveBeenCalledWith(formattedResponse);
     });
 
     it("should propagate errors if logoutUser fails", async () => {
@@ -88,12 +108,14 @@ describe("AuthController", () => {
       );
 
       expect(res.clearCookie).toHaveBeenCalled();
-      expect(res.sendStatus).toHaveBeenCalled();
     });
 
     it("should pass undefined refreshToken if cookie is missing", async () => {
       // Arrange: remove the refresh token from cookies.
       req.cookies = {};
+
+      // Arrange: mock the response formatter to return the expected response.
+      responseFormatter.formatResponse.mockReturnValue(formattedResponse);
 
       // Act
       await controller.logout(req, res);
@@ -107,7 +129,7 @@ describe("AuthController", () => {
         REFRESH_TOKEN_NAME,
         clearRefreshTokenCookieConfig
       );
-      expect(res.sendStatus).toHaveBeenCalledWith(httpStatus.NO_CONTENT);
+      expect(res.json).toHaveBeenCalledWith(formattedResponse);
     });
   });
 });

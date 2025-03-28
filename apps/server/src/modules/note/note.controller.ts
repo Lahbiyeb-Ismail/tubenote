@@ -1,12 +1,11 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
+import type { IResponseFormatter } from "@/modules/shared/services";
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type {
   ICreateBodyDto,
-  IFindAllDto,
-  IPaginatedItems,
   IParamIdDto,
   IQueryPaginationDto,
   IUpdateBodyDto,
@@ -33,74 +32,28 @@ export class NoteController implements INoteController {
    * Creates an instance of NoteController.
    *
    * @param _noteService - An instance of the note service that handles business logic.
+   * @param _responseFormatter - An instance of the response formatter service.
    */
-  private constructor(private readonly _noteService: INoteService) {}
+  private constructor(
+    private readonly _noteService: INoteService,
+    private readonly _responseFormatter: IResponseFormatter
+  ) {}
 
   /**
    * Gets the singleton instance of NoteController.
    *
    * @param noteService - An instance of the note service that handles business logic.
+   * @param responseFormatter - An instance of the response formatter service.
    * @returns The singleton instance of NoteController.
    */
   public static getInstance(options: INoteControllerOptions): NoteController {
     if (!this._instance) {
-      this._instance = new NoteController(options.noteService);
+      this._instance = new NoteController(
+        options.noteService,
+        options.responseFormatter
+      );
     }
     return this._instance;
-  }
-
-  /**
-   * Sends a standardized paginated response.
-   *
-   * @private
-   * @param res - Express response object used to send the HTTP response.
-   * @param paginationQuery - The query parameters containing pagination details.
-   * @param result - The result object containing notes data and pagination metadata.
-   */
-  private _sendPaginatedResponse(
-    res: Response,
-    paginationQuery: IQueryPaginationDto,
-    result: IPaginatedItems<Note>
-  ): void {
-    const currentPage = Number(paginationQuery.page) || 1;
-
-    res.status(httpStatus.OK).json({
-      success: true,
-      data: result.items,
-      pagination: {
-        totalPages: result.totalPages,
-        currentPage,
-        totalItems: result.totalItems,
-        hasNextPage: currentPage < result.totalPages,
-        hasPrevPage: currentPage > 1,
-      },
-    });
-  }
-
-  /**
-   * Extracts and calculates pagination parameters from the query.
-   *
-   * @private
-   * @param queries - The query parameters containing pagination and sorting details.
-   * @param defaultLimit - The default limit for items per page (default is 8).
-   * @returns An object with pagination parameters (skip, limit, and sort options) excluding the userId.
-   */
-  private _getPaginationQueries(
-    queries: IQueryPaginationDto,
-    defaultLimit = 8
-  ): Omit<IFindAllDto, "userId"> {
-    const page = Math.max(Number(queries.page) || 1, 1);
-    const limit = Math.max(Number(queries.limit) || defaultLimit, 1);
-    const skip = (page - 1) * limit;
-
-    return {
-      skip,
-      limit,
-      sort: {
-        by: queries.sortBy || "createdAt",
-        order: queries.order || "desc",
-      },
-    };
   }
 
   /**
@@ -115,13 +68,18 @@ export class NoteController implements INoteController {
     res: Response
   ): Promise<void> {
     const userId = req.userId;
+
     const note = await this._noteService.createNote({ userId, data: req.body });
 
-    res.status(httpStatus.CREATED).json({
-      success: true,
-      data: note,
-      message: "Note created successfully.",
+    const formattedResponse = this._responseFormatter.formatResponse<Note>({
+      responseOptions: {
+        data: note,
+        status: httpStatus.CREATED,
+        message: "Note created successfully.",
+      },
     });
+
+    res.status(httpStatus.CREATED).json(formattedResponse);
   }
 
   /**
@@ -144,11 +102,15 @@ export class NoteController implements INoteController {
       data: req.body,
     });
 
-    res.status(httpStatus.OK).json({
-      success: true,
-      data: updatedNote,
-      message: "Note updated successfully.",
+    const formattedResponse = this._responseFormatter.formatResponse<Note>({
+      responseOptions: {
+        data: updatedNote,
+        status: httpStatus.OK,
+        message: "Note updated successfully.",
+      },
     });
+
+    res.status(httpStatus.OK).json(formattedResponse);
   }
 
   /**
@@ -167,9 +129,14 @@ export class NoteController implements INoteController {
 
     await this._noteService.deleteNote({ id, userId });
 
-    res
-      .status(httpStatus.OK)
-      .json({ success: true, message: "Note deleted successfully." });
+    const formattedResponse = this._responseFormatter.formatResponse({
+      responseOptions: {
+        status: httpStatus.OK,
+        message: "Note deleted successfully.",
+      },
+    });
+
+    res.status(httpStatus.OK).json(formattedResponse);
   }
 
   /**
@@ -188,10 +155,15 @@ export class NoteController implements INoteController {
 
     const note = await this._noteService.findNote({ id, userId });
 
-    res.status(httpStatus.OK).json({
-      success: true,
-      data: note,
+    const formattedResponse = this._responseFormatter.formatResponse<Note>({
+      responseOptions: {
+        data: note,
+        status: httpStatus.OK,
+        message: "Note retrieved successfully.",
+      },
     });
+
+    res.status(httpStatus.OK).json(formattedResponse);
   }
 
   /**
@@ -206,14 +178,26 @@ export class NoteController implements INoteController {
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-    const paginationQueries = this._getPaginationQueries(req.query);
+    const paginationQueries = this._responseFormatter.getPaginationQueries({
+      reqQuery: req.query,
+      itemsPerPage: 8,
+    });
 
-    const result = await this._noteService.fetchUserNotes({
+    const paginatedData = await this._noteService.fetchUserNotes({
       userId,
       ...paginationQueries,
     });
 
-    this._sendPaginatedResponse(res, req.query, result);
+    const formattedResponse = this._responseFormatter.formatPaginatedResponse({
+      page: req.query.page ?? 1,
+      paginatedData,
+      responseOptions: {
+        status: httpStatus.OK,
+        message: "User notes retrieved successfully.",
+      },
+    });
+
+    res.status(httpStatus.OK).json(formattedResponse);
   }
 
   /**
@@ -228,14 +212,25 @@ export class NoteController implements INoteController {
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-    const paginationQueries = this._getPaginationQueries(req.query, 2);
+    const paginationQueries = this._responseFormatter.getPaginationQueries({
+      reqQuery: req.query,
+      itemsPerPage: 2,
+    });
 
     const notes = await this._noteService.fetchRecentNotes({
       userId,
       ...paginationQueries,
     });
 
-    res.status(httpStatus.OK).json({ success: true, data: notes });
+    const formattedResponse = this._responseFormatter.formatResponse<Note[]>({
+      responseOptions: {
+        data: notes,
+        status: httpStatus.OK,
+        message: "Recent notes retrieved successfully.",
+      },
+    });
+
+    res.status(httpStatus.OK).json(formattedResponse);
   }
 
   /**
@@ -250,14 +245,25 @@ export class NoteController implements INoteController {
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-    const paginationQueries = this._getPaginationQueries(req.query, 2);
+    const paginationQueries = this._responseFormatter.getPaginationQueries({
+      reqQuery: req.query,
+      itemsPerPage: 2,
+    });
 
     const notes = await this._noteService.fetchRecentNotes({
       userId,
       ...paginationQueries,
     });
 
-    res.status(httpStatus.OK).json({ success: true, data: notes });
+    const formattedResponse = this._responseFormatter.formatResponse<Note[]>({
+      responseOptions: {
+        data: notes,
+        status: httpStatus.OK,
+        message: "Recent updated notes retrieved successfully.",
+      },
+    });
+
+    res.status(httpStatus.OK).json(formattedResponse);
   }
 
   /**
@@ -274,14 +280,26 @@ export class NoteController implements INoteController {
     const userId = req.userId;
     const { id } = req.params;
 
-    const paginationQueries = this._getPaginationQueries(req.query);
+    const paginationQueries = this._responseFormatter.getPaginationQueries({
+      reqQuery: req.query,
+      itemsPerPage: 8,
+    });
 
-    const result = await this._noteService.fetchNotesByVideoId({
+    const paginatedData = await this._noteService.fetchNotesByVideoId({
       videoId: id,
       userId,
       ...paginationQueries,
     });
 
-    this._sendPaginatedResponse(res, req.query, result);
+    const formattedResponse = this._responseFormatter.formatPaginatedResponse({
+      page: req.query.page ?? 1,
+      paginatedData,
+      responseOptions: {
+        status: httpStatus.OK,
+        message: "Notes retrieved successfully.",
+      },
+    });
+
+    res.status(httpStatus.OK).json(formattedResponse);
   }
 }

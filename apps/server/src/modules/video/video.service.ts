@@ -1,3 +1,5 @@
+import type { Prisma } from "@prisma/client";
+
 import {
   ERROR_MESSAGES,
   YOUTUBE_API_KEY,
@@ -9,11 +11,10 @@ import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
 import type {
   IFindAllDto,
   IFindUniqueDto,
-  IPaginatedItems,
+  IPaginatedData,
 } from "@/modules/shared/dtos";
 import type { IPrismaService } from "@/modules/shared/services";
 
-import type { Prisma } from "@prisma/client";
 import type { Video, YoutubeVideoData } from "./video.model";
 import type {
   IVideoRepository,
@@ -102,11 +103,9 @@ export class VideoService implements IVideoService {
     };
   }
 
-  async getUserVideos(
-    findAllDto: IFindAllDto
-  ): Promise<IPaginatedItems<Video>> {
+  async getUserVideos(findAllDto: IFindAllDto): Promise<IPaginatedData<Video>> {
     return this._prismaService.transaction(async (tx) => {
-      const items = await this._videoRepository.findMany(findAllDto, tx);
+      const data = await this._videoRepository.findMany(findAllDto, tx);
 
       const totalItems = await this._videoRepository.count(
         findAllDto.userId,
@@ -114,7 +113,7 @@ export class VideoService implements IVideoService {
       );
 
       const totalPages = Math.ceil(totalItems / findAllDto.limit);
-      return { items, totalItems, totalPages };
+      return { data, totalItems, totalPages };
     });
   }
 

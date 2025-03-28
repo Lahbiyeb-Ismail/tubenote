@@ -20,15 +20,21 @@ import type { IAuthResponseDto } from "@/modules/auth/dtos";
 
 import { RefreshTokenController } from "../refresh-token.controller";
 
+import type {
+  IApiResponse,
+  IResponseFormatter,
+} from "@/modules/shared/services";
 import { mock, mockReset } from "jest-mock-extended";
 import type { IRefreshTokenService } from "../refresh-token.types";
 
 describe("RefreshTokenController", () => {
   // Mock the refresh token service
   const refreshTokenService = mock<IRefreshTokenService>();
+  const responseFormatter = mock<IResponseFormatter>();
 
   const refreshTokenController = RefreshTokenController.getInstance({
     refreshTokenService,
+    responseFormatter,
   });
 
   const req = mock<TypedRequest>();
@@ -44,6 +50,7 @@ describe("RefreshTokenController", () => {
 
   beforeEach(() => {
     mockReset(refreshTokenService);
+    mockReset(responseFormatter);
 
     // Mock request object
     req.cookies = {};
@@ -58,12 +65,21 @@ describe("RefreshTokenController", () => {
   });
 
   describe("RefreshTokenController - refreshToken", () => {
+    const formattedResponse: IApiResponse<{ accessToken: string }> = {
+      success: true,
+      status: httpStatus.OK,
+      data: { accessToken: mockNewTokens.accessToken },
+      message: "Access token refreshed successfully.",
+    };
+
     it("should successfully refresh tokens when valid refresh token is provided", async () => {
       req.cookies = {
         [REFRESH_TOKEN_NAME]: mockRefreshToken,
       };
 
       refreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
+
+      responseFormatter.formatResponse.mockReturnValue(formattedResponse);
 
       // Act
       await refreshTokenController.refreshToken(req, res);
@@ -87,9 +103,7 @@ describe("RefreshTokenController", () => {
 
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
 
-      expect(res.json).toHaveBeenCalledWith({
-        accessToken: mockNewTokens.accessToken,
-      });
+      expect(res.json).toHaveBeenCalledWith(formattedResponse);
     });
 
     it.each([
@@ -183,6 +197,8 @@ describe("RefreshTokenController", () => {
 
       refreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
 
+      responseFormatter.formatResponse.mockReturnValue(formattedResponse);
+
       await refreshTokenController.refreshToken(req, res);
 
       // Subsequent request with new token
@@ -204,6 +220,8 @@ describe("RefreshTokenController", () => {
     it("should validate cookie security configurations", async () => {
       req.cookies = { [REFRESH_TOKEN_NAME]: mockRefreshToken };
       refreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
+
+      responseFormatter.formatResponse.mockReturnValue(formattedResponse);
 
       await refreshTokenController.refreshToken(req, res);
 

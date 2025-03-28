@@ -1,4 +1,8 @@
-import { loggerService, prismaService } from "@/modules/shared/services";
+import {
+  loggerService,
+  prismaService,
+  responseFormatter,
+} from "@/modules/shared/services";
 
 import { userService } from "@/modules/user";
 
@@ -22,6 +26,7 @@ const verifyEmailService = VerifyEmailService.getInstance({
 
 const verifyEmailController = VerifyEmailController.getInstance({
   verifyEmailService,
+  responseFormatter,
 });
 
 export { verifyEmailController, verifyEmailService };

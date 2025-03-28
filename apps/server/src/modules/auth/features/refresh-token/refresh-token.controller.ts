@@ -11,6 +11,7 @@ import {
 } from "@/modules/auth/config";
 import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 
+import type { IResponseFormatter } from "@/modules/shared/services";
 import type {
   IRefreshTokenController,
   IRefreshTokenControllerOptions,
@@ -21,14 +22,18 @@ export class RefreshTokenController implements IRefreshTokenController {
   private static _instance: RefreshTokenController;
 
   private constructor(
-    private readonly _refreshTokenService: IRefreshTokenService
+    private readonly _refreshTokenService: IRefreshTokenService,
+    private readonly _responseFormatter: IResponseFormatter
   ) {}
 
   public static getInstance(
     options: IRefreshTokenControllerOptions
   ): RefreshTokenController {
     if (!this._instance) {
-      this._instance = new RefreshTokenController(options.refreshTokenService);
+      this._instance = new RefreshTokenController(
+        options.refreshTokenService,
+        options.responseFormatter
+      );
     }
 
     return this._instance;
@@ -60,10 +65,18 @@ export class RefreshTokenController implements IRefreshTokenController {
         userId,
       });
 
+    const formattedResponse = this._responseFormatter.formatResponse<{
+      accessToken: string;
+    }>({
+      responseOptions: {
+        data: { accessToken },
+        status: httpStatus.OK,
+        message: "Access token refreshed successfully.",
+      },
+    });
+
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
-    res.status(httpStatus.OK).json({
-      accessToken,
-    });
+    res.status(httpStatus.OK).json(formattedResponse);
   }
 }

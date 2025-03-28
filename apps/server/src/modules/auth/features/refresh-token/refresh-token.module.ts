@@ -1,4 +1,8 @@
-import { loggerService, prismaService } from "@/modules/shared/services";
+import {
+  loggerService,
+  prismaService,
+  responseFormatter,
+} from "@/modules/shared/services";
 
 import { RefreshTokenController } from "./refresh-token.controller";
 import { RefreshTokenRepository } from "./refresh-token.repository";
@@ -19,6 +23,7 @@ const refreshTokenService = RefreshTokenService.getInstance({
 
 const refreshTokenController = RefreshTokenController.getInstance({
   refreshTokenService,
+  responseFormatter,
 });
 
 export { refreshTokenService, refreshTokenController };

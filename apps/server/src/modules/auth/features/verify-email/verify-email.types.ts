@@ -5,7 +5,11 @@ import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type { ICreateDto, IParamTokenDto } from "@/modules/shared/dtos";
 
-import type { ILoggerService, IPrismaService } from "@/modules/shared/services";
+import type {
+  ILoggerService,
+  IPrismaService,
+  IResponseFormatter,
+} from "@/modules/shared/services";
 import type { IUserService } from "@/modules/user";
 import type { IJwtService } from "../../utils";
 import type { FindActiveTokenDto } from "./dtos";
@@ -49,4 +53,5 @@ export interface IVerifyEmailServiceOptions {
 
 export interface IVerifyEmailControllerOptions {
   verifyEmailService: IVerifyEmailService;
+  responseFormatter: IResponseFormatter;
 }

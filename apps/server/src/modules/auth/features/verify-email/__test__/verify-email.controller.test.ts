@@ -1,6 +1,13 @@
-import type { Response } from "express";
+import { type Response } from "express";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
+
+import type { IParamTokenDto } from "@/modules/shared/dtos";
+import type {
+  IApiResponse,
+  IResponseFormatter,
+} from "@/modules/shared/services";
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import { VerifyEmailController } from "../verify-email.controller";
 import type {
@@ -8,25 +15,25 @@ import type {
   IVerifyEmailService,
 } from "../verify-email.types";
 
-import type { IParamTokenDto } from "@/modules/shared/dtos";
-import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
-
 describe("VerifyEmailController", () => {
   let controller: VerifyEmailController;
 
   const verifyEmailService = mock<IVerifyEmailService>();
+  const responseFormatter = mock<IResponseFormatter>();
 
   const verifyReq = mock<TypedRequest<EmptyRecord, IParamTokenDto>>();
   const res = mock<Response>();
 
   const controllerOptions: IVerifyEmailControllerOptions = {
     verifyEmailService,
+    responseFormatter,
   };
 
   const validResetToken = "valid_reset_token";
 
   beforeEach(() => {
     mockReset(verifyEmailService);
+    mockReset(responseFormatter);
 
     // Create fresh mocks for the verifyEmailService methods
     verifyEmailService.verifyUserEmail.mockResolvedValue(undefined);
@@ -59,7 +66,15 @@ describe("VerifyEmailController", () => {
   });
 
   describe("verifyEmail", () => {
+    const formattedRes: IApiResponse<unknown> = {
+      success: true,
+      status: httpStatus.OK,
+      message: "Email verified successfully.",
+    };
     it("should verify the user email and return a success response", async () => {
+      // Arrange
+      responseFormatter.formatResponse.mockReturnValue(formattedRes);
+
       // Act
       await controller.verifyEmail(verifyReq, res);
 
@@ -68,9 +83,7 @@ describe("VerifyEmailController", () => {
         validResetToken
       );
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Email verified successfully.",
-      });
+      expect(res.json).toHaveBeenCalledWith(formattedRes);
     });
 
     it("should propagate error if verifyUserEmail fails", async () => {

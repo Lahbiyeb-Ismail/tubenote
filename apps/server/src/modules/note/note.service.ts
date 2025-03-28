@@ -6,7 +6,7 @@ import type {
   IDeleteDto,
   IFindAllDto,
   IFindUniqueDto,
-  IPaginatedItems,
+  IPaginatedData,
   IUpdateDto,
 } from "@/modules/shared/dtos";
 
@@ -125,13 +125,13 @@ export class NoteService implements INoteService {
    * Fetches the notes for a user based on the provided criteria.
    *
    * @param {IFindAllDto} findManyDto - The data transfer object containing the criteria for finding notes.
-   * @returns {Promise<IPaginatedItems<Note>>} A promise that resolves to an object containing the paginated notes, total number of notes, and total pages.
+   * @returns {Promise<IPaginatedData<Note>>} A promise that resolves to an object containing the paginated notes, total number of notes, and total pages.
    */
   async fetchUserNotes(
     findManyDto: IFindAllDto
-  ): Promise<IPaginatedItems<Note>> {
+  ): Promise<IPaginatedData<Note>> {
     return await this._prismaService.transaction(async (tx) => {
-      const items = await this._noteRepository.findMany(findManyDto, tx);
+      const data = await this._noteRepository.findMany(findManyDto, tx);
 
       const totalItems = await this._noteRepository.count(
         findManyDto.userId,
@@ -140,7 +140,7 @@ export class NoteService implements INoteService {
 
       const totalPages = Math.ceil(totalItems / findManyDto.limit);
 
-      return { items, totalItems, totalPages };
+      return { data, totalItems, totalPages };
     });
   }
 
@@ -173,20 +173,20 @@ export class NoteService implements INoteService {
    * @returns A promise that resolves to an object containing the paginated notes, total number of notes, and total pages.
    *
    * @template IFindAllDto - Interface for the data transfer object that includes pagination and user information.
-   * @template IPaginatedItems - Interface for the paginated items response.
+   * @template IPaginatedData - Interface for the paginated items response.
    * @template Note - Type representing a note.
    */
   async fetchNotesByVideoId(
     dto: IFindAllDto & { videoId: string }
-  ): Promise<IPaginatedItems<Note>> {
+  ): Promise<IPaginatedData<Note>> {
     return await this._prismaService.transaction(async (tx) => {
-      const items = await this._noteRepository.findManyByVideoId(dto, tx);
+      const data = await this._noteRepository.findManyByVideoId(dto, tx);
 
       const totalItems = await this._noteRepository.count(dto.userId, tx);
 
       const totalPages = Math.ceil(totalItems / dto.limit);
 
-      return { items, totalItems, totalPages };
+      return { data, totalItems, totalPages };
     });
   }
 }

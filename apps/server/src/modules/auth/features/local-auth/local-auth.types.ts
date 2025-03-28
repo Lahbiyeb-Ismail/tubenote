@@ -11,6 +11,7 @@ import type {
   ICryptoService,
   IMailSenderService,
   IPrismaService,
+  IResponseFormatter,
 } from "@/modules/shared/services";
 import type { IJwtService } from "../../utils";
 import type { IRefreshTokenService } from "../refresh-token";
@@ -41,4 +42,5 @@ export interface ILocalAuthServiceOptions {
 
 export interface ILocalAuthControllerOptions {
   localAuthService: ILocalAuthService;
+  responseFormatter: IResponseFormatter;
 }

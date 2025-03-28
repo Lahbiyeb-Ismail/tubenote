@@ -5,6 +5,7 @@ import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type { IParamTokenDto } from "@/modules/shared/dtos";
 
+import type { IResponseFormatter } from "@/modules/shared/services";
 import type {
   IVerifyEmailController,
   IVerifyEmailControllerOptions,
@@ -18,14 +19,18 @@ export class VerifyEmailController implements IVerifyEmailController {
   private static _instance: VerifyEmailController;
 
   private constructor(
-    private readonly _verifyEmailService: IVerifyEmailService
+    private readonly _verifyEmailService: IVerifyEmailService,
+    private readonly _responseFormatter: IResponseFormatter
   ) {}
 
   public static getInstance(
     options: IVerifyEmailControllerOptions
   ): VerifyEmailController {
     if (!this._instance) {
-      this._instance = new VerifyEmailController(options.verifyEmailService);
+      this._instance = new VerifyEmailController(
+        options.verifyEmailService,
+        options.responseFormatter
+      );
     }
     return this._instance;
   }
@@ -43,6 +48,13 @@ export class VerifyEmailController implements IVerifyEmailController {
 
     await this._verifyEmailService.verifyUserEmail(token);
 
-    res.status(httpStatus.OK).json({ message: "Email verified successfully." });
+    const formattedResponse = this._responseFormatter.formatResponse({
+      responseOptions: {
+        status: httpStatus.OK,
+        message: "Email verified successfully.",
+      },
+    });
+
+    res.status(httpStatus.OK).json(formattedResponse);
   }
 }
