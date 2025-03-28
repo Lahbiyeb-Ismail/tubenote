@@ -46,9 +46,11 @@ export class UserController implements IUserController {
     const user = await this._userService.getUserByIdOrEmail({ id: userId });
 
     const formatedResponse = this._responseFormatter.formatResponse<User>({
-      data: user,
-      status: httpStatus.OK,
-      message: "User retrieved successfully.",
+      responseOptions: {
+        data: user,
+        status: httpStatus.OK,
+        message: "User retrieved successfully.",
+      },
     });
 
     res.status(httpStatus.OK).json(formatedResponse);
@@ -72,9 +74,11 @@ export class UserController implements IUserController {
     });
 
     const formatedResponse = this._responseFormatter.formatResponse<User>({
-      data: user,
-      status: httpStatus.OK,
-      message: "User updated successfully.",
+      responseOptions: {
+        data: user,
+        status: httpStatus.OK,
+        message: "User updated successfully.",
+      },
     });
 
     res.status(httpStatus.OK).json(formatedResponse);
@@ -106,9 +110,11 @@ export class UserController implements IUserController {
     });
 
     const formatedResponse = this._responseFormatter.formatResponse<User>({
-      data: user,
-      status: httpStatus.OK,
-      message: "User password updated successfully.",
+      responseOptions: {
+        data: user,
+        status: httpStatus.OK,
+        message: "User password updated successfully.",
+      },
     });
 
     res.status(httpStatus.OK).json(formatedResponse);

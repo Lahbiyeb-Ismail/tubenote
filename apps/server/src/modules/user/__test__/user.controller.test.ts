@@ -104,9 +104,11 @@ describe("UserController tests", () => {
       });
 
       expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
-        data: getUserFormattedRes.data,
-        message: getUserFormattedRes.message,
-        status: getUserFormattedRes.status,
+        responseOptions: {
+          data: getUserFormattedRes.data,
+          message: getUserFormattedRes.message,
+          status: getUserFormattedRes.status,
+        },
       });
 
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
@@ -157,9 +159,11 @@ describe("UserController tests", () => {
       });
 
       expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
-        data: updateUserFormattedRes.data,
-        message: updateUserFormattedRes.message,
-        status: updateUserFormattedRes.status,
+        responseOptions: {
+          data: updateUserFormattedRes.data,
+          message: updateUserFormattedRes.message,
+          status: updateUserFormattedRes.status,
+        },
       });
 
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
@@ -184,9 +188,11 @@ describe("UserController tests", () => {
       });
 
       expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
-        data: mockUser,
-        message: updateUserFormattedRes.message,
-        status: updateUserFormattedRes.status,
+        responseOptions: {
+          data: mockUser,
+          message: updateUserFormattedRes.message,
+          status: updateUserFormattedRes.status,
+        },
       });
 
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
@@ -241,9 +247,11 @@ describe("UserController tests", () => {
       );
 
       expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
-        data: updatePasswordFormattedRes.data,
-        message: updatePasswordFormattedRes.message,
-        status: updatePasswordFormattedRes.status,
+        responseOptions: {
+          data: updatePasswordFormattedRes.data,
+          message: updatePasswordFormattedRes.message,
+          status: updatePasswordFormattedRes.status,
+        },
       });
 
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
