@@ -65,10 +65,14 @@ export class VideoController implements IVideoController {
 
     const paginatedData = await this._videoService.getUserVideos(findAllDto);
 
-    const formattedResponse = this._responseFormatter.formatPaginatedResponse(
-      paginationQueries,
-      paginatedData
-    );
+    const formattedResponse = this._responseFormatter.formatPaginatedResponse({
+      page: req.query.page || 1,
+      paginatedData,
+      responseOptions: {
+        status: httpStatus.OK,
+        message: "Videos retrieved successfully.",
+      },
+    });
 
     res.status(httpStatus.OK).json(formattedResponse);
   }
@@ -94,9 +98,11 @@ export class VideoController implements IVideoController {
     });
 
     const formattedResponse = this._responseFormatter.formatResponse<Video>({
-      data: video,
-      status: httpStatus.OK,
-      message: "Video retrieved successfully.",
+      responseOptions: {
+        data: video,
+        status: httpStatus.OK,
+        message: "Video retrieved successfully.",
+      },
     });
 
     res.status(httpStatus.OK).json(formattedResponse);

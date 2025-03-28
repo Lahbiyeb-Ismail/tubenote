@@ -181,8 +181,9 @@ export class NoteController implements INoteController {
     });
 
     const formattedResponse = this._responseFormatter.formatPaginatedResponse(
-      paginationQueries,
-      paginatedData
+      1,
+      paginatedData,
+      { status: httpStatus.OK, message: "User notes retrieved successfully." }
     );
 
     res.status(httpStatus.OK).json(formattedResponse);
@@ -276,8 +277,9 @@ export class NoteController implements INoteController {
     });
 
     const formattedResponse = this._responseFormatter.formatPaginatedResponse(
-      paginationQueries,
-      paginatedData
+      req.query.page ?? 1,
+      paginatedData,
+      { status: httpStatus.OK, message: "Notes retrieved successfully." }
     );
 
     res.status(httpStatus.OK).json(formattedResponse);

@@ -241,9 +241,11 @@ describe("VideoController", () => {
       });
 
       expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
-        data: mockVideo,
-        message: "Video retrieved successfully.",
-        status: 200,
+        responseOptions: {
+          data: mockVideo,
+          message: "Video retrieved successfully.",
+          status: 200,
+        },
       });
       expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
       expect(mockResponse.json).toHaveBeenCalledWith(formattedRes);
