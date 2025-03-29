@@ -2,8 +2,10 @@ import { userService } from "@/modules/user";
 
 import {
   cryptoService,
+  loggerService,
   mailSenderService,
   prismaService,
+  rateLimitService,
   responseFormatter,
 } from "@/modules/shared/services";
 
@@ -22,6 +24,8 @@ const localAuthService = LocalAuthService.getInstance({
   jwtService,
   cryptoService,
   mailSenderService,
+  rateLimitService,
+  loggerService,
 });
 
 const localAuthController = LocalAuthController.getInstance({

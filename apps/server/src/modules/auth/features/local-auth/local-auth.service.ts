@@ -3,6 +3,7 @@ import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import {
   ForbiddenError,
   NotFoundError,
+  TooManyRequestsError,
   UnauthorizedError,
 } from "@/modules/shared/api-errors";
 import { stringToDate } from "@/modules/shared/utils";
@@ -11,8 +12,10 @@ import type { ICreateUserDto, IUserService, User } from "@/modules/user";
 
 import type {
   ICryptoService,
+  ILoggerService,
   IMailSenderService,
   IPrismaService,
+  IRateLimitService,
 } from "@/modules/shared/services";
 
 import type {
@@ -25,6 +28,7 @@ import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
 import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
 import type { IJwtService } from "@/modules/auth/utils";
 
+import { AUTH_RATE_LIMIT_CONFIG } from "../../config";
 import type {
   ILocalAuthService,
   ILocalAuthServiceOptions,
@@ -40,7 +44,9 @@ export class LocalAuthService implements ILocalAuthService {
     private readonly _refreshTokenService: IRefreshTokenService,
     private readonly _jwtService: IJwtService,
     private readonly _cryptoService: ICryptoService,
-    private readonly _mailSenderService: IMailSenderService
+    private readonly _mailSenderService: IMailSenderService,
+    private readonly _rateLimitService: IRateLimitService,
+    private readonly _loggerService: ILoggerService
   ) {}
 
   public static getInstance(
@@ -54,7 +60,9 @@ export class LocalAuthService implements ILocalAuthService {
         options.refreshTokenService,
         options.jwtService,
         options.cryptoService,
-        options.mailSenderService
+        options.mailSenderService,
+        options.rateLimitService,
+        options.loggerService
       );
     }
     return this._instance;
@@ -95,39 +103,190 @@ export class LocalAuthService implements ILocalAuthService {
   }
 
   async loginUser(loginDto: ILoginDto): Promise<IAuthResponseDto> {
-    const { email, password } = loginDto;
+    const { email, password, ip } = loginDto;
 
-    const user = await this._userService.getUserByIdOrEmail({ email });
+    // Create rate limit keys based on both IP and email
+    const ipKey = `login:ip:${ip || "unknown"}`;
+    const emailKey = `login:email:${email}`;
 
-    if (!user) {
-      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
+    try {
+      // Check IP-based rate limiting first
+      const ipLimitResult = await this._rateLimitService.check({
+        key: ipKey,
+        ...AUTH_RATE_LIMIT_CONFIG.login,
+      });
+
+      if (ipLimitResult.blocked) {
+        this._loggerService.warn("IP address rate limited for login attempts", {
+          ip,
+          resetAt: ipLimitResult.resetAt,
+        });
+
+        throw new TooManyRequestsError(ERROR_MESSAGES.TOO_MANY_ATTEMPTS, {
+          resetAt: ipLimitResult.resetAt,
+          remainingSeconds: ipLimitResult.resetAt
+            ? Math.ceil((ipLimitResult.resetAt.getTime() - Date.now()) / 1000)
+            : null,
+        });
+      }
+
+      // Get the user first to check if they exist
+      const user = await this._userService.getUserByEmail(email);
+
+      if (!user) {
+        // Increment the IP-based counter even for non-existent users
+        await this._rateLimitService.increment({
+          key: ipKey,
+          ...AUTH_RATE_LIMIT_CONFIG.login,
+        });
+
+        this._loggerService.info("Login attempt with non-existent email", {
+          email,
+          ip,
+        });
+        throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
+      }
+
+      // Now check email-based rate limiting
+      const emailLimitResult = await this._rateLimitService.check({
+        key: emailKey,
+        ...AUTH_RATE_LIMIT_CONFIG.login,
+      });
+
+      if (emailLimitResult.blocked) {
+        this._loggerService.warn("Account rate limited for login attempts", {
+          email,
+          userId: user.id,
+          resetAt: emailLimitResult.resetAt,
+        });
+
+        throw new TooManyRequestsError(
+          ERROR_MESSAGES.ACCOUNT_TEMPORARILY_LOCKED,
+          {
+            resetAt: emailLimitResult.resetAt,
+            remainingSeconds: emailLimitResult.resetAt
+              ? Math.ceil(
+                  (emailLimitResult.resetAt.getTime() - Date.now()) / 1000
+                )
+              : null,
+          }
+        );
+      }
+
+      if (!user.isEmailVerified) {
+        // Don't increment rate limit for unverified emails
+        throw new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED);
+      }
+
+      const isPasswordMatch = await this._cryptoService.comparePasswords({
+        plainText: password,
+        hash: user.password,
+      });
+
+      if (!isPasswordMatch) {
+        // Increment both rate limiters on failed password
+        await Promise.all([
+          this._rateLimitService.increment({
+            key: ipKey,
+            ...AUTH_RATE_LIMIT_CONFIG.login,
+          }),
+          this._rateLimitService.increment({
+            key: emailKey,
+            ...AUTH_RATE_LIMIT_CONFIG.login,
+          }),
+        ]);
+
+        this._loggerService.info("Failed login attempt - invalid password", {
+          userId: user.id,
+          email,
+          ip,
+        });
+
+        throw new ForbiddenError(ERROR_MESSAGES.INVALID_CREDENTIALS);
+      }
+
+      const { accessToken, refreshToken } = this._jwtService.generateAuthTokens(
+        user.id
+      );
+
+      // Store refresh token
+      await this._refreshTokenService.createToken({
+        userId: user.id,
+        data: {
+          token: refreshToken,
+          expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+        },
+      });
+
+      // Reset rate limiters on successful login
+      await Promise.all([
+        this._rateLimitService.reset(ipKey),
+        this._rateLimitService.reset(emailKey),
+      ]);
+
+      this._loggerService.info("User logged in successfully", {
+        userId: user.id,
+        email,
+        ip,
+      });
+
+      return { accessToken, refreshToken };
+    } catch (error: any) {
+      // Ensure all errors are properly logged
+      if (!(error instanceof TooManyRequestsError)) {
+        this._loggerService.error("Login error", {
+          email,
+          ip,
+          errorType: error.constructor.name,
+          errorMessage: error.message,
+        });
+      }
+
+      throw error;
     }
 
-    if (!user.isEmailVerified) {
-      throw new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED);
-    }
+    // const user = await this._userService.getUserByEmail(email);
 
-    const isPasswordMatch = await this._cryptoService.comparePasswords({
-      plainText: password,
-      hash: user.password,
-    });
+    // if (!user) {
+    //   // Increment IP-based rate limit for non-existent users
+    //   await this._rateLimitService.increment({
+    //     key: `login:ip:${ip}`,
+    //     ...AUTH_RATE_LIMIT_CONFIG.login,
+    //   });
 
-    if (!isPasswordMatch) {
-      throw new ForbiddenError(ERROR_MESSAGES.INVALID_CREDENTIALS);
-    }
+    //   this._loggerService.warn("Login attempt with non-existent email", {
+    //     email,
+    //     ip,
+    //   });
 
-    const { accessToken, refreshToken } = this._jwtService.generateAuthTokens(
-      user.id
-    );
+    //   throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
+    // }
 
-    await this._refreshTokenService.createToken({
-      userId: user.id,
-      data: {
-        token: refreshToken,
-        expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
-      },
-    });
+    // if (!user.isEmailVerified) {
+    //   throw new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED);
+    // }
 
-    return { accessToken, refreshToken };
+    // const isPasswordMatch = await this._cryptoService.comparePasswords({
+    //   plainText: password,
+    //   hash: user.password,
+    // });
+
+    // if (!isPasswordMatch) {
+    //   throw new ForbiddenError(ERROR_MESSAGES.INVALID_CREDENTIALS);
+    // }
+
+    // const { accessToken, refreshToken } = this._jwtService.generateAuthTokens(
+    //   user.id
+    // );
+
+    // await this._refreshTokenService.createToken({
+    //   userId: user.id,
+    //   data: {
+    //     token: refreshToken,
+    //     expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+    //   },
+    // });
+
+    // return { accessToken, refreshToken };
   }
 }

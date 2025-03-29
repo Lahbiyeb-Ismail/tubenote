@@ -70,7 +70,7 @@ export class LocalAuthController implements ILocalAuthController {
    */
   async login(req: TypedRequest<ILoginDto>, res: Response) {
     const { accessToken, refreshToken } =
-      await this._localAuthService.loginUser(req.body);
+      await this._localAuthService.loginUser({ ...req.body, ip: req.ip });
 
     const formattedResponse = this._responseFormatter.formatResponse<{
       accessToken: string;

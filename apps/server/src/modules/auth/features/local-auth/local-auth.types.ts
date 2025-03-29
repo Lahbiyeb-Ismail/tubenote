@@ -9,8 +9,10 @@ import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
 
 import type {
   ICryptoService,
+  ILoggerService,
   IMailSenderService,
   IPrismaService,
+  IRateLimitService,
   IResponseFormatter,
 } from "@/modules/shared/services";
 import type { IJwtService } from "../../utils";
@@ -38,6 +40,8 @@ export interface ILocalAuthServiceOptions {
   jwtService: IJwtService;
   cryptoService: ICryptoService;
   mailSenderService: IMailSenderService;
+  rateLimitService: IRateLimitService;
+  loggerService: ILoggerService;
 }
 
 export interface ILocalAuthControllerOptions {
