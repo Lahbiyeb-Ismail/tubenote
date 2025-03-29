@@ -151,6 +151,13 @@ export class UserService implements IUserService {
     });
   }
 
+  async getUserByEmail(
+    email: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<User | null> {
+    return this._userRepository.getByEmail(email, tx);
+  }
+
   /**
    * Retrieves an existing user by the provided data transfer object.
    *

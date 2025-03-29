@@ -101,6 +101,11 @@ export interface IUserService {
    */
   getOrCreateUser(createUserDto: ICreateUserDto): Promise<User>;
 
+  getUserByEmail(
+    email: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<User | null>;
+
   /**
    * Retrieves a user based on the provided details.
    * @param getUserDto - Data transfer object containing user retrieval details.
