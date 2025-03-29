@@ -1,6 +1,7 @@
 export interface ILoginDto {
   email: string;
   password: string;
+  ip?: string;
 }
 
 export interface ILogoutDto {
