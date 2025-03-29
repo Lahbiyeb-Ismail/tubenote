@@ -42,10 +42,11 @@ export class CacheService implements ICacheService {
    * @template T - The type of the value to be cached.
    * @param {string} key - The key under which the value should be stored.
    * @param {T} value - The value to be stored in the cache.
+   * @param {number} [ttl] - Optional time-to-live for the cached item in seconds.
    * @returns {boolean} - Returns true if the value was successfully set in the cache.
    */
-  set<T>(key: string, value: T): boolean {
-    return this.cache.set(key, value);
+  set<T>(key: string, value: T, ttl: number = 500): boolean {
+    return this.cache.set(key, value, ttl);
   }
 
   /**

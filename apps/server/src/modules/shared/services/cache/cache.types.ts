@@ -1,7 +1,7 @@
 import type NodeCache from "node-cache";
 
 export interface ICacheService {
-  set<T>(key: string, value: T): boolean;
+  set<T>(key: string, value: T, ttl?: number): boolean;
   get<T>(key: string): T | undefined;
   del(key: string): number;
   flush(): void;
