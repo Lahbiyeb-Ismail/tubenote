@@ -28,19 +28,45 @@ export class LoggerService implements ILoggerService {
 
     // Create formats
     const consoleFormat = winston.format.combine(
+      winston.format.json(),
       winston.format.timestamp({ format: DEFAULT_TIMESTAMP_FORMAT }),
       winston.format.colorize({ all: true }),
-      winston.format.printf(
-        (info) => `[${info.timestamp}] [${info.level}]: ${info.message}`
-      )
+      winston.format.metadata({
+        fillExcept: ["message", "level", "timestamp", "metadata"],
+      }),
+      winston.format.printf((info) => {
+        // console.log(info);
+        let logMessage = `[${info.timestamp}] [${info.level}]: ${info.message}`;
+
+        if (info.metadata && Object.keys(info.metadata).length > 0) {
+          // Add metadata if it exists
+          // Convert metadata to a formatted string
+          const metaString = JSON.stringify(info.metadata, null, 2);
+          logMessage += `\n${metaString}`;
+        }
+
+        return logMessage;
+      })
     );
 
     const fileFormat = winston.format.combine(
       winston.format.timestamp({ format: DEFAULT_TIMESTAMP_FORMAT }),
-      winston.format.printf(
-        (info) =>
-          `[${info.timestamp}] [${info.level.toUpperCase()}]: ${info.message}`
-      )
+      winston.format.metadata({
+        fillExcept: ["message", "level", "timestamp", "metadata"],
+      }),
+      winston.format.json(),
+      winston.format.printf((info) => {
+        let logMessage = `[${info.timestamp}] [${info.level.toUpperCase()}]: ${info.message}`;
+
+        if (info.metadata && Object.keys(info.metadata).length > 0) {
+          // Add metadata if it exists
+          // Convert metadata to a formatted string
+          const metaString = JSON.stringify(info.metadata, null, 2);
+          logMessage += `\n${metaString}`;
+        }
+
+        return logMessage;
+      })
     );
 
     // Create logger instance
