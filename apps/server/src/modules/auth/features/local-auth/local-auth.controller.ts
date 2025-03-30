@@ -1,7 +1,10 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import { refreshTokenCookieConfig } from "@/modules/auth/config";
+import {
+  AUTH_RATE_LIMIT_CONFIG,
+  refreshTokenCookieConfig,
+} from "@/modules/auth/config";
 import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 
 import { BadRequestError } from "@/modules/shared/api-errors";
@@ -12,7 +15,11 @@ import type { User } from "@/modules/user";
 
 import type { ILoginDto } from "@/modules/auth/dtos";
 
-import type { IResponseFormatter } from "@/modules/shared/services";
+import type {
+  ILoggerService,
+  IRateLimitService,
+  IResponseFormatter,
+} from "@/modules/shared/services";
 import type {
   ILocalAuthController,
   ILocalAuthControllerOptions,
@@ -24,6 +31,8 @@ export class LocalAuthController implements ILocalAuthController {
 
   private constructor(
     private readonly _localAuthService: ILocalAuthService,
+    private readonly _rateLimiter: IRateLimitService,
+    private readonly _logger: ILoggerService,
     private readonly _responseFormatter: IResponseFormatter
   ) {}
 
@@ -33,6 +42,8 @@ export class LocalAuthController implements ILocalAuthController {
     if (!this._instance) {
       this._instance = new LocalAuthController(
         options.localAuthService,
+        options.rateLimiter,
+        options.logger,
         options.responseFormatter
       );
     }
@@ -69,21 +80,35 @@ export class LocalAuthController implements ILocalAuthController {
    * @param res - The response object.
    */
   async login(req: TypedRequest<ILoginDto>, res: Response) {
-    const { accessToken, refreshToken } =
-      await this._localAuthService.loginUser({ ...req.body, ip: req.ip });
+    const rateLimitKey = req.rateLimitKey;
 
-    const formattedResponse = this._responseFormatter.formatResponse<{
-      accessToken: string;
-    }>({
-      responseOptions: {
-        status: httpStatus.OK,
-        message: "Login successful",
-        data: { accessToken },
-      },
-    });
+    try {
+      const { accessToken, refreshToken } =
+        await this._localAuthService.loginUser({ ...req.body });
 
-    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+      const formattedResponse = this._responseFormatter.formatResponse<{
+        accessToken: string;
+      }>({
+        responseOptions: {
+          status: httpStatus.OK,
+          message: "Login successful",
+          data: { accessToken },
+        },
+      });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+      // Reset rate limiters on successful login
+      await this._rateLimiter.reset(rateLimitKey);
+
+      res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+
+      res.status(httpStatus.OK).json(formattedResponse);
+    } catch (error: any) {
+      await this._rateLimiter.increment({
+        key: rateLimitKey,
+        ...AUTH_RATE_LIMIT_CONFIG.login,
+      });
+
+      throw error;
+    }
   }
 }
