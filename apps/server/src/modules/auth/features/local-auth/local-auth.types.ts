@@ -40,11 +40,12 @@ export interface ILocalAuthServiceOptions {
   jwtService: IJwtService;
   cryptoService: ICryptoService;
   mailSenderService: IMailSenderService;
-  rateLimitService: IRateLimitService;
   loggerService: ILoggerService;
 }
 
 export interface ILocalAuthControllerOptions {
   localAuthService: ILocalAuthService;
+  rateLimiter: IRateLimitService;
+  logger: ILoggerService;
   responseFormatter: IResponseFormatter;
 }
