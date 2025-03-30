@@ -24,12 +24,13 @@ const localAuthService = LocalAuthService.getInstance({
   jwtService,
   cryptoService,
   mailSenderService,
-  rateLimitService,
   loggerService,
 });
 
 const localAuthController = LocalAuthController.getInstance({
   localAuthService,
+  rateLimiter: rateLimitService,
+  logger: loggerService,
   responseFormatter,
 });
 
