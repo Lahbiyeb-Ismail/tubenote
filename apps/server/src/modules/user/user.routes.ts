@@ -1,8 +1,11 @@
 import { Router } from "express";
 
-import { isAuthenticated, validateRequest } from "@/middlewares";
+import {
+  createRateLimitMiddleware,
+  isAuthenticated,
+  validateRequest,
+} from "@/middlewares";
 
-import { createRateLimitMiddleware } from "@/middlewares/rate-limit.middleware";
 import { USER_RATE_LIMIT_CONFIG } from "./config";
 import { updatePasswordSchema, updateUserSchema } from "./schemas";
 import { userController } from "./user.module";

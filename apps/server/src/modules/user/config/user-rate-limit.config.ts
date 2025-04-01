@@ -1,4 +1,4 @@
-import type { IRateLimitConfig } from "@/middlewares/rate-limit.middleware";
+import type { IRateLimitConfig } from "@/middlewares/rate-limit";
 
 export const USER_RATE_LIMIT_CONFIG: Record<string, IRateLimitConfig> = {
   updatePassword: {

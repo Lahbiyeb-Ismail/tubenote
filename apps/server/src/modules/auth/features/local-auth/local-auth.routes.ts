@@ -1,10 +1,9 @@
 import { Router } from "express";
 
-import { validateRequest } from "@/middlewares";
+import { createRateLimitMiddleware, validateRequest } from "@/middlewares";
 
 import { loginSchema, registerSchema } from "@/modules/shared/schemas";
 
-import { createRateLimitMiddleware } from "@/middlewares/rate-limit.middleware";
 import { AUTH_RATE_LIMIT_CONFIG } from "../../config";
 import { localAuthController } from "./local-auth.module";
 

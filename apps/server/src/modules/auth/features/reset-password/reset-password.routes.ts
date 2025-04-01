@@ -6,8 +6,7 @@ import {
   tokenParamSchema,
 } from "@/modules/shared/schemas";
 
-import { validateRequest } from "@/middlewares";
-import { createRateLimitMiddleware } from "@/middlewares/rate-limit.middleware";
+import { createRateLimitMiddleware, validateRequest } from "@/middlewares";
 import { AUTH_RATE_LIMIT_CONFIG } from "../../config";
 import { resetPasswordController } from "./reset-password.module";
 
