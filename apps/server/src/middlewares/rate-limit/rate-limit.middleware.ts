@@ -3,17 +3,7 @@ import type { NextFunction, Request, Response } from "express";
 import { TooManyRequestsError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { loggerService, rateLimitService } from "@/modules/shared/services";
-
-export interface IRateLimitConfig {
-  maxAttempts: number;
-  windowMs: number;
-  blockDurationMs: number;
-}
-
-interface IRateLimitMiddlewareOptions {
-  rateLimitConfig: IRateLimitConfig;
-  keyGenerator: (req: Request) => string;
-}
+import type { IRateLimitMiddlewareOptions } from "./rate-limit.middleware.types";
 
 /**
  * Creates a rate limiting middleware for Express
