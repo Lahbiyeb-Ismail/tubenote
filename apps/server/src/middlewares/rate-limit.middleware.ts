@@ -4,7 +4,7 @@ import { TooManyRequestsError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { loggerService, rateLimitService } from "@/modules/shared/services";
 
-interface IRateLimitConfig {
+export interface IRateLimitConfig {
   maxAttempts: number;
   windowMs: number;
   blockDurationMs: number;
