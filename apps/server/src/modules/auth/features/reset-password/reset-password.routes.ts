@@ -7,15 +7,24 @@ import {
 } from "@/modules/shared/schemas";
 
 import { validateRequest } from "@/middlewares";
+import { createRateLimitMiddleware } from "@/middlewares/rate-limit.middleware";
+import { AUTH_RATE_LIMIT_CONFIG } from "../../config";
 import { resetPasswordController } from "./reset-password.module";
+
+const forgotPasswordRateLimiter = createRateLimitMiddleware({
+  keyGenerator: (req) => `forgot-password:ip:${req.ip}`,
+  rateLimitConfig: AUTH_RATE_LIMIT_CONFIG.forgotPassword,
+});
 
 const resetPasswordRoutes = Router();
 
 // - POST /forgot-password: Initiate the password reset process (requires request body validation).
 resetPasswordRoutes
   .route("/forgot-password")
-  .post(validateRequest({ body: emailBodySchema }), (req, res) =>
-    resetPasswordController.forgotPassword(req, res)
+  .post(
+    forgotPasswordRateLimiter,
+    validateRequest({ body: emailBodySchema }),
+    (req, res) => resetPasswordController.forgotPassword(req, res)
   );
 
 // - GET /reset-password/:token/verify: Verify the password reset token (requires request params validation).
