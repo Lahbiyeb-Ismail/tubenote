@@ -57,21 +57,35 @@ export class LocalAuthController implements ILocalAuthController {
    * @param res - The response object.
    */
   async register(req: TypedRequest<ICreateBodyDto<User>>, res: Response) {
-    const user = await this._localAuthService.registerUser({ data: req.body });
+    try {
+      const user = await this._localAuthService.registerUser({
+        data: req.body,
+      });
 
-    if (!user) throw new BadRequestError("User registration failed.");
+      if (!user) throw new BadRequestError("User registration failed.");
 
-    const formattedResponse = this._responseFormatter.formatResponse<{
-      email: string;
-    }>({
-      responseOptions: {
-        status: httpStatus.CREATED,
-        message: "A verification email has been sent to your email.",
-        data: { email: user.email },
-      },
-    });
+      const formattedResponse = this._responseFormatter.formatResponse<{
+        email: string;
+      }>({
+        responseOptions: {
+          status: httpStatus.CREATED,
+          message: "A verification email has been sent to your email.",
+          data: { email: user.email },
+        },
+      });
 
-    res.status(httpStatus.CREATED).json(formattedResponse);
+      // Reset rate limiters on successful registration
+      await this._rateLimiter.reset(req.rateLimitKey);
+
+      res.status(httpStatus.CREATED).json(formattedResponse);
+    } catch (error: any) {
+      await this._rateLimiter.increment({
+        key: req.rateLimitKey,
+        ...AUTH_RATE_LIMIT_CONFIG.registration,
+      });
+
+      throw error;
+    }
   }
 
   /**

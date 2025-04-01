@@ -5,27 +5,29 @@ import { validateRequest } from "@/middlewares";
 import { loginSchema, registerSchema } from "@/modules/shared/schemas";
 
 import { createRateLimitMiddleware } from "@/middlewares/rate-limit.middleware";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import { loggerService, rateLimitService } from "@/modules/shared/services";
 import { AUTH_RATE_LIMIT_CONFIG } from "../../config";
 import { localAuthController } from "./local-auth.module";
 
 const localAuthRoutes = Router();
 
+const registerRateLimiter = createRateLimitMiddleware({
+  keyGenerator: (req) => `register:ip:${req.ip}`,
+  rateLimitConfig: AUTH_RATE_LIMIT_CONFIG.registration,
+});
+
 // IP-based rate limiting middleware for login
 const loginRateLimiter = createRateLimitMiddleware({
-  rateLimitService,
-  logger: loggerService,
   keyGenerator: (req) => `login:ip:email:${req.ip}-${req.body.email}`,
   rateLimitConfig: AUTH_RATE_LIMIT_CONFIG.login,
-  errorMessage: ERROR_MESSAGES.TOO_MANY_ATTEMPTS,
 });
 
 // - POST /register: Register a new user (requires request body validation).
 localAuthRoutes
   .route("/register")
-  .post(validateRequest({ body: registerSchema }), (req, res) =>
-    localAuthController.register(req, res)
+  .post(
+    validateRequest({ body: registerSchema }),
+    registerRateLimiter,
+    (req, res) => localAuthController.register(req, res)
   );
 
 // - POST /login: Authenticate a user (requires request body validation).
