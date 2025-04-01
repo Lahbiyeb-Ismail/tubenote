@@ -98,19 +98,32 @@ export class ResetPasswordController implements IResetPasswordController {
     req: TypedRequest<IPasswordBodyDto, IParamTokenDto>,
     res: Response
   ): Promise<void> {
-    const { password } = req.body;
-    const { token } = req.params;
+    try {
+      const { password } = req.body;
+      const { token } = req.params;
 
-    await this._resetPasswordService.resetPassword(token, password);
+      await this._resetPasswordService.resetPassword(token, password);
 
-    const formattedResponse = this._responseFormatter.formatResponse({
-      responseOptions: {
-        status: httpStatus.OK,
-        message: "Password reset successfully.",
-      },
-    });
+      const formattedResponse = this._responseFormatter.formatResponse({
+        responseOptions: {
+          status: httpStatus.OK,
+          message: "Password reset successfully.",
+        },
+      });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+      await this._rateLimitService.reset(req.rateLimitKey);
+
+      res.status(httpStatus.OK).json(formattedResponse);
+    } catch (error: any) {
+      await this._rateLimitService.increment({
+        key: req.rateLimitKey,
+        ...AUTH_RATE_LIMIT_CONFIG.resetPassword,
+      });
+
+      this._loggerService.error("Error in resetPassword", error);
+
+      throw error;
+    }
   }
 
   /**

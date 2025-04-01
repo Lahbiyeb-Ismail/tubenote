@@ -16,6 +16,11 @@ const forgotPasswordRateLimiter = createRateLimitMiddleware({
   rateLimitConfig: AUTH_RATE_LIMIT_CONFIG.forgotPassword,
 });
 
+const resetPasswordRateLimiter = createRateLimitMiddleware({
+  keyGenerator: (req) => `reset-password:token:${req.params.token}`,
+  rateLimitConfig: AUTH_RATE_LIMIT_CONFIG.resetPassword,
+});
+
 const resetPasswordRoutes = Router();
 
 // - POST /forgot-password: Initiate the password reset process (requires request body validation).
@@ -36,6 +41,7 @@ resetPasswordRoutes
 
 // - POST /reset-password/:token: Reset the password using a valid token (requires request params and body validation).
 resetPasswordRoutes.route("/reset-password/:token").post(
+  resetPasswordRateLimiter,
   validateRequest({
     params: tokenParamSchema,
     body: passwordBodySchema,

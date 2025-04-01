@@ -17,6 +17,11 @@ export const AUTH_RATE_LIMIT_CONFIG = {
     windowMs: 60 * 60 * 1000, // 1 hour
     blockDurationMs: 60 * 60 * 1000, // 1 hour
   },
+  resetPassword: {
+    maxAttempts: 2,
+    windowMs: 60 * 60 * 1000, // 1 hour
+    blockDurationMs: 60 * 60 * 1000, // 1 hour
+  },
   verificationEmail: {
     maxAttempts: 3,
     windowMs: 60 * 60 * 1000, // 1 hour
