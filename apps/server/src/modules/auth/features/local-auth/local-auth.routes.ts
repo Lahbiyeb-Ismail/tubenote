@@ -17,7 +17,7 @@ const loginRateLimiter = createRateLimitMiddleware({
   rateLimitService,
   logger: loggerService,
   keyGenerator: (req) => `login:ip:email:${req.ip}-${req.body.email}`,
-  limits: AUTH_RATE_LIMIT_CONFIG.login,
+  rateLimitConfig: AUTH_RATE_LIMIT_CONFIG.login,
   errorMessage: ERROR_MESSAGES.TOO_MANY_ATTEMPTS,
 });
 

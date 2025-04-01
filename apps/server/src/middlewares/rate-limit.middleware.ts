@@ -7,15 +7,17 @@ import type {
   IRateLimitService,
 } from "@/modules/shared/services";
 
+interface IRateLimitConfig {
+  maxAttempts: number;
+  windowMs: number;
+  blockDurationMs: number;
+}
+
 interface IRateLimitMiddlewareOptions {
   rateLimitService: IRateLimitService;
   logger: ILoggerService;
+  rateLimitConfig: IRateLimitConfig;
   keyGenerator: (req: Request) => string;
-  limits: {
-    maxAttempts: number;
-    windowMs: number;
-    blockDurationMs: number;
-  };
   errorMessage?: string;
 }
 
@@ -26,10 +28,10 @@ interface IRateLimitMiddlewareOptions {
  * @param {Object} options.rateLimitService - The rate limit service instance
  * @param {Object} options.logger - The logger service instance
  * @param {Function} options.keyGenerator - Function to generate rate limit key from request
- * @param {Object} options.limits - Rate limit configuration
- * @param {number} options.limits.maxAttempts - Maximum number of attempts allowed
- * @param {number} options.limits.windowMs - Time window in milliseconds
- * @param {number} options.limits.blockDurationMs - Duration to block after exceeding limit
+ * @param {Object} options.rateLimitConfig - Rate limit configuration
+ * @param {number} options.rateLimitConfig.maxAttempts - Maximum number of attempts allowed
+ * @param {number} options.rateLimitConfig.windowMs - Time window in milliseconds
+ * @param {number} options.rateLimitConfig.blockDurationMs - Duration to block after exceeding limit
  * @param {string} options.errorMessage - Error message to display when rate limited
  */
 export function createRateLimitMiddleware(
@@ -39,7 +41,7 @@ export function createRateLimitMiddleware(
     rateLimitService,
     logger,
     keyGenerator,
-    limits,
+    rateLimitConfig,
     errorMessage = ERROR_MESSAGES.TOO_MANY_ATTEMPTS,
   } = options;
 
@@ -51,13 +53,13 @@ export function createRateLimitMiddleware(
       // Check if the request is already rate limited
       const result = await rateLimitService.check({
         key,
-        maxAttempts: limits.maxAttempts,
-        windowMs: limits.windowMs,
-        blockDurationMs: limits.blockDurationMs,
+        maxAttempts: rateLimitConfig.maxAttempts,
+        windowMs: rateLimitConfig.windowMs,
+        blockDurationMs: rateLimitConfig.blockDurationMs,
       });
 
       // Set rate limit headers
-      res.set("X-RateLimit-Limit", limits.maxAttempts.toString());
+      res.set("X-RateLimit-Limit", rateLimitConfig.maxAttempts.toString());
       res.set("X-RateLimit-Remaining", result.remaining.toString());
 
       if (result.resetAt) {
@@ -75,7 +77,7 @@ export function createRateLimitMiddleware(
         // Calculate retry after in seconds
         const retryAfterSeconds = result.resetAt
           ? Math.ceil((result.resetAt.getTime() - Date.now()) / 1000)
-          : Math.ceil(limits.blockDurationMs / 1000);
+          : Math.ceil(rateLimitConfig.blockDurationMs / 1000);
 
         res.set("Retry-After", retryAfterSeconds.toString());
 
