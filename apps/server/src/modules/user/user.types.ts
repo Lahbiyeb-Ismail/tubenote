@@ -8,7 +8,9 @@ import type { User } from "./user.model";
 
 import type {
   ICryptoService,
+  ILoggerService,
   IPrismaService,
+  IRateLimitService,
   IResponseFormatter,
 } from "../shared/services";
 import type {
@@ -194,4 +196,6 @@ export interface IUserServiceOptions {
 export interface IUserControllerOptions {
   userService: IUserService;
   responseFormatter: IResponseFormatter;
+  rateLimitService: IRateLimitService;
+  loggerService: ILoggerService;
 }

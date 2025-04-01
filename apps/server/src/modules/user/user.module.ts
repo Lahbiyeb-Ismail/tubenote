@@ -1,6 +1,8 @@
 import {
   cryptoService,
+  loggerService,
   prismaService,
+  rateLimitService,
   responseFormatter,
 } from "@/modules/shared/services";
 
@@ -21,6 +23,8 @@ const userService = UserService.getInstance({
 const userController = UserController.getInstance({
   userService,
   responseFormatter,
+  rateLimitService,
+  loggerService,
 });
 
 export { userController, userService, userRepository };

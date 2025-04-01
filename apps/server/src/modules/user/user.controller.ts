@@ -2,9 +2,14 @@ import type { Response } from "express";
 import httpStatus from "http-status";
 
 import type { IUpdateBodyDto } from "@/modules/shared/dtos";
-import type { IResponseFormatter } from "@/modules/shared/services";
+import type {
+  ILoggerService,
+  IRateLimitService,
+  IResponseFormatter,
+} from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
+import { USER_RATE_LIMIT_CONFIG } from "./config";
 import type { IUpdatePasswordBodyDto } from "./dtos";
 import type { User } from "./user.model";
 import type {
@@ -21,14 +26,18 @@ export class UserController implements IUserController {
 
   private constructor(
     private readonly _userService: IUserService,
-    private readonly _responseFormatter: IResponseFormatter
+    private readonly _responseFormatter: IResponseFormatter,
+    private readonly _rateLimitService: IRateLimitService,
+    private readonly _loggerService: ILoggerService
   ) {}
 
   public static getInstance(options: IUserControllerOptions): UserController {
     if (!this._instance) {
       this._instance = new UserController(
         options.userService,
-        options.responseFormatter
+        options.responseFormatter,
+        options.rateLimitService,
+        options.loggerService
       );
     }
     return this._instance;
@@ -101,22 +110,35 @@ export class UserController implements IUserController {
     req: TypedRequest<IUpdatePasswordBodyDto>,
     res: Response
   ) {
-    const userId = req.userId;
+    try {
+      const userId = req.userId;
 
-    const user = await this._userService.updateUserPassword({
-      id: userId,
-      currentPassword: req.body.currentPassword,
-      newPassword: req.body.newPassword,
-    });
+      const user = await this._userService.updateUserPassword({
+        id: userId,
+        currentPassword: req.body.currentPassword,
+        newPassword: req.body.newPassword,
+      });
 
-    const formatedResponse = this._responseFormatter.formatResponse<User>({
-      responseOptions: {
-        data: user,
-        status: httpStatus.OK,
-        message: "User password updated successfully.",
-      },
-    });
+      const formatedResponse = this._responseFormatter.formatResponse<User>({
+        responseOptions: {
+          data: user,
+          status: httpStatus.OK,
+          message: "User password updated successfully.",
+        },
+      });
 
-    res.status(httpStatus.OK).json(formatedResponse);
+      await this._rateLimitService.reset(req.rateLimitKey);
+
+      res.status(httpStatus.OK).json(formatedResponse);
+    } catch (error: any) {
+      await this._rateLimitService.increment({
+        key: req.rateLimitKey,
+        ...USER_RATE_LIMIT_CONFIG.updatePassword,
+      });
+
+      this._loggerService.error("Error updating password", error);
+
+      throw error;
+    }
   }
 }
