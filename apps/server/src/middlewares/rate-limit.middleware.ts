@@ -2,10 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 
 import { TooManyRequestsError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import type {
-  ILoggerService,
-  IRateLimitService,
-} from "@/modules/shared/services";
+import { loggerService, rateLimitService } from "@/modules/shared/services";
 
 interface IRateLimitConfig {
   maxAttempts: number;
@@ -14,36 +11,24 @@ interface IRateLimitConfig {
 }
 
 interface IRateLimitMiddlewareOptions {
-  rateLimitService: IRateLimitService;
-  logger: ILoggerService;
   rateLimitConfig: IRateLimitConfig;
   keyGenerator: (req: Request) => string;
-  errorMessage?: string;
 }
 
 /**
  * Creates a rate limiting middleware for Express
  *
  * @param {Object} options - Rate limiting options
- * @param {Object} options.rateLimitService - The rate limit service instance
- * @param {Object} options.logger - The logger service instance
  * @param {Function} options.keyGenerator - Function to generate rate limit key from request
  * @param {Object} options.rateLimitConfig - Rate limit configuration
  * @param {number} options.rateLimitConfig.maxAttempts - Maximum number of attempts allowed
  * @param {number} options.rateLimitConfig.windowMs - Time window in milliseconds
  * @param {number} options.rateLimitConfig.blockDurationMs - Duration to block after exceeding limit
- * @param {string} options.errorMessage - Error message to display when rate limited
  */
 export function createRateLimitMiddleware(
   options: IRateLimitMiddlewareOptions
 ) {
-  const {
-    rateLimitService,
-    logger,
-    keyGenerator,
-    rateLimitConfig,
-    errorMessage = ERROR_MESSAGES.TOO_MANY_ATTEMPTS,
-  } = options;
+  const { keyGenerator, rateLimitConfig } = options;
 
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -69,7 +54,7 @@ export function createRateLimitMiddleware(
 
       // If blocked, throw rate limit error
       if (result.blocked) {
-        logger.warn(`Rate limit exceeded for key: ${key}`, {
+        loggerService.warn(`Rate limit exceeded for key: ${key}`, {
           key,
           resetAt: result.resetAt,
         });
@@ -81,7 +66,7 @@ export function createRateLimitMiddleware(
 
         res.set("Retry-After", retryAfterSeconds.toString());
 
-        throw new TooManyRequestsError(errorMessage, {
+        throw new TooManyRequestsError(ERROR_MESSAGES.TOO_MANY_ATTEMPTS, {
           resetAt: result.resetAt,
           remainingSeconds: retryAfterSeconds,
         });
