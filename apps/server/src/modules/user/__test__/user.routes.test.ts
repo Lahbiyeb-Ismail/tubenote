@@ -202,8 +202,8 @@ describe("User Routes", () => {
         username: "newusername",
         email: "new@example.com",
         profilePicture: "http://example.com/pic.jpg",
-        isEmailVerified: true,
       };
+
       const res = await request(app)
         .patch("/api/v1/users/me")
         .set("Authorization", "Bearer valid-token")
