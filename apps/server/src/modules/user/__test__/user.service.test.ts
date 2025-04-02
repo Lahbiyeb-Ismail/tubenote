@@ -1,8 +1,9 @@
+import type { Prisma } from "@prisma/client";
 import { mock, mockReset } from "jest-mock-extended";
 
 import {
-  // BadRequestError,
-  // ConflictError,
+  BadRequestError,
+  ConflictError,
   NotFoundError,
 } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
@@ -12,28 +13,31 @@ import type { ICryptoService, IPrismaService } from "@/modules/shared/services";
 import { UserService } from "../user.service";
 
 import type {
-  // ICreateUserDto,
-  // IResetPasswordDto,
-  // IUpdatePasswordDto,
-  // IUpdateUserDto,
+  ICreateUserDto,
+  IResetPasswordDto,
+  IUpdatePasswordDto,
+  IUpdateUserDto,
 } from "../dtos";
 import type { IAccountService } from "../features/account/account.types";
+import type { ICreateAccountDto } from "../features/account/dtos";
 import type { User } from "../user.model";
-import type { IUserRepository } from "../user.types";
-// import type { ICreateAccountDto } from "../features/account/dtos";
+import type { IUserRepository, IUserServiceOptions } from "../user.types";
 
 describe("UserService", () => {
-  const mockUserRepository = mock<IUserRepository>();
-  const mockAccountService = mock<IAccountService>();
-  const mockCryptoService = mock<ICryptoService>();
-  const mockPrismaService = mock<IPrismaService>();
+  let userService: UserService;
+  let mockTx: Prisma.TransactionClient;
 
-  const userService = UserService.getInstance({
-    userRepository: mockUserRepository,
-    accountService: mockAccountService,
-    prismaService: mockPrismaService,
-    cryptoService: mockCryptoService,
-  });
+  const userRepository = mock<IUserRepository>();
+  const accountService = mock<IAccountService>();
+  const cryptoService = mock<ICryptoService>();
+  const prismaService = mock<IPrismaService>();
+
+  const serviceOptions: IUserServiceOptions = {
+    userRepository,
+    accountService,
+    prismaService,
+    cryptoService,
+  };
 
   const mockUserId = "user_id_001";
   const mockUserEmail = "test@example.com";
@@ -50,900 +54,561 @@ describe("UserService", () => {
   };
 
   beforeEach(() => {
-    mockReset(mockUserRepository);
-    mockReset(mockAccountService);
-    mockReset(mockCryptoService);
-    mockReset(mockPrismaService);
+    mockReset(userRepository);
+    mockReset(accountService);
+    mockReset(cryptoService);
+    mockReset(prismaService);
+
+    // Reset all mocks before each test
+    jest.resetAllMocks();
+
+    prismaService.transaction.mockImplementation(
+      async (fn: (tx: Prisma.TransactionClient) => Promise<any>) => {
+        const tx = {};
+        return fn(tx as Prisma.TransactionClient);
+      }
+    );
+
+    mockTx = {} as Prisma.TransactionClient;
+
+    // Reset singleton instance before each test to ensure a clean state.
+    // @ts-ignore: resetting the private _instance for testing purposes
+    UserService._instance = undefined;
+
+    // Create a new instance for each test
+    userService = UserService.getInstance(serviceOptions);
   });
 
-  // describe("UserService - createUser", () => {
-  //   const createUserDto: ICreateUserDto = {
-  //     data: {
-  //       email: "new@example.com",
-  //       password: "ValidPass123!",
-  //       username: "newuser",
-  //       profilePicture: null,
-  //       isEmailVerified: false,
-  //     },
-  //   };
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-  //   it("should create user with hashed password within transaction", async () => {
-  //     // Mock transaction flow
-  //     const txMock = {
-  //       getUserByEmail: jest.fn().mockResolvedValue(null),
-  //       createUser: jest.fn().mockResolvedValue({
-  //         ...createUserDto.data,
-  //         password: "hashed123",
-  //       }),
-  //     };
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-  //     (mockCryptoService.hashPassword as jest.Mock).mockResolvedValue(
-  //       "hashed123"
-  //     );
+  describe("Singleton behavior", () => {
+    it("should create a new instance when none exists", () => {
+      const instance1 = UserService.getInstance(serviceOptions);
+      expect(instance1).toBeInstanceOf(UserService);
+    });
 
-  //     const result = await userService.createUser(createUserDto);
+    it("should return the existing instance when called multiple times", () => {
+      const instance1 = UserService.getInstance(serviceOptions);
+      const instance2 = UserService.getInstance(serviceOptions);
+      expect(instance1).toBe(instance2);
+    });
+  });
 
-  //     expect(txMock.getUserByEmail).toHaveBeenCalledWith(
-  //       createUserDto.data.email
-  //     );
-  //     expect(txMock.createUser).toHaveBeenCalledWith({
-  //       data: {
-  //         ...createUserDto.data,
-  //         password: "hashed123",
-  //       },
-  //     });
-  //     expect(result.password).toBe("hashed123");
-  //   });
-
-  //   it("should throw ConflictError for duplicate email within transaction", async () => {
-  //     const txMock = {
-  //       getUserByEmail: jest.fn().mockResolvedValue(mockUser),
-  //     };
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     await expect(userService.createUser(createUserDto)).rejects.toThrow(
-  //       new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS)
-  //     );
-  //   });
-
-  //   it("should propagate errors if createUser in transaction fails", async () => {
-  //     const txMock = {
-  //       getUserByEmail: jest.fn().mockResolvedValue(null),
-  //       createUser: jest.fn().mockRejectedValue(new Error("DB Error")),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     (mockCryptoService.hashPassword as jest.Mock).mockResolvedValue(
-  //       "hashed123"
-  //     );
-
-  //     await expect(userService.createUser(createUserDto)).rejects.toThrow(
-  //       "DB Error"
-  //     );
-  //   });
-
-  //   it("should propagate errors if crypto.hashPassword rejects", async () => {
-  //     const txMock = {
-  //       getUserByEmail: jest.fn().mockResolvedValue(null),
-  //       createUser: jest.fn(),
-  //     };
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-  //     (mockCryptoService.hashPassword as jest.Mock).mockRejectedValue(
-  //       new Error("Hashing error")
-  //     );
-
-  //     await expect(userService.createUser(createUserDto)).rejects.toThrow(
-  //       "Hashing error"
-  //     );
-  //   });
-  // });
-
-  // describe("UserService - getOrCreateUser", () => {
-  //   const createUserDto: ICreateUserDto = {
-  //     data: { ...mockUser, password: "password" },
-  //   };
-
-  //   it("should return existing user without creating", async () => {
-  //     const txMock = {
-  //       getByEmail: jest.fn().mockResolvedValue(mockUser),
-  //       create: jest.fn(),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     const result = await userService.getOrCreateUser(createUserDto);
-
-  //     expect(result).toEqual(mockUser);
-
-  //     expect(txMock.create).not.toHaveBeenCalled();
-  //   });
-
-  //   it("should create new user within transaction when not exists", async () => {
-  //     const txMock = {
-  //       getByEmail: jest.fn().mockResolvedValue(null),
-  //       create: jest.fn().mockResolvedValue(mockUser),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     (mockCryptoService.hashPassword as jest.Mock).mockResolvedValue(
-  //       "hashed123"
-  //     );
-
-  //     const result = await userService.getOrCreateUser(createUserDto);
-
-  //     expect(txMock.create).toHaveBeenCalled();
-  //     expect(result).toEqual(mockUser);
-  //   });
-
-  //   it("should propagate error if user creation fails", async () => {
-  //     const txMock = {
-  //       getByEmail: jest.fn().mockResolvedValue(null),
-  //       create: jest.fn().mockRejectedValue(new Error("Creation failed")),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     await expect(userService.getOrCreateUser(createUserDto)).rejects.toThrow(
-  //       "Creation failed"
-  //     );
-  //   });
-
-  //   it("should propagate error if crypto.hashPassword rejects in getOrCreateUser", async () => {
-  //     const txMock = {
-  //       getByEmail: jest.fn().mockResolvedValue(null),
-  //       create: jest.fn(),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     (mockCryptoService.hashPassword as jest.Mock).mockRejectedValue(
-  //       new Error("Hash error")
-  //     );
-
-  //     await expect(userService.getOrCreateUser(createUserDto)).rejects.toThrow(
-  //       "Hash error"
-  //     );
-  //   });
-  // });
-
-  describe("UserService - getUserByIdOrEmail", () => {
+  describe("UserService - getUserById", () => {
     afterEach(() => jest.clearAllMocks());
 
-    it("should return user by ID", async () => {
-      (mockUserRepository.getById as jest.Mock).mockResolvedValue(mockUser);
+    it("should return user when found by id", async () => {
+      userRepository.getById.mockResolvedValue(mockUser);
 
-      const result = await userService.getUserByIdOrEmail({ id: mockUserId });
+      const result = await userService.getUserById(mockUserId);
 
+      expect(userRepository.getById).toHaveBeenCalledWith(
+        mockUserId,
+        undefined
+      );
       expect(result).toEqual(mockUser);
     });
 
-    it("should return user by email", async () => {
-      (mockUserRepository.getByEmail as jest.Mock).mockResolvedValue(mockUser);
+    it("should return null if user does not exist", async () => {
+      userRepository.getById.mockResolvedValue(null);
 
-      const result = await userService.getUserByIdOrEmail({
-        email: mockUserEmail,
-      });
+      const result = await userService.getUserById(mockUserId);
 
+      expect(result).toBeNull();
+    });
+
+    it("should propagate errors if repository.getById rejects", async () => {
+      const error = new Error("Database error");
+
+      userRepository.getById.mockRejectedValue(error);
+
+      await expect(userService.getUserById(mockUserId)).rejects.toThrow(error);
+    });
+  });
+
+  describe("UserService - getUserByEmail", () => {
+    afterEach(() => jest.clearAllMocks());
+
+    it("should return user when found by email", async () => {
+      userRepository.getByEmail.mockResolvedValue(mockUser);
+
+      const result = await userService.getUserByEmail(mockUserEmail);
+
+      expect(userRepository.getByEmail).toHaveBeenCalledWith(
+        mockUserEmail,
+        undefined
+      );
       expect(result).toEqual(mockUser);
     });
 
-    it("should throw NotFoundError when user not found", async () => {
-      (mockUserRepository.getById as jest.Mock).mockResolvedValue(null);
+    it("should return null if user does not exist", async () => {
+      userRepository.getByEmail.mockResolvedValue(null);
 
-      await expect(
-        userService.getUserByIdOrEmail({ id: "invalid" })
-      ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
+      const result = await userService.getUserByEmail(mockUserEmail);
+
+      expect(result).toBeNull();
     });
 
-    it("should propagate errors if repository.getUser rejects", async () => {
-      (mockUserRepository.getByEmail as jest.Mock).mockRejectedValue(
-        new Error("Repo error")
+    it("should propagate errors if repository.getByEmail rejects", async () => {
+      const error = new Error("Database error");
+
+      userRepository.getByEmail.mockRejectedValue(error);
+
+      await expect(userService.getUserByEmail(mockUserEmail)).rejects.toThrow(
+        error
+      );
+    });
+  });
+
+  describe("UserService - createUserWithAccount", () => {
+    const createUserDto: ICreateUserDto = {
+      email: "new@example.com",
+      password: "ValidPass123!",
+      username: "newuser",
+    };
+
+    const createAccountDto: ICreateAccountDto = {
+      data: {
+        provider: "google",
+        providerAccountId: "12345",
+        type: "oauth",
+      },
+    };
+
+    it("should create user and account within transaction", async () => {
+      // const txMock = jest.fn();
+
+      // prismaService.transaction.mockImplementation(async (fn) => fn(txMock()));
+      userRepository.create.mockResolvedValue(mockUser);
+      cryptoService.hashPassword.mockResolvedValue("hashed123");
+
+      const result = await userService.createUserWithAccount(
+        mockTx,
+        createUserDto,
+        createAccountDto
+      );
+
+      expect(userRepository.create).toHaveBeenCalledWith(
+        mockTx,
+        expect.objectContaining({
+          ...createUserDto,
+          password: "hashed123",
+        })
+      );
+      expect(accountService.createAccount).toHaveBeenCalledWith(
+        mockTx,
+        mockUser.id,
+        createAccountDto
+      );
+      expect(result).toEqual(mockUser);
+    });
+
+    it("should rollback transaction on account creation failure", async () => {
+      prismaService.transaction.mockImplementation(async (fn) => fn(mockTx));
+      userRepository.create.mockResolvedValue(mockUser);
+      cryptoService.hashPassword.mockResolvedValue("hashed123");
+
+      accountService.createAccount.mockRejectedValue(
+        new Error("Account creation failed")
       );
 
       await expect(
-        userService.getUserByIdOrEmail({ email: "error@example.com" })
-      ).rejects.toThrow("Repo error");
+        userService.createUserWithAccount(
+          mockTx,
+          createUserDto,
+          createAccountDto
+        )
+      ).rejects.toThrow("Account creation failed");
+
+      // Verify transaction was attempted
+      expect(userRepository.create).toHaveBeenCalled();
+      expect(accountService.createAccount).toHaveBeenCalled();
     });
   });
 
-  // describe("UserService - createUserWithAccount", () => {
-  //   const createUserDto: ICreateUserDto = {
-  //     data: {
-  //       email: "new@example.com",
-  //       password: "ValidPass123!",
-  //       username: "newuser",
-  //       profilePicture: null,
-  //       isEmailVerified: false,
-  //     },
-  //   };
-
-  //   const createAccountDto: ICreateAccountDto = {
-  //     data: {
-  //       provider: "google",
-  //       providerAccountId: "12345",
-  //       type: "oauth",
-  //     },
-  //   };
-
-  //   it("should create user and account within transaction", async () => {
-  //     const txMock = {
-  //       getByEmail: jest.fn().mockResolvedValue(null),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-  //     (mockUserRepository.create as jest.Mock).mockResolvedValue(mockUser);
-
-  //     (mockCryptoService.hashPassword as jest.Mock).mockResolvedValue(
-  //       "hashed123"
-  //     );
-
-  //     const result = await userService.createUserWithAccount(
-  //       createUserDto,
-  //       createAccountDto
-  //     );
-
-  //     expect(txMock.getByEmail).toHaveBeenCalledWith(createUserDto.data.email);
-
-  //     expect(mockUserRepository.create).toHaveBeenCalledWith(
-  //       txMock,
-  //       expect.objectContaining({
-  //         data: {
-  //           ...createUserDto.data,
-  //           password: "hashed123",
-  //         },
-  //       })
-  //     );
-  //     expect(mockAccountService.createAccount).toHaveBeenCalledWith(
-  //       txMock,
-  //       mockUser.id,
-  //       createAccountDto
-  //     );
-  //     expect(result).toEqual(mockUser);
-  //   });
-
-  //   it("should throw ConflictError when email exists", async () => {
-  //     const txMock = {
-  //       getByEmail: jest.fn().mockResolvedValue(mockUser),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     await expect(
-  //       userService.createUserWithAccount(createUserDto, createAccountDto)
-  //     ).rejects.toThrow(new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS));
-  //   });
-
-  //   it("should rollback transaction on account creation failure", async () => {
-  //     const txMock = {
-  //       getByEmail: jest.fn().mockResolvedValue(null),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-  //     (mockUserRepository.create as jest.Mock).mockResolvedValue(mockUser);
-  //     (mockCryptoService.hashPassword as jest.Mock).mockResolvedValue(
-  //       "hashed123"
-  //     );
-  //     (mockAccountService.createAccount as jest.Mock).mockRejectedValue(
-  //       new Error("Account creation failed")
-  //     );
-
-  //     await expect(
-  //       userService.createUserWithAccount(createUserDto, createAccountDto)
-  //     ).rejects.toThrow("Account creation failed");
-
-  //     // Verify transaction was attempted
-  //     expect(mockUserRepository.create).toHaveBeenCalled();
-  //     expect(mockAccountService.createAccount).toHaveBeenCalled();
-  //   });
-  // });
-
-  // describe("UserService - getUserByIdOrEmail Edge Cases", () => {
-  //   it("should prioritize ID when both ID and email are provided", async () => {
-  //     const differentUser: User = {
-  //       ...mockUser,
-  //       id: "different_id",
-  //       email: "different@example.com",
-  //     };
-
-  //     (mockUserRepository.getById as jest.Mock).mockResolvedValue(mockUser);
-  //     (mockUserRepository.getByEmail as jest.Mock).mockResolvedValue(
-  //       differentUser
-  //     );
-
-  //     const result = await userService.getUserByIdOrEmail({
-  //       id: mockUserId,
-  //       email: "different@example.com",
-  //     });
-
-  //     expect(result).toEqual(mockUser);
-  //     expect(mockUserRepository.getByEmail).not.toHaveBeenCalled();
-  //   });
-
-  //   it("should fallback to email when ID not found", async () => {
-  //     (mockUserRepository.getById as jest.Mock).mockResolvedValue(null);
-  //     (mockUserRepository.getByEmail as jest.Mock).mockResolvedValue(mockUser);
-
-  //     const result = await userService.getUserByIdOrEmail({
-  //       id: "invalid_id",
-  //       email: mockUserEmail,
-  //     });
-
-  //     expect(result).toEqual(mockUser);
-  //     expect(mockUserRepository.getById).toHaveBeenCalledWith("invalid_id");
-  //     expect(mockUserRepository.getByEmail).toHaveBeenCalledWith(mockUserEmail);
-  //   });
-  // });
-
-  // describe("UserService - updateUser Edge Cases", () => {
-  //   it("should skip email uniqueness check when email remains unchanged", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //       getByEmail: jest.fn(),
-  //       update: jest.fn().mockResolvedValue(mockUser),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     await userService.updateUser({
-  //       id: mockUserId,
-  //       data: { email: mockUserEmail },
-  //     });
-
-  //     expect(txMock.getByEmail).not.toHaveBeenCalled();
-  //     expect(txMock.update).toHaveBeenCalled();
-  //   });
-
-  //   it("should handle database constraint violation during email update", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //       getByEmail: jest.fn().mockResolvedValue(null),
-  //       update: jest.fn().mockRejectedValue({
-  //         code: "P2002",
-  //         message: "Unique constraint violation",
-  //       }),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     await expect(
-  //       userService.updateUser({
-  //         id: mockUserId,
-  //         data: { email: "new@example.com" },
-  //       })
-  //     ).rejects.toThrow(new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS));
-  //   });
-  // });
-
-  // describe("UserService - Security Checks", () => {
-  //   it("should prevent password update without current password verification", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     await expect(
-  //       userService.updateUserPassword({
-  //         id: mockUserId,
-  //         currentPassword: "wrongPassword",
-  //         newPassword: "newPassword",
-  //       })
-  //     ).rejects.toThrow(
-  //       new BadRequestError(ERROR_MESSAGES.INVALID_CREDENTIALS)
-  //     );
-  //   });
-
-  //   it("should ensure password hashing occurs during reset", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //       updatePassword: jest.fn().mockResolvedValue(mockUser),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-  //     (mockCryptoService.hashPassword as jest.Mock).mockResolvedValue(
-  //       "newHash"
-  //     );
-
-  //     await userService.resetUserPassword({
-  //       id: mockUserId,
-  //       newPassword: "plainTextPassword",
-  //     });
-
-  //     expect(mockCryptoService.hashPassword).toHaveBeenCalledWith(
-  //       "plainTextPassword"
-  //     );
-  //     expect(txMock.updatePassword).toHaveBeenCalledWith(
-  //       txMock,
-  //       mockUserId,
-  //       "newHash"
-  //     );
-  //   });
-  // });
-
-  // describe("UserService - Concurrency", () => {
-  //   it("should handle parallel verifyEmail requests", async () => {
-  //     const txMock1 = {
-  //       getById: jest
-  //         .fn()
-  //         .mockResolvedValue({ ...mockUser, isEmailVerified: false }),
-  //       verifyEmail: jest
-  //         .fn()
-  //         .mockResolvedValue({ ...mockUser, isEmailVerified: true }),
-  //     };
-
-  //     const txMock2 = {
-  //       getById: jest
-  //         .fn()
-  //         .mockResolvedValue({ ...mockUser, isEmailVerified: false }),
-  //       verifyEmail: jest
-  //         .fn()
-  //         .mockResolvedValue({ ...mockUser, isEmailVerified: true }),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock)
-  //       .mockImplementationOnce(async (fn) => fn(txMock1))
-  //       .mockImplementationOnce(async (fn) => fn(txMock2));
-
-  //     const [result1, result2] = await Promise.all([
-  //       userService.verifyUserEmail(mockUserId),
-  //       userService.verifyUserEmail(mockUserId),
-  //     ]);
-
-  //     expect(result1.isEmailVerified).toBe(true);
-  //     expect(result2.isEmailVerified).toBe(true);
-  //     expect(mockUserRepository.transaction).toHaveBeenCalledTimes(2);
-  //   });
-  // });
-
-  // describe("UserService - updateUser", () => {
-  //   const updateUserDto: IUpdateUserDto = {
-  //     id: mockUserId,
-  //     data: {
-  //       username: "newuser",
-  //       email: "new@example.com",
-  //     },
-  //   };
-
-  //   it("should update user within transaction", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //       getByEmail: jest.fn().mockResolvedValue(null),
-  //       update: jest
-  //         .fn()
-  //         .mockResolvedValue({ ...mockUser, ...updateUserDto.data }),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     const result = await userService.updateUser(updateUserDto);
-
-  //     expect(txMock.update).toHaveBeenCalledWith(updateUserDto);
-
-  //     expect(result).toEqual({ ...mockUser, ...updateUserDto.data });
-  //   });
-
-  //   it("should return found user without update if dto is empty", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //       getByEmail: jest.fn().mockResolvedValue(null),
-  //       update: jest.fn().mockResolvedValue(mockUser),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     const result = await userService.updateUser({ id: mockUserId, data: {} });
-
-  //     expect(result).toEqual(mockUser);
-
-  //     expect(txMock.update).not.toHaveBeenCalled();
-  //   });
-
-  //   it("should throw ConflictError for duplicate email in transaction", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //       getByEmail: jest.fn().mockResolvedValue(mockUser),
-  //       update: jest.fn().mockRejectedValue(
-  //         new (class implements Error {
-  //           name = "PrismaClientKnownRequestError";
-  //           message = "Unique constraint failed";
-  //           code = "P2002";
-  //         })()
-  //       ),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     await expect(userService.updateUser(updateUserDto)).rejects.toThrow(
-  //       new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS)
-  //     );
-  //   });
-
-  //   it("should allow email update to current email", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //       getByEmail: jest.fn().mockResolvedValue(null),
-  //       update: jest.fn().mockResolvedValue(mockUser),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     const result = await userService.updateUser({
-  //       id: mockUserId,
-  //       data: {
-  //         email: mockUserEmail,
-  //       },
-  //     });
-
-  //     expect(txMock.update).toHaveBeenCalled();
-  //     expect(result).toEqual(mockUser);
-  //   });
-
-  //   it("should propagate error if tx.update rejects", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //       getByEmail: jest.fn().mockResolvedValue(null),
-  //       update: jest.fn().mockRejectedValue(new Error("Update failed")),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     await expect(userService.updateUser(updateUserDto)).rejects.toThrow(
-  //       "Update failed"
-  //     );
-  //   });
-  // });
-
-  // describe("UserService - updateUserPassword", () => {
-  //   const updatePassDto: IUpdatePasswordDto = {
-  //     id: mockUserId,
-  //     currentPassword: "oldPass123!",
-  //     newPassword: "newPass123!",
-  //   };
-
-  //   it("should update password within transaction", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //       updatePassword: jest.fn().mockResolvedValue({
-  //         ...mockUser,
-  //         password: "newHashed",
-  //       }),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     (mockCryptoService.comparePasswords as jest.Mock).mockResolvedValue(true);
-  //     (mockCryptoService.hashPassword as jest.Mock).mockResolvedValue(
-  //       "newHashed"
-  //     );
-
-  //     const result = await userService.updateUserPassword(updatePassDto);
-  //     expect(result.password).toBe("newHashed");
-  //   });
-
-  //   it("should throw BadRequestError if current password is invalid", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     (mockCryptoService.comparePasswords as jest.Mock).mockResolvedValue(
-  //       false
-  //     );
-
-  //     await expect(
-  //       userService.updateUserPassword(updatePassDto)
-  //     ).rejects.toThrow(
-  //       new BadRequestError(ERROR_MESSAGES.INVALID_CREDENTIALS)
-  //     );
-  //   });
-
-  //   it("should throw BadRequestError if new password matches current", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     (mockCryptoService.comparePasswords as jest.Mock).mockResolvedValue(true);
-
-  //     await expect(
-  //       userService.updateUserPassword({
-  //         id: mockUserId,
-  //         currentPassword: "pass",
-  //         newPassword: "pass",
-  //       })
-  //     ).rejects.toThrow(
-  //       new BadRequestError(ERROR_MESSAGES.PASSWORD_SAME_AS_CURRENT)
-  //     );
-  //   });
-
-  //   it("should propagate error if crypto.comparePasswords rejects", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     (mockCryptoService.comparePasswords as jest.Mock).mockRejectedValue(
-  //       new Error("Compare error")
-  //     );
-
-  //     await expect(
-  //       userService.updateUserPassword(updatePassDto)
-  //     ).rejects.toThrow("Compare error");
-  //   });
-
-  //   it("should propagate error if crypto.hashPassword rejects during updatePassword", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //       updatePassword: jest.fn(),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     (mockCryptoService.comparePasswords as jest.Mock).mockResolvedValue(true);
-  //     (mockCryptoService.hashPassword as jest.Mock).mockRejectedValue(
-  //       new Error("Hash error")
-  //     );
-
-  //     await expect(
-  //       userService.updateUserPassword(updatePassDto)
-  //     ).rejects.toThrow("Hash error");
-  //   });
-
-  //   it("should propagate error if tx.updatePassword rejects", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //       updatePassword: jest
-  //         .fn()
-  //         .mockRejectedValue(new Error("UpdatePassword failed")),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     (mockCryptoService.comparePasswords as jest.Mock).mockResolvedValue(true);
-  //     (mockCryptoService.hashPassword as jest.Mock).mockResolvedValue(
-  //       "newHashed"
-  //     );
-
-  //     await expect(
-  //       userService.updateUserPassword(updatePassDto)
-  //     ).rejects.toThrow("UpdatePassword failed");
-  //   });
-  // });
-
-  // describe("UserService - resetUserPassword", () => {
-  //   const resetPasswordDto: IResetPasswordDto = {
-  //     id: mockUserId,
-  //     newPassword: "newPassword",
-  //   };
-
-  //   it("should reset password within transaction", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //       updatePassword: jest.fn().mockResolvedValue({
-  //         ...mockUser,
-  //         password: "newHashed",
-  //       }),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     (mockCryptoService.hashPassword as jest.Mock).mockResolvedValue(
-  //       "newHashed"
-  //     );
-
-  //     const result = await userService.resetUserPassword(resetPasswordDto);
-
-  //     expect(result.password).toBe("newHashed");
-  //   });
-
-  //   it("should throw NotFoundError if user does not exist during resetPassword", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(null),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     await expect(
-  //       userService.resetUserPassword({
-  //         id: "invalid_id",
-  //         newPassword: "newPassword",
-  //       })
-  //     ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
-  //   });
-
-  //   it("should propagate error if crypto.hashPassword rejects during resetPassword", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //       updatePassword: jest.fn(),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     (mockCryptoService.hashPassword as jest.Mock).mockRejectedValue(
-  //       new Error("Hash reset error")
-  //     );
-
-  //     await expect(
-  //       userService.resetUserPassword(resetPasswordDto)
-  //     ).rejects.toThrow("Hash reset error");
-  //   });
-
-  //   it("should propagate error if tx.updatePassword rejects during resetPassword", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //       updatePassword: jest
-  //         .fn()
-  //         .mockRejectedValue(new Error("Tx update failed")),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     (mockCryptoService.hashPassword as jest.Mock).mockResolvedValue(
-  //       "newHashed"
-  //     );
-
-  //     await expect(
-  //       userService.resetUserPassword(resetPasswordDto)
-  //     ).rejects.toThrow("Tx update failed");
-  //   });
-  // });
-
-  // describe("UserService - verifyUserEmail", () => {
-  //   it("should verify user email within transaction", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //       verifyEmail: jest.fn().mockResolvedValue({
-  //         ...mockUser,
-  //         isEmailVerified: true,
-  //       }),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     const result = await userService.verifyUserEmail(mockUserId);
-
-  //     expect(result.isEmailVerified).toBe(true);
-  //   });
-
-  //   it("should throw NotFoundError if user does not exist during verifyUserEmail", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(null),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     await expect(userService.verifyUserEmail("invalid")).rejects.toThrow(
-  //       new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
-  //     );
-  //   });
-
-  //   it("should throw BadRequestError if email is already verified", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue({
-  //         ...mockUser,
-  //         isEmailVerified: true,
-  //       }),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     await expect(userService.verifyUserEmail(mockUserId)).rejects.toThrow(
-  //       new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED)
-  //     );
-  //   });
-
-  //   it("should propagate error if tx.verifyUserEmail rejects", async () => {
-  //     const txMock = {
-  //       getById: jest.fn().mockResolvedValue(mockUser),
-  //       verifyEmail: jest.fn().mockRejectedValue(new Error("Verify error")),
-  //     };
-
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => fn(txMock)
-  //     );
-
-  //     await expect(userService.verifyUserEmail(mockUserId)).rejects.toThrow(
-  //       "Verify error"
-  //     );
-  //   });
-  // });
-
-  // describe("UserService - Edge Cases", () => {
-  //   it("should handle concurrent getOrCreateUser transactions", async () => {
-  //     let callCount = 0;
-  //     (mockUserRepository.transaction as jest.Mock).mockImplementation(
-  //       async (fn) => {
-  //         callCount++;
-  //         const txMock = {
-  //           getByEmail:
-  //             callCount === 1
-  //               ? jest.fn().mockResolvedValue(null)
-  //               : jest.fn().mockResolvedValue(mockUser),
-  //           create: jest.fn().mockResolvedValue(mockUser),
-  //         };
-  //         return fn(txMock);
-  //       }
-  //     );
-
-  //     const [result1, result2] = await Promise.all([
-  //       userService.getOrCreateUser({ data: mockUser }),
-  //       userService.getOrCreateUser({ data: mockUser }),
-  //     ]);
-
-  //     expect(result1).toEqual(mockUser);
-  //     expect(result2).toEqual(mockUser);
-  //     expect(mockUserRepository.transaction).toHaveBeenCalledTimes(2);
-  //   });
-  // });
+  describe("UserService - updateUser", () => {
+    const updateUserDto: IUpdateUserDto = {
+      username: "newuser",
+      email: "new@example.com",
+    };
+
+    it("should update user successfully", async () => {
+      // Arrange
+      const updatedUser = { ...mockUser, ...updateUserDto };
+
+      userRepository.getById.mockResolvedValue(mockUser);
+      userRepository.getByEmail.mockResolvedValue(null); // No user with the new email
+      userRepository.update.mockResolvedValue(updatedUser);
+
+      // Act
+      const result = await userService.updateUser(mockUserId, updateUserDto);
+
+      // Assert
+      expect(prismaService.transaction).toHaveBeenCalled();
+      expect(userRepository.getById).toHaveBeenCalledWith(mockUserId, mockTx);
+      expect(userRepository.getByEmail).toHaveBeenCalledWith(
+        "new@example.com",
+        mockTx
+      );
+      expect(userRepository.update).toHaveBeenCalledWith(
+        mockTx,
+        mockUserId,
+        updateUserDto
+      );
+      expect(result).toEqual(updatedUser);
+    });
+
+    it("should return existing user when no data to update", async () => {
+      // Arrange
+      const existingUser = mockUser;
+
+      userRepository.getById.mockResolvedValue(existingUser);
+
+      // Act
+      const result = await userService.updateUser(mockUserId, {});
+
+      // Assert
+      expect(prismaService.transaction).toHaveBeenCalled();
+      expect(userRepository.getById).toHaveBeenCalledWith(mockUserId, mockTx);
+      expect(userRepository.update).not.toHaveBeenCalled();
+      expect(result).toEqual(existingUser);
+    });
+
+    it("should throw NotFoundError when user does not exist", async () => {
+      // Arrange
+      userRepository.getById.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        userService.updateUser(mockUserId, updateUserDto)
+      ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
+
+      expect(prismaService.transaction).toHaveBeenCalled();
+    });
+
+    it("should throw ConflictError when new email already exists", async () => {
+      // Arrange
+      const existingUser = mockUser;
+      const conflictUser = { ...mockUser, id: "2", email: "new@example.com" };
+
+      userRepository.getById.mockResolvedValue(existingUser);
+      userRepository.getByEmail.mockResolvedValue(conflictUser);
+
+      // Act & Assert
+      await expect(
+        userService.updateUser(mockUserId, updateUserDto)
+      ).rejects.toThrow(new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS));
+
+      expect(prismaService.transaction).toHaveBeenCalled();
+      expect(userRepository.getById).toHaveBeenCalledWith(mockUserId, mockTx);
+      expect(userRepository.getByEmail).toHaveBeenCalledWith(
+        "new@example.com",
+        mockTx
+      );
+    });
+
+    it("should handle transaction rollback on error", async () => {
+      // Arrange
+      userRepository.getById.mockResolvedValue(mockUser);
+      userRepository.getByEmail.mockResolvedValue(null);
+      userRepository.update.mockRejectedValue(new Error("Update failed"));
+
+      // Mock transaction to properly simulate rollback
+      prismaService.transaction.mockImplementation(async (callback) => {
+        try {
+          return await callback(mockTx);
+        } catch (error) {
+          // Simulate transaction rollback
+          // biome-ignore lint/complexity/noUselessCatch: <explanation>
+          throw error;
+        }
+      });
+
+      // Act & Assert
+      await expect(
+        userService.updateUser(mockUserId, updateUserDto)
+      ).rejects.toThrow("Update failed");
+
+      expect(prismaService.transaction).toHaveBeenCalled();
+    });
+  });
+
+  describe("UserService - updateUserPassword", () => {
+    const existingUser = mockUser;
+
+    const updatePasswordDto: IUpdatePasswordDto = {
+      currentPassword: "old_password",
+      newPassword: "new_password",
+    };
+
+    it("should update password successfully when current password is valid", async () => {
+      // Arrange
+      const updatedUser = {
+        ...mockUser,
+        password: "hashed_new_password",
+      };
+
+      userRepository.getById.mockResolvedValue(existingUser);
+      cryptoService.comparePasswords.mockResolvedValue(true);
+      cryptoService.hashPassword.mockResolvedValue("hashed_new_password");
+      userRepository.updatePassword.mockResolvedValue(updatedUser);
+
+      // Act
+      const result = await userService.updateUserPassword(
+        mockUserId,
+        updatePasswordDto
+      );
+
+      // Assert
+      expect(prismaService.transaction).toHaveBeenCalled();
+      expect(userRepository.getById).toHaveBeenCalledWith(mockUserId, mockTx);
+      expect(cryptoService.comparePasswords).toHaveBeenCalledWith({
+        plainText: "old_password",
+        hash: "hashedPassword",
+      });
+      expect(cryptoService.hashPassword).toHaveBeenCalledWith("new_password");
+      expect(userRepository.updatePassword).toHaveBeenCalledWith(
+        mockTx,
+        mockUserId,
+        "hashed_new_password"
+      );
+      expect(result).toEqual(updatedUser);
+    });
+
+    it("should throw BadRequestError when current password is invalid", async () => {
+      // Arrange
+      userRepository.getById.mockResolvedValue(existingUser);
+      cryptoService.comparePasswords.mockResolvedValue(false);
+
+      const updatePasswordDto: IUpdatePasswordDto = {
+        currentPassword: "wrong_password",
+        newPassword: "new_password",
+      };
+
+      // Act & Assert
+      await expect(
+        userService.updateUserPassword(mockUserId, updatePasswordDto)
+      ).rejects.toThrow(
+        new BadRequestError(ERROR_MESSAGES.INVALID_CREDENTIALS)
+      );
+
+      expect(prismaService.transaction).toHaveBeenCalled();
+      expect(userRepository.getById).toHaveBeenCalledWith(mockUserId, mockTx);
+      expect(cryptoService.comparePasswords).toHaveBeenCalled();
+      expect(cryptoService.hashPassword).not.toHaveBeenCalled();
+      expect(userRepository.updatePassword).not.toHaveBeenCalled();
+    });
+
+    it("should throw BadRequestError when new password is same as current", async () => {
+      const updatePasswordDto: IUpdatePasswordDto = {
+        currentPassword: "same_password",
+        newPassword: "same_password",
+      };
+
+      // Arrange
+      userRepository.getById.mockResolvedValue(existingUser);
+      cryptoService.comparePasswords.mockResolvedValue(true);
+
+      // Act & Assert
+      await expect(
+        userService.updateUserPassword(mockUserId, updatePasswordDto)
+      ).rejects.toThrow(
+        new BadRequestError(ERROR_MESSAGES.PASSWORD_SAME_AS_CURRENT)
+      );
+
+      expect(prismaService.transaction).toHaveBeenCalled();
+      expect(userRepository.getById).toHaveBeenCalledWith(mockUserId, mockTx);
+      expect(cryptoService.comparePasswords).toHaveBeenCalled();
+      expect(cryptoService.hashPassword).not.toHaveBeenCalled();
+      expect(userRepository.updatePassword).not.toHaveBeenCalled();
+    });
+
+    it("should throw NotFoundError when user does not exist", async () => {
+      // Arrange
+      userRepository.getById.mockResolvedValue(null);
+
+      const updatePasswordDto: IUpdatePasswordDto = {
+        currentPassword: "old_password",
+        newPassword: "new_password",
+      };
+
+      // Act & Assert
+      await expect(
+        userService.updateUserPassword("999", updatePasswordDto)
+      ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
+
+      expect(prismaService.transaction).toHaveBeenCalled();
+      expect(userRepository.getById).toHaveBeenCalledWith("999", mockTx);
+    });
+  });
+
+  describe("UserService - resetUserPassword", () => {
+    const existingUser = mockUser;
+    it("should reset password successfully", async () => {
+      // Arrange
+      const updatedUser = {
+        ...existingUser,
+        password: "hashed_new_password",
+      };
+
+      userRepository.getById.mockResolvedValue(existingUser);
+      cryptoService.hashPassword.mockResolvedValue("hashed_new_password");
+      userRepository.updatePassword.mockResolvedValue(updatedUser);
+
+      const resetPasswordDto: IResetPasswordDto = {
+        id: mockUserId,
+        newPassword: "new_password",
+      };
+
+      // Act
+      const result = await userService.resetUserPassword(resetPasswordDto);
+
+      // Assert
+      expect(prismaService.transaction).toHaveBeenCalled();
+      expect(userRepository.getById).toHaveBeenCalledWith(mockUserId, mockTx);
+      expect(cryptoService.hashPassword).toHaveBeenCalledWith("new_password");
+      expect(userRepository.updatePassword).toHaveBeenCalledWith(
+        mockTx,
+        mockUserId,
+        "hashed_new_password"
+      );
+      expect(result).toEqual(updatedUser);
+    });
+
+    it("should throw NotFoundError when user does not exist", async () => {
+      // Arrange
+      userRepository.getById.mockResolvedValue(null);
+
+      const resetPasswordDto = {
+        id: "999",
+        newPassword: "new_password",
+      };
+
+      // Act & Assert
+      await expect(
+        userService.resetUserPassword(resetPasswordDto)
+      ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
+
+      expect(prismaService.transaction).toHaveBeenCalled();
+      expect(userRepository.getById).toHaveBeenCalledWith("999", mockTx);
+    });
+  });
+
+  describe("UserService - verifyUserEmail", () => {
+    it("should verify email successfully", async () => {
+      // Arrange
+      const existingUser = {
+        ...mockUser,
+        isEmailVerified: false,
+      };
+      const verifiedUser = {
+        ...mockUser,
+        isEmailVerified: true,
+      };
+
+      userRepository.getById.mockResolvedValue(existingUser);
+      userRepository.verifyEmail.mockResolvedValue(verifiedUser);
+
+      // Act
+      const result = await userService.verifyUserEmail(mockUserId);
+
+      // Assert
+      expect(userRepository.getById).toHaveBeenCalledWith(
+        mockUserId,
+        undefined
+      );
+      expect(userRepository.verifyEmail).toHaveBeenCalledWith(
+        mockUserId,
+        undefined
+      );
+      expect(result).toEqual(verifiedUser);
+    });
+
+    it("should throw NotFoundError when user does not exist", async () => {
+      // Arrange
+      userRepository.getById.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(userService.verifyUserEmail("999")).rejects.toThrow(
+        new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
+      );
+    });
+
+    it("should throw BadRequestError when email is already verified", async () => {
+      // Arrange
+      const existingUser = {
+        ...mockUser,
+        isEmailVerified: true,
+      };
+
+      userRepository.getById.mockResolvedValue(existingUser);
+
+      // Act & Assert
+      await expect(userService.verifyUserEmail(mockUserId)).rejects.toThrow(
+        new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED)
+      );
+    });
+
+    it("should pass transaction to repository when provided", async () => {
+      // Arrange
+      const existingUser = {
+        ...mockUser,
+        isEmailVerified: false,
+      };
+
+      const verifiedUser = {
+        ...mockUser,
+        isEmailVerified: true,
+      };
+
+      userRepository.getById.mockResolvedValue(existingUser);
+      userRepository.verifyEmail.mockResolvedValue(verifiedUser);
+
+      // Act
+      await userService.verifyUserEmail(mockUserId, mockTx);
+
+      // Assert
+      expect(userRepository.getById).toHaveBeenCalledWith(mockUserId, mockTx);
+      expect(userRepository.verifyEmail).toHaveBeenCalledWith(
+        mockUserId,
+        mockTx
+      );
+    });
+
+    // it("should use withTransaction when no transaction is provided", async () => {
+    //   // Arrange
+    //   const existingUser = {
+    //     id: mockUserId,
+    //     email: "test@example.com",
+    //     isEmailVerified: false,
+    //   };
+    //   const verifiedUser = {
+    //     id: mockUserId,
+    //     email: "test@example.com",
+    //     isEmailVerified: true,
+    //   };
+
+    //   userRepository.getById.mockResolvedValue(existingUser);
+    //   userRepository.verifyEmail.mockResolvedValue(verifiedUser);
+
+    //   // Mock withTransaction to simulate transaction behavior
+    //   prismaService.withTransaction.mockImplementation(async (callback) => {
+    //     return await callback(mockTx);
+    //   });
+
+    //   // Act
+    //   await userService.verifyUserEmail(mockUserId);
+
+    //   // Assert
+    //   // In a real implementation, we would expect withTransaction to be called
+    //   // but since our current UserService doesn't use it, we're just checking the repository calls
+    //   expect(userRepository.getById).toHaveBeenCalledWith(mockUserId, undefined);
+    //   expect(userRepository.verifyEmail).toHaveBeenCalledWith(
+    //     mockUserId,
+    //     undefined
+    //   );
+    // });
+  });
 });
