@@ -1,44 +1,58 @@
-import type { ICreateDto, IUpdateDto } from "@/modules/shared/dtos";
 import type { User } from "../user.model";
 
 /**
- * Data Transfer Object (DTO) for creating a user.
- *
- * This interface extends the `ICreateDto` interface, omitting the `userId` property.
- *
- * @interface ICreateUserDto
- * @extends {Omit<ICreateDto<User>, "userId">}
+ * Interface representing the data transfer object for creating a user.
  */
-export interface ICreateUserDto extends Omit<ICreateDto<User>, "userId"> {}
+export interface ICreateUserDto {
+  /**
+   * The email address of the user.
+   */
+  email: string;
 
-/**
- * Data Transfer Object (DTO) for retrieving user information.
- *
- * @interface IGetUserDto
- *
- * @property {string} [id] - The unique identifier of the user.
- * @property {string} [email] - The email address of the user.
- */
-export interface IGetUserDto {
-  id?: string;
-  email?: string;
+  /**
+   * The password for the user's account.
+   */
+  password: string;
+
+  /**
+   * The username chosen by the user.
+   */
+  username: string;
+
+  /**
+   * Indicates whether the user's email has been verified.
+   * Optional field.
+   */
+  isEmailVerified?: boolean;
+
+  /**
+   * The URL of the user's profile picture.
+   * Optional field.
+   */
+  profilePicture?: string;
 }
 
 /**
  * Data Transfer Object (DTO) for updating a user.
  *
- * This interface extends the `IUpdateDto` interface for the `User` entity,
- * omitting the `userId` property.
+ * This interface is used to define the structure of the data
+ * required to update a user's information. It extends a partial
+ * subset of the `User` entity, allowing only specific fields
+ * to be updated.
  *
- * @interface IUpdateUserDto
- * @extends {Omit<IUpdateDto<User>, "userId">}
+ * @extends Partial<User>
+ *
+ * @property email - The new email address of the user (optional).
+ * @property username - The new username of the user (optional).
+ * @property profilePicture - The new profile picture URL of the user (optional).
  */
-export interface IUpdateUserDto extends Omit<IUpdateDto<User>, "userId"> {}
+export interface IUpdateUserDto
+  extends Pick<Partial<User>, "email" | "username" | "profilePicture"> {}
 
 /**
  * Interface representing the data transfer object for updating a user's password.
  */
-export interface IUpdatePasswordBodyDto {
+export interface IUpdatePasswordDto {
   /**
    * The current password of the user.
    */
@@ -48,21 +62,6 @@ export interface IUpdatePasswordBodyDto {
    * The new password that the user wants to set.
    */
   newPassword: string;
-}
-
-/**
- * Data Transfer Object (DTO) for updating a user's password.
- *
- * This interface extends the `IUpdatePasswordBodyDto` and includes an additional
- * `id` property to uniquely identify the user whose password is being updated.
- *
- * @interface IUpdatePasswordDto
- * @extends IUpdatePasswordBodyDto
- *
- * @property {string} id - The unique identifier of the user.
- */
-export interface IUpdatePasswordDto extends IUpdatePasswordBodyDto {
-  id: string;
 }
 
 /**
