@@ -37,7 +37,7 @@ export class UserRepository implements IUserRepository {
       async () => {
         const isEmailAlreadyRegistered = await tx.user.findUnique({
           where: {
-            email: createUserDto.data.email,
+            email: createUserDto.email,
           },
           select: { id: true },
         });
@@ -46,7 +46,11 @@ export class UserRepository implements IUserRepository {
           throw new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS);
 
         const user = await tx.user.create({
-          data: { ...createUserDto.data },
+          data: {
+            ...createUserDto,
+            isEmailVerified: createUserDto.isEmailVerified ?? false,
+            profilePicture: createUserDto.profilePicture ?? null,
+          },
         });
 
         return user;
@@ -114,15 +118,14 @@ export class UserRepository implements IUserRepository {
    */
   async update(
     tx: Prisma.TransactionClient,
+    userId: string,
     updatedUserDto: IUpdateUserDto
   ): Promise<User> {
-    const { id, data } = updatedUserDto;
-
     return handleAsyncOperation(
       () =>
         tx.user.update({
-          where: { id },
-          data: { ...data },
+          where: { id: userId },
+          data: { ...updatedUserDto },
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE }
     );
