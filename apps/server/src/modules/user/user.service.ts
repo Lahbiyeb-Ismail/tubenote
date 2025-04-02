@@ -11,7 +11,6 @@ import type { ICryptoService, IPrismaService } from "@/modules/shared/services";
 
 import type {
   ICreateUserDto,
-  IGetUserDto,
   IResetPasswordDto,
   IUpdatePasswordDto,
   IUpdateUserDto,
@@ -79,17 +78,11 @@ export class UserService implements IUserService {
     tx: Prisma.TransactionClient,
     dto: ICreateUserDto
   ): Promise<User> {
-    const { data } = dto;
-
-    const hashedPassword = await this._cryptoService.hashPassword(
-      data.password
-    );
+    const hashedPassword = await this._cryptoService.hashPassword(dto.password);
 
     return this._userRepository.create(tx, {
-      data: {
-        ...data,
-        password: hashedPassword,
-      },
+      ...dto,
+      password: hashedPassword,
     });
   }
 
@@ -125,32 +118,6 @@ export class UserService implements IUserService {
     return user;
   }
 
-  /**
-   * Retrieves an existing user by email or creates a new user if not found.
-   *
-   * @param createUserDto - Data Transfer Object containing user creation data.
-   * @returns A promise that resolves to the user entity.
-   *
-   * The function performs the following steps:
-   * 1. Checks if a user with the given email exists within a transaction.
-   * 2. Returns the existing user if found.
-   * 3. Creates a new user within the transaction if not found.
-   */
-  async getOrCreateUser(createUserDto: ICreateUserDto): Promise<User> {
-    const { email } = createUserDto.data;
-
-    return this._prismaService.transaction(async (tx) => {
-      // 1. Check if user exists within the transaction
-      const user = await this._userRepository.getByEmail(email, tx);
-
-      // 2. Return existing user if found
-      if (user) return user;
-
-      // 3. Create user if not found
-      return this._createUser(tx, createUserDto);
-    });
-  }
-
   async getUserByEmail(
     email: string,
     tx?: Prisma.TransactionClient
@@ -158,34 +125,11 @@ export class UserService implements IUserService {
     return this._userRepository.getByEmail(email, tx);
   }
 
-  /**
-   * Retrieves an existing user by the provided data transfer object.
-   *
-   * @param getUserDto - The data transfer object containing user retrieval details.
-   * @returns A promise that resolves to the retrieved user.
-   * @throws NotFoundError if the user is not found
-   */
-  async getUserByIdOrEmail(
-    getUserDto: IGetUserDto,
+  async getUserById(
+    id: string,
     tx?: Prisma.TransactionClient
-  ): Promise<User> {
-    const { id, email } = getUserDto;
-
-    let user: User | null = null;
-
-    if (id) {
-      user = await this._userRepository.getById(id, tx);
-    }
-
-    if (email) {
-      user = await this._userRepository.getByEmail(email, tx);
-    }
-
-    if (!user) {
-      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
-    }
-
-    return user;
+  ): Promise<User | null> {
+    return this._userRepository.getById(id, tx);
   }
 
   /**
@@ -196,21 +140,22 @@ export class UserService implements IUserService {
    *
    * @throws {Error} - Throws an error if the user does not exist or if the email is not unique.
    */
-  async updateUser(updateUserDto: IUpdateUserDto): Promise<User> {
-    const { id, data } = updateUserDto;
-
+  async updateUser(
+    userId: string,
+    updateUserDto: IUpdateUserDto
+  ): Promise<User> {
     const updatedUser = await this._prismaService.transaction(async (tx) => {
-      const user = await this._ensureUserExists(id, tx);
+      const user = await this._ensureUserExists(userId, tx);
 
-      if (Object.keys(data).length === 0) {
+      if (Object.keys(updateUserDto).length === 0) {
         return user;
       }
 
-      if (data.email && data.email !== user.email) {
-        await this._ensureEmailIsUnique(data.email, tx);
+      if (updateUserDto.email && updateUserDto.email !== user.email) {
+        await this._ensureEmailIsUnique(updateUserDto.email, tx);
       }
 
-      return this._userRepository.update(tx, updateUserDto);
+      return this._userRepository.update(tx, userId, updateUserDto);
     });
 
     return updatedUser;
@@ -223,11 +168,14 @@ export class UserService implements IUserService {
    * @returns {Promise<User>} - A promise that resolves to the updated user.
    * @throws {BadRequestError} - Throws an error if the current password is invalid or if the new password is the same as the current password.
    */
-  async updateUserPassword(updateUserDto: IUpdatePasswordDto): Promise<User> {
-    const { id, currentPassword, newPassword } = updateUserDto;
+  async updateUserPassword(
+    userId: string,
+    updatePasswordDto: IUpdatePasswordDto
+  ): Promise<User> {
+    const { currentPassword, newPassword } = updatePasswordDto;
 
     const updatedUser = await this._prismaService.transaction(async (tx) => {
-      const user = await this._ensureUserExists(id, tx);
+      const user = await this._ensureUserExists(userId, tx);
 
       const isPasswordValid = await this._cryptoService.comparePasswords({
         plainText: currentPassword,
