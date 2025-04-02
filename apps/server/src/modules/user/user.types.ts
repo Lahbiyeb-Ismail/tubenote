@@ -1,7 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
-import type { IUpdateBodyDto } from "@/modules/shared/dtos";
 import type { TypedRequest } from "@/modules/shared/types";
 
 import type { User } from "./user.model";
@@ -15,9 +14,7 @@ import type {
 } from "../shared/services";
 import type {
   ICreateUserDto,
-  IGetUserDto,
   IResetPasswordDto,
-  IUpdatePasswordBodyDto,
   IUpdatePasswordDto,
   IUpdateUserDto,
 } from "./dtos";
@@ -62,6 +59,7 @@ export interface IUserRepository {
    */
   update(
     tx: Prisma.TransactionClient,
+    userId: string,
     updateUserDto: IUpdateUserDto
   ): Promise<User>;
 
@@ -96,12 +94,7 @@ export interface IUserService {
     createAccountDto: ICreateAccountDto
   ): Promise<User>;
 
-  /**
-   * Retrieves an existing user or creates a new one if not found.
-   * @param createUserDto - Data transfer object containing user creation details.
-   * @returns A promise that resolves to the retrieved or created user.
-   */
-  getOrCreateUser(createUserDto: ICreateUserDto): Promise<User>;
+  getUserById(id: string, tx?: Prisma.TransactionClient): Promise<User | null>;
 
   getUserByEmail(
     email: string,
@@ -109,28 +102,21 @@ export interface IUserService {
   ): Promise<User | null>;
 
   /**
-   * Retrieves a user based on the provided details.
-   * @param getUserDto - Data transfer object containing user retrieval details.
-   * @returns A promise that resolves to the retrieved user.
-   */
-  getUserByIdOrEmail(
-    getUserDto: IGetUserDto,
-    tx?: Prisma.TransactionClient
-  ): Promise<User>;
-
-  /**
    * Updates an existing user.
    * @param updateUserDto - Data transfer object containing user update details.
    * @returns A promise that resolves to the updated user.
    */
-  updateUser(updateUserDto: IUpdateUserDto): Promise<User>;
+  updateUser(userId: string, updateUserDto: IUpdateUserDto): Promise<User>;
 
   /**
    * Updates the password of an existing user.
    * @param updatedPasswordDto - Data transfer object containing updated password details.
    * @returns A promise that resolves to the user with the updated password.
    */
-  updateUserPassword(updatedPasswordDto: IUpdatePasswordDto): Promise<User>;
+  updateUserPassword(
+    userId: string,
+    updatedPasswordDto: IUpdatePasswordDto
+  ): Promise<User>;
 
   /**
    * Resets the password of an existing user.
@@ -166,7 +152,7 @@ export interface IUserController {
    * @returns A promise that resolves when the operation is complete.
    */
   updateCurrentUser(
-    req: TypedRequest<IUpdateBodyDto<User>>,
+    req: TypedRequest<IUpdateUserDto>,
     res: Response
   ): Promise<void>;
 
@@ -177,7 +163,7 @@ export interface IUserController {
    * @returns A promise that resolves when the operation is complete.
    */
   updatePassword(
-    req: TypedRequest<IUpdatePasswordBodyDto>,
+    req: TypedRequest<IUpdatePasswordDto>,
     res: Response
   ): Promise<void>;
 }
