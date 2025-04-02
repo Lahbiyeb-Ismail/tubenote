@@ -97,7 +97,7 @@ export class OAuthService implements IOAuthService {
         } else {
           // Account doesn't exist, create user and account
           this._loggerService.info(
-            `User with email ${createUserDto.data.email} signed up with ${createAccountDto.data.provider}.`
+            `User with email ${createUserDto.email} signed up with ${createAccountDto.data.provider}.`
           );
 
           const user = await this._userService.createUserWithAccount(

@@ -2,7 +2,6 @@ import type { Response } from "express";
 
 import type { TypedRequest } from "@/modules/shared/types";
 
-import type { ICreateBodyDto } from "@/modules/shared/dtos";
 import type { ICreateUserDto, IUserService, User } from "@/modules/user";
 
 import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
@@ -25,10 +24,7 @@ export interface ILocalAuthService {
 }
 
 export interface ILocalAuthController {
-  register(
-    req: TypedRequest<ICreateBodyDto<User>>,
-    res: Response
-  ): Promise<void>;
+  register(req: TypedRequest<ICreateUserDto>, res: Response): Promise<void>;
   login(req: TypedRequest<ILoginDto>, res: Response): Promise<void>;
 }
 

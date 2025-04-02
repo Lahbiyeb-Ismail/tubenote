@@ -74,7 +74,7 @@ export class LocalAuthService implements ILocalAuthService {
         {
           data: {
             provider: "credentials",
-            providerAccountId: createUserDto.data.email,
+            providerAccountId: createUserDto.email,
             type: "email",
           },
         }

@@ -9,9 +9,8 @@ import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 
 import { BadRequestError } from "@/modules/shared/api-errors";
 
-import type { ICreateBodyDto } from "@/modules/shared/dtos";
 import type { TypedRequest } from "@/modules/shared/types";
-import type { User } from "@/modules/user";
+import type { ICreateUserDto } from "@/modules/user";
 
 import type { ILoginDto } from "@/modules/auth/dtos";
 
@@ -56,11 +55,9 @@ export class LocalAuthController implements ILocalAuthController {
    * @param req - The request object containing user registration credentials.
    * @param res - The response object.
    */
-  async register(req: TypedRequest<ICreateBodyDto<User>>, res: Response) {
+  async register(req: TypedRequest<ICreateUserDto>, res: Response) {
     try {
-      const user = await this._localAuthService.registerUser({
-        data: req.body,
-      });
+      const user = await this._localAuthService.registerUser(req.body);
 
       if (!user) throw new BadRequestError("User registration failed.");
 
