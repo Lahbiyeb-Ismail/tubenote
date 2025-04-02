@@ -1,16 +1,20 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { IUpdateBodyDto } from "@/modules/shared/dtos";
+import { NotFoundError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+
+import type { TypedRequest } from "@/modules/shared/types";
+
 import type {
   ILoggerService,
   IRateLimitService,
   IResponseFormatter,
 } from "@/modules/shared/services";
-import type { TypedRequest } from "@/modules/shared/types";
 
 import { USER_RATE_LIMIT_CONFIG } from "./config";
-import type { IUpdatePasswordBodyDto } from "./dtos";
+
+import type { IUpdatePasswordDto, IUpdateUserDto } from "./dtos";
 import type { User } from "./user.model";
 import type {
   IUserController,
@@ -52,7 +56,11 @@ export class UserController implements IUserController {
   async getCurrentUser(req: TypedRequest, res: Response): Promise<void> {
     const userId = req.userId;
 
-    const user = await this._userService.getUserByIdOrEmail({ id: userId });
+    const user = await this._userService.getUserById(userId);
+
+    if (!user) {
+      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
+    }
 
     const formatedResponse = this._responseFormatter.formatResponse<User>({
       responseOptions: {
@@ -72,14 +80,13 @@ export class UserController implements IUserController {
    * @param res - The response object to confirm the update.
    */
   async updateCurrentUser(
-    req: TypedRequest<IUpdateBodyDto<User>>,
+    req: TypedRequest<IUpdateUserDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
 
-    const user = await this._userService.updateUser({
-      id: userId,
-      data: req.body,
+    const user = await this._userService.updateUser(userId, {
+      ...req.body,
     });
 
     const formatedResponse = this._responseFormatter.formatResponse<User>({
@@ -106,17 +113,12 @@ export class UserController implements IUserController {
    * It uses the user ID from the request to identify the user whose password is to be updated.
    * The response will include a success message and the updated user details.
    */
-  async updatePassword(
-    req: TypedRequest<IUpdatePasswordBodyDto>,
-    res: Response
-  ) {
+  async updatePassword(req: TypedRequest<IUpdatePasswordDto>, res: Response) {
     try {
       const userId = req.userId;
 
-      const user = await this._userService.updateUserPassword({
-        id: userId,
-        currentPassword: req.body.currentPassword,
-        newPassword: req.body.newPassword,
+      const user = await this._userService.updateUserPassword(userId, {
+        ...req.body,
       });
 
       const formatedResponse = this._responseFormatter.formatResponse<User>({
