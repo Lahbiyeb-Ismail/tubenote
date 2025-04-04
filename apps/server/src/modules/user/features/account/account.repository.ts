@@ -16,13 +16,11 @@ export class AccountRepository implements IAccountRepository {
     userId: string,
     createAccountDto: ICreateAccountDto
   ): Promise<Account> {
-    const { data } = createAccountDto;
-
     return handleAsyncOperation(
       async () => {
         const account = await tx.account.create({
           data: {
-            ...data,
+            ...createAccountDto,
             userId,
           },
         });
