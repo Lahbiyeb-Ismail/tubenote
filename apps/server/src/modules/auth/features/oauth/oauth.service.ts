@@ -83,21 +83,21 @@ export class OAuthService implements IOAuthService {
         // Try to find existing account for this OAuth provider
         const existingAccount =
           await this._accountService.findAccountByProvider(
-            createAccountDto.data.provider,
-            createAccountDto.data.providerAccountId
+            createAccountDto.provider,
+            createAccountDto.providerAccountId
           );
 
         if (existingAccount) {
           // Account exists, login flow
           this._loggerService.info(
-            `User with ID ${existingAccount.userId} logged in with ${createAccountDto.data.provider}.`
+            `User with ID ${existingAccount.userId} logged in with ${createAccountDto.provider}.`
           );
 
           userId = existingAccount.userId;
         } else {
           // Account doesn't exist, create user and account
           this._loggerService.info(
-            `User with email ${createUserDto.email} signed up with ${createAccountDto.data.provider}.`
+            `User with email ${createUserDto.email} signed up with ${createAccountDto.provider}.`
           );
 
           const user = await this._userService.createUserWithAccount(
