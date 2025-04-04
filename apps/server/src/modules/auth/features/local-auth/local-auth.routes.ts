@@ -10,13 +10,13 @@ import { localAuthController } from "./local-auth.module";
 const localAuthRoutes = Router();
 
 const registerRateLimiter = createRateLimitMiddleware({
-  keyGenerator: (req) => `register:ip:${req.ip}`,
+  keyGenerator: (req) => `rate:register:ip:${req.ip}`,
   rateLimitConfig: AUTH_RATE_LIMIT_CONFIG.registration,
 });
 
 // IP-based rate limiting middleware for login
 const loginRateLimiter = createRateLimitMiddleware({
-  keyGenerator: (req) => `login:ip:email:${req.ip}-${req.body.email}`,
+  keyGenerator: (req) => `rate:login:ip:email:${req.ip}-${req.body.email}`,
   rateLimitConfig: AUTH_RATE_LIMIT_CONFIG.login,
 });
 
