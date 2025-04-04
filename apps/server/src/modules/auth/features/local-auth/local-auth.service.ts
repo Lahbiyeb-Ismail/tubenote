@@ -26,6 +26,7 @@ import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
 import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
 import type { IJwtService } from "@/modules/auth/utils";
 
+import type { ICreateAccountDto } from "@/modules/user/features/account/dtos";
 import type {
   ILocalAuthService,
   ILocalAuthServiceOptions,
@@ -67,17 +68,17 @@ export class LocalAuthService implements ILocalAuthService {
     let newUser: User | undefined;
     let verifyEmailToken: string | undefined;
 
+    const createAccountDto: ICreateAccountDto = {
+      provider: "credentials",
+      providerAccountId: createUserDto.email,
+      type: "email",
+    };
+
     await this._prismaService.transaction(async (tx) => {
       newUser = await this._userService.createUserWithAccount(
         tx,
         createUserDto,
-        {
-          data: {
-            provider: "credentials",
-            providerAccountId: createUserDto.email,
-            type: "email",
-          },
-        }
+        createAccountDto
       );
 
       verifyEmailToken = await this._verifyEmailService.createToken(
