@@ -40,7 +40,7 @@ export class RateLimitService implements IRateLimitService {
 
     try {
       // Get current rate limit data
-      const rateLimitKey = `ratelimit:${key}`;
+      const rateLimitKey = `rate:${key}`;
       const data = this._cacheService.get<IRateLimitData>(rateLimitKey);
 
       if (!data) {
@@ -94,7 +94,7 @@ export class RateLimitService implements IRateLimitService {
   async increment(options: IRateLimitOptions): Promise<IRateLimitResult> {
     const { key, maxAttempts, windowMs, blockDurationMs } = options;
     const now = Date.now();
-    const rateLimitKey = `ratelimit:${key}`;
+    const rateLimitKey = `rate:${key}`;
 
     try {
       // Get current data or initialize new data
@@ -187,7 +187,7 @@ export class RateLimitService implements IRateLimitService {
    */
   async reset(key: string): Promise<void> {
     try {
-      const rateLimitKey = `ratelimit:${key}`;
+      const rateLimitKey = `rate:${key}`;
       this._cacheService.del(rateLimitKey);
 
       this._logger.debug("Rate limit reset", { key });
@@ -196,6 +196,8 @@ export class RateLimitService implements IRateLimitService {
         key,
         error: error instanceof Error ? error.message : String(error),
       });
+
+      throw error;
     }
   }
 }
