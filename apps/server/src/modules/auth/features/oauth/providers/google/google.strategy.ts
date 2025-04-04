@@ -39,7 +39,7 @@ export class GoogleOAuthStrategy {
     try {
       const { id, emails, displayName, photos } = profile;
       const email = emails?.[0].value;
-      const profilePicture = photos?.[0].value || null;
+      const profilePicture = photos?.[0].value ?? undefined;
 
       if (!email) {
         return done(new Error("No email provided from Google"));
@@ -54,13 +54,11 @@ export class GoogleOAuthStrategy {
           },
         },
         createUserDto: {
-          data: {
-            email,
-            profilePicture,
-            username: displayName,
-            password: id,
-            isEmailVerified: true,
-          },
+          email,
+          profilePicture,
+          username: displayName,
+          password: id,
+          isEmailVerified: true,
         },
       };
 
