@@ -11,6 +11,7 @@ import type { ICreateUserDto, IUserService, User } from "@/modules/user";
 
 import type {
   ICryptoService,
+  ILoggerService,
   IMailSenderService,
   IPrismaService,
 } from "@/modules/shared/services";
@@ -25,6 +26,7 @@ import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
 import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
 import type { IJwtService } from "@/modules/auth/utils";
 
+import type { ICreateAccountDto } from "@/modules/user/features/account/dtos";
 import type {
   ILocalAuthService,
   ILocalAuthServiceOptions,
@@ -40,7 +42,8 @@ export class LocalAuthService implements ILocalAuthService {
     private readonly _refreshTokenService: IRefreshTokenService,
     private readonly _jwtService: IJwtService,
     private readonly _cryptoService: ICryptoService,
-    private readonly _mailSenderService: IMailSenderService
+    private readonly _mailSenderService: IMailSenderService,
+    private readonly _loggerService: ILoggerService
   ) {}
 
   public static getInstance(
@@ -54,7 +57,8 @@ export class LocalAuthService implements ILocalAuthService {
         options.refreshTokenService,
         options.jwtService,
         options.cryptoService,
-        options.mailSenderService
+        options.mailSenderService,
+        options.loggerService
       );
     }
     return this._instance;
@@ -64,17 +68,17 @@ export class LocalAuthService implements ILocalAuthService {
     let newUser: User | undefined;
     let verifyEmailToken: string | undefined;
 
+    const createAccountDto: ICreateAccountDto = {
+      provider: "credentials",
+      providerAccountId: createUserDto.email,
+      type: "email",
+    };
+
     await this._prismaService.transaction(async (tx) => {
       newUser = await this._userService.createUserWithAccount(
         tx,
         createUserDto,
-        {
-          data: {
-            provider: "credentials",
-            providerAccountId: createUserDto.data.email,
-            type: "email",
-          },
-        }
+        createAccountDto
       );
 
       verifyEmailToken = await this._verifyEmailService.createToken(
@@ -97,9 +101,14 @@ export class LocalAuthService implements ILocalAuthService {
   async loginUser(loginDto: ILoginDto): Promise<IAuthResponseDto> {
     const { email, password } = loginDto;
 
-    const user = await this._userService.getUserByIdOrEmail({ email });
+    // Get the user first to check if they exist
+    const user = await this._userService.getUserByEmail(email);
 
     if (!user) {
+      this._loggerService.warn("Login attempt with non-existent email", {
+        email,
+      });
+
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
@@ -113,6 +122,11 @@ export class LocalAuthService implements ILocalAuthService {
     });
 
     if (!isPasswordMatch) {
+      this._loggerService.warn("Failed login attempt - invalid password", {
+        userId: user.id,
+        email,
+      });
+
       throw new ForbiddenError(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
@@ -120,12 +134,18 @@ export class LocalAuthService implements ILocalAuthService {
       user.id
     );
 
+    // Store refresh token
     await this._refreshTokenService.createToken({
       userId: user.id,
       data: {
         token: refreshToken,
         expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
       },
+    });
+
+    this._loggerService.info("User logged in successfully", {
+      userId: user.id,
+      email,
     });
 
     return { accessToken, refreshToken };

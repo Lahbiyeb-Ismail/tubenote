@@ -1,6 +1,7 @@
-import type { ICreateDto } from "@/modules/shared/dtos";
+import type { AccountProviders, AccountType } from "../account.model";
 
-import type { Account } from "../account.model";
-
-export interface ICreateAccountDto
-  extends Omit<ICreateDto<Account>, "userId"> {}
+export interface ICreateAccountDto {
+  type: AccountType;
+  provider: AccountProviders;
+  providerAccountId: string;
+}

@@ -8,6 +8,7 @@ import {
 
 import type {
   ICryptoService,
+  ILoggerService,
   IMailSenderService,
   IPrismaService,
 } from "@/modules/shared/services";
@@ -17,6 +18,7 @@ import type { ICreateUserDto, IUserService, User } from "@/modules/user";
 import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
 
 import type {
+  ILocalAuthServiceOptions,
   IRefreshTokenService,
   IVerifyEmailService,
 } from "@/modules/auth/features";
@@ -28,6 +30,8 @@ import { mock, mockReset } from "jest-mock-extended";
 import { LocalAuthService } from "../local-auth.service";
 
 describe("LocalAuthService", () => {
+  let localAuthService: LocalAuthService;
+
   // Mock dependencies
   const jwtService = mock<IJwtService>();
 
@@ -43,7 +47,9 @@ describe("LocalAuthService", () => {
 
   const mailSenderService = mock<IMailSenderService>();
 
-  const localAuthService = LocalAuthService.getInstance({
+  const loggerService = mock<ILoggerService>();
+
+  const serviceOptions: ILocalAuthServiceOptions = {
     prismaService,
     userService,
     verifyEmailService,
@@ -51,7 +57,10 @@ describe("LocalAuthService", () => {
     jwtService,
     cryptoService,
     mailSenderService,
-  });
+    loggerService,
+  };
+
+  // const localAuthService = LocalAuthService.getInstance();
 
   // Mock data
   const mockUser: User = {
@@ -71,21 +80,16 @@ describe("LocalAuthService", () => {
   };
 
   const createUserDto: ICreateUserDto = {
-    data: {
-      email: "test@example.com",
-      password: "password123",
-      username: "Test User",
-      isEmailVerified: false,
-      profilePicture: null,
-    },
+    email: "test@example.com",
+    password: "password123",
+    username: "Test User",
+    isEmailVerified: false,
   };
 
   const createAccountDto: ICreateAccountDto = {
-    data: {
-      providerAccountId: mockUser.email,
-      provider: "credentials",
-      type: "email",
-    },
+    providerAccountId: mockUser.email,
+    provider: "credentials",
+    type: "email",
   };
 
   beforeEach(() => {
@@ -96,141 +100,34 @@ describe("LocalAuthService", () => {
     mockReset(jwtService);
     mockReset(refreshTokenService);
     mockReset(mailSenderService);
+    mockReset(loggerService);
 
     // Clear all mocks before each test
     jest.clearAllMocks();
+
+    // Reset singleton instance before each test to ensure a clean state.
+    // @ts-ignore: resetting the private _instance for testing purposes
+    LocalAuthService._instance = undefined;
+
+    localAuthService = LocalAuthService.getInstance(serviceOptions);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  // describe("LocalAuthService - registerUser method", () => {
-  //   const verifyEmailToken = "verify-email-token";
+  describe("Singleton behavior", () => {
+    it("should create a new instance when none exists", () => {
+      const instance1 = LocalAuthService.getInstance(serviceOptions);
+      expect(instance1).toBeInstanceOf(LocalAuthService);
+    });
 
-  //   it("should successfully register a new user", async () => {
-  //     (userService.createUserWithAccount as jest.Mock).mockResolvedValue(
-  //       mockUser
-  //     );
-
-  //     (verifyEmailService.createToken as jest.Mock).mockResolvedValue(
-  //       verifyEmailToken
-  //     );
-
-  //     (
-  //       mailSenderService.sendVerificationEmail as jest.Mock
-  //     ).mockResolvedValue(undefined);
-
-  //     const result = await localAuthService.registerUser(createUserDto);
-
-  //     expect(result).toEqual(mockUser);
-
-  //     expect(userService.createUserWithAccount).toHaveBeenCalledWith(
-  //       createUserDto,
-  //       createAccountDto
-  //     );
-
-  //     expect(mailSenderService.sendVerificationEmail).toHaveBeenCalledWith(
-  //       mockUser.email,
-  //       verifyEmailToken
-  //     );
-  //   });
-
-  //   it("should throw error if user creation fails", async () => {
-  //     const error = new Error("User creation failed");
-  //     (userService.createUserWithAccount as jest.Mock).mockRejectedValue(
-  //       error
-  //     );
-
-  //     await expect(
-  //       localAuthService.registerUser(createUserDto)
-  //     ).rejects.toThrow(error);
-
-  //     expect(verifyEmailService.createToken).not.toHaveBeenCalled();
-
-  //     expect(
-  //       mailSenderService.sendVerificationEmail
-  //     ).not.toHaveBeenCalled();
-  //   });
-
-  //   it("should throw error if verification token generation fails", async () => {
-  //     const error = new Error("Token generation failed");
-
-  //     (userService.createUserWithAccount as jest.Mock).mockResolvedValue(
-  //       mockUser
-  //     );
-
-  //     (verifyEmailService.createToken as jest.Mock).mockRejectedValue(
-  //       error
-  //     );
-
-  //     await expect(
-  //       localAuthService.registerUser(createUserDto)
-  //     ).rejects.toThrow(error);
-
-  //     expect(
-  //       mailSenderService.sendVerificationEmail
-  //     ).not.toHaveBeenCalled();
-  //   });
-
-  //   it("should throw error if email verification sending fails", async () => {
-  //     const error = new Error("Email sending failed");
-  //     (userService.createUserWithAccount as jest.Mock).mockResolvedValue(
-  //       mockUser
-  //     );
-
-  //     (verifyEmailService.createToken as jest.Mock).mockResolvedValue(
-  //       verifyEmailToken
-  //     );
-
-  //     (
-  //       mailSenderService.sendVerificationEmail as jest.Mock
-  //     ).mockRejectedValue(error);
-
-  //     await expect(
-  //       localAuthService.registerUser(createUserDto)
-  //     ).rejects.toThrow(error);
-  //   });
-
-  //   it("should handle empty email in createUserDto", async () => {
-  //     const invalidDto = {
-  //       ...createUserDto,
-  //       email: "",
-  //     };
-
-  //     await expect(localAuthService.registerUser(invalidDto)).rejects.toThrow();
-  //   });
-
-  //   it("should handle invalid email format in createUserDto", async () => {
-  //     const invalidDto = {
-  //       ...createUserDto,
-  //       email: "invalid-email",
-  //     };
-
-  //     await expect(localAuthService.registerUser(invalidDto)).rejects.toThrow();
-  //   });
-
-  //   it("should handle empty username in createUserDto", async () => {
-  //     const invalidDto = {
-  //       ...createUserDto,
-  //       username: "",
-  //     };
-
-  //     await expect(localAuthService.registerUser(invalidDto)).rejects.toThrow();
-  //   });
-
-  //   it("should handle concurrent user registration with same email", async () => {
-  //     const conflictError = new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS);
-
-  //     (
-  //       userService.createUserWithAccount as jest.Mock
-  //     ).mockRejectedValueOnce(conflictError);
-
-  //     await expect(
-  //       localAuthService.registerUser(createUserDto)
-  //     ).rejects.toThrow(conflictError);
-  //   });
-  // });
+    it("should return the existing instance when called multiple times", () => {
+      const instance1 = LocalAuthService.getInstance(serviceOptions);
+      const instance2 = LocalAuthService.getInstance(serviceOptions);
+      expect(instance1).toBe(instance2);
+    });
+  });
 
   describe("LocalAuthService - loginUser method", () => {
     const loginDto: ILoginDto = {
@@ -246,15 +143,13 @@ describe("LocalAuthService", () => {
     });
 
     it("should successfully login a user", async () => {
-      (userService.getUserByIdOrEmail as jest.Mock).mockResolvedValue(mockUser);
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue(mockUser);
       (cryptoService.comparePasswords as jest.Mock).mockResolvedValue(true);
 
       const result = await localAuthService.loginUser(loginDto);
 
       expect(result).toEqual(mockTokens);
-      expect(userService.getUserByIdOrEmail).toHaveBeenCalledWith({
-        email: loginDto.email,
-      });
+      expect(userService.getUserByEmail).toHaveBeenCalledWith(loginDto.email);
       expect(cryptoService.comparePasswords).toHaveBeenCalledWith({
         plainText: loginDto.password,
         hash: mockUser.password,
@@ -270,7 +165,7 @@ describe("LocalAuthService", () => {
     });
 
     it("should throw NotFoundError if user does not exist", async () => {
-      (userService.getUserByIdOrEmail as jest.Mock).mockRejectedValue(
+      (userService.getUserByEmail as jest.Mock).mockRejectedValue(
         new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
       );
 
@@ -281,7 +176,7 @@ describe("LocalAuthService", () => {
     });
 
     it("should throw UnauthorizedError if email is not verified", async () => {
-      (userService.getUserByIdOrEmail as jest.Mock).mockResolvedValue({
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue({
         ...mockUser,
         isEmailVerified: false,
       });
@@ -293,7 +188,7 @@ describe("LocalAuthService", () => {
     });
 
     it("should throw ForbiddenError if password is incorrect", async () => {
-      (userService.getUserByIdOrEmail as jest.Mock).mockResolvedValue(mockUser);
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue(mockUser);
       (cryptoService.comparePasswords as jest.Mock).mockResolvedValue(false);
 
       await expect(localAuthService.loginUser(loginDto)).rejects.toThrow(
@@ -303,7 +198,7 @@ describe("LocalAuthService", () => {
     });
 
     it("should throw error if refresh token creation fails", async () => {
-      (userService.getUserByIdOrEmail as jest.Mock).mockResolvedValue(mockUser);
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue(mockUser);
       (cryptoService.comparePasswords as jest.Mock).mockResolvedValue(true);
       const error = new Error("Token creation failed");
       (refreshTokenService.createToken as jest.Mock).mockRejectedValue(error);
@@ -312,7 +207,7 @@ describe("LocalAuthService", () => {
     });
 
     it("should handle JWT token generation failure", async () => {
-      (userService.getUserByIdOrEmail as jest.Mock).mockResolvedValue(mockUser);
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue(mockUser);
 
       (cryptoService.comparePasswords as jest.Mock).mockResolvedValue(true);
 
@@ -326,7 +221,7 @@ describe("LocalAuthService", () => {
     });
 
     it("should handle createToken failure", async () => {
-      (userService.getUserByIdOrEmail as jest.Mock).mockResolvedValue(mockUser);
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue(mockUser);
 
       (cryptoService.comparePasswords as jest.Mock).mockResolvedValue(true);
 
@@ -341,7 +236,7 @@ describe("LocalAuthService", () => {
   describe("error handling", () => {
     it("should handle unexpected errors from user service", async () => {
       const error = new Error("Database connection failed");
-      (userService.getUserByIdOrEmail as jest.Mock).mockRejectedValue(error);
+      (userService.getUserByEmail as jest.Mock).mockRejectedValue(error);
 
       await expect(
         localAuthService.loginUser({
@@ -352,7 +247,7 @@ describe("LocalAuthService", () => {
     });
 
     it("should handle unexpected errors from password hasher service", async () => {
-      (userService.getUserByIdOrEmail as jest.Mock).mockResolvedValue(mockUser);
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue(mockUser);
       const error = new Error("Comparison failed");
       (cryptoService.comparePasswords as jest.Mock).mockRejectedValue(error);
 
@@ -381,7 +276,7 @@ describe("LocalAuthService", () => {
   //     const registeredUser = await localAuthService.registerUser(createUserDto);
 
   //     // Login
-  //     (userService.getUserByIdOrEmail as jest.Mock).mockResolvedValue(
+  //     (userService.getUserByEmail as jest.Mock).mockResolvedValue(
   //       registeredUser
   //     );
   //     (cryptoService.comparePasswords as jest.Mock).mockResolvedValue(true);
@@ -393,7 +288,7 @@ describe("LocalAuthService", () => {
   //     );
 
   //     const loginResult = await localAuthService.loginUser({
-  //       email: createUserDto.data.email,
+  //       email: createUserDto.email,
   //       password: "password123",
   //     });
 
@@ -552,7 +447,7 @@ describe("LocalAuthService", () => {
     it("should handle case when createUserDto has missing email", async () => {
       const invalidDto = {
         data: {
-          ...createUserDto.data,
+          ...createUserDto,
           email: undefined,
         },
       };
@@ -566,7 +461,7 @@ describe("LocalAuthService", () => {
     it("should handle case when createUserDto has missing password", async () => {
       const invalidDto = {
         data: {
-          ...createUserDto.data,
+          ...createUserDto,
           password: undefined,
         },
       };

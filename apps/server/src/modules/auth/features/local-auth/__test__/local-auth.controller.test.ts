@@ -2,33 +2,50 @@ import { Response } from "express";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
-import type { ICreateBodyDto } from "@/modules/shared/dtos";
 import type {
   IApiResponse,
+  ILoggerService,
+  IRateLimitService,
   IResponseFormatter,
 } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
-import { refreshTokenCookieConfig } from "@/modules/auth/config";
+import {
+  AUTH_RATE_LIMIT_CONFIG,
+  refreshTokenCookieConfig,
+} from "@/modules/auth/config";
 import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 
 import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
-import type { User } from "@/modules/user";
+import type { ICreateUserDto, User } from "@/modules/user";
 
+import {
+  BadRequestError,
+  UnauthorizedError,
+} from "@/modules/shared/api-errors";
 import { LocalAuthController } from "../local-auth.controller";
-import type { ILocalAuthService } from "../local-auth.types";
+import type {
+  ILocalAuthControllerOptions,
+  ILocalAuthService,
+} from "../local-auth.types";
 
 describe("LocalAuthController", () => {
+  let localAuthController: LocalAuthController;
+
   // Mock LocalAuthService
   const localAuthService = mock<ILocalAuthService>();
+  const rateLimiter = mock<IRateLimitService>();
+  const logger = mock<ILoggerService>();
   const responseFormatter = mock<IResponseFormatter>();
 
-  const localAuthController = LocalAuthController.getInstance({
+  const controllerOptions: ILocalAuthControllerOptions = {
     localAuthService,
+    rateLimiter,
+    logger,
     responseFormatter,
-  });
+  };
 
-  const registerReq = mock<TypedRequest<ICreateBodyDto<User>>>();
+  const registerReq = mock<TypedRequest<ICreateUserDto>>();
 
   const loginReq = mock<TypedRequest<ILoginDto>>();
 
@@ -46,12 +63,10 @@ describe("LocalAuthController", () => {
     updatedAt: new Date(),
   };
 
-  const mockRegisterDto: ICreateBodyDto<User> = {
+  const mockRegisterDto: ICreateUserDto = {
     email: "test@example.com",
     password: "Password123!",
     username: "Test User",
-    isEmailVerified: false,
-    profilePicture: null,
   };
 
   const mockLoginDto: ILoginDto = {
@@ -67,15 +82,39 @@ describe("LocalAuthController", () => {
   beforeEach(() => {
     mockReset(localAuthService);
     mockReset(responseFormatter);
+    mockReset(rateLimiter);
+    mockReset(logger);
 
     registerReq.body = mockRegisterDto;
+    registerReq.rateLimitKey = `rate:register:ip:${registerReq.ip}`;
+
     loginReq.body = mockLoginDto;
+    loginReq.rateLimitKey = `rate:login:ip:email:${loginReq.ip}-${loginReq.body.email}`;
 
     res.status.mockReturnThis();
     res.json.mockReturnThis();
     res.cookie.mockReturnThis();
 
     jest.clearAllMocks();
+
+    // Reset singleton instance before each test to ensure a clean state.
+    // @ts-ignore: resetting the private _instance for testing purposes
+    LocalAuthController._instance = undefined;
+
+    localAuthController = LocalAuthController.getInstance(controllerOptions);
+  });
+
+  describe("Singleton behavior", () => {
+    it("should create a new instance when none exists", () => {
+      const instance1 = LocalAuthController.getInstance(controllerOptions);
+      expect(instance1).toBeInstanceOf(LocalAuthController);
+    });
+
+    it("should return the existing instance when called multiple times", () => {
+      const instance1 = LocalAuthController.getInstance(controllerOptions);
+      const instance2 = LocalAuthController.getInstance(controllerOptions);
+      expect(instance1).toBe(instance2);
+    });
   });
 
   describe("LocalAuthController - register", () => {
@@ -93,14 +132,41 @@ describe("LocalAuthController", () => {
 
       await localAuthController.register(registerReq, res);
 
-      expect(localAuthService.registerUser).toHaveBeenCalledWith({
-        data: mockRegisterDto,
+      expect(localAuthService.registerUser).toHaveBeenCalledWith(
+        mockRegisterDto
+      );
+      expect(rateLimiter.reset).toHaveBeenCalledWith(registerReq.rateLimitKey);
+      expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
+        responseOptions: {
+          status: httpStatus.CREATED,
+          message: "A verification email has been sent to your email.",
+          data: { email: mockUser.email },
+        },
       });
       expect(res.status).toHaveBeenCalledWith(httpStatus.CREATED);
       expect(res.json).toHaveBeenCalledWith(formattedRegisterRes);
     });
 
-    it("should handle registration service errors", async () => {
+    it("should handle registration failure when service returns undefined", async () => {
+      // Arrange
+      localAuthService.registerUser.mockResolvedValue(undefined);
+
+      // Act & Assert
+      await expect(
+        localAuthController.register(registerReq, res)
+      ).rejects.toThrow(BadRequestError);
+
+      expect(localAuthService.registerUser).toHaveBeenCalledWith(
+        mockRegisterDto
+      );
+
+      expect(rateLimiter.increment).toHaveBeenCalledWith({
+        key: registerReq.rateLimitKey,
+        ...AUTH_RATE_LIMIT_CONFIG.registration,
+      });
+    });
+
+    it("should handle unexpected errors during registration", async () => {
       const error = new Error("Registration failed");
 
       localAuthService.registerUser.mockRejectedValue(error);
@@ -128,6 +194,8 @@ describe("LocalAuthController", () => {
 
       expect(localAuthService.loginUser).toHaveBeenCalledWith(mockLoginDto);
 
+      expect(rateLimiter.reset).toHaveBeenCalledWith(loginReq.rateLimitKey);
+
       expect(res.cookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
         mockAuthResponse.refreshToken,
@@ -138,6 +206,88 @@ describe("LocalAuthController", () => {
 
       expect(res.json).toHaveBeenCalledWith(formattedLoginRes);
     });
+
+    it("should handle unexpected errors during login", async () => {
+      // Arrange
+      const unexpectedError = new Error("Database connection error");
+      localAuthService.loginUser.mockRejectedValue(unexpectedError);
+
+      // Act & Assert
+      await expect(localAuthController.login(loginReq, res)).rejects.toThrow(
+        unexpectedError
+      );
+      expect(localAuthService.loginUser).toHaveBeenCalledWith(mockLoginDto);
+      expect(rateLimiter.increment).toHaveBeenCalledWith({
+        key: loginReq.rateLimitKey,
+        ...AUTH_RATE_LIMIT_CONFIG.login,
+      });
+    });
+  });
+
+  describe("LocalAuthController - Rate Limiting", () => {
+    it("should increment rate limiter on failed login attempts", async () => {
+      // Arrange
+      localAuthService.loginUser.mockRejectedValue(
+        new UnauthorizedError("Invalid credentials")
+      );
+
+      // Act & Assert
+      await expect(localAuthController.login(loginReq, res)).rejects.toThrow(
+        UnauthorizedError
+      );
+      expect(rateLimiter.increment).toHaveBeenCalledWith({
+        key: loginReq.rateLimitKey,
+        ...AUTH_RATE_LIMIT_CONFIG.login,
+      });
+    });
+
+    it("should increment rate limiter on failed registration attempts", async () => {
+      localAuthService.registerUser.mockRejectedValue(
+        new BadRequestError("Email already exists")
+      );
+
+      // Act & Assert
+      await expect(
+        localAuthController.register(registerReq, res)
+      ).rejects.toThrow(BadRequestError);
+      expect(rateLimiter.increment).toHaveBeenCalledWith({
+        key: registerReq.rateLimitKey,
+        ...AUTH_RATE_LIMIT_CONFIG.registration,
+      });
+    });
+
+    it("should reset rate limiter on successful login", async () => {
+      // Arrange
+      localAuthService.loginUser.mockResolvedValue(mockAuthResponse);
+
+      // Act
+      await localAuthController.login(registerReq, res);
+
+      // Assert
+      expect(rateLimiter.reset).toHaveBeenCalledWith(registerReq.rateLimitKey);
+    });
+
+    it("should reset rate limiter on successful registration", async () => {
+      // Arrange
+      localAuthService.registerUser.mockResolvedValue(mockUser);
+
+      // Act
+      await localAuthController.register(registerReq, res);
+
+      // Assert
+      expect(rateLimiter.reset).toHaveBeenCalledWith(registerReq.rateLimitKey);
+    });
+
+    // it("should handle rate limiter errors gracefully", async () => {
+    //   // Arrange
+    //   localAuthService.loginUser.mockResolvedValue(mockAuthResponse);
+    //   rateLimiter.reset.mockRejectedValue(new Error("Rate limiter error"));
+
+    //   // Act & Assert
+    //   // Even if rate limiter fails, the login should still succeed
+    //   await localAuthController.login(loginReq, res);
+    //   expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+    // });
   });
 
   describe("LocalAuthController - error handling", () => {
@@ -156,8 +306,8 @@ describe("LocalAuthController", () => {
     });
   });
 
-  describe("LocalAuthController - Response Security", () => {
-    it("should not include sensitive user data in registration response", async () => {
+  describe("LocalAuthController - Security Considerations", () => {
+    it("should not expose sensitive user data in registration response", async () => {
       localAuthService.registerUser.mockResolvedValue(mockUser);
 
       await localAuthController.register(registerReq, res);
@@ -170,7 +320,7 @@ describe("LocalAuthController", () => {
       );
     });
 
-    it("should not include sensitive data in login response", async () => {
+    it("should not expose sensitive user data in login response", async () => {
       localAuthService.loginUser.mockResolvedValue(mockAuthResponse);
 
       await localAuthController.login(loginReq, res);
@@ -181,6 +331,68 @@ describe("LocalAuthController", () => {
           password: expect.any(String),
         })
       );
+    });
+
+    it("should set secure cookie options for refresh token", async () => {
+      localAuthService.loginUser.mockResolvedValue(mockAuthResponse);
+
+      // Act
+      await localAuthController.login(loginReq, res);
+
+      // Assert
+      expect(res.cookie).toHaveBeenCalledWith(
+        REFRESH_TOKEN_NAME,
+        "mock-refresh-token",
+        refreshTokenCookieConfig
+      );
+      // Verify that the cookie config has secure settings
+      expect(refreshTokenCookieConfig).toEqual(
+        expect.objectContaining({
+          httpOnly: true,
+        })
+      );
+    });
+  });
+
+  describe("LocalAuthController - Brute Force Protection", () => {
+    it("should implement rate limiting for failed login attempts", async () => {
+      localAuthService.loginUser.mockRejectedValue(
+        new UnauthorizedError("Invalid credentials")
+      );
+
+      // Act
+      for (let i = 0; i < 3; i++) {
+        await expect(
+          localAuthController.login(loginReq, res)
+        ).rejects.toThrow();
+      }
+
+      // Assert
+      expect(rateLimiter.increment).toHaveBeenCalledTimes(3);
+      expect(rateLimiter.increment).toHaveBeenCalledWith({
+        key: loginReq.rateLimitKey,
+        ...AUTH_RATE_LIMIT_CONFIG.login,
+      });
+    });
+
+    it("should implement rate limiting for failed registration attempts", async () => {
+      localAuthService.registerUser.mockRejectedValue(
+        new BadRequestError("Email already exists")
+      );
+
+      // Act
+      for (let i = 0; i < 3; i++) {
+        await expect(
+          localAuthController.register(registerReq, res)
+        ).rejects.toThrow();
+      }
+
+      // Assert
+      expect(rateLimiter.increment).toHaveBeenCalledTimes(3);
+      expect(rateLimiter.increment).toHaveBeenCalledWith({
+        key: registerReq.rateLimitKey,
+        ...AUTH_RATE_LIMIT_CONFIG.registration,
+      });
     });
   });
 });

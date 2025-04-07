@@ -111,7 +111,7 @@ describe("VerifyEmailService methods test", () => {
     });
 
     it("should successfully create a verification token for an unverified email and save it to the database", async () => {
-      userService.getUserByIdOrEmail.mockResolvedValue(mockUnverifiedUser);
+      userService.getUserByEmail.mockResolvedValue(mockUnverifiedUser);
 
       verifyEmailRepository.findActiveToken.mockResolvedValue(null);
 
@@ -128,10 +128,8 @@ describe("VerifyEmailService methods test", () => {
 
       expect(result).toBe(mockValidToken);
 
-      expect(userService.getUserByIdOrEmail).toHaveBeenCalledWith(
-        {
-          email: mockEmail,
-        },
+      expect(userService.getUserByEmail).toHaveBeenCalledWith(
+        mockEmail,
         mockTx
       );
 
@@ -151,7 +149,7 @@ describe("VerifyEmailService methods test", () => {
     });
 
     it("should throw a NotFoundError if the user is not found", async () => {
-      userService.getUserByIdOrEmail.mockRejectedValue(
+      userService.getUserByEmail.mockRejectedValue(
         new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
       );
 
@@ -159,16 +157,14 @@ describe("VerifyEmailService methods test", () => {
         verifyEmailService.createToken(mockTx as any, mockEmail)
       ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
 
-      expect(userService.getUserByIdOrEmail).toHaveBeenCalledWith(
-        {
-          email: mockEmail,
-        },
+      expect(userService.getUserByEmail).toHaveBeenCalledWith(
+        mockEmail,
         mockTx
       );
     });
 
     it("should throw a BadRequestError if the user's email is already verified", async () => {
-      userService.getUserByIdOrEmail.mockResolvedValue({
+      userService.getUserByEmail.mockResolvedValue({
         ...mockUnverifiedUser,
         isEmailVerified: true,
       });
@@ -177,16 +173,14 @@ describe("VerifyEmailService methods test", () => {
         verifyEmailService.createToken(mockTx as any, mockEmail)
       ).rejects.toThrow(new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED));
 
-      expect(userService.getUserByIdOrEmail).toHaveBeenCalledWith(
-        {
-          email: mockEmail,
-        },
+      expect(userService.getUserByEmail).toHaveBeenCalledWith(
+        mockEmail,
         mockTx
       );
     });
 
     it("should throw a BadRequestError if a verification link was already sent", async () => {
-      userService.getUserByIdOrEmail.mockResolvedValue(mockUnverifiedUser);
+      userService.getUserByEmail.mockResolvedValue(mockUnverifiedUser);
 
       verifyEmailRepository.findActiveToken.mockResolvedValue(
         mockVerificationToken
@@ -198,10 +192,8 @@ describe("VerifyEmailService methods test", () => {
         new BadRequestError(ERROR_MESSAGES.VERIFICATION_LINK_SENT)
       );
 
-      expect(userService.getUserByIdOrEmail).toHaveBeenCalledWith(
-        {
-          email: mockEmail,
-        },
+      expect(userService.getUserByEmail).toHaveBeenCalledWith(
+        mockEmail,
         mockTx
       );
 
@@ -214,7 +206,7 @@ describe("VerifyEmailService methods test", () => {
     });
 
     it("should throw an Error if token creation fails", async () => {
-      userService.getUserByIdOrEmail.mockResolvedValue(mockUnverifiedUser);
+      userService.getUserByEmail.mockResolvedValue(mockUnverifiedUser);
 
       verifyEmailRepository.findActiveToken.mockResolvedValue(null);
 
@@ -228,7 +220,7 @@ describe("VerifyEmailService methods test", () => {
     });
 
     it("should log an info message when a verification token is created", async () => {
-      userService.getUserByIdOrEmail.mockResolvedValue(mockUnverifiedUser);
+      userService.getUserByEmail.mockResolvedValue(mockUnverifiedUser);
 
       verifyEmailRepository.findActiveToken.mockResolvedValue(null);
 
@@ -346,7 +338,7 @@ describe("VerifyEmailService methods test", () => {
     it("should throw a BadRequestError if token is not found in the database", async () => {
       jwtService.verify.mockResolvedValue(decodedToken);
 
-      userService.getUserByIdOrEmail.mockResolvedValue(mockUnverifiedUser);
+      userService.getUserByEmail.mockResolvedValue(mockUnverifiedUser);
 
       verifyEmailRepository.findActiveToken.mockResolvedValue(null);
 
@@ -407,7 +399,7 @@ describe("VerifyEmailService methods test", () => {
 
       jwtService.verify.mockResolvedValue(decodedToken);
 
-      userService.getUserByIdOrEmail.mockResolvedValue(mockUnverifiedUser);
+      userService.getUserByEmail.mockResolvedValue(mockUnverifiedUser);
 
       verifyEmailRepository.findActiveToken.mockResolvedValue(
         mockVerificationToken

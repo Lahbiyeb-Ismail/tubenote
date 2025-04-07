@@ -9,7 +9,12 @@ import type {
   IPasswordBodyDto,
 } from "@/modules/shared/dtos";
 
-import type { IResponseFormatter } from "@/modules/shared/services";
+import type {
+  ILoggerService,
+  IRateLimitService,
+  IResponseFormatter,
+} from "@/modules/shared/services";
+import { AUTH_RATE_LIMIT_CONFIG } from "../../config";
 import type {
   IResetPasswordController,
   IResetPasswordControllerOptions,
@@ -24,7 +29,9 @@ export class ResetPasswordController implements IResetPasswordController {
 
   private constructor(
     private readonly _resetPasswordService: IResetPasswordService,
-    private readonly _responseFormatter: IResponseFormatter
+    private readonly _responseFormatter: IResponseFormatter,
+    private readonly _rateLimitService: IRateLimitService,
+    private readonly _loggerService: ILoggerService
   ) {}
 
   public static getInstance(
@@ -33,7 +40,9 @@ export class ResetPasswordController implements IResetPasswordController {
     if (!this._instance) {
       this._instance = new ResetPasswordController(
         options.resetPasswordService,
-        options.responseFormatter
+        options.responseFormatter,
+        options.rateLimitService,
+        options.loggerService
       );
     }
 
@@ -51,18 +60,31 @@ export class ResetPasswordController implements IResetPasswordController {
     req: TypedRequest<IEmailBodyDto>,
     res: Response
   ): Promise<void> {
-    const { email } = req.body;
+    try {
+      const { email } = req.body;
 
-    await this._resetPasswordService.sendResetToken(email);
+      await this._resetPasswordService.sendResetToken(email);
 
-    const formattedResponse = this._responseFormatter.formatResponse({
-      responseOptions: {
-        status: httpStatus.OK,
-        message: "Password reset link sent to your email.",
-      },
-    });
+      const formattedResponse = this._responseFormatter.formatResponse({
+        responseOptions: {
+          status: httpStatus.OK,
+          message: "Password reset link sent to your email.",
+        },
+      });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+      await this._rateLimitService.reset(req.rateLimitKey);
+
+      res.status(httpStatus.OK).json(formattedResponse);
+    } catch (error: any) {
+      await this._rateLimitService.increment({
+        key: req.rateLimitKey,
+        ...AUTH_RATE_LIMIT_CONFIG.forgotPassword,
+      });
+
+      this._loggerService.error("Error in forgotPassword", error);
+
+      throw error;
+    }
   }
 
   /**
@@ -76,19 +98,32 @@ export class ResetPasswordController implements IResetPasswordController {
     req: TypedRequest<IPasswordBodyDto, IParamTokenDto>,
     res: Response
   ): Promise<void> {
-    const { password } = req.body;
-    const { token } = req.params;
+    try {
+      const { password } = req.body;
+      const { token } = req.params;
 
-    await this._resetPasswordService.resetPassword(token, password);
+      await this._resetPasswordService.resetPassword(token, password);
 
-    const formattedResponse = this._responseFormatter.formatResponse({
-      responseOptions: {
-        status: httpStatus.OK,
-        message: "Password reset successfully.",
-      },
-    });
+      const formattedResponse = this._responseFormatter.formatResponse({
+        responseOptions: {
+          status: httpStatus.OK,
+          message: "Password reset successfully.",
+        },
+      });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+      await this._rateLimitService.reset(req.rateLimitKey);
+
+      res.status(httpStatus.OK).json(formattedResponse);
+    } catch (error: any) {
+      await this._rateLimitService.increment({
+        key: req.rateLimitKey,
+        ...AUTH_RATE_LIMIT_CONFIG.resetPassword,
+      });
+
+      this._loggerService.error("Error in resetPassword", error);
+
+      throw error;
+    }
   }
 
   /**

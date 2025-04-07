@@ -5,6 +5,7 @@ import { DatabaseError } from "./database.error";
 import { ForbiddenError } from "./forbidden.error";
 import { InternalServerError } from "./internal-server.error";
 import { NotFoundError } from "./not-found.error";
+import { TooManyRequestsError } from "./too-many-requests.error";
 import { UnauthorizedError } from "./unauthorized.error";
 
 export {
@@ -16,4 +17,5 @@ export {
   BadRequestError,
   InternalServerError,
   DatabaseError,
+  TooManyRequestsError,
 };

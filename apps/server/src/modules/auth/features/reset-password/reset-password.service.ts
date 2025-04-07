@@ -42,7 +42,11 @@ export class ResetPasswordService implements IResetPasswordService {
   }
 
   async sendResetToken(email: string): Promise<void> {
-    const user = await this._userService.getUserByIdOrEmail({ email });
+    const user = await this._userService.getUserByEmail(email);
+    if (!user) {
+      this._loggerService.error(`User not found with email: ${email}`);
+      throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
+    }
 
     if (!user.isEmailVerified) {
       throw new ForbiddenError(ERROR_MESSAGES.NOT_VERIFIED);

@@ -81,20 +81,16 @@ describe("OAuthController", () => {
   describe("oauthLogin", () => {
     const oauthLoginDto: IOauthLoginDto = {
       createAccountDto: {
-        data: {
-          provider: "google",
-          providerAccountId: "provider-id",
-          type: "oauth",
-        },
+        provider: "google",
+        providerAccountId: "provider-id",
+        type: "oauth",
       },
       createUserDto: {
-        data: {
-          email: "user@example.com",
-          password: "userPassword12!",
-          username: "test user",
-          isEmailVerified: true,
-          profilePicture: "profile_picture.png",
-        },
+        email: "user@example.com",
+        password: "userPassword12!",
+        username: "test user",
+        isEmailVerified: true,
+        profilePicture: "profile_picture.png",
       },
     };
 

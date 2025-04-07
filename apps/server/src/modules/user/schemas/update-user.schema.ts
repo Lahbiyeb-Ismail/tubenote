@@ -6,7 +6,6 @@ export const updateUserSchema = z
   .object({
     username: usernameSchema.optional(),
     email: emailSchema.optional(),
-    profilePicture: z.string().optional(),
-    isEmailVerified: z.boolean().optional(),
+    profilePicture: z.string().url().optional(),
   })
   .strict();

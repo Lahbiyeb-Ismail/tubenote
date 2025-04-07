@@ -18,12 +18,12 @@ export class AccountService implements IAccountService {
     userId: string,
     createAccountDto: ICreateAccountDto
   ): Promise<Account> {
-    const { data } = createAccountDto;
+    const { provider, providerAccountId } = createAccountDto;
 
     // Check if account already exists with this provider and providerAccountId
     const existingAccount = await this._accountRepository.findByProvider(
-      data.provider,
-      data.providerAccountId,
+      provider,
+      providerAccountId,
       tx
     );
 
@@ -53,13 +53,11 @@ export class AccountService implements IAccountService {
     userId: string,
     createAccountDto: ICreateAccountDto
   ): Promise<Account> {
-    const { data } = createAccountDto;
-
     return this._prismaService.transaction(async (tx) => {
       // Verify that this provider account isn't already linked to another user
       const existingAccount = await this._accountRepository.findByProvider(
-        data.provider,
-        data.providerAccountId,
+        createAccountDto.provider,
+        createAccountDto.providerAccountId,
         tx
       );
 

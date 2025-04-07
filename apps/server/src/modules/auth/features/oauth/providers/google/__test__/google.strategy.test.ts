@@ -72,20 +72,16 @@ describe("GoogleOAuthStrategy", () => {
       // Assert: verify done is called with no error and a user object that matches expected shape.
       expect(done).toHaveBeenCalledWith(null, {
         createAccountDto: {
-          data: {
-            type: "oauth",
-            provider: "google",
-            providerAccountId: profile.id,
-          },
+          type: "oauth",
+          provider: "google",
+          providerAccountId: profile.id,
         },
         createUserDto: {
-          data: {
-            email: "testuser@example.com",
-            profilePicture: "http://example.com/photo.png",
-            username: "Test User",
-            password: profile.id,
-            isEmailVerified: true,
-          },
+          email: "testuser@example.com",
+          profilePicture: "http://example.com/photo.png",
+          username: "Test User",
+          password: profile.id,
+          isEmailVerified: true,
         },
       });
     });

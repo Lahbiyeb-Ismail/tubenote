@@ -1,18 +1,24 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import { refreshTokenCookieConfig } from "@/modules/auth/config";
+import {
+  AUTH_RATE_LIMIT_CONFIG,
+  refreshTokenCookieConfig,
+} from "@/modules/auth/config";
 import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 
 import { BadRequestError } from "@/modules/shared/api-errors";
 
-import type { ICreateBodyDto } from "@/modules/shared/dtos";
 import type { TypedRequest } from "@/modules/shared/types";
-import type { User } from "@/modules/user";
+import type { ICreateUserDto } from "@/modules/user";
 
 import type { ILoginDto } from "@/modules/auth/dtos";
 
-import type { IResponseFormatter } from "@/modules/shared/services";
+import type {
+  ILoggerService,
+  IRateLimitService,
+  IResponseFormatter,
+} from "@/modules/shared/services";
 import type {
   ILocalAuthController,
   ILocalAuthControllerOptions,
@@ -24,6 +30,8 @@ export class LocalAuthController implements ILocalAuthController {
 
   private constructor(
     private readonly _localAuthService: ILocalAuthService,
+    private readonly _rateLimiter: IRateLimitService,
+    private readonly _logger: ILoggerService,
     private readonly _responseFormatter: IResponseFormatter
   ) {}
 
@@ -33,6 +41,8 @@ export class LocalAuthController implements ILocalAuthController {
     if (!this._instance) {
       this._instance = new LocalAuthController(
         options.localAuthService,
+        options.rateLimiter,
+        options.logger,
         options.responseFormatter
       );
     }
@@ -45,22 +55,34 @@ export class LocalAuthController implements ILocalAuthController {
    * @param req - The request object containing user registration credentials.
    * @param res - The response object.
    */
-  async register(req: TypedRequest<ICreateBodyDto<User>>, res: Response) {
-    const user = await this._localAuthService.registerUser({ data: req.body });
+  async register(req: TypedRequest<ICreateUserDto>, res: Response) {
+    try {
+      const user = await this._localAuthService.registerUser(req.body);
 
-    if (!user) throw new BadRequestError("User registration failed.");
+      if (!user) throw new BadRequestError("User registration failed.");
 
-    const formattedResponse = this._responseFormatter.formatResponse<{
-      email: string;
-    }>({
-      responseOptions: {
-        status: httpStatus.CREATED,
-        message: "A verification email has been sent to your email.",
-        data: { email: user.email },
-      },
-    });
+      const formattedResponse = this._responseFormatter.formatResponse<{
+        email: string;
+      }>({
+        responseOptions: {
+          status: httpStatus.CREATED,
+          message: "A verification email has been sent to your email.",
+          data: { email: user.email },
+        },
+      });
 
-    res.status(httpStatus.CREATED).json(formattedResponse);
+      // Reset rate limiters on successful registration
+      await this._rateLimiter.reset(req.rateLimitKey);
+
+      res.status(httpStatus.CREATED).json(formattedResponse);
+    } catch (error: any) {
+      await this._rateLimiter.increment({
+        key: req.rateLimitKey,
+        ...AUTH_RATE_LIMIT_CONFIG.registration,
+      });
+
+      throw error;
+    }
   }
 
   /**
@@ -69,21 +91,35 @@ export class LocalAuthController implements ILocalAuthController {
    * @param res - The response object.
    */
   async login(req: TypedRequest<ILoginDto>, res: Response) {
-    const { accessToken, refreshToken } =
-      await this._localAuthService.loginUser(req.body);
+    const rateLimitKey = req.rateLimitKey;
 
-    const formattedResponse = this._responseFormatter.formatResponse<{
-      accessToken: string;
-    }>({
-      responseOptions: {
-        status: httpStatus.OK,
-        message: "Login successful",
-        data: { accessToken },
-      },
-    });
+    try {
+      const { accessToken, refreshToken } =
+        await this._localAuthService.loginUser({ ...req.body });
 
-    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+      const formattedResponse = this._responseFormatter.formatResponse<{
+        accessToken: string;
+      }>({
+        responseOptions: {
+          status: httpStatus.OK,
+          message: "Login successful",
+          data: { accessToken },
+        },
+      });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+      // Reset rate limiters on successful login
+      await this._rateLimiter.reset(rateLimitKey);
+
+      res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+
+      res.status(httpStatus.OK).json(formattedResponse);
+    } catch (error: any) {
+      await this._rateLimiter.increment({
+        key: rateLimitKey,
+        ...AUTH_RATE_LIMIT_CONFIG.login,
+      });
+
+      throw error;
+    }
   }
 }

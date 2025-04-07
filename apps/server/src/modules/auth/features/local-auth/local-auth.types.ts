@@ -2,15 +2,16 @@ import type { Response } from "express";
 
 import type { TypedRequest } from "@/modules/shared/types";
 
-import type { ICreateBodyDto } from "@/modules/shared/dtos";
 import type { ICreateUserDto, IUserService, User } from "@/modules/user";
 
 import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
 
 import type {
   ICryptoService,
+  ILoggerService,
   IMailSenderService,
   IPrismaService,
+  IRateLimitService,
   IResponseFormatter,
 } from "@/modules/shared/services";
 import type { IJwtService } from "../../utils";
@@ -23,10 +24,7 @@ export interface ILocalAuthService {
 }
 
 export interface ILocalAuthController {
-  register(
-    req: TypedRequest<ICreateBodyDto<User>>,
-    res: Response
-  ): Promise<void>;
+  register(req: TypedRequest<ICreateUserDto>, res: Response): Promise<void>;
   login(req: TypedRequest<ILoginDto>, res: Response): Promise<void>;
 }
 
@@ -38,9 +36,12 @@ export interface ILocalAuthServiceOptions {
   jwtService: IJwtService;
   cryptoService: ICryptoService;
   mailSenderService: IMailSenderService;
+  loggerService: ILoggerService;
 }
 
 export interface ILocalAuthControllerOptions {
   localAuthService: ILocalAuthService;
+  rateLimiter: IRateLimitService;
+  logger: ILoggerService;
   responseFormatter: IResponseFormatter;
 }

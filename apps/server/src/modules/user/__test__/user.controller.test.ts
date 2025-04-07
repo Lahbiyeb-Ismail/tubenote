@@ -8,47 +8,46 @@ import type { TypedRequest } from "@/modules/shared/types";
 
 import { UserController } from "../user.controller";
 
-import type { IResponseFormatter } from "@/modules/shared/services";
+import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
 import type {
-  IUpdatePasswordBodyDto,
-  IUpdatePasswordDto,
-  IUpdateUserDto,
-} from "../dtos";
+  ILoggerService,
+  IRateLimitService,
+  IResponseFormatter,
+} from "@/modules/shared/services";
+import type { IUpdatePasswordDto, IUpdateUserDto } from "../dtos";
 import type { User } from "../user.model";
-import type { IUserService } from "../user.types";
+import type { IUserControllerOptions, IUserService } from "../user.types";
 
 describe("UserController tests", () => {
+  let userController: UserController;
+
   const userService = mock<IUserService>();
   const responseFormatter = mock<IResponseFormatter>();
+  const rateLimitService = mock<IRateLimitService>();
+  const loggerService = mock<ILoggerService>();
 
-  const userController = UserController.getInstance({
+  const controllerOptions: IUserControllerOptions = {
     userService,
     responseFormatter,
-  });
+    rateLimitService,
+    loggerService,
+  };
 
   const req = mock<TypedRequest>();
   const res = mock<Response>();
-  const updateUserReq = mock<TypedRequest<IUpdateBodyDto<User>>>();
-  const updatePasswordReq = mock<TypedRequest<IUpdatePasswordBodyDto>>();
+  const updateUserReq = mock<TypedRequest<IUpdateUserDto>>();
+  const updatePasswordReq = mock<TypedRequest<IUpdatePasswordDto>>();
 
   const mockUserId = "user_id_001";
 
   const updateUserDto: IUpdateUserDto = {
-    id: mockUserId,
-    data: {
-      username: "test_user_updated",
-      email: "testuser@example.com",
-    },
-  };
-
-  const updatePasswordBodyDto: IUpdatePasswordBodyDto = {
-    currentPassword: "current_user_password",
-    newPassword: "new_user_password",
+    username: "test_user_updated",
+    email: "testuser@example.com",
   };
 
   const updatePasswordDto: IUpdatePasswordDto = {
-    id: mockUserId,
-    ...updatePasswordBodyDto,
+    currentPassword: "current_user_password",
+    newPassword: "new_user_password",
   };
 
   const mockUser: User = {
@@ -65,17 +64,47 @@ describe("UserController tests", () => {
 
   beforeEach(() => {
     mockReset(userService);
+    mockReset(responseFormatter);
+    mockReset(rateLimitService);
+    mockReset(loggerService);
+
+    // Reset all mocks before each test
+    jest.resetAllMocks();
 
     res.status.mockReturnThis();
     res.json.mockReturnThis();
 
     req.userId = mockUserId;
 
-    updateUserReq.body = updateUserDto.data;
-    updateUserReq.userId = updateUserDto.id;
+    updateUserReq.body = updateUserDto;
+    updateUserReq.userId = mockUserId;
 
-    updatePasswordReq.body = updatePasswordBodyDto;
-    updatePasswordReq.userId = updatePasswordDto.id;
+    updatePasswordReq.body = updatePasswordDto;
+    updatePasswordReq.userId = mockUserId;
+    updatePasswordReq.rateLimitKey = `${mockUserId}:password-update`;
+
+    // Reset singleton instance before each test to ensure a clean state.
+    // @ts-ignore: resetting the private _instance for testing purposes
+    UserController._instance = undefined;
+
+    userController = UserController.getInstance(controllerOptions);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe("Singleton Behavior", () => {
+    it("should create a new instance when none exists", () => {
+      const instance1 = UserController.getInstance(controllerOptions);
+      expect(instance1).toBeInstanceOf(UserController);
+    });
+
+    it("should return the existing instance when called multiple times", () => {
+      const instance1 = UserController.getInstance(controllerOptions);
+      const instance2 = UserController.getInstance(controllerOptions);
+      expect(instance1).toBe(instance2);
+    });
   });
 
   describe("UserController - getCurrentUser", () => {
@@ -91,7 +120,7 @@ describe("UserController tests", () => {
     };
 
     it("should send the current user's information and remove sensitive data", async () => {
-      (userService.getUserByIdOrEmail as jest.Mock).mockResolvedValue(mockUser);
+      (userService.getUserById as jest.Mock).mockResolvedValue(mockUser);
 
       (responseFormatter.formatResponse as jest.Mock).mockReturnValue(
         getUserFormattedRes
@@ -99,9 +128,7 @@ describe("UserController tests", () => {
 
       await userController.getCurrentUser(req, res);
 
-      expect(userService.getUserByIdOrEmail).toHaveBeenCalledWith({
-        id: mockUserId,
-      });
+      expect(userService.getUserById).toHaveBeenCalledWith(mockUserId);
 
       expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
         responseOptions: {
@@ -119,7 +146,7 @@ describe("UserController tests", () => {
 
     it("should propagate user service errors", async () => {
       const errorMessage = "Error fetching user data";
-      (userService.getUserByIdOrEmail as jest.Mock).mockRejectedValue(
+      (userService.getUserById as jest.Mock).mockRejectedValue(
         new Error(errorMessage)
       );
 
@@ -133,7 +160,7 @@ describe("UserController tests", () => {
     const updateUserFormattedRes = {
       success: true,
       status: httpStatus.OK,
-      data: { ...mockUser, ...updateUserDto.data },
+      data: { ...mockUser, ...updateUserDto },
       message: "User updated successfully.",
     };
 
@@ -144,7 +171,7 @@ describe("UserController tests", () => {
     it("should update the current user's information", async () => {
       (userService.updateUser as jest.Mock).mockResolvedValue({
         ...mockUser,
-        ...updateUserDto.data,
+        ...updateUserDto,
       });
 
       (responseFormatter.formatResponse as jest.Mock).mockReturnValue(
@@ -153,10 +180,10 @@ describe("UserController tests", () => {
 
       await userController.updateCurrentUser(updateUserReq, res);
 
-      expect(userService.updateUser).toHaveBeenCalledWith({
-        id: mockUserId,
-        data: updateUserReq.body,
-      });
+      expect(userService.updateUser).toHaveBeenCalledWith(
+        mockUserId,
+        updateUserReq.body
+      );
 
       expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
         responseOptions: {
@@ -182,10 +209,7 @@ describe("UserController tests", () => {
 
       await userController.updateCurrentUser(updateUserReq, res);
 
-      expect(userService.updateUser).toHaveBeenCalledWith({
-        id: mockUserId,
-        data: {},
-      });
+      expect(userService.updateUser).toHaveBeenCalledWith(mockUserId, {});
 
       expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
         responseOptions: {
@@ -230,44 +254,150 @@ describe("UserController tests", () => {
       jest.clearAllMocks();
     });
 
-    it("should update the current user's password", async () => {
-      (userService.updateUserPassword as jest.Mock).mockResolvedValue({
-        ...mockUser,
-        password: "new_hashed_password",
-      });
-
-      (responseFormatter.formatResponse as jest.Mock).mockReturnValue(
+    it("should update password successfully", async () => {
+      // Arrange
+      userService.updateUserPassword.mockResolvedValue(mockUser);
+      responseFormatter.formatResponse.mockReturnValue(
         updatePasswordFormattedRes
       );
 
+      // Act
       await userController.updatePassword(updatePasswordReq, res);
 
+      // Assert
       expect(userService.updateUserPassword).toHaveBeenCalledWith(
-        updatePasswordDto
+        mockUserId,
+        updatePasswordReq.body
       );
 
       expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
         responseOptions: {
-          data: updatePasswordFormattedRes.data,
-          message: updatePasswordFormattedRes.message,
-          status: updatePasswordFormattedRes.status,
+          data: mockUser,
+          status: httpStatus.OK,
+          message: "User password updated successfully.",
         },
       });
-
+      expect(rateLimitService.reset).toHaveBeenCalledWith(
+        `${updatePasswordReq.userId}:password-update`
+      );
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
-
       expect(res.json).toHaveBeenCalledWith(updatePasswordFormattedRes);
     });
 
-    it("should propagate Userservice errors", async () => {
-      const errorMessage = "Error updating user data";
-      (userService.updateUserPassword as jest.Mock).mockRejectedValue(
-        new Error(errorMessage)
-      );
+    it("should handle invalid current password", async () => {
+      // Arrange
+      updatePasswordReq.body = {
+        currentPassword: "wrongPassword",
+        newPassword: "newPassword456",
+      };
 
+      const invalidPasswordError = new BadRequestError("Invalid credentials");
+
+      userService.updateUserPassword.mockRejectedValue(invalidPasswordError);
+
+      // Act & Assert
       await expect(
         userController.updatePassword(updatePasswordReq, res)
-      ).rejects.toThrow(errorMessage);
+      ).rejects.toThrow(invalidPasswordError);
+
+      expect(userService.updateUserPassword).toHaveBeenCalledWith(
+        mockUserId,
+        updatePasswordReq.body
+      );
+
+      expect(rateLimitService.increment).toHaveBeenCalled();
+      expect(loggerService.error).toHaveBeenCalledWith(
+        "Error updating password",
+        invalidPasswordError
+      );
+      expect(rateLimitService.reset).not.toHaveBeenCalled();
+      expect(res.status).not.toHaveBeenCalled();
+      expect(res.json).not.toHaveBeenCalled();
+    });
+
+    it("should handle same password error", async () => {
+      // Arrange
+      updatePasswordReq.body = {
+        currentPassword: "samePassword123",
+        newPassword: "samePassword123",
+      };
+
+      const samePasswordError = new BadRequestError(
+        "New password must be different from current password"
+      );
+
+      userService.updateUserPassword.mockRejectedValue(samePasswordError);
+
+      // Act & Assert
+      await expect(
+        userController.updatePassword(updatePasswordReq, res)
+      ).rejects.toThrow(samePasswordError);
+
+      expect(userService.updateUserPassword).toHaveBeenCalledWith(
+        mockUserId,
+        updatePasswordReq.body
+      );
+
+      expect(rateLimitService.increment).toHaveBeenCalled();
+      expect(loggerService.error).toHaveBeenCalledWith(
+        "Error updating password",
+        samePasswordError
+      );
+      expect(res.status).not.toHaveBeenCalled();
+      expect(res.json).not.toHaveBeenCalled();
+    });
+
+    it("should handle user not found error during password update", async () => {
+      // Arrange
+      updatePasswordReq.userId = "nonexistent-user";
+      updatePasswordReq.rateLimitKey = "nonexistent-user:password-update";
+
+      const notFoundError = new NotFoundError("User not found");
+
+      userService.updateUserPassword.mockRejectedValue(notFoundError);
+
+      // Act & Assert
+      await expect(
+        userController.updatePassword(updatePasswordReq, res)
+      ).rejects.toThrow(notFoundError);
+
+      expect(userService.updateUserPassword).toHaveBeenCalledWith(
+        updatePasswordReq.userId,
+        updatePasswordReq.body
+      );
+
+      expect(rateLimitService.increment).toHaveBeenCalled();
+      expect(loggerService.error).toHaveBeenCalledWith(
+        "Error updating password",
+        notFoundError
+      );
+      expect(res.status).not.toHaveBeenCalled();
+      expect(res.json).not.toHaveBeenCalled();
+    });
+
+    it("should handle unexpected errors during password update", async () => {
+      // Arrange
+      const unexpectedError = new Error("Database connection error");
+
+      userService.updateUserPassword.mockRejectedValue(unexpectedError);
+
+      // Act & Assert
+      await expect(
+        userController.updatePassword(updatePasswordReq, res)
+      ).rejects.toThrow(unexpectedError);
+
+      expect(userService.updateUserPassword).toHaveBeenCalledWith(
+        mockUserId,
+        updatePasswordReq.body
+      );
+
+      expect(rateLimitService.increment).toHaveBeenCalled();
+      expect(loggerService.error).toHaveBeenCalledWith(
+        "Error updating password",
+        unexpectedError
+      );
+      expect(res.status).not.toHaveBeenCalled();
+      expect(res.json).not.toHaveBeenCalled();
     });
   });
 });

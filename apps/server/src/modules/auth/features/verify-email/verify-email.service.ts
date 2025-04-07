@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
-import { BadRequestError } from "@/modules/shared/api-errors";
+import { BadRequestError, ForbiddenError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { stringToDate } from "@/modules/shared/utils";
 
@@ -50,7 +50,11 @@ export class VerifyEmailService implements IVerifyEmailService {
     tx: Prisma.TransactionClient,
     email: string
   ): Promise<string> {
-    const user = await this._userService.getUserByIdOrEmail({ email }, tx);
+    const user = await this._userService.getUserByEmail(email, tx);
+
+    if (!user) {
+      throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
+    }
 
     if (user.isEmailVerified) {
       throw new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED);

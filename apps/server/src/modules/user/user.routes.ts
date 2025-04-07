@@ -1,11 +1,21 @@
 import { Router } from "express";
 
-import { isAuthenticated, validateRequest } from "@/middlewares";
+import {
+  createRateLimitMiddleware,
+  isAuthenticated,
+  validateRequest,
+} from "@/middlewares";
 
+import { USER_RATE_LIMIT_CONFIG } from "./config";
 import { updatePasswordSchema, updateUserSchema } from "./schemas";
 import { userController } from "./user.module";
 
 const userRoutes = Router();
+
+const updatePasswordRateLimiter = createRateLimitMiddleware({
+  keyGenerator: (req) => `updatePassword:userId:${req.userId}`,
+  rateLimitConfig: USER_RATE_LIMIT_CONFIG.updatePassword,
+});
 
 // - isAuthenticated: Ensures the user is authenticated before accessing any user routes.
 userRoutes.use(isAuthenticated);
@@ -22,8 +32,10 @@ userRoutes
 // - PATCH /update-password: Update the current user's password (requires request body validation)
 userRoutes
   .route("/update-password")
-  .patch(validateRequest({ body: updatePasswordSchema }), (req, res) =>
-    userController.updatePassword(req, res)
+  .patch(
+    updatePasswordRateLimiter,
+    validateRequest({ body: updatePasswordSchema }),
+    (req, res) => userController.updatePassword(req, res)
   );
 
 export { userRoutes };

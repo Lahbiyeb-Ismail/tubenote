@@ -2,23 +2,29 @@ import { z } from "zod";
 
 export const usernameSchema = z
   .string()
+  .regex(/^[a-zA-Z0-9_]+$/, {
+    message:
+      "Invalid username format. Only letters, numbers, and underscores are allowed.",
+  })
   .min(3, { message: "Username must be at least 3 characters long." })
-  .max(20, { message: "Username must be at most 20 characters long." });
+  .max(20, { message: "Username must be at most 20 characters long." })
+  .refine((value) => !/['"<>;(){}]/.test(value), {
+    message: "Username cannot contain special characters like '\"<>;(){}.",
+  });
 
 export const emailSchema = z
   .string()
-  .email({ message: "Invalid email address. Please try another one." });
+  .max(255, { message: "Email must be at most 255 characters long." })
+  .email({ message: "Invalid email format. Please try another one." });
 
 export const passwordSchema = z
   .string()
-  .min(8, { message: "Password must be at least 8 characters long." })
-  .regex(/[a-z]/, {
-    message: "Password must contain at least one lowercase letter.",
+  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).*$/, {
+    message:
+      "Password must include a lowercase, uppercase, number, and special character.",
   })
-  .regex(/[A-Z]/, {
-    message: "Password must contain at least one uppercase letter.",
-  })
-  .regex(/[0-9]/, { message: "Password must contain at least one number." })
-  .regex(/[^a-zA-Z0-9]/, {
-    message: "Password must contain at least one special character.",
+  .min(8, { message: "Password must be at least 8 characters." })
+  .max(128, { message: "Password must be at most 128 characters." })
+  .refine((value) => !/['"<>;(){}]/.test(value), {
+    message: "Password cannot contain special characters like '\"<>;(){}.",
   });

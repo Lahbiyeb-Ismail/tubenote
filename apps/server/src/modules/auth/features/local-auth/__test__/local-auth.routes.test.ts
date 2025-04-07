@@ -4,13 +4,13 @@ import request from "supertest";
 import app from "@/app";
 
 import type { ILoginDto } from "@/modules/auth/dtos";
-import type { ICreateBodyDto } from "@/modules/shared/dtos";
-import type { User } from "@/modules/user";
+import type { ICreateUserDto } from "@/modules/user";
 
-import { ConflictError } from "@/modules/shared/api-errors";
+import { BadRequestError, ConflictError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import type { IApiResponse } from "@/modules/shared/services";
 import { localAuthController } from "../local-auth.module";
+
+import type { IApiResponse } from "@/modules/shared/services";
 
 jest.mock("../local-auth.module", () => ({
   localAuthController: {
@@ -20,12 +20,10 @@ jest.mock("../local-auth.module", () => ({
 }));
 
 describe("Local Auth Routes", () => {
-  const validRegisterPayload: ICreateBodyDto<User> = {
+  const validRegisterPayload: ICreateUserDto = {
     email: "test@example.com",
     password: "Password123!",
     username: "testuser",
-    isEmailVerified: false,
-    profilePicture: null,
   };
 
   const validLoginPayload: ILoginDto = {
@@ -147,6 +145,45 @@ describe("Local Auth Routes", () => {
       expect(conflictResponses.length).toBeGreaterThanOrEqual(4); // The rest should fail
       expect(localAuthController.register).toHaveBeenCalledTimes(5);
     });
+
+    it("should handle controller errors correctly", async () => {
+      (localAuthController.register as jest.Mock).mockImplementation(() => {
+        throw new BadRequestError("Email already exists");
+      });
+
+      const res = await request(app)
+        .post("/api/v1/auth/register")
+        .send(validRegisterPayload);
+
+      expect(res.status).toBe(httpStatus.BAD_REQUEST);
+      expect(res.body.error).toHaveProperty("message", "Email already exists");
+    });
+
+    it("should handle unexpected controller errors", async () => {
+      (localAuthController.register as jest.Mock).mockImplementation(() => {
+        throw new Error("Unexpected error");
+      });
+
+      const res = await request(app)
+        .post("/api/v1/auth/register")
+        .send(validRegisterPayload);
+
+      expect(res.status).toBe(httpStatus.INTERNAL_SERVER_ERROR);
+      expect(res.body.error).toHaveProperty("message", "Unexpected error");
+    });
+
+    it("should pass the correct rate limit key to the controller", async () => {
+      await request(app)
+        .post("/api/v1/auth/register")
+        .send(validRegisterPayload);
+
+      const registerCall = (localAuthController.register as jest.Mock).mock
+        .calls[0];
+      const req = registerCall[0];
+
+      expect(req).toHaveProperty("rateLimitKey");
+      expect(req.rateLimitKey).toContain(req.ip);
+    });
   });
 
   describe("POST api/v1/auth/login", () => {
@@ -223,55 +260,78 @@ describe("Local Auth Routes", () => {
       expect(response.body).toHaveProperty("error");
       expect(localAuthController.login).not.toHaveBeenCalled();
     });
+
+    it("should handle unexpected controller errors", async () => {
+      (localAuthController.login as jest.Mock).mockImplementation(() => {
+        throw new Error("Unexpected error");
+      });
+
+      const res = await request(app)
+        .post("/api/v1/auth/login")
+        .send(validLoginPayload);
+
+      expect(res.status).toBe(httpStatus.INTERNAL_SERVER_ERROR);
+      expect(res.body.error).toHaveProperty("message", "Unexpected error");
+    });
+
+    it("should pass the correct rate limit key to the controller", async () => {
+      await request(app).post("/api/v1/auth/login").send(validLoginPayload);
+
+      const loginCall = (localAuthController.login as jest.Mock).mock.calls[0];
+      const req = loginCall[0];
+
+      expect(req).toHaveProperty("rateLimitKey");
+      expect(req.rateLimitKey).toContain(req.ip);
+      expect(req.rateLimitKey).toContain(validLoginPayload.email);
+    });
   });
 
-  describe("Route Not Found", () => {
-    it("should return 404 for non-existent route", async () => {
-      await request(app)
-        .post("/auth/non-existent-route")
-        .send({})
-        .expect(httpStatus.NOT_FOUND);
+  describe("Route Configuration", () => {
+    it("should only allow POST method for /register", async () => {
+      const getRes = await request(app).get("/api/v1/auth/register");
+      expect(getRes.status).toBe(httpStatus.NOT_FOUND);
+
+      const putRes = await request(app).put("/api/v1/auth/register");
+      expect(putRes.status).toBe(httpStatus.NOT_FOUND);
+
+      const deleteRes = await request(app).delete("/api/v1/auth/register");
+      expect(deleteRes.status).toBe(httpStatus.NOT_FOUND);
+    });
+
+    it("should only allow POST method for /login", async () => {
+      const getRes = await request(app).get("/api/v1/auth/login");
+      expect(getRes.status).toBe(httpStatus.NOT_FOUND);
+
+      const putRes = await request(app).put("/api/v1/auth/login");
+      expect(putRes.status).toBe(httpStatus.NOT_FOUND);
+
+      const deleteRes = await request(app).delete("/api/v1/auth/login");
+      expect(deleteRes.status).toBe(httpStatus.NOT_FOUND);
+    });
+
+    it("should return 404 for non-existent routes", async () => {
+      const res = await request(app).post("/api/v1/auth/non-existent-route");
+      expect(res.status).toBe(httpStatus.NOT_FOUND);
     });
   });
 
   describe("Content Type Handling", () => {
-    it("should reject requests with invalid content type", async () => {
-      await request(app)
+    it("should reject non-JSON content types", async () => {
+      const res = await request(app)
         .post("/api/v1/auth/login")
         .set("Content-Type", "text/plain")
-        .send("invalid data")
-        .expect(httpStatus.BAD_REQUEST);
+        .send(JSON.stringify(validLoginPayload));
+
+      expect(res.status).toBe(httpStatus.BAD_REQUEST);
     });
 
-    it("should handle missing content type header", async () => {
-      await request(app)
+    it("should handle malformed JSON", async () => {
+      const res = await request(app)
         .post("/api/v1/auth/login")
-        .send("invalid data")
-        .expect(httpStatus.BAD_REQUEST);
-    });
-  });
+        .set("Content-Type", "application/json")
+        .send("{malformed json");
 
-  describe("Error Handling", () => {
-    it("should handle internal server error in register route", async () => {
-      (localAuthController.register as jest.Mock).mockImplementation(() => {
-        throw new Error("Internal server error");
-      });
-
-      await request(app)
-        .post("/api/v1/auth/register")
-        .send(validRegisterPayload)
-        .expect(httpStatus.INTERNAL_SERVER_ERROR);
-    });
-
-    it("should handle internal server error in login route", async () => {
-      (localAuthController.login as jest.Mock).mockImplementation(() => {
-        throw new Error("Internal server error");
-      });
-
-      await request(app)
-        .post("/api/v1/auth/login")
-        .send(validLoginPayload)
-        .expect(httpStatus.INTERNAL_SERVER_ERROR);
+      expect(res.status).toBe(httpStatus.INTERNAL_SERVER_ERROR);
     });
   });
 
@@ -292,37 +352,224 @@ describe("Local Auth Routes", () => {
       );
     });
 
-    it("should validate minimum length of password in registration", async () => {
-      const invalidPayload = {
-        ...validRegisterPayload,
-        password: "Aa1!", // Too short
-      };
+    it("should enforce password complexity requirements", async () => {
+      // Arrange
+      const weakPasswords = [
+        "short", // Too short
+        "onlylowercase", // Missing uppercase
+        "ONLYUPPERCASE", // Missing lowercase
+        "NoNumbers", // Missing numbers
+        "NoSpecial123", // Missing special characters
+      ];
 
-      const response = await request(app)
-        .post("/api/v1/auth/register")
-        .send(invalidPayload);
+      // Act & Assert
+      for (const weakPassword of weakPasswords) {
+        const response = await request(app)
+          .post("/api/v1/auth/register")
+          .send({ ...validRegisterPayload, password: weakPassword });
 
-      expect(response.statusCode).toBe(httpStatus.BAD_REQUEST);
+        expect(response.status).toBe(httpStatus.BAD_REQUEST);
+        expect(response.body.error.message).toContain("Password must");
+        expect(localAuthController.register).not.toHaveBeenCalled();
+      }
 
-      expect(response.body.error.message).toBe(
-        "Validation error in password field: Password must be at least 8 characters long."
-      );
+      // Reset the mock for the next test
+      jest.clearAllMocks();
+    });
+  });
+
+  describe("SQL Injection Prevention", () => {
+    it("should handle SQL injection attempts in email field", async () => {
+      // Arrange
+      const sqlInjectionPayloads = [
+        "' OR 1=1 --",
+        "admin@example.com'; DROP TABLE users; --",
+        "admin@example.com' UNION SELECT * FROM users --",
+      ];
+
+      // Act & Assert
+      for (const payload of sqlInjectionPayloads) {
+        const response = await request(app)
+          .post("/api/v1/auth/register")
+          .send({ ...validRegisterPayload, email: payload });
+
+        expect(response.status).toBe(400);
+        expect(response.body.error.message).toContain("Invalid email format");
+        expect(localAuthController.register).not.toHaveBeenCalled();
+      }
     });
 
-    it("should validate password complexity requirements", async () => {
-      const invalidPayload = {
-        ...validRegisterPayload,
-        password: "password123", // Missing uppercase and special character
+    it("should handle SQL injection attempts in username field", async () => {
+      // Arrange
+      const sqlInjectionPayloads = [
+        "' OR 1=1 --",
+        "testname' OR '1'='1'; --",
+        "testname' UNION SELECT * FROM users --",
+      ];
+
+      // Act & Assert
+      for (const payload of sqlInjectionPayloads) {
+        const response = await request(app)
+          .post("/api/v1/auth/register")
+          .send({ ...validRegisterPayload, username: payload });
+
+        expect(response.status).toBe(400);
+        expect(response.body.error.message).toContain(
+          "Invalid username format."
+        );
+        expect(localAuthController.register).not.toHaveBeenCalled();
+      }
+    });
+
+    it("should handle SQL injection attempts in password field", async () => {
+      // Arrange
+      const sqlInjectionPayloads = [
+        "' OR 1=1 --",
+        "Password123!' OR '1'='1'; --",
+        "Password123!' UNION SELECT * FROM users --",
+      ];
+
+      // Act & Assert
+      for (const payload of sqlInjectionPayloads) {
+        const response = await request(app)
+          .post("/api/v1/auth/register")
+          .send({ ...validRegisterPayload, password: payload });
+
+        expect(response.status).toBe(400);
+        expect(response.body.error.message).toContain(
+          "Validation error in password field"
+        );
+        expect(localAuthController.register).not.toHaveBeenCalled();
+      }
+    });
+  });
+
+  describe("NoSQL Injection Prevention", () => {
+    it("should handle NoSQL injection attempts in email field", async () => {
+      // Arrange
+      const nosqlInjectionPayloads = [
+        { email: { $ne: null } },
+        { email: { $gt: "" } },
+      ];
+
+      // Act & Assert
+      for (const payload of nosqlInjectionPayloads) {
+        const response = await request(app)
+          .post("/api/v1/auth/login")
+          .send({ ...validLoginPayload, email: payload });
+
+        expect(response.status).toBe(400);
+        expect(response.body.error.message).toContain(
+          "Validation error in email field"
+        );
+        expect(localAuthController.register).not.toHaveBeenCalled();
+      }
+    });
+
+    it("should handle NoSQL injection attempts in password field", async () => {
+      // Arrange
+      const nosqlInjectionPayloads = [
+        { password: { $gt: "" } },
+        { password: { $ne: null } },
+      ];
+
+      // Act & Assert
+      for (const payload of nosqlInjectionPayloads) {
+        const response = await request(app)
+          .post("/api/v1/auth/login")
+          .send({ ...validLoginPayload, password: payload });
+
+        expect(response.status).toBe(400);
+        expect(response.body.error.message).toContain(
+          "Validation error in password field"
+        );
+        expect(localAuthController.register).not.toHaveBeenCalled();
+      }
+    });
+
+    it("should handle SQL injection attempts in username field", async () => {
+      // Arrange
+      const nosqlInjectionPayloads = [
+        { username: { $gt: "" } },
+        { username: { $ne: null } },
+      ];
+
+      // Act & Assert
+      for (const payload of nosqlInjectionPayloads) {
+        const response = await request(app)
+          .post("/api/v1/auth/register")
+          .send({ ...validRegisterPayload, username: payload });
+
+        expect(response.status).toBe(400);
+        expect(response.body.error.message).toContain(
+          "Validation error in username field"
+        );
+        expect(localAuthController.register).not.toHaveBeenCalled();
+      }
+    });
+  });
+
+  describe("Security Tests", () => {
+    it("should handle SQL injection attempts", async () => {
+      const sqlInjectionPayload = {
+        email: "' OR 1=1 --",
+        password: "' OR 1=1 --",
       };
 
-      const response = await request(app)
-        .post("/api/v1/auth/register")
-        .send(invalidPayload);
+      const res = await request(app)
+        .post("/api/v1/auth/login")
+        .send(sqlInjectionPayload);
 
-      expect(response.statusCode).toBe(httpStatus.BAD_REQUEST);
-      expect(response.body.error.message).toBe(
-        "Validation error in password field: Password must contain at least one uppercase letter."
+      expect(res.status).toBe(httpStatus.BAD_REQUEST);
+      expect(localAuthController.login).not.toHaveBeenCalled();
+    });
+
+    it("should handle large payloads", async () => {
+      const largePayload = {
+        email: "test@example.com",
+        password: "Password123!",
+        username: "a".repeat(10000), // Very large username
+      };
+
+      const res = await request(app)
+        .post("/api/v1/auth/register")
+        .send(largePayload);
+
+      expect(res.status).toBe(httpStatus.BAD_REQUEST);
+      expect(res.body.error.message).toMatch(
+        /must be at most 20 characters long/
       );
+    });
+  });
+
+  describe("Edge Cases", () => {
+    it("should handle empty request body", async () => {
+      const res = await request(app).post("/api/v1/auth/login").send({});
+
+      // This should be caught by validation
+      expect(res.status).toBe(httpStatus.BAD_REQUEST);
+    });
+
+    it("should handle null values in request body", async () => {
+      const nullPayload = {
+        email: null,
+        password: null,
+      };
+
+      // Mock validation to fail for null values
+      const res = await request(app)
+        .post("/api/v1/auth/login")
+        .send(nullPayload);
+
+      // This should be caught by validation
+      expect(res.status).toBe(httpStatus.BAD_REQUEST);
+    });
+
+    it("should handle requests with missing body", async () => {
+      const res = await request(app).post("/api/v1/auth/login");
+
+      // Express.json() middleware should set req.body to {}
+      expect(res.status).toBe(httpStatus.BAD_REQUEST);
     });
   });
 });
