@@ -190,40 +190,31 @@ describe("OAuthService", () => {
   describe("handleOAuthLogin", () => {
     const oauthLoginDtoExisting: IOauthLoginDto = {
       createAccountDto: {
-        data: {
-          provider: "google",
-          providerAccountId: "provider-id-123",
-          type: "oauth",
-        },
+        provider: "google",
+        providerAccountId: "provider-id-123",
+        type: "oauth",
       },
       createUserDto: {
-        data: {
-          email: "existing@example.com",
-          isEmailVerified: true,
-          password: "userPassword12!",
-          username: "test_name",
-          profilePicture: "https://example.com/profile.jpg",
-          // additional fields as needed
-        },
+        email: "existing@example.com",
+        isEmailVerified: true,
+        password: "userPassword12!",
+        username: "test_name",
+        profilePicture: "https://example.com/profile.jpg",
       },
     };
 
     const oauthLoginDtoNew: IOauthLoginDto = {
       createAccountDto: {
-        data: {
-          provider: "google",
-          providerAccountId: "provider-id-new",
-          type: "oauth",
-        },
+        provider: "google",
+        providerAccountId: "provider-id-new",
+        type: "oauth",
       },
       createUserDto: {
-        data: {
-          email: "new@example.com",
-          isEmailVerified: true,
-          password: "newUserPassword12!",
-          username: "new_user",
-          profilePicture: "https://example.com/new_profile.jpg",
-        },
+        email: "new@example.com",
+        isEmailVerified: true,
+        password: "newUserPassword12!",
+        username: "new_user",
+        profilePicture: "https://example.com/new_profile.jpg",
       },
     };
 
