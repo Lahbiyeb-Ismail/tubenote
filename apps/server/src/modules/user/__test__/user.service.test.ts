@@ -170,11 +170,9 @@ describe("UserService", () => {
     };
 
     const createAccountDto: ICreateAccountDto = {
-      data: {
-        provider: "google",
-        providerAccountId: "12345",
-        type: "oauth",
-      },
+      provider: "google",
+      providerAccountId: "12345",
+      type: "oauth",
     };
 
     it("should create user and account within transaction", async () => {
