@@ -60,7 +60,7 @@ describe("ResetPasswordService", () => {
   describe("sendResetToken", () => {
     it("should throw ForbiddenError if the user email is not verified", async () => {
       // Arrange: simulate a user with unverified email.
-      userService.getUserByIdOrEmail.mockResolvedValue({
+      userService.getUserByEmail.mockResolvedValue({
         ...mockUser,
         isEmailVerified: false,
       });
@@ -70,14 +70,12 @@ describe("ResetPasswordService", () => {
         resetPasswordService.sendResetToken(mockEmail)
       ).rejects.toThrow(ForbiddenError);
 
-      expect(userService.getUserByIdOrEmail).toHaveBeenCalledWith({
-        email: mockEmail,
-      });
+      expect(userService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
     });
 
     it("should generate a reset token, store it in cache, and send an email for a verified user", async () => {
       // Arrange: simulate a verified user.
-      userService.getUserByIdOrEmail.mockResolvedValue(mockUser);
+      userService.getUserByEmail.mockResolvedValue(mockUser);
 
       cryptoService.generateRandomSecureToken.mockReturnValue(mockValidToken);
 
@@ -85,9 +83,7 @@ describe("ResetPasswordService", () => {
       await resetPasswordService.sendResetToken(mockEmail);
 
       // Assert
-      expect(userService.getUserByIdOrEmail).toHaveBeenCalledWith({
-        email: mockEmail,
-      });
+      expect(userService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
 
       expect(cryptoService.generateRandomSecureToken).toHaveBeenCalled();
 
@@ -107,7 +103,7 @@ describe("ResetPasswordService", () => {
     it("should propagate mailSenderService errors", async () => {
       const error = new Error("Failed to send email");
 
-      userService.getUserByIdOrEmail.mockResolvedValue(mockUser);
+      userService.getUserByEmail.mockResolvedValue(mockUser);
 
       cryptoService.generateRandomSecureToken.mockReturnValue(mockValidToken);
 
