@@ -373,7 +373,7 @@ describe("Reset password Routes", () => {
       // Assert
       expect(response.status).toBe(400);
       expect(response.body.error.message).toContain(
-        "Password must be at most 128 characters."
+        "Validation error in password field"
       );
       expect(resetPasswordController.resetPassword).not.toHaveBeenCalled();
     });
