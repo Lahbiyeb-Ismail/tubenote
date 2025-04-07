@@ -14,7 +14,11 @@ import { z } from "zod";
  */
 export const tokenParamSchema = z
   .object({
-    token: z.string().min(4),
+    token: z
+      .string()
+      .min(4)
+      .max(255, "The provided token is invalid.")
+      .regex(/^[a-zA-Z0-9-_]+$/, "Invalid token format."),
   })
   .strict();
 
