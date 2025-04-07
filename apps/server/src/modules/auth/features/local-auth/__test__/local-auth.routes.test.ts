@@ -352,37 +352,160 @@ describe("Local Auth Routes", () => {
       );
     });
 
-    it("should validate minimum length of password in registration", async () => {
-      const invalidPayload = {
-        ...validRegisterPayload,
-        password: "Aa1!", // Too short
-      };
+    it("should enforce password complexity requirements", async () => {
+      // Arrange
+      const weakPasswords = [
+        "short", // Too short
+        "onlylowercase", // Missing uppercase
+        "ONLYUPPERCASE", // Missing lowercase
+        "NoNumbers", // Missing numbers
+        "NoSpecial123", // Missing special characters
+      ];
 
-      const response = await request(app)
-        .post("/api/v1/auth/register")
-        .send(invalidPayload);
+      // Act & Assert
+      for (const weakPassword of weakPasswords) {
+        const response = await request(app)
+          .post("/api/v1/auth/register")
+          .send({ ...validRegisterPayload, password: weakPassword });
 
-      expect(response.statusCode).toBe(httpStatus.BAD_REQUEST);
+        expect(response.status).toBe(httpStatus.BAD_REQUEST);
+        expect(response.body.error.message).toContain("Password must");
+        expect(localAuthController.register).not.toHaveBeenCalled();
+      }
 
-      expect(response.body.error.message).toBe(
-        "Validation error in password field: Password must be at least 8 characters long."
-      );
+      // Reset the mock for the next test
+      jest.clearAllMocks();
+    });
+  });
+
+  describe("SQL Injection Prevention", () => {
+    it("should handle SQL injection attempts in email field", async () => {
+      // Arrange
+      const sqlInjectionPayloads = [
+        "' OR 1=1 --",
+        "admin@example.com'; DROP TABLE users; --",
+        "admin@example.com' UNION SELECT * FROM users --",
+      ];
+
+      // Act & Assert
+      for (const payload of sqlInjectionPayloads) {
+        const response = await request(app)
+          .post("/api/v1/auth/register")
+          .send({ ...validRegisterPayload, email: payload });
+
+        expect(response.status).toBe(400);
+        expect(response.body.error.message).toContain("Invalid email format");
+        expect(localAuthController.register).not.toHaveBeenCalled();
+      }
     });
 
-    it("should validate password complexity requirements", async () => {
-      const invalidPayload = {
-        ...validRegisterPayload,
-        password: "password123", // Missing uppercase and special character
-      };
+    it("should handle SQL injection attempts in username field", async () => {
+      // Arrange
+      const sqlInjectionPayloads = [
+        "' OR 1=1 --",
+        "testname' OR '1'='1'; --",
+        "testname' UNION SELECT * FROM users --",
+      ];
 
-      const response = await request(app)
-        .post("/api/v1/auth/register")
-        .send(invalidPayload);
+      // Act & Assert
+      for (const payload of sqlInjectionPayloads) {
+        const response = await request(app)
+          .post("/api/v1/auth/register")
+          .send({ ...validRegisterPayload, username: payload });
 
-      expect(response.statusCode).toBe(httpStatus.BAD_REQUEST);
-      expect(response.body.error.message).toBe(
-        "Validation error in password field: Password must contain at least one uppercase letter."
-      );
+        expect(response.status).toBe(400);
+        expect(response.body.error.message).toContain(
+          "Invalid username format."
+        );
+        expect(localAuthController.register).not.toHaveBeenCalled();
+      }
+    });
+
+    it("should handle SQL injection attempts in password field", async () => {
+      // Arrange
+      const sqlInjectionPayloads = [
+        "' OR 1=1 --",
+        "Password123!' OR '1'='1'; --",
+        "Password123!' UNION SELECT * FROM users --",
+      ];
+
+      // Act & Assert
+      for (const payload of sqlInjectionPayloads) {
+        const response = await request(app)
+          .post("/api/v1/auth/register")
+          .send({ ...validRegisterPayload, password: payload });
+
+        expect(response.status).toBe(400);
+        expect(response.body.error.message).toContain(
+          "Validation error in password field"
+        );
+        expect(localAuthController.register).not.toHaveBeenCalled();
+      }
+    });
+  });
+
+  describe("NoSQL Injection Prevention", () => {
+    it("should handle NoSQL injection attempts in email field", async () => {
+      // Arrange
+      const nosqlInjectionPayloads = [
+        { email: { $ne: null } },
+        { email: { $gt: "" } },
+      ];
+
+      // Act & Assert
+      for (const payload of nosqlInjectionPayloads) {
+        const response = await request(app)
+          .post("/api/v1/auth/login")
+          .send({ ...validLoginPayload, email: payload });
+
+        expect(response.status).toBe(400);
+        expect(response.body.error.message).toContain(
+          "Validation error in email field"
+        );
+        expect(localAuthController.register).not.toHaveBeenCalled();
+      }
+    });
+
+    it("should handle NoSQL injection attempts in password field", async () => {
+      // Arrange
+      const nosqlInjectionPayloads = [
+        { password: { $gt: "" } },
+        { password: { $ne: null } },
+      ];
+
+      // Act & Assert
+      for (const payload of nosqlInjectionPayloads) {
+        const response = await request(app)
+          .post("/api/v1/auth/login")
+          .send({ ...validLoginPayload, password: payload });
+
+        expect(response.status).toBe(400);
+        expect(response.body.error.message).toContain(
+          "Validation error in password field"
+        );
+        expect(localAuthController.register).not.toHaveBeenCalled();
+      }
+    });
+
+    it("should handle SQL injection attempts in username field", async () => {
+      // Arrange
+      const nosqlInjectionPayloads = [
+        { username: { $gt: "" } },
+        { username: { $ne: null } },
+      ];
+
+      // Act & Assert
+      for (const payload of nosqlInjectionPayloads) {
+        const response = await request(app)
+          .post("/api/v1/auth/register")
+          .send({ ...validRegisterPayload, username: payload });
+
+        expect(response.status).toBe(400);
+        expect(response.body.error.message).toContain(
+          "Validation error in username field"
+        );
+        expect(localAuthController.register).not.toHaveBeenCalled();
+      }
     });
   });
 
