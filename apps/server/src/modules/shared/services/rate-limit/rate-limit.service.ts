@@ -9,38 +9,121 @@ import {
 } from "./rate-limit.types";
 
 /**
- * Rate limiting service implementation
+ * Rate limiting service implementation using a fixed window algorithm
+ *
+ * This service provides methods to check, increment, and reset rate limits
+ * for different resources identified by a key.
  */
 export class RateLimitService implements IRateLimitService {
-  private static _instance: RateLimitService;
+  private static instance: RateLimitService | null = null;
 
+  /**
+   * Private constructor to enforce singleton pattern
+   */
   private constructor(
-    private readonly _cacheService: ICacheService,
-    private readonly _logger: ILoggerService
+    private readonly cacheService: ICacheService,
+    private readonly logger: ILoggerService
   ) {}
 
+  /**
+   * Get the singleton instance of the rate limit service
+   *
+   * @param options Configuration options including cache and logger services
+   * @returns The singleton instance of RateLimitService
+   */
   public static getInstance(
     options: IRateLimitServiceOptions
   ): RateLimitService {
-    if (!this._instance) {
-      this._instance = new RateLimitService(
+    if (!this.instance) {
+      this.instance = new RateLimitService(
         options.cacheService,
         options.logger
       );
+
+      this.instance.logger.info("Rate limit service initialized");
     }
-    return this._instance;
+    return this.instance;
   }
 
   /**
-   * Check if a request is rate limited
+   * For testing purposes only - reset the singleton instance
    */
-  async check(options: IRateLimitOptions): Promise<IRateLimitResult> {
-    const { key, maxAttempts } = options;
+  public static resetInstance(): void {
+    this.instance = null;
+  }
+
+  /**
+   * Calculate the reset time based on current data
+   *
+   * @param data Rate limit data
+   * @param windowMs Time window in milliseconds
+   * @param now Current timestamp
+   * @returns Date object representing when the rate limit resets, or null
+   */
+  private calculateResetTime(
+    data: IRateLimitData | null,
+    windowMs: number,
+    now: number
+  ): Date | null {
+    if (!data) return null;
+
+    const { blockedUntil, createdAt } = data;
+
+    if (blockedUntil && blockedUntil > now) {
+      return new Date(blockedUntil);
+    } else if (createdAt) {
+      const expiresAt = createdAt + windowMs;
+      if (expiresAt > now) {
+        return new Date(expiresAt);
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Validate rate limit options
+   *
+   * @param options Rate limit options to validate
+   * @throws Error if options are invalid
+   */
+  private validateOptions(options: IRateLimitOptions): void {
+    if (!options.key || typeof options.key !== "string") {
+      throw new Error("Invalid key: must be a non-empty string");
+    }
+
+    if (typeof options.maxAttempts !== "number" || options.maxAttempts < 0) {
+      throw new Error("Invalid maxAttempts: must be a non-negative number");
+    }
+
+    if (typeof options.windowMs !== "number" || options.windowMs <= 0) {
+      throw new Error("Invalid windowMs: must be a positive number");
+    }
+
+    if (
+      options.blockDurationMs !== undefined &&
+      (typeof options.blockDurationMs !== "number" ||
+        options.blockDurationMs < 0)
+    ) {
+      throw new Error("Invalid blockDurationMs: must be a non-negative number");
+    }
+  }
+
+  /**
+   * Check if a request is rate limited without incrementing the counter
+   *
+   * @param options Rate limit options
+   * @returns Promise resolving to rate limit result
+   */
+  public async check(options: IRateLimitOptions): Promise<IRateLimitResult> {
+    const { key, maxAttempts, windowMs } = options;
     const now = Date.now();
 
     try {
+      this.validateOptions(options);
+
       // Get current rate limit data
-      const data = this._cacheService.get<IRateLimitData>(key);
+      const data = this.cacheService.get<IRateLimitData>(key);
 
       if (!data) {
         return {
@@ -50,22 +133,10 @@ export class RateLimitService implements IRateLimitService {
         };
       }
 
-      const { count, blockedUntil, createdAt } = data;
+      const { count, blockedUntil } = data;
       const isBlocked = !!blockedUntil && blockedUntil > now;
       const remaining = Math.max(0, maxAttempts - count);
-
-      // Calculate reset time based on window
-      let resetAt: Date | null = null;
-
-      if (isBlocked) {
-        resetAt = new Date(blockedUntil);
-      } else if (createdAt) {
-        // Calculate when the window expires
-        const expiresAt = createdAt + options.windowMs;
-        if (expiresAt > now) {
-          resetAt = new Date(expiresAt);
-        }
-      }
+      const resetAt = this.calculateResetTime(data, windowMs, now);
 
       return {
         remaining,
@@ -73,7 +144,7 @@ export class RateLimitService implements IRateLimitService {
         resetAt,
       };
     } catch (error) {
-      this._logger.error("Error checking rate limit", {
+      this.logger.error("Error checking rate limit", {
         key,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -89,14 +160,21 @@ export class RateLimitService implements IRateLimitService {
 
   /**
    * Increment the rate limit counter
+   *
+   * @param options Rate limit options
+   * @returns Promise resolving to rate limit result
    */
-  async increment(options: IRateLimitOptions): Promise<IRateLimitResult> {
-    const { key, maxAttempts, windowMs, blockDurationMs } = options;
+  public async increment(
+    options: IRateLimitOptions
+  ): Promise<IRateLimitResult> {
+    const { key, maxAttempts, windowMs, blockDurationMs = 0 } = options;
     const now = Date.now();
 
     try {
+      this.validateOptions(options);
+
       // Get current data or initialize new data
-      let data = this._cacheService.get<IRateLimitData>(key);
+      let data = this.cacheService.get<IRateLimitData>(key);
 
       if (!data) {
         data = {
@@ -126,10 +204,10 @@ export class RateLimitService implements IRateLimitService {
       data.count += 1;
 
       // Check if we need to block
-      if (data.count > maxAttempts && blockDurationMs) {
+      if (data.count > maxAttempts && blockDurationMs > 0) {
         data.blockedUntil = now + blockDurationMs;
 
-        this._logger.warn("Rate limit exceeded, blocking further attempts", {
+        this.logger.warn("Rate limit exceeded, blocking further attempts", {
           key,
           attempts: data.count,
           maxAttempts,
@@ -148,17 +226,11 @@ export class RateLimitService implements IRateLimitService {
       const ttlSeconds = Math.ceil(ttl / 1000);
 
       // Store in cache with custom TTL
-      this._cacheService.set<IRateLimitData>(key, data, ttlSeconds);
+      this.cacheService.set<IRateLimitData>(key, data, ttlSeconds);
 
       // Calculate remaining attempts and reset time
       const remaining = Math.max(0, maxAttempts - data.count);
-      let resetAt: Date | null = null;
-
-      if (data.blockedUntil) {
-        resetAt = new Date(data.blockedUntil);
-      } else {
-        resetAt = new Date(data.createdAt + windowMs);
-      }
+      const resetAt = this.calculateResetTime(data, windowMs, now);
 
       return {
         remaining,
@@ -166,7 +238,7 @@ export class RateLimitService implements IRateLimitService {
         resetAt,
       };
     } catch (error) {
-      this._logger.error("Error incrementing rate limit", {
+      this.logger.error("Error incrementing rate limit", {
         key,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -182,14 +254,20 @@ export class RateLimitService implements IRateLimitService {
 
   /**
    * Reset the rate limit counter
+   *
+   * @param key The key to reset
+   * @returns Promise that resolves when the reset is complete
    */
-  async reset(key: string): Promise<void> {
+  public async reset(key: string): Promise<void> {
     try {
-      this._cacheService.del(key);
+      if (!key || typeof key !== "string") {
+        throw new Error("Invalid key: must be a non-empty string");
+      }
 
-      this._logger.debug("Rate limit reset", { key });
+      this.cacheService.del(key);
+      this.logger.debug("Rate limit reset", { key });
     } catch (error) {
-      this._logger.error("Error resetting rate limit", {
+      this.logger.error("Error resetting rate limit", {
         key,
         error: error instanceof Error ? error.message : String(error),
       });
