@@ -11,12 +11,12 @@ import { AUTH_RATE_LIMIT_CONFIG } from "../../config";
 import { resetPasswordController } from "./reset-password.module";
 
 const forgotPasswordRateLimiter = createRateLimitMiddleware({
-  keyGenerator: (req) => `forgot-password:ip:${req.ip}`,
+  keyGenerator: (req) => `rate:forgot-password:ip:${req.ip}`,
   rateLimitConfig: AUTH_RATE_LIMIT_CONFIG.forgotPassword,
 });
 
 const resetPasswordRateLimiter = createRateLimitMiddleware({
-  keyGenerator: (req) => `reset-password:token:${req.params.token}`,
+  keyGenerator: (req) => `rate:reset-password:token:${req.params.token}`,
   rateLimitConfig: AUTH_RATE_LIMIT_CONFIG.resetPassword,
 });
 
