@@ -1,4 +1,6 @@
-// import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
+import type { Video, YoutubeVideoData } from "@tubenote/shared";
+
+import type { IPrismaService } from "@/modules/shared/services";
 
 import type {
   ICreateDto,
@@ -6,10 +8,10 @@ import type {
   // IFindUniqueDto,
 } from "@/modules/shared/dtos";
 
+// import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
+
 import { VideoService } from "../video.service";
 
-import type { IPrismaService } from "@/modules/shared/services";
-import type { Video, YoutubeVideoData } from "../video.model";
 import type { IVideoRepository, IVideoService } from "../video.types";
 
 describe("VideoService methods tests cases", () => {

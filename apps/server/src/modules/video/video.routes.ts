@@ -1,8 +1,8 @@
 import { Router } from "express";
 
-import { isAuthenticated, validateRequest } from "@/middlewares";
+import { idParamSchema, paginationQuerySchema } from "@tubenote/shared";
 
-import { idParamSchema, paginationQuerySchema } from "@/modules/shared/schemas";
+import { isAuthenticated, validateRequest } from "@/middlewares";
 
 import { videoController } from "./video.module";
 

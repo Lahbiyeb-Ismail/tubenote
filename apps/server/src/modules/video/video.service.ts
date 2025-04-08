@@ -1,5 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
+import type { Video, YoutubeVideoData } from "@tubenote/shared";
+
 import {
   ERROR_MESSAGES,
   YOUTUBE_API_KEY,
@@ -15,7 +17,6 @@ import type {
 } from "@/modules/shared/dtos";
 import type { IPrismaService } from "@/modules/shared/services";
 
-import type { Video, YoutubeVideoData } from "./video.model";
 import type {
   IVideoRepository,
   IVideoService,

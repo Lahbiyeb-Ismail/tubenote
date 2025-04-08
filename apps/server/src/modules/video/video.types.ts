@@ -1,4 +1,7 @@
+import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
+
+import type { Video, YoutubeVideoData } from "@tubenote/shared";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
@@ -11,9 +14,10 @@ import type {
   IQueryPaginationDto,
 } from "@/modules/shared/dtos";
 
-import type { Prisma } from "@prisma/client";
-import type { IPrismaService, IResponseFormatter } from "../shared/services";
-import type { Video, YoutubeVideoData } from "./video.model";
+import type {
+  IPrismaService,
+  IResponseFormatter,
+} from "@/modules/shared/services";
 
 export interface IVideoRepository {
   findByYoutubeId(

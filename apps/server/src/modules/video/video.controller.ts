@@ -1,6 +1,8 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
+import type { Video } from "@tubenote/shared";
+
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type {
@@ -10,7 +12,6 @@ import type {
 } from "@/modules/shared/dtos";
 import type { IResponseFormatter } from "@/modules/shared/services";
 
-import type { Video } from "./video.model";
 import type {
   IVideoController,
   IVideoControllerOptions,

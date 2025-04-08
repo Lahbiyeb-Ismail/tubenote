@@ -2,6 +2,9 @@ import type { Response } from "express";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
+import type { Video } from "@tubenote/shared";
+
 import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
 
 import type {
@@ -9,14 +12,13 @@ import type {
   IParamIdDto,
   IQueryPaginationDto,
 } from "@/modules/shared/dtos";
+
 import type {
   IApiResponse,
   IResponseFormatter,
 } from "@/modules/shared/services";
-import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import { VideoController } from "../video.controller";
-import type { Video } from "../video.model";
 import type { IVideoService } from "../video.types";
 
 describe("VideoController", () => {

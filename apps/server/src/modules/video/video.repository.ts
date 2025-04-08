@@ -1,12 +1,13 @@
 import type { Prisma } from "@prisma/client";
 
+import type { Video, YoutubeVideoData } from "@tubenote/shared";
+
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import type { ICreateDto, IFindAllDto } from "@/modules/shared/dtos";
 import type { IPrismaService } from "@/modules/shared/services";
 
-import type { Video, YoutubeVideoData } from "./video.model";
 import type { IVideoRepository, IVideoRepositoryOptions } from "./video.types";
 
 export class VideoRepository implements IVideoRepository {
