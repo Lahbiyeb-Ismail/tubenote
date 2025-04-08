@@ -1,6 +1,3 @@
-export * from "./schemas";
-
-export * from "./note.model";
 export * from "./note.types";
 
 export * from "./note.repository";

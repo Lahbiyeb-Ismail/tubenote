@@ -1,11 +1,15 @@
 import { Router } from "express";
 
+import {
+  createNoteSchema,
+  idParamSchema,
+  paginationQuerySchema,
+  updateNoteSchema,
+} from "@tubenote/shared";
+
 import { isAuthenticated, validateRequest } from "@/middlewares";
 
-import { idParamSchema, paginationQuerySchema } from "@/modules/shared/schemas";
-
 import { noteController } from "./note.module";
-import { createNoteSchema, updateNoteSchema } from "./schemas";
 
 const noteRoutes = Router();
 
@@ -13,14 +17,18 @@ const noteRoutes = Router();
 noteRoutes.use(isAuthenticated);
 
 // - GET /: Get all notes for the authenticated user.
-// - POST /: Create a new note (requires request body validation).
 noteRoutes
   .route("/")
   .get(validateRequest({ query: paginationQuerySchema }), (req, res) =>
     noteController.getUserNotes(req, res)
-  )
-  .post(validateRequest({ body: createNoteSchema }), (req, res) =>
-    noteController.createNote(req, res)
+  );
+
+// - POST /:id: Create a new note for a specific video (requires request params validation).
+noteRoutes
+  .route("/:id")
+  .post(
+    validateRequest({ params: idParamSchema, body: createNoteSchema }),
+    (req, res) => noteController.createNote(req, res)
   );
 
 // - GET /recent: Get the most recent notes for the authenticated user.

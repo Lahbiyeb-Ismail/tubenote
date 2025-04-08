@@ -1,18 +1,14 @@
+import type { Prisma } from "@prisma/client";
+
+import type { ICreateNoteDto, IUpdateNoteDto, Note } from "@tubenote/shared";
+
 import { NotFoundError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import type {
-  ICreateDto,
-  IDeleteDto,
-  IFindAllDto,
-  IFindUniqueDto,
-  IPaginatedData,
-  IUpdateDto,
-} from "@/modules/shared/dtos";
+import type { IPrismaService } from "@/modules/shared/services";
 
-import type { Prisma } from "@prisma/client";
-import type { IPrismaService } from "../shared/services";
-import type { Note } from "./note.model";
+import type { IFindAllDto, IPaginatedData } from "@/modules/shared/dtos";
+
 import type {
   INoteRepository,
   INoteService,
@@ -52,15 +48,19 @@ export class NoteService implements INoteService {
   /**
    * Retrieves a note based on the given criteria.
    *
-   * @param {FindNoteDto} findNoteDto - Data transfer object containing note identification details.
+   * @param userId - The unique identifier of the user.
+   * @param noteId - The unique identifier of the note to find.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns {Promise<Note>} A promise that resolves to the found note.
    * @throws {NotFoundError} If no note is found matching the criteria.
    */
   async findNote(
-    findNoteDto: IFindUniqueDto,
+    userId: string,
+    noteId: string,
     tx?: Prisma.TransactionClient
   ): Promise<Note> {
-    const note = await this._noteRepository.find(findNoteDto, tx);
+    const note = await this._noteRepository.find(userId, noteId, tx);
 
     if (!note) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -72,34 +72,46 @@ export class NoteService implements INoteService {
   /**
    * Creates a new note.
    *
-   * @param {CreateNoteDto} createNoteDto - Data transfer object containing the details of the note to create.
+   * @param userId - The unique identifier of the user.
+   * @param videoId - The unique identifier of the video associated with the note.
+   * @param createNoteDto - The data transfer object containing the note details.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns {Promise<Note>} A promise that resolves to the newly created note.
    */
   async createNote(
-    createNoteDto: ICreateDto<Note>,
+    userId: string,
+    videoId: string,
+    createNoteDto: ICreateNoteDto,
     tx?: Prisma.TransactionClient
   ): Promise<Note> {
-    return await this._noteRepository.create(createNoteDto, tx);
+    return await this._noteRepository.create(
+      userId,
+      videoId,
+      createNoteDto,
+      tx
+    );
   }
 
   /**
    * Updates a note with the provided data.
    *
-   * @param {IUpdateDto<Note>} updateNoteDto - The data transfer object containing the note update information.
+   * @param {string} userId - The unique identifier of the user.
+   * @param {string} noteId - The unique identifier of the note to update.
+   * @param {IUpdateNoteDto} updateNoteDto - The data transfer object containing the note update information.
+   *
    * @returns {Promise<Note>} - A promise that resolves to the updated note.
    * @throws {Error} - Throws an error if the note is not found.
    */
-  async updateNote(updateNoteDto: IUpdateDto<Note>): Promise<Note> {
+  async updateNote(
+    userId: string,
+    noteId: string,
+    updateNoteDto: IUpdateNoteDto
+  ): Promise<Note> {
     return await this._prismaService.transaction(async (tx) => {
-      await this.findNote(
-        {
-          id: updateNoteDto.id,
-          userId: updateNoteDto.userId,
-        },
-        tx
-      );
+      await this.findNote(userId, noteId, tx);
 
-      return this._noteRepository.update(updateNoteDto, tx);
+      return this._noteRepository.update(userId, noteId, updateNoteDto, tx);
     });
   }
 
@@ -109,15 +121,17 @@ export class NoteService implements INoteService {
    * Executes the delete operation within a transaction. It first verifies the note's existence and then proceeds
    * with the deletion.
    *
-   * @param {DeleteNoteDto} deleteNoteDto - Data transfer object containing note identification details.
+   * @param userId - The unique identifier of the user.
+   * @param noteId - The unique identifier of the note to delete.
+   *
    * @returns {Promise<Note>} A promise that resolves to the deleted note.
    * @throws {NotFoundError} If the note is not found.
    */
-  async deleteNote(deleteNoteDto: IDeleteDto): Promise<Note> {
+  async deleteNote(userId: string, noteId: string): Promise<Note> {
     return await this._prismaService.transaction(async (tx) => {
-      await this.findNote(deleteNoteDto, tx);
+      await this.findNote(userId, noteId, tx);
 
-      return this._noteRepository.delete(deleteNoteDto, tx);
+      return this._noteRepository.delete(userId, noteId, tx);
     });
   }
 

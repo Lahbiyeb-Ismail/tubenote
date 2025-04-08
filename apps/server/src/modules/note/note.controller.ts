@@ -1,17 +1,13 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
+import type { ICreateNoteDto, IUpdateNoteDto, Note } from "@tubenote/shared";
+
 import type { IResponseFormatter } from "@/modules/shared/services";
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
-import type {
-  ICreateBodyDto,
-  IParamIdDto,
-  IQueryPaginationDto,
-  IUpdateBodyDto,
-} from "@/modules/shared/dtos";
+import type { IParamIdDto, IQueryPaginationDto } from "@/modules/shared/dtos";
 
-import type { Note } from "./note.model";
 import type {
   INoteController,
   INoteControllerOptions,
@@ -64,12 +60,13 @@ export class NoteController implements INoteController {
    * @returns A promise that resolves to void.
    */
   async createNote(
-    req: TypedRequest<ICreateBodyDto<Note>>,
+    req: TypedRequest<ICreateNoteDto, IParamIdDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
+    const videoId = req.params.id;
 
-    const note = await this._noteService.createNote({ userId, data: req.body });
+    const note = await this._noteService.createNote(userId, videoId, req.body);
 
     const formattedResponse = this._responseFormatter.formatResponse<Note>({
       responseOptions: {
@@ -90,17 +87,17 @@ export class NoteController implements INoteController {
    * @returns A promise that resolves to void.
    */
   async updateNote(
-    req: TypedRequest<IUpdateBodyDto<Note>, IParamIdDto>,
+    req: TypedRequest<IUpdateNoteDto, IParamIdDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-    const { id } = req.params;
+    const noteId = req.params.id;
 
-    const updatedNote = await this._noteService.updateNote({
-      id,
+    const updatedNote = await this._noteService.updateNote(
       userId,
-      data: req.body,
-    });
+      noteId,
+      req.body
+    );
 
     const formattedResponse = this._responseFormatter.formatResponse<Note>({
       responseOptions: {
@@ -125,9 +122,9 @@ export class NoteController implements INoteController {
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-    const { id } = req.params;
+    const noteId = req.params.id;
 
-    await this._noteService.deleteNote({ id, userId });
+    await this._noteService.deleteNote(userId, noteId);
 
     const formattedResponse = this._responseFormatter.formatResponse({
       responseOptions: {
@@ -151,9 +148,9 @@ export class NoteController implements INoteController {
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-    const { id } = req.params;
+    const noteId = req.params.id;
 
-    const note = await this._noteService.findNote({ id, userId });
+    const note = await this._noteService.findNote(userId, noteId);
 
     const formattedResponse = this._responseFormatter.formatResponse<Note>({
       responseOptions: {

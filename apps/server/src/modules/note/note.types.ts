@@ -1,22 +1,17 @@
+import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
-import type { Note } from "./note.model";
+import type { ICreateNoteDto, IUpdateNoteDto, Note } from "@tubenote/shared";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type {
-  ICreateBodyDto,
-  ICreateDto,
-  IDeleteDto,
   IFindAllDto,
-  IFindUniqueDto,
   IPaginatedData,
   IParamIdDto,
   IQueryPaginationDto,
-  IUpdateBodyDto,
-  IUpdateDto,
 } from "@/modules/shared/dtos";
-import type { Prisma } from "@prisma/client";
+
 import type { IPrismaService, IResponseFormatter } from "../shared/services";
 
 /**
@@ -26,45 +21,65 @@ export interface INoteRepository {
   /**
    * Finds a note using the specified criteria.
    *
-   * @param findNoteDto - Data transfer object containing the note ID and user ID.
+   * @param userId - The unique identifier of the user.
+   * @param noteId - The unique identifier of the note to find.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns A promise that resolves to the found note or null if no note is found.
    */
   find(
-    findNoteDto: IFindUniqueDto,
+    userId: string,
+    noteId: string,
     tx?: Prisma.TransactionClient
   ): Promise<Note | null>;
 
   /**
    * Creates a new note.
    *
+   * @param userId - The unique identifier of the user.
+   * @param videoId - The unique identifier of the video associated with the note.
    * @param createNoteDto - Data transfer object containing the note details.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns A promise that resolves to the newly created note.
    */
   create(
-    createNoteDto: ICreateDto<Note>,
+    userId: string,
+    videoId: string,
+    createNoteDto: ICreateNoteDto,
     tx?: Prisma.TransactionClient
   ): Promise<Note>;
 
   /**
    * Updates an existing note.
    *
-   * @param {IUpdateDto<Note>} updateNoteDto - The data transfer object containing the note's ID, user ID, and the data to update.
+   * @param userId - The unique identifier of the user.
+   * @param noteId - The unique identifier of the note to update.
+   * @param {IUpdateDto<Note>} updateNoteDto - The data transfer object containing the data to update.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns A promise that resolves to the updated note.
    * @throws {Error} - Throws an error if the update operation fails.
    */
   update(
-    updateNoteDto: IUpdateDto<Note>,
+    userId: string,
+    noteId: string,
+    updateNoteDto: IUpdateNoteDto,
     tx?: Prisma.TransactionClient
   ): Promise<Note>;
 
   /**
    * Deletes a note.
    *
-   * @param deleteNoteDto - Data transfer object containing the note ID and user ID.
+   * @param userId - The unique identifier of the user.
+   * @param noteId - The unique identifier of the note to delete.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns A promise that resolves to the deleted note.
    */
   delete(
-    deleteNoteDto: IDeleteDto,
+    userId: string,
+    noteId: string,
     tx?: Prisma.TransactionClient
   ): Promise<Note>;
 
@@ -94,6 +109,8 @@ export interface INoteRepository {
    * Counts the total number of notes for a specific user.
    *
    * @param userId - The unique identifier of the user.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns A promise that resolves to the number of notes.
    */
   count(userId: string, tx?: Prisma.TransactionClient): Promise<number>;
@@ -106,41 +123,59 @@ export interface INoteService {
   /**
    * Finds a note using the specified criteria.
    *
-   * @param findNoteDto - Data transfer object containing the note ID and user ID.
+   * @param userId - The unique identifier of the user.
+   * @param noteId - The unique identifier of the note to find.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns A promise that resolves to the found note.
    */
   findNote(
-    findNoteDto: IFindUniqueDto,
+    userId: string,
+    noteId: string,
     tx?: Prisma.TransactionClient
   ): Promise<Note>;
 
   /**
    * Creates a new note.
    *
+   * @param userId - The unique identifier of the user.
+   * @param videoId - The unique identifier of the video associated with the note.
    * @param createNoteDto - Data transfer object containing the note details.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns A promise that resolves to the newly created note.
    */
   createNote(
-    createNoteDto: ICreateDto<Note>,
+    userId: string,
+    videoId: string,
+    createNoteDto: ICreateNoteDto,
     tx?: Prisma.TransactionClient
   ): Promise<Note>;
 
   /**
    * Updates an existing note.
    *
-   * @param findNoteDto - Data transfer object containing the note ID and user ID.
+   * @param userId - The unique identifier of the user.
+   * @param noteId - The unique identifier of the note to update.
    * @param updateNoteDto - Data transfer object containing the updated note data.
+   *
    * @returns A promise that resolves to the updated note.
    */
-  updateNote(updateNoteDto: IUpdateDto<Note>): Promise<Note>;
+  updateNote(
+    userId: string,
+    noteId: string,
+    updateNoteDto: IUpdateNoteDto
+  ): Promise<Note>;
 
   /**
    * Deletes a note.
    *
-   * @param deleteNoteDto - Data transfer object containing the note ID and user ID.
+   * @param userId - The unique identifier of the user.
+   * @param noteId - The unique identifier of the note to delete.
+   *
    * @returns A promise that resolves to the deleted note.
    */
-  deleteNote(deleteNoteDto: IDeleteDto): Promise<Note>;
+  deleteNote(userId: string, noteId: string): Promise<Note>;
 
   /**
    * Fetches paginated notes for a user.
@@ -189,7 +224,7 @@ export interface INoteController {
    * @returns A promise that resolves when the note is created.
    */
   createNote(
-    req: TypedRequest<ICreateBodyDto<Note>>,
+    req: TypedRequest<ICreateNoteDto, IParamIdDto>,
     res: Response
   ): Promise<void>;
 
@@ -201,7 +236,7 @@ export interface INoteController {
    * @returns A promise that resolves when the note is updated.
    */
   updateNote(
-    req: TypedRequest<IUpdateBodyDto<Note>, IParamIdDto>,
+    req: TypedRequest<IUpdateNoteDto, IParamIdDto>,
     res: Response
   ): Promise<void>;
 

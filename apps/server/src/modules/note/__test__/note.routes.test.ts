@@ -3,8 +3,7 @@ import request from "supertest";
 
 import app from "@/app";
 
-import type { ICreateBodyDto, IUpdateBodyDto } from "@/modules/shared/dtos";
-import type { Note } from "../note.model";
+import type { ICreateNoteDto, IUpdateNoteDto, Note } from "@tubenote/shared";
 
 import { noteController } from "../note.module";
 
@@ -336,19 +335,18 @@ describe("Note Routes Tests", () => {
   // POST /api/v1/notes
   // **********************************************
   describe("POST /api/v1/notes", () => {
-    const newNoteBody: ICreateBodyDto<Note> = {
+    const newNoteBody: ICreateNoteDto = {
       title: "Note 1",
       content: "Note Content 001",
       videoTitle: "Video Title",
       thumbnail: "thumbnail_url",
-      videoId: "video_id_001",
       youtubeId: "youtube_id_001",
       timestamp: 12,
     };
 
     it("should create a new note", async () => {
       const res = await request(app)
-        .post("/api/v1/notes")
+        .post("/api/v1/notes/video_id_001")
         .set("Authorization", "Bearer valid-token")
         .send(newNoteBody);
 
@@ -363,7 +361,7 @@ describe("Note Routes Tests", () => {
       const invalidNoteBody = { title: "" };
 
       const res = await request(app)
-        .post("/api/v1/notes")
+        .post("/api/v1/notes/video_id_001")
         .set("Authorization", "Bearer valid-token")
         .send(invalidNoteBody);
 
@@ -372,7 +370,7 @@ describe("Note Routes Tests", () => {
 
     it("should return 400 for a missing data body", async () => {
       const res = await request(app)
-        .post("/api/v1/notes")
+        .post("/api/v1/notes/video_id_001")
         .set("Authorization", "Bearer valid-token")
         .send();
 
@@ -385,7 +383,7 @@ describe("Note Routes Tests", () => {
       });
 
       const res = await request(app)
-        .post("/api/v1/notes")
+        .post("/api/v1/notes/video_id_001")
         .set("Authorization", "Bearer valid-token")
         .send(newNoteBody);
 
@@ -540,7 +538,7 @@ describe("Note Routes Tests", () => {
     const noteId = "note_id_001";
 
     it("should update a note with a valid id and request body", async () => {
-      const updatedNoteBody: IUpdateBodyDto<Note> = {
+      const updatedNoteBody: IUpdateNoteDto = {
         title: "Updated Title",
         content: "Updated Content",
       };
