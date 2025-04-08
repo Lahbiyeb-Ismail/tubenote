@@ -1,6 +1,8 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
+import type { ICreateUserDto } from "@tubenote/shared";
+
 import {
   AUTH_RATE_LIMIT_CONFIG,
   refreshTokenCookieConfig,
@@ -10,7 +12,6 @@ import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 import { BadRequestError } from "@/modules/shared/api-errors";
 
 import type { TypedRequest } from "@/modules/shared/types";
-import type { ICreateUserDto } from "@/modules/user";
 
 import type { ILoginDto } from "@/modules/auth/dtos";
 

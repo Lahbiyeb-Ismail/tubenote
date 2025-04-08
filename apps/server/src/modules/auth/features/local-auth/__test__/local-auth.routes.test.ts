@@ -3,8 +3,9 @@ import request from "supertest";
 
 import app from "@/app";
 
+import type { ICreateUserDto } from "@tubenote/shared";
+
 import type { ILoginDto } from "@/modules/auth/dtos";
-import type { ICreateUserDto } from "@/modules/user";
 
 import { BadRequestError, ConflictError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";

@@ -1,3 +1,5 @@
+import type { ICreateUserDto, User } from "@tubenote/shared";
+
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import {
@@ -7,7 +9,7 @@ import {
 } from "@/modules/shared/api-errors";
 import { stringToDate } from "@/modules/shared/utils";
 
-import type { ICreateUserDto, IUserService, User } from "@/modules/user";
+import type { IUserService } from "@/modules/user";
 
 import type {
   ICryptoService,

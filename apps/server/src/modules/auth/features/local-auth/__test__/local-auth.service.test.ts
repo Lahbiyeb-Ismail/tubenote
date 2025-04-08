@@ -1,3 +1,5 @@
+import type { ICreateUserDto, User } from "@tubenote/shared";
+
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import {
@@ -13,7 +15,7 @@ import type {
   IPrismaService,
 } from "@/modules/shared/services";
 
-import type { ICreateUserDto, IUserService, User } from "@/modules/user";
+import type { IUserService } from "@/modules/user";
 
 import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
 

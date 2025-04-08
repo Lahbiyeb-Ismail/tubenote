@@ -2,6 +2,8 @@ import { Response } from "express";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
+import type { ICreateUserDto, User } from "@tubenote/shared";
+
 import type {
   IApiResponse,
   ILoggerService,
@@ -17,13 +19,14 @@ import {
 import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 
 import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
-import type { ICreateUserDto, User } from "@/modules/user";
 
 import {
   BadRequestError,
   UnauthorizedError,
 } from "@/modules/shared/api-errors";
+
 import { LocalAuthController } from "../local-auth.controller";
+
 import type {
   ILocalAuthControllerOptions,
   ILocalAuthService,
