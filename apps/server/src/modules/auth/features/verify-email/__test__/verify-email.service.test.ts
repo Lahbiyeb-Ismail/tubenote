@@ -1,12 +1,14 @@
 import { mock, mockReset } from "jest-mock-extended";
 
+import type { User } from "@tubenote/shared";
+
 import {
   VERIFY_EMAIL_TOKEN_EXPIRES_IN,
   VERIFY_EMAIL_TOKEN_SECRET,
 } from "@/modules/auth/constants";
 import type { IJwtService, ISignTokenDto } from "@/modules/auth/utils";
 
-import type { IUserService, User } from "@/modules/user";
+import type { IUserService } from "@/modules/user";
 
 import {
   BadRequestError,

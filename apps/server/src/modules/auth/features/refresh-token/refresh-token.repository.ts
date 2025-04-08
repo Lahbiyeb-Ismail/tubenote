@@ -1,10 +1,11 @@
+import type { Prisma } from "@prisma/client";
+
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import type { ICreateDto } from "@/modules/shared/dtos";
 import type { IPrismaService } from "@/modules/shared/services";
 
-import type { Prisma } from "@prisma/client";
 import type { RefreshToken } from "./refresh-token.model";
 import type {
   IRefreshTokenRepository,

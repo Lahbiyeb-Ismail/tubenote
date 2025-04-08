@@ -4,7 +4,7 @@ import {
   emailBodySchema,
   passwordBodySchema,
   tokenParamSchema,
-} from "@/modules/shared/schemas";
+} from "@tubenote/shared";
 
 import { createRateLimitMiddleware, validateRequest } from "@/middlewares";
 import { AUTH_RATE_LIMIT_CONFIG } from "../../config";

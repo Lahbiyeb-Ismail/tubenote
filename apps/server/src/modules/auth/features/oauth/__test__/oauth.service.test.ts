@@ -1,6 +1,8 @@
 import { mock } from "jest-mock-extended";
 
-import { REFRESH_TOKEN_EXPIRES_IN } from "../../../constants";
+import type { User } from "@tubenote/shared";
+
+import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
 import { OAuthService } from "../oauth.service";
 
 import type { IJwtService } from "@/modules/auth/utils";
@@ -12,9 +14,11 @@ import type {
   IPrismaService,
 } from "@/modules/shared/services";
 import { stringToDate } from "@/modules/shared/utils";
-import type { IUserService, User } from "@/modules/user";
+
+import type { IUserService } from "@/modules/user";
 import type { Account } from "@/modules/user/features/account/account.model";
 import type { IAccountService } from "@/modules/user/features/account/account.types";
+
 import type { IRefreshTokenService, RefreshToken } from "../../refresh-token";
 import type { IOauthLoginDto } from "../dtos";
 import type { IOAuthServiceOptions } from "../oauth.types";

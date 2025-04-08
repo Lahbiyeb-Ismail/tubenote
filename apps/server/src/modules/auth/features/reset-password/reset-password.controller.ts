@@ -1,6 +1,8 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
+import { AUTH_RATE_LIMIT_CONFIG } from "../../config";
+
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type {
@@ -14,7 +16,7 @@ import type {
   IRateLimitService,
   IResponseFormatter,
 } from "@/modules/shared/services";
-import { AUTH_RATE_LIMIT_CONFIG } from "../../config";
+
 import type {
   IResetPasswordController,
   IResetPasswordControllerOptions,

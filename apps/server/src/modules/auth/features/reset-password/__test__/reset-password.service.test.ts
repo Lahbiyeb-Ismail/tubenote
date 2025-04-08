@@ -1,3 +1,7 @@
+import { mock, mockReset } from "jest-mock-extended";
+
+import type { User } from "@tubenote/shared";
+
 import { BadRequestError, ForbiddenError } from "@/modules/shared/api-errors";
 import type {
   ICacheService,
@@ -5,8 +9,8 @@ import type {
   ILoggerService,
   IMailSenderService,
 } from "@/modules/shared/services";
-import type { IUserService, User } from "@/modules/user";
-import { mock, mockReset } from "jest-mock-extended";
+
+import type { IUserService } from "@/modules/user";
 import { ResetPasswordService } from "../reset-password.service";
 import type { IResetPasswordServiceOptions } from "../reset-password.types";
 
