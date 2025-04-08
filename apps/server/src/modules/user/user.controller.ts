@@ -1,6 +1,12 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
+import type {
+  IUpdatePasswordDto,
+  IUpdateUserDto,
+  User,
+} from "@tubenote/shared";
+
 import { NotFoundError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
@@ -14,8 +20,6 @@ import type {
 
 import { USER_RATE_LIMIT_CONFIG } from "./config";
 
-import type { IUpdatePasswordDto, IUpdateUserDto } from "./dtos";
-import type { User } from "./user.model";
 import type {
   IUserController,
   IUserControllerOptions,

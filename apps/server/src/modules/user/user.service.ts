@@ -1,5 +1,12 @@
 import type { Prisma } from "@prisma/client";
 
+import type {
+  ICreateUserDto,
+  IUpdatePasswordDto,
+  IUpdateUserDto,
+  User,
+} from "@tubenote/shared";
+
 import {
   BadRequestError,
   ConflictError,
@@ -9,13 +16,6 @@ import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import type { ICryptoService, IPrismaService } from "@/modules/shared/services";
 
-import type {
-  ICreateUserDto,
-  IResetPasswordDto,
-  IUpdatePasswordDto,
-  IUpdateUserDto,
-} from "./dtos";
-import type { User } from "./user.model";
 import type {
   IUserRepository,
   IUserService,
@@ -202,17 +202,17 @@ export class UserService implements IUserService {
   /**
    * Resets the password for a user.
    *
-   * @param {IResetPasswordDto} resetPasswordDto - The data transfer object containing the user's ID and the new password.
+   * @param userId - The ID of the user whose password is to be reset.
+   * @param newPassword - The new password to set for the user.
+   *
    * @returns {Promise<User>} - A promise that resolves to the updated user.
    *
    * @throws {UserNotFoundException} - If the user with the given ID does not exist.
    * @throws {HashingException} - If there is an error while hashing the new password.
    */
-  async resetUserPassword(resetPasswordDto: IResetPasswordDto): Promise<User> {
-    const { id, newPassword } = resetPasswordDto;
-
+  async resetUserPassword(userId: string, newPassword: string): Promise<User> {
     const updatedUser = await this._prismaService.transaction(async (tx) => {
-      const user = await this._ensureUserExists(id, tx);
+      const user = await this._ensureUserExists(userId, tx);
 
       const hashedPassword =
         await this._cryptoService.hashPassword(newPassword);

@@ -3,8 +3,12 @@ import httpStatus from "http-status";
 
 import { mock, mockReset } from "jest-mock-extended";
 
-import type { IUpdateBodyDto } from "@/modules/shared/dtos";
 import type { TypedRequest } from "@/modules/shared/types";
+import type {
+  IUpdatePasswordDto,
+  IUpdateUserDto,
+  User,
+} from "@tubenote/shared";
 
 import { UserController } from "../user.controller";
 
@@ -14,8 +18,7 @@ import type {
   IRateLimitService,
   IResponseFormatter,
 } from "@/modules/shared/services";
-import type { IUpdatePasswordDto, IUpdateUserDto } from "../dtos";
-import type { User } from "../user.model";
+
 import type { IUserControllerOptions, IUserService } from "../user.types";
 
 describe("UserController tests", () => {
@@ -234,10 +237,7 @@ describe("UserController tests", () => {
       );
 
       await expect(
-        userController.updateCurrentUser(
-          updateUserReq as TypedRequest<IUpdateBodyDto<User>>,
-          res
-        )
+        userController.updateCurrentUser(updateUserReq, res)
       ).rejects.toThrow(errorMessage);
     });
   });

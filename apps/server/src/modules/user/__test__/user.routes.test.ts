@@ -3,11 +3,13 @@ import request from "supertest";
 
 import app from "@/app";
 
+import type { IUpdatePasswordDto, User } from "@tubenote/shared";
+
+import type { TypedRequest } from "@/modules/shared/types";
+
 import { BadRequestError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import type { TypedRequest } from "@/modules/shared/types";
-import type { IUpdatePasswordDto } from "../dtos";
-import type { User } from "../user.model";
+
 import { userController } from "../user.module";
 
 const MOCK_USER_ID = "user_id_001";

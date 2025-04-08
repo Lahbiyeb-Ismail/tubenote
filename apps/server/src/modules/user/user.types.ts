@@ -1,9 +1,14 @@
 import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
-import type { TypedRequest } from "@/modules/shared/types";
+import type {
+  ICreateUserDto,
+  IUpdatePasswordDto,
+  IUpdateUserDto,
+  User,
+} from "@tubenote/shared";
 
-import type { User } from "./user.model";
+import type { TypedRequest } from "@/modules/shared/types";
 
 import type {
   ICryptoService,
@@ -11,13 +16,8 @@ import type {
   IPrismaService,
   IRateLimitService,
   IResponseFormatter,
-} from "../shared/services";
-import type {
-  ICreateUserDto,
-  IResetPasswordDto,
-  IUpdatePasswordDto,
-  IUpdateUserDto,
-} from "./dtos";
+} from "@/modules/shared/services";
+
 import type { IAccountService } from "./features/account/account.types";
 import type { ICreateAccountDto } from "./features/account/dtos";
 
@@ -120,10 +120,13 @@ export interface IUserService {
 
   /**
    * Resets the password of an existing user.
-   * @param resetPasswordDto - Data transfer object containing reset password details.
+   *
+   * @param userId - The ID of the user whose password is to be reset.
+   * @param newPassword - The new password to set for the user.
+   *
    * @returns A promise that resolves to the user with the reset password.
    */
-  resetUserPassword(resetPasswordDto: IResetPasswordDto): Promise<User>;
+  resetUserPassword(userId: string, newPassword: string): Promise<User>;
 
   /**
    * Verifies the email of a user.

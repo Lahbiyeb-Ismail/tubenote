@@ -1,13 +1,13 @@
 import type { Prisma } from "@prisma/client";
 
+import type { ICreateUserDto, IUpdateUserDto, User } from "@tubenote/shared";
+
 import { ConflictError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import type { IPrismaService } from "@/modules/shared/services";
 
-import type { ICreateUserDto, IUpdateUserDto } from "./dtos";
-import type { User } from "./user.model";
 import type { IUserRepository, IUserRepositoryOptions } from "./user.types";
 
 export class UserRepository implements IUserRepository {
