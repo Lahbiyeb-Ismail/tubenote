@@ -84,13 +84,13 @@ export class VideoController implements IVideoController {
     req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ) {
-    const videoId = req.params.id;
+    const videoYoutubeId = req.params.id;
     const userId = req.userId;
 
-    const video = await this._videoService.findVideoOrCreate({
+    const video = await this._videoService.findVideoOrCreate(
       userId,
-      id: videoId,
-    });
+      videoYoutubeId
+    );
 
     const formattedResponse = this._responseFormatter.formatResponse<Video>({
       responseOptions: {

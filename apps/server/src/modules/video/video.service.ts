@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
+import type { IFindManyDto } from "@tubenote/dtos";
 import type { Video, YoutubeVideoData } from "@tubenote/types";
 
 import {
@@ -10,10 +11,9 @@ import {
 
 import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
 
-import type { IFindUniqueDto, IPaginatedData } from "@/modules/shared/dtos";
+import type { IPaginatedData } from "@/modules/shared/dtos";
 import type { IPrismaService } from "@/modules/shared/services";
 
-import type { IFindManyDto } from "@tubenote/dtos";
 import type {
   IVideoRepository,
   IVideoService,
@@ -53,13 +53,7 @@ export class VideoService implements IVideoService {
   ): Promise<Video> {
     const videoData = await this.getYoutubeVideoData(youtubeVideoId);
 
-    return this._videoRepository.create(
-      {
-        userId,
-        data: videoData,
-      },
-      tx
-    );
+    return this._videoRepository.create(userId, videoData, tx);
   }
 
   private async _linkVideoToUser(
@@ -119,22 +113,23 @@ export class VideoService implements IVideoService {
     });
   }
 
-  async findVideoOrCreate(findVideoDto: IFindUniqueDto): Promise<Video> {
-    const { userId, id: youtubeVideoId } = findVideoDto;
-
-    if (!youtubeVideoId || !userId) {
+  async findVideoOrCreate(
+    userId: string,
+    videoYoutubeId: string
+  ): Promise<Video> {
+    if (!videoYoutubeId || !userId) {
       throw new BadRequestError(ERROR_MESSAGES.BAD_REQUEST);
     }
 
     return this._prismaService.transaction(async (tx) => {
       const existingVideo = await this._findVideoByYoutubeId(
         tx,
-        youtubeVideoId
+        videoYoutubeId
       );
 
       if (!existingVideo) {
         // If video doesn't exist, create it.
-        return this._createVideo(tx, userId, youtubeVideoId);
+        return this._createVideo(tx, userId, videoYoutubeId);
       }
 
       if (existingVideo.userIds?.includes(userId)) {
