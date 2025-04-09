@@ -1,10 +1,11 @@
 import type { Prisma } from "@prisma/client";
 
+import type { User } from "@tubenote/types";
+
 import type {
   ICreateUserDto,
   IUpdatePasswordDto,
   IUpdateUserDto,
-  User,
 } from "@tubenote/shared";
 
 import {

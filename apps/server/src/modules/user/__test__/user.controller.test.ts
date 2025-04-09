@@ -4,11 +4,9 @@ import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
 import type { TypedRequest } from "@/modules/shared/types";
-import type {
-  IUpdatePasswordDto,
-  IUpdateUserDto,
-  User,
-} from "@tubenote/shared";
+
+import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/shared";
+import type { User } from "@tubenote/types";
 
 import { UserController } from "../user.controller";
 

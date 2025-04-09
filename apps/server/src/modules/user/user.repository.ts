@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
-import type { ICreateUserDto, IUpdateUserDto, User } from "@tubenote/shared";
+import type { ICreateUserDto, IUpdateUserDto } from "@tubenote/shared";
+import type { User } from "@tubenote/types";
 
 import { ConflictError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";

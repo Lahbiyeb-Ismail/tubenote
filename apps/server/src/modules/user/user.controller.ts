@@ -1,11 +1,8 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type {
-  IUpdatePasswordDto,
-  IUpdateUserDto,
-  User,
-} from "@tubenote/shared";
+import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/shared";
+import type { User } from "@tubenote/types";
 
 import { NotFoundError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";

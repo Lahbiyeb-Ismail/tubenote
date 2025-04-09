@@ -5,8 +5,8 @@ import type {
   ICreateUserDto,
   IUpdatePasswordDto,
   IUpdateUserDto,
-  User,
 } from "@tubenote/shared";
+import type { User } from "@tubenote/types";
 
 import {
   BadRequestError,

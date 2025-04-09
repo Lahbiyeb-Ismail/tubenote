@@ -1,11 +1,12 @@
 import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
+import type { User } from "@tubenote/types";
+
 import type {
   ICreateUserDto,
   IUpdatePasswordDto,
   IUpdateUserDto,
-  User,
 } from "@tubenote/shared";
 
 import type { TypedRequest } from "@/modules/shared/types";
