@@ -14,9 +14,9 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@tubenote/shared": "workspace:*",
     "@tubenote/types": "workspace:*",
     "@tubenote/schemas": "workspace:*",
+    "@tubenote/dtos": "workspace:*",
     "@prisma/client": "^5.20.0",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
