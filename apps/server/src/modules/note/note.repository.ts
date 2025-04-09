@@ -1,12 +1,15 @@
 import type { Prisma } from "@prisma/client";
 
-import type { ICreateNoteDto, IUpdateNoteDto } from "@tubenote/shared/";
+import type {
+  ICreateNoteDto,
+  IFindManyDto,
+  IUpdateNoteDto,
+} from "@tubenote/dtos";
 import type { Note } from "@tubenote/types";
 
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
-import type { IFindAllDto } from "@/modules/shared/dtos";
 import type { IPrismaService } from "@/modules/shared/services";
 
 import type { INoteRepository, INoteRepositoryOptions } from "./note.types";
@@ -74,7 +77,7 @@ export class NoteRepository implements INoteRepository {
    *
    * @param userId - The ID of the user who owns the note.
    * @param videoId - The ID of the video associated with the note.
-   * @param createNoteDto - The DTO containing the data required to create a note.
+   * @param data - The DTO containing the data required to create a note.
    * @param tx - Optional transaction client for database operations.
    *
    * @returns A Promise that resolves with the created Note.
@@ -82,7 +85,7 @@ export class NoteRepository implements INoteRepository {
   async create(
     userId: string,
     videoId: string,
-    createNoteDto: ICreateNoteDto,
+    data: ICreateNoteDto,
     tx?: Prisma.TransactionClient
   ): Promise<Note> {
     const client = tx ?? this._db;
@@ -93,7 +96,7 @@ export class NoteRepository implements INoteRepository {
           data: {
             userId,
             videoId,
-            ...createNoteDto,
+            ...data,
           },
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
@@ -105,7 +108,7 @@ export class NoteRepository implements INoteRepository {
    *
    * @param userId - The ID of the user who owns the note.
    * @param noteId - The ID of the note to update.
-   * @param updateNoteDto - The DTO containing the data to update the note.
+   * @param data - The DTO containing the data to update the note.
    * @param tx - Optional transaction client for database operations.
    *
    * @returns {Promise<Note>} - A promise that resolves to the updated note.
@@ -114,7 +117,7 @@ export class NoteRepository implements INoteRepository {
   async update(
     userId: string,
     noteId: string,
-    updateNoteDto: IUpdateNoteDto,
+    data: IUpdateNoteDto,
     tx?: Prisma.TransactionClient
   ): Promise<Note> {
     const client = tx ?? this._db;
@@ -126,7 +129,7 @@ export class NoteRepository implements INoteRepository {
             id: noteId,
             userId,
           },
-          data: updateNoteDto,
+          data,
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE }
     );
@@ -160,16 +163,19 @@ export class NoteRepository implements INoteRepository {
   /**
    * Retrieves multiple notes for a given user with pagination and sorting options.
    *
-   * @param findManyDto - The DTO containing userId, limit, sort options, and skip value.
+   * @param userId - The ID of the user whose notes are to be fetched.
+   * @param findManyDto - The DTO containing pagination and sorting options.
+   *
    * @returns A Promise that resolves with an array of Notes.
    */
   async findMany(
-    findManyDto: IFindAllDto,
+    userId: string,
+    findManyDto: IFindManyDto,
     tx?: Prisma.TransactionClient
   ): Promise<Note[]> {
     const client = tx ?? this._db;
 
-    const { userId, limit, sort, skip = 0 } = findManyDto;
+    const { limit, sort, skip } = findManyDto;
 
     return handleAsyncOperation(
       () =>
@@ -190,16 +196,21 @@ export class NoteRepository implements INoteRepository {
   /**
    * Retrieves multiple notes for a given user filtered by video ID with pagination and sorting options.
    *
-   * @param dto - The DTO containing videoId, userId, limit, sort options, and skip value.
+   * @param userId - The ID of the user whose notes are to be fetched.
+   * @param videoId - The ID of the video associated with the notes.
+   * @param findManyDto - The DTO containing pagination and sorting options.
+   *
    * @returns A Promise that resolves with an array of Notes associated with the given video ID.
    */
   async findManyByVideoId(
-    dto: IFindAllDto & { videoId: string },
+    userId: string,
+    videoId: string,
+    findManyDto: IFindManyDto,
     tx?: Prisma.TransactionClient
   ): Promise<Note[]> {
     const client = tx ?? this._db;
 
-    const { videoId, userId, limit, sort, skip = 0 } = dto;
+    const { limit, sort, skip } = findManyDto;
 
     return handleAsyncOperation(
       () =>
