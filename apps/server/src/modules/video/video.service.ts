@@ -10,13 +10,10 @@ import {
 
 import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
 
-import type {
-  IFindAllDto,
-  IFindUniqueDto,
-  IPaginatedData,
-} from "@/modules/shared/dtos";
+import type { IFindUniqueDto, IPaginatedData } from "@/modules/shared/dtos";
 import type { IPrismaService } from "@/modules/shared/services";
 
+import type { IFindManyDto } from "@tubenote/dtos";
 import type {
   IVideoRepository,
   IVideoService,
@@ -104,16 +101,20 @@ export class VideoService implements IVideoService {
     };
   }
 
-  async getUserVideos(findAllDto: IFindAllDto): Promise<IPaginatedData<Video>> {
+  async getUserVideos(
+    userId: string,
+    findManyDto: IFindManyDto
+  ): Promise<IPaginatedData<Video>> {
     return this._prismaService.transaction(async (tx) => {
-      const data = await this._videoRepository.findMany(findAllDto, tx);
-
-      const totalItems = await this._videoRepository.count(
-        findAllDto.userId,
+      const data = await this._videoRepository.findMany(
+        userId,
+        findManyDto,
         tx
       );
 
-      const totalPages = Math.ceil(totalItems / findAllDto.limit);
+      const totalItems = await this._videoRepository.count(userId, tx);
+
+      const totalPages = Math.ceil(totalItems / findManyDto.limit);
       return { data, totalItems, totalPages };
     });
   }

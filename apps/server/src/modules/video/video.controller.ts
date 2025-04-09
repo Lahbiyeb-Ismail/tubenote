@@ -5,11 +5,7 @@ import type { Video } from "@tubenote/types";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
-import type {
-  IFindAllDto,
-  IParamIdDto,
-  IQueryPaginationDto,
-} from "@/modules/shared/dtos";
+import type { IParamIdDto, IQueryPaginationDto } from "@/modules/shared/dtos";
 import type { IResponseFormatter } from "@/modules/shared/services";
 
 import type {
@@ -54,17 +50,15 @@ export class VideoController implements IVideoController {
   ) {
     const userId = req.userId;
 
-    const paginationQueries = this._responseFormatter.getPaginationQueries({
+    const findManyDto = this._responseFormatter.getPaginationQueries({
       reqQuery: req.query,
       itemsPerPage: 8,
     });
 
-    const findAllDto: IFindAllDto = {
+    const paginatedData = await this._videoService.getUserVideos(
       userId,
-      ...paginationQueries,
-    };
-
-    const paginatedData = await this._videoService.getUserVideos(findAllDto);
+      findManyDto
+    );
 
     const formattedResponse = this._responseFormatter.formatPaginatedResponse({
       page: req.query.page || 1,
@@ -90,12 +84,12 @@ export class VideoController implements IVideoController {
     req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ) {
-    const { id } = req.params;
+    const videoId = req.params.id;
     const userId = req.userId;
 
     const video = await this._videoService.findVideoOrCreate({
       userId,
-      id,
+      id: videoId,
     });
 
     const formattedResponse = this._responseFormatter.formatResponse<Video>({
