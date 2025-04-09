@@ -1,48 +1,17 @@
 import type { IFindManyDto } from "@tubenote/dtos";
+import type { IApiResponse } from "@tubenote/types";
 
 import type {
   IPaginatedData,
   IQueryPaginationDto,
 } from "@/modules/shared/dtos";
 
-/**
- * Interface representing the pagination metadata.
- */
-export interface IPaginationInfo {
-  totalPages: number;
-  currentPage: number;
-  totalItems: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-}
-
 export interface IGetPaginationQueriesOptions {
   reqQuery: IQueryPaginationDto;
   itemsPerPage: number;
 }
 
-/**
- * Options to customize the API response.
- */
-export interface IResponseOptions<T> {
-  status: number;
-  message: string;
-  data?: T;
-  pagination?: IPaginationInfo;
-}
-
-/**
- * Represents a standardized API response.
- *
- * @template T - The type of the data being returned in the response.
- * @extends IResponseOptions
- *
- * @property {boolean} success - Indicates whether the API request was successful.
- * @property {T} data - The data returned by the API.
- */
-export interface IApiResponse<T> extends IResponseOptions<T> {
-  success: boolean;
-}
+export interface IResponseOptions<T> extends IApiResponse<T> {}
 
 /**
  * Sanitization rule for data processing - simplified to only remove sensitive fields

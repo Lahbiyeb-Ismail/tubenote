@@ -1,10 +1,10 @@
 import type { IFindManyDto } from "@tubenote/dtos";
+import type { IApiResponse, IPaginationMeta } from "@tubenote/types";
+
 import type {
-  IApiResponse,
   IFormatPaginatedResponseOptions,
   IFormatResponseOptions,
   IGetPaginationQueriesOptions,
-  IPaginationInfo,
   IResponseFormatter,
   ISanitizationOptions,
   ISanitizationRule,
@@ -149,7 +149,7 @@ export class ResponseFormatter implements IResponseFormatter {
   formatResponse<T>(formatOptions: IFormatResponseOptions<T>): IApiResponse<T> {
     const { responseOptions, sanitizationOptions } = formatOptions;
 
-    const { status, message, data, pagination } = responseOptions;
+    const { success, status, message, data, paginationMeta } = responseOptions;
 
     const sanitization = {
       ...this._sanitizationOptions,
@@ -157,7 +157,7 @@ export class ResponseFormatter implements IResponseFormatter {
     };
 
     const response: IApiResponse<T> = {
-      success: true,
+      success,
       message,
       status,
     };
@@ -170,8 +170,8 @@ export class ResponseFormatter implements IResponseFormatter {
       response.data = sanitizedData;
     }
 
-    if (pagination) {
-      response.pagination = pagination;
+    if (paginationMeta) {
+      response.paginationMeta = paginationMeta;
     }
 
     return response;
@@ -190,7 +190,6 @@ export class ResponseFormatter implements IResponseFormatter {
       formatOptions;
 
     const { totalPages, totalItems, data } = paginatedData;
-    const { status, message } = responseOptions;
 
     const sanitization = {
       ...this._sanitizationOptions,
@@ -199,7 +198,7 @@ export class ResponseFormatter implements IResponseFormatter {
 
     const currentPage = page || 1;
 
-    const pagination: IPaginationInfo = {
+    const paginationMeta: IPaginationMeta = {
       totalPages,
       totalItems,
       currentPage,
@@ -208,7 +207,7 @@ export class ResponseFormatter implements IResponseFormatter {
     };
 
     return this.formatResponse<T[]>({
-      responseOptions: { status, message, pagination, data },
+      responseOptions: { ...responseOptions, paginationMeta, data },
       sanitizationOptions: sanitization,
     });
   }
