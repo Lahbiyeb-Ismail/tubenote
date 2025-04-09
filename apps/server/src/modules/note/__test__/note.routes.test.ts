@@ -3,7 +3,7 @@ import request from "supertest";
 
 import app from "@/app";
 
-import type { ICreateNoteDto, IUpdateNoteDto } from "@tubenote/shared";
+import type { ICreateNoteDto, IUpdateNoteDto } from "@tubenote/dtos";
 import type { Note } from "@tubenote/types";
 
 import { noteController } from "../note.module";
