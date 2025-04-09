@@ -2,28 +2,41 @@ import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
-
-import type { ICreateDto, IParamTokenDto } from "@/modules/shared/dtos";
+import type { IParamTokenDto } from "@tubenote/dtos";
 
 import type {
   ILoggerService,
   IPrismaService,
   IResponseFormatter,
 } from "@/modules/shared/services";
+
 import type { IUserService } from "@/modules/user";
+
 import type { IJwtService } from "../../utils";
-import type { FindActiveTokenDto } from "./dtos";
 import type { VerifyEmailToken } from "./verify-email.model";
 
+export interface ICreateVerifyEmailTokenDto {
+  token: string;
+  expiresAt: Date;
+}
+
 export interface IVerifyEmailRepository {
-  findActiveToken(
-    dto: FindActiveTokenDto,
+  findByUserId(
+    userId: string,
     tx?: Prisma.TransactionClient
   ): Promise<VerifyEmailToken | null>;
+
+  findByToken(
+    token: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<VerifyEmailToken | null>;
+
   createToken(
-    createTokenDto: ICreateDto<VerifyEmailToken>,
+    userId: string,
+    data: ICreateVerifyEmailTokenDto,
     tx?: Prisma.TransactionClient
   ): Promise<VerifyEmailToken>;
+
   deleteMany(userId: string, tx?: Prisma.TransactionClient): Promise<void>;
 }
 

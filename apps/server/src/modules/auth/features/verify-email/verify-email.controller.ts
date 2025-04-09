@@ -1,9 +1,9 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
+import type { IParamTokenDto } from "@tubenote/dtos";
 
-import type { IParamTokenDto } from "@/modules/shared/dtos";
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type { IResponseFormatter } from "@/modules/shared/services";
 import type {
@@ -50,6 +50,7 @@ export class VerifyEmailController implements IVerifyEmailController {
 
     const formattedResponse = this._responseFormatter.formatResponse({
       responseOptions: {
+        success: true,
         status: httpStatus.OK,
         message: "Email verified successfully.",
       },

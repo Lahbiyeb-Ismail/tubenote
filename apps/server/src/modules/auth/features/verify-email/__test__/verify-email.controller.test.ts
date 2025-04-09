@@ -2,13 +2,11 @@ import { type Response } from "express";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
-import type { IParamTokenDto } from "@/modules/shared/dtos";
-import type {
-  IApiResponse,
-  IResponseFormatter,
-} from "@/modules/shared/services";
+import type { IResponseFormatter } from "@/modules/shared/services";
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
+import type { IParamTokenDto } from "@tubenote/dtos";
+import type { IApiResponse } from "@tubenote/types";
 import { VerifyEmailController } from "../verify-email.controller";
 import type {
   IVerifyEmailControllerOptions,

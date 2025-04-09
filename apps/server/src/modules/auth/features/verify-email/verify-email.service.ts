@@ -61,10 +61,7 @@ export class VerifyEmailService implements IVerifyEmailService {
     }
 
     const existingVerificationToken =
-      await this._verifyEmailRepository.findActiveToken(
-        { userId: user.id },
-        tx
-      );
+      await this._verifyEmailRepository.findByUserId(user.id, tx);
 
     if (existingVerificationToken) {
       throw new BadRequestError(ERROR_MESSAGES.VERIFICATION_LINK_SENT);
@@ -79,12 +76,10 @@ export class VerifyEmailService implements IVerifyEmailService {
     });
 
     await this._verifyEmailRepository.createToken(
+      user.id,
       {
-        userId: user.id,
-        data: {
-          token,
-          expiresAt: stringToDate(expiresIn),
-        },
+        token,
+        expiresAt: stringToDate(expiresIn),
       },
       tx
     );
@@ -103,10 +98,8 @@ export class VerifyEmailService implements IVerifyEmailService {
     });
 
     await this._prismaService.transaction(async (tx) => {
-      const foundToken = await this._verifyEmailRepository.findActiveToken(
-        {
-          token,
-        },
+      const foundToken = await this._verifyEmailRepository.findByToken(
+        token,
         tx
       );
 
