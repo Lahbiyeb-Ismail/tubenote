@@ -57,7 +57,8 @@ export class AuthController implements IAuthController {
 
     const formattedResponse = this._responseFormatter.formatResponse({
       responseOptions: {
-        status: httpStatus.NO_CONTENT,
+        success: true,
+        status: httpStatus.OK,
         message: "User logged out successfully.",
       },
     });
