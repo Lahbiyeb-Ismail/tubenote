@@ -3,7 +3,7 @@ import request from "supertest";
 
 import app from "@/app";
 
-import type { IUpdatePasswordDto } from "@tubenote/shared";
+import type { IUpdatePasswordDto } from "@tubenote/dtos";
 import type { User } from "@tubenote/types";
 
 import type { TypedRequest } from "@/modules/shared/types";

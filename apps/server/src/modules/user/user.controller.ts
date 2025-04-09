@@ -1,7 +1,7 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/shared";
+import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/dtos";
 import type { User } from "@tubenote/types";
 
 import { NotFoundError } from "@/modules/shared/api-errors";
@@ -65,6 +65,7 @@ export class UserController implements IUserController {
 
     const formatedResponse = this._responseFormatter.formatResponse<User>({
       responseOptions: {
+        success: true,
         data: user,
         status: httpStatus.OK,
         message: "User retrieved successfully.",
@@ -92,6 +93,7 @@ export class UserController implements IUserController {
 
     const formatedResponse = this._responseFormatter.formatResponse<User>({
       responseOptions: {
+        success: true,
         data: user,
         status: httpStatus.OK,
         message: "User updated successfully.",
@@ -124,6 +126,7 @@ export class UserController implements IUserController {
 
       const formatedResponse = this._responseFormatter.formatResponse<User>({
         responseOptions: {
+          success: true,
           data: user,
           status: httpStatus.OK,
           message: "User password updated successfully.",

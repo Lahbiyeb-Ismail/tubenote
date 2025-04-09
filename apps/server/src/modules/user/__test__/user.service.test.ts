@@ -5,7 +5,7 @@ import type {
   ICreateUserDto,
   IUpdatePasswordDto,
   IUpdateUserDto,
-} from "@tubenote/shared";
+} from "@tubenote/dtos";
 import type { User } from "@tubenote/types";
 
 import {
@@ -477,14 +477,9 @@ describe("UserService", () => {
       // Arrange
       userRepository.getById.mockResolvedValue(null);
 
-      const _resetPasswordDto = {
-        id: "999",
-        newPassword: "new_password",
-      };
-
       // Act & Assert
       await expect(
-        userService.resetUserPassword(mockUserId, "new_password")
+        userService.resetUserPassword("999", "new_password")
       ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
 
       expect(prismaService.transaction).toHaveBeenCalled();

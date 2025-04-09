@@ -3,20 +3,20 @@ import httpStatus from "http-status";
 
 import { mock, mockReset } from "jest-mock-extended";
 
-import type { TypedRequest } from "@/modules/shared/types";
-
-import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/shared";
+import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/dtos";
 import type { User } from "@tubenote/types";
 
-import { UserController } from "../user.controller";
-
 import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
+
+import type { TypedRequest } from "@/modules/shared/types";
+
 import type {
   ILoggerService,
   IRateLimitService,
   IResponseFormatter,
 } from "@/modules/shared/services";
 
+import { UserController } from "../user.controller";
 import type { IUserControllerOptions, IUserService } from "../user.types";
 
 describe("UserController tests", () => {
@@ -133,6 +133,7 @@ describe("UserController tests", () => {
 
       expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
         responseOptions: {
+          success: true,
           data: getUserFormattedRes.data,
           message: getUserFormattedRes.message,
           status: getUserFormattedRes.status,
@@ -188,6 +189,7 @@ describe("UserController tests", () => {
 
       expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
         responseOptions: {
+          success: true,
           data: updateUserFormattedRes.data,
           message: updateUserFormattedRes.message,
           status: updateUserFormattedRes.status,
@@ -214,6 +216,7 @@ describe("UserController tests", () => {
 
       expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
         responseOptions: {
+          success: true,
           data: mockUser,
           message: updateUserFormattedRes.message,
           status: updateUserFormattedRes.status,
@@ -270,6 +273,7 @@ describe("UserController tests", () => {
 
       expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
         responseOptions: {
+          success: true,
           data: mockUser,
           status: httpStatus.OK,
           message: "User password updated successfully.",
