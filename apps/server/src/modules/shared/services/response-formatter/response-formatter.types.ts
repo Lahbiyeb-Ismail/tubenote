@@ -1,5 +1,6 @@
+import type { IFindManyDto } from "@tubenote/dtos";
+
 import type {
-  IFindAllDto,
   IPaginatedData,
   IQueryPaginationDto,
 } from "@/modules/shared/dtos";
@@ -75,7 +76,5 @@ export interface IResponseFormatter {
   formatPaginatedResponse<T>(
     formatOptions: IFormatPaginatedResponseOptions<T>
   ): IApiResponse<T[]>;
-  getPaginationQueries(
-    options: IGetPaginationQueriesOptions
-  ): Omit<IFindAllDto, "userId">;
+  getPaginationQueries(options: IGetPaginationQueriesOptions): IFindManyDto;
 }

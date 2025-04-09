@@ -1,5 +1,4 @@
-import type { IFindAllDto } from "@/modules/shared/dtos";
-
+import type { IFindManyDto } from "@tubenote/dtos";
 import type {
   IApiResponse,
   IFormatPaginatedResponseOptions,
@@ -220,9 +219,7 @@ export class ResponseFormatter implements IResponseFormatter {
    * @param options - The options for generating pagination queries.
    * @returns An object containing the skip, limit, and sort options for pagination.
    */
-  getPaginationQueries(
-    options: IGetPaginationQueriesOptions
-  ): Omit<IFindAllDto, "userId"> {
+  getPaginationQueries(options: IGetPaginationQueriesOptions): IFindManyDto {
     const { reqQuery, itemsPerPage } = options;
     const page = Math.max(Number(reqQuery.page) || 1, 1);
     const limit = Math.max(Number(reqQuery.limit) || itemsPerPage, 1);
@@ -232,8 +229,8 @@ export class ResponseFormatter implements IResponseFormatter {
       skip,
       limit,
       sort: {
-        by: reqQuery.sortBy || "createdAt",
-        order: reqQuery.order || "desc",
+        by: reqQuery.sortBy ?? "createdAt",
+        order: reqQuery.order ?? "desc",
       },
     };
   }
