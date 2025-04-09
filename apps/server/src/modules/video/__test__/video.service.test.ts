@@ -2,14 +2,6 @@ import type { Video, YoutubeVideoData } from "@tubenote/types";
 
 import type { IPrismaService } from "@/modules/shared/services";
 
-import type {
-  ICreateDto,
-  // IFindAllDto,
-  // IFindUniqueDto,
-} from "@/modules/shared/dtos";
-
-// import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
-
 import { VideoService } from "../video.service";
 
 import type { IVideoRepository, IVideoService } from "../video.types";
@@ -140,17 +132,12 @@ describe("VideoService methods tests cases", () => {
     embedHtmlPlayer: "embed_html",
   };
 
-  const createVideoDto: ICreateDto<YoutubeVideoData> = {
-    userId: mockUserId,
-    data: mockYoutubeVideoData,
-  };
-
   const mockNewVideo: Video = {
     id: "video_003",
     userIds: [mockUserId],
     createdAt: new Date(),
     updatedAt: new Date(),
-    ...createVideoDto.data,
+    ...mockYoutubeVideoData,
   };
 
   const mockVideosCount = mockVideos.length;

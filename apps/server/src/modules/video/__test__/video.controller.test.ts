@@ -2,21 +2,18 @@ import type { Response } from "express";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
+import type {
+  IFindManyDto,
+  IPaginationQueryDto,
+  IParamIdDto,
+} from "@tubenote/dtos";
+import type { IApiResponse, Video } from "@tubenote/types";
+
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
-import type { Video } from "@tubenote/types";
 
 import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
 
-import type {
-  IFindAllDto,
-  IParamIdDto,
-  IQueryPaginationDto,
-} from "@/modules/shared/dtos";
-
-import type {
-  IApiResponse,
-  IResponseFormatter,
-} from "@/modules/shared/services";
+import type { IResponseFormatter } from "@/modules/shared/services";
 
 import { VideoController } from "../video.controller";
 import type { IVideoService } from "../video.types";
@@ -34,7 +31,7 @@ describe("VideoController", () => {
   const mockVideoId = "video_id_456";
 
   const mockRequest =
-    mock<TypedRequest<EmptyRecord, EmptyRecord, IQueryPaginationDto>>();
+    mock<TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>>();
   const mockFindOrCreateReq = mock<TypedRequest<EmptyRecord, IParamIdDto>>();
   const mockResponse = mock<Response>();
 
@@ -43,7 +40,7 @@ describe("VideoController", () => {
     status: httpStatus.OK,
     message: "Videos retrieved successfully.",
     data: [],
-    pagination: {
+    paginationMeta: {
       currentPage: 1,
       hasNextPage: false,
       hasPrevPage: false,
@@ -102,7 +99,7 @@ describe("VideoController", () => {
   });
 
   describe("VideoController - getUserVideos", () => {
-    const paginationQueries: Omit<IFindAllDto, "userId"> = {
+    const paginationQueries: IFindManyDto = {
       limit: 10,
       skip: 0,
       sort: {
@@ -111,7 +108,7 @@ describe("VideoController", () => {
       },
     };
 
-    const baseQuery: IQueryPaginationDto = {
+    const baseQuery: IPaginationQueryDto = {
       page: 1,
       limit: 10,
       sortBy: "createdAt",
@@ -136,10 +133,10 @@ describe("VideoController", () => {
 
       await videoController.getUserVideos(mockRequest, mockResponse);
 
-      expect(videoService.getUserVideos).toHaveBeenCalledWith({
-        userId: mockUserId,
-        ...paginationQueries,
-      });
+      expect(videoService.getUserVideos).toHaveBeenCalledWith(
+        mockUserId,
+        paginationQueries
+      );
 
       expect(responseFormatter.formatPaginatedResponse).toHaveBeenCalled();
       expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
@@ -237,10 +234,10 @@ describe("VideoController", () => {
         mockResponse
       );
 
-      expect(videoService.findVideoOrCreate).toHaveBeenCalledWith({
-        userId: mockUserId,
-        id: mockVideoId,
-      });
+      expect(videoService.findVideoOrCreate).toHaveBeenCalledWith(
+        mockUserId,
+        mockVideoId
+      );
 
       expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
         responseOptions: {
