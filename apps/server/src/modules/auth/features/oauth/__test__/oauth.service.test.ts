@@ -1,6 +1,6 @@
 import { mock } from "jest-mock-extended";
 
-import type { User } from "@tubenote/shared";
+import type { User } from "@tubenote/types";
 
 import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
 import { OAuthService } from "../oauth.service";
