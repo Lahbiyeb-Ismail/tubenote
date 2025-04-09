@@ -13,6 +13,7 @@
     "build:server": "pnpm run --filter server build",
     "build:client": "pnpm run --filter client build",
     "build:shared": "pnpm run --filter shared build",
+    "build:types": "pnpm run --filter types build",
     "build:all": "pnpm run --parallel -r build",
     "dev:all": "pnpm run --parallel -r dev",
     "dev": "pnpm run --parallel -r dev",
