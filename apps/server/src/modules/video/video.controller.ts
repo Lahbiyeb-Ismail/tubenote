@@ -1,11 +1,11 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
+import type { IPaginationQueryDto, IParamIdDto } from "@tubenote/dtos";
 import type { Video } from "@tubenote/types";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
-import type { IParamIdDto, IQueryPaginationDto } from "@/modules/shared/dtos";
 import type { IResponseFormatter } from "@/modules/shared/services";
 
 import type {
@@ -45,7 +45,7 @@ export class VideoController implements IVideoController {
    * @returns A JSON response with the list of videos and pagination details.
    */
   async getUserVideos(
-    req: TypedRequest<EmptyRecord, EmptyRecord, IQueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
     res: Response
   ) {
     const userId = req.userId;

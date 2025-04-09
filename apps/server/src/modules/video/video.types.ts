@@ -1,16 +1,15 @@
 import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
-import type { ICreateVideoDto, IFindManyDto } from "@tubenote/dtos";
-import type { Video, YoutubeVideoData } from "@tubenote/types";
+import type {
+  ICreateVideoDto,
+  IFindManyDto,
+  IPaginationQueryDto,
+  IParamIdDto,
+} from "@tubenote/dtos";
+import type { IPaginatedData, Video, YoutubeVideoData } from "@tubenote/types";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
-
-import type {
-  IPaginatedData,
-  IParamIdDto,
-  IQueryPaginationDto,
-} from "@/modules/shared/dtos";
 
 import type {
   IPrismaService,
@@ -51,7 +50,7 @@ export interface IVideoService {
 
 export interface IVideoController {
   getUserVideos(
-    req: TypedRequest<EmptyRecord, EmptyRecord, IQueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
     res: Response
   ): Promise<void>;
   getVideoByIdOrCreate(

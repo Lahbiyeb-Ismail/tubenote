@@ -1,7 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import type { IFindManyDto } from "@tubenote/dtos";
-import type { Video, YoutubeVideoData } from "@tubenote/types";
+import type { IPaginatedData, Video, YoutubeVideoData } from "@tubenote/types";
 
 import {
   ERROR_MESSAGES,
@@ -11,7 +11,6 @@ import {
 
 import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
 
-import type { IPaginatedData } from "@/modules/shared/dtos";
 import type { IPrismaService } from "@/modules/shared/services";
 
 import type {
