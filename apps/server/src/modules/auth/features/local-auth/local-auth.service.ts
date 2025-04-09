@@ -1,4 +1,5 @@
-import type { ICreateUserDto, User } from "@tubenote/shared";
+import type { ICreateUserDto } from "@tubenote/shared";
+import type { User } from "@tubenote/types";
 
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 

@@ -1,7 +1,9 @@
 import type { Response } from "express";
 
+import type { ICreateUserDto } from "@tubenote/shared";
+import type { User } from "@tubenote/types";
+
 import type { TypedRequest } from "@/modules/shared/types";
-import type { ICreateUserDto, User } from "@tubenote/shared";
 
 import type { IUserService } from "@/modules/user";
 

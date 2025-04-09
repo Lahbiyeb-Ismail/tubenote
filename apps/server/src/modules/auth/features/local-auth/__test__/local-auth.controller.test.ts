@@ -2,7 +2,8 @@ import { Response } from "express";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
-import type { ICreateUserDto, User } from "@tubenote/shared";
+import type { ICreateUserDto } from "@tubenote/shared";
+import type { User } from "@tubenote/types";
 
 import type {
   IApiResponse,
