@@ -1,6 +1,7 @@
 import { mock, mockReset } from "jest-mock-extended";
 
-import type { ICreateNoteDto, IUpdateNoteDto, Note } from "@tubenote/shared";
+import type { ICreateNoteDto, IUpdateNoteDto } from "@tubenote/shared";
+import type { Note } from "@tubenote/types";
 
 import { NotFoundError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";

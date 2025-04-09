@@ -1,7 +1,8 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { ICreateNoteDto, IUpdateNoteDto, Note } from "@tubenote/shared";
+import type { ICreateNoteDto, IUpdateNoteDto } from "@tubenote/shared";
+import type { Note } from "@tubenote/types";
 
 import type { IResponseFormatter } from "@/modules/shared/services";
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";

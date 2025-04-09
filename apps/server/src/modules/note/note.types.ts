@@ -1,7 +1,9 @@
 import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
-import type { ICreateNoteDto, IUpdateNoteDto, Note } from "@tubenote/shared";
+import type { Note } from "@tubenote/types";
+
+import type { ICreateNoteDto, IUpdateNoteDto } from "@tubenote/shared";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 

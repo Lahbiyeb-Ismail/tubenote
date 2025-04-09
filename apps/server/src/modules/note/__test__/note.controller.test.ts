@@ -2,7 +2,8 @@ import { Response } from "express";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
-import type { ICreateNoteDto, IUpdateNoteDto, Note } from "@tubenote/shared";
+import type { ICreateNoteDto, IUpdateNoteDto } from "@tubenote/shared";
+import type { Note } from "@tubenote/types";
 
 import type { TypedRequest } from "@/modules/shared/types";
 

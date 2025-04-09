@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
-import type { ICreateNoteDto, IUpdateNoteDto, Note } from "@tubenote/shared/";
+import type { ICreateNoteDto, IUpdateNoteDto } from "@tubenote/shared/";
+import type { Note } from "@tubenote/types";
 
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";
