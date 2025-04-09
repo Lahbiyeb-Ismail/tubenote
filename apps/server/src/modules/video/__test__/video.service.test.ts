@@ -1,4 +1,4 @@
-import type { Video, YoutubeVideoData } from "@tubenote/shared";
+import type { Video, YoutubeVideoData } from "@tubenote/types";
 
 import type { IPrismaService } from "@/modules/shared/services";
 

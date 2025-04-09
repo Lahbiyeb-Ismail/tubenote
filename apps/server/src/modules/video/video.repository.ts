@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
-import type { Video, YoutubeVideoData } from "@tubenote/shared";
+import type { Video, YoutubeVideoData } from "@tubenote/types";
 
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";

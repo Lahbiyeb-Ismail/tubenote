@@ -1,7 +1,7 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { Video } from "@tubenote/shared";
+import type { Video } from "@tubenote/types";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 

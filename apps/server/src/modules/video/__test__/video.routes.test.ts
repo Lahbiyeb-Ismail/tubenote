@@ -1,7 +1,7 @@
 import httpStatus from "http-status";
 import request from "supertest";
 
-import type { Video } from "@tubenote/shared";
+import type { Video } from "@tubenote/types";
 
 import app from "@/app";
 

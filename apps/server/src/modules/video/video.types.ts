@@ -1,7 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
-import type { Video, YoutubeVideoData } from "@tubenote/shared";
+import type { Video, YoutubeVideoData } from "@tubenote/types";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 

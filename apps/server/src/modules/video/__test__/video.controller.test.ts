@@ -3,7 +3,7 @@ import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
-import type { Video } from "@tubenote/shared";
+import type { Video } from "@tubenote/types";
 
 import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
 
