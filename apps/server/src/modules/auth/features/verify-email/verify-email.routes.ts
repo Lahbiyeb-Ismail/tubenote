@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { tokenParamSchema } from "@tubenote/shared";
+import { tokenParamSchema } from "@tubenote/schemas";
 
 import { validateRequest } from "@/middlewares";
 

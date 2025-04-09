@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { idParamSchema, paginationQuerySchema } from "@tubenote/shared";
+import { idParamSchema, paginationQuerySchema } from "@tubenote/schemas";
 
 import { isAuthenticated, validateRequest } from "@/middlewares";
 

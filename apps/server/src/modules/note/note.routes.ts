@@ -5,7 +5,7 @@ import {
   idParamSchema,
   paginationQuerySchema,
   updateNoteSchema,
-} from "@tubenote/shared";
+} from "@tubenote/schemas";
 
 import { isAuthenticated, validateRequest } from "@/middlewares";
 

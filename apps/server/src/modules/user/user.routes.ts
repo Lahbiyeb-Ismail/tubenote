@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { updatePasswordSchema, updateUserSchema } from "@tubenote/shared";
+import { updatePasswordSchema, updateUserSchema } from "@tubenote/schemas";
 
 import {
   createRateLimitMiddleware,
