@@ -1,3 +1,5 @@
+import { mock, mockReset } from "jest-mock-extended";
+
 import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
 import type { IAuthResponseDto, IRefreshDto } from "@/modules/auth/dtos";
 import type { IJwtService } from "@/modules/auth/utils";
@@ -9,12 +11,13 @@ import {
   UnauthorizedError,
 } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
+
 import type { ICreateDto } from "@/modules/shared/dtos";
 import type { ILoggerService, IPrismaService } from "@/modules/shared/services";
 import type { JwtPayload } from "@/modules/shared/types";
+
 import { stringToDate } from "@/modules/shared/utils";
 
-import { mock, mockReset } from "jest-mock-extended";
 import type { RefreshToken } from "../refresh-token.model";
 import { RefreshTokenService } from "../refresh-token.service";
 import type { IRefreshTokenRepository } from "../refresh-token.types";
