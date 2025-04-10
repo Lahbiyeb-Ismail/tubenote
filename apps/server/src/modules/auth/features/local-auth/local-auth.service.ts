@@ -1,4 +1,4 @@
-import type { ICreateUserDto } from "@tubenote/shared";
+import type { ICreateUserDto, ILoginDto } from "@tubenote/dtos";
 import type { User } from "@tubenote/types";
 
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
@@ -26,7 +26,7 @@ import type {
 
 import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
 
-import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
+import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import type { IJwtService } from "@/modules/auth/utils";
 
 import type { ICreateAccountDto } from "@/modules/user/features/account/dtos";
@@ -138,12 +138,9 @@ export class LocalAuthService implements ILocalAuthService {
     );
 
     // Store refresh token
-    await this._refreshTokenService.createToken({
-      userId: user.id,
-      data: {
-        token: refreshToken,
-        expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
-      },
+    await this._refreshTokenService.createToken(user.id, {
+      token: refreshToken,
+      expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
     });
 
     this._loggerService.info("User logged in successfully", {
