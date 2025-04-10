@@ -246,13 +246,13 @@ describe("OAuthService", () => {
       expect(jwtService.generateAuthTokens).toHaveBeenCalledWith(
         mockExistingUserId
       );
-      expect(refreshTokenService.createToken).toHaveBeenCalledWith({
-        userId: mockExistingUserId,
-        data: {
+      expect(refreshTokenService.createToken).toHaveBeenCalledWith(
+        mockExistingUserId,
+        {
           token: "refresh-token",
           expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
-        },
-      });
+        }
+      );
       expect(result).toEqual({
         accessToken: "access-token",
         refreshToken: "refresh-token",
@@ -282,13 +282,13 @@ describe("OAuthService", () => {
         mockNewUser.id
       );
 
-      expect(refreshTokenService.createToken).toHaveBeenCalledWith({
-        userId: mockNewUser.id,
-        data: {
+      expect(refreshTokenService.createToken).toHaveBeenCalledWith(
+        mockNewUser.id,
+        {
           token: "refresh-token",
           expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
-        },
-      });
+        }
+      );
 
       expect(result).toEqual({
         accessToken: "access-token",

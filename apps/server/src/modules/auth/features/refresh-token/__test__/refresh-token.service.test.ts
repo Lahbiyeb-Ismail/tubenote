@@ -120,12 +120,10 @@ describe("RefreshTokenService", () => {
       expect(jwtService.generateAuthTokens).toHaveBeenCalledWith(mockUserId);
 
       expect(refreshTokenRepository.create).toHaveBeenCalledWith(
+        mockUserId,
         {
-          userId: mockUserId,
-          data: {
-            token: mockNewRefreshToken,
-            expiresAt: expiresIn,
-          },
+          token: mockNewRefreshToken,
+          expiresAt: expiresIn,
         },
         mockTransaction
       );

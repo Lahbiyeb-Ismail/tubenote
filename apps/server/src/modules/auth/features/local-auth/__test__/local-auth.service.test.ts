@@ -159,13 +159,13 @@ describe("LocalAuthService", () => {
         hash: mockUser.password,
       });
       expect(jwtService.generateAuthTokens).toHaveBeenCalledWith(mockUser.id);
-      expect(refreshTokenService.createToken).toHaveBeenCalledWith({
-        userId: mockUser.id,
-        data: {
+      expect(refreshTokenService.createToken).toHaveBeenCalledWith(
+        mockUser.id,
+        {
           token: mockTokens.refreshToken,
           expiresAt: expect.any(Date),
-        },
-      });
+        }
+      );
     });
 
     it("should throw NotFoundError if user does not exist", async () => {

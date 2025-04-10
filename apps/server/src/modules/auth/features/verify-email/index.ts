@@ -1,4 +1,3 @@
-export * from "./dtos";
 export * from "./verify-email.types";
 export * from "./verify-email.model";
 
