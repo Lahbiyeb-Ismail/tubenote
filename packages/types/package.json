@@ -9,11 +9,12 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "tsup": "^8.4.0",
     "typescript": "^5.7.2"
   }
 }

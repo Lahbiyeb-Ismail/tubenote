@@ -9,12 +9,13 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "clean": "rm -rf dist"
   },
   "dependencies": {
     "@tubenote/types": "workspace:*",
+    "tsup": "^8.4.0",
     "typescript": "^5.7.2",
     "zod": "^3.23.8"
   }
