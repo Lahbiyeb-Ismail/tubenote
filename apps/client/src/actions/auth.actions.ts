@@ -1,12 +1,9 @@
 import axios from "axios";
 
 import axiosInstance from "@/lib/axios.lib";
-import type {
-  LoginFormData,
-  LoginUserResponse,
-  RegisterFormData,
-  RegisterUserResponse,
-} from "@/types/auth.types";
+
+import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
+import type { IApiResponse, User } from "@tubenote/types";
 
 import { API_URL } from "@/utils/constants";
 import { setStorageValue } from "@/utils/localStorage";
@@ -14,34 +11,55 @@ import { setStorageValue } from "@/utils/localStorage";
 /**
  * Registers a new user with the provided registration credentials.
  *
- * @param registerCredentials - The registration data required to create a new user.
+ * @param registerDto - The registration data required to create a new user.
  * @returns A promise that resolves to the registration response.
  */
 export async function registerUser(
-  registerCredentials: RegisterFormData
-): Promise<RegisterUserResponse> {
-  const response = await axios.post(
+  registerDto: IRegisterDto
+): Promise<{ message: string; email: string }> {
+  const { data: responseData } = await axios.post<IApiResponse<User>>(
     `${API_URL}/auth/register`,
-    registerCredentials
+    registerDto
   );
 
-  return response.data;
+  if (!responseData.success || !responseData.data) {
+    throw new Error("Registration failed");
+  }
+
+  const { message, data } = responseData;
+
+  return { message, email: data.email };
 }
 
 /**
  * Logs in a user with the provided login credentials.
  *
- * @param loginCredentials - The login form data containing user credentials.
+ * @param loginDto - The login form data containing user credentials.
  * @returns A promise that resolves to the login response.
  */
 export async function loginUser(
-  loginCredentials: LoginFormData
-): Promise<LoginUserResponse> {
-  const response = await axios.post(`${API_URL}/auth/login`, loginCredentials, {
-    withCredentials: true,
-  });
+  loginDto: ILoginDto
+): Promise<{ message: string; accessToken: string }> {
+  try {
+    const { data: responseData } = await axios.post<
+      IApiResponse<{ accessToken: string }>
+    >(`${API_URL}/auth/login`, loginDto, {
+      withCredentials: true,
+    });
 
-  return response.data;
+    console.log(responseData);
+
+    if (!responseData.success || !responseData.data) {
+      throw new Error("Login failed");
+    }
+
+    const { message, data } = responseData;
+
+    return { message, accessToken: data.accessToken };
+  } catch (error) {
+    console.error("Error logging in:", error);
+    throw new Error("Login failed");
+  }
 }
 
 /**
@@ -64,15 +82,24 @@ export async function logoutUser(): Promise<void> {
  *
  * @throws Will log an error message if the token refresh fails.
  */
-export async function refreshAccessToken(): Promise<void> {
+export async function refreshAccessToken(): Promise<string | void> {
   try {
-    const response = await axios.post(
+    const response = await axios.post<IApiResponse<{ accessToken: string }>>(
       `${API_URL}/auth/refresh`,
       {},
       { withCredentials: true }
     );
-    const newAccessToken = response.data.accessToken;
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error("Token refresh failed");
+    }
+
+    const { data } = response.data;
+
+    const newAccessToken = data.accessToken;
+
     setStorageValue("accessToken", newAccessToken);
+
     return newAccessToken;
   } catch (error) {
     console.error("Error refreshing token:", error);
