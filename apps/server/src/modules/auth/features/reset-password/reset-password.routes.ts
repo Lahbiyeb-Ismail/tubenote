@@ -6,8 +6,10 @@ import {
   tokenParamSchema,
 } from "@tubenote/schemas";
 
+import { AUTH_RATE_LIMIT_CONFIG } from "@/modules/auth/config";
+
 import { createRateLimitMiddleware, validateRequest } from "@/middlewares";
-import { AUTH_RATE_LIMIT_CONFIG } from "../../config";
+
 import { resetPasswordController } from "./reset-password.module";
 
 const forgotPasswordRateLimiter = createRateLimitMiddleware({
