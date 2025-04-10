@@ -2,7 +2,7 @@ import { Response } from "express";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
-import type { ICreateUserDto, ILoginDto } from "@tubenote/dtos";
+import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 import type { IApiResponse, User } from "@tubenote/types";
 
 import type {
@@ -48,7 +48,7 @@ describe("LocalAuthController", () => {
     responseFormatter,
   };
 
-  const registerReq = mock<TypedRequest<ICreateUserDto>>();
+  const registerReq = mock<TypedRequest<IRegisterDto>>();
 
   const loginReq = mock<TypedRequest<ILoginDto>>();
 
@@ -66,7 +66,7 @@ describe("LocalAuthController", () => {
     updatedAt: new Date(),
   };
 
-  const mockRegisterDto: ICreateUserDto = {
+  const mockRegisterDto: IRegisterDto = {
     email: "test@example.com",
     password: "Password123!",
     username: "Test User",

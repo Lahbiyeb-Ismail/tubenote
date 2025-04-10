@@ -1,6 +1,6 @@
 import { mock, mockReset } from "jest-mock-extended";
 
-import type { ICreateUserDto, ILoginDto } from "@tubenote/dtos";
+import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 import type { User } from "@tubenote/types";
 
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
@@ -83,11 +83,10 @@ describe("LocalAuthService", () => {
     refreshToken: "mock-refresh-token",
   };
 
-  const createUserDto: ICreateUserDto = {
+  const createUserDto: IRegisterDto = {
     email: "test@example.com",
     password: "password123",
     username: "Test User",
-    isEmailVerified: false,
   };
 
   const createAccountDto: ICreateAccountDto = {

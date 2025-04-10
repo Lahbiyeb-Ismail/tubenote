@@ -3,7 +3,7 @@ import request from "supertest";
 
 import app from "@/app";
 
-import type { ICreateUserDto, ILoginDto } from "@tubenote/dtos";
+import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 import type { IApiResponse } from "@tubenote/types";
 
 import { BadRequestError, ConflictError } from "@/modules/shared/api-errors";
@@ -19,7 +19,7 @@ jest.mock("../local-auth.module", () => ({
 }));
 
 describe("Local Auth Routes", () => {
-  const validRegisterPayload: ICreateUserDto = {
+  const validRegisterPayload: IRegisterDto = {
     email: "test@example.com",
     password: "Password123!",
     username: "testuser",
