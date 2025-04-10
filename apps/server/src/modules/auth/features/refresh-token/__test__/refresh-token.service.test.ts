@@ -1,7 +1,7 @@
 import { mock, mockReset } from "jest-mock-extended";
 
 import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
-import type { IAuthResponseDto, IRefreshDto } from "@/modules/auth/dtos";
+import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import type { IJwtService } from "@/modules/auth/utils";
 
 import {
@@ -12,12 +12,12 @@ import {
 } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import type { ICreateDto } from "@/modules/shared/dtos";
 import type { ILoggerService, IPrismaService } from "@/modules/shared/services";
 import type { JwtPayload } from "@/modules/shared/types";
 
 import { stringToDate } from "@/modules/shared/utils";
 
+import type { ICreateRefreshTokenDto } from "../dtos";
 import type { RefreshToken } from "../refresh-token.model";
 import { RefreshTokenService } from "../refresh-token.service";
 import type { IRefreshTokenRepository } from "../refresh-token.types";
@@ -73,8 +73,6 @@ describe("RefreshTokenService", () => {
   });
 
   describe("RefreshTokenService - refreshToken", () => {
-    const IrefreshDto: IRefreshDto = { userId: mockUserId, token: mockToken };
-
     const decodedToken: JwtPayload = {
       userId: mockUserId,
       exp: 1123454,
@@ -103,7 +101,10 @@ describe("RefreshTokenService", () => {
 
       refreshTokenRepository.create.mockResolvedValue(mockRefreshToken);
 
-      const result = await refreshTokenService.refreshToken(IrefreshDto);
+      const result = await refreshTokenService.refreshToken(
+        mockUserId,
+        mockToken
+      );
 
       expect(result).toEqual(mockLoginResponse);
 
@@ -136,7 +137,7 @@ describe("RefreshTokenService", () => {
       jwtService.verify.mockRejectedValue(error);
 
       await expect(
-        refreshTokenService.refreshToken(IrefreshDto)
+        refreshTokenService.refreshToken(mockUserId, mockToken)
       ).rejects.toThrow(error);
 
       expect(jwtService.verify).toHaveBeenCalled();
@@ -155,7 +156,7 @@ describe("RefreshTokenService", () => {
       });
 
       await expect(
-        refreshTokenService.refreshToken(IrefreshDto)
+        refreshTokenService.refreshToken(mockUserId, mockToken)
       ).rejects.toThrow(new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED));
 
       expect(refreshTokenRepository.deleteAll).toHaveBeenCalledWith(mockUserId);
@@ -167,7 +168,7 @@ describe("RefreshTokenService", () => {
       refreshTokenRepository.findValid.mockResolvedValue(null);
 
       await expect(
-        refreshTokenService.refreshToken(IrefreshDto)
+        refreshTokenService.refreshToken(mockUserId, mockToken)
       ).rejects.toThrow(new ForbiddenError(ERROR_MESSAGES.FORBIDDEN));
 
       expect(prismaService.transaction).toHaveBeenCalled();
@@ -193,7 +194,7 @@ describe("RefreshTokenService", () => {
       refreshTokenRepository.delete.mockRejectedValue(databaseError);
 
       await expect(
-        refreshTokenService.refreshToken(IrefreshDto)
+        refreshTokenService.refreshToken(mockUserId, mockToken)
       ).rejects.toThrow(databaseError);
     });
 
@@ -203,7 +204,7 @@ describe("RefreshTokenService", () => {
       jwtService.verify.mockRejectedValue(expiredError);
 
       await expect(
-        refreshTokenService.refreshToken(IrefreshDto)
+        refreshTokenService.refreshToken(mockUserId, mockToken)
       ).rejects.toThrow(expiredError);
     });
 
@@ -212,7 +213,7 @@ describe("RefreshTokenService", () => {
       jwtService.verify.mockResolvedValue(invalidDecodedToken);
 
       await expect(
-        refreshTokenService.refreshToken(IrefreshDto)
+        refreshTokenService.refreshToken(mockUserId, mockToken)
       ).rejects.toThrow(UnauthorizedError);
 
       expect(refreshTokenRepository.deleteAll).toHaveBeenCalled();
@@ -238,26 +239,26 @@ describe("RefreshTokenService", () => {
   });
 
   describe("RefreshTokenService - create", () => {
-    const createTokenDto: ICreateDto<RefreshToken> = {
-      userId: mockUserId,
-      data: {
-        token: "new-token",
-        expiresAt: new Date(),
-      },
+    const createTokenDto: ICreateRefreshTokenDto = {
+      token: "new-token",
+      expiresAt: new Date(),
     };
 
     it("should create a new refresh token", async () => {
       refreshTokenRepository.create.mockResolvedValue({
-        ...createTokenDto.data,
+        ...createTokenDto,
         id: "new-id",
         userId: mockUserId,
         createdAt: new Date(),
       });
 
-      const result = await refreshTokenService.createToken(createTokenDto);
+      const result = await refreshTokenService.createToken(
+        mockUserId,
+        createTokenDto
+      );
       expect(result).toMatchObject({
-        userId: createTokenDto.userId,
-        ...createTokenDto.data,
+        ...createTokenDto,
+        userId: mockUserId,
         id: expect.any(String),
         createdAt: expect.any(Date),
       });
@@ -269,7 +270,7 @@ describe("RefreshTokenService", () => {
       refreshTokenRepository.create.mockRejectedValue(dbError);
 
       await expect(
-        refreshTokenService.createToken(createTokenDto)
+        refreshTokenService.createToken(mockUserId, createTokenDto)
       ).rejects.toThrow(dbError);
     });
   });
