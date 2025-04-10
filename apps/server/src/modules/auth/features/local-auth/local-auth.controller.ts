@@ -1,7 +1,7 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { ICreateUserDto, ILoginDto } from "@tubenote/dtos";
+import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 
 import {
   AUTH_RATE_LIMIT_CONFIG,
@@ -55,7 +55,7 @@ export class LocalAuthController implements ILocalAuthController {
    * @param req - The request object containing user registration credentials.
    * @param res - The response object.
    */
-  async register(req: TypedRequest<ICreateUserDto>, res: Response) {
+  async register(req: TypedRequest<IRegisterDto>, res: Response) {
     try {
       const user = await this._localAuthService.registerUser(req.body);
 
