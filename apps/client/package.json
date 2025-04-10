@@ -10,6 +10,9 @@
     "lint:fix": "biome check . --apply"
   },
   "dependencies": {
+    "@tubenote/dtos": "workspace:*",
+    "@tubenote/types": "workspace:*",
+    "@tubenote/schemas": "workspace:*",
     "@blocknote/core": "^0.16.0",
     "@blocknote/mantine": "^0.16.0",
     "@blocknote/react": "^0.16.0",
