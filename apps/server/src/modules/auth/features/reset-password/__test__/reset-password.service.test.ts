@@ -11,6 +11,7 @@ import type {
 } from "@/modules/shared/services";
 
 import type { IUserService } from "@/modules/user";
+
 import { ResetPasswordService } from "../reset-password.service";
 import type { IResetPasswordServiceOptions } from "../reset-password.types";
 
@@ -198,10 +199,10 @@ describe("ResetPasswordService", () => {
       // and then the token is deleted and user password is reset.
       expect(cacheService.get).toHaveBeenCalledWith(testToken);
       expect(cacheService.del).toHaveBeenCalledWith(testToken);
-      expect(userService.resetUserPassword).toHaveBeenCalledWith({
-        id: mockUserId,
-        newPassword,
-      });
+      expect(userService.resetUserPassword).toHaveBeenCalledWith(
+        mockUserId,
+        newPassword
+      );
       expect(loggerService.warn).toHaveBeenCalledWith(
         expect.stringContaining(`Remove reset token ${testToken} from cache`)
       );

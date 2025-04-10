@@ -2,17 +2,20 @@ import type { Response } from "express";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
+import type { IApiResponse } from "@tubenote/types";
+
 import type {
   IEmailBodyDto,
   IParamTokenDto,
   IPasswordBodyDto,
-} from "@/modules/shared/dtos";
+} from "@tubenote/dtos";
+
 import type {
-  IApiResponse,
   ILoggerService,
   IRateLimitService,
   IResponseFormatter,
 } from "@/modules/shared/services";
+
 import type { TypedRequest } from "@/modules/shared/types";
 
 import { AUTH_RATE_LIMIT_CONFIG } from "@/modules/auth/config";
@@ -123,6 +126,7 @@ describe("ResetPasswordController", () => {
 
         expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
           responseOptions: {
+            success: true,
             status: httpStatus.OK,
             message: "Password reset link sent to your email.",
           },
@@ -420,6 +424,7 @@ describe("ResetPasswordController", () => {
         // Assert
         expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
           responseOptions: {
+            success: true,
             status: httpStatus.OK,
             message: "Password reset link sent to your email.",
           },
