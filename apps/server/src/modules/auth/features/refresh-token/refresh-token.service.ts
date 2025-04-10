@@ -2,7 +2,6 @@ import { ForbiddenError, UnauthorizedError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { stringToDate } from "@/modules/shared/utils";
 
-import type { ICreateDto } from "@/modules/shared/dtos";
 import type { ILoggerService, IPrismaService } from "@/modules/shared/services";
 
 import {
@@ -10,11 +9,12 @@ import {
   REFRESH_TOKEN_SECRET,
 } from "@/modules/auth/constants";
 
-import type { IAuthResponseDto, IRefreshDto } from "@/modules/auth/dtos";
+import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import type { IJwtService } from "@/modules/auth/utils";
 
 import type { RefreshToken } from "./refresh-token.model";
 
+import type { ICreateRefreshTokenDto } from "./dtos";
 import type {
   IRefreshTokenRepository,
   IRefreshTokenService,
@@ -46,9 +46,7 @@ export class RefreshTokenService implements IRefreshTokenService {
     return this._instance;
   }
 
-  async refreshToken(refreshDto: IRefreshDto): Promise<IAuthResponseDto> {
-    const { userId, token } = refreshDto;
-
+  async refreshToken(userId: string, token: string): Promise<IAuthResponseDto> {
     const decodedToken = await this._jwtService.verify({
       token,
       secret: REFRESH_TOKEN_SECRET,
@@ -87,16 +85,12 @@ export class RefreshTokenService implements IRefreshTokenService {
       const { accessToken, refreshToken } =
         this._jwtService.generateAuthTokens(userId);
 
-      await this._refreshTokenRepository.create(
-        {
-          userId,
-          data: {
-            token: refreshToken,
-            expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
-          },
-        },
-        tx
-      );
+      const createTokenDto = {
+        token: refreshToken,
+        expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+      };
+
+      await this._refreshTokenRepository.create(userId, createTokenDto, tx);
 
       return { accessToken, refreshToken };
     });
@@ -107,8 +101,9 @@ export class RefreshTokenService implements IRefreshTokenService {
   }
 
   async createToken(
-    createTokenDto: ICreateDto<RefreshToken>
+    userId: string,
+    data: ICreateRefreshTokenDto
   ): Promise<RefreshToken> {
-    return this._refreshTokenRepository.create(createTokenDto);
+    return this._refreshTokenRepository.create(userId, data);
   }
 }

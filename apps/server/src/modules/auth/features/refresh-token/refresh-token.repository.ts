@@ -3,9 +3,9 @@ import type { Prisma } from "@prisma/client";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
-import type { ICreateDto } from "@/modules/shared/dtos";
 import type { IPrismaService } from "@/modules/shared/services";
 
+import type { ICreateRefreshTokenDto } from "./dtos";
 import type { RefreshToken } from "./refresh-token.model";
 import type {
   IRefreshTokenRepository,
@@ -28,7 +28,8 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
   }
 
   async create(
-    createTokenDto: ICreateDto<RefreshToken>,
+    userId: string,
+    data: ICreateRefreshTokenDto,
     tx?: Prisma.TransactionClient
   ): Promise<RefreshToken> {
     const client = tx ?? this._db;
@@ -36,7 +37,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
     return handleAsyncOperation(
       () =>
         client.refreshToken.create({
-          data: { userId: createTokenDto.userId, ...createTokenDto.data },
+          data: { userId, ...data },
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
     );
