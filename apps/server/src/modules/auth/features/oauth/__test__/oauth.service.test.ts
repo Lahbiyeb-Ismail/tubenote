@@ -3,7 +3,6 @@ import { mock } from "jest-mock-extended";
 import type { User } from "@tubenote/types";
 
 import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
-import { OAuthService } from "../oauth.service";
 
 import type { IJwtService } from "@/modules/auth/utils";
 import { BadRequestError } from "@/modules/shared/api-errors";
@@ -21,6 +20,8 @@ import type { IAccountService } from "@/modules/user/features/account/account.ty
 
 import type { IRefreshTokenService, RefreshToken } from "../../refresh-token";
 import type { IOauthLoginDto } from "../dtos";
+
+import { OAuthService } from "../oauth.service";
 import type { IOAuthServiceOptions } from "../oauth.types";
 
 jest.mock("@/modules/shared/utils", () => ({
@@ -227,7 +228,10 @@ describe("OAuthService", () => {
       accountService.findAccountByProvider.mockResolvedValue(mockAccount);
 
       // Act
-      const result = await oauthService.handleOAuthLogin(oauthLoginDtoExisting);
+      const result = await oauthService.handleOAuthLogin(
+        oauthLoginDtoExisting.createUserDto,
+        oauthLoginDtoExisting.createAccountDto
+      );
 
       // Assert
       expect(accountService.findAccountByProvider).toHaveBeenCalledWith(
@@ -262,7 +266,10 @@ describe("OAuthService", () => {
       userService.createUserWithAccount.mockResolvedValue(mockNewUser);
 
       // Act
-      const result = await oauthService.handleOAuthLogin(oauthLoginDtoNew);
+      const result = await oauthService.handleOAuthLogin(
+        oauthLoginDtoNew.createUserDto,
+        oauthLoginDtoNew.createAccountDto
+      );
 
       // Assert
       expect(accountService.findAccountByProvider).toHaveBeenCalledWith(
@@ -298,7 +305,10 @@ describe("OAuthService", () => {
 
       // Act & Assert
       await expect(
-        oauthService.handleOAuthLogin(oauthLoginDtoExisting)
+        oauthService.handleOAuthLogin(
+          oauthLoginDtoExisting.createUserDto,
+          oauthLoginDtoExisting.createAccountDto
+        )
       ).rejects.toThrow("Transaction failed");
     });
   });
