@@ -241,6 +241,7 @@ describe("VideoController", () => {
 
       expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
         responseOptions: {
+          success: true,
           data: mockVideo,
           message: "Video retrieved successfully.",
           status: 200,
@@ -312,18 +313,18 @@ describe("VideoController", () => {
     // });
 
     it("should handle special characters in video ID", async () => {
-      const specialId = "video_!@#$%^&*()";
-      mockFindOrCreateReq.params = { id: specialId };
+      const specialVideoId = "video_!@#$%^&*()";
+      mockFindOrCreateReq.params = { id: specialVideoId };
 
       await videoController.getVideoByIdOrCreate(
         mockFindOrCreateReq,
         mockResponse
       );
 
-      expect(videoService.findVideoOrCreate).toHaveBeenCalledWith({
-        userId: mockUserId,
-        id: specialId,
-      });
+      expect(videoService.findVideoOrCreate).toHaveBeenCalledWith(
+        mockFindOrCreateReq.userId,
+        mockFindOrCreateReq.params.id
+      );
     });
 
     it("should handle concurrent requests for same video ID", async () => {
