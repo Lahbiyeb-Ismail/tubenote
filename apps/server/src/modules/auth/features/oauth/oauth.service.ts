@@ -1,25 +1,24 @@
-import { stringToDate } from "@/modules/shared/utils";
-import { REFRESH_TOKEN_EXPIRES_IN } from "../../constants";
+import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
+import type { IAuthResponseDto } from "@/modules/auth/dtos";
+import type { IJwtService } from "@/modules/auth/utils";
 
+import { BadRequestError } from "@/modules/shared/api-errors";
 import {
   type ICacheService,
   type ICryptoService,
   type ILoggerService,
   type IPrismaService,
 } from "@/modules/shared/services";
+import { stringToDate } from "@/modules/shared/utils";
+
 import type { IUserService } from "@/modules/user";
 import type { IAccountService } from "@/modules/user/features/account/account.types";
-import type { IJwtService } from "../../utils";
+
 import type { IRefreshTokenService } from "../refresh-token";
 
-import type {
-  IAuthResponseDto,
-  OAuthCodePayloadDto,
-  OAuthResponseDto,
-} from "../../dtos";
-import type { IOauthLoginDto } from "./dtos";
-
-import { BadRequestError } from "@/modules/shared/api-errors";
+import type { ICreateAccountDto } from "@/modules/user/features/account/dtos";
+import type { ICreateUserDto } from "@tubenote/dtos";
+import type { IOAuthResponseDto, IOAuthTokenPayloadDto } from "./dtos";
 import type { IOAuthService, IOAuthServiceOptions } from "./oauth.types";
 
 export class OAuthService implements IOAuthService {
@@ -54,11 +53,11 @@ export class OAuthService implements IOAuthService {
   }
 
   async generateTemporaryOAuthCode(
-    temporaryOAuthCodeDto: OAuthCodePayloadDto
+    temporaryOAuthCodeDto: IOAuthTokenPayloadDto
   ): Promise<string> {
     const code = this._cryptoService.generateRandomSecureToken();
 
-    const setResult = this._cacheService.set<OAuthCodePayloadDto>(code, {
+    const setResult = this._cacheService.set<IOAuthTokenPayloadDto>(code, {
       ...temporaryOAuthCodeDto,
     });
 
@@ -72,12 +71,11 @@ export class OAuthService implements IOAuthService {
 
   // New method for OAuth login/signup
   async handleOAuthLogin(
-    oauthLoginDto: IOauthLoginDto
-  ): Promise<OAuthResponseDto> {
-    const { createAccountDto, createUserDto } = oauthLoginDto;
-
+    createUserDto: ICreateUserDto,
+    createAccountDto: ICreateAccountDto
+  ): Promise<IOAuthResponseDto> {
     const oauthResponse =
-      await this._prismaService.transaction<OAuthResponseDto>(async (tx) => {
+      await this._prismaService.transaction<IOAuthResponseDto>(async (tx) => {
         let userId: string;
 
         // Try to find existing account for this OAuth provider
@@ -121,12 +119,9 @@ export class OAuthService implements IOAuthService {
           `Saving refresh token for user with ID ${userId}.`
         );
 
-        await this._refreshTokenService.createToken({
-          userId,
-          data: {
-            token: refreshToken,
-            expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
-          },
+        await this._refreshTokenService.createToken(userId, {
+          token: refreshToken,
+          expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
         });
 
         const temporaryCode = await this.generateTemporaryOAuthCode({
@@ -142,7 +137,7 @@ export class OAuthService implements IOAuthService {
   }
 
   async exchangeOauthCodeForTokens(code: string): Promise<IAuthResponseDto> {
-    const codeData = this._cacheService.get<OAuthCodePayloadDto>(code);
+    const codeData = this._cacheService.get<IOAuthTokenPayloadDto>(code);
 
     this._loggerService.info(`Retrieved codeData: ${codeData}`);
 
