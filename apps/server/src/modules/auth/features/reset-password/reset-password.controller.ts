@@ -1,20 +1,22 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
-import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
-
 import type {
   IEmailBodyDto,
   IParamTokenDto,
   IPasswordBodyDto,
-} from "@/modules/shared/dtos";
+} from "@tubenote/dtos";
+
+import { AUTH_RATE_LIMIT_CONFIG } from "@/modules/auth/config";
+
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type {
   ILoggerService,
   IRateLimitService,
   IResponseFormatter,
 } from "@/modules/shared/services";
-import { AUTH_RATE_LIMIT_CONFIG } from "../../config";
+
 import type {
   IResetPasswordController,
   IResetPasswordControllerOptions,
@@ -67,6 +69,7 @@ export class ResetPasswordController implements IResetPasswordController {
 
       const formattedResponse = this._responseFormatter.formatResponse({
         responseOptions: {
+          success: true,
           status: httpStatus.OK,
           message: "Password reset link sent to your email.",
         },
@@ -106,6 +109,7 @@ export class ResetPasswordController implements IResetPasswordController {
 
       const formattedResponse = this._responseFormatter.formatResponse({
         responseOptions: {
+          success: true,
           status: httpStatus.OK,
           message: "Password reset successfully.",
         },
@@ -143,6 +147,7 @@ export class ResetPasswordController implements IResetPasswordController {
 
     const formattedResponse = this._responseFormatter.formatResponse({
       responseOptions: {
+        success: true,
         status: httpStatus.OK,
         message: "Reset password token is valid.",
       },

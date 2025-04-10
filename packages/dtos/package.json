@@ -1,0 +1,22 @@
+{
+  "name": "@tubenote/dtos",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@tubenote/types": "workspace:*",
+    "tsup": "^8.4.0",
+    "typescript": "^5.7.2",
+    "zod": "^3.23.8"
+  }
+}

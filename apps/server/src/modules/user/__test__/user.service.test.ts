@@ -1,6 +1,13 @@
 import type { Prisma } from "@prisma/client";
 import { mock, mockReset } from "jest-mock-extended";
 
+import type {
+  ICreateUserDto,
+  IUpdatePasswordDto,
+  IUpdateUserDto,
+} from "@tubenote/dtos";
+import type { User } from "@tubenote/types";
+
 import {
   BadRequestError,
   ConflictError,
@@ -12,15 +19,8 @@ import type { ICryptoService, IPrismaService } from "@/modules/shared/services";
 
 import { UserService } from "../user.service";
 
-import type {
-  ICreateUserDto,
-  IResetPasswordDto,
-  IUpdatePasswordDto,
-  IUpdateUserDto,
-} from "../dtos";
 import type { IAccountService } from "../features/account/account.types";
 import type { ICreateAccountDto } from "../features/account/dtos";
-import type { User } from "../user.model";
 import type { IUserRepository, IUserServiceOptions } from "../user.types";
 
 describe("UserService", () => {
@@ -455,13 +455,11 @@ describe("UserService", () => {
       cryptoService.hashPassword.mockResolvedValue("hashed_new_password");
       userRepository.updatePassword.mockResolvedValue(updatedUser);
 
-      const resetPasswordDto: IResetPasswordDto = {
-        id: mockUserId,
-        newPassword: "new_password",
-      };
-
       // Act
-      const result = await userService.resetUserPassword(resetPasswordDto);
+      const result = await userService.resetUserPassword(
+        mockUserId,
+        "new_password"
+      );
 
       // Assert
       expect(prismaService.transaction).toHaveBeenCalled();
@@ -479,14 +477,9 @@ describe("UserService", () => {
       // Arrange
       userRepository.getById.mockResolvedValue(null);
 
-      const resetPasswordDto = {
-        id: "999",
-        newPassword: "new_password",
-      };
-
       // Act & Assert
       await expect(
-        userService.resetUserPassword(resetPasswordDto)
+        userService.resetUserPassword("999", "new_password")
       ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
 
       expect(prismaService.transaction).toHaveBeenCalled();

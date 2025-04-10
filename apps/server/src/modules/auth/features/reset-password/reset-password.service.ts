@@ -76,10 +76,7 @@ export class ResetPasswordService implements IResetPasswordService {
       `Remove reset token ${token} from cache: ${deleteResult}`
     );
 
-    await this._userService.resetUserPassword({
-      id: userId,
-      newPassword: password,
-    });
+    await this._userService.resetUserPassword(userId, password);
 
     this._loggerService.info(`Password reset for user ${userId}`);
   }

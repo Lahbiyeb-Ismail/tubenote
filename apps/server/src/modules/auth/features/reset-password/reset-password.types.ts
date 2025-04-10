@@ -1,12 +1,13 @@
 import type { Response } from "express";
 
-import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
-
 import type {
   IEmailBodyDto,
   IParamTokenDto,
   IPasswordBodyDto,
-} from "@/modules/shared/dtos";
+} from "@tubenote/dtos";
+
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
+
 import type {
   ICacheService,
   ICryptoService,
@@ -15,6 +16,7 @@ import type {
   IRateLimitService,
   IResponseFormatter,
 } from "@/modules/shared/services";
+
 import type { IUserService } from "@/modules/user";
 
 export interface IResetPasswordService {

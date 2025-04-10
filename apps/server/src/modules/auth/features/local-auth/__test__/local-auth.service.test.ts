@@ -1,3 +1,8 @@
+import { mock, mockReset } from "jest-mock-extended";
+
+import type { ICreateUserDto, ILoginDto } from "@tubenote/dtos";
+import type { User } from "@tubenote/types";
+
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import {
@@ -13,9 +18,9 @@ import type {
   IPrismaService,
 } from "@/modules/shared/services";
 
-import type { ICreateUserDto, IUserService, User } from "@/modules/user";
+import type { IUserService } from "@/modules/user";
 
-import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
+import type { IAuthResponseDto } from "@/modules/auth/dtos";
 
 import type {
   ILocalAuthServiceOptions,
@@ -26,7 +31,6 @@ import type {
 import type { IJwtService } from "@/modules/auth/utils";
 
 import type { ICreateAccountDto } from "@/modules/user/features/account/dtos";
-import { mock, mockReset } from "jest-mock-extended";
 import { LocalAuthService } from "../local-auth.service";
 
 describe("LocalAuthService", () => {
@@ -155,13 +159,13 @@ describe("LocalAuthService", () => {
         hash: mockUser.password,
       });
       expect(jwtService.generateAuthTokens).toHaveBeenCalledWith(mockUser.id);
-      expect(refreshTokenService.createToken).toHaveBeenCalledWith({
-        userId: mockUser.id,
-        data: {
+      expect(refreshTokenService.createToken).toHaveBeenCalledWith(
+        mockUser.id,
+        {
           token: mockTokens.refreshToken,
           expiresAt: expect.any(Date),
-        },
-      });
+        }
+      );
     });
 
     it("should throw NotFoundError if user does not exist", async () => {

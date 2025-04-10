@@ -1,8 +1,8 @@
 import { Router } from "express";
 
-import { createRateLimitMiddleware, validateRequest } from "@/middlewares";
+import { loginSchema, registerSchema } from "@tubenote/schemas";
 
-import { loginSchema, registerSchema } from "@/modules/shared/schemas";
+import { createRateLimitMiddleware, validateRequest } from "@/middlewares";
 
 import { AUTH_RATE_LIMIT_CONFIG } from "../../config";
 import { localAuthController } from "./local-auth.module";

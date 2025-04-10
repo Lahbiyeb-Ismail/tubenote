@@ -1,18 +1,17 @@
+import type { Prisma } from "@prisma/client";
+
+import type {
+  ICreateNoteDto,
+  IFindManyDto,
+  IUpdateNoteDto,
+} from "@tubenote/dtos";
+import type { IPaginatedData, Note } from "@tubenote/types";
+
 import { NotFoundError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import type {
-  ICreateDto,
-  IDeleteDto,
-  IFindAllDto,
-  IFindUniqueDto,
-  IPaginatedData,
-  IUpdateDto,
-} from "@/modules/shared/dtos";
+import type { IPrismaService } from "@/modules/shared/services";
 
-import type { Prisma } from "@prisma/client";
-import type { IPrismaService } from "../shared/services";
-import type { Note } from "./note.model";
 import type {
   INoteRepository,
   INoteService,
@@ -52,15 +51,19 @@ export class NoteService implements INoteService {
   /**
    * Retrieves a note based on the given criteria.
    *
-   * @param {FindNoteDto} findNoteDto - Data transfer object containing note identification details.
+   * @param userId - The unique identifier of the user.
+   * @param noteId - The unique identifier of the note to find.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns {Promise<Note>} A promise that resolves to the found note.
    * @throws {NotFoundError} If no note is found matching the criteria.
    */
   async findNote(
-    findNoteDto: IFindUniqueDto,
+    userId: string,
+    noteId: string,
     tx?: Prisma.TransactionClient
   ): Promise<Note> {
-    const note = await this._noteRepository.find(findNoteDto, tx);
+    const note = await this._noteRepository.find(userId, noteId, tx);
 
     if (!note) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
@@ -72,34 +75,41 @@ export class NoteService implements INoteService {
   /**
    * Creates a new note.
    *
-   * @param {CreateNoteDto} createNoteDto - Data transfer object containing the details of the note to create.
+   * @param userId - The unique identifier of the user.
+   * @param videoId - The unique identifier of the video associated with the note.
+   * @param data - The data transfer object containing the note details.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns {Promise<Note>} A promise that resolves to the newly created note.
    */
   async createNote(
-    createNoteDto: ICreateDto<Note>,
+    userId: string,
+    videoId: string,
+    data: ICreateNoteDto,
     tx?: Prisma.TransactionClient
   ): Promise<Note> {
-    return await this._noteRepository.create(createNoteDto, tx);
+    return await this._noteRepository.create(userId, videoId, data, tx);
   }
 
   /**
    * Updates a note with the provided data.
    *
-   * @param {IUpdateDto<Note>} updateNoteDto - The data transfer object containing the note update information.
+   * @param {string} userId - The unique identifier of the user.
+   * @param {string} noteId - The unique identifier of the note to update.
+   * @param {IUpdateNoteDto} data - The data transfer object containing the note update information.
+   *
    * @returns {Promise<Note>} - A promise that resolves to the updated note.
    * @throws {Error} - Throws an error if the note is not found.
    */
-  async updateNote(updateNoteDto: IUpdateDto<Note>): Promise<Note> {
+  async updateNote(
+    userId: string,
+    noteId: string,
+    data: IUpdateNoteDto
+  ): Promise<Note> {
     return await this._prismaService.transaction(async (tx) => {
-      await this.findNote(
-        {
-          id: updateNoteDto.id,
-          userId: updateNoteDto.userId,
-        },
-        tx
-      );
+      await this.findNote(userId, noteId, tx);
 
-      return this._noteRepository.update(updateNoteDto, tx);
+      return this._noteRepository.update(userId, noteId, data, tx);
     });
   }
 
@@ -109,34 +119,36 @@ export class NoteService implements INoteService {
    * Executes the delete operation within a transaction. It first verifies the note's existence and then proceeds
    * with the deletion.
    *
-   * @param {DeleteNoteDto} deleteNoteDto - Data transfer object containing note identification details.
+   * @param userId - The unique identifier of the user.
+   * @param noteId - The unique identifier of the note to delete.
+   *
    * @returns {Promise<Note>} A promise that resolves to the deleted note.
    * @throws {NotFoundError} If the note is not found.
    */
-  async deleteNote(deleteNoteDto: IDeleteDto): Promise<Note> {
+  async deleteNote(userId: string, noteId: string): Promise<Note> {
     return await this._prismaService.transaction(async (tx) => {
-      await this.findNote(deleteNoteDto, tx);
+      await this.findNote(userId, noteId, tx);
 
-      return this._noteRepository.delete(deleteNoteDto, tx);
+      return this._noteRepository.delete(userId, noteId, tx);
     });
   }
 
   /**
    * Fetches the notes for a user based on the provided criteria.
    *
-   * @param {IFindAllDto} findManyDto - The data transfer object containing the criteria for finding notes.
+   * @param userId - The unique identifier of the user.
+   * @param findManyDto - The data transfer object containing the criteria for finding notes.
+   *
    * @returns {Promise<IPaginatedData<Note>>} A promise that resolves to an object containing the paginated notes, total number of notes, and total pages.
    */
   async fetchUserNotes(
-    findManyDto: IFindAllDto
+    userId: string,
+    findManyDto: IFindManyDto
   ): Promise<IPaginatedData<Note>> {
     return await this._prismaService.transaction(async (tx) => {
-      const data = await this._noteRepository.findMany(findManyDto, tx);
+      const data = await this._noteRepository.findMany(userId, findManyDto, tx);
 
-      const totalItems = await this._noteRepository.count(
-        findManyDto.userId,
-        tx
-      );
+      const totalItems = await this._noteRepository.count(userId, tx);
 
       const totalPages = Math.ceil(totalItems / findManyDto.limit);
 
@@ -147,11 +159,16 @@ export class NoteService implements INoteService {
   /**
    * Retrieves recent notes for a user.
    *
-   * @param {FindManyDto} findManyDto - Data transfer object containing user id, pagination, and sorting details.
+   * @param userId - The unique identifier of the user.
+   * @param findManyDto - Data transfer object containing pagination, and sorting details.
+   *
    * @returns {Promise<Note[]>} A promise that resolves to an array of recent notes.
    */
-  async fetchRecentNotes(findManyDto: IFindAllDto): Promise<Note[]> {
-    return await this._noteRepository.findMany(findManyDto);
+  async fetchRecentNotes(
+    userId: string,
+    findManyDto: IFindManyDto
+  ): Promise<Note[]> {
+    return await this._noteRepository.findMany(userId, findManyDto);
   }
 
   /**
@@ -159,11 +176,16 @@ export class NoteService implements INoteService {
    *
    * Note: This method currently uses the same repository method as fetchRecentNotes.
    *
-   * @param {FindManyDto} findManyDto - Data transfer object containing user id, pagination, and sorting details.
+   * @param userId - The unique identifier of the user.
+   * @param findManyDto - Data transfer object containing pagination, and sorting details.
+   *
    * @returns {Promise<Note[]>} A promise that resolves to an array of recently updated notes.
    */
-  async fetchRecentlyUpdatedNotes(findManyDto: IFindAllDto): Promise<Note[]> {
-    return await this._noteRepository.findMany(findManyDto);
+  async fetchRecentlyUpdatedNotes(
+    userId: string,
+    findManyDto: IFindManyDto
+  ): Promise<Note[]> {
+    return await this._noteRepository.findMany(userId, findManyDto);
   }
 
   /**
@@ -172,19 +194,26 @@ export class NoteService implements INoteService {
    * @param dto - Data transfer object containing the video ID and pagination information.
    * @returns A promise that resolves to an object containing the paginated notes, total number of notes, and total pages.
    *
-   * @template IFindAllDto - Interface for the data transfer object that includes pagination and user information.
+   * @template IFindManyDto - Interface for the data transfer object that includes pagination and user information.
    * @template IPaginatedData - Interface for the paginated items response.
    * @template Note - Type representing a note.
    */
   async fetchNotesByVideoId(
-    dto: IFindAllDto & { videoId: string }
+    userId: string,
+    videoId: string,
+    findManyDto: IFindManyDto
   ): Promise<IPaginatedData<Note>> {
     return await this._prismaService.transaction(async (tx) => {
-      const data = await this._noteRepository.findManyByVideoId(dto, tx);
+      const data = await this._noteRepository.findManyByVideoId(
+        userId,
+        videoId,
+        findManyDto,
+        tx
+      );
 
-      const totalItems = await this._noteRepository.count(dto.userId, tx);
+      const totalItems = await this._noteRepository.count(userId, tx);
 
-      const totalPages = Math.ceil(totalItems / dto.limit);
+      const totalPages = Math.ceil(totalItems / findManyDto.limit);
 
       return { data, totalItems, totalPages };
     });

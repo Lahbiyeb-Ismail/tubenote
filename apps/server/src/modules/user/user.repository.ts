@@ -1,13 +1,14 @@
 import type { Prisma } from "@prisma/client";
 
+import type { ICreateUserDto, IUpdateUserDto } from "@tubenote/dtos";
+import type { User } from "@tubenote/types";
+
 import { ConflictError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import type { IPrismaService } from "@/modules/shared/services";
 
-import type { ICreateUserDto, IUpdateUserDto } from "./dtos";
-import type { User } from "./user.model";
 import type { IUserRepository, IUserRepositoryOptions } from "./user.types";
 
 export class UserRepository implements IUserRepository {
@@ -25,19 +26,21 @@ export class UserRepository implements IUserRepository {
   /**
    * Creates a new user in the database.
    *
-   * @param {CreateUserDto} createUserDto - The data transfer object containing user creation parameters.
+   * @param tx - The transaction client to use for the creation.
+   * @param data - The data transfer object containing user creation parameters.
+   *
    * @returns {Promise<User>} A promise that resolves to the created user.
    * @throws Will throw an error if the user creation fails.
    */
   async create(
     tx: Prisma.TransactionClient,
-    createUserDto: ICreateUserDto
+    data: ICreateUserDto
   ): Promise<User> {
     return handleAsyncOperation(
       async () => {
         const isEmailAlreadyRegistered = await tx.user.findUnique({
           where: {
-            email: createUserDto.email,
+            email: data.email,
           },
           select: { id: true },
         });
@@ -47,9 +50,9 @@ export class UserRepository implements IUserRepository {
 
         const user = await tx.user.create({
           data: {
-            ...createUserDto,
-            isEmailVerified: createUserDto.isEmailVerified ?? false,
-            profilePicture: createUserDto.profilePicture ?? null,
+            ...data,
+            isEmailVerified: data.isEmailVerified ?? false,
+            profilePicture: data.profilePicture ?? null,
           },
         });
 
@@ -112,20 +115,23 @@ export class UserRepository implements IUserRepository {
   /**
    * Updates a user with the given parameters.
    *
-   * @param updatedUserDto - The parameters to update the user with.
+   * @param tx - The transaction client to use for the update.
+   * @param userId - The unique identifier of the user to update.
+   * @param data - The parameters to update the user with.
+   *
    * @returns A promise that resolves to the updated user.
    * @throws Will throw an error if the update operation fails.
    */
   async update(
     tx: Prisma.TransactionClient,
     userId: string,
-    updatedUserDto: IUpdateUserDto
+    data: IUpdateUserDto
   ): Promise<User> {
     return handleAsyncOperation(
       () =>
         tx.user.update({
           where: { id: userId },
-          data: { ...updatedUserDto },
+          data: { ...data },
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE }
     );
@@ -134,8 +140,10 @@ export class UserRepository implements IUserRepository {
   /**
    * Updates the password for a user with the given userId.
    *
+   * @param tx - The transaction client to use for the update.
    * @param userId - The unique identifier of the user whose password is to be updated.
    * @param hashedPassword - The new hashed password to be set for the user.
+   *
    * @returns A promise that resolves to the updated User object.
    * @throws Will throw an error if the update operation fails.
    */

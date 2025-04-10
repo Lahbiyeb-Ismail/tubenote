@@ -1,5 +1,13 @@
 import type { Prisma } from "@prisma/client";
 
+import type { User } from "@tubenote/types";
+
+import type {
+  ICreateUserDto,
+  IUpdatePasswordDto,
+  IUpdateUserDto,
+} from "@tubenote/dtos";
+
 import {
   BadRequestError,
   ConflictError,
@@ -9,13 +17,6 @@ import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import type { ICryptoService, IPrismaService } from "@/modules/shared/services";
 
-import type {
-  ICreateUserDto,
-  IResetPasswordDto,
-  IUpdatePasswordDto,
-  IUpdateUserDto,
-} from "./dtos";
-import type { User } from "./user.model";
 import type {
   IUserRepository,
   IUserService,
@@ -76,12 +77,14 @@ export class UserService implements IUserService {
    */
   private async _createUser(
     tx: Prisma.TransactionClient,
-    dto: ICreateUserDto
+    data: ICreateUserDto
   ): Promise<User> {
-    const hashedPassword = await this._cryptoService.hashPassword(dto.password);
+    const hashedPassword = await this._cryptoService.hashPassword(
+      data.password
+    );
 
     return this._userRepository.create(tx, {
-      ...dto,
+      ...data,
       password: hashedPassword,
     });
   }
@@ -108,12 +111,12 @@ export class UserService implements IUserService {
 
   async createUserWithAccount(
     tx: Prisma.TransactionClient,
-    createUserDto: ICreateUserDto,
-    createAccountDto: ICreateAccountDto
+    userData: ICreateUserDto,
+    accountData: ICreateAccountDto
   ): Promise<User> {
-    const user = await this._createUser(tx, createUserDto);
+    const user = await this._createUser(tx, userData);
 
-    await this._accountService.createAccount(tx, user.id, createAccountDto);
+    await this._accountService.createAccount(tx, user.id, accountData);
 
     return user;
   }
@@ -135,27 +138,26 @@ export class UserService implements IUserService {
   /**
    * Updates a user with the provided data.
    *
-   * @param {IUpdateUserDto} updateUserDto - The data transfer object containing the user ID and the data to update.
+   * @param userId - The ID of the user to update.
+   * @param data - The data transfer object containing the user ID and the data to update.
+   *
    * @returns {Promise<User>} - A promise that resolves to the updated user.
    *
    * @throws {Error} - Throws an error if the user does not exist or if the email is not unique.
    */
-  async updateUser(
-    userId: string,
-    updateUserDto: IUpdateUserDto
-  ): Promise<User> {
+  async updateUser(userId: string, data: IUpdateUserDto): Promise<User> {
     const updatedUser = await this._prismaService.transaction(async (tx) => {
       const user = await this._ensureUserExists(userId, tx);
 
-      if (Object.keys(updateUserDto).length === 0) {
+      if (Object.keys(data).length === 0) {
         return user;
       }
 
-      if (updateUserDto.email && updateUserDto.email !== user.email) {
-        await this._ensureEmailIsUnique(updateUserDto.email, tx);
+      if (data.email && data.email !== user.email) {
+        await this._ensureEmailIsUnique(data.email, tx);
       }
 
-      return this._userRepository.update(tx, userId, updateUserDto);
+      return this._userRepository.update(tx, userId, data);
     });
 
     return updatedUser;
@@ -164,15 +166,17 @@ export class UserService implements IUserService {
   /**
    * Updates the password of a user.
    *
-   * @param {IUpdatePasswordDto} updateUserDto - Data transfer object containing the user's ID, current password, and new password.
+   * @param userId - The ID of the user whose password is to be updated.
+   * @param data - Data transfer object containing the user's ID, current password, and new password.
+   *
    * @returns {Promise<User>} - A promise that resolves to the updated user.
    * @throws {BadRequestError} - Throws an error if the current password is invalid or if the new password is the same as the current password.
    */
   async updateUserPassword(
     userId: string,
-    updatePasswordDto: IUpdatePasswordDto
+    data: IUpdatePasswordDto
   ): Promise<User> {
-    const { currentPassword, newPassword } = updatePasswordDto;
+    const { currentPassword, newPassword } = data;
 
     const updatedUser = await this._prismaService.transaction(async (tx) => {
       const user = await this._ensureUserExists(userId, tx);
@@ -202,17 +206,17 @@ export class UserService implements IUserService {
   /**
    * Resets the password for a user.
    *
-   * @param {IResetPasswordDto} resetPasswordDto - The data transfer object containing the user's ID and the new password.
+   * @param userId - The ID of the user whose password is to be reset.
+   * @param newPassword - The new password to set for the user.
+   *
    * @returns {Promise<User>} - A promise that resolves to the updated user.
    *
    * @throws {UserNotFoundException} - If the user with the given ID does not exist.
    * @throws {HashingException} - If there is an error while hashing the new password.
    */
-  async resetUserPassword(resetPasswordDto: IResetPasswordDto): Promise<User> {
-    const { id, newPassword } = resetPasswordDto;
-
+  async resetUserPassword(userId: string, newPassword: string): Promise<User> {
     const updatedUser = await this._prismaService.transaction(async (tx) => {
-      const user = await this._ensureUserExists(id, tx);
+      const user = await this._ensureUserExists(userId, tx);
 
       const hashedPassword =
         await this._cryptoService.hashPassword(newPassword);

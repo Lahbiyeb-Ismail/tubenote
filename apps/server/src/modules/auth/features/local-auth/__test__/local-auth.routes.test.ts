@@ -3,14 +3,13 @@ import request from "supertest";
 
 import app from "@/app";
 
-import type { ILoginDto } from "@/modules/auth/dtos";
-import type { ICreateUserDto } from "@/modules/user";
+import type { ICreateUserDto, ILoginDto } from "@tubenote/dtos";
+import type { IApiResponse } from "@tubenote/types";
 
 import { BadRequestError, ConflictError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import { localAuthController } from "../local-auth.module";
 
-import type { IApiResponse } from "@/modules/shared/services";
+import { localAuthController } from "../local-auth.module";
 
 jest.mock("../local-auth.module", () => ({
   localAuthController: {

@@ -1,19 +1,20 @@
+import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
+
+import type {
+  ICreateVideoDto,
+  IFindManyDto,
+  IPaginationQueryDto,
+  IParamIdDto,
+} from "@tubenote/dtos";
+import type { IPaginatedData, Video, YoutubeVideoData } from "@tubenote/types";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type {
-  ICreateDto,
-  IFindAllDto,
-  IFindUniqueDto,
-  IPaginatedData,
-  IParamIdDto,
-  IQueryPaginationDto,
-} from "@/modules/shared/dtos";
-
-import type { Prisma } from "@prisma/client";
-import type { IPrismaService, IResponseFormatter } from "../shared/services";
-import type { Video, YoutubeVideoData } from "./video.model";
+  IPrismaService,
+  IResponseFormatter,
+} from "@/modules/shared/services";
 
 export interface IVideoRepository {
   findByYoutubeId(
@@ -21,12 +22,14 @@ export interface IVideoRepository {
     tx?: Prisma.TransactionClient
   ): Promise<Video | null>;
   findMany(
-    findAllDto: IFindAllDto,
+    userId: string,
+    findManyDto: IFindManyDto,
     tx?: Prisma.TransactionClient
   ): Promise<Video[]>;
   count(userId: string, tx?: Prisma.TransactionClient): Promise<number>;
   create(
-    createVideoDto: ICreateDto<YoutubeVideoData>,
+    userId: string,
+    data: ICreateVideoDto,
     tx?: Prisma.TransactionClient
   ): Promise<Video>;
   connectVideoToUser(
@@ -38,13 +41,16 @@ export interface IVideoRepository {
 
 export interface IVideoService {
   getYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData>;
-  findVideoOrCreate(findVideoDto: IFindUniqueDto): Promise<Video>;
-  getUserVideos(findAllDto: IFindAllDto): Promise<IPaginatedData<Video>>;
+  findVideoOrCreate(userId: string, videoYoutubeId: string): Promise<Video>;
+  getUserVideos(
+    userId: string,
+    findManyDto: IFindManyDto
+  ): Promise<IPaginatedData<Video>>;
 }
 
 export interface IVideoController {
   getUserVideos(
-    req: TypedRequest<EmptyRecord, EmptyRecord, IQueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
     res: Response
   ): Promise<void>;
   getVideoByIdOrCreate(

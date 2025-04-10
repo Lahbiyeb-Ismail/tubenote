@@ -1,4 +1,5 @@
 import type { Response } from "express";
+import httpStatus from "http-status";
 
 import type { TypedRequest } from "@/modules/shared/types";
 
@@ -10,9 +11,8 @@ import type { IResponseFormatter } from "@/modules/shared/services";
 
 import { refreshTokenCookieConfig } from "@/modules/auth/config";
 import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
-import httpStatus from "http-status";
-import type { OAuthCodeDto } from "../../dtos";
-import type { IOauthLoginDto } from "./dtos";
+
+import type { IOAuthAuthorizationCodeDto, IOauthLoginDto } from "./dtos";
 import type {
   IOAuthController,
   IOAuthControllerOptions,
@@ -53,10 +53,13 @@ export class OAuthController implements IOAuthController {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    const user = req.user as IOauthLoginDto;
+    const { createAccountDto, createUserDto } = req.user as IOauthLoginDto;
 
     const { refreshToken, temporaryCode } =
-      await this._oauthService.handleOAuthLogin(user);
+      await this._oauthService.handleOAuthLogin(
+        createUserDto,
+        createAccountDto
+      );
 
     this.setRefreshTokenCookie(res, refreshToken);
 
@@ -64,7 +67,7 @@ export class OAuthController implements IOAuthController {
   }
 
   async exchangeOauthCodeForTokens(
-    req: TypedRequest<OAuthCodeDto>,
+    req: TypedRequest<IOAuthAuthorizationCodeDto>,
     res: Response
   ): Promise<void> {
     const { code } = req.body;
@@ -76,6 +79,7 @@ export class OAuthController implements IOAuthController {
       accessToken: string;
     }>({
       responseOptions: {
+        success: true,
         status: httpStatus.OK,
         message: "Access token exchanged successfully.",
         data: {

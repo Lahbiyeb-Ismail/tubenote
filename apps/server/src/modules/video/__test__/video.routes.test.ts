@@ -1,9 +1,10 @@
 import httpStatus from "http-status";
 import request from "supertest";
 
+import type { Video } from "@tubenote/types";
+
 import app from "@/app";
 
-import type { Video } from "../video.model";
 import { videoController } from "../video.module";
 
 // **********************************************

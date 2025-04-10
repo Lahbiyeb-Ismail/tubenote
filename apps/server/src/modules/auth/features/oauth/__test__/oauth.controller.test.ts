@@ -9,13 +9,14 @@ import { UnauthorizedError } from "@/modules/shared/api-errors";
 import { envConfig } from "@/modules/shared/config";
 import { OAuthController } from "../oauth.controller";
 
-import type {
-  IAuthResponseDto,
-  OAuthCodeDto,
-  OAuthResponseDto,
-} from "@/modules/auth/dtos";
+import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import type { IResponseFormatter } from "@/modules/shared/services";
-import type { IOauthLoginDto } from "../dtos";
+
+import type {
+  IOAuthAuthorizationCodeDto,
+  IOAuthResponseDto,
+  IOauthLoginDto,
+} from "../dtos";
 import type { IOAuthControllerOptions, IOAuthService } from "../oauth.types";
 
 describe("OAuthController", () => {
@@ -24,7 +25,7 @@ describe("OAuthController", () => {
   const responseFormatter = mock<IResponseFormatter>();
 
   const oauthLoginreq = mock<TypedRequest>();
-  const oauthCodeReq = mock<TypedRequest<OAuthCodeDto>>();
+  const oauthCodeReq = mock<TypedRequest<IOAuthAuthorizationCodeDto>>();
 
   const res = mock<Response>();
 
@@ -38,7 +39,7 @@ describe("OAuthController", () => {
     refreshToken: "test-refresh-token",
   };
 
-  const oauthResponse: OAuthResponseDto = {
+  const oauthResponse: IOAuthResponseDto = {
     ...authResponse,
     temporaryCode: "test-temp-code",
   };
@@ -112,7 +113,8 @@ describe("OAuthController", () => {
 
       // Assert: verify that handleOAuthLogin is called with oauthLoginreq.user.
       expect(oauthService.handleOAuthLogin).toHaveBeenCalledWith(
-        oauthLoginreq.user
+        oauthLoginDto.createUserDto,
+        oauthLoginDto.createAccountDto
       );
       // Verify that the refresh token cookie is set.
       expect(res.cookie).toHaveBeenCalledWith(

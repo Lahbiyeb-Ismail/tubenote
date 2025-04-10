@@ -1,6 +1,8 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
+import type { IApiResponse } from "@tubenote/types";
+
 import {
   BadRequestError,
   ForbiddenError,
@@ -20,10 +22,7 @@ import type { IAuthResponseDto } from "@/modules/auth/dtos";
 
 import { RefreshTokenController } from "../refresh-token.controller";
 
-import type {
-  IApiResponse,
-  IResponseFormatter,
-} from "@/modules/shared/services";
+import type { IResponseFormatter } from "@/modules/shared/services";
 import { mock, mockReset } from "jest-mock-extended";
 import type { IRefreshTokenService } from "../refresh-token.types";
 
@@ -85,10 +84,10 @@ describe("RefreshTokenController", () => {
       await refreshTokenController.refreshToken(req, res);
 
       // Assert
-      expect(refreshTokenService.refreshToken).toHaveBeenCalledWith({
-        token: mockRefreshToken,
-        userId: mockUserId,
-      });
+      expect(refreshTokenService.refreshToken).toHaveBeenCalledWith(
+        mockUserId,
+        mockRefreshToken
+      );
 
       expect(res.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,

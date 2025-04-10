@@ -3,9 +3,9 @@ import request from "supertest";
 
 import app from "@/app";
 
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type { IEmailBodyDto } from "@tubenote/dtos";
 
-import type { IEmailBodyDto } from "@/modules/shared/dtos";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import { UnauthorizedError } from "@/modules/shared/api-errors";
 import { resetPasswordController } from "../reset-password.module";

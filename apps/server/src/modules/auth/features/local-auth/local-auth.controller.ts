@@ -1,6 +1,8 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
+import type { ICreateUserDto, ILoginDto } from "@tubenote/dtos";
+
 import {
   AUTH_RATE_LIMIT_CONFIG,
   refreshTokenCookieConfig,
@@ -10,15 +12,13 @@ import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 import { BadRequestError } from "@/modules/shared/api-errors";
 
 import type { TypedRequest } from "@/modules/shared/types";
-import type { ICreateUserDto } from "@/modules/user";
-
-import type { ILoginDto } from "@/modules/auth/dtos";
 
 import type {
   ILoggerService,
   IRateLimitService,
   IResponseFormatter,
 } from "@/modules/shared/services";
+
 import type {
   ILocalAuthController,
   ILocalAuthControllerOptions,
@@ -65,6 +65,7 @@ export class LocalAuthController implements ILocalAuthController {
         email: string;
       }>({
         responseOptions: {
+          success: true,
           status: httpStatus.CREATED,
           message: "A verification email has been sent to your email.",
           data: { email: user.email },
@@ -101,6 +102,7 @@ export class LocalAuthController implements ILocalAuthController {
         accessToken: string;
       }>({
         responseOptions: {
+          success: true,
           status: httpStatus.OK,
           message: "Login successful",
           data: { accessToken },

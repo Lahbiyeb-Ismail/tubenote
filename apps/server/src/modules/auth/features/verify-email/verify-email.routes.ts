@@ -1,8 +1,8 @@
 import { Router } from "express";
 
-import { validateRequest } from "@/middlewares";
+import { tokenParamSchema } from "@tubenote/schemas";
 
-import { tokenParamSchema } from "@/modules/shared/schemas";
+import { validateRequest } from "@/middlewares";
 
 import { verifyEmailController } from "./verify-email.module";
 

@@ -2,8 +2,10 @@ import { Response } from "express";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
+import type { ICreateUserDto, ILoginDto } from "@tubenote/dtos";
+import type { IApiResponse, User } from "@tubenote/types";
+
 import type {
-  IApiResponse,
   ILoggerService,
   IRateLimitService,
   IResponseFormatter,
@@ -16,14 +18,15 @@ import {
 } from "@/modules/auth/config";
 import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 
-import type { IAuthResponseDto, ILoginDto } from "@/modules/auth/dtos";
-import type { ICreateUserDto, User } from "@/modules/user";
+import type { IAuthResponseDto } from "@/modules/auth/dtos";
 
 import {
   BadRequestError,
   UnauthorizedError,
 } from "@/modules/shared/api-errors";
+
 import { LocalAuthController } from "../local-auth.controller";
+
 import type {
   ILocalAuthControllerOptions,
   ILocalAuthService,
@@ -138,6 +141,7 @@ describe("LocalAuthController", () => {
       expect(rateLimiter.reset).toHaveBeenCalledWith(registerReq.rateLimitKey);
       expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
         responseOptions: {
+          success: true,
           status: httpStatus.CREATED,
           message: "A verification email has been sent to your email.",
           data: { email: mockUser.email },

@@ -2,28 +2,20 @@ import { Response } from "express";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
+import type {
+  ICreateNoteDto,
+  IFindManyDto,
+  IPaginationQueryDto,
+  IParamIdDto,
+  IUpdateNoteDto,
+} from "@tubenote/dtos";
+import type { IApiResponse, IPaginatedData, Note } from "@tubenote/types";
+
 import type { TypedRequest } from "@/modules/shared/types";
 
-import type {
-  ICreateBodyDto,
-  ICreateDto,
-  IDeleteDto,
-  IFindAllDto,
-  IFindUniqueDto,
-  IPaginatedData,
-  IParamIdDto,
-  IQueryPaginationDto,
-  IUpdateBodyDto,
-  IUpdateDto,
-} from "@/modules/shared/dtos";
+import type { IResponseFormatter } from "@/modules/shared/services";
 
 import { NoteController } from "../note.controller";
-
-import type {
-  IApiResponse,
-  IResponseFormatter,
-} from "@/modules/shared/services";
-import type { Note } from "../note.model";
 import type { INoteService } from "../note.types";
 
 describe("NoteController Tests", () => {
@@ -38,28 +30,29 @@ describe("NoteController Tests", () => {
   const req = mock<TypedRequest>();
   const res = mock<Response>();
 
-  const createReq = mock<TypedRequest<ICreateBodyDto<Note>>>();
+  const createReq = mock<TypedRequest<ICreateNoteDto, IParamIdDto>>();
 
   const getReq = mock<TypedRequest<{}, IParamIdDto>>();
 
-  const getNotesReq = mock<TypedRequest<{}, {}, IQueryPaginationDto>>();
+  const getNotesReq = mock<TypedRequest<{}, {}, IPaginationQueryDto>>();
 
-  const updateReq = mock<TypedRequest<IUpdateBodyDto<Note>, IParamIdDto>>();
+  const updateReq = mock<TypedRequest<IUpdateNoteDto, IParamIdDto>>();
 
   const deleteReq = mock<TypedRequest<{}, IParamIdDto>>();
 
   const getByVideoIdReq =
-    mock<TypedRequest<{}, IParamIdDto, IQueryPaginationDto>>();
+    mock<TypedRequest<{}, IParamIdDto, IPaginationQueryDto>>();
 
   const mockUserId = "user_id_001";
   const mockNoteId = "note_id_001";
+  const mockVideoId = "video_id_001";
 
   const mockNote: Note = {
     id: mockNoteId,
     userId: mockUserId,
+    videoId: mockVideoId,
     title: "Test Note",
     content: "Test Content",
-    videoId: "video_id_001",
     thumbnail: "thumbnail_url",
     timestamp: 12,
     videoTitle: "Video Title",
@@ -97,35 +90,18 @@ describe("NoteController Tests", () => {
     },
   ];
 
-  const findNoteDto: IFindUniqueDto = {
-    id: mockNoteId,
-    userId: mockUserId,
+  const createNoteDto: ICreateNoteDto = {
+    title: "Test Note",
+    content: "Test Content",
+    thumbnail: "thumbnail_url",
+    timestamp: 12,
+    videoTitle: "Video Title",
+    youtubeId: "youtube_id_001",
   };
 
-  const createNoteDto: ICreateDto<Note> = {
-    userId: mockUserId,
-    data: {
-      title: "Test Note",
-      content: "Test Content",
-      videoId: "video_id_001",
-      thumbnail: "thumbnail_url",
-      timestamp: 12,
-      videoTitle: "Video Title",
-      youtubeId: "youtube_id_001",
-    },
-  };
-
-  const updateNoteDto: IUpdateDto<Note> = {
-    ...findNoteDto,
-    data: {
-      title: "Updated Note",
-      content: "Updated Content",
-    },
-  };
-
-  const deleteNoteDto: IDeleteDto = {
-    id: mockNoteId,
-    userId: mockUserId,
+  const updateNoteDto: IUpdateNoteDto = {
+    title: "Updated Note",
+    content: "Updated Content",
   };
 
   beforeEach(() => {
@@ -137,18 +113,19 @@ describe("NoteController Tests", () => {
 
     req.userId = mockUserId;
 
-    createReq.userId = createNoteDto.userId;
-    createReq.body = createNoteDto.data;
+    createReq.userId = mockUserId;
+    createReq.body = createNoteDto;
+    createReq.params = { id: mockVideoId };
 
-    getReq.userId = findNoteDto.userId;
-    getReq.params = { id: findNoteDto.id };
+    getReq.userId = mockUserId;
+    getReq.params = { id: mockNoteId };
 
-    updateReq.userId = updateNoteDto.userId;
-    updateReq.body = updateNoteDto.data;
-    updateReq.params = { id: updateNoteDto.id };
+    updateReq.userId = mockUserId;
+    updateReq.body = updateNoteDto;
+    updateReq.params = { id: mockNoteId };
 
-    deleteReq.userId = deleteNoteDto.userId;
-    deleteReq.params = { id: deleteNoteDto.id };
+    deleteReq.userId = mockUserId;
+    deleteReq.params = { id: mockNoteId };
 
     getNotesReq.userId = mockUserId;
     getNotesReq.query = {
@@ -167,7 +144,7 @@ describe("NoteController Tests", () => {
     };
 
     getByVideoIdReq.params = {
-      id: "video_id_001",
+      id: mockVideoId,
     };
   });
 
@@ -188,7 +165,11 @@ describe("NoteController Tests", () => {
 
       await noteController.createNote(createReq, res);
 
-      expect(noteService.createNote).toHaveBeenCalledWith(createNoteDto);
+      expect(noteService.createNote).toHaveBeenCalledWith(
+        mockUserId,
+        mockVideoId,
+        createNoteDto
+      );
 
       expect(res.status).toHaveBeenCalledWith(httpStatus.CREATED);
 
@@ -222,7 +203,7 @@ describe("NoteController Tests", () => {
 
       await noteController.getNoteById(getReq, res);
 
-      expect(noteService.findNote).toHaveBeenCalledWith(findNoteDto);
+      expect(noteService.findNote).toHaveBeenCalledWith(mockUserId, mockNoteId);
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
       expect(res.json).toHaveBeenCalledWith(formattedGetRes);
     });
@@ -240,7 +221,7 @@ describe("NoteController Tests", () => {
   describe("NoteController - updateNote", () => {
     const mockUpdatedNote: Note = {
       ...mockNote,
-      ...updateNoteDto.data,
+      ...updateNoteDto,
     };
 
     const formattedUpdateRes: IApiResponse<Note> = {
@@ -259,7 +240,11 @@ describe("NoteController Tests", () => {
 
       await noteController.updateNote(updateReq, res);
 
-      expect(noteService.updateNote).toHaveBeenCalledWith(updateNoteDto);
+      expect(noteService.updateNote).toHaveBeenCalledWith(
+        mockUserId,
+        mockNoteId,
+        updateNoteDto
+      );
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
 
       expect(res.json).toHaveBeenCalledWith(formattedUpdateRes);
@@ -291,7 +276,10 @@ describe("NoteController Tests", () => {
 
       await noteController.deleteNote(deleteReq, res);
 
-      expect(noteService.deleteNote).toHaveBeenCalledWith(deleteNoteDto);
+      expect(noteService.deleteNote).toHaveBeenCalledWith(
+        mockUserId,
+        mockNoteId
+      );
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
 
       expect(res.json).toHaveBeenCalledWith(formattedDeleteRes);
@@ -314,7 +302,7 @@ describe("NoteController Tests", () => {
       totalPages: 1,
     };
 
-    const paginationQueries: Omit<IFindAllDto, "userId"> = {
+    const findManyDto: IFindManyDto = {
       skip: 0,
       limit: 8,
       sort: { by: "createdAt", order: "desc" },
@@ -325,7 +313,7 @@ describe("NoteController Tests", () => {
       data: mockNotes,
       message: "Notes retrieved successfully.",
       status: httpStatus.OK,
-      pagination: {
+      paginationMeta: {
         totalPages: 1,
         currentPage: 1,
         totalItems: 2,
@@ -338,7 +326,7 @@ describe("NoteController Tests", () => {
       (noteService.fetchUserNotes as jest.Mock).mockResolvedValue(mockResult);
 
       (responseFormatter.getPaginationQueries as jest.Mock).mockReturnValue(
-        paginationQueries
+        findManyDto
       );
 
       (responseFormatter.formatPaginatedResponse as jest.Mock).mockReturnValue(
@@ -347,10 +335,10 @@ describe("NoteController Tests", () => {
 
       await noteController.getUserNotes(getNotesReq, res);
 
-      expect(noteService.fetchUserNotes).toHaveBeenCalledWith({
-        userId: mockUserId,
-        ...paginationQueries,
-      });
+      expect(noteService.fetchUserNotes).toHaveBeenCalledWith(
+        mockUserId,
+        findManyDto
+      );
 
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
       expect(res.json).toHaveBeenCalledWith(formattedPaginateRes);
@@ -362,7 +350,7 @@ describe("NoteController Tests", () => {
       (noteService.fetchUserNotes as jest.Mock).mockResolvedValue(mockResult);
 
       (responseFormatter.getPaginationQueries as jest.Mock).mockReturnValue(
-        paginationQueries
+        findManyDto
       );
 
       (responseFormatter.formatPaginatedResponse as jest.Mock).mockReturnValue(
@@ -371,10 +359,10 @@ describe("NoteController Tests", () => {
 
       await noteController.getUserNotes(getNotesReq, res);
 
-      expect(noteService.fetchUserNotes).toHaveBeenCalledWith({
-        userId: mockUserId,
-        ...paginationQueries,
-      });
+      expect(noteService.fetchUserNotes).toHaveBeenCalledWith(
+        mockUserId,
+        findManyDto
+      );
 
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
       expect(res.json).toHaveBeenCalledWith(formattedPaginateRes);
@@ -391,7 +379,7 @@ describe("NoteController Tests", () => {
       (noteService.fetchUserNotes as jest.Mock).mockResolvedValue(mockResult);
 
       (responseFormatter.getPaginationQueries as jest.Mock).mockReturnValue({
-        ...paginationQueries,
+        ...findManyDto,
         skip: 10,
         limit: 10,
       });
@@ -402,9 +390,8 @@ describe("NoteController Tests", () => {
 
       await noteController.getUserNotes(getNotesReq, res);
 
-      expect(noteService.fetchUserNotes).toHaveBeenCalledWith({
-        ...paginationQueries,
-        userId: mockUserId,
+      expect(noteService.fetchUserNotes).toHaveBeenCalledWith(mockUserId, {
+        ...findManyDto,
         skip: 10,
         limit: 10,
       });
@@ -424,7 +411,7 @@ describe("NoteController Tests", () => {
   });
 
   describe("NoteController - getUserRecentNotes", () => {
-    const paginationQueries: Omit<IFindAllDto, "userId"> = {
+    const findManyDto: IFindManyDto = {
       skip: 0,
       limit: 2,
       sort: { by: "createdAt", order: "desc" },
@@ -454,15 +441,15 @@ describe("NoteController Tests", () => {
       );
 
       (responseFormatter.getPaginationQueries as jest.Mock).mockReturnValue(
-        paginationQueries
+        findManyDto
       );
 
       await noteController.getUserRecentNotes(getNotesReq, res);
 
-      expect(noteService.fetchRecentNotes).toHaveBeenCalledWith({
-        userId: mockUserId,
-        ...paginationQueries,
-      });
+      expect(noteService.fetchRecentNotes).toHaveBeenCalledWith(
+        mockUserId,
+        findManyDto
+      );
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
       expect(res.json).toHaveBeenCalledWith(formattedRes);
     });
@@ -477,15 +464,15 @@ describe("NoteController Tests", () => {
       );
 
       (responseFormatter.getPaginationQueries as jest.Mock).mockReturnValue(
-        paginationQueries
+        findManyDto
       );
 
       await noteController.getUserRecentNotes(getNotesReq, res);
 
-      expect(noteService.fetchRecentNotes).toHaveBeenCalledWith({
-        userId: mockUserId,
-        ...paginationQueries,
-      });
+      expect(noteService.fetchRecentNotes).toHaveBeenCalledWith(
+        mockUserId,
+        findManyDto
+      );
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
       expect(res.json).toHaveBeenCalledWith(formattedRes);
     });
@@ -501,7 +488,7 @@ describe("NoteController Tests", () => {
   });
 
   describe("NoteController - getRecentlyUpdatedNotes", () => {
-    const paginationQueries: Omit<IFindAllDto, "userId"> = {
+    const findManyDto: IFindManyDto = {
       skip: 0,
       limit: 2,
       sort: { by: "updatedAt", order: "desc" },
@@ -531,15 +518,15 @@ describe("NoteController Tests", () => {
       );
 
       (responseFormatter.getPaginationQueries as jest.Mock).mockReturnValue(
-        paginationQueries
+        findManyDto
       );
 
       await noteController.getRecentlyUpdatedNotes(getNotesReq, res);
 
-      expect(noteService.fetchRecentNotes).toHaveBeenCalledWith({
-        userId: mockUserId,
-        ...paginationQueries,
-      });
+      expect(noteService.fetchRecentNotes).toHaveBeenCalledWith(
+        mockUserId,
+        findManyDto
+      );
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
       expect(res.json).toHaveBeenCalledWith(formattedRes);
     });
@@ -561,7 +548,7 @@ describe("NoteController Tests", () => {
       totalPages: 1,
     };
 
-    const paginationQueries: Omit<IFindAllDto, "userId"> = {
+    const findManyDto: IFindManyDto = {
       skip: 0,
       limit: 8,
       sort: { by: "createdAt", order: "desc" },
@@ -572,7 +559,7 @@ describe("NoteController Tests", () => {
       data: mockNotes,
       message: "Notes retrieved successfully.",
       status: httpStatus.OK,
-      pagination: {
+      paginationMeta: {
         totalPages: 1,
         currentPage: 1,
         totalItems: 2,
@@ -587,7 +574,7 @@ describe("NoteController Tests", () => {
       );
 
       (responseFormatter.getPaginationQueries as jest.Mock).mockReturnValue(
-        paginationQueries
+        findManyDto
       );
 
       (responseFormatter.formatPaginatedResponse as jest.Mock).mockReturnValue(
@@ -596,11 +583,11 @@ describe("NoteController Tests", () => {
 
       await noteController.getNotesByVideoId(getByVideoIdReq, res);
 
-      expect(noteService.fetchNotesByVideoId).toHaveBeenCalledWith({
-        userId: getByVideoIdReq.userId,
-        videoId: getByVideoIdReq.params?.id,
-        ...paginationQueries,
-      });
+      expect(noteService.fetchNotesByVideoId).toHaveBeenCalledWith(
+        mockUserId,
+        mockVideoId,
+        findManyDto
+      );
 
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
       expect(res.json).toHaveBeenCalledWith(formattedPaginateRes);
@@ -614,7 +601,7 @@ describe("NoteController Tests", () => {
       );
 
       (responseFormatter.getPaginationQueries as jest.Mock).mockReturnValue(
-        paginationQueries
+        findManyDto
       );
 
       (responseFormatter.formatPaginatedResponse as jest.Mock).mockReturnValue(
@@ -623,11 +610,11 @@ describe("NoteController Tests", () => {
 
       await noteController.getNotesByVideoId(getByVideoIdReq, res);
 
-      expect(noteService.fetchNotesByVideoId).toHaveBeenCalledWith({
-        userId: getByVideoIdReq.userId,
-        videoId: getByVideoIdReq.params?.id,
-        ...paginationQueries,
-      });
+      expect(noteService.fetchNotesByVideoId).toHaveBeenCalledWith(
+        mockUserId,
+        mockVideoId,
+        findManyDto
+      );
       expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
       expect(res.json).toHaveBeenCalledWith(formattedPaginateRes);
     });

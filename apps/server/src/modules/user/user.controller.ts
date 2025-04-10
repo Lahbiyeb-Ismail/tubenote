@@ -1,6 +1,9 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
+import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/dtos";
+import type { User } from "@tubenote/types";
+
 import { NotFoundError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
@@ -14,8 +17,6 @@ import type {
 
 import { USER_RATE_LIMIT_CONFIG } from "./config";
 
-import type { IUpdatePasswordDto, IUpdateUserDto } from "./dtos";
-import type { User } from "./user.model";
 import type {
   IUserController,
   IUserControllerOptions,
@@ -64,6 +65,7 @@ export class UserController implements IUserController {
 
     const formatedResponse = this._responseFormatter.formatResponse<User>({
       responseOptions: {
+        success: true,
         data: user,
         status: httpStatus.OK,
         message: "User retrieved successfully.",
@@ -91,6 +93,7 @@ export class UserController implements IUserController {
 
     const formatedResponse = this._responseFormatter.formatResponse<User>({
       responseOptions: {
+        success: true,
         data: user,
         status: httpStatus.OK,
         message: "User updated successfully.",
@@ -123,6 +126,7 @@ export class UserController implements IUserController {
 
       const formatedResponse = this._responseFormatter.formatResponse<User>({
         responseOptions: {
+          success: true,
           data: user,
           status: httpStatus.OK,
           message: "User password updated successfully.",

@@ -1,22 +1,18 @@
+import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
-import type { Note } from "./note.model";
+import type { IPaginatedData, Note } from "@tubenote/types";
+
+import type {
+  ICreateNoteDto,
+  IFindManyDto,
+  IPaginationQueryDto,
+  IParamIdDto,
+  IUpdateNoteDto,
+} from "@tubenote/dtos";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
-import type {
-  ICreateBodyDto,
-  ICreateDto,
-  IDeleteDto,
-  IFindAllDto,
-  IFindUniqueDto,
-  IPaginatedData,
-  IParamIdDto,
-  IQueryPaginationDto,
-  IUpdateBodyDto,
-  IUpdateDto,
-} from "@/modules/shared/dtos";
-import type { Prisma } from "@prisma/client";
 import type { IPrismaService, IResponseFormatter } from "../shared/services";
 
 /**
@@ -26,67 +22,97 @@ export interface INoteRepository {
   /**
    * Finds a note using the specified criteria.
    *
-   * @param findNoteDto - Data transfer object containing the note ID and user ID.
+   * @param userId - The unique identifier of the user.
+   * @param noteId - The unique identifier of the note to find.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns A promise that resolves to the found note or null if no note is found.
    */
   find(
-    findNoteDto: IFindUniqueDto,
+    userId: string,
+    noteId: string,
     tx?: Prisma.TransactionClient
   ): Promise<Note | null>;
 
   /**
    * Creates a new note.
    *
-   * @param createNoteDto - Data transfer object containing the note details.
+   * @param userId - The unique identifier of the user.
+   * @param videoId - The unique identifier of the video associated with the note.
+   * @param data - Data transfer object containing the note details.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns A promise that resolves to the newly created note.
    */
   create(
-    createNoteDto: ICreateDto<Note>,
+    userId: string,
+    videoId: string,
+    data: ICreateNoteDto,
     tx?: Prisma.TransactionClient
   ): Promise<Note>;
 
   /**
    * Updates an existing note.
    *
-   * @param {IUpdateDto<Note>} updateNoteDto - The data transfer object containing the note's ID, user ID, and the data to update.
+   * @param userId - The unique identifier of the user.
+   * @param noteId - The unique identifier of the note to update.
+   * @param data - The data transfer object containing the data to update.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns A promise that resolves to the updated note.
    * @throws {Error} - Throws an error if the update operation fails.
    */
   update(
-    updateNoteDto: IUpdateDto<Note>,
+    userId: string,
+    noteId: string,
+    data: IUpdateNoteDto,
     tx?: Prisma.TransactionClient
   ): Promise<Note>;
 
   /**
    * Deletes a note.
    *
-   * @param deleteNoteDto - Data transfer object containing the note ID and user ID.
+   * @param userId - The unique identifier of the user.
+   * @param noteId - The unique identifier of the note to delete.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns A promise that resolves to the deleted note.
    */
   delete(
-    deleteNoteDto: IDeleteDto,
+    userId: string,
+    noteId: string,
     tx?: Prisma.TransactionClient
   ): Promise<Note>;
 
   /**
    * Retrieves multiple notes with pagination.
    *
+   * @param userId - The unique identifier of the user.
    * @param findManyDto - Data transfer object containing pagination and sorting parameters.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns A promise that resolves to an array of notes.
    */
   findMany(
-    findManyDto: IFindAllDto,
+    userId: string,
+    findManyDto: IFindManyDto,
     tx?: Prisma.TransactionClient
   ): Promise<Note[]>;
 
   /**
    * Retrieves multiple notes associated with a specific video.
    *
-   * @param dto - Data transfer object containing the video ID along with pagination parameters.
+   * @param userId - The unique identifier of the user.
+   * @param videoId - The unique identifier of the video.
+   * @param findManyDto - Data transfer object containing the video ID along with pagination parameters.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns A promise that resolves to an array of notes.
    */
   findManyByVideoId(
-    dto: IFindAllDto & { videoId: string },
+    userId: string,
+    videoId: string,
+    findManyDto: IFindManyDto,
     tx?: Prisma.TransactionClient
   ): Promise<Note[]>;
 
@@ -94,6 +120,8 @@ export interface INoteRepository {
    * Counts the total number of notes for a specific user.
    *
    * @param userId - The unique identifier of the user.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns A promise that resolves to the number of notes.
    */
   count(userId: string, tx?: Prisma.TransactionClient): Promise<number>;
@@ -106,74 +134,108 @@ export interface INoteService {
   /**
    * Finds a note using the specified criteria.
    *
-   * @param findNoteDto - Data transfer object containing the note ID and user ID.
+   * @param userId - The unique identifier of the user.
+   * @param noteId - The unique identifier of the note to find.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns A promise that resolves to the found note.
    */
   findNote(
-    findNoteDto: IFindUniqueDto,
+    userId: string,
+    noteId: string,
     tx?: Prisma.TransactionClient
   ): Promise<Note>;
 
   /**
    * Creates a new note.
    *
-   * @param createNoteDto - Data transfer object containing the note details.
+   * @param userId - The unique identifier of the user.
+   * @param videoId - The unique identifier of the video associated with the note.
+   * @param data - Data transfer object containing the note details.
+   * @param tx - Optional transaction client for database operations.
+   *
    * @returns A promise that resolves to the newly created note.
    */
   createNote(
-    createNoteDto: ICreateDto<Note>,
+    userId: string,
+    videoId: string,
+    data: ICreateNoteDto,
     tx?: Prisma.TransactionClient
   ): Promise<Note>;
 
   /**
    * Updates an existing note.
    *
-   * @param findNoteDto - Data transfer object containing the note ID and user ID.
-   * @param updateNoteDto - Data transfer object containing the updated note data.
+   * @param userId - The unique identifier of the user.
+   * @param noteId - The unique identifier of the note to update.
+   * @param data - Data transfer object containing the updated note data.
+   *
    * @returns A promise that resolves to the updated note.
    */
-  updateNote(updateNoteDto: IUpdateDto<Note>): Promise<Note>;
+  updateNote(
+    userId: string,
+    noteId: string,
+    data: IUpdateNoteDto
+  ): Promise<Note>;
 
   /**
    * Deletes a note.
    *
-   * @param deleteNoteDto - Data transfer object containing the note ID and user ID.
+   * @param userId - The unique identifier of the user.
+   * @param noteId - The unique identifier of the note to delete.
+   *
    * @returns A promise that resolves to the deleted note.
    */
-  deleteNote(deleteNoteDto: IDeleteDto): Promise<Note>;
+  deleteNote(userId: string, noteId: string): Promise<Note>;
 
   /**
    * Fetches paginated notes for a user.
    *
+   * @param userId - The unique identifier of the user.
    * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
    * @returns A promise that resolves to the paginated notes information.
    */
-  fetchUserNotes(findManyDto: IFindAllDto): Promise<IPaginatedData<Note>>;
+  fetchUserNotes(
+    userId: string,
+    findManyDto: IFindManyDto
+  ): Promise<IPaginatedData<Note>>;
 
   /**
    * Fetches recent notes for a user.
    *
+   * @param userId - The unique identifier of the user.
    * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
+   *
    * @returns A promise that resolves to an array of recent notes.
    */
-  fetchRecentNotes(findManyDto: IFindAllDto): Promise<Note[]>;
+  fetchRecentNotes(userId: string, findManyDto: IFindManyDto): Promise<Note[]>;
 
   /**
    * Fetches recently updated notes for a user.
    *
+   * @param userId - The unique identifier of the user.
    * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
+   *
    * @returns A promise that resolves to an array of recently updated notes.
    */
-  fetchRecentlyUpdatedNotes(findManyDto: IFindAllDto): Promise<Note[]>;
+  fetchRecentlyUpdatedNotes(
+    userId: string,
+    findManyDto: IFindManyDto
+  ): Promise<Note[]>;
 
   /**
    * Fetches notes associated with a specific video with pagination.
    *
-   * @param dto - Data transfer object containing the video ID and pagination parameters.
+   * @param userId - The unique identifier of the user.
+   * @param videoId - The unique identifier of the video.
+   * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
+   *
    * @returns A promise that resolves to the paginated notes information.
    */
   fetchNotesByVideoId(
-    dto: IFindAllDto & { videoId: string }
+    userId: string,
+    videoId: string,
+    findManyDto: IFindManyDto
   ): Promise<IPaginatedData<Note>>;
 }
 
@@ -189,7 +251,7 @@ export interface INoteController {
    * @returns A promise that resolves when the note is created.
    */
   createNote(
-    req: TypedRequest<ICreateBodyDto<Note>>,
+    req: TypedRequest<ICreateNoteDto, IParamIdDto>,
     res: Response
   ): Promise<void>;
 
@@ -201,7 +263,7 @@ export interface INoteController {
    * @returns A promise that resolves when the note is updated.
    */
   updateNote(
-    req: TypedRequest<IUpdateBodyDto<Note>, IParamIdDto>,
+    req: TypedRequest<IUpdateNoteDto, IParamIdDto>,
     res: Response
   ): Promise<void>;
 
@@ -237,7 +299,7 @@ export interface INoteController {
    * @returns A promise that resolves when the notes are retrieved.
    */
   getUserNotes(
-    req: TypedRequest<EmptyRecord, EmptyRecord, IQueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
     res: Response
   ): Promise<void>;
 
@@ -267,7 +329,7 @@ export interface INoteController {
    * @returns A promise that resolves when the notes are retrieved.
    */
   getNotesByVideoId(
-    req: TypedRequest<EmptyRecord, IParamIdDto, IQueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto, IPaginationQueryDto>,
     res: Response
   ): Promise<void>;
 }

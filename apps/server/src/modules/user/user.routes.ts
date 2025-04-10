@@ -1,5 +1,7 @@
 import { Router } from "express";
 
+import { updatePasswordSchema, updateUserSchema } from "@tubenote/schemas";
+
 import {
   createRateLimitMiddleware,
   isAuthenticated,
@@ -7,7 +9,6 @@ import {
 } from "@/middlewares";
 
 import { USER_RATE_LIMIT_CONFIG } from "./config";
-import { updatePasswordSchema, updateUserSchema } from "./schemas";
 import { userController } from "./user.module";
 
 const userRoutes = Router();

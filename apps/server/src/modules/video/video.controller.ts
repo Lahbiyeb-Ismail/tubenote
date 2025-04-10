@@ -1,16 +1,13 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
 
+import type { IPaginationQueryDto, IParamIdDto } from "@tubenote/dtos";
+import type { Video } from "@tubenote/types";
+
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
-import type {
-  IFindAllDto,
-  IParamIdDto,
-  IQueryPaginationDto,
-} from "@/modules/shared/dtos";
 import type { IResponseFormatter } from "@/modules/shared/services";
 
-import type { Video } from "./video.model";
 import type {
   IVideoController,
   IVideoControllerOptions,
@@ -48,27 +45,26 @@ export class VideoController implements IVideoController {
    * @returns A JSON response with the list of videos and pagination details.
    */
   async getUserVideos(
-    req: TypedRequest<EmptyRecord, EmptyRecord, IQueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
     res: Response
   ) {
     const userId = req.userId;
 
-    const paginationQueries = this._responseFormatter.getPaginationQueries({
+    const findManyDto = this._responseFormatter.getPaginationQueries({
       reqQuery: req.query,
       itemsPerPage: 8,
     });
 
-    const findAllDto: IFindAllDto = {
+    const paginatedData = await this._videoService.getUserVideos(
       userId,
-      ...paginationQueries,
-    };
-
-    const paginatedData = await this._videoService.getUserVideos(findAllDto);
+      findManyDto
+    );
 
     const formattedResponse = this._responseFormatter.formatPaginatedResponse({
       page: req.query.page || 1,
       paginatedData,
       responseOptions: {
+        success: true,
         status: httpStatus.OK,
         message: "Videos retrieved successfully.",
       },
@@ -89,16 +85,17 @@ export class VideoController implements IVideoController {
     req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ) {
-    const { id } = req.params;
+    const videoYoutubeId = req.params.id;
     const userId = req.userId;
 
-    const video = await this._videoService.findVideoOrCreate({
+    const video = await this._videoService.findVideoOrCreate(
       userId,
-      id,
-    });
+      videoYoutubeId
+    );
 
     const formattedResponse = this._responseFormatter.formatResponse<Video>({
       responseOptions: {
+        success: true,
         data: video,
         status: httpStatus.OK,
         message: "Video retrieved successfully.",

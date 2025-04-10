@@ -12,6 +12,7 @@ import {
 import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 
 import type { IResponseFormatter } from "@/modules/shared/services";
+
 import type {
   IRefreshTokenController,
   IRefreshTokenControllerOptions,
@@ -41,8 +42,10 @@ export class RefreshTokenController implements IRefreshTokenController {
 
   /**
    * Refreshes the access token using the refresh token.
+   *
    * @param req - The request object.
    * @param res - The response object.
+   *
    * @throws {UnauthorizedError} If the refresh token is not provided.
    */
   async refreshToken(req: TypedRequest, res: Response): Promise<void> {
@@ -60,15 +63,13 @@ export class RefreshTokenController implements IRefreshTokenController {
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
     const { accessToken, refreshToken } =
-      await this._refreshTokenService.refreshToken({
-        token,
-        userId,
-      });
+      await this._refreshTokenService.refreshToken(userId, token);
 
     const formattedResponse = this._responseFormatter.formatResponse<{
       accessToken: string;
     }>({
       responseOptions: {
+        success: true,
         data: { accessToken },
         status: httpStatus.OK,
         message: "Access token refreshed successfully.",

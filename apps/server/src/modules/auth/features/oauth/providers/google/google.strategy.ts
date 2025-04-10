@@ -37,7 +37,7 @@ export class GoogleOAuthStrategy {
     done: (error: any, user?: IOauthLoginDto) => void
   ) {
     try {
-      const { id, emails, displayName, photos } = profile;
+      const { id, emails, displayName, photos, provider } = profile;
       const email = emails?.[0].value;
       const profilePicture = photos?.[0].value;
 
@@ -48,7 +48,7 @@ export class GoogleOAuthStrategy {
       const user: IOauthLoginDto = {
         createAccountDto: {
           type: "oauth",
-          provider: "google",
+          provider,
           providerAccountId: id,
         },
         createUserDto: {

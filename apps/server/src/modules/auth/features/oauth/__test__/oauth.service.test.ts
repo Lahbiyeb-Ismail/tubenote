@@ -1,7 +1,8 @@
 import { mock } from "jest-mock-extended";
 
-import { REFRESH_TOKEN_EXPIRES_IN } from "../../../constants";
-import { OAuthService } from "../oauth.service";
+import type { User } from "@tubenote/types";
+
+import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
 
 import type { IJwtService } from "@/modules/auth/utils";
 import { BadRequestError } from "@/modules/shared/api-errors";
@@ -12,11 +13,15 @@ import type {
   IPrismaService,
 } from "@/modules/shared/services";
 import { stringToDate } from "@/modules/shared/utils";
-import type { IUserService, User } from "@/modules/user";
+
+import type { IUserService } from "@/modules/user";
 import type { Account } from "@/modules/user/features/account/account.model";
 import type { IAccountService } from "@/modules/user/features/account/account.types";
+
 import type { IRefreshTokenService, RefreshToken } from "../../refresh-token";
 import type { IOauthLoginDto } from "../dtos";
+
+import { OAuthService } from "../oauth.service";
 import type { IOAuthServiceOptions } from "../oauth.types";
 
 jest.mock("@/modules/shared/utils", () => ({
@@ -223,7 +228,10 @@ describe("OAuthService", () => {
       accountService.findAccountByProvider.mockResolvedValue(mockAccount);
 
       // Act
-      const result = await oauthService.handleOAuthLogin(oauthLoginDtoExisting);
+      const result = await oauthService.handleOAuthLogin(
+        oauthLoginDtoExisting.createUserDto,
+        oauthLoginDtoExisting.createAccountDto
+      );
 
       // Assert
       expect(accountService.findAccountByProvider).toHaveBeenCalledWith(
@@ -238,13 +246,13 @@ describe("OAuthService", () => {
       expect(jwtService.generateAuthTokens).toHaveBeenCalledWith(
         mockExistingUserId
       );
-      expect(refreshTokenService.createToken).toHaveBeenCalledWith({
-        userId: mockExistingUserId,
-        data: {
+      expect(refreshTokenService.createToken).toHaveBeenCalledWith(
+        mockExistingUserId,
+        {
           token: "refresh-token",
           expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
-        },
-      });
+        }
+      );
       expect(result).toEqual({
         accessToken: "access-token",
         refreshToken: "refresh-token",
@@ -258,7 +266,10 @@ describe("OAuthService", () => {
       userService.createUserWithAccount.mockResolvedValue(mockNewUser);
 
       // Act
-      const result = await oauthService.handleOAuthLogin(oauthLoginDtoNew);
+      const result = await oauthService.handleOAuthLogin(
+        oauthLoginDtoNew.createUserDto,
+        oauthLoginDtoNew.createAccountDto
+      );
 
       // Assert
       expect(accountService.findAccountByProvider).toHaveBeenCalledWith(
@@ -271,13 +282,13 @@ describe("OAuthService", () => {
         mockNewUser.id
       );
 
-      expect(refreshTokenService.createToken).toHaveBeenCalledWith({
-        userId: mockNewUser.id,
-        data: {
+      expect(refreshTokenService.createToken).toHaveBeenCalledWith(
+        mockNewUser.id,
+        {
           token: "refresh-token",
           expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
-        },
-      });
+        }
+      );
 
       expect(result).toEqual({
         accessToken: "access-token",
@@ -294,7 +305,10 @@ describe("OAuthService", () => {
 
       // Act & Assert
       await expect(
-        oauthService.handleOAuthLogin(oauthLoginDtoExisting)
+        oauthService.handleOAuthLogin(
+          oauthLoginDtoExisting.createUserDto,
+          oauthLoginDtoExisting.createAccountDto
+        )
       ).rejects.toThrow("Transaction failed");
     });
   });

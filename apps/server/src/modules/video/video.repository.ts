@@ -1,12 +1,13 @@
 import type { Prisma } from "@prisma/client";
 
+import type { ICreateVideoDto, IFindManyDto } from "@tubenote/dtos";
+import type { Video } from "@tubenote/types";
+
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
-import type { ICreateDto, IFindAllDto } from "@/modules/shared/dtos";
 import type { IPrismaService } from "@/modules/shared/services";
 
-import type { Video, YoutubeVideoData } from "./video.model";
 import type { IVideoRepository, IVideoRepositoryOptions } from "./video.types";
 
 export class VideoRepository implements IVideoRepository {
@@ -38,12 +39,13 @@ export class VideoRepository implements IVideoRepository {
   }
 
   async findMany(
-    findAllDto: IFindAllDto,
+    userId: string,
+    findManyDto: IFindManyDto,
     tx?: Prisma.TransactionClient
   ): Promise<Video[]> {
     const client = tx ?? this._db;
 
-    const { userId, limit, skip, sort } = findAllDto;
+    const { limit, skip, sort } = findManyDto;
 
     return handleAsyncOperation(
       () =>
@@ -74,12 +76,11 @@ export class VideoRepository implements IVideoRepository {
   }
 
   async create(
-    createVideoDto: ICreateDto<YoutubeVideoData>,
+    userId: string,
+    data: ICreateVideoDto,
     tx?: Prisma.TransactionClient
   ): Promise<Video> {
     const client = tx ?? this._db;
-
-    const { userId, data } = createVideoDto;
 
     return handleAsyncOperation(
       async () =>
