@@ -1,5 +1,4 @@
 import type { Response } from "express";
-import httpStatus from "http-status";
 
 import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/dtos";
 import type { User } from "@tubenote/types";
@@ -63,16 +62,15 @@ export class UserController implements IUserController {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
-    const formatedResponse = this._responseFormatter.formatResponse<User>({
-      responseOptions: {
-        success: true,
-        data: user,
-        status: httpStatus.OK,
-        message: "User retrieved successfully.",
-      },
-    });
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<User>({
+        responseOptions: {
+          data: user,
+          message: "User retrieved successfully.",
+        },
+      });
 
-    res.status(httpStatus.OK).json(formatedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
@@ -91,16 +89,15 @@ export class UserController implements IUserController {
       ...req.body,
     });
 
-    const formatedResponse = this._responseFormatter.formatResponse<User>({
-      responseOptions: {
-        success: true,
-        data: user,
-        status: httpStatus.OK,
-        message: "User updated successfully.",
-      },
-    });
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<User>({
+        responseOptions: {
+          data: user,
+          message: "User updated successfully.",
+        },
+      });
 
-    res.status(httpStatus.OK).json(formatedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
@@ -124,18 +121,17 @@ export class UserController implements IUserController {
         ...req.body,
       });
 
-      const formatedResponse = this._responseFormatter.formatResponse<User>({
-        responseOptions: {
-          success: true,
-          data: user,
-          status: httpStatus.OK,
-          message: "User password updated successfully.",
-        },
-      });
+      const formattedResponse =
+        this._responseFormatter.formatSuccessResponse<User>({
+          responseOptions: {
+            data: user,
+            message: "User password updated successfully.",
+          },
+        });
 
       await this._rateLimitService.reset(req.rateLimitKey);
 
-      res.status(httpStatus.OK).json(formatedResponse);
+      res.status(formattedResponse.statusCode).json(formattedResponse);
     } catch (error: any) {
       await this._rateLimitService.increment({
         key: req.rateLimitKey,

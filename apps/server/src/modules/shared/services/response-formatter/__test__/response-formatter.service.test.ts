@@ -172,15 +172,20 @@ describe("ResponseFormatter", () => {
   describe("formatResponse", () => {
     it("should format a basic response correctly", () => {
       const responseOptions: IResponseOptions<{ id: number; name: string }> = {
-        success: true,
         data: { id: 1, name: "Test" },
-        status: 200,
         message: "Success",
       };
 
       const response = responseFormatter.formatResponse({ responseOptions });
 
-      expect(response).toEqual(responseOptions);
+      expect(response).toEqual({
+        success: true,
+        statusCode: 200,
+        payload: {
+          message: "Success",
+          data: { id: 1, name: "Test" },
+        },
+      });
     });
 
     it("should include pagination info when provided", () => {
@@ -193,28 +198,39 @@ describe("ResponseFormatter", () => {
       };
 
       const responseOptions: IResponseOptions<Array<{ id: number }>> = {
-        success: true,
         data: [{ id: 1 }, { id: 2 }],
-        status: 200,
         message: "Success",
         paginationMeta,
       };
 
       const response = responseFormatter.formatResponse({ responseOptions });
 
-      expect(response).toEqual(responseOptions);
+      expect(response).toEqual({
+        success: true,
+        statusCode: 200,
+        payload: {
+          message: "Success",
+          data: [{ id: 1 }, { id: 2 }],
+          paginationMeta,
+        },
+      });
     });
 
     it("should handle response without data", () => {
       const responseOptions: IResponseOptions<null> = {
-        success: true,
-        status: 204,
+        statusCode: 204,
         message: "No Content",
       };
 
       const response = responseFormatter.formatResponse({ responseOptions });
 
-      expect(response).toEqual(responseOptions);
+      expect(response).toEqual({
+        success: true,
+        statusCode: 204,
+        payload: {
+          message: "No Content",
+        },
+      });
     });
 
     it("should sanitize data by default", () => {
@@ -223,16 +239,14 @@ describe("ResponseFormatter", () => {
         name: string;
         password: string;
       }> = {
-        success: true,
         data: { id: 1, name: "Test", password: "secret" },
-        status: 200,
         message: "Success",
       };
 
       const response = responseFormatter.formatResponse({ responseOptions });
 
-      expect(response.data).toEqual({ id: 1, name: "Test" });
-      expect(response.data?.password).toBeUndefined();
+      expect(response.payload.data).toEqual({ id: 1, name: "Test" });
+      expect(response.payload.data?.password).toBeUndefined();
     });
 
     it("should not sanitize data when sanitize option is false", () => {
@@ -241,9 +255,7 @@ describe("ResponseFormatter", () => {
         name: string;
         password: string;
       }> = {
-        success: true,
         data: { id: 1, name: "Test", password: "secret" },
-        status: 200,
         message: "Success",
       };
 
@@ -256,7 +268,7 @@ describe("ResponseFormatter", () => {
         sanitizationOptions,
       });
 
-      expect(response.data).toEqual({
+      expect(response.payload.data).toEqual({
         id: 1,
         name: "Test",
         password: "secret",
@@ -270,14 +282,12 @@ describe("ResponseFormatter", () => {
         password: string;
         customField: string;
       }> = {
-        success: true,
         data: {
           id: 1,
           name: "Test",
           password: "secret",
           customField: "sensitive",
         },
-        status: 200,
         message: "Success",
       };
 
@@ -291,12 +301,12 @@ describe("ResponseFormatter", () => {
         sanitizationOptions,
       });
 
-      expect(response.data).toEqual({
+      expect(response.payload.data).toEqual({
         id: 1,
         name: "Test",
         password: "secret",
       });
-      expect(response.data?.customField).toBeUndefined();
+      expect(response.payload.data?.customField).toBeUndefined();
     });
   });
 
@@ -310,8 +320,6 @@ describe("ResponseFormatter", () => {
       };
 
       const responseOptions: IResponseOptions<null> = {
-        success: true,
-        status: 200,
         message: "Success",
       };
 
@@ -323,15 +331,17 @@ describe("ResponseFormatter", () => {
 
       expect(response).toEqual({
         success: true,
-        message: "Success",
-        status: 200,
-        data: [{ id: 1 }, { id: 2 }],
-        paginationMeta: {
-          totalPages: 5,
-          totalItems: 10,
-          currentPage: 2,
-          hasNextPage: true,
-          hasPrevPage: true,
+        statusCode: 200,
+        payload: {
+          message: "Success",
+          data: [{ id: 1 }, { id: 2 }],
+          paginationMeta: {
+            totalPages: 5,
+            totalItems: 10,
+            currentPage: 2,
+            hasNextPage: true,
+            hasPrevPage: true,
+          },
         },
       });
     });
@@ -345,8 +355,6 @@ describe("ResponseFormatter", () => {
       };
 
       const responseOptions: IResponseOptions<null> = {
-        success: true,
-        status: 200,
         message: "Success",
       };
 
@@ -356,7 +364,7 @@ describe("ResponseFormatter", () => {
         responseOptions,
       });
 
-      expect(response.paginationMeta).toEqual({
+      expect(response.payload.paginationMeta).toEqual({
         totalPages: 5,
         totalItems: 10,
         currentPage: 1,
@@ -374,8 +382,6 @@ describe("ResponseFormatter", () => {
       };
 
       const responseOptions: IResponseOptions<null> = {
-        success: true,
-        status: 200,
         message: "Success",
       };
 
@@ -385,7 +391,7 @@ describe("ResponseFormatter", () => {
         responseOptions,
       });
 
-      expect(response.paginationMeta).toEqual({
+      expect(response.payload.paginationMeta).toEqual({
         totalPages: 5,
         totalItems: 10,
         currentPage: 5,
@@ -403,8 +409,6 @@ describe("ResponseFormatter", () => {
       };
 
       const responseOptions: IResponseOptions<null> = {
-        success: true,
-        status: 200,
         message: "Success",
       };
 
@@ -414,7 +418,7 @@ describe("ResponseFormatter", () => {
         responseOptions,
       });
 
-      expect(response.paginationMeta?.currentPage).toBe(1);
+      expect(response.payload.paginationMeta?.currentPage).toBe(1);
     });
 
     it("should sanitize data in paginated response", () => {
@@ -429,8 +433,6 @@ describe("ResponseFormatter", () => {
       };
 
       const responseOptions: IResponseOptions<null> = {
-        success: true,
-        status: 200,
         message: "Success",
       };
 
@@ -440,7 +442,7 @@ describe("ResponseFormatter", () => {
         responseOptions,
       });
 
-      expect(response.data).toEqual([{ id: 1 }, { id: 2 }]);
+      expect(response.payload.data).toEqual([{ id: 1 }, { id: 2 }]);
     });
   });
 
@@ -593,8 +595,6 @@ describe("ResponseFormatter", () => {
         page,
         paginatedData,
         responseOptions: {
-          success: true,
-          status: 200,
           message: "Success",
         },
       });
@@ -602,24 +602,30 @@ describe("ResponseFormatter", () => {
       // Verify the response structure and sanitization
       expect(response).toEqual({
         success: true,
-        status: 200,
-        message: "Success",
-        data: [
-          { id: 3, name: "User 3" },
-          { id: 4, name: "User 4" },
-        ],
-        paginationMeta: {
-          totalPages: 5,
-          totalItems: 10,
-          currentPage: 2,
-          hasNextPage: true,
-          hasPrevPage: true,
+        statusCode: 200,
+        payload: {
+          message: "Success",
+          data: [
+            { id: 3, name: "User 3" },
+            { id: 4, name: "User 4" },
+          ],
+          paginationMeta: {
+            totalPages: 5,
+            totalItems: 10,
+            currentPage: 2,
+            hasNextPage: true,
+            hasPrevPage: true,
+          },
         },
       });
 
       // Verify sensitive data was removed
-      expect(response.data && response.data[0]?.password).toBeUndefined();
-      expect(response.data && response.data[1]?.password).toBeUndefined();
+      expect(
+        response.payload.data && response.payload.data[0]?.password
+      ).toBeUndefined();
+      expect(
+        response.payload.data && response.payload.data[1]?.password
+      ).toBeUndefined();
     });
 
     it("should handle the complete flow from pagination queries to formatted response", () => {
@@ -667,8 +673,6 @@ describe("ResponseFormatter", () => {
         page: reqQuery.page,
         paginatedData,
         responseOptions: {
-          success: true,
-          status: 200,
           message: "Success",
         },
       });
@@ -676,19 +680,21 @@ describe("ResponseFormatter", () => {
       // Verify the complete response
       expect(response).toEqual({
         success: true,
-        status: 200,
-        message: "Success",
-        data: [
-          { id: 4, name: "User 4" },
-          { id: 5, name: "User 5" },
-          { id: 6, name: "User 6" },
-        ],
-        paginationMeta: {
-          totalPages: 4,
-          totalItems: 10,
-          currentPage: 2,
-          hasNextPage: true,
-          hasPrevPage: true,
+        statusCode: 200,
+        payload: {
+          message: "Success",
+          data: [
+            { id: 4, name: "User 4" },
+            { id: 5, name: "User 5" },
+            { id: 6, name: "User 6" },
+          ],
+          paginationMeta: {
+            totalPages: 4,
+            totalItems: 10,
+            currentPage: 2,
+            hasNextPage: true,
+            hasPrevPage: true,
+          },
         },
       });
     });

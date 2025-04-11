@@ -54,7 +54,7 @@ describe("OAuth Routes", () => {
 
       // Assert: The validateRequest middleware should catch the schema violation.
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
-      expect(response.body).toHaveProperty("error");
+      expect(response.body.payload).toHaveProperty("name", "BAD_REQUEST");
     });
 
     it("should handle unexpected errors gracefully", async () => {

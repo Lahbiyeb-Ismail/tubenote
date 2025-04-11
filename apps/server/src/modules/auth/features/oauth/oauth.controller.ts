@@ -1,5 +1,4 @@
 import type { Response } from "express";
-import httpStatus from "http-status";
 
 import type { TypedRequest } from "@/modules/shared/types";
 
@@ -33,7 +32,9 @@ export class OAuthController implements IOAuthController {
 
   private redirectWithTemporaryCode(res: Response, temporaryCode: string) {
     res.redirect(
-      `${envConfig.client.url}/auth/callback?code=${encodeURIComponent(temporaryCode)}`
+      `${envConfig.client.url}/auth/callback?code=${encodeURIComponent(
+        temporaryCode
+      )}`
     );
   }
 
@@ -75,19 +76,14 @@ export class OAuthController implements IOAuthController {
     const { accessToken } =
       await this._oauthService.exchangeOauthCodeForTokens(code);
 
-    const formattedResponse = this._responseFormatter.formatResponse<{
-      accessToken: string;
-    }>({
-      responseOptions: {
-        success: true,
-        status: httpStatus.OK,
-        message: "Access token exchanged successfully.",
-        data: {
-          accessToken,
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<string>({
+        responseOptions: {
+          message: "Access token exchanged successfully.",
+          data: accessToken,
         },
-      },
-    });
+      });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 }

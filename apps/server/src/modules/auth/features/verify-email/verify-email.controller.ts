@@ -1,5 +1,4 @@
 import type { Response } from "express";
-import httpStatus from "http-status";
 
 import type { IParamTokenDto } from "@tubenote/dtos";
 
@@ -48,14 +47,12 @@ export class VerifyEmailController implements IVerifyEmailController {
 
     await this._verifyEmailService.verifyUserEmail(token);
 
-    const formattedResponse = this._responseFormatter.formatResponse({
+    const formattedResponse = this._responseFormatter.formatSuccessResponse({
       responseOptions: {
-        success: true,
-        status: httpStatus.OK,
         message: "Email verified successfully.",
       },
     });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 }

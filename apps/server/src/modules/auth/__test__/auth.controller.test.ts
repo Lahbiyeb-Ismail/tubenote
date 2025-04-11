@@ -2,6 +2,8 @@ import type { Response } from "express";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
+import type { IApiSuccessResponse } from "@tubenote/types";
+
 import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
@@ -12,7 +14,6 @@ import {
 } from "@/modules/auth";
 
 import { AuthController, IAuthService } from "@/modules/auth";
-import type { IApiResponse } from "@tubenote/types";
 
 describe("AuthController", () => {
   let controller: AuthController;
@@ -70,15 +71,19 @@ describe("AuthController", () => {
   });
 
   describe("logout", () => {
-    const formattedResponse: IApiResponse<unknown> = {
+    const formattedResponse: IApiSuccessResponse<null> = {
       success: true,
-      status: httpStatus.OK,
-      message: "User logged out successfully.",
+      statusCode: httpStatus.OK,
+      payload: {
+        message: "User logged out successfully.",
+      },
     };
 
     it("should call logoutUser with correct parameters, clear the refresh token cookie, and send OK status", async () => {
       // Arrange: mock the response formatter to return the expected response.
-      responseFormatter.formatResponse.mockReturnValue(formattedResponse);
+      responseFormatter.formatSuccessResponse.mockReturnValue(
+        formattedResponse
+      );
 
       // Act
       await controller.logout(req, res);
@@ -113,7 +118,9 @@ describe("AuthController", () => {
       req.cookies = {};
 
       // Arrange: mock the response formatter to return the expected response.
-      responseFormatter.formatResponse.mockReturnValue(formattedResponse);
+      responseFormatter.formatSuccessResponse.mockReturnValue(
+        formattedResponse
+      );
 
       // Act
       await controller.logout(req, res);

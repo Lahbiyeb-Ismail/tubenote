@@ -114,7 +114,7 @@ describe("User Routes", () => {
     it("should return 401 if Authorization header is missing", async () => {
       const res = await request(app).get("/api/v1/users/me");
       expect(res.statusCode).toBe(httpStatus.UNAUTHORIZED);
-      expect(res.body.error.message).toMatch(/authenticated/);
+      expect(res.body.payload.message).toMatch(/authenticated/);
     });
 
     it("should return 401 if Authorization header is malformed", async () => {
@@ -122,7 +122,7 @@ describe("User Routes", () => {
         .get("/api/v1/users/me")
         .set("Authorization", "Token sometoken");
       expect(res.statusCode).toBe(httpStatus.UNAUTHORIZED);
-      expect(res.body.error.message).toMatch(/authenticated/);
+      expect(res.body.payload.message).toMatch(/authenticated/);
     });
 
     it("should return 401 if token is empty", async () => {
@@ -130,7 +130,7 @@ describe("User Routes", () => {
         .get("/api/v1/users/me")
         .set("Authorization", "Bearer ");
       expect(res.statusCode).toBe(httpStatus.UNAUTHORIZED);
-      expect(res.body.error.message).toMatch(/authenticated/);
+      expect(res.body.payload.message).toMatch(/authenticated/);
     });
 
     it("should return 401 if token verification fails", async () => {
@@ -138,7 +138,7 @@ describe("User Routes", () => {
         .get("/api/v1/users/me")
         .set("Authorization", "Bearer invalid-token");
       expect(res.statusCode).toBe(httpStatus.UNAUTHORIZED);
-      expect(res.body.error.message).toMatch(/Unauthorized access/);
+      expect(res.body.payload.message).toMatch(/Unauthorized access/);
     });
 
     it("should pass authentication with a valid token", async () => {
@@ -160,7 +160,7 @@ describe("User Routes", () => {
         .get("/api/v1/users/me")
         .set("Authorization", "Bearer expired-token");
       expect(res.statusCode).toBe(httpStatus.UNAUTHORIZED);
-      expect(res.body.error.message).toMatch(/Unauthorized access/i);
+      expect(res.body.payload.message).toMatch(/Unauthorized access/i);
     });
 
     it("should return 401 if token is malformed", async () => {
@@ -168,7 +168,7 @@ describe("User Routes", () => {
         .get("/api/v1/users/me")
         .set("Authorization", "Bearer malformed-token");
       expect(res.statusCode).toBe(httpStatus.UNAUTHORIZED);
-      expect(res.body.error.message).toMatch(/Unauthorized access/i);
+      expect(res.body.payload.message).toMatch(/Unauthorized access/i);
     });
   });
 
@@ -276,7 +276,7 @@ describe("User Routes", () => {
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
 
-      expect(res.body.error.message).toMatch(/Unrecognized key/);
+      expect(res.body.payload.message).toMatch(/Unrecognized key/);
     });
 
     it("should return 400 for invalid data types", async () => {
@@ -288,7 +288,7 @@ describe("User Routes", () => {
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
 
-      expect(res.body.error.message).toMatch(/Expected string/);
+      expect(res.body.payload.message).toMatch(/Expected string/);
     });
 
     it("should propagate errors from the controller", async () => {
@@ -316,7 +316,7 @@ describe("User Routes", () => {
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
-      expect(res.body.error.message).toMatch(/email/i);
+      expect(res.body.payload.message).toMatch(/email/i);
     });
 
     it("should validate username length", async () => {
@@ -328,7 +328,7 @@ describe("User Routes", () => {
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
-      expect(res.body.error.message).toMatch(/username/i);
+      expect(res.body.payload.message).toMatch(/username/i);
     });
 
     it("should validate profilePicture URL format", async () => {
@@ -340,7 +340,7 @@ describe("User Routes", () => {
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
-      expect(res.body.error.message).toMatch(/profilePicture/i);
+      expect(res.body.payload.message).toMatch(/profilePicture/i);
     });
 
     // it("should sanitize input to prevent XSS attacks", async () => {
@@ -372,7 +372,7 @@ describe("User Routes", () => {
     //     .send(payload);
 
     //   expect(res.statusCode).toBe(httpStatus.CONFLICT);
-    //   expect(res.body.error.message).toMatch(/Email already in use/);
+    //   expect(res.body.payload.message).toMatch(/Email already in use/);
     // });
   });
 
@@ -426,7 +426,7 @@ describe("User Routes", () => {
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
 
-      expect(res.body.error.message).toMatch(/currentPassword/);
+      expect(res.body.payload.message).toMatch(/currentPassword/);
     });
 
     it("should return 400 when newPassword is missing", async () => {
@@ -441,7 +441,7 @@ describe("User Routes", () => {
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
 
-      expect(res.body.error.message).toMatch(/newPassword/);
+      expect(res.body.payload.message).toMatch(/newPassword/);
     });
 
     it("should return 400 when newPassword is same as currentPassword", async () => {
@@ -457,7 +457,9 @@ describe("User Routes", () => {
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
 
-      expect(res.body.error.message).toMatch(/New password must be different/);
+      expect(res.body.payload.message).toMatch(
+        /New password must be different/
+      );
     });
 
     it("should return 400 when newPassword not meet the security requirement", async () => {
@@ -473,7 +475,7 @@ describe("User Routes", () => {
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
 
-      expect(res.body.error.message).toMatch(/Validation error/);
+      expect(res.body.payload.message).toMatch(/Validation error/);
     });
 
     it("should return 400 for payload with extra unexpected fields", async () => {
@@ -490,7 +492,7 @@ describe("User Routes", () => {
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
 
-      expect(res.body.error.message).toMatch(/Unrecognized key/);
+      expect(res.body.payload.message).toMatch(/Unrecognized key/);
     });
 
     it("should return 400 for invalid data types", async () => {
@@ -507,7 +509,7 @@ describe("User Routes", () => {
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
 
       // Expect messages related to type validation.
-      expect(res.body.error.message).toMatch(/Expected string/);
+      expect(res.body.payload.message).toMatch(/Expected string/);
     });
 
     it("should propagate errors from the controller", async () => {
@@ -543,7 +545,7 @@ describe("User Routes", () => {
     //     .send(payload);
 
     //   expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
-    //   expect(res.body.error.message).toMatch(
+    //   expect(res.body.payload.message).toMatch(
     //     /password you entered is incorrect/
     //   );
     // });
@@ -570,7 +572,7 @@ describe("User Routes", () => {
           .send(payload);
 
         expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
-        expect(res.body.error.message).toContain("Validation error");
+        expect(res.body.payload.message).toContain("Validation error");
       }
     });
 
@@ -587,7 +589,7 @@ describe("User Routes", () => {
     //     .send(payload);
 
     //   expect(res.statusCode).toBe(httpStatus.TOO_MANY_REQUESTS);
-    //   expect(res.body.error.message).toMatch(/Too many requests/);
+    //   expect(res.body.payload.message).toMatch(/Too many requests/);
     //   expect(userController.updatePassword).not.toHaveBeenCalled();
     // });
 
@@ -640,7 +642,7 @@ describe("User Routes", () => {
         .send(largePayload);
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
-      expect(res.body.error.message).toMatch(/most 20 characters long./i);
+      expect(res.body.payload.message).toMatch(/most 20 characters long./i);
     });
 
     it("should handle unsupported HTTP methods", async () => {
@@ -685,7 +687,7 @@ describe("User Routes", () => {
         .set("Authorization", "Bearer valid-token");
 
       expect(res.statusCode).toBe(httpStatus.INTERNAL_SERVER_ERROR);
-      expect(res.body.error.message).toMatch(/Database|service unavailable/i);
+      expect(res.body.payload.message).toMatch(/Database|service unavailable/i);
     });
   });
 });

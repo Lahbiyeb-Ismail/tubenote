@@ -4,7 +4,7 @@ import httpStatus from "http-status";
 import { type BaseError, NotFoundError } from "@/modules/shared/api-errors";
 
 import { envConfig } from "@/modules/shared/config";
-import { loggerService } from "@/modules/shared/services";
+import { loggerService, responseFormatter } from "@/modules/shared/services";
 
 /**
  * Middleware function to handle errors in the application.
@@ -35,9 +35,13 @@ function errorHandler(
     loggerService.debug(`Error Stack: ${err.stack}`);
   }
 
-  res.status(statusCode).json({
-    error: { name: err.name, statusCode: err.httpCode, message: err.message },
+  const formattedErrorResponse = responseFormatter.formatErrorResponse({
+    message: err.message,
+    statusCode,
+    name: err.name,
   });
+
+  res.status(statusCode).json(formattedErrorResponse);
 
   next();
 }

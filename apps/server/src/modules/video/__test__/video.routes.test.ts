@@ -1,10 +1,12 @@
 import httpStatus from "http-status";
 import request from "supertest";
 
-import type { Video } from "@tubenote/types";
+import type { IApiSuccessResponse, Video } from "@tubenote/types";
 
 import app from "@/app";
 
+import { NotFoundError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { videoController } from "../video.module";
 
 // **********************************************
@@ -80,17 +82,24 @@ describe("Video routes tests", () => {
         );
         const currentPage = Number(req.query.page) || 1;
         const totalPages = Math.ceil(videos.length / 10);
-        return res.status(httpStatus.OK).json({
+
+        const formattedResponse: IApiSuccessResponse<Video[]> = {
           success: true,
-          data: videos,
-          pagination: {
-            currentPage,
-            totalItems: videos.length,
-            totalPages,
-            hasNextPage: currentPage < totalPages,
-            hasPrevPage: currentPage > 1,
+          statusCode: httpStatus.OK,
+          payload: {
+            message: "Videos retrieved successfully",
+            data: videos,
+            paginationMeta: {
+              currentPage,
+              totalItems: videos.length,
+              totalPages,
+              hasNextPage: currentPage < totalPages,
+              hasPrevPage: currentPage > 1,
+            },
           },
-        });
+        };
+
+        return res.status(formattedResponse.statusCode).json(formattedResponse);
       });
 
     // Mock GET /videos/:id for the authenticated user.
@@ -101,16 +110,20 @@ describe("Video routes tests", () => {
         const video = mockVideos.find(
           (v) => v.id === req.params.id && v.userIds?.includes(req.userId)
         );
+
         if (!video) {
-          return res.status(httpStatus.NOT_FOUND).json({
-            success: false,
-            error: { message: "Video not found." },
-          });
+          throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
         }
-        return res.status(httpStatus.OK).json({
+
+        const formattedResponse: IApiSuccessResponse<Video> = {
           success: true,
-          data: video,
-        });
+          statusCode: httpStatus.OK,
+          payload: {
+            message: "Video retrieved successfully",
+            data: video,
+          },
+        };
+        return res.status(formattedResponse.statusCode).json(formattedResponse);
       });
 
     jest.clearAllMocks();
@@ -129,7 +142,7 @@ describe("Video routes tests", () => {
 
       expect(res.statusCode).toEqual(httpStatus.UNAUTHORIZED);
 
-      expect(res.body.error.message).toMatch(/authenticated/);
+      expect(res.body.payload.message).toMatch(/authenticated/);
 
       expect(videoController.getUserVideos).not.toHaveBeenCalled();
     });
@@ -141,7 +154,7 @@ describe("Video routes tests", () => {
 
       expect(res.statusCode).toEqual(httpStatus.UNAUTHORIZED);
 
-      expect(res.body.error.message).toMatch(/authenticated/);
+      expect(res.body.payload.message).toMatch(/authenticated/);
 
       expect(videoController.getUserVideos).not.toHaveBeenCalled();
     });
@@ -153,7 +166,7 @@ describe("Video routes tests", () => {
 
       expect(res.statusCode).toEqual(httpStatus.UNAUTHORIZED);
 
-      expect(res.body.error.message).toMatch(/Unauthorized/);
+      expect(res.body.payload.message).toMatch(/Unauthorized/);
 
       expect(videoController.getUserVideos).not.toHaveBeenCalled();
     });
@@ -165,11 +178,10 @@ describe("Video routes tests", () => {
         .expect(httpStatus.OK);
 
       expect(res.body.success).toBe(true);
-      expect(res.body).toHaveProperty("data");
-      expect(res.body).toHaveProperty("pagination");
+      expect(res.body).toHaveProperty("payload");
 
       // Only videos for user_id_001 should be returned.
-      expect(res.body.data).toHaveLength(1);
+      expect(res.body.payload.data).toHaveLength(1);
     });
   });
 
@@ -184,12 +196,12 @@ describe("Video routes tests", () => {
 
       expect(res.statusCode).toEqual(httpStatus.OK);
       expect(res.body.success).toEqual(true);
-      expect(res.body).toHaveProperty("data");
+      expect(res.body).toHaveProperty("payload");
 
       // Only video_001 belongs to user_id_001.
-      expect(res.body.data).toHaveLength(1);
-      expect(res.body).toHaveProperty("pagination");
+      expect(res.body.payload.data).toHaveLength(1);
 
+      expect(res.body.payload.paginationMeta).toHaveProperty("currentPage");
       expect(videoController.getUserVideos).toHaveBeenCalled();
     });
 
@@ -199,7 +211,7 @@ describe("Video routes tests", () => {
         .set("Authorization", "Bearer valid-token");
 
       expect(res.statusCode).toEqual(httpStatus.OK);
-      expect(res.body.pagination).toHaveProperty("currentPage", 1);
+      expect(res.body.payload.paginationMeta).toHaveProperty("currentPage", 1);
       expect(videoController.getUserVideos).toHaveBeenCalled();
     });
 
@@ -243,7 +255,7 @@ describe("Video routes tests", () => {
 
       expect(res.statusCode).toEqual(httpStatus.OK);
       expect(res.body.success).toEqual(true);
-      expect(res.body.data).toHaveProperty("id", "video_001");
+      expect(res.body.payload.data).toHaveProperty("id", "video_001");
       expect(videoController.getVideoByIdOrCreate).toHaveBeenCalled();
     });
 

@@ -3,6 +3,8 @@ import request from "supertest";
 
 import app from "@/app";
 
+import type { IApiSuccessResponse } from "@tubenote/types";
+
 import { UnauthorizedError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
@@ -42,12 +44,21 @@ jest.mock("jsonwebtoken", () => {
 describe("Refresh Token Routes", () => {
   const validRefreshToken = "valid-refresh-token";
 
+  const formattedResponse: IApiSuccessResponse<string> = {
+    success: true,
+    statusCode: httpStatus.OK,
+    payload: {
+      message: "Access token refreshed successfully.",
+      data: MOCK_ACCESS_TOKEN,
+    },
+  };
+
   beforeAll(() => {
     (refreshTokenController.refreshToken as jest.Mock) = jest.fn();
 
     (refreshTokenController.refreshToken as jest.Mock).mockImplementation(
       (_req, res) => {
-        res.status(httpStatus.OK).json({ accessToken: MOCK_ACCESS_TOKEN });
+        res.status(formattedResponse.statusCode).json(formattedResponse);
       }
     );
   });
@@ -68,7 +79,7 @@ describe("Refresh Token Routes", () => {
         .set("Cookie", [`${REFRESH_TOKEN_NAME}=${validRefreshToken}`]);
 
       expect(response.statusCode).toBe(httpStatus.OK);
-      expect(response.body).toEqual({ accessToken: MOCK_ACCESS_TOKEN });
+      expect(response.body).toEqual(formattedResponse);
 
       expect(refreshTokenController.refreshToken).toHaveBeenCalled();
     });
@@ -133,47 +144,40 @@ describe("Refresh Token Routes", () => {
           res
             .set("Custom-Header", "test-value")
             .status(httpStatus.OK)
-            .json({ accessToken: MOCK_ACCESS_TOKEN });
+            .json(formattedResponse);
         }
       );
 
       // Act & Assert
-      await request(app)
+      const res = await request(app)
         .post("/api/v1/auth/refresh")
         .set("Authorization", "Bearer valid-token")
-        .set("Cookie", [`${REFRESH_TOKEN_NAME}=valid-refresh-token`])
-        .expect(httpStatus.OK)
-        .expect("Custom-Header", "test-value")
-        .expect((res) => {
-          expect(res.body).toEqual({
-            accessToken: MOCK_ACCESS_TOKEN,
-          });
-        });
+        .set("Cookie", [`${REFRESH_TOKEN_NAME}=valid-refresh-token`]);
+
+      expect(res.headers["custom-header"]).toBe("test-value");
+      expect(res.status).toBe(formattedResponse.statusCode);
+      expect(res.body).toEqual(formattedResponse);
     });
 
     it("should handle multiple cookies correctly", async () => {
       // Arrange
       (refreshTokenController.refreshToken as jest.Mock).mockImplementation(
         (_req, res) => {
-          res.status(httpStatus.OK).json({ accessToken: MOCK_ACCESS_TOKEN });
+          res.status(httpStatus.OK).json(formattedResponse);
         }
       );
 
       // Act & Assert
-      await request(app)
+      const res = await request(app)
         .post("/api/v1/auth/refresh")
         .set("Authorization", "Bearer valid-token")
         .set("Cookie", [
           `${REFRESH_TOKEN_NAME}=valid-refresh-token`,
           "other-cookie=some-value",
-        ])
-        .expect(httpStatus.OK)
-        .expect((res) => {
-          expect(res.body).toEqual({
-            accessToken: MOCK_ACCESS_TOKEN,
-          });
-        });
+        ]);
 
+      expect(res.status).toBe(formattedResponse.statusCode);
+      expect(res.body).toEqual(formattedResponse);
       expect(refreshTokenController.refreshToken).toHaveBeenCalled();
     });
 
@@ -188,9 +192,16 @@ describe("Refresh Token Routes", () => {
         );
 
       const responses = await Promise.all(requests);
+
       responses.forEach((response) => {
         expect(response.status).toBe(httpStatus.OK);
       });
+
+      responses.forEach((response) => {
+        expect(response.body).toEqual(formattedResponse);
+      });
+
+      expect(refreshTokenController.refreshToken).toHaveBeenCalledTimes(5);
     });
 
     it.each(disallowedMethods)(
