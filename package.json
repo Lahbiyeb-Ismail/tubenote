@@ -15,6 +15,7 @@
     "build:types": "pnpm run --filter types build",
     "build:schemas": "pnpm run --filter schemas build",
     "build:dtos": "pnpm run --filter dtos build",
+    "build:utils": "pnpm run --filter utils build",
     "build:all": "pnpm run --parallel -r build",
     "clean": "pnpm run --parallel -r clean",
     "lint": "biome check .",
