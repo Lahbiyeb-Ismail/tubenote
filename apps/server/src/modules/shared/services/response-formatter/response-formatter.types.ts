@@ -1,5 +1,10 @@
 import type { IFindManyDto, IPaginationQueryDto } from "@tubenote/dtos";
-import type { IApiResponse, IPaginatedData } from "@tubenote/types";
+import type {
+  IApiErrorResponse,
+  IApiSuccessResponse,
+  IPaginatedData,
+  IPaginationMeta,
+} from "@tubenote/types";
 
 /**
  * Options for retrieving pagination queries.
@@ -17,13 +22,84 @@ export interface IGetPaginationQueriesOptions {
 }
 
 /**
- * Represents the options for formatting a response.
- * This interface extends the `IApiResponse` interface, allowing for
- * additional customization or specification of response-related properties.
- *
- * @template T - The type of the data contained in the response.
+ * Options for formatting a response.
  */
-export interface IResponseOptions<T> extends IApiResponse<T> {}
+export interface IResponseOptions<T> {
+  /**
+   * Whether the operation was successful. Defaults to true.
+   */
+  success?: boolean;
+
+  /**
+   * The HTTP status code for the response.
+   */
+  statusCode?: number;
+
+  /**
+   * The message describing the result of the operation.
+   */
+  message: string;
+
+  /**
+   * The data to include in the response.
+   */
+  data?: T;
+
+  /**
+   * Pagination metadata for paginated responses.
+   */
+  paginationMeta?: IPaginationMeta;
+
+  /**
+   * Additional metadata to include in the response.
+   */
+  metadata?: Record<string, any>;
+}
+
+/**
+ * Details about an error that occurred.
+ */
+export interface IErrorDetails {
+  /**
+   * A map of field names to error messages.
+   */
+  [field: string]: string | string[] | Record<string, any>;
+}
+
+/**
+ * Options for formatting an error response.
+ */
+export interface IFormatErrorResponseOptions {
+  /**
+   * A message describing the error.
+   */
+  message: string;
+
+  /**
+   * The HTTP status code for the error.
+   */
+  statusCode: number;
+
+  /**
+   * A code identifying the type of error.
+   */
+  name?: string;
+
+  /**
+   * Additional details about the error.
+   */
+  errorDetails?: IErrorDetails;
+
+  /**
+   * The stack trace for the error (only included in development).
+   */
+  stack?: string;
+
+  /**
+   * Additional metadata to include in the response.
+   */
+  metadata?: Record<string, any>;
+}
 
 /**
  * Represents a rule for sanitizing data fields.
@@ -74,9 +150,9 @@ export interface IFormatPaginatedResponseOptions<T> {
   paginatedData: IPaginatedData<T>;
 
   /**
-   * Options for customizing the response structure.
+   * The response options.
    */
-  responseOptions: IResponseOptions<T>;
+  responseOptions: Omit<IResponseOptions<T[]>, "data" | "paginationMeta">;
 
   /**
    * Optional sanitization options to apply to the response data.
@@ -89,13 +165,16 @@ export interface IFormatPaginatedResponseOptions<T> {
  */
 export interface IResponseFormatter {
   /**
-   * Formats a standard API response.
-   *
-   * @template T - The type of the data being formatted.
-   * @param formatOptions - Options for formatting the response.
-   * @returns The formatted API response.
+   * Formats a successful API response with the provided data and options.
    */
-  formatResponse<T>(formatOptions: IFormatResponseOptions<T>): IApiResponse<T>;
+  formatSuccessResponse<T>(
+    formatOptions: IFormatResponseOptions<T>
+  ): IApiSuccessResponse<T>;
+
+  /**
+   * Formats an error API response with the provided error details.
+   */
+  formatErrorResponse(options: IFormatErrorResponseOptions): IApiErrorResponse;
 
   /**
    * Formats a paginated API response.
@@ -106,7 +185,7 @@ export interface IResponseFormatter {
    */
   formatPaginatedResponse<T>(
     formatOptions: IFormatPaginatedResponseOptions<T>
-  ): IApiResponse<T[]>;
+  ): IApiSuccessResponse<T[]>;
 
   /**
    * Retrieves pagination query parameters based on the provided options.
