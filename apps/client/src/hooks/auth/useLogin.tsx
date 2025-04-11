@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 import { loginUser } from "@/actions/auth.actions";
 
-import type { TypedError } from "@/types";
+// import type { TypedError } from "@/types";
 import type { AuthAction } from "@/types/auth.types";
 import { setStorageValue } from "@/utils/localStorage";
 import useGetCurrentUser from "../user/useGetCurrentUser";
@@ -22,20 +22,21 @@ function useLogin(dispatch: React.Dispatch<AuthAction>) {
     onMutate: () => {
       toast.loading("Logging in...", { id: "loadingToast" });
     },
-    onSuccess: async (data) => {
+    onSuccess: async ({ data, message }) => {
+      if (!data) throw new Error("Login faild");
       toast.dismiss("loadingToast");
 
-      toast.success(data.message);
+      toast.success(message);
 
       queryClient.invalidateQueries({ queryKey: ["user", "current-user"] });
 
-      setStorageValue("accessToken", data.accessToken);
+      setStorageValue("accessToken", data?.accessToken);
 
       dispatch({
         type: "LOGIN_SUCCESS",
         payload: {
-          message: data.message,
-          accessToken: data.accessToken,
+          message,
+          accessToken: data?.accessToken as string,
         },
       });
 
@@ -44,10 +45,10 @@ function useLogin(dispatch: React.Dispatch<AuthAction>) {
       // Redirect to dashboard after successful login
       router.push("/dashboard");
     },
-    onError: (error: TypedError) => {
+    onError: (error: any) => {
       toast.dismiss("loadingToast");
       if (error.response) {
-        toast.error(error.response.data.message);
+        toast.error(error.response.data.error.message);
         // dispatch({
         // 	type: "REQUEST_FAIL",
         // 	payload: { errorMessage: error.response.data.message },

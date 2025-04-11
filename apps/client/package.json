@@ -13,6 +13,7 @@
     "@tubenote/dtos": "workspace:*",
     "@tubenote/types": "workspace:*",
     "@tubenote/schemas": "workspace:*",
+    "@tubenote/utils": "workspace:*",
     "@blocknote/core": "^0.16.0",
     "@blocknote/mantine": "^0.16.0",
     "@blocknote/react": "^0.16.0",

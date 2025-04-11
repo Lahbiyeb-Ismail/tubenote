@@ -4,6 +4,7 @@ import axiosInstance from "@/lib/axios.lib";
 
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 import type { IApiResponse, User } from "@tubenote/types";
+import { asyncTryCatch } from "@tubenote/utils";
 
 import { API_URL } from "@/utils/constants";
 import { setStorageValue } from "@/utils/localStorage";
@@ -39,27 +40,23 @@ export async function registerUser(
  */
 export async function loginUser(
   loginDto: ILoginDto
-): Promise<{ message: string; accessToken: string }> {
-  try {
-    const { data: responseData } = await axios.post<
-      IApiResponse<{ accessToken: string }>
-    >(`${API_URL}/auth/login`, loginDto, {
-      withCredentials: true,
-    });
+): Promise<IApiResponse<{ accessToken: string }>> {
+  // try {
+  const { data: responseData, error } = await asyncTryCatch(
+    axios.post<IApiResponse<{ accessToken: string }>>(
+      `${API_URL}/auth/login`,
+      loginDto,
+      {
+        withCredentials: true,
+      }
+    )
+  );
 
-    console.log(responseData);
-
-    if (!responseData.success || !responseData.data) {
-      throw new Error("Login failed");
-    }
-
-    const { message, data } = responseData;
-
-    return { message, accessToken: data.accessToken };
-  } catch (error) {
-    console.error("Error logging in:", error);
-    throw new Error("Login failed");
+  if (error) {
+    throw error;
   }
+
+  return responseData.data;
 }
 
 /**
