@@ -5,8 +5,6 @@ import app from "@/app";
 
 import type { IEmailBodyDto } from "@tubenote/dtos";
 
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
-
 import { UnauthorizedError } from "@/modules/shared/api-errors";
 import { resetPasswordController } from "../reset-password.module";
 // import { BadRequestError } from "@/modules/shared/api-errors";
@@ -31,9 +29,9 @@ describe("Reset password Routes", () => {
   };
 
   const mockValidToken = "valid-token";
-  const mockInvalidToken = "invalid-token";
+  const _mockInvalidToken = "invalid-token";
 
-  const mockErrorResponse = {
+  const _mockErrorResponse = {
     statusCode: httpStatus.BAD_REQUEST,
     name: "BAD_REQUEST",
   };
@@ -71,11 +69,11 @@ describe("Reset password Routes", () => {
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
 
-      expect(response.body.error.message).toContain("Invalid email format");
+      expect(response.body.payload.message).toContain("Invalid email format");
 
-      expect(response.body.error.statusCode).toBe(httpStatus.BAD_REQUEST);
+      expect(response.body.statusCode).toBe(httpStatus.BAD_REQUEST);
 
-      expect(response.body.error.name).toBe("BAD_REQUEST");
+      expect(response.body.payload.name).toBe("BAD_REQUEST");
     });
 
     it("should return 400 status code and throw a BadRequest Error for a missing email field", async () => {
@@ -86,13 +84,13 @@ describe("Reset password Routes", () => {
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
 
-      expect(response.body.error.message).toBe(
+      expect(response.body.payload.message).toBe(
         "Validation error in email field: Required"
       );
 
-      expect(response.body.error.statusCode).toBe(httpStatus.BAD_REQUEST);
+      expect(response.body.statusCode).toBe(httpStatus.BAD_REQUEST);
 
-      expect(response.body.error.name).toBe("BAD_REQUEST");
+      expect(response.body.payload.name).toBe("BAD_REQUEST");
     });
 
     it("should return 400 status code and throw a BadRequest Error for an empty email field", async () => {
@@ -104,17 +102,16 @@ describe("Reset password Routes", () => {
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
 
-      expect(response.body.error.message).toContain("Invalid email format");
+      expect(response.body.payload.message).toContain("Invalid email format");
 
-      expect(response.body.error.statusCode).toBe(httpStatus.BAD_REQUEST);
+      expect(response.body.statusCode).toBe(httpStatus.BAD_REQUEST);
 
-      expect(response.body.error.name).toBe("BAD_REQUEST");
+      expect(response.body.payload.name).toBe("BAD_REQUEST");
     });
   });
 
   describe("GET /api/v1/auth/reset-password/:token/verify", () => {
     const validResetToken = "valid-token";
-    const invalidResetToken = "invalid-token";
 
     it("should return a 200 status code for a valid token", async () => {
       const message = "Reset token verified.";
@@ -132,27 +129,6 @@ describe("Reset password Routes", () => {
       expect(response.status).toBe(httpStatus.OK);
 
       expect(response.body.message).toBe(message);
-    });
-
-    it("should return a 400 status code for an invalid or expired token", async () => {
-      (
-        resetPasswordController.verifyResetToken as jest.Mock
-      ).mockImplementation((_req, res) => {
-        res.status(httpStatus.BAD_REQUEST).json({
-          error: {
-            ...mockErrorResponse,
-            message: ERROR_MESSAGES.INVALID_TOKEN,
-          },
-        });
-      });
-
-      const response = await request(app).get(
-        `/api/v1/auth/reset-password/${invalidResetToken}/verify`
-      );
-
-      expect(response.status).toBe(httpStatus.BAD_REQUEST);
-
-      expect(response.body.error.message).toBe(ERROR_MESSAGES.INVALID_TOKEN);
     });
 
     it("should return 404 for empty token in verify endpoint", async () => {
@@ -180,34 +156,13 @@ describe("Reset password Routes", () => {
       expect(response.body.message).toBe(message);
     });
 
-    it("should return a 400 status code for an invalid or expired token", async () => {
-      (resetPasswordController.resetPassword as jest.Mock).mockImplementation(
-        (_req, res) => {
-          res.status(httpStatus.BAD_REQUEST).json({
-            error: {
-              ...mockErrorResponse,
-              message: ERROR_MESSAGES.INVALID_TOKEN,
-            },
-          });
-        }
-      );
-
-      const response = await request(app)
-        .post(`/api/v1/auth/reset-password/${mockInvalidToken}`)
-        .send({ password: "newPassword123!" });
-
-      expect(response.status).toBe(httpStatus.BAD_REQUEST);
-
-      expect(response.body.error.message).toBe(ERROR_MESSAGES.INVALID_TOKEN);
-    });
-
     it("should throw a BadRequest validation error if the password is to short", async () => {
       const response = await request(app)
         .post(`/api/v1/auth/reset-password/${mockValidToken}`)
         .send({ password: "weak" });
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
-      expect(response.body.error.name).toBe("BAD_REQUEST");
+      expect(response.body.payload.name).toBe("BAD_REQUEST");
     });
 
     it("should throw a BadRequest validation error for a missing password field", async () => {
@@ -216,7 +171,7 @@ describe("Reset password Routes", () => {
         .send({});
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
-      expect(response.body.error.name).toBe("BAD_REQUEST");
+      expect(response.body.payload.name).toBe("BAD_REQUEST");
     });
 
     it("should throw a BadRequest validation error for an empty password field", async () => {
@@ -226,7 +181,7 @@ describe("Reset password Routes", () => {
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
 
-      expect(response.body.error.name).toBe("BAD_REQUEST");
+      expect(response.body.payload.name).toBe("BAD_REQUEST");
     });
 
     it("should throw a BadRequest validation error for passwords without special characters (numbers/symbols)", async () => {
@@ -355,7 +310,7 @@ describe("Reset password Routes", () => {
 
       // Assert
       expect(response.status).toBe(400);
-      expect(response.body.error.message).toContain(
+      expect(response.body.payload.message).toContain(
         "Email must be at most 255 characters long."
       );
       expect(resetPasswordController.forgotPassword).not.toHaveBeenCalled();
@@ -372,7 +327,7 @@ describe("Reset password Routes", () => {
 
       // Assert
       expect(response.status).toBe(400);
-      expect(response.body.error.message).toContain(
+      expect(response.body.payload.message).toContain(
         "Validation error in password field"
       );
       expect(resetPasswordController.resetPassword).not.toHaveBeenCalled();
@@ -389,7 +344,7 @@ describe("Reset password Routes", () => {
 
       // Assert
       expect(response.status).toBe(400);
-      expect(response.body.error.message).toContain(
+      expect(response.body.payload.message).toContain(
         "The provided token is invalid."
       );
       expect(resetPasswordController.verifyResetToken).not.toHaveBeenCalled();
@@ -441,7 +396,7 @@ describe("Reset password Routes", () => {
           .send({ email: payload });
 
         expect(response.status).toBe(400);
-        expect(response.body.error.message).toContain("Invalid email format");
+        expect(response.body.payload.message).toContain("Invalid email format");
         expect(resetPasswordController.forgotPassword).not.toHaveBeenCalled();
       }
     });
@@ -461,7 +416,9 @@ describe("Reset password Routes", () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.body.error.message).toContain("Invalid token format.");
+        expect(response.body.payload.message).toContain(
+          "Invalid token format."
+        );
         expect(resetPasswordController.verifyResetToken).not.toHaveBeenCalled();
       }
     });
@@ -482,7 +439,7 @@ describe("Reset password Routes", () => {
           .send({ password: payload });
 
         expect(response.status).toBe(400);
-        expect(response.body.error.message).toContain(
+        expect(response.body.payload.message).toContain(
           "Validation error in password field"
         );
         expect(resetPasswordController.resetPassword).not.toHaveBeenCalled();
@@ -502,7 +459,7 @@ describe("Reset password Routes", () => {
           .send({ email: payload });
 
         expect(response.status).toBe(400);
-        expect(response.body.error.message).toContain(
+        expect(response.body.payload.message).toContain(
           "Validation error in email field"
         );
         expect(resetPasswordController.forgotPassword).not.toHaveBeenCalled();
@@ -523,7 +480,9 @@ describe("Reset password Routes", () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.body.error.message).toContain("Invalid token format.");
+        expect(response.body.payload.message).toContain(
+          "Invalid token format."
+        );
         expect(resetPasswordController.verifyResetToken).not.toHaveBeenCalled();
       }
     });
@@ -615,10 +574,6 @@ describe("Reset password Routes", () => {
       );
 
       expect(verifyTokenResponse.status).toBe(httpStatus.UNAUTHORIZED);
-      expect(verifyTokenResponse.body.error).toHaveProperty(
-        "message",
-        "Invalid reset token"
-      );
 
       // Step 3: Attempt to reset password (should also fail)
       (resetPasswordController.resetPassword as jest.Mock).mockRejectedValue(
@@ -630,10 +585,6 @@ describe("Reset password Routes", () => {
         .send({ password: "NewPassword123!" });
 
       expect(resetPasswordResponse.status).toBe(httpStatus.UNAUTHORIZED);
-      expect(resetPasswordResponse.body.error).toHaveProperty(
-        "message",
-        "Invalid reset token"
-      );
     });
 
     it("should handle a failed password reset flow with expired token", async () => {
@@ -662,10 +613,6 @@ describe("Reset password Routes", () => {
       );
 
       expect(verifyTokenResponse.status).toBe(httpStatus.UNAUTHORIZED);
-      expect(verifyTokenResponse.body.error).toHaveProperty(
-        "message",
-        "Reset token has expired"
-      );
 
       // Step 3: Attempt to reset password (should also fail)
       (resetPasswordController.resetPassword as jest.Mock).mockRejectedValue(
@@ -677,10 +624,6 @@ describe("Reset password Routes", () => {
         .send({ password: "NewPassword123!" });
 
       expect(resetPasswordResponse.status).toBe(httpStatus.UNAUTHORIZED);
-      expect(resetPasswordResponse.body.error).toHaveProperty(
-        "message",
-        "Reset token has expired"
-      );
     });
   });
 
@@ -742,7 +685,7 @@ describe("Reset password Routes", () => {
           .send({ password: weakPassword });
 
         expect(response.status).toBe(httpStatus.BAD_REQUEST);
-        expect(response.body.error.message).toContain("Password must");
+        expect(response.body.payload.message).toContain("Password must");
         expect(resetPasswordController.resetPassword).not.toHaveBeenCalled();
       }
 

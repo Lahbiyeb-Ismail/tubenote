@@ -4,7 +4,7 @@ import request from "supertest";
 import app from "@/app";
 
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
-import type { IApiResponse } from "@tubenote/types";
+import type { IApiSuccessResponse } from "@tubenote/types";
 
 import { BadRequestError, ConflictError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
@@ -35,11 +35,13 @@ describe("Local Auth Routes", () => {
   });
 
   describe("POST api/v1/auth/register", () => {
-    const registerRes: IApiResponse<{ email: string }> = {
+    const registerRes: IApiSuccessResponse<string> = {
       success: true,
-      status: httpStatus.CREATED,
-      data: { email: validRegisterPayload.email },
-      message: "A verification email has been sent to your email.",
+      statusCode: httpStatus.CREATED,
+      payload: {
+        data: validRegisterPayload.email,
+        message: "A verification email has been sent to your email.",
+      },
     };
 
     it("should successfully register a new user with valid data", async () => {
@@ -71,7 +73,7 @@ describe("Local Auth Routes", () => {
         .expect("Content-Type", /json/)
         .expect(httpStatus.BAD_REQUEST);
 
-      expect(response.body).toHaveProperty("error");
+      expect(response.body.payload).toHaveProperty("name", "BAD_REQUEST");
       expect(localAuthController.register).not.toHaveBeenCalled();
     });
 
@@ -87,7 +89,7 @@ describe("Local Auth Routes", () => {
         .expect("Content-Type", /json/)
         .expect(httpStatus.BAD_REQUEST);
 
-      expect(response.body).toHaveProperty("error");
+      expect(response.body.payload).toHaveProperty("name", "BAD_REQUEST");
       expect(localAuthController.register).not.toHaveBeenCalled();
     });
 
@@ -103,7 +105,7 @@ describe("Local Auth Routes", () => {
         .expect("Content-Type", /json/)
         .expect(httpStatus.BAD_REQUEST);
 
-      expect(response.body).toHaveProperty("error");
+      expect(response.body.payload).toHaveProperty("name", "BAD_REQUEST");
       expect(localAuthController.register).not.toHaveBeenCalled();
     });
 
@@ -114,7 +116,7 @@ describe("Local Auth Routes", () => {
         .expect("Content-Type", /json/)
         .expect(httpStatus.BAD_REQUEST);
 
-      expect(response.body).toHaveProperty("error");
+      expect(response.body.payload).toHaveProperty("name", "BAD_REQUEST");
       expect(localAuthController.register).not.toHaveBeenCalled();
     });
 
@@ -155,7 +157,10 @@ describe("Local Auth Routes", () => {
         .send(validRegisterPayload);
 
       expect(res.status).toBe(httpStatus.BAD_REQUEST);
-      expect(res.body.error).toHaveProperty("message", "Email already exists");
+      expect(res.body.payload).toHaveProperty(
+        "message",
+        "Email already exists"
+      );
     });
 
     it("should handle unexpected controller errors", async () => {
@@ -168,7 +173,7 @@ describe("Local Auth Routes", () => {
         .send(validRegisterPayload);
 
       expect(res.status).toBe(httpStatus.INTERNAL_SERVER_ERROR);
-      expect(res.body.error).toHaveProperty("message", "Unexpected error");
+      expect(res.body.payload).toHaveProperty("message", "Unexpected error");
     });
 
     it("should pass the correct rate limit key to the controller", async () => {
@@ -187,11 +192,13 @@ describe("Local Auth Routes", () => {
 
   describe("POST api/v1/auth/login", () => {
     it("should successfully login user with valid credentials", async () => {
-      const loginRes: IApiResponse<Record<string, string>> = {
+      const loginRes: IApiSuccessResponse<string> = {
         success: true,
-        status: httpStatus.OK,
-        message: "Login successful",
-        data: { accessToken: "mock-access-token" },
+        statusCode: httpStatus.OK,
+        payload: {
+          message: "Login successful",
+          data: "mock-access-token",
+        },
       };
 
       (localAuthController.login as jest.Mock).mockImplementation(
@@ -229,7 +236,7 @@ describe("Local Auth Routes", () => {
         .expect("Content-Type", /json/)
         .expect(httpStatus.BAD_REQUEST);
 
-      expect(response.body).toHaveProperty("error");
+      expect(response.body.payload).toHaveProperty("name", "BAD_REQUEST");
       expect(localAuthController.login).not.toHaveBeenCalled();
     });
 
@@ -245,7 +252,7 @@ describe("Local Auth Routes", () => {
         .expect("Content-Type", /json/)
         .expect(httpStatus.BAD_REQUEST);
 
-      expect(response.body).toHaveProperty("error");
+      expect(response.body.payload).toHaveProperty("name", "BAD_REQUEST");
       expect(localAuthController.login).not.toHaveBeenCalled();
     });
 
@@ -256,7 +263,7 @@ describe("Local Auth Routes", () => {
         .expect("Content-Type", /json/)
         .expect(httpStatus.BAD_REQUEST);
 
-      expect(response.body).toHaveProperty("error");
+      expect(response.body.payload).toHaveProperty("name", "BAD_REQUEST");
       expect(localAuthController.login).not.toHaveBeenCalled();
     });
 
@@ -270,7 +277,7 @@ describe("Local Auth Routes", () => {
         .send(validLoginPayload);
 
       expect(res.status).toBe(httpStatus.INTERNAL_SERVER_ERROR);
-      expect(res.body.error).toHaveProperty("message", "Unexpected error");
+      expect(res.body.payload).toHaveProperty("message", "Unexpected error");
     });
 
     it("should pass the correct rate limit key to the controller", async () => {
@@ -346,7 +353,7 @@ describe("Local Auth Routes", () => {
         .send(invalidPayload);
 
       expect(response.statusCode).toBe(httpStatus.BAD_REQUEST);
-      expect(response.body.error.message).toBe(
+      expect(response.body.payload.message).toBe(
         "Validation error in username field: Username must be at most 20 characters long."
       );
     });
@@ -368,7 +375,7 @@ describe("Local Auth Routes", () => {
           .send({ ...validRegisterPayload, password: weakPassword });
 
         expect(response.status).toBe(httpStatus.BAD_REQUEST);
-        expect(response.body.error.message).toContain("Password must");
+        expect(response.body.payload.message).toContain("Password must");
         expect(localAuthController.register).not.toHaveBeenCalled();
       }
 
@@ -393,7 +400,7 @@ describe("Local Auth Routes", () => {
           .send({ ...validRegisterPayload, email: payload });
 
         expect(response.status).toBe(400);
-        expect(response.body.error.message).toContain("Invalid email format");
+        expect(response.body.payload.message).toContain("Invalid email format");
         expect(localAuthController.register).not.toHaveBeenCalled();
       }
     });
@@ -413,7 +420,7 @@ describe("Local Auth Routes", () => {
           .send({ ...validRegisterPayload, username: payload });
 
         expect(response.status).toBe(400);
-        expect(response.body.error.message).toContain(
+        expect(response.body.payload.message).toContain(
           "Invalid username format."
         );
         expect(localAuthController.register).not.toHaveBeenCalled();
@@ -435,7 +442,7 @@ describe("Local Auth Routes", () => {
           .send({ ...validRegisterPayload, password: payload });
 
         expect(response.status).toBe(400);
-        expect(response.body.error.message).toContain(
+        expect(response.body.payload.message).toContain(
           "Validation error in password field"
         );
         expect(localAuthController.register).not.toHaveBeenCalled();
@@ -458,7 +465,7 @@ describe("Local Auth Routes", () => {
           .send({ ...validLoginPayload, email: payload });
 
         expect(response.status).toBe(400);
-        expect(response.body.error.message).toContain(
+        expect(response.body.payload.message).toContain(
           "Validation error in email field"
         );
         expect(localAuthController.register).not.toHaveBeenCalled();
@@ -479,7 +486,7 @@ describe("Local Auth Routes", () => {
           .send({ ...validLoginPayload, password: payload });
 
         expect(response.status).toBe(400);
-        expect(response.body.error.message).toContain(
+        expect(response.body.payload.message).toContain(
           "Validation error in password field"
         );
         expect(localAuthController.register).not.toHaveBeenCalled();
@@ -500,7 +507,7 @@ describe("Local Auth Routes", () => {
           .send({ ...validRegisterPayload, username: payload });
 
         expect(response.status).toBe(400);
-        expect(response.body.error.message).toContain(
+        expect(response.body.payload.message).toContain(
           "Validation error in username field"
         );
         expect(localAuthController.register).not.toHaveBeenCalled();
@@ -535,7 +542,7 @@ describe("Local Auth Routes", () => {
         .send(largePayload);
 
       expect(res.status).toBe(httpStatus.BAD_REQUEST);
-      expect(res.body.error.message).toMatch(
+      expect(res.body.payload.message).toMatch(
         /must be at most 20 characters long/
       );
     });

@@ -83,7 +83,7 @@ describe("Auth Routes", () => {
         .set("Cookie", [`${REFRESH_TOKEN_NAME}=valid-refresh-token`]);
 
       expect(res.status).toBe(httpStatus.INTERNAL_SERVER_ERROR);
-      expect(res.body.error).toHaveProperty("message", "Logout error");
+      expect(res.body.payload).toHaveProperty("message", "Logout error");
     });
 
     it("should use the isAuthenticated middleware to attach userId", async () => {

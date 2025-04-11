@@ -27,10 +27,9 @@ describe("Verify Email Route", () => {
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
 
-      expect(response.body.error).toEqual({
+      expect(response.body.payload).toEqual({
         message: expect.stringContaining("Validation error in token"),
         name: "BAD_REQUEST",
-        statusCode: httpStatus.BAD_REQUEST,
       });
 
       // Ensure controller is never invoked

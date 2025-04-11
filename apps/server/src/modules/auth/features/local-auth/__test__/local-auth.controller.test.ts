@@ -3,7 +3,7 @@ import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
-import type { IApiResponse, User } from "@tubenote/types";
+import type { IApiSuccessResponse, User } from "@tubenote/types";
 
 import type {
   ILoggerService,
@@ -82,6 +82,24 @@ describe("LocalAuthController", () => {
     refreshToken: "mock-refresh-token",
   };
 
+  const formattedRegisterRes: IApiSuccessResponse<string> = {
+    success: true,
+    statusCode: httpStatus.CREATED,
+    payload: {
+      message: "A verification email has been sent to your email.",
+      data: mockUser.email,
+    },
+  };
+
+  const formattedLoginRes: IApiSuccessResponse<string> = {
+    success: true,
+    statusCode: httpStatus.OK,
+    payload: {
+      message: "Login successful",
+      data: mockAuthResponse.accessToken,
+    },
+  };
+
   beforeEach(() => {
     mockReset(localAuthService);
     mockReset(responseFormatter);
@@ -95,6 +113,7 @@ describe("LocalAuthController", () => {
     loginReq.rateLimitKey = `rate:login:ip:email:${loginReq.ip}-${loginReq.body.email}`;
 
     res.status.mockReturnThis();
+    // Removed as res.statusCode is a number and cannot have mockReturnThis
     res.json.mockReturnThis();
     res.cookie.mockReturnThis();
 
@@ -121,17 +140,12 @@ describe("LocalAuthController", () => {
   });
 
   describe("LocalAuthController - register", () => {
-    const formattedRegisterRes: IApiResponse<{ email: string }> = {
-      success: true,
-      status: httpStatus.CREATED,
-      message: "A verification email has been sent to your email.",
-      data: { email: mockUser.email },
-    };
-
     it("should successfully register a new user", async () => {
       localAuthService.registerUser.mockResolvedValue(mockUser);
 
-      responseFormatter.formatResponse.mockReturnValue(formattedRegisterRes);
+      responseFormatter.formatSuccessResponse.mockReturnValue(
+        formattedRegisterRes
+      );
 
       await localAuthController.register(registerReq, res);
 
@@ -139,15 +153,14 @@ describe("LocalAuthController", () => {
         mockRegisterDto
       );
       expect(rateLimiter.reset).toHaveBeenCalledWith(registerReq.rateLimitKey);
-      expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
+      expect(responseFormatter.formatSuccessResponse).toHaveBeenCalledWith({
         responseOptions: {
-          success: true,
-          status: httpStatus.CREATED,
+          statusCode: httpStatus.CREATED,
           message: "A verification email has been sent to your email.",
-          data: { email: mockUser.email },
+          data: mockUser.email,
         },
       });
-      expect(res.status).toHaveBeenCalledWith(httpStatus.CREATED);
+      expect(res.status).toHaveBeenCalledWith(formattedRegisterRes.statusCode);
       expect(res.json).toHaveBeenCalledWith(formattedRegisterRes);
     });
 
@@ -182,17 +195,12 @@ describe("LocalAuthController", () => {
   });
 
   describe("LocalAuthController - login", () => {
-    const formattedLoginRes: IApiResponse<{ accessToken: string }> = {
-      success: true,
-      status: httpStatus.OK,
-      message: "Login successful",
-      data: { accessToken: mockAuthResponse.accessToken },
-    };
-
     it("should successfully login a user and set refresh token cookie", async () => {
       localAuthService.loginUser.mockResolvedValue(mockAuthResponse);
 
-      responseFormatter.formatResponse.mockReturnValue(formattedLoginRes);
+      responseFormatter.formatSuccessResponse.mockReturnValue(
+        formattedLoginRes
+      );
 
       await localAuthController.login(loginReq, res);
 
@@ -206,7 +214,7 @@ describe("LocalAuthController", () => {
         refreshTokenCookieConfig
       );
 
-      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(formattedLoginRes.statusCode);
 
       expect(res.json).toHaveBeenCalledWith(formattedLoginRes);
     });
@@ -264,16 +272,24 @@ describe("LocalAuthController", () => {
       // Arrange
       localAuthService.loginUser.mockResolvedValue(mockAuthResponse);
 
+      responseFormatter.formatSuccessResponse.mockReturnValue(
+        formattedLoginRes
+      );
+
       // Act
-      await localAuthController.login(registerReq, res);
+      await localAuthController.login(loginReq, res);
 
       // Assert
-      expect(rateLimiter.reset).toHaveBeenCalledWith(registerReq.rateLimitKey);
+      expect(rateLimiter.reset).toHaveBeenCalledWith(loginReq.rateLimitKey);
     });
 
     it("should reset rate limiter on successful registration", async () => {
       // Arrange
       localAuthService.registerUser.mockResolvedValue(mockUser);
+
+      responseFormatter.formatSuccessResponse.mockReturnValue(
+        formattedRegisterRes
+      );
 
       // Act
       await localAuthController.register(registerReq, res);
@@ -314,6 +330,10 @@ describe("LocalAuthController", () => {
     it("should not expose sensitive user data in registration response", async () => {
       localAuthService.registerUser.mockResolvedValue(mockUser);
 
+      responseFormatter.formatSuccessResponse.mockReturnValue(
+        formattedRegisterRes
+      );
+
       await localAuthController.register(registerReq, res);
 
       expect(res.json).toHaveBeenCalledWith(
@@ -326,6 +346,10 @@ describe("LocalAuthController", () => {
 
     it("should not expose sensitive user data in login response", async () => {
       localAuthService.loginUser.mockResolvedValue(mockAuthResponse);
+
+      responseFormatter.formatSuccessResponse.mockReturnValue(
+        formattedLoginRes
+      );
 
       await localAuthController.login(loginReq, res);
 
@@ -340,6 +364,9 @@ describe("LocalAuthController", () => {
     it("should set secure cookie options for refresh token", async () => {
       localAuthService.loginUser.mockResolvedValue(mockAuthResponse);
 
+      responseFormatter.formatSuccessResponse.mockReturnValue(
+        formattedLoginRes
+      );
       // Act
       await localAuthController.login(loginReq, res);
 

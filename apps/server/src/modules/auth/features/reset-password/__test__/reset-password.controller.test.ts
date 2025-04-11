@@ -2,7 +2,7 @@ import type { Response } from "express";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
-import type { IApiResponse } from "@tubenote/types";
+import type { IApiSuccessResponse } from "@tubenote/types";
 
 import type {
   IEmailBodyDto,
@@ -50,6 +50,22 @@ describe("ResetPasswordController", () => {
 
   const res = mock<Response>();
 
+  const formattedForgotRes: IApiSuccessResponse<null> = {
+    success: true,
+    statusCode: httpStatus.OK,
+    payload: {
+      message: "Password reset link sent to your email.",
+    },
+  };
+
+  const formattedResetRes: IApiSuccessResponse<null> = {
+    success: true,
+    statusCode: httpStatus.OK,
+    payload: {
+      message: "Password reset successfully.",
+    },
+  };
+
   beforeEach(() => {
     mockReset(resetPasswordService);
     mockReset(responseFormatter);
@@ -59,16 +75,6 @@ describe("ResetPasswordController", () => {
     resetPasswordService.sendResetToken.mockResolvedValue(undefined);
     resetPasswordService.resetPassword.mockResolvedValue(undefined);
     resetPasswordService.verifyResetToken.mockResolvedValue("user_id_001");
-
-    // Set default response formatter behavior
-    responseFormatter.formatResponse.mockImplementation(
-      ({ responseOptions }) => ({
-        success: true,
-        status: responseOptions.status,
-        message: responseOptions.message,
-        data: responseOptions.data,
-      })
-    );
 
     // Reset the singleton instance for isolation.
     // @ts-ignore: resetting private static property for testing purposes.
@@ -104,17 +110,13 @@ describe("ResetPasswordController", () => {
   });
 
   describe("forgotPassword", () => {
-    const formattedForgotRes: IApiResponse<unknown> = {
-      success: true,
-      status: httpStatus.OK,
-      message: "Password reset link sent to your email.",
-    };
-
     // 2. Success Scenarios
     describe("Success Scenarios", () => {
       it("should successfully send a reset password token to a valid email", async () => {
         // Arrange
-        responseFormatter.formatResponse.mockReturnValue(formattedForgotRes);
+        responseFormatter.formatSuccessResponse.mockReturnValue(
+          formattedForgotRes
+        );
 
         // Act
         await controller.forgotPassword(forgotReq, res);
@@ -124,10 +126,8 @@ describe("ResetPasswordController", () => {
           forgotReq.body.email
         );
 
-        expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
+        expect(responseFormatter.formatSuccessResponse).toHaveBeenCalledWith({
           responseOptions: {
-            success: true,
-            status: httpStatus.OK,
             message: "Password reset link sent to your email.",
           },
         });
@@ -136,7 +136,7 @@ describe("ResetPasswordController", () => {
           forgotReq.rateLimitKey
         );
 
-        expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+        expect(res.status).toHaveBeenCalledWith(formattedForgotRes.statusCode);
         expect(res.json).toHaveBeenCalledWith(formattedForgotRes);
       });
     });
@@ -174,6 +174,10 @@ describe("ResetPasswordController", () => {
         // Arrange
         resetPasswordService.sendResetToken.mockResolvedValue(undefined);
 
+        responseFormatter.formatSuccessResponse.mockReturnValue(
+          formattedForgotRes
+        );
+
         // Act
         await controller.forgotPassword(forgotReq, res);
 
@@ -203,17 +207,13 @@ describe("ResetPasswordController", () => {
   });
 
   describe("resetPassword", () => {
-    const formattedResetRes: IApiResponse<unknown> = {
-      success: true,
-      status: httpStatus.OK,
-      message: "Password reset successfully.",
-    };
-
     // 1. Success Scenarios
     describe("Success Scenarios", () => {
       it("should successfully reset password with valid token and password", async () => {
         // Arrange
-        responseFormatter.formatResponse.mockReturnValue(formattedResetRes);
+        responseFormatter.formatSuccessResponse.mockReturnValue(
+          formattedResetRes
+        );
 
         // Act
         await controller.resetPassword(resetReq, res);
@@ -228,7 +228,7 @@ describe("ResetPasswordController", () => {
           resetReq.rateLimitKey
         );
 
-        expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+        expect(res.status).toHaveBeenCalledWith(formattedResetRes.statusCode);
         expect(res.json).toHaveBeenCalledWith(formattedResetRes);
       });
     });
@@ -346,6 +346,10 @@ describe("ResetPasswordController", () => {
         // Arrange
         resetPasswordService.resetPassword.mockResolvedValue(undefined);
 
+        responseFormatter.formatSuccessResponse.mockReturnValue(
+          formattedResetRes
+        );
+
         // Act
         await controller.resetPassword(resetReq, res);
 
@@ -373,17 +377,21 @@ describe("ResetPasswordController", () => {
   });
 
   describe("verifyResetToken", () => {
-    const formattedVerifyRes: IApiResponse<unknown> = {
+    const formattedVerifyRes: IApiSuccessResponse<null> = {
       success: true,
-      status: httpStatus.OK,
-      message: "Reset password token is valid.",
+      statusCode: httpStatus.OK,
+      payload: {
+        message: "Reset password token is valid.",
+      },
     };
 
     // 1. Success Scenarios
     describe("Success Scenarios", () => {
       it("should successfully verify a valid token", async () => {
         // Arrange
-        responseFormatter.formatResponse.mockReturnValue(formattedVerifyRes);
+        responseFormatter.formatSuccessResponse.mockReturnValue(
+          formattedVerifyRes
+        );
 
         // Act
         await controller.verifyResetToken(verifyReq, res);
@@ -392,7 +400,7 @@ describe("ResetPasswordController", () => {
         expect(resetPasswordService.verifyResetToken).toHaveBeenCalledWith(
           verifyReq.params.token
         );
-        expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+        expect(res.status).toHaveBeenCalledWith(formattedVerifyRes.statusCode);
         expect(res.json).toHaveBeenCalledWith(formattedVerifyRes);
       });
     });
@@ -418,21 +426,23 @@ describe("ResetPasswordController", () => {
         // Arrange
         resetPasswordService.sendResetToken.mockResolvedValue(undefined);
 
+        responseFormatter.formatSuccessResponse.mockReturnValue(
+          formattedForgotRes
+        );
+
         // Act
         await controller.forgotPassword(forgotReq, res);
 
         // Assert
-        expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
+        expect(responseFormatter.formatSuccessResponse).toHaveBeenCalledWith({
           responseOptions: {
-            success: true,
-            status: httpStatus.OK,
             message: "Password reset link sent to your email.",
           },
         });
 
         // Ensure token is not included in the response
         const formatResponseArgs =
-          responseFormatter.formatResponse.mock.calls[0][0];
+          responseFormatter.formatSuccessResponse.mock.calls[0][0];
         expect(JSON.stringify(formatResponseArgs)).not.toContain(
           "secret-token"
         );
@@ -443,6 +453,10 @@ describe("ResetPasswordController", () => {
       it("should not log or expose passwords", async () => {
         // Arrange
         resetPasswordService.resetPassword.mockResolvedValue(undefined);
+
+        responseFormatter.formatSuccessResponse.mockReturnValue(
+          formattedResetRes
+        );
 
         // Act
         await controller.resetPassword(resetReq, res);
@@ -458,7 +472,7 @@ describe("ResetPasswordController", () => {
 
         // Check that password is not included in the response
         const formatResponseArgs =
-          responseFormatter.formatResponse.mock.calls[0][0];
+          responseFormatter.formatSuccessResponse.mock.calls[0][0];
         expect(JSON.stringify(formatResponseArgs)).not.toContain(
           resetReq.body.password
         );
@@ -469,7 +483,13 @@ describe("ResetPasswordController", () => {
       it("should implement rate limiting for forgotPassword", async () => {
         // First call succeeds
         resetPasswordService.sendResetToken.mockResolvedValue(undefined);
+
+        responseFormatter.formatSuccessResponse.mockReturnValue(
+          formattedForgotRes
+        );
+
         await controller.forgotPassword(forgotReq, res);
+
         expect(rateLimitService.reset).toHaveBeenCalledWith(
           forgotReq.rateLimitKey
         );
@@ -494,7 +514,13 @@ describe("ResetPasswordController", () => {
       it("should implement rate limiting for resetPassword", async () => {
         // First call succeeds
         resetPasswordService.resetPassword.mockResolvedValue(undefined);
+
+        responseFormatter.formatSuccessResponse.mockReturnValue(
+          formattedResetRes
+        );
+
         await controller.resetPassword(resetReq, res);
+
         expect(rateLimitService.reset).toHaveBeenCalledWith(
           resetReq.rateLimitKey
         );

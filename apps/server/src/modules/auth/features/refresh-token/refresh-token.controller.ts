@@ -1,5 +1,4 @@
 import type { Response } from "express";
-import httpStatus from "http-status";
 
 import { UnauthorizedError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
@@ -65,19 +64,16 @@ export class RefreshTokenController implements IRefreshTokenController {
     const { accessToken, refreshToken } =
       await this._refreshTokenService.refreshToken(userId, token);
 
-    const formattedResponse = this._responseFormatter.formatResponse<{
-      accessToken: string;
-    }>({
-      responseOptions: {
-        success: true,
-        data: { accessToken },
-        status: httpStatus.OK,
-        message: "Access token refreshed successfully.",
-      },
-    });
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<string>({
+        responseOptions: {
+          data: accessToken,
+          message: "Access token refreshed successfully.",
+        },
+      });
 
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
-    res.status(httpStatus.OK).json(formattedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 }

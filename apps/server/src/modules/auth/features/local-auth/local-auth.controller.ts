@@ -61,21 +61,19 @@ export class LocalAuthController implements ILocalAuthController {
 
       if (!user) throw new BadRequestError("User registration failed.");
 
-      const formattedResponse = this._responseFormatter.formatResponse<{
-        email: string;
-      }>({
-        responseOptions: {
-          success: true,
-          status: httpStatus.CREATED,
-          message: "A verification email has been sent to your email.",
-          data: { email: user.email },
-        },
-      });
+      const formattedResponse =
+        this._responseFormatter.formatSuccessResponse<string>({
+          responseOptions: {
+            statusCode: httpStatus.CREATED,
+            message: "A verification email has been sent to your email.",
+            data: user.email,
+          },
+        });
 
       // Reset rate limiters on successful registration
       await this._rateLimiter.reset(req.rateLimitKey);
 
-      res.status(httpStatus.CREATED).json(formattedResponse);
+      res.status(formattedResponse.statusCode).json(formattedResponse);
     } catch (error: any) {
       await this._rateLimiter.increment({
         key: req.rateLimitKey,
@@ -98,23 +96,20 @@ export class LocalAuthController implements ILocalAuthController {
       const { accessToken, refreshToken } =
         await this._localAuthService.loginUser({ ...req.body });
 
-      const formattedResponse = this._responseFormatter.formatResponse<{
-        accessToken: string;
-      }>({
-        responseOptions: {
-          success: true,
-          status: httpStatus.OK,
-          message: "Login successful",
-          data: { accessToken },
-        },
-      });
+      const formattedResponse =
+        this._responseFormatter.formatSuccessResponse<string>({
+          responseOptions: {
+            message: "Login successful",
+            data: accessToken,
+          },
+        });
 
       // Reset rate limiters on successful login
       await this._rateLimiter.reset(rateLimitKey);
 
       res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
 
-      res.status(httpStatus.OK).json(formattedResponse);
+      res.status(formattedResponse.statusCode).json(formattedResponse);
     } catch (error: any) {
       await this._rateLimiter.increment({
         key: rateLimitKey,

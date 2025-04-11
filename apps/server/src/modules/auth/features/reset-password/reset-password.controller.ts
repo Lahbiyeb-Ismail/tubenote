@@ -1,5 +1,4 @@
 import type { Response } from "express";
-import httpStatus from "http-status";
 
 import type {
   IEmailBodyDto,
@@ -67,17 +66,15 @@ export class ResetPasswordController implements IResetPasswordController {
 
       await this._resetPasswordService.sendResetToken(email);
 
-      const formattedResponse = this._responseFormatter.formatResponse({
+      const formattedResponse = this._responseFormatter.formatSuccessResponse({
         responseOptions: {
-          success: true,
-          status: httpStatus.OK,
           message: "Password reset link sent to your email.",
         },
       });
 
       await this._rateLimitService.reset(req.rateLimitKey);
 
-      res.status(httpStatus.OK).json(formattedResponse);
+      res.status(formattedResponse.statusCode).json(formattedResponse);
     } catch (error: any) {
       await this._rateLimitService.increment({
         key: req.rateLimitKey,
@@ -107,17 +104,15 @@ export class ResetPasswordController implements IResetPasswordController {
 
       await this._resetPasswordService.resetPassword(token, password);
 
-      const formattedResponse = this._responseFormatter.formatResponse({
+      const formattedResponse = this._responseFormatter.formatSuccessResponse({
         responseOptions: {
-          success: true,
-          status: httpStatus.OK,
           message: "Password reset successfully.",
         },
       });
 
       await this._rateLimitService.reset(req.rateLimitKey);
 
-      res.status(httpStatus.OK).json(formattedResponse);
+      res.status(formattedResponse.statusCode).json(formattedResponse);
     } catch (error: any) {
       await this._rateLimitService.increment({
         key: req.rateLimitKey,
@@ -145,14 +140,12 @@ export class ResetPasswordController implements IResetPasswordController {
 
     await this._resetPasswordService.verifyResetToken(token);
 
-    const formattedResponse = this._responseFormatter.formatResponse({
+    const formattedResponse = this._responseFormatter.formatSuccessResponse({
       responseOptions: {
-        success: true,
-        status: httpStatus.OK,
         message: "Reset password token is valid.",
       },
     });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 }
