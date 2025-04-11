@@ -72,16 +72,16 @@ export class NoteController implements INoteController {
 
     const note = await this._noteService.createNote(userId, videoId, req.body);
 
-    const formattedResponse = this._responseFormatter.formatResponse<Note>({
-      responseOptions: {
-        success: true,
-        data: note,
-        status: httpStatus.CREATED,
-        message: "Note created successfully.",
-      },
-    });
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<Note>({
+        responseOptions: {
+          statusCode: httpStatus.CREATED,
+          data: note,
+          message: "Note created successfully.",
+        },
+      });
 
-    res.status(httpStatus.CREATED).json(formattedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
@@ -104,16 +104,15 @@ export class NoteController implements INoteController {
       req.body
     );
 
-    const formattedResponse = this._responseFormatter.formatResponse<Note>({
-      responseOptions: {
-        success: true,
-        data: updatedNote,
-        status: httpStatus.OK,
-        message: "Note updated successfully.",
-      },
-    });
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<Note>({
+        responseOptions: {
+          data: updatedNote,
+          message: "Note updated successfully.",
+        },
+      });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
@@ -132,15 +131,13 @@ export class NoteController implements INoteController {
 
     await this._noteService.deleteNote(userId, noteId);
 
-    const formattedResponse = this._responseFormatter.formatResponse({
+    const formattedResponse = this._responseFormatter.formatSuccessResponse({
       responseOptions: {
-        success: true,
-        status: httpStatus.OK,
         message: "Note deleted successfully.",
       },
     });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
@@ -159,16 +156,15 @@ export class NoteController implements INoteController {
 
     const note = await this._noteService.findNote(userId, noteId);
 
-    const formattedResponse = this._responseFormatter.formatResponse<Note>({
-      responseOptions: {
-        success: true,
-        data: note,
-        status: httpStatus.OK,
-        message: "Note retrieved successfully.",
-      },
-    });
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<Note>({
+        responseOptions: {
+          data: note,
+          message: "Note retrieved successfully.",
+        },
+      });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
@@ -198,13 +194,11 @@ export class NoteController implements INoteController {
       page: req.query.page ?? 1,
       paginatedData,
       responseOptions: {
-        success: true,
-        status: httpStatus.OK,
         message: "User notes retrieved successfully.",
       },
     });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
@@ -226,16 +220,16 @@ export class NoteController implements INoteController {
 
     const notes = await this._noteService.fetchRecentNotes(userId, findManyDto);
 
-    const formattedResponse = this._responseFormatter.formatResponse<Note[]>({
+    const formattedResponse = this._responseFormatter.formatSuccessResponse<
+      Note[]
+    >({
       responseOptions: {
-        success: true,
         data: notes,
-        status: httpStatus.OK,
         message: "Recent notes retrieved successfully.",
       },
     });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
@@ -258,16 +252,16 @@ export class NoteController implements INoteController {
 
     const notes = await this._noteService.fetchRecentNotes(userId, findManyDto);
 
-    const formattedResponse = this._responseFormatter.formatResponse<Note[]>({
+    const formattedResponse = this._responseFormatter.formatSuccessResponse<
+      Note[]
+    >({
       responseOptions: {
-        success: true,
         data: notes,
-        status: httpStatus.OK,
         message: "Recent updated notes retrieved successfully.",
       },
     });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
@@ -299,12 +293,10 @@ export class NoteController implements INoteController {
       page: req.query.page ?? 1,
       paginatedData,
       responseOptions: {
-        success: true,
-        status: httpStatus.OK,
         message: "Notes retrieved successfully.",
       },
     });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 }

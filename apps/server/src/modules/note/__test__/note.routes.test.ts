@@ -222,7 +222,7 @@ describe("Note Routes Tests", () => {
 
       expect(res.statusCode).toEqual(httpStatus.UNAUTHORIZED);
 
-      expect(res.body.error.message).toMatch(/authenticated/);
+      expect(res.body.payload.message).toMatch(/authenticated/);
 
       expect(noteController.getUserNotes).not.toHaveBeenCalled();
     });
@@ -234,7 +234,7 @@ describe("Note Routes Tests", () => {
 
       expect(res.statusCode).toEqual(httpStatus.UNAUTHORIZED);
 
-      expect(res.body.error.message).toMatch(/authenticated/);
+      expect(res.body.payload.message).toMatch(/authenticated/);
 
       expect(noteController.getUserNotes).not.toHaveBeenCalled();
     });
@@ -246,7 +246,7 @@ describe("Note Routes Tests", () => {
 
       expect(res.statusCode).toEqual(httpStatus.UNAUTHORIZED);
 
-      expect(res.body.error.message).toMatch(/Unauthorized/);
+      expect(res.body.payload.message).toMatch(/Unauthorized/);
 
       expect(noteController.getUserNotes).not.toHaveBeenCalled();
     });
