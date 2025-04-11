@@ -4,7 +4,7 @@ import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
 import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/dtos";
-import type { User } from "@tubenote/types";
+import type { IApiSuccessResponse, User } from "@tubenote/types";
 
 import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
 
@@ -113,17 +113,19 @@ describe("UserController tests", () => {
       jest.clearAllMocks();
     });
 
-    const getUserFormattedRes = {
+    const getUserFormattedRes: IApiSuccessResponse<User> = {
       success: true,
-      status: httpStatus.OK,
-      data: mockUser,
-      message: "User retrieved successfully.",
+      statusCode: httpStatus.OK,
+      payload: {
+        data: mockUser,
+        message: "User retrieved successfully.",
+      },
     };
 
     it("should send the current user's information and remove sensitive data", async () => {
       (userService.getUserById as jest.Mock).mockResolvedValue(mockUser);
 
-      (responseFormatter.formatResponse as jest.Mock).mockReturnValue(
+      (responseFormatter.formatSuccessResponse as jest.Mock).mockReturnValue(
         getUserFormattedRes
       );
 
@@ -131,16 +133,14 @@ describe("UserController tests", () => {
 
       expect(userService.getUserById).toHaveBeenCalledWith(mockUserId);
 
-      expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
+      expect(responseFormatter.formatSuccessResponse).toHaveBeenCalledWith({
         responseOptions: {
-          success: true,
-          data: getUserFormattedRes.data,
-          message: getUserFormattedRes.message,
-          status: getUserFormattedRes.status,
+          data: mockUser,
+          message: getUserFormattedRes.payload.message,
         },
       });
 
-      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(getUserFormattedRes.statusCode);
 
       // Expect the response user object not to include password
       expect(res.json).toHaveBeenCalledWith(getUserFormattedRes);
@@ -159,11 +159,13 @@ describe("UserController tests", () => {
   });
 
   describe("UserController - updateCurrentUser", () => {
-    const updateUserFormattedRes = {
+    const updateUserFormattedRes: IApiSuccessResponse<User> = {
       success: true,
-      status: httpStatus.OK,
-      data: { ...mockUser, ...updateUserDto },
-      message: "User updated successfully.",
+      statusCode: httpStatus.OK,
+      payload: {
+        data: { ...mockUser, ...updateUserDto },
+        message: "User updated successfully.",
+      },
     };
 
     afterEach(() => {
@@ -176,7 +178,7 @@ describe("UserController tests", () => {
         ...updateUserDto,
       });
 
-      (responseFormatter.formatResponse as jest.Mock).mockReturnValue(
+      (responseFormatter.formatSuccessResponse as jest.Mock).mockReturnValue(
         updateUserFormattedRes
       );
 
@@ -187,16 +189,16 @@ describe("UserController tests", () => {
         updateUserReq.body
       );
 
-      expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
+      expect(responseFormatter.formatSuccessResponse).toHaveBeenCalledWith({
         responseOptions: {
-          success: true,
-          data: updateUserFormattedRes.data,
-          message: updateUserFormattedRes.message,
-          status: updateUserFormattedRes.status,
+          data: updateUserFormattedRes.payload.data,
+          message: updateUserFormattedRes.payload.message,
         },
       });
 
-      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(
+        updateUserFormattedRes.statusCode
+      );
 
       expect(res.json).toHaveBeenCalledWith(updateUserFormattedRes);
     });
@@ -205,7 +207,7 @@ describe("UserController tests", () => {
       updateUserReq.body = {};
       (userService.updateUser as jest.Mock).mockResolvedValue(mockUser);
 
-      (responseFormatter.formatResponse as jest.Mock).mockReturnValue({
+      (responseFormatter.formatSuccessResponse as jest.Mock).mockReturnValue({
         ...updateUserFormattedRes,
         data: mockUser,
       });
@@ -214,12 +216,10 @@ describe("UserController tests", () => {
 
       expect(userService.updateUser).toHaveBeenCalledWith(mockUserId, {});
 
-      expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
+      expect(responseFormatter.formatSuccessResponse).toHaveBeenCalledWith({
         responseOptions: {
-          success: true,
           data: mockUser,
-          message: updateUserFormattedRes.message,
-          status: updateUserFormattedRes.status,
+          message: updateUserFormattedRes.payload.message,
         },
       });
 
@@ -244,11 +244,18 @@ describe("UserController tests", () => {
   });
 
   describe("UserController - updateUserPassword", () => {
-    const updatePasswordFormattedRes = {
+    const mockUpdatedUser: User = {
+      ...mockUser,
+      password: "new_hashed_password",
+    };
+
+    const updatePasswordFormattedRes: IApiSuccessResponse<User> = {
       success: true,
-      status: httpStatus.OK,
-      data: { ...mockUser, password: "new_hashed_password" },
-      message: "User password updated successfully.",
+      statusCode: httpStatus.OK,
+      payload: {
+        data: mockUpdatedUser,
+        message: "User password updated successfully.",
+      },
     };
 
     afterEach(() => {
@@ -257,8 +264,8 @@ describe("UserController tests", () => {
 
     it("should update password successfully", async () => {
       // Arrange
-      userService.updateUserPassword.mockResolvedValue(mockUser);
-      responseFormatter.formatResponse.mockReturnValue(
+      userService.updateUserPassword.mockResolvedValue(mockUpdatedUser);
+      responseFormatter.formatSuccessResponse.mockReturnValue(
         updatePasswordFormattedRes
       );
 
@@ -271,18 +278,18 @@ describe("UserController tests", () => {
         updatePasswordReq.body
       );
 
-      expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
+      expect(responseFormatter.formatSuccessResponse).toHaveBeenCalledWith({
         responseOptions: {
-          success: true,
-          data: mockUser,
-          status: httpStatus.OK,
+          data: mockUpdatedUser,
           message: "User password updated successfully.",
         },
       });
       expect(rateLimitService.reset).toHaveBeenCalledWith(
         `${updatePasswordReq.userId}:password-update`
       );
-      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(
+        updatePasswordFormattedRes.statusCode
+      );
       expect(res.json).toHaveBeenCalledWith(updatePasswordFormattedRes);
     });
 
