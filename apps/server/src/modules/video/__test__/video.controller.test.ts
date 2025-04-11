@@ -7,7 +7,7 @@ import type {
   IPaginationQueryDto,
   IParamIdDto,
 } from "@tubenote/dtos";
-import type { IApiResponse, Video } from "@tubenote/types";
+import type { IApiSuccessResponse, Video } from "@tubenote/types";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
@@ -35,17 +35,19 @@ describe("VideoController", () => {
   const mockFindOrCreateReq = mock<TypedRequest<EmptyRecord, IParamIdDto>>();
   const mockResponse = mock<Response>();
 
-  const mockPaginatedVideos: IApiResponse<Video[]> = {
+  const mockPaginatedVideos: IApiSuccessResponse<Video[]> = {
     success: true,
-    status: httpStatus.OK,
-    message: "Videos retrieved successfully.",
-    data: [],
-    paginationMeta: {
-      currentPage: 1,
-      hasNextPage: false,
-      hasPrevPage: false,
-      totalItems: 0,
-      totalPages: 0,
+    statusCode: httpStatus.OK,
+    payload: {
+      message: "Videos retrieved successfully.",
+      data: [],
+      paginationMeta: {
+        currentPage: 1,
+        hasNextPage: false,
+        hasPrevPage: false,
+        totalItems: 0,
+        totalPages: 0,
+      },
     },
   };
 
@@ -212,11 +214,13 @@ describe("VideoController", () => {
   });
 
   describe("VideoController - getVideoByIdOrCreate", () => {
-    const formattedRes: IApiResponse<Video> = {
+    const formattedRes: IApiSuccessResponse<Video> = {
       success: true,
-      data: mockVideo,
-      message: "Video retrieved successfully.",
-      status: 200,
+      statusCode: httpStatus.OK,
+      payload: {
+        data: mockVideo,
+        message: "Video retrieved successfully.",
+      },
     };
 
     beforeEach(() => {
@@ -225,7 +229,7 @@ describe("VideoController", () => {
 
       videoService.findVideoOrCreate.mockResolvedValue(mockVideo);
 
-      responseFormatter.formatResponse.mockReturnValue(formattedRes);
+      responseFormatter.formatSuccessResponse.mockReturnValue(formattedRes);
     });
 
     it("should return formatted video response with valid parameters", async () => {
@@ -239,12 +243,10 @@ describe("VideoController", () => {
         mockVideoId
       );
 
-      expect(responseFormatter.formatResponse).toHaveBeenCalledWith({
+      expect(responseFormatter.formatSuccessResponse).toHaveBeenCalledWith({
         responseOptions: {
-          success: true,
           data: mockVideo,
           message: "Video retrieved successfully.",
-          status: 200,
         },
       });
       expect(mockResponse.status).toHaveBeenCalledWith(httpStatus.OK);
@@ -311,6 +313,24 @@ describe("VideoController", () => {
     //     })
     //   );
     // });
+
+    const formattedRes: IApiSuccessResponse<Video> = {
+      success: true,
+      statusCode: httpStatus.OK,
+      payload: {
+        data: mockVideo,
+        message: "Video retrieved successfully.",
+      },
+    };
+
+    beforeEach(() => {
+      mockFindOrCreateReq.params = { id: mockVideoId };
+      mockFindOrCreateReq.userId = mockUserId;
+
+      videoService.findVideoOrCreate.mockResolvedValue(mockVideo);
+
+      responseFormatter.formatSuccessResponse.mockReturnValue(formattedRes);
+    });
 
     it("should handle special characters in video ID", async () => {
       const specialVideoId = "video_!@#$%^&*()";
