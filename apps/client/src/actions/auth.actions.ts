@@ -17,19 +17,24 @@ import { setStorageValue } from "@/utils/localStorage";
  */
 export async function registerUser(
   registerDto: IRegisterDto
-): Promise<{ message: string; email: string }> {
-  const { data: responseData } = await axios.post<IApiResponse<User>>(
-    `${API_URL}/auth/register`,
-    registerDto
+): Promise<IApiSuccessResponse<string>> {
+  const { data: responseData, error } = await asyncTryCatch(
+    axios.post<IApiSuccessResponse<string>>(
+      `${API_URL}/auth/register`,
+      registerDto
+    )
   );
 
-  if (!responseData.success || !responseData.data) {
-    throw new Error("Registration failed");
+  if (error) {
+    const axiosError = error as AxiosError<IApiErrorResponse>;
+    if (axiosError.response) {
+      throw new Error(axiosError.response.data.payload.message);
+    } else {
+      throw new Error("Registration failed. Please try again.");
+    }
   }
 
-  const { message, data } = responseData;
-
-  return { message, email: data.email };
+  return responseData.data;
 }
 
 /**
