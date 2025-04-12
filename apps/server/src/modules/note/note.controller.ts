@@ -131,11 +131,13 @@ export class NoteController implements INoteController {
 
     await this._noteService.deleteNote(userId, noteId);
 
-    const formattedResponse = this._responseFormatter.formatSuccessResponse({
-      responseOptions: {
-        message: "Note deleted successfully.",
-      },
-    });
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<null>({
+        responseOptions: {
+          message: "Note deleted successfully.",
+          data: null,
+        },
+      });
 
     res.status(formattedResponse.statusCode).json(formattedResponse);
   }

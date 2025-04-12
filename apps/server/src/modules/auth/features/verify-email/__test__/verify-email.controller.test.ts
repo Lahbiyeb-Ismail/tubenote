@@ -69,6 +69,7 @@ describe("VerifyEmailController", () => {
       statusCode: httpStatus.OK,
       payload: {
         message: "Email verified successfully.",
+        data: null,
       },
     };
     it("should verify the user email and return a success response", async () => {

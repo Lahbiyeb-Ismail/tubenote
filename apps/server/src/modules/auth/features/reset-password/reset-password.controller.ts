@@ -66,11 +66,13 @@ export class ResetPasswordController implements IResetPasswordController {
 
       await this._resetPasswordService.sendResetToken(email);
 
-      const formattedResponse = this._responseFormatter.formatSuccessResponse({
-        responseOptions: {
-          message: "Password reset link sent to your email.",
-        },
-      });
+      const formattedResponse =
+        this._responseFormatter.formatSuccessResponse<null>({
+          responseOptions: {
+            message: "Password reset link sent to your email.",
+            data: null,
+          },
+        });
 
       await this._rateLimitService.reset(req.rateLimitKey);
 
@@ -104,11 +106,13 @@ export class ResetPasswordController implements IResetPasswordController {
 
       await this._resetPasswordService.resetPassword(token, password);
 
-      const formattedResponse = this._responseFormatter.formatSuccessResponse({
-        responseOptions: {
-          message: "Password reset successfully.",
-        },
-      });
+      const formattedResponse =
+        this._responseFormatter.formatSuccessResponse<null>({
+          responseOptions: {
+            message: "Password reset successfully.",
+            data: null,
+          },
+        });
 
       await this._rateLimitService.reset(req.rateLimitKey);
 
@@ -140,11 +144,13 @@ export class ResetPasswordController implements IResetPasswordController {
 
     await this._resetPasswordService.verifyResetToken(token);
 
-    const formattedResponse = this._responseFormatter.formatSuccessResponse({
-      responseOptions: {
-        message: "Reset password token is valid.",
-      },
-    });
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<null>({
+        responseOptions: {
+          message: "Reset password token is valid.",
+          data: null,
+        },
+      });
 
     res.status(formattedResponse.statusCode).json(formattedResponse);
   }

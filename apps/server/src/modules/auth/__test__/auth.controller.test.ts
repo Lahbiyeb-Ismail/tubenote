@@ -76,6 +76,7 @@ describe("AuthController", () => {
       statusCode: httpStatus.OK,
       payload: {
         message: "User logged out successfully.",
+        data: null,
       },
     };
 

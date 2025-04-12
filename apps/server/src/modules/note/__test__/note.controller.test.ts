@@ -276,6 +276,7 @@ describe("NoteController Tests", () => {
       statusCode: httpStatus.OK,
       payload: {
         message: "Note deleted successfully.",
+        data: null,
       },
     };
 

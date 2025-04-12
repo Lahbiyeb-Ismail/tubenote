@@ -55,6 +55,7 @@ describe("ResetPasswordController", () => {
     statusCode: httpStatus.OK,
     payload: {
       message: "Password reset link sent to your email.",
+      data: null,
     },
   };
 
@@ -63,6 +64,7 @@ describe("ResetPasswordController", () => {
     statusCode: httpStatus.OK,
     payload: {
       message: "Password reset successfully.",
+      data: null,
     },
   };
 
@@ -129,6 +131,7 @@ describe("ResetPasswordController", () => {
         expect(responseFormatter.formatSuccessResponse).toHaveBeenCalledWith({
           responseOptions: {
             message: "Password reset link sent to your email.",
+            data: null,
           },
         });
 
@@ -382,6 +385,7 @@ describe("ResetPasswordController", () => {
       statusCode: httpStatus.OK,
       payload: {
         message: "Reset password token is valid.",
+        data: null,
       },
     };
 
@@ -437,6 +441,7 @@ describe("ResetPasswordController", () => {
         expect(responseFormatter.formatSuccessResponse).toHaveBeenCalledWith({
           responseOptions: {
             message: "Password reset link sent to your email.",
+            data: null,
           },
         });
 

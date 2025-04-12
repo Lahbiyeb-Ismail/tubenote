@@ -230,6 +230,7 @@ describe("ResponseFormatter", () => {
         statusCode: 204,
         payload: {
           message: "No Content",
+          data: null,
         },
       });
     });

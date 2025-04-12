@@ -54,11 +54,13 @@ export class AuthController implements IAuthController {
 
     await this._authService.logoutUser({ refreshToken, userId });
 
-    const formattedResponse = this._responseFormatter.formatSuccessResponse({
-      responseOptions: {
-        message: "User logged out successfully.",
-      },
-    });
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<null>({
+        responseOptions: {
+          message: "User logged out successfully.",
+          data: null,
+        },
+      });
 
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 

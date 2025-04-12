@@ -169,20 +169,16 @@ export class ResponseFormatter implements IResponseFormatter {
       ...sanitizationOptions,
     };
 
-    // let sanitizedData: T;
-
-    // if (data) {
-    //   sanitizedData = sanitization.sanitize
-    //     ? this.sanitizeData(data, sanitization.sanitizationRules)
-    //     : data;
-    // }
+    const sanitizedData = sanitization.sanitize
+      ? this.sanitizeData(data, sanitization.sanitizationRules)
+      : data;
 
     const response: IApiSuccessResponse<T> = {
       success: true,
       statusCode,
       payload: {
         message,
-        data: this.sanitizeData(data, sanitization.sanitizationRules),
+        data: sanitizedData,
         paginationMeta,
       },
     };
@@ -204,7 +200,7 @@ export class ResponseFormatter implements IResponseFormatter {
    *   metadata: { timestamp: new Date() }
    * });
    */
-  formatSuccessResponse<T>(
+  formatSuccessResponse<T = null>(
     options: IFormatResponseOptions<T>
   ): IApiSuccessResponse<T> {
     return this.formatResponse(options);
