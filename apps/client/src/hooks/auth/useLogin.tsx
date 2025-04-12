@@ -6,7 +6,6 @@ import toast from "react-hot-toast";
 
 import { loginUser } from "@/actions/auth.actions";
 
-// import type { TypedError } from "@/types";
 import type { AuthAction } from "@/types/auth.types";
 import { setStorageValue } from "@/utils/localStorage";
 import useGetCurrentUser from "../user/useGetCurrentUser";
@@ -22,21 +21,22 @@ function useLogin(dispatch: React.Dispatch<AuthAction>) {
     onMutate: () => {
       toast.loading("Logging in...", { id: "loadingToast" });
     },
-    onSuccess: async ({ data, message }) => {
-      if (!data) throw new Error("Login faild");
+    onSuccess: async (responseData) => {
+      const { payload } = responseData;
+
       toast.dismiss("loadingToast");
 
-      toast.success(message);
+      toast.success(payload.message);
 
       queryClient.invalidateQueries({ queryKey: ["user", "current-user"] });
 
-      setStorageValue("accessToken", data?.accessToken);
+      setStorageValue("accessToken", payload.data);
 
       dispatch({
         type: "LOGIN_SUCCESS",
         payload: {
-          message,
-          accessToken: data?.accessToken as string,
+          message: payload.message,
+          accessToken: payload.data,
         },
       });
 
@@ -45,21 +45,9 @@ function useLogin(dispatch: React.Dispatch<AuthAction>) {
       // Redirect to dashboard after successful login
       router.push("/dashboard");
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.dismiss("loadingToast");
-      if (error.response) {
-        toast.error(error.response.data.error.message);
-        // dispatch({
-        // 	type: "REQUEST_FAIL",
-        // 	payload: { errorMessage: error.response.data.message },
-        // });
-      } else {
-        toast.error("Login failed. Please try again.");
-        // dispatch({
-        // 	type: "REQUEST_FAIL",
-        // 	payload: { errorMessage: "Login failed. Please try again." },
-        // });
-      }
+      toast.error(error.message);
     },
   });
 }
