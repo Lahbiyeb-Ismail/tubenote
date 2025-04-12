@@ -1,9 +1,9 @@
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
 
 import axiosInstance from "@/lib/axios.lib";
 
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
-import type { IApiResponse, User } from "@tubenote/types";
+import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
 import { asyncTryCatch } from "@tubenote/utils";
 
 import { API_URL } from "@/utils/constants";
@@ -40,20 +40,20 @@ export async function registerUser(
  */
 export async function loginUser(
   loginDto: ILoginDto
-): Promise<IApiResponse<{ accessToken: string }>> {
-  // try {
+): Promise<IApiSuccessResponse<string>> {
   const { data: responseData, error } = await asyncTryCatch(
-    axios.post<IApiResponse<{ accessToken: string }>>(
-      `${API_URL}/auth/login`,
-      loginDto,
-      {
-        withCredentials: true,
-      }
-    )
+    axios.post<IApiSuccessResponse<string>>(`${API_URL}/auth/login`, loginDto, {
+      withCredentials: true,
+    })
   );
 
   if (error) {
-    throw error;
+    const axiosError = error as AxiosError<IApiErrorResponse>;
+    if (axiosError.response) {
+      throw new Error(axiosError.response.data.payload.message);
+    } else {
+      throw new Error("Login failed. Please try again.");
+    }
   }
 
   return responseData.data;
