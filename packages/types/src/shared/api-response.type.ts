@@ -17,7 +17,7 @@ export interface IApiSuccessResponse<T> {
   statusCode: number;
   payload: {
     message: string;
-    data?: T;
+    data: T;
     paginationMeta?: IPaginationMeta;
   };
 }
