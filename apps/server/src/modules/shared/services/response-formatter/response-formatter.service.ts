@@ -169,25 +169,23 @@ export class ResponseFormatter implements IResponseFormatter {
       ...sanitizationOptions,
     };
 
+    // let sanitizedData: T;
+
+    // if (data) {
+    //   sanitizedData = sanitization.sanitize
+    //     ? this.sanitizeData(data, sanitization.sanitizationRules)
+    //     : data;
+    // }
+
     const response: IApiSuccessResponse<T> = {
       success: true,
       statusCode,
       payload: {
         message,
+        data: this.sanitizeData(data, sanitization.sanitizationRules),
+        paginationMeta,
       },
     };
-
-    if (data) {
-      const sanitizedData = sanitization.sanitize
-        ? this.sanitizeData(data, sanitization.sanitizationRules)
-        : data;
-
-      response.payload.data = sanitizedData;
-    }
-
-    if (paginationMeta) {
-      response.payload.paginationMeta = paginationMeta;
-    }
 
     return response;
   }

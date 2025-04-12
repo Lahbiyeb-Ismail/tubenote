@@ -220,6 +220,7 @@ describe("ResponseFormatter", () => {
       const responseOptions: IResponseOptions<null> = {
         statusCode: 204,
         message: "No Content",
+        data: null,
       };
 
       const response = responseFormatter.formatResponse({ responseOptions });
@@ -319,8 +320,9 @@ describe("ResponseFormatter", () => {
         totalPages: 5,
       };
 
-      const responseOptions: IResponseOptions<null> = {
+      const responseOptions: IResponseOptions<{ id: number }[]> = {
         message: "Success",
+        data: [{ id: 1 }, { id: 2 }],
       };
 
       const response = responseFormatter.formatPaginatedResponse({
@@ -354,8 +356,9 @@ describe("ResponseFormatter", () => {
         totalPages: 5,
       };
 
-      const responseOptions: IResponseOptions<null> = {
+      const responseOptions: IResponseOptions<{ id: number }[]> = {
         message: "Success",
+        data: [{ id: 1 }, { id: 2 }],
       };
 
       const response = responseFormatter.formatPaginatedResponse({
@@ -381,8 +384,9 @@ describe("ResponseFormatter", () => {
         totalPages: 5,
       };
 
-      const responseOptions: IResponseOptions<null> = {
+      const responseOptions: IResponseOptions<{ id: number }[]> = {
         message: "Success",
+        data: [{ id: 9 }, { id: 10 }],
       };
 
       const response = responseFormatter.formatPaginatedResponse({
@@ -408,8 +412,9 @@ describe("ResponseFormatter", () => {
         totalPages: 5,
       };
 
-      const responseOptions: IResponseOptions<null> = {
+      const responseOptions: IResponseOptions<{ id: number }[]> = {
         message: "Success",
+        data: [{ id: 1 }, { id: 2 }],
       };
 
       const response = responseFormatter.formatPaginatedResponse({
@@ -432,8 +437,14 @@ describe("ResponseFormatter", () => {
         totalPages: 1,
       };
 
-      const responseOptions: IResponseOptions<null> = {
+      const responseOptions: IResponseOptions<
+        { id: number; password: string }[]
+      > = {
         message: "Success",
+        data: [
+          { id: 1, password: "secret1" },
+          { id: 2, password: "secret2" },
+        ],
       };
 
       const response = responseFormatter.formatPaginatedResponse({

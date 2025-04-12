@@ -43,7 +43,7 @@ export interface IResponseOptions<T> {
   /**
    * The data to include in the response.
    */
-  data?: T;
+  data: T;
 
   /**
    * Pagination metadata for paginated responses.
