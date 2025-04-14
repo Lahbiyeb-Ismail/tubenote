@@ -1,4 +1,4 @@
-import ForgotPasswordForm from "@/components/forms/ForgotPasswordForm";
+import { ForgotPasswordForm } from "@/features/auth/components";
 
 function ForgotPasswordPage() {
   return <ForgotPasswordForm />;
