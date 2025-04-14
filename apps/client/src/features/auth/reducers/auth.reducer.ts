@@ -1,9 +1,9 @@
-import type { AuthAction, AuthState } from "@/types/auth.types";
 import {
   getStorageValue,
   removeStorageValue,
   setStorageValue,
 } from "@/utils/localStorage";
+import type { AuthAction, AuthState } from "../types";
 
 export function useAuthReducer() {
   const accessToken = getStorageValue<string>("accessToken");

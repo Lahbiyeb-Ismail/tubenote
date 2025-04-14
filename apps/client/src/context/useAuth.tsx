@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useReducer } from "react";
 
-import type { AuthContextType, AuthProviderProps } from "@/types/auth.types";
+import type { AuthContextType, AuthProviderProps } from "@/features/auth/types";
 
 import { useAuthReducer } from "@/features/auth/reducers";
 
