@@ -7,7 +7,6 @@ import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
 import { asyncTryCatch } from "@tubenote/utils";
 
 import { API_URL } from "@/utils/constants";
-import { setStorageValue } from "@/utils/localStorage";
 
 /**
  * Registers a new user with the provided registration credentials.
@@ -97,28 +96,27 @@ export async function logoutUser(): Promise<IApiSuccessResponse<null>> {
  *
  * @throws Will log an error message if the token refresh fails.
  */
-export async function refreshAccessToken(): Promise<string | void> {
-  try {
-    const response = await axios.post<IApiResponse<{ accessToken: string }>>(
+export async function refreshAccessToken(): Promise<
+  IApiSuccessResponse<string>
+> {
+  const { data: responseData, error } = await asyncTryCatch(
+    axios.post<IApiSuccessResponse<string>>(
       `${API_URL}/auth/refresh`,
       {},
       { withCredentials: true }
-    );
+    )
+  );
 
-    if (!response.data.success || !response.data.data) {
-      throw new Error("Token refresh failed");
+  if (error) {
+    const axiosError = error as AxiosError<IApiErrorResponse>;
+    if (axiosError.response) {
+      throw new Error(axiosError.response.data.payload.message);
+    } else {
+      throw new Error("Logout failed. Please try again.");
     }
-
-    const { data } = response.data;
-
-    const newAccessToken = data.accessToken;
-
-    setStorageValue("accessToken", newAccessToken);
-
-    return newAccessToken;
-  } catch (error) {
-    console.error("Error refreshing token:", error);
   }
+
+  return responseData.data;
 }
 
 /**
