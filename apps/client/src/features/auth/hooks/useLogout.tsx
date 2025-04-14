@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import type React from "react";
 import toast from "react-hot-toast";
 
-import { logoutUser } from "@/actions/auth.actions";
+import { logoutUser } from "@/features/auth/services";
 import type { AuthAction } from "@/types/auth.types";
 
 export function useLogout(dispatch: React.Dispatch<AuthAction>) {

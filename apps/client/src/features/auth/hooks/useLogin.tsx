@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { loginUser } from "@/actions/auth.actions";
+import { loginUser } from "@/features/auth/services";
 
 import useGetCurrentUser from "@/hooks/user/useGetCurrentUser";
 import type { AuthAction } from "@/types/auth.types";

@@ -4,7 +4,7 @@ import type {
   InternalAxiosRequestConfig,
 } from "axios";
 
-import { refreshAccessToken } from "@/actions/auth.actions";
+import { refreshAccessToken } from "@/features/auth/services";
 import {
   getStorageValue,
   removeStorageValue,

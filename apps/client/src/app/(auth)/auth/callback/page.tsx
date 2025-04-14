@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { exchangeOauthCodeForAuthTokens } from "@/actions/auth.actions";
+import { exchangeOauthCodeForAuthTokens } from "@/features/auth/services";
 import { setStorageValue } from "@/utils/localStorage";
 
 export default function AuthCallback() {
