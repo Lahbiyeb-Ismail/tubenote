@@ -6,7 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Mail, User } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { registerFormSchema } from "@/lib/schemas";
+import type { IRegisterDto } from "@tubenote/dtos";
+import { registerSchema } from "@tubenote/schemas";
 
 import { DividerWithText } from "@/components/global/DividerWithText";
 import { Button } from "@/components/ui/button";
@@ -18,11 +19,9 @@ import { GoogleAuthButton } from "../buttons";
 import { FormInput } from "../inputs";
 import { AuthLayout } from "../layout";
 
-import type { RegisterFormData } from "../../types";
-
 export function RegisterForm() {
-  const form = useForm<RegisterFormData>({
-    resolver: zodResolver(registerFormSchema),
+  const form = useForm<IRegisterDto>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       username: "",
       email: "",
@@ -32,7 +31,7 @@ export function RegisterForm() {
 
   const { isLoading, register } = useAuth();
 
-  const handleRegister = (formData: RegisterFormData) => register(formData);
+  const handleRegister = (formData: IRegisterDto) => register(formData);
 
   return (
     <AuthLayout

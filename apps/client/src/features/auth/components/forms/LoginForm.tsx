@@ -6,12 +6,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Mail } from "lucide-react";
 import { useForm } from "react-hook-form";
 
+import type { ILoginDto } from "@tubenote/dtos";
+import { loginSchema } from "@tubenote/schemas";
+
 import { DividerWithText } from "@/components/global/DividerWithText";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
-
-import { loginFormSchema } from "@/lib/schemas";
 
 import { GoogleAuthButton } from "../buttons";
 import { FormInput } from "../inputs";
@@ -20,11 +21,9 @@ import { ForogotPasswordLink } from "../links";
 
 import { useAuth } from "../../contexts";
 
-import type { LoginFormData } from "../../types";
-
 export function LoginForm() {
-  const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginFormSchema),
+  const form = useForm<ILoginDto>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -33,7 +32,7 @@ export function LoginForm() {
 
   const { login, isLoading } = useAuth();
 
-  const handleLogin = (formData: LoginFormData) => login(formData);
+  const handleLogin = (formData: ILoginDto) => login(formData);
 
   return (
     <AuthLayout
