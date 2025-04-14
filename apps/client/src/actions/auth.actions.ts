@@ -127,12 +127,23 @@ export async function refreshAccessToken(): Promise<
  */
 export async function exchangeOauthCodeForAuthTokens(
   code: string
-): Promise<string> {
-  const response = await axios.post(
-    `${API_URL}/oauth/exchange-oauth-code`,
-    { code },
-    { withCredentials: true }
+): Promise<IApiSuccessResponse<string>> {
+  const { data: responseData, error } = await asyncTryCatch(
+    axios.post<IApiSuccessResponse<string>>(
+      `${API_URL}/oauth/exchange-oauth-code`,
+      { code },
+      { withCredentials: true }
+    )
   );
 
-  return response.data.accessToken;
+  if (error) {
+    const axiosError = error as AxiosError<IApiErrorResponse>;
+    if (axiosError.response) {
+      throw new Error(axiosError.response.data.payload.message);
+    } else {
+      throw new Error("Exchange failed. Please try again.");
+    }
+  }
+
+  return responseData.data;
 }
