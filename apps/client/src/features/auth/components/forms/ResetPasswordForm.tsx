@@ -4,19 +4,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import AuthLayout from "@/components/auth/AuthLayout";
-import FormInput from "@/components/auth/FormInput";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
+
+import PasswordResetErrorState from "@/components/password-reset/PasswordResetErrorState";
+import PasswordResetLoadingState from "@/components/password-reset/PasswordResetLoadingState";
 
 import { resetPasswordSchema } from "@/lib/schemas";
 
 import useResetPassword from "@/hooks/password-reset/useResetPassword";
 import useVerifyResetToken from "@/hooks/password-reset/useVerifyResetToken";
 
-import PasswordResetErrorState from "../password-reset/PasswordResetErrorState";
-import PasswordResetLoadingState from "../password-reset/PasswordResetLoadingState";
+import { FormInput } from "../inputs";
+import { AuthLayout } from "../layout";
 
 type ResetPasswordFormData = {
   password: string;
