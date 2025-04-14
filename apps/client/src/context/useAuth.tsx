@@ -4,7 +4,7 @@ import { createContext, useContext, useReducer } from "react";
 
 import type { AuthContextType, AuthProviderProps } from "@/types/auth.types";
 
-import { useAuthReducer } from "@/reducers/auth.reducer";
+import { useAuthReducer } from "@/features/auth/reducers";
 
 import { useLogin, useLogout, useRegister } from "@/features/auth/hooks";
 
