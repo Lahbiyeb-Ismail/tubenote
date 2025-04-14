@@ -4,6 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 
+import type { IPasswordBodyDto } from "@tubenote/dtos";
+import { passwordBodySchema } from "@tubenote/schemas";
+
 import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
@@ -11,36 +14,25 @@ import { Form } from "@/components/ui/form";
 import PasswordResetErrorState from "@/components/password-reset/PasswordResetErrorState";
 import PasswordResetLoadingState from "@/components/password-reset/PasswordResetLoadingState";
 
-import { resetPasswordSchema } from "@/lib/schemas";
-
 import useResetPassword from "@/hooks/password-reset/useResetPassword";
 import useVerifyResetToken from "@/hooks/password-reset/useVerifyResetToken";
 
 import { FormInput } from "../inputs";
 import { AuthLayout } from "../layout";
 
-type ResetPasswordFormData = {
-  password: string;
-  confirmPassword: string;
-};
-
-type ResetPasswordFormProps = {
-  token: string;
-};
-
-export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+export function ResetPasswordForm({ token }: { token: string }) {
   const { isError, isLoading } = useVerifyResetToken(token);
   const { mutate, isPending } = useResetPassword();
 
-  const form = useForm<ResetPasswordFormData>({
-    resolver: zodResolver(resetPasswordSchema),
+  const form = useForm<IPasswordBodyDto>({
+    resolver: zodResolver(passwordBodySchema),
     defaultValues: {
       password: "",
-      confirmPassword: "",
+      // confirmPassword: "",
     },
   });
 
-  const handleResetPassword = async (formData: ResetPasswordFormData) => {
+  const handleResetPassword = async (formData: IPasswordBodyDto) => {
     mutate({ token, password: formData.password });
   };
 
@@ -64,14 +56,14 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               icon={Lock}
               control={form.control}
             />
-            <FormInput
+            {/* <FormInput
               name="confirmPassword"
               type="password"
               label="Confirm New Password"
               placeholder="Confirm your new password"
               icon={Lock}
               control={form.control}
-            />
+            /> */}
             <Button
               type="submit"
               className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
