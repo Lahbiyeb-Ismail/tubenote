@@ -11,14 +11,13 @@ import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 
-import PasswordResetErrorState from "@/components/password-reset/PasswordResetErrorState";
-import PasswordResetLoadingState from "@/components/password-reset/PasswordResetLoadingState";
-
 import useResetPassword from "@/hooks/password-reset/useResetPassword";
 import useVerifyResetToken from "@/hooks/password-reset/useVerifyResetToken";
 
+import { PasswordResetErrorState } from "../errors";
 import { FormInput } from "../inputs";
 import { AuthLayout } from "../layout";
+import { PasswordResetLoadingState } from "../loading";
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const { isError, isLoading } = useVerifyResetToken(token);
