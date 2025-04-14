@@ -11,15 +11,16 @@ import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 
-import { useAuth } from "@/context/useAuth";
 import { loginFormSchema } from "@/lib/schemas";
-
-import type { LoginFormData } from "@/types/auth.types";
 
 import { GoogleAuthButton } from "../buttons";
 import { FormInput } from "../inputs";
 import { AuthLayout } from "../layout";
 import { ForogotPasswordLink } from "../links";
+
+import { useAuth } from "../../contexts";
+
+import type { LoginFormData } from "../../types";
 
 export function LoginForm() {
   const form = useForm<LoginFormData>({

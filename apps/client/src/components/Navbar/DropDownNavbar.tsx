@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import { useAuth } from "@/context/useAuth";
+import { useAuth } from "@/features/auth/contexts";
 
 import UserAvatar from "../global/UserAvatar";
 

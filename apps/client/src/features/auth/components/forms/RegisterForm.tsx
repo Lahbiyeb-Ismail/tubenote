@@ -7,17 +7,18 @@ import { Lock, Mail, User } from "lucide-react";
 import { useForm } from "react-hook-form";
 
 import { registerFormSchema } from "@/lib/schemas";
-import type { RegisterFormData } from "@/types/auth.types";
 
 import { DividerWithText } from "@/components/global/DividerWithText";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
-import { useAuth } from "@/context/useAuth";
 
+import { useAuth } from "../../contexts";
 import { GoogleAuthButton } from "../buttons";
 import { FormInput } from "../inputs";
 import { AuthLayout } from "../layout";
+
+import type { RegisterFormData } from "../../types";
 
 export function RegisterForm() {
   const form = useForm<RegisterFormData>({

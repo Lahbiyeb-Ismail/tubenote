@@ -1,7 +1,7 @@
 import { LogOut } from "lucide-react";
 
-import { useAuth } from "@/context/useAuth";
 import { useLayout } from "@/context/useLayout";
+import { useAuth } from "../../contexts";
 
 export function LogoutButton() {
   const { isSidebarOpen } = useLayout();

@@ -1,5 +1,5 @@
 import { updatePassword } from "@/actions/user.actions";
-import { useAuth } from "@/context/useAuth";
+import { useAuth } from "@/features/auth/contexts/auth.context";
 import type { TypedError } from "@/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
