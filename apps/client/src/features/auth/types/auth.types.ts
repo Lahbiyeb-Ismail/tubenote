@@ -14,16 +14,6 @@ export type RegisterFormData = z.infer<typeof registerFormSchema>;
 export type UpdateProfileData = z.infer<typeof updateProfileSchema>;
 export type UpdatePasswordData = z.infer<typeof updatePasswordSchema>;
 
-export type RegisterUserResponse = {
-  message: string;
-  email: string;
-};
-
-export type LoginUserResponse = {
-  message: string;
-  accessToken: string;
-};
-
 export type AuthState = {
   accessToken: string | null;
   errorMessage?: string;
