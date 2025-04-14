@@ -4,31 +4,29 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail } from "lucide-react";
 import { useForm } from "react-hook-form";
 
+import type { IEmailBodyDto } from "@tubenote/dtos";
+import { emailBodySchema } from "@tubenote/schemas";
+
 import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 
 import useSendForgotPasswordEmail from "@/hooks/password-reset/useSendForgotPasswordEmail";
-import { forgotPasswordSchema } from "@/lib/schemas";
 
 import { FormInput } from "../inputs";
 import { AuthLayout } from "../layout";
 
-type ForgotPasswordFormData = {
-  email: string;
-};
-
 export function ForgotPasswordForm() {
   const { mutate, isPending } = useSendForgotPasswordEmail();
 
-  const form = useForm<ForgotPasswordFormData>({
-    resolver: zodResolver(forgotPasswordSchema),
+  const form = useForm<IEmailBodyDto>({
+    resolver: zodResolver(emailBodySchema),
     defaultValues: {
       email: "",
     },
   });
 
-  const handleForgotPassword = async (formData: ForgotPasswordFormData) => {
+  const handleForgotPassword = async (formData: IEmailBodyDto) => {
     mutate(formData.email);
   };
 
