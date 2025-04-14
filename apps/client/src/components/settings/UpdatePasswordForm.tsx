@@ -4,27 +4,28 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import FormInput from "@/components/auth/FormInput";
+import type { IUpdatePasswordDto } from "@tubenote/dtos";
+import { updatePasswordSchema } from "@tubenote/schemas";
+
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { FormInput } from "@/features/auth/components";
 
 import useUpdatePassword from "@/hooks/user/useUpdatePassword";
-import { updatePasswordSchema } from "@/lib/schemas";
-import type { UpdatePasswordData } from "@/types/auth.types";
 
 function UpdatePasswordForm() {
-  const form = useForm<UpdatePasswordData>({
+  const form = useForm<IUpdatePasswordDto>({
     resolver: zodResolver(updatePasswordSchema),
     defaultValues: {
       currentPassword: "",
       newPassword: "",
-      confirmPassword: "",
+      // confirmPassword: "",
     },
   });
 
   const { mutate, isPending } = useUpdatePassword();
 
-  const handleUpdatePassword = (data: UpdatePasswordData) => {
+  const handleUpdatePassword = (data: IUpdatePasswordDto) => {
     mutate(data);
   };
 
@@ -55,14 +56,14 @@ function UpdatePasswordForm() {
             icon={Lock}
             control={form.control}
           />
-          <FormInput
+          {/* <FormInput
             name="confirmPassword"
             type="password"
             label="Confirm New Password"
             placeholder="Confirm new password"
             icon={Lock}
             control={form.control}
-          />
+          /> */}
           <Button
             type="submit"
             className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"

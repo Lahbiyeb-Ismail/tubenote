@@ -4,20 +4,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, User } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import FormInput from "@/components/auth/FormInput";
+import type { IUpdateUserDto } from "@tubenote/dtos";
+import { updateUserSchema } from "@tubenote/schemas";
+
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 
 import { useUser } from "@/context/useUser";
 import useGetCurrentUser from "@/hooks/user/useGetCurrentUser";
-import { updateProfileSchema } from "@/lib/schemas";
-import type { UpdateProfileData } from "@/types/auth.types";
+
+import { FormInput } from "@/features/auth/components";
 
 function UpdateProfileForm() {
   const { data } = useGetCurrentUser();
 
-  const form = useForm<UpdateProfileData>({
-    resolver: zodResolver(updateProfileSchema),
+  const form = useForm<IUpdateUserDto>({
+    resolver: zodResolver(updateUserSchema),
     defaultValues: {
       username: data?.user?.username ?? "",
       email: data?.user?.email ?? "",
@@ -26,7 +28,7 @@ function UpdateProfileForm() {
 
   const { updateUser, isLoading } = useUser();
 
-  const handleUpdateProfile = (data: UpdateProfileData) => {
+  const handleUpdateProfile = (data: IUpdateUserDto) => {
     updateUser(data);
   };
 
