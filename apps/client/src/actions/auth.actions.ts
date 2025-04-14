@@ -73,8 +73,21 @@ export async function loginUser(
  * @returns {Promise<void>} A promise that resolves when the logout request
  * is complete.
  */
-export async function logoutUser(): Promise<void> {
-  await axiosInstance.post(`${API_URL}/auth/logout`);
+export async function logoutUser(): Promise<IApiSuccessResponse<null>> {
+  const { data: responseData, error } = await asyncTryCatch(
+    axiosInstance.post<IApiSuccessResponse<null>>(`${API_URL}/auth/logout`)
+  );
+
+  if (error) {
+    const axiosError = error as AxiosError<IApiErrorResponse>;
+    if (axiosError.response) {
+      throw new Error(axiosError.response.data.payload.message);
+    } else {
+      throw new Error("Logout failed. Please try again.");
+    }
+  }
+
+  return responseData.data;
 }
 
 /**
