@@ -1,9 +1,4 @@
-import type { User } from ".";
-
-export type UpdateUserProps = {
-  username: string;
-  email: string;
-};
+import type { IUpdateUserDto } from "@tubenote/dtos";
 
 export type UserState = {
   message: string;
@@ -11,7 +6,7 @@ export type UserState = {
 
 export type UserContextType = {
   state: UserState;
-  updateUser: (user: UpdateUserProps) => void;
+  updateUser: (data: IUpdateUserDto) => void;
   isLoading: boolean;
 };
 
