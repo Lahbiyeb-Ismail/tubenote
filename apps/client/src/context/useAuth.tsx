@@ -6,9 +6,7 @@ import type { AuthContextType, AuthProviderProps } from "@/types/auth.types";
 
 import { useAuthReducer } from "@/reducers/auth.reducer";
 
-import useLogin from "@/hooks/auth/useLogin";
-import useLogout from "@/hooks/auth/useLogout";
-import useRegister from "@/hooks/auth/useRegister";
+import { useLogin, useLogout, useRegister } from "@/features/auth/hooks";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
