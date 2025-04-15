@@ -6,14 +6,14 @@ import { Label } from "@/components/ui/label";
 type UserInfoProps = {
   username: string;
   email: string;
-  emailVerified: boolean;
-  createdAt: string;
+  isEmailVerified: boolean;
+  createdAt: Date;
 };
 
 export function UserInfo({
   username,
   email,
-  emailVerified,
+  isEmailVerified,
   createdAt,
 }: UserInfoProps) {
   return (
@@ -31,7 +31,7 @@ export function UserInfo({
           <Label htmlFor="email">Email</Label>
           <div className="flex items-center">
             <Input id="email" value={email} readOnly className="flex-grow" />
-            {emailVerified ? (
+            {isEmailVerified ? (
               <CheckCircle className="ml-2 text-green-500" />
             ) : (
               <AlertTriangle className="ml-2 text-yellow-500" />
