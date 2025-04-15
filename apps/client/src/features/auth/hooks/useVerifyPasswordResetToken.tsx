@@ -1,7 +1,7 @@
 "use client";
 
-import { verifyPasswordResetToken } from "@/actions/password.actions";
 import { useQuery } from "@tanstack/react-query";
+import { verifyPasswordResetToken } from "../services";
 
 export function useVerifyPasswordResetToken(token: string) {
   return useQuery({
