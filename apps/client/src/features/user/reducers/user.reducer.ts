@@ -1,6 +1,6 @@
-import type { UserAction, UserState } from "@/features/user/types/";
+import type { UserAction, UserState } from "../types";
 
-function userReducer(state: UserState, action: UserAction) {
+export function userReducer(state: UserState, action: UserAction) {
   switch (action.type) {
     case "UPDATE_USER":
       return {
@@ -17,5 +17,3 @@ function userReducer(state: UserState, action: UserAction) {
       return state;
   }
 }
-
-export default userReducer;
