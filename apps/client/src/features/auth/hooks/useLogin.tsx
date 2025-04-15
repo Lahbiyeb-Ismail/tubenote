@@ -4,11 +4,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { loginUser } from "@/features/auth/services";
-
-import useGetCurrentUser from "@/hooks/user/useGetCurrentUser";
-import type { AuthAction } from "@/types/auth.types";
+import { useGetCurrentUser } from "@/features/user/hooks";
 import { setStorageValue } from "@/utils/localStorage";
+
+import { loginUser } from "../services";
+import type { AuthAction } from "../types";
 
 export function useLogin(dispatch: React.Dispatch<AuthAction>) {
   const queryClient = useQueryClient();
