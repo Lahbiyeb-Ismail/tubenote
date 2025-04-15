@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/features/auth/contexts";
 import { updatePassword } from "../services";
 
-function useUpdatePassword() {
+export function useUpdatePassword() {
   const queryClient = useQueryClient();
   const { logout } = useAuth();
 
@@ -28,5 +28,3 @@ function useUpdatePassword() {
     },
   });
 }
-
-export default useUpdatePassword;
