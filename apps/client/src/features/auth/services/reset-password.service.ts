@@ -40,10 +40,10 @@ export async function sendForgotPasswordEmail(
  * @param token - The token used to authorize the password reset.
  * @returns A promise that resolves to an object containing a message.
  */
-export async function resetPassword(
-  token: string,
-  password: string
-): Promise<IApiSuccessResponse<null>> {
+export async function resetPassword({
+  token,
+  password,
+}: { token: string; password: string }): Promise<IApiSuccessResponse<null>> {
   const { data: response, error } = await asyncTryCatch(
     axiosInstance.post<IApiSuccessResponse<null>>(
       `/auth/reset-password/${token}`,
