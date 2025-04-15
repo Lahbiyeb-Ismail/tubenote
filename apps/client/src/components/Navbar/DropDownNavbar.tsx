@@ -8,10 +8,10 @@ import {
 import Link from "next/link";
 
 import { useAuth } from "@/features/auth/contexts";
+import { useGetCurrentUser } from "@/features/user/hooks";
 
-import UserAvatar from "../global/UserAvatar";
+import { UserAvatar } from "@/features/user/components";
 
-import useGetCurrentUser from "@/hooks/user/useGetCurrentUser";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -24,9 +24,9 @@ import {
 
 function DropDownNavbar() {
   const { logout } = useAuth();
-  const { data } = useGetCurrentUser();
+  const { data: response } = useGetCurrentUser();
 
-  const currentUser = data?.user;
+  const currentUser = response?.payload.data;
 
   return (
     <div className="flex items-center">

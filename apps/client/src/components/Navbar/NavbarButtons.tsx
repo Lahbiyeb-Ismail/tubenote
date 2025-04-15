@@ -1,12 +1,14 @@
 "use client";
 
-import useGetCurrentUser from "@/hooks/user/useGetCurrentUser";
+import { useGetCurrentUser } from "@/features/user/hooks";
 
 import LoggedInButtons from "./LoggedInButtons";
 import LoggedOutButtons from "./LoggedOutButtons";
 
 function NavbarButtons() {
-  const { data: currentUser, isLoading } = useGetCurrentUser();
+  const { data: response, isLoading } = useGetCurrentUser();
+
+  const currentUser = response?.payload.data;
 
   return (
     <>
