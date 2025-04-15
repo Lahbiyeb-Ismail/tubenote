@@ -17,7 +17,8 @@ import { FormInput } from "../inputs";
 import { AuthLayout } from "../layout";
 
 export function ForgotPasswordForm() {
-  const { mutate, isPending } = useSendForgotPasswordEmail();
+  const { mutate: sendForgotPasswordEmail, isPending } =
+    useSendForgotPasswordEmail();
 
   const form = useForm<IEmailBodyDto>({
     resolver: zodResolver(emailBodySchema),
@@ -27,7 +28,7 @@ export function ForgotPasswordForm() {
   });
 
   const handleForgotPassword = async (formData: IEmailBodyDto) => {
-    mutate(formData.email);
+    sendForgotPasswordEmail(formData.email);
   };
 
   return (
