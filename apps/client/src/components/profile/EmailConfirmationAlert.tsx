@@ -1,7 +1,9 @@
-import useSendEmailVerification from "@/hooks/emailVerification/useSendEmailVerification";
 import { AlertTriangle, CheckCircle } from "lucide-react";
+
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { Button } from "../ui/button";
+
+import { useSendVerificationEmail } from "@/features/auth/hooks";
 
 type EmailConfirmationAlertProps = {
   emailVerified: boolean;
@@ -12,7 +14,8 @@ function EmailConfirmationAlert({
   emailVerified,
   email,
 }: EmailConfirmationAlertProps) {
-  const { mutate, isPending } = useSendEmailVerification();
+  const { mutate: sendVerificationEmail, isPending } =
+    useSendVerificationEmail();
 
   if (emailVerified) {
     return (
@@ -35,7 +38,7 @@ function EmailConfirmationAlert({
         <Button
           variant="link"
           className="p-0 h-auto font-normal text-yellow-700 hover:text-yellow-900"
-          onClick={() => mutate(email)}
+          onClick={() => sendVerificationEmail(email)}
           disabled={isPending}
         >
           {isPending
