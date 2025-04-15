@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 
-import useSendForgotPasswordEmail from "@/hooks/password-reset/useSendForgotPasswordEmail";
+import { useSendForgotPasswordEmail } from "../../hooks";
 
 import { FormInput } from "../inputs";
 import { AuthLayout } from "../layout";
