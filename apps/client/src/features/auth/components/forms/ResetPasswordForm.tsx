@@ -20,7 +20,7 @@ import { PasswordResetLoadingState } from "../loading";
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const { isError, isLoading } = useVerifyPasswordResetToken(token);
-  const { mutate, isPending } = useResetPassword();
+  const { mutate: resetPassword, isPending } = useResetPassword();
 
   const form = useForm<IPasswordBodyDto>({
     resolver: zodResolver(passwordBodySchema),
@@ -31,7 +31,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
   });
 
   const handleResetPassword = async (formData: IPasswordBodyDto) => {
-    mutate({ token, password: formData.password });
+    resetPassword({ token, password: formData.password });
   };
 
   if (isLoading) return <PasswordResetLoadingState />;
