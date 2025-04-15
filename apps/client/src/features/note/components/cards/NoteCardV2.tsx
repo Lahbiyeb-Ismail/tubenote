@@ -1,22 +1,23 @@
 import { CalendarIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import Image from "next/image";
 
-import type { INote } from "@/types/note.types";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
+import type { Note } from "@tubenote/types";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../ui/card";
+} from "@/components/ui/card";
 
 type NoteCardProps = {
-  note: INote;
+  note: Note;
 };
 
-function NoteCard({ note }: NoteCardProps) {
+export function NoteCardV2({ note }: NoteCardProps) {
   return (
     <Card className="overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="relative h-40 sm:h-48">
@@ -64,5 +65,3 @@ function NoteCard({ note }: NoteCardProps) {
     </Card>
   );
 }
-
-export default NoteCard;

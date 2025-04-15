@@ -1,8 +1,8 @@
 "use client";
 
+import type { BreadcrumbItemType } from "@/components/global/NavigationHeader";
+import NavigationHeader from "@/components/global/NavigationHeader";
 import { Edit } from "lucide-react";
-import type { BreadcrumbItemType } from "../global/NavigationHeader";
-import NavigationHeader from "../global/NavigationHeader";
 
 type NotePageHeaderProps = {
   noteId: string;
@@ -11,7 +11,7 @@ type NotePageHeaderProps = {
   onToggleVideo: () => void;
 };
 
-function NotePageHeader({
+export function NotePageHeader({
   noteId,
   noteTitle,
   isVideoVisible,
@@ -42,5 +42,3 @@ function NotePageHeader({
     />
   );
 }
-
-export default NotePageHeader;

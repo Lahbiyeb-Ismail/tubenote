@@ -10,7 +10,7 @@ type EditNoteButtonProps = {
   isLoading: boolean;
 };
 
-function EditNoteButton({ noteId, isLoading }: EditNoteButtonProps) {
+export function EditNoteButton({ noteId, isLoading }: EditNoteButtonProps) {
   const { isGridLayout } = useLayout();
 
   return (
@@ -29,5 +29,3 @@ function EditNoteButton({ noteId, isLoading }: EditNoteButtonProps) {
     </Link>
   );
 }
-
-export default EditNoteButton;

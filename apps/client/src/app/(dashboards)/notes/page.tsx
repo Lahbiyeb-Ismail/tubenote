@@ -8,7 +8,7 @@ import Header from "@/components/dashboards/Header";
 import NoDataFound from "@/components/dashboards/NoDataFound";
 import Laoder from "@/components/global/Loader";
 import PaginationComponent from "@/components/global/Pagination";
-import NotesList from "@/components/note/NotesList";
+import NotesList from "@/features/note/components/ui/NotesList";
 
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
 

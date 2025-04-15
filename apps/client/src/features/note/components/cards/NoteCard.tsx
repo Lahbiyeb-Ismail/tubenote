@@ -1,6 +1,6 @@
 "use client";
 
-import type { Note } from "@/types/note.types";
+import type { Note } from "@tubenote/types";
 
 import { useLayout } from "@/context/useLayout";
 import { useModal } from "@/context/useModal";
@@ -12,14 +12,13 @@ import CardImage from "@/components/global/CardImage";
 import CardSettingsButton from "@/components/global/CardSettingsButton";
 import CardWrapper from "@/components/global/CardWrapper";
 
-import DeleteNoteButton from "@/components/note/DeleteNoteButton";
-import EditNoteButton from "@/components/note/EditNoteButton";
+import { DeleteNoteButton, EditNoteButton } from "../buttons";
 
 type NoteCardProps = {
   note: Note;
 };
 
-function NoteCard({ note }: NoteCardProps) {
+export function NoteCard({ note }: NoteCardProps) {
   const { deleteNote, isLoading } = useNote();
   const { isGridLayout } = useLayout();
   const { openModal } = useModal();
@@ -75,5 +74,3 @@ function NoteCard({ note }: NoteCardProps) {
     </CardWrapper>
   );
 }
-
-export default NoteCard;

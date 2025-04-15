@@ -1,19 +1,20 @@
 import Link from "next/link";
 
-import type { INote } from "@/types/note.types";
+import type { Note } from "@tubenote/types";
 
 import { useLayout } from "@/context/useLayout";
-import NoteCard from "../note/NoteCard";
+
+import { NoteCard } from "@/features/note/components";
 import { Button } from "../ui/button";
 
 interface RecentNoteListProps {
   title: string;
-  notes: INote[] | undefined;
+  notes: Note[];
   emptyMessage: string;
 }
 
 function RecentNoteList({ title, notes, emptyMessage }: RecentNoteListProps) {
-  const hasNotes = notes && notes?.length > 0;
+  const hasNotes = notes.length > 0;
 
   const { isGridLayout } = useLayout();
 

@@ -1,17 +1,16 @@
 "use client";
-import React from "react";
 
-import type { Note } from "@/types/note.types";
-
-import NoteCard from "./NoteCard";
+import type { Note } from "@tubenote/types";
 
 import { useLayout } from "@/context/useLayout";
+
+import { NoteCard } from "../cards";
 
 type NotesListProps = {
   notes?: Note[];
 };
 
-function NotesList({ notes }: NotesListProps) {
+export function NotesList({ notes }: NotesListProps) {
   const { isGridLayout } = useLayout();
 
   return (
@@ -26,5 +25,3 @@ function NotesList({ notes }: NotesListProps) {
     </div>
   );
 }
-
-export default NotesList;

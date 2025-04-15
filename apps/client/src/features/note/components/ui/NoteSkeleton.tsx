@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-function NoteSkeleton() {
+export function NoteSkeleton() {
   return (
     <div className="space-y-6 w-full">
       <div className="space-y-2">
@@ -16,5 +16,3 @@ function NoteSkeleton() {
     </div>
   );
 }
-
-export default NoteSkeleton;

@@ -1,7 +1,8 @@
-import { Button } from "@/components/ui/button";
 import { PrinterIcon, ShareIcon } from "lucide-react";
 
-function NotePageFooter() {
+import { Button } from "@/components/ui/button";
+
+export function NotePageFooter() {
   return (
     <footer className="border-t bg-muted/40">
       <div className="container max-w-4xl mx-auto px-4 py-6">
@@ -24,5 +25,3 @@ function NotePageFooter() {
     </footer>
   );
 }
-
-export default NotePageFooter;

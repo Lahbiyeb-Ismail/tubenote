@@ -11,7 +11,10 @@ type DeleteNoteButtonProps = {
   onDelete: () => void;
 };
 
-function DeleteNoteButton({ isLoading, onDelete }: DeleteNoteButtonProps) {
+export function DeleteNoteButton({
+  isLoading,
+  onDelete,
+}: DeleteNoteButtonProps) {
   const { isGridLayout } = useLayout();
   return (
     <Button
@@ -29,5 +32,3 @@ function DeleteNoteButton({ isLoading, onDelete }: DeleteNoteButtonProps) {
     </Button>
   );
 }
-
-export default DeleteNoteButton;

@@ -6,7 +6,7 @@ interface NoteErrorProps {
   onRetry: () => void;
 }
 
-function NoteError({ onRetry }: NoteErrorProps) {
+export function NoteError({ onRetry }: NoteErrorProps) {
   return (
     <Alert variant="destructive">
       <AlertCircle className="h-4 w-4" />
@@ -20,5 +20,3 @@ function NoteError({ onRetry }: NoteErrorProps) {
     </Alert>
   );
 }
-
-export default NoteError;
