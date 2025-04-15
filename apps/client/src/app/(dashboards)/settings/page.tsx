@@ -1,6 +1,5 @@
 import Header from "@/components/dashboards/Header";
-import UpdatePasswordForm from "@/components/settings/UpdatePasswordForm";
-import UpdateProfileForm from "@/components/settings/UpdateProfileForm";
+import { UpdatePasswordForm, UpdateUserForm } from "@/features/user/components";
 
 function SettingsPage() {
   return (
@@ -8,7 +7,7 @@ function SettingsPage() {
       <Header title="Settings" />
 
       <div className="grid md:grid-cols-2 gap-8 mt-8">
-        <UpdateProfileForm />
+        <UpdateUserForm />
         <UpdatePasswordForm />
       </div>
     </div>
