@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
-import type { UserAction } from "@/types/user.types";
 import { updateCurrentUser } from "../services";
+import type { UserAction } from "../types";
 
 export function useUpdateUser(dispatch: React.Dispatch<UserAction>) {
   const queryClient = useQueryClient();

@@ -3,12 +3,8 @@
 import { createContext, useContext, useReducer } from "react";
 
 import userReducer from "@/reducers/user.reducer";
-import type {
-  UserContextType,
-  UserProviderProps,
-  UserState,
-} from "@/types/user.types";
 import { useUpdateUser } from "../hooks";
+import type { UserContextType, UserProviderProps, UserState } from "../types";
 
 const userContext = createContext<UserContextType | undefined>(undefined);
 
