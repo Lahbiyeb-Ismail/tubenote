@@ -2,8 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { sendForgotPasswordEmail } from "@/actions/password.actions";
-import type { TypedError } from "@/types";
+import { sendForgotPasswordEmail } from "../services";
 
 export function useSendForgotPasswordEmail() {
   const router = useRouter();
@@ -13,20 +12,18 @@ export function useSendForgotPasswordEmail() {
     onMutate: () => {
       toast.loading("Sending...", { id: "loadingToast" });
     },
-    onSuccess: async (data) => {
+    onSuccess: async (response) => {
+      const { payload } = response;
+
       toast.dismiss("loadingToast");
 
-      toast.success(data.message);
+      toast.success(payload.message);
 
       router.push("/forgot-password/done");
     },
-    onError: (error: TypedError) => {
+    onError: (error) => {
       toast.dismiss("loadingToast");
-      if (error.response) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("Sending password reset email faild. Please try again.");
-      }
+      toast.error(error.message);
     },
   });
 }
