@@ -7,3 +7,6 @@ export * from "./useLogout";
 export * from "./useSendForgotPasswordEmail";
 export * from "./useVerifyPasswordResetToken";
 export * from "./useResetPassword";
+
+// Verification Email Hooks
+export * from "./useSendVerificationEmail";
