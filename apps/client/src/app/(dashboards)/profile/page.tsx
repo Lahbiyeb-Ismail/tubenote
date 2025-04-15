@@ -1,8 +1,8 @@
 "use client";
 
-import AccountActions from "@/components/profile/AccountActions";
-import EmailConfirmationAlert from "@/components/profile/EmailConfirmationAlert";
-import UserInfo from "@/components/profile/UserInfo";
+import { EmailConfirmationAlert } from "@/features/auth/components";
+import { AccountActions, UserInfo } from "@/features/user/components";
+
 import useGetCurrentUser from "@/hooks/user/useGetCurrentUser";
 
 export default function ProfilePage() {
@@ -23,7 +23,7 @@ export default function ProfilePage() {
         username={data.user.username}
         email={data.user.email}
         emailVerified={data.user.emailVerified}
-        createdAt={data.user.createdAt}
+        createdAt={data.user.createAt}
       />
 
       <AccountActions />
