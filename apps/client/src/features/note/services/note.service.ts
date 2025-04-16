@@ -14,19 +14,26 @@ import type {
 import { asyncTryCatch } from "@tubenote/utils";
 
 /**
- * Creates a new note by sending a POST request to the "/notes" endpoint.
+ * Creates a new note associated with a specific video.
  *
- * @param createNoteData - The data required to create a new note, adhering to the `ICreateNoteDto` interface.
- * @returns A promise that resolves to an `IApiSuccessResponse<Note>` object containing the created note.
- * @throws An error if the request fails. If the error is an Axios error with a response,
- *         the error message from the server's response payload is thrown. Otherwise,
- *         a generic "Failed to create note" error is thrown.
+ * @param {Object} params - The parameters for creating a note.
+ * @param {string} params.videoId - The ID of the video to associate the note with.
+ * @param {ICreateNoteDto} params.createNoteData - The data for the note to be created.
+ *
+ * @returns {Promise<IApiSuccessResponse<Note>>} A promise that resolves to the API success response containing the created note.
+ * @throws {Error} Throws an error if the note creation fails. If the error is from the API, it includes the error message from the API response.
  */
-export async function createNote(
-  createNoteData: ICreateNoteDto
-): Promise<IApiSuccessResponse<Note>> {
+export async function createNote({
+  videoId,
+  createNoteData,
+}: { videoId: string; createNoteData: ICreateNoteDto }): Promise<
+  IApiSuccessResponse<Note>
+> {
   const { data: response, error } = await asyncTryCatch(
-    axiosInstance.post<IApiSuccessResponse<Note>>("/notes", createNoteData)
+    axiosInstance.post<IApiSuccessResponse<Note>>(
+      `/notes/${videoId}`,
+      createNoteData
+    )
   );
 
   if (error) {
