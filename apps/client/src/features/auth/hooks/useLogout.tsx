@@ -1,10 +1,12 @@
+"use client";
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type React from "react";
 import toast from "react-hot-toast";
 
-import { logoutUser } from "@/features/auth/services";
-import type { AuthAction } from "@/types/auth.types";
+import { logoutUser } from "../services";
+import type { AuthAction } from "../types";
 
 export function useLogout(dispatch: React.Dispatch<AuthAction>) {
   const queryClient = useQueryClient();
