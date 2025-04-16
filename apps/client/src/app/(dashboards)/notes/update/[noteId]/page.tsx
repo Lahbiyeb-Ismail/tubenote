@@ -1,7 +1,7 @@
 "use client";
 
 import EditorPage from "@/components/editor/EditorPage";
-import useGetNoteById from "@/hooks/note/useGetNoteById";
+import { useGetNoteById } from "@/features/note/hooks";
 
 function UpdateNotePage({ params }: { params: { noteId: string } }) {
   const { noteId } = params;
@@ -21,7 +21,7 @@ function UpdateNotePage({ params }: { params: { noteId: string } }) {
       initialNoteContent={data.content}
       noteTitle={data.title}
       noteId={data.id}
-      videoId={data.youtubeId}
+      video={data.videoId}
     />
   );
 }

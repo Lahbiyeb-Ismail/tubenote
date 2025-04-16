@@ -9,9 +9,9 @@ import ReactQueryProvider from "@/providers/ReactQueryProvider";
 import ConfirmationModal from "@/components/global/ConfirmationModal";
 import { LayoutProvider } from "@/context/useLayout";
 import { ModalProvider } from "@/context/useModal";
-import { NoteProvider } from "@/context/useNote";
 import { VideoProvider } from "@/context/useVideo";
 import { AuthProvider } from "@/features/auth/contexts";
+import { NoteProvider } from "@/features/note/contexts";
 import { UserProvider } from "@/features/user/contexts";
 
 const geistSans = localFont({

@@ -1,14 +1,14 @@
 "use client";
 
+import { useGetUserNotes } from "@/features/note/hooks";
 import usePagination from "@/hooks/global/usePagination";
-import useGetUserNotes from "@/hooks/note/useGetUserNotes";
 
 import AddNoteForm from "@/components/dashboards/AddNoteForm";
 import Header from "@/components/dashboards/Header";
 import NoDataFound from "@/components/dashboards/NoDataFound";
 import Laoder from "@/components/global/Loader";
 import PaginationComponent from "@/components/global/Pagination";
-import NotesList from "@/features/note/components/ui/NotesList";
+import { NotesList } from "@/features/note/components";
 
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
 
@@ -22,7 +22,7 @@ function NotesPage() {
 
   if (isLoading) return <Laoder />;
 
-  if (!data || data.notes.length === 0)
+  if (!data || !data.notes || !data.paginationMeta)
     return <NoDataFound title="You don't have any notes yet." />;
 
   return (
@@ -35,7 +35,7 @@ function NotesPage() {
         <NotesList notes={data.notes} />
         <PaginationComponent
           currentPage={currentPage}
-          totalPages={data.pagination.totalPages}
+          totalPages={data.paginationMeta.totalPages}
           onPageChange={setPage}
         />
       </main>

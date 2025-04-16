@@ -7,9 +7,9 @@ import ResizablePanels from "@/components/global/ResizablePanels";
 import VideoNotesList from "@/components/video/VideoNotesList";
 import VideoPageHeader from "@/components/video/VideoPageHeader";
 import VideoPlayer from "@/components/video/VideoPlayer";
+import type { Note } from "@/features/note/types/note.types";
 import usePagination from "@/hooks/global/usePagination";
 import useGetVideoNotes from "@/hooks/video/useGetVideoNotes";
-import type { Note } from "@/types/note.types";
 import { DEFAULT_PAGE } from "@/utils/constants";
 import { useState } from "react";
 
