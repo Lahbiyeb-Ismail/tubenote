@@ -3,12 +3,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type SubmitHandler, useForm } from "react-hook-form";
 
-import { useNote } from "@/context/useNote";
 import { useVideo } from "@/context/useVideo";
+import { useNote } from "@/features/note/contexts";
+import type { NoteTitle } from "@/features/note/types/note.types";
 import { saveNoteFormSchema } from "@/lib/schemas";
-import type { NoteTitle } from "@/types/note.types";
 import type { Video } from "@/types/video.types";
-import { getStorageValue } from "@/utils/localStorage";
+// import { getStorageValue } from "@/utils/localStorage";
 import { Button } from "../ui/button";
 
 type SaveNoteFormProps = {

@@ -1,6 +1,6 @@
 import { Clock, MoreVertical, Pencil, Trash2 } from "lucide-react";
 
-import type { Note } from "@/types/note.types";
+import type { Note } from "@/features/note/types/note.types";
 
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 

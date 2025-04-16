@@ -1,4 +1,4 @@
-import type { Note } from "@/types/note.types";
+import type { Note } from "@/features/note/types/note.types";
 import VideoNote from "./VideoNote";
 
 type VideoNotesListProps = {

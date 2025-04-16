@@ -1,8 +1,8 @@
 "use client";
 
-import { useNote } from "@/context/useNote";
 import { useVideo } from "@/context/useVideo";
-import React, { useRef, useState } from "react";
+import { useNote } from "@/features/note/contexts";
+import { useRef } from "react";
 import YouTube, { type YouTubeProps } from "react-youtube";
 
 type VideoPlayerProps = {
