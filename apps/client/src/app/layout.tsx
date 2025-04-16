@@ -7,12 +7,14 @@ import "./globals.css";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
 
 import ConfirmationModal from "@/components/global/ConfirmationModal";
+
 import { LayoutProvider } from "@/context/useLayout";
 import { ModalProvider } from "@/context/useModal";
-import { VideoProvider } from "@/context/useVideo";
+
 import { AuthProvider } from "@/features/auth/contexts";
 import { NoteProvider } from "@/features/note/contexts";
 import { UserProvider } from "@/features/user/contexts";
+import { VideoProvider } from "@/features/video/contexts";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

@@ -8,7 +8,7 @@ import { Input } from "../ui/input";
 
 import type { VideoUrl } from "@/features/note/types/note.types";
 // import { useNote } from "@/features/note/contexts";
-// import { useVideo } from "@/context/useVideo";
+// import { useVideo } from "@/features/video/contexts";
 import extractVideoId from "@/helpers/extractVideoId";
 import { videoFormSchema } from "@/lib/schemas";
 import { useRouter } from "next/navigation";
