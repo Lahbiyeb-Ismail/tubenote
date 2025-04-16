@@ -22,7 +22,10 @@ export type NoteState = {
 
 export type NoteContextType = {
   state: NoteState;
-  createNote: (createNoteData: ICreateNoteDto) => void;
+  createNote: ({
+    videoId,
+    createNoteData,
+  }: { videoId: string; createNoteData: ICreateNoteDto }) => void;
   isLoading: boolean;
   deleteNote: (noteId: string) => void;
   updateNote: ({
