@@ -247,10 +247,10 @@ describe("Video routes tests", () => {
   // **********************************************
   // GET /api/v1/videos/:id
   // **********************************************
-  describe("GET /api/v1/videos/:id", () => {
+  describe("post /api/v1/videos/:id", () => {
     it("should get a video by ID for the authenticated user", async () => {
       const res = await request(app)
-        .get("/api/v1/videos/video_001")
+        .post("/api/v1/videos/video_001")
         .set("Authorization", "Bearer valid-token");
 
       expect(res.statusCode).toEqual(httpStatus.OK);
@@ -262,7 +262,7 @@ describe("Video routes tests", () => {
     it("should return 404 if the video is not found for the authenticated user", async () => {
       // video_002 does not belong to user_id_001.
       const res = await request(app)
-        .get("/api/v1/videos/video_002")
+        .post("/api/v1/videos/video_002")
         .set("Authorization", "Bearer valid-token");
 
       expect(res.statusCode).toEqual(httpStatus.NOT_FOUND);
@@ -278,7 +278,7 @@ describe("Video routes tests", () => {
       );
 
       const res = await request(app)
-        .get("/api/v1/videos/video_001")
+        .post("/api/v1/videos/video_001")
         .set("Authorization", "Bearer valid-token");
 
       expect(res.statusCode).toEqual(httpStatus.INTERNAL_SERVER_ERROR);
