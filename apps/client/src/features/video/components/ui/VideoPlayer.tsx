@@ -1,15 +1,16 @@
 "use client";
 
-import { useVideo } from "@/context/useVideo";
-import { useNote } from "@/features/note/contexts";
 import { useRef } from "react";
 import YouTube, { type YouTubeProps } from "react-youtube";
+
+import { useNote } from "@/features/note/contexts";
+import { useVideo } from "../../contexts";
 
 type VideoPlayerProps = {
   videoId?: string;
 };
 
-function VideoPlayer({ videoId }: VideoPlayerProps) {
+export function VideoPlayer({ videoId }: VideoPlayerProps) {
   const playerRef = useRef<any | null>(null);
   const { setVideoCurrentTime } = useVideo();
   const {
@@ -59,5 +60,3 @@ function VideoPlayer({ videoId }: VideoPlayerProps) {
     </div>
   );
 }
-
-export default VideoPlayer;

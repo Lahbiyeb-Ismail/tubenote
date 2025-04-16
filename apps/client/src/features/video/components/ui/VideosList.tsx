@@ -1,15 +1,15 @@
 "use client";
 
-import type { Video } from "@/types/video.types";
+import type { Video } from "@tubenote/types";
 
 import { useLayout } from "@/context/useLayout";
-import VideoCard from "./VideoCard";
+import { VideoCard } from "../cards";
 
 type VideosListProps = {
   videos: Video[];
 };
 
-function VideosList({ videos }: VideosListProps) {
+export function VideosList({ videos }: VideosListProps) {
   const { isGridLayout } = useLayout();
 
   return (
@@ -24,5 +24,3 @@ function VideosList({ videos }: VideosListProps) {
     </div>
   );
 }
-
-export default VideosList;

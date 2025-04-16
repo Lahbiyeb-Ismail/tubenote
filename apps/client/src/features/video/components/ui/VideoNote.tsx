@@ -1,10 +1,9 @@
 import { Clock, MoreVertical, Pencil, Trash2 } from "lucide-react";
 
-import type { Note } from "@/features/note/types/note.types";
-
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Note } from "@tubenote/types";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +19,11 @@ type VideoNoteProps = {
   setNote: (note: Note) => void;
 };
 
-function VideoNote({ note, setOpenMarkdownViewer, setNote }: VideoNoteProps) {
+export function VideoNote({
+  note,
+  setOpenMarkdownViewer,
+  setNote,
+}: VideoNoteProps) {
   return (
     <Card
       className="group relative overflow-hidden transition-all duration-300 hover:shadow-md cursor-pointer"
@@ -67,5 +70,3 @@ function VideoNote({ note, setOpenMarkdownViewer, setNote }: VideoNoteProps) {
     </Card>
   );
 }
-
-export default VideoNote;

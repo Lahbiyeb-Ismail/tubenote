@@ -1,5 +1,6 @@
-import type { Note } from "@/features/note/types/note.types";
-import VideoNote from "./VideoNote";
+import type { Note } from "@tubenote/types";
+
+import { VideoNote } from "./";
 
 type VideoNotesListProps = {
   notes: Note[];
@@ -7,7 +8,7 @@ type VideoNotesListProps = {
   setNote: (note: Note) => void;
 };
 
-function VideoNotesList({
+export function VideoNotesList({
   notes,
   setOpenMarkdownViewer,
   setNote,
@@ -25,5 +26,3 @@ function VideoNotesList({
     </div>
   );
 }
-
-export default VideoNotesList;

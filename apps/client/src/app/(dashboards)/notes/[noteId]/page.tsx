@@ -12,7 +12,7 @@ import {
   NotePageHeader,
 } from "@/features/note/components";
 
-import VideoPlayer from "@/components/video/VideoPlayer";
+import { VideoPlayer } from "@/features/video/components";
 import useToggleVideoPlayer from "@/hooks/global/useToggleVideoPlayer";
 
 type NotePageParams = {

@@ -1,8 +1,10 @@
 "use client";
 
-import { Edit, Plus } from "lucide-react";
-import type { BreadcrumbItemType } from "../global/NavigationHeader";
-import NavigationHeader from "../global/NavigationHeader";
+import { Plus } from "lucide-react";
+
+import NavigationHeader from "@/components/global/NavigationHeader";
+
+import type { BreadcrumbItemType } from "@/components/global/NavigationHeader";
 
 type VideoPageHeaderProps = {
   videoId: string;
@@ -11,7 +13,7 @@ type VideoPageHeaderProps = {
   isVideoVisible: boolean;
 };
 
-function VideoPageHeader({
+export function VideoPageHeader({
   videoId,
   videoTitle,
   onToggleVideo,
@@ -42,5 +44,3 @@ function VideoPageHeader({
     />
   );
 }
-
-export default VideoPageHeader;

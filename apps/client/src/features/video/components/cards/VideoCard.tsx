@@ -1,23 +1,19 @@
 import { useLayout } from "@/context/useLayout";
-import type { Video } from "@/types/video.types";
-import CardContent from "../global/CardContent";
-import CardFooterWrapper from "../global/CardFooterWrapper";
-import CardImage from "../global/CardImage";
-import CardWrapper from "../global/CardWrapper";
-import SeeAllButton from "../global/SeeAllButton";
-import { CardTitle } from "../ui/card";
 
-type VideoCardProps = {
-  video: Video;
-};
+import CardContent from "@/components/global/CardContent";
+import CardFooterWrapper from "@/components/global/CardFooterWrapper";
+import CardImage from "@/components/global/CardImage";
+import CardWrapper from "@/components/global/CardWrapper";
+import SeeAllButton from "@/components/global/SeeAllButton";
+import type { Video } from "@tubenote/types";
 
-function VideoCard({ video }: VideoCardProps) {
+export function VideoCard({ video }: { video: Video }) {
   const { isGridLayout } = useLayout();
   return (
     <CardWrapper>
       <CardImage
-        src={video.snippet.thumbnails.medium.url}
-        alt={video.snippet.title}
+        src={video.thumbnails.medium.url}
+        alt={video.title}
         isGridLayout={isGridLayout}
       />
 
@@ -27,7 +23,7 @@ function VideoCard({ video }: VideoCardProps) {
         }`}
       >
         <CardContent
-          cardTitle={video.snippet.title}
+          cardTitle={video.title}
           href={`/videos/${video.youtubeId}`}
           isGridLayout={isGridLayout}
         />
@@ -38,5 +34,3 @@ function VideoCard({ video }: VideoCardProps) {
     </CardWrapper>
   );
 }
-
-export default VideoCard;

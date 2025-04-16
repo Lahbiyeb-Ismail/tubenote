@@ -1,4 +1,4 @@
-import type { VideoAction, VideoState } from "@/types/video.types";
+import type { VideoAction, VideoState } from "../types";
 
 export const videoInitialState: VideoState = {
   video: null,
@@ -6,7 +6,10 @@ export const videoInitialState: VideoState = {
   success: false,
 };
 
-function videoReducer(state: VideoState, action: VideoAction): VideoState {
+export function videoReducer(
+  state: VideoState,
+  action: VideoAction
+): VideoState {
   switch (action.type) {
     case "SAVE_VIDEO_SUCCESS":
       return {
@@ -26,5 +29,3 @@ function videoReducer(state: VideoState, action: VideoAction): VideoState {
       return state;
   }
 }
-
-export default videoReducer;

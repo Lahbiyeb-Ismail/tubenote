@@ -1,11 +1,8 @@
-"use client";
-
 import { createContext, useContext, useReducer, useState } from "react";
 
-import type { VideoContextType, VideoProviderProps } from "@/types/video.types";
-
-import useSaveVideoData from "@/hooks/video/useSaveVideoData";
-import videoReducer, { videoInitialState } from "@/reducers/video.reducer";
+import { useGetVideoData } from "../hooks";
+import { videoInitialState, videoReducer } from "../reducers";
+import type { VideoContextType, VideoProviderProps } from "../types";
 
 const VideoContext = createContext<VideoContextType | undefined>(undefined);
 
@@ -13,12 +10,12 @@ export function VideoProvider({ children }: VideoProviderProps) {
   const [state, dispatch] = useReducer(videoReducer, videoInitialState);
   const [videoCurrentTime, setVideoCurrentTime] = useState(0);
 
-  const saveVideoMutation = useSaveVideoData(dispatch);
+  const getVideoMutation = useGetVideoData(dispatch);
 
   const value = {
     state,
-    saveVideo: saveVideoMutation.mutate,
-    isLoading: saveVideoMutation.isPending,
+    saveVideo: getVideoMutation.mutate,
+    isLoading: getVideoMutation.isPending,
     setVideoCurrentTime,
     videoCurrentTime,
   };

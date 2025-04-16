@@ -1,17 +1,24 @@
 "use client";
 
+import { useState } from "react";
+
+import type { Note } from "@tubenote/types";
+
+import { DEFAULT_PAGE } from "@/utils/constants";
+
+import { useGetVideoNotes } from "@/features/video/hooks";
+import usePagination from "@/hooks/global/usePagination";
+
 import Loader from "@/components/global/Loader";
 import MarkdownViewer from "@/components/global/MarkdownViewer";
 import PaginationComponent from "@/components/global/Pagination";
 import ResizablePanels from "@/components/global/ResizablePanels";
-import VideoNotesList from "@/components/video/VideoNotesList";
-import VideoPageHeader from "@/components/video/VideoPageHeader";
-import VideoPlayer from "@/components/video/VideoPlayer";
-import type { Note } from "@/features/note/types/note.types";
-import usePagination from "@/hooks/global/usePagination";
-import useGetVideoNotes from "@/hooks/video/useGetVideoNotes";
-import { DEFAULT_PAGE } from "@/utils/constants";
-import { useState } from "react";
+
+import {
+  VideoNotesList,
+  VideoPageHeader,
+  VideoPlayer,
+} from "@/features/video/components";
 
 function VideoPage({ params }: { params: { videoId: string } }) {
   const { videoId } = params;
@@ -22,7 +29,7 @@ function VideoPage({ params }: { params: { videoId: string } }) {
 
   const { data, isLoading, isError } = useGetVideoNotes({
     videoId,
-    page: currentPage,
+    paginationQuery: { page: currentPage },
   });
 
   if (isError) {
