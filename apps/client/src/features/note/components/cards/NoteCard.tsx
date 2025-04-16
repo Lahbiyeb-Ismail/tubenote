@@ -4,7 +4,7 @@ import type { Note } from "@tubenote/types";
 
 import { useLayout } from "@/context/useLayout";
 import { useModal } from "@/context/useModal";
-import { useNote } from "@/context/useNote";
+import { useNote } from "@/features/note/contexts";
 
 import CardContent from "@/components/global/CardContent";
 import CardFooterWrapper from "@/components/global/CardFooterWrapper";
