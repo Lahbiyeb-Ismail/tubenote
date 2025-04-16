@@ -140,10 +140,12 @@ export async function getNoteById(
  * @returns A promise that resolves to an API success response containing the updated note.
  * @throws An error if the request fails, including a specific error message if available.
  */
-export async function updateNote(
-  noteId: string,
-  updateData: IUpdateNoteDto
-): Promise<IApiSuccessResponse<Note>> {
+export async function updateNote({
+  noteId,
+  updateData,
+}: { noteId: string; updateData: IUpdateNoteDto }): Promise<
+  IApiSuccessResponse<Note>
+> {
   const { data: response, error } = await asyncTryCatch(
     axiosInstance.patch<IApiSuccessResponse<Note>>(
       `/notes/${noteId}`,
