@@ -1,5 +1,3 @@
-import { RegisterForm } from "@/features/auth/components";
+import { RegisterPage } from "@/features/auth/pages";
 
-export default function RegisterPage() {
-  return <RegisterForm />;
-}
+export default RegisterPage;
