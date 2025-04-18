@@ -3,27 +3,28 @@ import type { ReactNode } from "react";
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 
 export type AuthState = {
-  accessToken: string | null;
+  isAuthenticated: boolean;
   errorMessage?: string;
   successMessage?: string;
-  isAuthenticated: boolean;
 };
 
 export type AuthAction =
   | {
-      type: "LOGIN_SUCCESS";
-      payload: { message: string; accessToken: string };
+      type: "SET_SUCCESS_LOGIN";
+      payload: { isAuthenticated: boolean; message: string };
     }
-  | { type: "REGISTER_SUCCESS"; payload: { successMessage: string } }
-  | { type: "REQUEST_FAIL"; payload: { errorMessage: string } }
-  | { type: "LOGOUT_SUCCESS" };
+  | { type: "SET_SUCCESS_REGISTER"; payload: { message: string } }
+  | { type: "SET_SUCCESS_LOGOUT"; payload: { message: string } }
+  | { type: "SET_AUTH_ERROR"; payload: { message: string } };
 
 export type AuthContextType = {
-  state: AuthState;
+  authState: AuthState;
   login: (loginDto: ILoginDto) => void;
   register: (registerDto: IRegisterDto) => void;
   logout: () => void;
-  isLoading: boolean;
+  isLoginPending: boolean;
+  isRegistrationPending: boolean;
+  isLogoutPending: boolean;
 };
 
 export type AuthProviderProps = {
