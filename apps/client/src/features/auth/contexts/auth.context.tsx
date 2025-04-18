@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useReducer } from "react";
 
-import { useLogin, useLogout, useRegister } from "../hooks";
+import { useLogin, useLogout, useRegister, useResetPassword } from "../hooks";
 import { useAuthReducer } from "../reducers";
 import type { AuthContextType, AuthProviderProps } from "../types";
 
@@ -15,14 +15,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const loginMutation = useLogin(dispatch);
   const logoutMutation = useLogout(dispatch);
 
+  const resetPasswordMutation = useResetPassword(dispatch);
+
   const value = {
     authState,
     login: loginMutation.mutate,
     register: registerMutation.mutate,
     logout: logoutMutation.mutate,
+    resetPassword: resetPasswordMutation.mutate,
     isLoginPending: loginMutation.isPending,
     isRegistrationPending: registerMutation.isPending,
     isLogoutPending: logoutMutation.isPending,
+    isResetPasswordPending: resetPasswordMutation.isPending,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

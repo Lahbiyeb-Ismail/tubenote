@@ -15,6 +15,7 @@ export type AuthAction =
     }
   | { type: "SET_SUCCESS_REGISTER"; payload: { message: string } }
   | { type: "SET_SUCCESS_LOGOUT"; payload: { message: string } }
+  | { type: "SET_SUCCESS_RESET_PASSWORD"; payload: { message: string } }
   | { type: "SET_AUTH_ERROR"; payload: { message: string } };
 
 export type AuthContextType = {
@@ -22,9 +23,14 @@ export type AuthContextType = {
   login: (loginDto: ILoginDto) => void;
   register: (registerDto: IRegisterDto) => void;
   logout: () => void;
+  resetPassword: ({
+    token,
+    password,
+  }: { token: string; password: string }) => void;
   isLoginPending: boolean;
   isRegistrationPending: boolean;
   isLogoutPending: boolean;
+  isResetPasswordPending: boolean;
 };
 
 export type AuthProviderProps = {

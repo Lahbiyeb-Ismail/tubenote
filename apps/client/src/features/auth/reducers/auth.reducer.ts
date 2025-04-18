@@ -25,6 +25,11 @@ export function useAuthReducer() {
           ...state,
           successMessage: action.payload.message,
         };
+      case "SET_SUCCESS_RESET_PASSWORD":
+        return {
+          ...state,
+          successMessage: action.payload.message,
+        };
       case "SET_AUTH_ERROR":
         return {
           ...state,
