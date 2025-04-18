@@ -17,6 +17,10 @@ export type AuthAction =
   | { type: "SET_SUCCESS_LOGOUT"; payload: { message: string } }
   | { type: "SET_SUCCESS_RESET_PASSWORD"; payload: { message: string } }
   | { type: "SET_SUCCESS_FORGOT_EMAIL_SENT"; payload: { message: string } }
+  | {
+      type: "SET_SUCCESS_VERIFICATION_EMAIL_SENT";
+      payload: { message: string };
+    }
   | { type: "SET_AUTH_ERROR"; payload: { message: string } };
 
 export type AuthContextType = {
@@ -29,11 +33,13 @@ export type AuthContextType = {
     password,
   }: { token: string; password: string }) => void;
   sendForgotPasswordEmail: (email: string) => void;
+  sendVerificationEmail: (email: string) => void;
   isLoginPending: boolean;
   isRegistrationPending: boolean;
   isLogoutPending: boolean;
   isResetPasswordPending: boolean;
   isForgotPasswordPending: boolean;
+  isVerificationEmailPending: boolean;
 };
 
 export type AuthProviderProps = {

@@ -7,6 +7,7 @@ import {
   useRegister,
   useResetPassword,
   useSendForgotPasswordEmail,
+  useSendVerificationEmail,
 } from "../hooks";
 import { useAuthReducer } from "../reducers";
 import type { AuthContextType, AuthProviderProps } from "../types";
@@ -23,6 +24,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const resetPasswordMutation = useResetPassword(dispatch);
   const sendForgotPasswordEmailMutation = useSendForgotPasswordEmail(dispatch);
+  const sendVerificationEmailMutation = useSendVerificationEmail(dispatch);
 
   const value = {
     authState,
@@ -31,11 +33,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     logout: logoutMutation.mutate,
     resetPassword: resetPasswordMutation.mutate,
     sendForgotPasswordEmail: sendForgotPasswordEmailMutation.mutate,
+    sendVerificationEmail: sendVerificationEmailMutation.mutate,
     isLoginPending: loginMutation.isPending,
     isRegistrationPending: registerMutation.isPending,
     isLogoutPending: logoutMutation.isPending,
     isResetPasswordPending: resetPasswordMutation.isPending,
     isForgotPasswordPending: sendForgotPasswordEmailMutation.isPending,
+    isVerificationEmailPending: sendVerificationEmailMutation.isPending,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

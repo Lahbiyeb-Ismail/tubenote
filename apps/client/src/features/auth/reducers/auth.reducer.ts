@@ -35,6 +35,11 @@ export function useAuthReducer() {
           ...state,
           successMessage: action.payload.message,
         };
+      case "SET_SUCCESS_VERIFICATION_EMAIL_SENT":
+        return {
+          ...state,
+          successMessage: action.payload.message,
+        };
       case "SET_AUTH_ERROR":
         return {
           ...state,
