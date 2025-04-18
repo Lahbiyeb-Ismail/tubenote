@@ -13,10 +13,12 @@ import { Form } from "@/components/ui/form";
 
 import { useResetPassword, useVerifyPasswordResetToken } from "../../hooks";
 
-import { PasswordResetErrorState } from "../errors";
 import { FormInput } from "../inputs";
-import { AuthLayout } from "../layout";
-import { PasswordResetLoadingState } from "../loading";
+import {
+  AuthLayout,
+  PasswordResetErrorState,
+  PasswordResetLoadingState,
+} from "../ui";
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const { isError, isLoading } = useVerifyPasswordResetToken(token);
