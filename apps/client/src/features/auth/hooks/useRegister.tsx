@@ -1,16 +1,15 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { registerUser } from "@/features/auth/services";
+import { setStorageValue } from "@/utils/localStorage";
 
-import type { TypedError } from "@/types";
-import type { AuthAction } from "@/types/auth.types";
+import { registerUser } from "../services";
+import type { AuthAction } from "../types";
 
 export function useRegister(dispatch: React.Dispatch<AuthAction>) {
-  const queryClient = useQueryClient();
   const router = useRouter();
 
   return useMutation({
@@ -25,19 +24,22 @@ export function useRegister(dispatch: React.Dispatch<AuthAction>) {
 
       toast.success(payload.message);
 
-      queryClient.invalidateQueries({ queryKey: ["user"] });
+      dispatch({
+        type: "SET_SUCCESS_REGISTER",
+        payload: { message: payload.message },
+      });
 
-      localStorage.setItem("userEmail", payload.data);
+      setStorageValue("userEmail", payload.data);
 
       router.push("/verify-email");
     },
-    onError: (error: TypedError) => {
+    onError: (error) => {
       toast.dismiss("loadingToast");
       toast.error(error.message);
 
       dispatch({
-        type: "REQUEST_FAIL",
-        payload: { errorMessage: error.message },
+        type: "SET_AUTH_ERROR",
+        payload: { message: error.message },
       });
     },
   });
