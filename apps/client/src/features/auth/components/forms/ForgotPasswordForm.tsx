@@ -10,13 +10,11 @@ import { emailBodySchema } from "@tubenote/schemas";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 
-import { useSendForgotPasswordEmail } from "../../hooks";
-
+import { useAuth } from "../../contexts";
 import { FormInput } from "../inputs";
 
 export function ForgotPasswordForm() {
-  const { mutate: sendForgotPasswordEmail, isPending } =
-    useSendForgotPasswordEmail();
+  const { sendForgotPasswordEmail, isForgotPasswordPending } = useAuth();
 
   const form = useForm<IEmailBodyDto>({
     resolver: zodResolver(emailBodySchema),
@@ -46,9 +44,9 @@ export function ForgotPasswordForm() {
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={isPending}
+          disabled={isForgotPasswordPending}
         >
-          {isPending ? "Sending..." : "Reset Password"}
+          {isForgotPasswordPending ? "Sending..." : "Reset Password"}
         </Button>
       </form>
     </Form>
