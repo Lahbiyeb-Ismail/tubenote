@@ -9,7 +9,11 @@ import type {
   IParamIdDto,
   IUpdateNoteDto,
 } from "@tubenote/dtos";
-import type { IApiResponse, IPaginatedData, Note } from "@tubenote/types";
+import type {
+  IApiSuccessResponse,
+  IPaginatedData,
+  Note,
+} from "@tubenote/types";
 
 import type { TypedRequest } from "@/modules/shared/types";
 
@@ -149,17 +153,19 @@ describe("NoteController Tests", () => {
   });
 
   describe("NoteController - createNote", () => {
-    const formattedCreateRes: IApiResponse<Note> = {
+    const formattedCreateRes: IApiSuccessResponse<Note> = {
       success: true,
-      status: httpStatus.CREATED,
-      data: mockNote,
-      message: "Note created successfully.",
+      statusCode: httpStatus.CREATED,
+      payload: {
+        data: mockNote,
+        message: "Note created successfully.",
+      },
     };
 
     it("should add a new note successfully", async () => {
       (noteService.createNote as jest.Mock).mockResolvedValue(mockNote);
 
-      (responseFormatter.formatResponse as jest.Mock).mockReturnValue(
+      (responseFormatter.formatSuccessResponse as jest.Mock).mockReturnValue(
         formattedCreateRes
       );
 
@@ -187,17 +193,19 @@ describe("NoteController Tests", () => {
   });
 
   describe("NoteController - getNoteById", () => {
-    const formattedGetRes: IApiResponse<Note> = {
+    const formattedGetRes: IApiSuccessResponse<Note> = {
       success: true,
-      data: mockNote,
-      message: "Note retrieved successfully.",
-      status: httpStatus.OK,
+      statusCode: httpStatus.OK,
+      payload: {
+        data: mockNote,
+        message: "Note retrieved successfully.",
+      },
     };
 
     it("should get a note by id successfully", async () => {
       (noteService.findNote as jest.Mock).mockResolvedValue(mockNote);
 
-      (responseFormatter.formatResponse as jest.Mock).mockReturnValue(
+      (responseFormatter.formatSuccessResponse as jest.Mock).mockReturnValue(
         formattedGetRes
       );
 
@@ -224,17 +232,19 @@ describe("NoteController Tests", () => {
       ...updateNoteDto,
     };
 
-    const formattedUpdateRes: IApiResponse<Note> = {
+    const formattedUpdateRes: IApiSuccessResponse<Note> = {
       success: true,
-      data: mockUpdatedNote,
-      message: "Note updated successfully.",
-      status: httpStatus.OK,
+      statusCode: httpStatus.OK,
+      payload: {
+        data: mockUpdatedNote,
+        message: "Note updated successfully.",
+      },
     };
 
     it("should update a note successfully", async () => {
       (noteService.updateNote as jest.Mock).mockResolvedValue(mockUpdatedNote);
 
-      (responseFormatter.formatResponse as jest.Mock).mockReturnValue(
+      (responseFormatter.formatSuccessResponse as jest.Mock).mockReturnValue(
         formattedUpdateRes
       );
 
@@ -261,16 +271,19 @@ describe("NoteController Tests", () => {
   });
 
   describe("NoteController - deleteNote", () => {
-    const formattedDeleteRes: IApiResponse<Note> = {
+    const formattedDeleteRes: IApiSuccessResponse<null> = {
       success: true,
-      message: "Note deleted successfully.",
-      status: httpStatus.OK,
+      statusCode: httpStatus.OK,
+      payload: {
+        message: "Note deleted successfully.",
+        data: null,
+      },
     };
 
     it("should delete a note successfully", async () => {
       (noteService.deleteNote as jest.Mock).mockResolvedValue(undefined);
 
-      (responseFormatter.formatResponse as jest.Mock).mockReturnValue(
+      (responseFormatter.formatSuccessResponse as jest.Mock).mockReturnValue(
         formattedDeleteRes
       );
 
@@ -280,7 +293,7 @@ describe("NoteController Tests", () => {
         mockUserId,
         mockNoteId
       );
-      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(formattedDeleteRes.statusCode);
 
       expect(res.json).toHaveBeenCalledWith(formattedDeleteRes);
     });
@@ -308,17 +321,19 @@ describe("NoteController Tests", () => {
       sort: { by: "createdAt", order: "desc" },
     };
 
-    const formattedPaginateRes: IApiResponse<Note[]> = {
+    const formattedPaginateRes: IApiSuccessResponse<Note[]> = {
       success: true,
-      data: mockNotes,
-      message: "Notes retrieved successfully.",
-      status: httpStatus.OK,
-      paginationMeta: {
-        totalPages: 1,
-        currentPage: 1,
-        totalItems: 2,
-        hasNextPage: false,
-        hasPrevPage: false,
+      statusCode: httpStatus.OK,
+      payload: {
+        data: mockNotes,
+        message: "Notes retrieved successfully.",
+        paginationMeta: {
+          totalPages: 1,
+          currentPage: 1,
+          totalItems: 2,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
       },
     };
 
@@ -340,7 +355,7 @@ describe("NoteController Tests", () => {
         findManyDto
       );
 
-      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(formattedPaginateRes.statusCode);
       expect(res.json).toHaveBeenCalledWith(formattedPaginateRes);
     });
 
@@ -364,7 +379,7 @@ describe("NoteController Tests", () => {
         findManyDto
       );
 
-      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(formattedPaginateRes.statusCode);
       expect(res.json).toHaveBeenCalledWith(formattedPaginateRes);
     });
 
@@ -396,7 +411,7 @@ describe("NoteController Tests", () => {
         limit: 10,
       });
 
-      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(formattedPaginateRes.statusCode);
       expect(res.json).toHaveBeenCalledWith(formattedPaginateRes);
     });
 
@@ -417,11 +432,13 @@ describe("NoteController Tests", () => {
       sort: { by: "createdAt", order: "desc" },
     };
 
-    const formattedRes: IApiResponse<Note[]> = {
+    const formattedRes: IApiSuccessResponse<Note[]> = {
       success: true,
-      data: mockNotes,
-      message: "Recent notes retrieved successfully.",
-      status: httpStatus.OK,
+      statusCode: httpStatus.OK,
+      payload: {
+        data: mockNotes,
+        message: "Recent notes retrieved successfully.",
+      },
     };
 
     beforeEach(() => {
@@ -436,7 +453,7 @@ describe("NoteController Tests", () => {
     it("should get user recent notes successfully", async () => {
       (noteService.fetchRecentNotes as jest.Mock).mockResolvedValue(mockNotes);
 
-      (responseFormatter.formatResponse as jest.Mock).mockReturnValue(
+      (responseFormatter.formatSuccessResponse as jest.Mock).mockReturnValue(
         formattedRes
       );
 
@@ -450,7 +467,7 @@ describe("NoteController Tests", () => {
         mockUserId,
         findManyDto
       );
-      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(formattedRes.statusCode);
       expect(res.json).toHaveBeenCalledWith(formattedRes);
     });
 
@@ -459,7 +476,7 @@ describe("NoteController Tests", () => {
 
       (noteService.fetchRecentNotes as jest.Mock).mockResolvedValue(mockNotes);
 
-      (responseFormatter.formatResponse as jest.Mock).mockReturnValue(
+      (responseFormatter.formatSuccessResponse as jest.Mock).mockReturnValue(
         formattedRes
       );
 
@@ -473,7 +490,7 @@ describe("NoteController Tests", () => {
         mockUserId,
         findManyDto
       );
-      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(formattedRes.statusCode);
       expect(res.json).toHaveBeenCalledWith(formattedRes);
     });
 
@@ -494,11 +511,13 @@ describe("NoteController Tests", () => {
       sort: { by: "updatedAt", order: "desc" },
     };
 
-    const formattedRes: IApiResponse<Note[]> = {
+    const formattedRes: IApiSuccessResponse<Note[]> = {
       success: true,
-      data: mockNotes,
-      message: "Recent updated notes retrieved successfully.",
-      status: httpStatus.OK,
+      statusCode: httpStatus.OK,
+      payload: {
+        data: mockNotes,
+        message: "Recent updated notes retrieved successfully.",
+      },
     };
 
     beforeEach(() => {
@@ -513,7 +532,7 @@ describe("NoteController Tests", () => {
     it("should get recently updated notes successfully", async () => {
       (noteService.fetchRecentNotes as jest.Mock).mockResolvedValue(mockNotes);
 
-      (responseFormatter.formatResponse as jest.Mock).mockReturnValue(
+      (responseFormatter.formatSuccessResponse as jest.Mock).mockReturnValue(
         formattedRes
       );
 
@@ -527,7 +546,7 @@ describe("NoteController Tests", () => {
         mockUserId,
         findManyDto
       );
-      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(formattedRes.statusCode);
       expect(res.json).toHaveBeenCalledWith(formattedRes);
     });
 
@@ -554,17 +573,19 @@ describe("NoteController Tests", () => {
       sort: { by: "createdAt", order: "desc" },
     };
 
-    const formattedPaginateRes: IApiResponse<Note[]> = {
+    const formattedPaginateRes: IApiSuccessResponse<Note[]> = {
       success: true,
-      data: mockNotes,
-      message: "Notes retrieved successfully.",
-      status: httpStatus.OK,
-      paginationMeta: {
-        totalPages: 1,
-        currentPage: 1,
-        totalItems: 2,
-        hasNextPage: false,
-        hasPrevPage: false,
+      statusCode: httpStatus.OK,
+      payload: {
+        data: mockNotes,
+        message: "Notes retrieved successfully.",
+        paginationMeta: {
+          totalPages: 1,
+          currentPage: 1,
+          totalItems: 2,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
       },
     };
 
@@ -589,7 +610,7 @@ describe("NoteController Tests", () => {
         findManyDto
       );
 
-      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(formattedPaginateRes.statusCode);
       expect(res.json).toHaveBeenCalledWith(formattedPaginateRes);
     });
 
@@ -615,7 +636,7 @@ describe("NoteController Tests", () => {
         mockVideoId,
         findManyDto
       );
-      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(formattedPaginateRes.statusCode);
       expect(res.json).toHaveBeenCalledWith(formattedPaginateRes);
     });
 

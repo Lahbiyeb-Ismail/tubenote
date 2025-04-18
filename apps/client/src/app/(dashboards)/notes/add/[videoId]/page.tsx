@@ -1,6 +1,6 @@
 "use client";
 
-import useGetVideoById from "@/hooks/video/useGetVideoById";
+import { useGetVideoById } from "@/features/video/hooks";
 
 import EditorPage from "@/components/editor/EditorPage";
 import Loader from "@/components/global/Loader";
@@ -8,13 +8,13 @@ import Loader from "@/components/global/Loader";
 function AddNewNotePage({ params }: { params: { videoId: string } }) {
   const { videoId } = params;
 
-  const { data: video, isLoading, isError } = useGetVideoById(videoId);
+  const { data: response, isLoading, isError } = useGetVideoById(videoId);
 
   if (isError) {
     return <div>Error...</div>;
   }
 
-  if (isLoading || !video) {
+  if (isLoading || !response) {
     return (
       <div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
         <Loader />
@@ -22,7 +22,7 @@ function AddNewNotePage({ params }: { params: { videoId: string } }) {
     );
   }
 
-  return <EditorPage video={video} />;
+  return <EditorPage video={response.data} />;
 }
 
 export default AddNewNotePage;

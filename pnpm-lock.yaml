@@ -93,6 +93,18 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.59.0
         version: 5.62.3(react@18.3.1)
+      '@tubenote/dtos':
+        specifier: workspace:*
+        version: link:../../packages/dtos
+      '@tubenote/schemas':
+        specifier: workspace:*
+        version: link:../../packages/schemas
+      '@tubenote/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      '@tubenote/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       axios:
         specifier: ^1.7.7
         version: 1.7.9
@@ -349,6 +361,15 @@ importers:
         version: 3.23.8
 
   packages/types:
+    dependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.4.0(jiti@1.21.6)(postcss@8.4.49)(typescript@5.7.2)(yaml@2.6.1)
+      typescript:
+        specifier: ^5.7.2
+        version: 5.7.2
+
+  packages/utils:
     dependencies:
       tsup:
         specifier: ^8.4.0

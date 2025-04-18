@@ -3,10 +3,10 @@
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 
-import VideoPlayer from "@/components/video/VideoPlayer";
+import type { Video } from "@tubenote/types";
 
 import ResizablePanels from "@/components/global/ResizablePanels";
-import type { Video } from "@/types/video.types";
+import { VideoPlayer } from "@/features/video/components";
 
 const AppMDXEditor = dynamic(() => import("./AppMDXEditor"), { ssr: false });
 

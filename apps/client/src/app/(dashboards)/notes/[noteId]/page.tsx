@@ -1,16 +1,18 @@
 "use client";
 
-import useGetNoteById from "@/hooks/note/useGetNoteById";
+import { useGetNoteById } from "@/features/note/hooks";
 
 import Loader from "@/components/global/Loader";
 import MarkdownViewer from "@/components/global/MarkdownViewer";
 import ResizablePanels from "@/components/global/ResizablePanels";
 
-import NoteError from "@/components/note/NoteError";
-import NotePageFooter from "@/components/note/NotePageFooter";
-import NotePageHeader from "@/components/note/NotePageHeader";
+import {
+  NoteError,
+  NotePageFooter,
+  NotePageHeader,
+} from "@/features/note/components";
 
-import VideoPlayer from "@/components/video/VideoPlayer";
+import { VideoPlayer } from "@/features/video/components";
 import useToggleVideoPlayer from "@/hooks/global/useToggleVideoPlayer";
 
 type NotePageParams = {
@@ -19,7 +21,7 @@ type NotePageParams = {
 
 function NotePage({ params }: { params: NotePageParams }) {
   const { noteId } = params;
-  const { data, isLoading, isError, refetch } = useGetNoteById(noteId);
+  const { data: note, isLoading, isError, refetch } = useGetNoteById(noteId);
   const { isVideoPlayerVisible, toggleVideoPlayer } = useToggleVideoPlayer();
 
   if (isLoading) {
@@ -38,14 +40,14 @@ function NotePage({ params }: { params: NotePageParams }) {
     );
   }
 
-  if (!data) return null;
+  if (!note) return null;
 
   return (
     <main className="min-h-screen bg-white">
       {/* Header */}
       <NotePageHeader
-        noteId={data.id}
-        noteTitle={data.title}
+        noteId={note.id}
+        noteTitle={note.title}
         isVideoVisible={isVideoPlayerVisible}
         onToggleVideo={toggleVideoPlayer}
       />
@@ -55,12 +57,12 @@ function NotePage({ params }: { params: NotePageParams }) {
         {isVideoPlayerVisible ? (
           <ResizablePanels
             leftSideContent={
-              <MarkdownViewer content={data.content} noteTitle={data.title} />
+              <MarkdownViewer content={note.content} noteTitle={note.title} />
             }
-            rightSideContent={<VideoPlayer videoId={data.youtubeId} />}
+            rightSideContent={<VideoPlayer videoId={note.youtubeId} />}
           />
         ) : (
-          <MarkdownViewer content={data.content} noteTitle={data.title} />
+          <MarkdownViewer content={note.content} noteTitle={note.title} />
         )}
       </article>
 

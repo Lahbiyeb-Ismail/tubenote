@@ -1,14 +1,15 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { useLayout } from "@/context/useLayout";
 
-import Link from "next/link";
-import LogoutButton from "../auth/LogoutButton";
-import UserProfile from "../global/UserProfile";
+import { LogoutButton } from "@/features/auth/components";
+import { UserProfile } from "@/features/user/components";
+
 import SidebarLogo from "./SidebarLogo";
 import SidebarNav from "./SidebarNav";
 

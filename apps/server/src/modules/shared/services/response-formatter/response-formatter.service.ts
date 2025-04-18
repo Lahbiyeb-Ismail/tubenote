@@ -1,7 +1,13 @@
 import type { IFindManyDto } from "@tubenote/dtos";
-import type { IApiResponse, IPaginationMeta } from "@tubenote/types";
-
 import type {
+  IApiErrorResponse,
+  IApiSuccessResponse,
+  IPaginationMeta,
+} from "@tubenote/types";
+
+import httpStatus from "http-status";
+import type {
+  IFormatErrorResponseOptions,
   IFormatPaginatedResponseOptions,
   IFormatResponseOptions,
   IGetPaginationQueriesOptions,
@@ -146,33 +152,91 @@ export class ResponseFormatter implements IResponseFormatter {
    * @param sanitizationOptions - Optional sanitization options to override default settings.
    * @returns A standardized response object with the provided options.
    */
-  formatResponse<T>(formatOptions: IFormatResponseOptions<T>): IApiResponse<T> {
+  formatResponse<T>(
+    formatOptions: IFormatResponseOptions<T>
+  ): IApiSuccessResponse<T> {
     const { responseOptions, sanitizationOptions } = formatOptions;
 
-    const { success, status, message, data, paginationMeta } = responseOptions;
+    const {
+      statusCode = httpStatus.OK,
+      message,
+      data,
+      paginationMeta,
+    } = responseOptions;
 
     const sanitization = {
       ...this._sanitizationOptions,
       ...sanitizationOptions,
     };
 
-    const response: IApiResponse<T> = {
-      success,
-      message,
-      status,
+    const sanitizedData = sanitization.sanitize
+      ? this.sanitizeData(data, sanitization.sanitizationRules)
+      : data;
+
+    const response: IApiSuccessResponse<T> = {
+      success: true,
+      statusCode,
+      payload: {
+        message,
+        data: sanitizedData,
+        paginationMeta,
+      },
     };
 
-    if (data) {
-      const sanitizedData = sanitization.sanitize
-        ? this.sanitizeData(data, sanitization.sanitizationRules)
-        : data;
+    return response;
+  }
 
-      response.data = sanitizedData;
-    }
+  /**
+   * Formats a successful API response with the provided data and options.
+   *
+   * @param options - The options for formatting the success response.
+   * @returns A standardized success response object.
+   *
+   * @example
+   * const response = formatter.formatSuccessResponse({
+   *   data: { user: { id: 1, name: 'John' } },
+   *   message: 'User retrieved successfully',
+   *   status: 200,
+   *   metadata: { timestamp: new Date() }
+   * });
+   */
+  formatSuccessResponse<T = null>(
+    options: IFormatResponseOptions<T>
+  ): IApiSuccessResponse<T> {
+    return this.formatResponse(options);
+  }
 
-    if (paginationMeta) {
-      response.paginationMeta = paginationMeta;
-    }
+  /**
+   * Formats an error API response with the provided error details.
+   *
+   * @param options - The options for formatting the error response.
+   * @returns A standardized error response object.
+   *
+   * @example
+   * const errorResponse = formatter.formatErrorResponse({
+   *   message: 'User not found',
+   *   status: 404,
+   *   errorCode: 'USER_NOT_FOUND',
+   *   errorDetails: { id: 'The requested user ID does not exist' }
+   * });
+   */
+  formatErrorResponse(options: IFormatErrorResponseOptions): IApiErrorResponse {
+    const {
+      message,
+      name,
+      errorDetails,
+      statusCode = httpStatus.INTERNAL_SERVER_ERROR,
+    } = options;
+
+    const response: IApiErrorResponse = {
+      success: false,
+      statusCode,
+      payload: {
+        message,
+        name,
+        errorDetails,
+      },
+    };
 
     return response;
   }
@@ -185,7 +249,7 @@ export class ResponseFormatter implements IResponseFormatter {
    */
   formatPaginatedResponse<T>(
     formatOptions: IFormatPaginatedResponseOptions<T>
-  ): IApiResponse<T[]> {
+  ): IApiSuccessResponse<T[]> {
     const { page, paginatedData, responseOptions, sanitizationOptions } =
       formatOptions;
 

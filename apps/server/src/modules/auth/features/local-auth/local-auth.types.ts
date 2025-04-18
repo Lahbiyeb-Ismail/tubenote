@@ -1,6 +1,6 @@
 import type { Response } from "express";
 
-import type { ICreateUserDto, ILoginDto } from "@tubenote/dtos";
+import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 import type { User } from "@tubenote/types";
 
 import type { TypedRequest } from "@/modules/shared/types";
@@ -29,10 +29,10 @@ export interface ILocalAuthService {
   /**
    * Registers a new user in the system.
    *
-   * @param createUserDto - The data transfer object containing user registration details.
+   * @param registerUserDto - The data transfer object containing user registration details.
    * @returns A promise that resolves to the created user or undefined if registration fails.
    */
-  registerUser: (createUserDto: ICreateUserDto) => Promise<User | undefined>;
+  registerUser: (registerUserDto: IRegisterDto) => Promise<User | undefined>;
 
   /**
    * Logs in a user using their credentials.
@@ -55,7 +55,7 @@ export interface ILocalAuthController {
    *
    * @returns A promise that resolves when the registration process is complete.
    */
-  register(req: TypedRequest<ICreateUserDto>, res: Response): Promise<void>;
+  register(req: TypedRequest<IRegisterDto>, res: Response): Promise<void>;
 
   /**
    * Handles user login.

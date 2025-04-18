@@ -6,11 +6,11 @@ import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem } from "../ui/form";
 import { Input } from "../ui/input";
 
-import { useNote } from "@/context/useNote";
-import { useVideo } from "@/context/useVideo";
+import type { VideoUrl } from "@/features/note/types/note.types";
+// import { useNote } from "@/features/note/contexts";
+// import { useVideo } from "@/features/video/contexts";
 import extractVideoId from "@/helpers/extractVideoId";
 import { videoFormSchema } from "@/lib/schemas";
-import type { VideoUrl } from "@/types/note.types";
 import { useRouter } from "next/navigation";
 
 function AddNoteForm() {

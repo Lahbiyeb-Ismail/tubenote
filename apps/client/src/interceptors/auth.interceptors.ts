@@ -4,14 +4,13 @@ import type {
   InternalAxiosRequestConfig,
 } from "axios";
 
-import { refreshAccessToken } from "@/actions/auth.actions";
+import { refreshAccessToken } from "@/features/auth/services";
 import {
   getStorageValue,
   removeStorageValue,
   setStorageValue,
 } from "@/utils/localStorage";
 import { isTokenExpired } from "@/utils/tokenUtils";
-import { set } from "zod";
 
 /**
  * Handles the refresh token process by attempting to refresh the access token.
@@ -26,9 +25,10 @@ async function handleRefreshToken(
   config: InternalAxiosRequestConfig
 ): Promise<void> {
   try {
-    const newAccessToken = await refreshAccessToken();
-    setStorageValue("accessToken", newAccessToken);
-    config.headers.Authorization = `Bearer ${newAccessToken}`;
+    const { payload } = await refreshAccessToken();
+
+    setStorageValue("accessToken", payload.data);
+    config.headers.Authorization = `Bearer ${payload.data}`;
   } catch (error) {
     // If refresh fails, redirect to login
     removeStorageValue("accessToken");

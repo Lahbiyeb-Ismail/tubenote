@@ -1,4 +1,4 @@
-import type { ICreateUserDto, ILoginDto } from "@tubenote/dtos";
+import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 import type { User } from "@tubenote/types";
 
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
@@ -67,20 +67,20 @@ export class LocalAuthService implements ILocalAuthService {
     return this._instance;
   }
 
-  async registerUser(createUserDto: ICreateUserDto): Promise<User | undefined> {
+  async registerUser(registerUserDto: IRegisterDto): Promise<User | undefined> {
     let newUser: User | undefined;
     let verifyEmailToken: string | undefined;
 
     const createAccountDto: ICreateAccountDto = {
       provider: "credentials",
-      providerAccountId: createUserDto.email,
+      providerAccountId: registerUserDto.email,
       type: "email",
     };
 
     await this._prismaService.transaction(async (tx) => {
       newUser = await this._userService.createUserWithAccount(
         tx,
-        createUserDto,
+        registerUserDto,
         createAccountDto
       );
 

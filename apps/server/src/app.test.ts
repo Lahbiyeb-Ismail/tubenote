@@ -12,13 +12,15 @@ describe("Server", () => {
 
   it("should return a not found message", async () => {
     const response = await request(app).get("/random-route");
+
     expect(response.status).toBe(404);
-    expect(response.body).toEqual({
-      error: {
-        name: "NOT_FOUND",
-        statusCode: 404,
-        message: `404 - Route Not Found - /random-route`,
-      },
-    });
+
+    expect(response.body).toHaveProperty("statusCode", 404);
+    expect(response.body).toHaveProperty("success", false);
+    expect(response.body.payload).toHaveProperty("name", "NOT_FOUND");
+    expect(response.body.payload).toHaveProperty(
+      "message",
+      "404 - Route Not Found - /random-route"
+    );
   });
 });

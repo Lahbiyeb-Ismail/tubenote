@@ -1,5 +1,4 @@
 import type { Response } from "express";
-import httpStatus from "http-status";
 
 import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
@@ -55,16 +54,16 @@ export class AuthController implements IAuthController {
 
     await this._authService.logoutUser({ refreshToken, userId });
 
-    const formattedResponse = this._responseFormatter.formatResponse({
-      responseOptions: {
-        success: true,
-        status: httpStatus.OK,
-        message: "User logged out successfully.",
-      },
-    });
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<null>({
+        responseOptions: {
+          message: "User logged out successfully.",
+          data: null,
+        },
+      });
 
     res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
-    res.status(httpStatus.OK).json(formattedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 }

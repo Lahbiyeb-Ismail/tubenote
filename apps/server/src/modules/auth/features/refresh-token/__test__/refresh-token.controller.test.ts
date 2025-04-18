@@ -1,7 +1,11 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
+import { mock, mockReset } from "jest-mock-extended";
 
-import type { IApiResponse } from "@tubenote/types";
+import type { IApiSuccessResponse } from "@tubenote/types";
+
+import type { IResponseFormatter } from "@/modules/shared/services";
+import type { TypedRequest } from "@/modules/shared/types";
 
 import {
   BadRequestError,
@@ -10,7 +14,6 @@ import {
 } from "@/modules/shared/api-errors";
 import { envConfig } from "@/modules/shared/config";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import type { TypedRequest } from "@/modules/shared/types";
 
 import {
   clearRefreshTokenCookieConfig,
@@ -22,8 +25,6 @@ import type { IAuthResponseDto } from "@/modules/auth/dtos";
 
 import { RefreshTokenController } from "../refresh-token.controller";
 
-import type { IResponseFormatter } from "@/modules/shared/services";
-import { mock, mockReset } from "jest-mock-extended";
 import type { IRefreshTokenService } from "../refresh-token.types";
 
 describe("RefreshTokenController", () => {
@@ -64,11 +65,13 @@ describe("RefreshTokenController", () => {
   });
 
   describe("RefreshTokenController - refreshToken", () => {
-    const formattedResponse: IApiResponse<{ accessToken: string }> = {
+    const formattedResponse: IApiSuccessResponse<string> = {
       success: true,
-      status: httpStatus.OK,
-      data: { accessToken: mockNewTokens.accessToken },
-      message: "Access token refreshed successfully.",
+      statusCode: httpStatus.OK,
+      payload: {
+        data: mockNewTokens.accessToken,
+        message: "Access token refreshed successfully.",
+      },
     };
 
     it("should successfully refresh tokens when valid refresh token is provided", async () => {
@@ -78,7 +81,9 @@ describe("RefreshTokenController", () => {
 
       refreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
 
-      responseFormatter.formatResponse.mockReturnValue(formattedResponse);
+      responseFormatter.formatSuccessResponse.mockReturnValue(
+        formattedResponse
+      );
 
       // Act
       await refreshTokenController.refreshToken(req, res);
@@ -100,7 +105,7 @@ describe("RefreshTokenController", () => {
         refreshTokenCookieConfig
       );
 
-      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.status).toHaveBeenCalledWith(formattedResponse.statusCode);
 
       expect(res.json).toHaveBeenCalledWith(formattedResponse);
     });
@@ -160,6 +165,10 @@ describe("RefreshTokenController", () => {
       // First attempt
       refreshTokenService.refreshToken.mockResolvedValueOnce(mockNewTokens);
 
+      responseFormatter.formatSuccessResponse.mockReturnValue(
+        formattedResponse
+      );
+
       await refreshTokenController.refreshToken(req, res);
 
       // Second concurrent attempt with same token
@@ -196,7 +205,9 @@ describe("RefreshTokenController", () => {
 
       refreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
 
-      responseFormatter.formatResponse.mockReturnValue(formattedResponse);
+      responseFormatter.formatSuccessResponse.mockReturnValue(
+        formattedResponse
+      );
 
       await refreshTokenController.refreshToken(req, res);
 
@@ -220,7 +231,9 @@ describe("RefreshTokenController", () => {
       req.cookies = { [REFRESH_TOKEN_NAME]: mockRefreshToken };
       refreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
 
-      responseFormatter.formatResponse.mockReturnValue(formattedResponse);
+      responseFormatter.formatSuccessResponse.mockReturnValue(
+        formattedResponse
+      );
 
       await refreshTokenController.refreshToken(req, res);
 

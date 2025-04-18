@@ -1,5 +1,4 @@
 import type { Response } from "express";
-import httpStatus from "http-status";
 
 import type { IPaginationQueryDto, IParamIdDto } from "@tubenote/dtos";
 import type { Video } from "@tubenote/types";
@@ -64,13 +63,11 @@ export class VideoController implements IVideoController {
       page: req.query.page || 1,
       paginatedData,
       responseOptions: {
-        success: true,
-        status: httpStatus.OK,
         message: "Videos retrieved successfully.",
       },
     });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
@@ -93,15 +90,14 @@ export class VideoController implements IVideoController {
       videoYoutubeId
     );
 
-    const formattedResponse = this._responseFormatter.formatResponse<Video>({
-      responseOptions: {
-        success: true,
-        data: video,
-        status: httpStatus.OK,
-        message: "Video retrieved successfully.",
-      },
-    });
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<Video>({
+        responseOptions: {
+          data: video,
+          message: "Video retrieved successfully.",
+        },
+      });
 
-    res.status(httpStatus.OK).json(formattedResponse);
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 }

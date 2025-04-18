@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { exchangeOauthCodeForAuthTokens } from "@/actions/auth.actions";
+import { exchangeOauthCodeForAuthTokens } from "@/features/auth/services";
 import { setStorageValue } from "@/utils/localStorage";
 
 export default function AuthCallback() {
@@ -29,9 +29,9 @@ export default function AuthCallback() {
       }
 
       try {
-        const accessToken = await exchangeOauthCodeForAuthTokens(code);
+        const { payload } = await exchangeOauthCodeForAuthTokens(code);
 
-        setStorageValue("accessToken", accessToken);
+        setStorageValue("accessToken", payload.data);
 
         setStatus("success");
         router.push("/dashboard");
