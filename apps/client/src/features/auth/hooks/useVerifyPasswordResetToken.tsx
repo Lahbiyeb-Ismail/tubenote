@@ -5,7 +5,7 @@ import { verifyPasswordResetToken } from "../services";
 
 export function useVerifyPasswordResetToken(token: string) {
   return useQuery({
-    queryKey: ["reset-token", token],
+    queryKey: ["reset-password-token", token],
     queryFn: () => verifyPasswordResetToken(token),
     // Enable the query only if the token is available.
     enabled: !!token,
