@@ -9,21 +9,20 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const { authInitialState, authReducer } = useAuthReducer();
-  const [state, dispatch] = useReducer(authReducer, authInitialState);
+  const [authState, dispatch] = useReducer(authReducer, authInitialState);
 
   const registerMutation = useRegister(dispatch);
   const loginMutation = useLogin(dispatch);
   const logoutMutation = useLogout(dispatch);
 
   const value = {
-    state,
+    authState,
     login: loginMutation.mutate,
     register: registerMutation.mutate,
     logout: logoutMutation.mutate,
-    isLoading:
-      registerMutation.isPending ||
-      loginMutation.isPending ||
-      logoutMutation.isPending,
+    isLoginPending: loginMutation.isPending,
+    isRegistrationPending: registerMutation.isPending,
+    isLogoutPending: logoutMutation.isPending,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

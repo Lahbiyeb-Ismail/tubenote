@@ -1,48 +1,34 @@
-import {
-  getStorageValue,
-  removeStorageValue,
-  setStorageValue,
-} from "@/utils/localStorage";
 import type { AuthAction, AuthState } from "../types";
 
 export function useAuthReducer() {
-  const accessToken = getStorageValue<string>("accessToken");
-
   const authInitialState: AuthState = {
+    isAuthenticated: false,
     errorMessage: "",
     successMessage: "",
-    isAuthenticated: !!accessToken,
-    accessToken,
   };
 
   function authReducer(state: AuthState, action: AuthAction): AuthState {
     switch (action.type) {
-      case "LOGIN_SUCCESS":
-        setStorageValue("accessToken", action.payload.accessToken);
+      case "SET_SUCCESS_LOGIN":
         return {
           ...state,
-          accessToken: action.payload.accessToken,
-          isAuthenticated: true,
-          errorMessage: "",
+          isAuthenticated: action.payload.isAuthenticated,
+          successMessage: action.payload.message,
         };
-      case "REGISTER_SUCCESS":
+      case "SET_SUCCESS_REGISTER":
         return {
           ...state,
-          successMessage: action.payload.successMessage,
+          successMessage: action.payload.message,
         };
-      case "LOGOUT_SUCCESS":
-        removeStorageValue("accessToken");
+      case "SET_SUCCESS_LOGOUT":
         return {
           ...state,
-          accessToken: null,
-          isAuthenticated: false,
-          errorMessage: "",
-          successMessage: "",
+          successMessage: action.payload.message,
         };
-      case "REQUEST_FAIL":
+      case "SET_AUTH_ERROR":
         return {
           ...state,
-          errorMessage: action.payload.errorMessage,
+          errorMessage: action.payload.message,
         };
       default:
         return state;
