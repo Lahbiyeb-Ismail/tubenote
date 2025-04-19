@@ -1,8 +1,9 @@
+import { getStorageValue } from "@/utils/localStorage";
 import type { AuthAction, AuthState } from "../types";
 
 export function useAuthReducer() {
   const authInitialState: AuthState = {
-    isAuthenticated: false,
+    isAuthenticated: getStorageValue<boolean>("isAuthenticated") ?? false,
     errorMessage: "",
     successMessage: "",
   };

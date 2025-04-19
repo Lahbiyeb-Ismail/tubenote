@@ -6,13 +6,13 @@ import { getStorageValue } from "@/utils/localStorage";
 import { getCurrentUser } from "../services";
 
 export function useGetCurrentUser() {
-  const accessToken = getStorageValue<string>("accessToken");
+  const isAuthenticated = getStorageValue<boolean>("isAuthenticated");
 
   return useQuery({
-    queryKey: ["current-user", accessToken],
+    queryKey: ["current-user", isAuthenticated],
     queryFn: getCurrentUser,
-    // Enable the query only if the access token is available.
-    enabled: !!accessToken,
+    // Enable the query only if the user is authenticated.
+    enabled: !!isAuthenticated,
     // The data is considered fresh for 5 minutes, after which it will be refetched.
     staleTime: 5 * 60 * 1000,
   });
