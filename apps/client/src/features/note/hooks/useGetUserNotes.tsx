@@ -2,13 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getStorageValue } from "@/utils/localStorage";
-import { getUserNotes } from "../services";
-
 import type { IPaginationQueryDto } from "@tubenote/dtos";
 
+import { getSecureCookie } from "@/utils/secureCookies";
+import { getUserNotes } from "../services";
+
 export function useGetUserNotes(paginationQuery: IPaginationQueryDto) {
-  const accessToken = getStorageValue<string>("accessToken");
+  const accessToken = getSecureCookie("access_token");
 
   return useQuery({
     queryKey: ["notes", paginationQuery],

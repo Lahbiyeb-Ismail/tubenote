@@ -2,16 +2,16 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getStorageValue } from "@/utils/localStorage";
-import { getVideoNotes } from "../services";
-
 import type { IPaginationQueryDto } from "@tubenote/dtos";
+
+import { getSecureCookie } from "@/utils/secureCookies";
+import { getVideoNotes } from "../services";
 
 export function useGetVideoNotes({
   videoId,
   paginationQuery,
 }: { videoId: string; paginationQuery: IPaginationQueryDto }) {
-  const accessToken = getStorageValue<string>("accessToken");
+  const accessToken = getSecureCookie("access_token");
 
   return useQuery({
     queryKey: ["videoNotes", videoId, paginationQuery],

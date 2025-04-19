@@ -1,6 +1,7 @@
 "use client";
+import Cookies from "js-cookie";
 
-import { setStorageValue } from "@/utils/localStorage";
+// import { setStorageValue } from "@/utils/localStorage";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -35,8 +36,8 @@ export function useLogin(dispatch: React.Dispatch<AuthAction>) {
         },
       });
 
-      setStorageValue("accessToken", payload.data);
-      setStorageValue("isAuthenticated", true);
+      Cookies.set("access_token", payload.data);
+      // setStorageValue("isAuthenticated", true);
 
       queryClient.invalidateQueries({ queryKey: ["user", "current-user"] });
 

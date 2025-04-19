@@ -4,11 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { IPaginationQueryDto } from "@tubenote/dtos";
 
-import { getStorageValue } from "@/utils/localStorage";
+import { getSecureCookie } from "@/utils/secureCookies";
 import { getUserVideos } from "../services";
 
 export function useGetUserVideos(paginationQuery: IPaginationQueryDto) {
-  const accessToken = getStorageValue<string>("accessToken");
+  const accessToken = getSecureCookie("access_token");
 
   return useQuery({
     queryKey: ["videos", paginationQuery],
