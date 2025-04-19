@@ -16,7 +16,7 @@ import { envConfig } from "@/modules/shared/config";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import {
-  clearRefreshTokenCookieConfig,
+  clearAuthTokenCookieConfig,
   refreshTokenCookieConfig,
 } from "@/modules/auth/config";
 
@@ -96,7 +96,7 @@ describe("RefreshTokenController", () => {
 
       expect(res.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
-        clearRefreshTokenCookieConfig
+        clearAuthTokenCookieConfig
       );
 
       expect(res.cookie).toHaveBeenCalledWith(
@@ -143,7 +143,7 @@ describe("RefreshTokenController", () => {
       // Assert
       expect(res.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
-        clearRefreshTokenCookieConfig
+        clearAuthTokenCookieConfig
       );
     });
 
