@@ -13,16 +13,17 @@ export function useLogin(dispatch: React.Dispatch<AuthAction>) {
   const router = useRouter();
 
   return useMutation({
+    mutationKey: ["login"],
     mutationFn: loginUser,
+    retry: false,
     onMutate: () => {
+      // Cancel any outgoing refetches
+      queryClient.cancelQueries({ queryKey: ["user", "current-user"] });
+
       toast.loading("Logging in...", { id: "loadingToast" });
     },
     onSuccess: async (responseData) => {
-      queryClient.invalidateQueries({ queryKey: ["user", "current-user"] });
-
       const { payload } = responseData;
-
-      toast.dismiss("loadingToast");
 
       toast.success(payload.message);
 
@@ -35,18 +36,24 @@ export function useLogin(dispatch: React.Dispatch<AuthAction>) {
       });
 
       setStorageValue("accessToken", payload.data);
+      setStorageValue("isAuthenticated", true);
+
+      queryClient.invalidateQueries({ queryKey: ["user", "current-user"] });
 
       // Redirect to dashboard after successful login
       router.push("/dashboard");
     },
     onError: (error) => {
-      toast.dismiss("loadingToast");
       toast.error(error.message);
 
       dispatch({
         type: "SET_AUTH_ERROR",
         payload: { message: error.message },
       });
+    },
+    onSettled: () => {
+      // Clean up loading states regardless of outcome
+      toast.dismiss("loadingToast");
     },
   });
 }
