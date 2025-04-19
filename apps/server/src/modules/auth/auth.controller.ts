@@ -10,7 +10,7 @@ import type {
 } from "./auth.types";
 
 import { clearAuthTokenCookieConfig } from "./config";
-import { ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } from "./constants";
+import { REFRESH_TOKEN_NAME } from "./constants";
 
 /**
  * Controller for handling authentication-related operations.
@@ -63,7 +63,6 @@ export class AuthController implements IAuthController {
       });
 
     res.clearCookie(REFRESH_TOKEN_NAME, clearAuthTokenCookieConfig);
-    res.clearCookie(ACCESS_TOKEN_NAME, clearAuthTokenCookieConfig);
 
     res.status(formattedResponse.statusCode).json(formattedResponse);
   }
