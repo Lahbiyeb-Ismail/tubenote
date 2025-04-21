@@ -5,6 +5,7 @@ import type { IApiSuccessResponse, Video } from "@tubenote/types";
 
 import app from "@/app";
 
+import { ACCESS_TOKEN_NAME } from "@/modules/auth";
 import { NotFoundError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { videoController } from "../video.module";
@@ -22,7 +23,7 @@ jest.mock("jsonwebtoken", () => {
         _secret: string,
         callback: (err: Error | null, payload?: any) => void
       ) => {
-        if (token === "valid-token") {
+        if (token === "valid-access-token") {
           callback(null, { userId: "user_id_001" });
         } else {
           callback(new Error("Invalid token"), null);
@@ -71,6 +72,8 @@ describe("Video routes tests", () => {
       updatedAt: new Date(),
     },
   ];
+
+  const validAccessToken = "valid-access-token";
 
   beforeAll(() => {
     // Mock GET /videos for the authenticated user.
@@ -147,26 +150,12 @@ describe("Video routes tests", () => {
       expect(videoController.getUserVideos).not.toHaveBeenCalled();
     });
 
-    it("should return 401 if the Authorization header does not start with 'Bearer '", async () => {
-      const res = await request(app)
-        .get("/api/v1/videos")
-        .set("Authorization", "Token valid-token");
-
-      expect(res.statusCode).toEqual(httpStatus.UNAUTHORIZED);
-
-      expect(res.body.payload.message).toMatch(/authenticated/);
-
-      expect(videoController.getUserVideos).not.toHaveBeenCalled();
-    });
-
     it("should return 401 if the token is invalid", async () => {
       const res = await request(app)
         .get("/api/v1/videos")
-        .set("Authorization", "Bearer invalid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=invalid-access-token`]);
 
-      expect(res.statusCode).toEqual(httpStatus.UNAUTHORIZED);
-
-      expect(res.body.payload.message).toMatch(/Unauthorized/);
+      expect(res.statusCode).toEqual(httpStatus.BAD_REQUEST);
 
       expect(videoController.getUserVideos).not.toHaveBeenCalled();
     });
@@ -174,7 +163,7 @@ describe("Video routes tests", () => {
     it("should authenticate successfully with a valid token", async () => {
       const res = await request(app)
         .get("/api/v1/videos")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .expect(httpStatus.OK);
 
       expect(res.body.success).toBe(true);
@@ -192,7 +181,7 @@ describe("Video routes tests", () => {
     it("should get all videos for the authenticated user", async () => {
       const res = await request(app)
         .get("/api/v1/videos")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.OK);
       expect(res.body.success).toEqual(true);
@@ -208,7 +197,7 @@ describe("Video routes tests", () => {
     it("should handle pagination query parameters", async () => {
       const res = await request(app)
         .get("/api/v1/videos?page=1")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.OK);
       expect(res.body.payload.paginationMeta).toHaveProperty("currentPage", 1);
@@ -218,7 +207,7 @@ describe("Video routes tests", () => {
     it("should return 400 for invalid pagination parameters", async () => {
       const res = await request(app)
         .get("/api/v1/videos?page=invalid&limit=invalid")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.BAD_REQUEST);
     });
@@ -226,7 +215,7 @@ describe("Video routes tests", () => {
     it("should return 400 for invalid query parameters", async () => {
       const res = await request(app)
         .get("/api/v1/videos?invalidParam=true")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.BAD_REQUEST);
     });
@@ -238,7 +227,7 @@ describe("Video routes tests", () => {
 
       const res = await request(app)
         .get("/api/v1/videos")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.INTERNAL_SERVER_ERROR);
     });
@@ -251,7 +240,7 @@ describe("Video routes tests", () => {
     it("should get a video by ID for the authenticated user", async () => {
       const res = await request(app)
         .post("/api/v1/videos/video_001")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.OK);
       expect(res.body.success).toEqual(true);
@@ -263,7 +252,7 @@ describe("Video routes tests", () => {
       // video_002 does not belong to user_id_001.
       const res = await request(app)
         .post("/api/v1/videos/video_002")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.NOT_FOUND);
       expect(res.body.success).toEqual(false);
@@ -279,7 +268,7 @@ describe("Video routes tests", () => {
 
       const res = await request(app)
         .post("/api/v1/videos/video_001")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.INTERNAL_SERVER_ERROR);
     });
