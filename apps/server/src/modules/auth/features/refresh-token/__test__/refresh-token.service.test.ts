@@ -113,6 +113,7 @@ describe("RefreshTokenService", () => {
       expect(prismaService.transaction).toHaveBeenCalled();
 
       expect(refreshTokenRepository.delete).toHaveBeenCalledWith(
+        mockUserId,
         mockToken,
         mockTransaction
       );
