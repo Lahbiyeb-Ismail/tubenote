@@ -5,10 +5,14 @@ import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import type { TypedRequest } from "@/modules/shared/types";
 
 import {
-  clearRefreshTokenCookieConfig,
+  accessTokenCookieConfig,
+  clearAuthTokenCookieConfig,
   refreshTokenCookieConfig,
 } from "@/modules/auth/config";
-import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
+import {
+  ACCESS_TOKEN_NAME,
+  REFRESH_TOKEN_NAME,
+} from "@/modules/auth/constants";
 
 import type { IResponseFormatter } from "@/modules/shared/services";
 
@@ -51,15 +55,14 @@ export class RefreshTokenController implements IRefreshTokenController {
     const cookies = req.cookies;
     const userId = req.userId;
 
-    res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
+    res.clearCookie(REFRESH_TOKEN_NAME, clearAuthTokenCookieConfig);
+    res.clearCookie(ACCESS_TOKEN_NAME, clearAuthTokenCookieConfig);
 
     const token = cookies[REFRESH_TOKEN_NAME];
 
     if (!token || typeof token !== "string") {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
-
-    res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
 
     const { accessToken, refreshToken } =
       await this._refreshTokenService.refreshToken(userId, token);
@@ -73,6 +76,7 @@ export class RefreshTokenController implements IRefreshTokenController {
       });
 
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+    res.cookie(ACCESS_TOKEN_NAME, accessToken, accessTokenCookieConfig);
 
     res.status(formattedResponse.statusCode).json(formattedResponse);
   }

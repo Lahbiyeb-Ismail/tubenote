@@ -1,9 +1,9 @@
 import axios from "axios";
 
-import {
-  setupRequestInterceptor,
-  setupResponseInterceptor,
-} from "@/interceptors/auth.interceptors";
+// import {
+//   setupRequestInterceptor,
+//   setupResponseInterceptor,
+// } from "@/interceptors/auth.interceptors";
 import { API_URL } from "@/utils/constants";
 
 const axiosInstance = axios.create({
@@ -11,7 +11,7 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-setupRequestInterceptor(axiosInstance);
-setupResponseInterceptor(axiosInstance);
+// setupRequestInterceptor(axiosInstance);
+// setupResponseInterceptor(axiosInstance);
 
 export default axiosInstance;
