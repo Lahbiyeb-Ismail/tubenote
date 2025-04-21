@@ -8,12 +8,14 @@ import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
 import {
+  ACCESS_TOKEN_NAME,
   type IAuthControllerOptions,
   REFRESH_TOKEN_NAME,
-  clearRefreshTokenCookieConfig,
+  clearAuthTokenCookieConfig,
 } from "@/modules/auth";
 
 import { AuthController, IAuthService } from "@/modules/auth";
+import { UnauthorizedError } from "@/modules/shared/api-errors";
 
 describe("AuthController", () => {
   let controller: AuthController;
@@ -94,10 +96,17 @@ describe("AuthController", () => {
         refreshToken: MOCK_REFRESH_TOKEN_VALUE,
         userId: MOCK_USER_ID,
       });
+
       expect(res.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
-        clearRefreshTokenCookieConfig
+        clearAuthTokenCookieConfig
       );
+
+      expect(res.clearCookie).toHaveBeenCalledWith(
+        ACCESS_TOKEN_NAME,
+        clearAuthTokenCookieConfig
+      );
+
       expect(res.json).toHaveBeenCalledWith(formattedResponse);
     });
 
@@ -111,31 +120,39 @@ describe("AuthController", () => {
         "Logout failed"
       );
 
-      expect(res.clearCookie).toHaveBeenCalled();
+      expect(res.clearCookie).toHaveBeenCalledWith(
+        REFRESH_TOKEN_NAME,
+        clearAuthTokenCookieConfig
+      );
+
+      expect(res.clearCookie).toHaveBeenCalledWith(
+        ACCESS_TOKEN_NAME,
+        clearAuthTokenCookieConfig
+      );
     });
 
-    it("should pass undefined refreshToken if cookie is missing", async () => {
+    it("should throw an UnauthorizedError if cookie is missing", async () => {
       // Arrange: remove the refresh token from cookies.
       req.cookies = {};
 
-      // Arrange: mock the response formatter to return the expected response.
-      responseFormatter.formatSuccessResponse.mockReturnValue(
-        formattedResponse
+      // Act & Assert
+      await expect(controller.logout(req, res)).rejects.toThrow(
+        UnauthorizedError
       );
 
-      // Act
-      await controller.logout(req, res);
+      // Assert: logoutUser should not be called.
+      expect(authService.logoutUser).not.toHaveBeenCalled();
+      expect(responseFormatter.formatSuccessResponse).not.toHaveBeenCalled();
 
-      // Assert: logoutUser should be called with undefined refreshToken.
-      expect(authService.logoutUser).toHaveBeenCalledWith({
-        refreshToken: undefined,
-        userId: MOCK_USER_ID,
-      });
       expect(res.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
-        clearRefreshTokenCookieConfig
+        clearAuthTokenCookieConfig
       );
-      expect(res.json).toHaveBeenCalledWith(formattedResponse);
+
+      expect(res.clearCookie).toHaveBeenCalledWith(
+        ACCESS_TOKEN_NAME,
+        clearAuthTokenCookieConfig
+      );
     });
   });
 });

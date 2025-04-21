@@ -5,8 +5,6 @@ import {
   type ILogoutDto,
   type IRefreshTokenService,
 } from "@/modules/auth";
-import { UnauthorizedError } from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 describe("AuthService", () => {
   const refreshTokenService = mock<IRefreshTokenService>();
@@ -51,76 +49,28 @@ describe("AuthService", () => {
 
       await authService.logoutUser(validLogoutDto);
 
-      expect(refreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
-        validLogoutDto.userId
+      expect(refreshTokenService.deleteToken).toHaveBeenCalledWith(
+        validLogoutDto.userId,
+        validLogoutDto.refreshToken
       );
 
-      expect(refreshTokenService.deleteAllTokens).toHaveBeenCalledTimes(1);
+      expect(refreshTokenService.deleteToken).toHaveBeenCalledTimes(1);
     });
 
-    it("should throw an UnauthorizedError if refreshToken is missing", async () => {
-      const logoutDto = {
-        userId: "user_id_001",
-        refreshToken: "",
-      };
-
-      await expect(authService.logoutUser(logoutDto)).rejects.toThrow(
-        UnauthorizedError
-      );
-
-      await expect(authService.logoutUser(logoutDto)).rejects.toThrow(
-        ERROR_MESSAGES.UNAUTHORIZED
-      );
-
-      expect(refreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
-    });
-
-    it("should throw an UnauthorizedError if userId is missing", async () => {
-      const logoutDto = {
-        userId: "",
-        refreshToken: "valid_refresh_token",
-      };
-
-      await expect(authService.logoutUser(logoutDto)).rejects.toThrow(
-        UnauthorizedError
-      );
-
-      await expect(authService.logoutUser(logoutDto)).rejects.toThrow(
-        ERROR_MESSAGES.UNAUTHORIZED
-      );
-
-      expect(refreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
-    });
-
-    it("should throw an UnauthorizedError if both userId and refreshToken are missing", async () => {
-      const logoutDto = {
-        userId: "",
-        refreshToken: "",
-      };
-
-      await expect(authService.logoutUser(logoutDto)).rejects.toThrow(
-        UnauthorizedError
-      );
-
-      await expect(authService.logoutUser(logoutDto)).rejects.toThrow(
-        ERROR_MESSAGES.UNAUTHORIZED
-      );
-
-      expect(refreshTokenService.deleteAllTokens).not.toHaveBeenCalled();
-    });
-
-    it("should propagate errors thrown by refreshTokenService.deleteAllTokens", async () => {
+    it("should propagate errors thrown by refreshTokenService.deleteToken", async () => {
       const errorMessage = "Delete tokens failure";
 
-      refreshTokenService.deleteAllTokens.mockRejectedValue(
+      refreshTokenService.deleteToken.mockRejectedValue(
         new Error(errorMessage)
       );
 
       await expect(authService.logoutUser(validLogoutDto)).rejects.toThrow(
         errorMessage
       );
-      expect(refreshTokenService.deleteAllTokens).toHaveBeenCalledWith(
-        validLogoutDto.userId
+
+      expect(refreshTokenService.deleteToken).toHaveBeenCalledWith(
+        validLogoutDto.userId,
+        validLogoutDto.refreshToken
       );
     });
   });

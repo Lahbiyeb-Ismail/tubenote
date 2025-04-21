@@ -5,7 +5,7 @@ import request from "supertest";
 import app from "@/app";
 
 import { authController } from "../auth.module";
-import { REFRESH_TOKEN_NAME } from "../constants";
+import { ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } from "../constants";
 
 const MOCK_USER_ID = "user_id_001";
 
@@ -23,7 +23,7 @@ jest.mock("jsonwebtoken", () => {
         _secret: string,
         callback: (err: Error | null, payload?: any) => void
       ) => {
-        if (token === "valid-token") {
+        if (token === "valid-access-token") {
           // Simulate a successful verification with a payload.
           callback(null, { userId: MOCK_USER_ID });
         } else {
@@ -55,8 +55,10 @@ describe("Auth Routes", () => {
       // Arrange: provide a valid Authorization header and cookie.
       const res = await request(app)
         .post("/api/v1/auth/logout")
-        .set("Authorization", "Bearer valid-token")
-        .set("Cookie", [`${REFRESH_TOKEN_NAME}=valid-refresh-token`]);
+        .set("Cookie", [
+          `${ACCESS_TOKEN_NAME}=valid-access-token`,
+          `${REFRESH_TOKEN_NAME}=valid-refresh-token`,
+        ]);
 
       // Assert: authController.logout should have been called and the response should be 204.
       expect(authController.logout).toHaveBeenCalled();
@@ -79,8 +81,10 @@ describe("Auth Routes", () => {
 
       const res = await request(app)
         .post("/api/v1/auth/logout")
-        .set("Authorization", "Bearer valid-token")
-        .set("Cookie", [`${REFRESH_TOKEN_NAME}=valid-refresh-token`]);
+        .set("Cookie", [
+          `${ACCESS_TOKEN_NAME}=valid-access-token`,
+          `${REFRESH_TOKEN_NAME}=valid-refresh-token`,
+        ]);
 
       expect(res.status).toBe(httpStatus.INTERNAL_SERVER_ERROR);
       expect(res.body.payload).toHaveProperty("message", "Logout error");
@@ -102,8 +106,10 @@ describe("Auth Routes", () => {
       // We simulate this by checking that authController.logout is called with a request having userId.
       await request(app)
         .post("/api/v1/auth/logout")
-        .set("Authorization", "Bearer valid-token")
-        .set("Cookie", [`${REFRESH_TOKEN_NAME}=valid-refresh-token`]);
+        .set("Cookie", [
+          `${ACCESS_TOKEN_NAME}=valid-access-token`,
+          `${REFRESH_TOKEN_NAME}=valid-refresh-token`,
+        ]);
 
       // Access the first call's first argument to authController.logout.
       const calledReq = (authController.logout as jest.Mock).mock.calls[0][0];
@@ -113,15 +119,21 @@ describe("Auth Routes", () => {
     it("should reject request with invalid token", async () => {
       await request(app)
         .post("/api/v1/auth/logout")
-        .set("Authorization", "Bearer invalid-token")
-        .expect(httpStatus.UNAUTHORIZED);
+        .set("Cookie", [
+          `${ACCESS_TOKEN_NAME}=invalid-access-token`,
+          `${REFRESH_TOKEN_NAME}=valid-refresh-token`,
+        ])
+        .expect(httpStatus.BAD_REQUEST);
     });
 
     it("should handle malformed authorization header", async () => {
       await request(app)
         .post("/api/v1/auth/logout")
-        .set("Authorization", "malformed-token")
-        .expect(httpStatus.UNAUTHORIZED);
+        .set("Cookie", [
+          `${ACCESS_TOKEN_NAME}=malformed-access-token`,
+          `${REFRESH_TOKEN_NAME}=valid-refresh-token`,
+        ])
+        .expect(httpStatus.BAD_REQUEST);
     });
   });
 
@@ -129,21 +141,30 @@ describe("Auth Routes", () => {
     it("should not accept GET method on /api/v1/auth/logout", async () => {
       const res = await request(app)
         .get("/api/v1/auth/logout")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [
+          `${ACCESS_TOKEN_NAME}=valid-access-token`,
+          `${REFRESH_TOKEN_NAME}=valid-refresh-token`,
+        ]);
       expect(res.status).toBe(httpStatus.NOT_FOUND);
     });
 
     it("should not accept PUT method on /api/v1/auth/logout", async () => {
       const res = await request(app)
         .put("/api/v1/auth/logout")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [
+          `${ACCESS_TOKEN_NAME}=valid-access-token`,
+          `${REFRESH_TOKEN_NAME}=valid-refresh-token`,
+        ]);
       expect(res.status).toBe(httpStatus.NOT_FOUND);
     });
 
     it("should not accept DELETE method on /api/v1/auth/logout", async () => {
       const res = await request(app)
         .delete("/api/v1/auth/logout")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [
+          `${ACCESS_TOKEN_NAME}=valid-access-token`,
+          `${REFRESH_TOKEN_NAME}=valid-refresh-token`,
+        ]);
       expect(res.status).toBe(httpStatus.NOT_FOUND);
     });
   });
