@@ -10,7 +10,7 @@ import type { TypedRequest } from "@/modules/shared/types";
 import {
   type IAuthControllerOptions,
   REFRESH_TOKEN_NAME,
-  clearAuthTokenCookieConfig,
+  clearRefreshTokenCookieConfig,
 } from "@/modules/auth";
 
 import { AuthController, IAuthService } from "@/modules/auth";
@@ -96,7 +96,7 @@ describe("AuthController", () => {
       });
       expect(res.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
-        clearAuthTokenCookieConfig
+        clearRefreshTokenCookieConfig
       );
       expect(res.json).toHaveBeenCalledWith(formattedResponse);
     });
@@ -133,7 +133,7 @@ describe("AuthController", () => {
       });
       expect(res.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
-        clearAuthTokenCookieConfig
+        clearRefreshTokenCookieConfig
       );
       expect(res.json).toHaveBeenCalledWith(formattedResponse);
     });

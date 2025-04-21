@@ -8,14 +8,8 @@ import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import type { IResponseFormatter } from "@/modules/shared/services";
 
-import {
-  accessTokenCookieConfig,
-  refreshTokenCookieConfig,
-} from "@/modules/auth/config";
-import {
-  ACCESS_TOKEN_NAME,
-  REFRESH_TOKEN_NAME,
-} from "@/modules/auth/constants";
+import { refreshTokenCookieConfig } from "@/modules/auth/config";
+import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 
 import type { IOAuthAuthorizationCodeDto, IOauthLoginDto } from "./dtos";
 import type {
@@ -32,12 +26,10 @@ export class OAuthController implements IOAuthController {
     private readonly _responseFormatter: IResponseFormatter
   ) {}
 
-  /**
-   * Redirects the user to the client application with a temporary code.
-   *
-   * @param res - The response object.
-   * @param temporaryCode - The temporary code to be sent to the client application.
-   */
+  private setRefreshTokenCookie(res: Response, refreshToken: string) {
+    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+  }
+
   private redirectWithTemporaryCode(res: Response, temporaryCode: string) {
     res.redirect(
       `${envConfig.client.url}/auth/callback?code=${encodeURIComponent(
@@ -70,7 +62,7 @@ export class OAuthController implements IOAuthController {
         createAccountDto
       );
 
-    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+    this.setRefreshTokenCookie(res, refreshToken);
 
     this.redirectWithTemporaryCode(res, temporaryCode);
   }
@@ -91,8 +83,6 @@ export class OAuthController implements IOAuthController {
           data: accessToken,
         },
       });
-
-    res.cookie(ACCESS_TOKEN_NAME, accessToken, accessTokenCookieConfig);
 
     res.status(formattedResponse.statusCode).json(formattedResponse);
   }

@@ -1,52 +1,69 @@
 import type { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken";
 
-import {
-  ACCESS_TOKEN_NAME,
-  ACCESS_TOKEN_SECRET,
-  clearAuthTokenCookieConfig,
-  jwtService,
-} from "@/modules/auth";
+import { ACCESS_TOKEN_SECRET } from "@/modules/auth";
 
 import { UnauthorizedError } from "@/modules/shared/api-errors";
 import { loggerService } from "@/modules/shared/services";
+import type { JwtPayload } from "@/modules/shared/types";
+
+const { verify } = jwt;
 
 /**
- * Middleware to check if the user is authenticated.
+ * Middleware to check if the request is authenticated.
  *
- * This function verifies the presence and validity of an access token
- * in the request cookies. If the token is missing or invalid, it clears
- * the authentication cookie and throws an `UnauthorizedError`. If the
- * token is valid, it extracts the user ID from the token and attaches
- * it to the request object for further use in the request lifecycle.
+ * This middleware checks for the presence of a Bearer token in the
+ * Authorization header of the request. If the token is present and valid,
+ * it attaches the payload to the request object and calls the next middleware.
+ * If the token is missing or invalid, it responds with an appropriate
+ * HTTP status and error message.
  *
- * @param req - The HTTP request object.
- * @param res - The HTTP response object.
+ * @param req - The request object, extended with a potential payload.
+ * @param res - The response object.
  * @param next - The next middleware function in the stack.
- * @throws {UnauthorizedError} If the access token is missing or invalid.
+ *
+ * @returns void
+ *
+ * @throws {Error} If the token is invalid or missing.
  */
 export async function isAuthenticated(
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) {
-  const accessToken = req.cookies[ACCESS_TOKEN_NAME];
+  const authHeader = req.headers?.authorization;
 
-  if (!accessToken || typeof accessToken !== "string") {
-    loggerService.error("Access token is missing or invalid.");
-    // Clear the cookies if the token is invalid
-    res.clearCookie(ACCESS_TOKEN_NAME, clearAuthTokenCookieConfig);
+  if (!authHeader || !authHeader?.startsWith("Bearer ")) {
+    loggerService.error("Authorization header is missing or invalid.");
 
     throw new UnauthorizedError(
       "You need to be authenticated to access this route."
     );
   }
 
-  const { userId } = await jwtService.verify({
-    token: accessToken,
-    secret: ACCESS_TOKEN_SECRET,
+  const token: string | undefined = authHeader.split("Bearer ")[1];
+
+  if (!token) {
+    throw new UnauthorizedError(
+      "You need to be authenticated to access this route."
+    );
+  }
+
+  verify(token, ACCESS_TOKEN_SECRET, (err, payload: unknown) => {
+    if (err) {
+      loggerService.error(`Error verifying token: ${err.message}`);
+
+      throw new UnauthorizedError("Unauthorized access. Please try again.");
+    }
+
+    if (typeof payload === "object" && payload !== null) {
+      const userId = (payload as JwtPayload).userId;
+
+      req.userId = userId;
+    } else {
+      throw new UnauthorizedError("Invalid token payload.");
+    }
+
+    next();
   });
-
-  req.userId = userId;
-
-  next();
 }

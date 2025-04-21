@@ -13,7 +13,6 @@ const envSchema = z.object({
   SERVER_URL: z.string({ message: "SERVER_URL must be a string" }),
   CLIENT_URL: z.string({ message: "CLIENT_URL must be a string" }),
   SESSION_SECRET: z.string().min(8),
-  ACCESS_TOKEN_NAME: z.string().default("access_token"),
   ACCESS_TOKEN_SECRET: z.string().min(8),
   ACCESS_TOKEN_EXPIRES_IN: z.string().default("15m"),
   REFRESH_TOKEN_SECRET: z.string().min(8),
@@ -70,7 +69,6 @@ export const envConfig = {
     access_token: {
       secret: validatedEnv.ACCESS_TOKEN_SECRET,
       expires_in: validatedEnv.ACCESS_TOKEN_EXPIRES_IN,
-      cookie_name: validatedEnv.ACCESS_TOKEN_NAME,
     },
     refresh_token: {
       secret: validatedEnv.REFRESH_TOKEN_SECRET,

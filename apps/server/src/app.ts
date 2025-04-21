@@ -47,7 +47,7 @@ app.use(
     secret: envConfig.server.session_secret,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: envConfig.node_env === "production" },
+    cookie: { secure: false },
   })
 );
 

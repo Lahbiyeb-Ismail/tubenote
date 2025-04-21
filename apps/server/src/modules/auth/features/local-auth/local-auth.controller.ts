@@ -5,13 +5,9 @@ import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 
 import {
   AUTH_RATE_LIMIT_CONFIG,
-  accessTokenCookieConfig,
   refreshTokenCookieConfig,
 } from "@/modules/auth/config";
-import {
-  ACCESS_TOKEN_NAME,
-  REFRESH_TOKEN_NAME,
-} from "@/modules/auth/constants";
+import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 
 import { BadRequestError } from "@/modules/shared/api-errors";
 
@@ -112,7 +108,6 @@ export class LocalAuthController implements ILocalAuthController {
       await this._rateLimiter.reset(rateLimitKey);
 
       res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
-      res.cookie(ACCESS_TOKEN_NAME, accessToken, accessTokenCookieConfig);
 
       res.status(formattedResponse.statusCode).json(formattedResponse);
     } catch (error: any) {
