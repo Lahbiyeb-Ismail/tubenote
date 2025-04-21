@@ -50,12 +50,17 @@ export interface IRefreshTokenRepository {
   /**
    * Deletes a refresh token by its token string.
    *
+   * @param userId - The ID of the user associated with the token.
    * @param token - The token string to delete.
    * @param tx - Optional transaction client for database operations.
    *
    * @returns A promise that resolves when the token is successfully deleted.
    */
-  delete(token: string, tx?: Prisma.TransactionClient): Promise<void>;
+  delete(
+    userId: string,
+    token: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<void>;
 
   /**
    * Deletes all refresh tokens associated with a specific user.
@@ -81,6 +86,8 @@ export interface IRefreshTokenService {
    * @returns A promise that resolves to an authentication response DTO.
    */
   refreshToken(userId: string, token: string): Promise<IAuthResponseDto>;
+
+  deleteToken(useId: string, token: string): Promise<void>;
 
   /**
    * Deletes all refresh tokens associated with a specific user.

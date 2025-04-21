@@ -61,13 +61,18 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
     );
   }
 
-  async delete(token: string, tx?: Prisma.TransactionClient): Promise<void> {
+  async delete(
+    userId: string,
+    token: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<void> {
     const client = tx ?? this._db;
 
     await handleAsyncOperation(
       () =>
         client.refreshToken.delete({
           where: {
+            userId,
             token,
           },
         }),
