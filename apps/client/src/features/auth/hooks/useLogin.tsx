@@ -1,10 +1,10 @@
 "use client";
 
-import { setStorageValue } from "@/utils/localStorage";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
+import { setStorageValue } from "@/utils/localStorage";
 import { loginUser } from "../services";
 import type { AuthAction } from "../types";
 
@@ -35,7 +35,6 @@ export function useLogin(dispatch: React.Dispatch<AuthAction>) {
         },
       });
 
-      setStorageValue("accessToken", payload.data);
       setStorageValue("isAuthenticated", true);
 
       queryClient.invalidateQueries({ queryKey: ["user", "current-user"] });
