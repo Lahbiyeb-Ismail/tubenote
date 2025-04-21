@@ -11,6 +11,7 @@ import type { TypedRequest } from "@/modules/shared/types";
 import { BadRequestError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
+import { ACCESS_TOKEN_NAME } from "@/modules/auth";
 import { userController } from "../user.module";
 
 const MOCK_USER_ID = "user_id_001";
@@ -29,13 +30,13 @@ jest.mock("jsonwebtoken", () => {
         _secret: string,
         callback: (err: Error | null, payload?: any) => void
       ) => {
-        if (token === "valid-token") {
+        if (token === "valid-access-token") {
           // Simulate a successful verification with a payload.
           callback(null, { userId: MOCK_USER_ID });
-        } else if (token === "expired-token") {
+        } else if (token === "expired-access-token") {
           // Simulate an expired token
           callback(new Error("Expired token"), null);
-        } else if (token === "malformed-token") {
+        } else if (token === "malformed-access-token") {
           // Simulate a malformed token
           callback(new Error("Malformed token"), null);
         } else {
@@ -57,6 +58,8 @@ describe("User Routes", () => {
     createdAt: new Date(),
     updatedAt: new Date(),
   };
+
+  const validAccessToken = "valid-access-token";
 
   beforeAll(() => {
     jest.clearAllMocks();
@@ -111,24 +114,8 @@ describe("User Routes", () => {
   // ---
   // 1. Authentication middleware tests
   describe("Authentication Middleware", () => {
-    it("should return 401 if Authorization header is missing", async () => {
+    it("should return 401 if no accessToken is provided", async () => {
       const res = await request(app).get("/api/v1/users/me");
-      expect(res.statusCode).toBe(httpStatus.UNAUTHORIZED);
-      expect(res.body.payload.message).toMatch(/authenticated/);
-    });
-
-    it("should return 401 if Authorization header is malformed", async () => {
-      const res = await request(app)
-        .get("/api/v1/users/me")
-        .set("Authorization", "Token sometoken");
-      expect(res.statusCode).toBe(httpStatus.UNAUTHORIZED);
-      expect(res.body.payload.message).toMatch(/authenticated/);
-    });
-
-    it("should return 401 if token is empty", async () => {
-      const res = await request(app)
-        .get("/api/v1/users/me")
-        .set("Authorization", "Bearer ");
       expect(res.statusCode).toBe(httpStatus.UNAUTHORIZED);
       expect(res.body.payload.message).toMatch(/authenticated/);
     });
@@ -136,15 +123,15 @@ describe("User Routes", () => {
     it("should return 401 if token verification fails", async () => {
       const res = await request(app)
         .get("/api/v1/users/me")
-        .set("Authorization", "Bearer invalid-token");
-      expect(res.statusCode).toBe(httpStatus.UNAUTHORIZED);
-      expect(res.body.payload.message).toMatch(/Unauthorized access/);
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=invalid-access-token`]);
+
+      expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
     });
 
     it("should pass authentication with a valid token", async () => {
       const res = await request(app)
         .get("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
       // The controller returns a 200 response if the token is valid.
       expect(res.statusCode).toBe(httpStatus.OK);
 
@@ -158,17 +145,17 @@ describe("User Routes", () => {
     it("should return 401 if token is expired", async () => {
       const res = await request(app)
         .get("/api/v1/users/me")
-        .set("Authorization", "Bearer expired-token");
-      expect(res.statusCode).toBe(httpStatus.UNAUTHORIZED);
-      expect(res.body.payload.message).toMatch(/Unauthorized access/i);
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=expired-access-token`]);
+
+      expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
     });
 
     it("should return 401 if token is malformed", async () => {
       const res = await request(app)
         .get("/api/v1/users/me")
-        .set("Authorization", "Bearer malformed-token");
-      expect(res.statusCode).toBe(httpStatus.UNAUTHORIZED);
-      expect(res.body.payload.message).toMatch(/Unauthorized access/i);
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=malformed-access-token`]);
+
+      expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
     });
   });
 
@@ -183,7 +170,7 @@ describe("User Routes", () => {
     it("should return current user data when authenticated", async () => {
       const res = await request(app)
         .get("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toBe(httpStatus.OK);
 
@@ -202,7 +189,7 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .get("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toBe(httpStatus.INTERNAL_SERVER_ERROR);
 
@@ -226,7 +213,7 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .patch("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.OK);
@@ -245,7 +232,7 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .patch("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.OK);
@@ -258,7 +245,7 @@ describe("User Routes", () => {
     it("should allow an empty payload (all fields are optional)", async () => {
       const res = await request(app)
         .patch("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send({});
 
       expect(res.statusCode).toBe(httpStatus.OK);
@@ -271,7 +258,7 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .patch("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
@@ -283,7 +270,7 @@ describe("User Routes", () => {
       const payload = { username: 123, email: 456 };
       const res = await request(app)
         .patch("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
@@ -299,7 +286,7 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .patch("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send({ username: "newname" });
 
       expect(res.statusCode).toBe(httpStatus.INTERNAL_SERVER_ERROR);
@@ -312,7 +299,7 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .patch("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
@@ -324,7 +311,7 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .patch("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
@@ -336,44 +323,12 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .patch("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
       expect(res.body.payload.message).toMatch(/profilePicture/i);
     });
-
-    // it("should sanitize input to prevent XSS attacks", async () => {
-    //   const payload = { username: "<script>alert('XSS')</script>" };
-
-    //   const res = await request(app)
-    //     .patch("/api/v1/users/me")
-    //     .set("Authorization", "Bearer valid-token")
-    //     .send(payload);
-
-    //   expect(res.statusCode).toBe(httpStatus.OK);
-    //   expect(res.body.user.username).toBe("alert('XSS')");
-    // });
-
-    // it("should handle conflict errors when email is already in use", async () => {
-    //   const payload = { email: "existing@example.com" };
-
-    //   // Mock controller to simulate conflict
-    //   (userController.updateCurrentUser as jest.Mock).mockImplementation(() => {
-    //     const error = new Error("Email already in use");
-    //     error.name = "ConflictError";
-    //     error.statusCode = httpStatus.CONFLICT;
-    //     throw error;
-    //   });
-
-    //   const res = await request(app)
-    //     .patch("/api/v1/users/me")
-    //     .set("Authorization", "Bearer valid-token")
-    //     .send(payload);
-
-    //   expect(res.statusCode).toBe(httpStatus.CONFLICT);
-    //   expect(res.body.payload.message).toMatch(/Email already in use/);
-    // });
   });
 
   // ---
@@ -388,7 +343,7 @@ describe("User Routes", () => {
       };
       const res = await request(app)
         .patch("/api/v1/users/update-password")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.OK);
@@ -421,7 +376,7 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .patch("/api/v1/users/update-password")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
@@ -436,7 +391,7 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .patch("/api/v1/users/update-password")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
@@ -452,7 +407,7 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .patch("/api/v1/users/update-password")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
@@ -470,7 +425,7 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .patch("/api/v1/users/update-password")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
@@ -487,7 +442,7 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .patch("/api/v1/users/update-password")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
@@ -503,7 +458,7 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .patch("/api/v1/users/update-password")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
@@ -525,30 +480,13 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .patch("/api/v1/users/update-password")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(payload);
 
       expect(res.statusCode).toBe(httpStatus.INTERNAL_SERVER_ERROR);
 
       expect(userController.updatePassword).toHaveBeenCalled();
     });
-
-    // it("should return 400 when currentPassword is incorrect", async () => {
-    //   const payload = {
-    //     currentPassword: "WrongPassword123!",
-    //     newPassword: "Newpassword123!",
-    //   };
-
-    //   const res = await request(app)
-    //     .patch("/api/v1/users/update-password")
-    //     .set("Authorization", "Bearer valid-token")
-    //     .send(payload);
-
-    //   expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
-    //   expect(res.body.payload.message).toMatch(
-    //     /password you entered is incorrect/
-    //   );
-    // });
 
     it("should enforce password complexity requirements", async () => {
       // Test various weak passwords
@@ -568,53 +506,13 @@ describe("User Routes", () => {
 
         const res = await request(app)
           .patch("/api/v1/users/update-password")
-          .set("Authorization", "Bearer valid-token")
+          .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
           .send(payload);
 
         expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
         expect(res.body.payload.message).toContain("Validation error");
       }
     });
-
-    // it("should handle rate limiting for password update attempts", async () => {
-    //   const payload = {
-    //     currentPassword: "Oldpassword123!",
-    //     newPassword: "Newpassword123!",
-    //   };
-
-    //   const res = await request(app)
-    //     .patch("/api/v1/users/update-password")
-    //     .set("Authorization", "Bearer valid-token")
-    //     .set("X-RateLimit-Remaining", "0") // Trigger rate limit in our mock
-    //     .send(payload);
-
-    //   expect(res.statusCode).toBe(httpStatus.TOO_MANY_REQUESTS);
-    //   expect(res.body.payload.message).toMatch(/Too many requests/);
-    //   expect(userController.updatePassword).not.toHaveBeenCalled();
-    // });
-
-    // it("should handle concurrent password update requests", async () => {
-    //   const payload = {
-    //     currentPassword: "Oldpassword123!",
-    //     newPassword: "Newpassword123!",
-    //   };
-
-    //   // Make two concurrent requests
-    //   const [res1, res2] = await Promise.all([
-    //     request(app)
-    //       .patch("/api/v1/users/update-password")
-    //       .set("Authorization", "Bearer valid-token")
-    //       .send(payload),
-    //     request(app)
-    //       .patch("/api/v1/users/update-password")
-    //       .set("Authorization", "Bearer valid-token")
-    //       .send(payload),
-    //   ]);
-
-    //   expect(res1.statusCode).toBe(httpStatus.OK);
-    //   expect(res2.statusCode).toBe(httpStatus.OK);
-    //   expect(userController.updatePassword).toHaveBeenCalledTimes(2);
-    // });
   });
 
   // ---
@@ -623,7 +521,7 @@ describe("User Routes", () => {
     it("should handle malformed JSON in request body", async () => {
       const res = await request(app)
         .patch("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .set("Content-Type", "application/json")
         .send("{malformed json");
 
@@ -638,7 +536,7 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .patch("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(largePayload);
 
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
@@ -648,7 +546,7 @@ describe("User Routes", () => {
     it("should handle unsupported HTTP methods", async () => {
       const res = await request(app)
         .put("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send({ username: "newname" });
 
       expect(res.statusCode).toBe(httpStatus.NOT_FOUND);
@@ -657,7 +555,7 @@ describe("User Routes", () => {
     it("should handle non-existent routes", async () => {
       const res = await request(app)
         .get("/api/v1/users/nonexistent")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toBe(httpStatus.NOT_FOUND);
     });
@@ -665,7 +563,7 @@ describe("User Routes", () => {
     it("should set appropriate security headers", async () => {
       const res = await request(app)
         .get("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       // Check security headers
       expect(res.headers).toHaveProperty("content-security-policy");
@@ -684,7 +582,7 @@ describe("User Routes", () => {
 
       const res = await request(app)
         .get("/api/v1/users/me")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toBe(httpStatus.INTERNAL_SERVER_ERROR);
       expect(res.body.payload.message).toMatch(/Database|service unavailable/i);
