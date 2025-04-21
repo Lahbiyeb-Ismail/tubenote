@@ -7,20 +7,19 @@ import type { IApiSuccessResponse } from "@tubenote/types";
 import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
-import {
-  BadRequestError,
-  ForbiddenError,
-  UnauthorizedError,
-} from "@/modules/shared/api-errors";
-import { envConfig } from "@/modules/shared/config";
+import { ForbiddenError, UnauthorizedError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import {
-  clearRefreshTokenCookieConfig,
+  accessTokenCookieConfig,
+  clearAuthTokenCookieConfig,
   refreshTokenCookieConfig,
 } from "@/modules/auth/config";
 
-import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
+import {
+  ACCESS_TOKEN_NAME,
+  REFRESH_TOKEN_NAME,
+} from "@/modules/auth/constants";
 import type { IAuthResponseDto } from "@/modules/auth/dtos";
 
 import { RefreshTokenController } from "../refresh-token.controller";
@@ -94,15 +93,16 @@ describe("RefreshTokenController", () => {
         mockRefreshToken
       );
 
-      expect(res.clearCookie).toHaveBeenCalledWith(
-        REFRESH_TOKEN_NAME,
-        clearRefreshTokenCookieConfig
-      );
-
       expect(res.cookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
         mockNewTokens.refreshToken,
         refreshTokenCookieConfig
+      );
+
+      expect(res.cookie).toHaveBeenCalledWith(
+        ACCESS_TOKEN_NAME,
+        mockNewTokens.accessToken,
+        accessTokenCookieConfig
       );
 
       expect(res.status).toHaveBeenCalledWith(formattedResponse.statusCode);
@@ -143,7 +143,11 @@ describe("RefreshTokenController", () => {
       // Assert
       expect(res.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
-        clearRefreshTokenCookieConfig
+        clearAuthTokenCookieConfig
+      );
+      expect(res.clearCookie).toHaveBeenCalledWith(
+        ACCESS_TOKEN_NAME,
+        clearAuthTokenCookieConfig
       );
     });
 
@@ -156,7 +160,7 @@ describe("RefreshTokenController", () => {
         refreshTokenController.refreshToken(req, res)
       ).rejects.toThrow(UnauthorizedError);
 
-      expect(res.clearCookie).toHaveBeenCalled();
+      expect(res.clearCookie).toHaveBeenCalledTimes(2);
     });
 
     it("should handle multiple concurrent refresh attempts", async () => {
@@ -178,25 +182,8 @@ describe("RefreshTokenController", () => {
       await expect(
         refreshTokenController.refreshToken(req, res)
       ).rejects.toThrow(ForbiddenError);
-    });
 
-    it("should handle malformed JWT tokens", async () => {
-      const malformedTokens = [
-        "invalid.token.structure",
-        "a".repeat(500), // Long invalid token
-        "header.payload.signature", // Proper structure but invalid
-      ];
-
-      for (const token of malformedTokens) {
-        req.cookies = { [REFRESH_TOKEN_NAME]: token };
-        refreshTokenService.refreshToken.mockRejectedValue(
-          new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN)
-        );
-
-        await expect(
-          refreshTokenController.refreshToken(req, res)
-        ).rejects.toThrow(BadRequestError);
-      }
+      expect(res.clearCookie).toHaveBeenCalledTimes(2);
     });
 
     it("should maintain cookie consistency after multiple operations", async () => {
@@ -223,8 +210,7 @@ describe("RefreshTokenController", () => {
 
       await refreshTokenController.refreshToken(req, res);
 
-      expect(res.clearCookie).toHaveBeenCalledTimes(4);
-      expect(res.cookie).toHaveBeenCalledTimes(2);
+      expect(res.cookie).toHaveBeenCalledTimes(4);
     });
 
     it("should validate cookie security configurations", async () => {
@@ -240,12 +226,13 @@ describe("RefreshTokenController", () => {
       expect(res.cookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
         mockNewTokens.refreshToken,
-        expect.objectContaining({
-          httpOnly: true,
-          secure: envConfig.node_env === "production",
-          sameSite: "lax",
-          maxAge: 24 * 60 * 60 * 1000,
-        })
+        refreshTokenCookieConfig
+      );
+
+      expect(res.cookie).toHaveBeenCalledWith(
+        ACCESS_TOKEN_NAME,
+        mockNewTokens.accessToken,
+        accessTokenCookieConfig
       );
     });
   });

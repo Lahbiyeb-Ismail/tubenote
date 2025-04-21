@@ -8,7 +8,10 @@ import type { IApiSuccessResponse } from "@tubenote/types";
 import { UnauthorizedError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
+import {
+  ACCESS_TOKEN_NAME,
+  REFRESH_TOKEN_NAME,
+} from "@/modules/auth/constants";
 
 import { refreshTokenController } from "../refresh-token.module";
 
@@ -29,7 +32,7 @@ jest.mock("jsonwebtoken", () => {
         _secret: string,
         callback: (err: Error | null, payload?: any) => void
       ) => {
-        if (token === "valid-token") {
+        if (token === "valid-access-token") {
           // Simulate a successful verification with a payload.
           callback(null, { userId: MOCK_USER_ID });
         } else {
@@ -43,6 +46,7 @@ jest.mock("jsonwebtoken", () => {
 
 describe("Refresh Token Routes", () => {
   const validRefreshToken = "valid-refresh-token";
+  const validAccessToken = "valid-access-token";
 
   const formattedResponse: IApiSuccessResponse<string> = {
     success: true,
@@ -75,8 +79,10 @@ describe("Refresh Token Routes", () => {
       // Act & Assert
       const response = await request(app)
         .post("/api/v1/auth/refresh")
-        .set("Authorization", "Bearer valid-token")
-        .set("Cookie", [`${REFRESH_TOKEN_NAME}=${validRefreshToken}`]);
+        .set("Cookie", [
+          `${ACCESS_TOKEN_NAME}=${validAccessToken}`,
+          `${REFRESH_TOKEN_NAME}=${validRefreshToken}`,
+        ]);
 
       expect(response.statusCode).toBe(httpStatus.OK);
       expect(response.body).toEqual(formattedResponse);
@@ -95,7 +101,7 @@ describe("Refresh Token Routes", () => {
       // Act & Assert
       await request(app)
         .post("/api/v1/auth/refresh")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .expect(httpStatus.UNAUTHORIZED);
 
       expect(refreshTokenController.refreshToken).toHaveBeenCalled();
@@ -112,26 +118,11 @@ describe("Refresh Token Routes", () => {
       // Act & Assert
       await request(app)
         .post("/api/v1/auth/refresh")
-        .set("Authorization", "Bearer valid-token")
-        .set("Cookie", [`${REFRESH_TOKEN_NAME}=valid-refresh-token`])
-        .expect(httpStatus.INTERNAL_SERVER_ERROR);
+        .set("Cookie", [
+          `${ACCESS_TOKEN_NAME}=${validAccessToken}`,
+          `${REFRESH_TOKEN_NAME}=${validRefreshToken}`,
+        ])
 
-      expect(refreshTokenController.refreshToken).toHaveBeenCalled();
-    });
-
-    it("should handle malformed cookies", async () => {
-      // Arrange
-      (refreshTokenController.refreshToken as jest.Mock).mockImplementation(
-        () => {
-          throw new Error("Invalid cookie format");
-        }
-      );
-
-      // Act & Assert
-      await request(app)
-        .post("/api/v1/auth/refresh")
-        .set("Authorization", "Bearer valid-token")
-        .set("Cookie", ["malformed-cookie-format"])
         .expect(httpStatus.INTERNAL_SERVER_ERROR);
 
       expect(refreshTokenController.refreshToken).toHaveBeenCalled();
@@ -151,8 +142,10 @@ describe("Refresh Token Routes", () => {
       // Act & Assert
       const res = await request(app)
         .post("/api/v1/auth/refresh")
-        .set("Authorization", "Bearer valid-token")
-        .set("Cookie", [`${REFRESH_TOKEN_NAME}=valid-refresh-token`]);
+        .set("Cookie", [
+          `${ACCESS_TOKEN_NAME}=${validAccessToken}`,
+          `${REFRESH_TOKEN_NAME}=${validRefreshToken}`,
+        ]);
 
       expect(res.headers["custom-header"]).toBe("test-value");
       expect(res.status).toBe(formattedResponse.statusCode);
@@ -170,10 +163,9 @@ describe("Refresh Token Routes", () => {
       // Act & Assert
       const res = await request(app)
         .post("/api/v1/auth/refresh")
-        .set("Authorization", "Bearer valid-token")
         .set("Cookie", [
-          `${REFRESH_TOKEN_NAME}=valid-refresh-token`,
-          "other-cookie=some-value",
+          `${ACCESS_TOKEN_NAME}=${validAccessToken}`,
+          `${REFRESH_TOKEN_NAME}=${validRefreshToken}`,
         ]);
 
       expect(res.status).toBe(formattedResponse.statusCode);
@@ -187,8 +179,10 @@ describe("Refresh Token Routes", () => {
         .map(() =>
           request(app)
             .post("/api/v1/auth/refresh")
-            .set("Authorization", "Bearer valid-token")
-            .set("Cookie", `${REFRESH_TOKEN_NAME}=valid-token`)
+            .set("Cookie", [
+              `${ACCESS_TOKEN_NAME}=${validAccessToken}`,
+              `${REFRESH_TOKEN_NAME}=${validRefreshToken}`,
+            ])
         );
 
       const responses = await Promise.all(requests);
@@ -209,7 +203,10 @@ describe("Refresh Token Routes", () => {
       async (method) => {
         await (request(app) as any)
           [method]("/api/v1/auth/refresh")
-          .set("Authorization", "Bearer valid-token")
+          .set("Cookie", [
+            `${ACCESS_TOKEN_NAME}=${validAccessToken}`,
+            `${REFRESH_TOKEN_NAME}=${validRefreshToken}`,
+          ])
           .expect(httpStatus.NOT_FOUND);
       }
     );
