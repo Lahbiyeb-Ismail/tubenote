@@ -1,3 +1,5 @@
+import Cookies from "js-cookie";
+
 import type {
   AxiosError,
   AxiosInstance,
@@ -5,11 +7,8 @@ import type {
 } from "axios";
 
 import { refreshAccessToken } from "@/features/auth/services";
-import {
-  getStorageValue,
-  removeStorageValue,
-  setStorageValue,
-} from "@/utils/localStorage";
+
+import { getSecureCookie } from "@/utils/secureCookies";
 import { isTokenExpired } from "@/utils/tokenUtils";
 
 /**
@@ -27,11 +26,9 @@ async function handleRefreshToken(
   try {
     const { payload } = await refreshAccessToken();
 
-    setStorageValue("accessToken", payload.data);
+    Cookies.set("access_token", payload.data);
     config.headers.Authorization = `Bearer ${payload.data}`;
   } catch (error) {
-    // If refresh fails, redirect to login
-    removeStorageValue("accessToken");
     window.location.href = "/login";
     throw error;
   }
@@ -50,7 +47,8 @@ async function handleRefreshToken(
 export function setupRequestInterceptor(instance: AxiosInstance): void {
   instance.interceptors.request.use(
     async (config) => {
-      const accessToken = getStorageValue<string>("accessToken");
+      const accessToken = getSecureCookie("access_token");
+
       if (!accessToken) {
         return config;
       }
@@ -87,19 +85,20 @@ export function setupResponseInterceptor(instance: AxiosInstance): void {
         originalRequest._retry = true;
 
         try {
-          const newAccessToken = await refreshAccessToken();
-          setStorageValue("accessToken", newAccessToken);
+          const { payload } = await refreshAccessToken();
 
-          instance.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
+          Cookies.set("accessToken", payload.data);
+
+          const accessToken = payload.data;
+
+          instance.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
 
           if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           }
 
           return instance(originalRequest);
         } catch (refreshError) {
-          removeStorageValue("accessToken");
-
           window.location.href = "/login";
           return Promise.reject(refreshError);
         }

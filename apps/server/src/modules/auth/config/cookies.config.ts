@@ -14,13 +14,13 @@ import { envConfig } from "@/modules/shared/config";
  */
 export const refreshTokenCookieConfig: CookieOptions = {
   httpOnly: true,
-  sameSite: "lax",
+  sameSite: "none",
   secure: envConfig.node_env === "production",
   maxAge: 24 * 60 * 60 * 1000,
 };
 
 /**
- * Configuration object for clearing the refresh token cookie.
+ * Configuration object for clearing the auth token cookie.
  *
  * @constant
  * @type {CookieOptions}
@@ -29,8 +29,8 @@ export const refreshTokenCookieConfig: CookieOptions = {
  * @property {boolean} secure - Indicates if the cookie is only to be sent over HTTPS.
  * This is true if the environment is production.
  */
-export const clearRefreshTokenCookieConfig: CookieOptions = {
+export const clearAuthTokenCookieConfig: CookieOptions = {
   httpOnly: true,
-  sameSite: false,
+  sameSite: "none",
   secure: envConfig.node_env === "production",
 };

@@ -24,7 +24,7 @@ export function LoginForm() {
     },
   });
 
-  const { login, isLoading } = useAuth();
+  const { login, isLoginPending } = useAuth();
 
   const handleLogin = (formData: ILoginDto) => login(formData);
 
@@ -51,9 +51,9 @@ export function LoginForm() {
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700"
-          disabled={isLoading}
+          disabled={isLoginPending}
         >
-          {isLoading ? "Logging in..." : "Login"}
+          {isLoginPending ? "Logging in..." : "Login"}
         </Button>
       </form>
     </Form>

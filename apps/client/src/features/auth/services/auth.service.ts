@@ -112,7 +112,7 @@ export async function refreshAccessToken(): Promise<
     if (axiosError.response) {
       throw new Error(axiosError.response.data.payload.message);
     } else {
-      throw new Error("Logout failed. Please try again.");
+      throw new Error("Refresh failed. Please try again.");
     }
   }
 

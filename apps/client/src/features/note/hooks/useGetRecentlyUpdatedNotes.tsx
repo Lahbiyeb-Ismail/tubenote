@@ -2,11 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getStorageValue } from "@/utils/localStorage";
+import { getSecureCookie } from "@/utils/secureCookies";
 import { getRecentlyUpdatedNotes } from "../services";
 
 export function useGetRecentlyUpdatedNotes() {
-  const accessToken = getStorageValue<string>("accessToken");
+  const accessToken = getSecureCookie("access_token");
 
   return useQuery({
     queryKey: ["notes", "recently_updated_notes"],

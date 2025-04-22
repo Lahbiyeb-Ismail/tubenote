@@ -1,11 +1,10 @@
 "use client";
+import Cookies from "js-cookie";
 
+// import { setStorageValue } from "@/utils/localStorage";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-
-import { useGetCurrentUser } from "@/features/user/hooks";
-import { setStorageValue } from "@/utils/localStorage";
 
 import { loginUser } from "../services";
 import type { AuthAction } from "../types";
@@ -14,40 +13,48 @@ export function useLogin(dispatch: React.Dispatch<AuthAction>) {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const { refetch: refetchCurrentUser } = useGetCurrentUser();
-
   return useMutation({
+    mutationKey: ["login"],
     mutationFn: loginUser,
+    retry: false,
     onMutate: () => {
+      // Cancel any outgoing refetches
+      queryClient.cancelQueries({ queryKey: ["user", "current-user"] });
+
       toast.loading("Logging in...", { id: "loadingToast" });
     },
     onSuccess: async (responseData) => {
       const { payload } = responseData;
 
-      toast.dismiss("loadingToast");
-
       toast.success(payload.message);
 
-      queryClient.invalidateQueries({ queryKey: ["user", "current-user"] });
-
-      setStorageValue("accessToken", payload.data);
-
       dispatch({
-        type: "LOGIN_SUCCESS",
+        type: "SET_SUCCESS_LOGIN",
         payload: {
+          isAuthenticated: true,
           message: payload.message,
-          accessToken: payload.data,
         },
       });
 
-      await refetchCurrentUser();
+      Cookies.set("access_token", payload.data);
+      // setStorageValue("isAuthenticated", true);
+
+      queryClient.invalidateQueries({ queryKey: ["user", "current-user"] });
 
       // Redirect to dashboard after successful login
       router.push("/dashboard");
     },
     onError: (error) => {
-      toast.dismiss("loadingToast");
       toast.error(error.message);
+
+      dispatch({
+        type: "SET_AUTH_ERROR",
+        payload: { message: error.message },
+      });
+    },
+    onSettled: () => {
+      // Clean up loading states regardless of outcome
+      toast.dismiss("loadingToast");
     },
   });
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type React from "react";
 import toast from "react-hot-toast";
@@ -9,7 +9,6 @@ import { logoutUser } from "../services";
 import type { AuthAction } from "../types";
 
 export function useLogout(dispatch: React.Dispatch<AuthAction>) {
-  const queryClient = useQueryClient();
   const router = useRouter();
 
   return useMutation({
@@ -23,16 +22,16 @@ export function useLogout(dispatch: React.Dispatch<AuthAction>) {
       toast.dismiss("loadingToast");
 
       toast.success(payload.message);
-      queryClient.invalidateQueries({ queryKey: ["user", "current-user"] });
+
+      dispatch({
+        type: "SET_SUCCESS_LOGOUT",
+        payload: { message: responseData.payload.message },
+      });
 
       localStorage.clear();
-      dispatch({ type: "LOGOUT_SUCCESS" });
 
       // Redirect to Home page after successful logout
       router.push("/");
-
-      // Reload the page to clear any cached data
-      window.location.reload();
     },
     onError(error) {
       toast.dismiss("loadingToast");
@@ -40,8 +39,8 @@ export function useLogout(dispatch: React.Dispatch<AuthAction>) {
       toast.error(error.message);
 
       dispatch({
-        type: "REQUEST_FAIL",
-        payload: { errorMessage: error.message },
+        type: "SET_AUTH_ERROR",
+        payload: { message: error.message },
       });
     },
   });

@@ -10,12 +10,11 @@ import { passwordBodySchema } from "@tubenote/schemas";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 
+import { useAuth } from "../../contexts";
 import { FormInput } from "../inputs";
 
-import { useResetPassword } from "../../hooks";
-
 export function ResetPasswordForm({ token }: { token: string }) {
-  const { mutate: resetPassword, isPending } = useResetPassword();
+  const { resetPassword, isResetPasswordPending } = useAuth();
 
   const form = useForm<IPasswordBodyDto>({
     resolver: zodResolver(passwordBodySchema),
@@ -54,9 +53,9 @@ export function ResetPasswordForm({ token }: { token: string }) {
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={isPending}
+          disabled={isResetPasswordPending}
         >
-          {isPending ? "Resetting..." : "Reset Password"}
+          {isResetPasswordPending ? "Resetting..." : "Reset Password"}
         </Button>
       </form>
     </Form>

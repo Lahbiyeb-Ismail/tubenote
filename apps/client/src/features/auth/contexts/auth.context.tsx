@@ -1,7 +1,14 @@
 "use client";
 import { createContext, useContext, useReducer } from "react";
 
-import { useLogin, useLogout, useRegister } from "../hooks";
+import {
+  useLogin,
+  useLogout,
+  useRegister,
+  useResetPassword,
+  useSendForgotPasswordEmail,
+  useSendVerificationEmail,
+} from "../hooks";
 import { useAuthReducer } from "../reducers";
 import type { AuthContextType, AuthProviderProps } from "../types";
 
@@ -9,21 +16,30 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const { authInitialState, authReducer } = useAuthReducer();
-  const [state, dispatch] = useReducer(authReducer, authInitialState);
+  const [authState, dispatch] = useReducer(authReducer, authInitialState);
 
   const registerMutation = useRegister(dispatch);
   const loginMutation = useLogin(dispatch);
   const logoutMutation = useLogout(dispatch);
 
+  const resetPasswordMutation = useResetPassword(dispatch);
+  const sendForgotPasswordEmailMutation = useSendForgotPasswordEmail(dispatch);
+  const sendVerificationEmailMutation = useSendVerificationEmail(dispatch);
+
   const value = {
-    state,
+    authState,
     login: loginMutation.mutate,
     register: registerMutation.mutate,
     logout: logoutMutation.mutate,
-    isLoading:
-      registerMutation.isPending ||
-      loginMutation.isPending ||
-      logoutMutation.isPending,
+    resetPassword: resetPasswordMutation.mutate,
+    sendForgotPasswordEmail: sendForgotPasswordEmailMutation.mutate,
+    sendVerificationEmail: sendVerificationEmailMutation.mutate,
+    isLoginPending: loginMutation.isPending,
+    isRegistrationPending: registerMutation.isPending,
+    isLogoutPending: logoutMutation.isPending,
+    isResetPasswordPending: resetPasswordMutation.isPending,
+    isForgotPasswordPending: sendForgotPasswordEmailMutation.isPending,
+    isVerificationEmailPending: sendVerificationEmailMutation.isPending,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

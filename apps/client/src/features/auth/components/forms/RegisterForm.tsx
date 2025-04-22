@@ -23,7 +23,7 @@ export function RegisterForm() {
     },
   });
 
-  const { isLoading, register } = useAuth();
+  const { isRegistrationPending, register } = useAuth();
 
   const handleRegister = (formData: IRegisterDto) => register(formData);
 
@@ -57,9 +57,9 @@ export function RegisterForm() {
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700"
-          disabled={isLoading}
+          disabled={isRegistrationPending}
         >
-          {isLoading ? "Registering..." : "Register"}
+          {isRegistrationPending ? "Registering..." : "Register"}
         </Button>
       </form>
     </Form>
