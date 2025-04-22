@@ -23,8 +23,10 @@ import {
 } from "../ui/dropdown-menu";
 
 function DropDownNavbar() {
-  const { logout } = useAuth();
   const { data: response } = useGetCurrentUser();
+  const { logoutMutationResult } = useAuth();
+
+  const { mutate: logout, isPending } = logoutMutationResult;
 
   const currentUser = response?.payload.data;
 
@@ -81,6 +83,7 @@ function DropDownNavbar() {
           <DropdownMenuItem
             className="flex items-center cursor-pointer text-red-600 
 					focus:text-red-600 focus:bg-red-50"
+            disabled={isPending}
             onClick={() => logout()}
           >
             <LogOut className="mr-2 h-4 w-4" />
