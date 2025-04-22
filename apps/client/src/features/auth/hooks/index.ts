@@ -10,3 +10,6 @@ export * from "./useResetPassword";
 
 // Verification Email Hooks
 export * from "./useSendVerificationEmail";
+
+// OAuth Hooks
+export * from "./useExchangeOauthCode";

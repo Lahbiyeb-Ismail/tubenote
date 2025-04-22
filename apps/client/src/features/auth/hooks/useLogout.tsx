@@ -12,6 +12,8 @@ export function useLogout(dispatch: React.Dispatch<AuthAction>) {
   const router = useRouter();
 
   return useMutation({
+    // The query key is used to identify the mutation
+    mutationKey: ["logout-user"],
     mutationFn: logoutUser,
     onMutate: () => {
       toast.loading("Logging out...", { id: "loadingToast" });

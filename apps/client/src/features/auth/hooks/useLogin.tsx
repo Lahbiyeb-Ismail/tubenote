@@ -14,7 +14,7 @@ export function useLogin(dispatch: React.Dispatch<AuthAction>) {
   const router = useRouter();
 
   return useMutation({
-    mutationKey: ["login"],
+    mutationKey: ["login-user"],
     mutationFn: loginUser,
     retry: false,
     onMutate: () => {
