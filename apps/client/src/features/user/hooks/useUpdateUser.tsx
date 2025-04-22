@@ -19,7 +19,7 @@ export function useUpdateUser(dispatch: React.Dispatch<UserAction>) {
 
       toast.success(payload.message);
 
-      queryClient.invalidateQueries({ queryKey: ["user", "current-user"] });
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
 
       dispatch({
         type: "UPDATE_USER",
