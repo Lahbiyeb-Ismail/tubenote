@@ -29,9 +29,9 @@ export default function AuthCallback() {
       }
 
       try {
-        const { payload } = await exchangeOauthCodeForAuthTokens(code);
+        await exchangeOauthCodeForAuthTokens(code);
 
-        setStorageValue("accessToken", payload.data);
+        setStorageValue("isAuthenticated", true);
 
         setStatus("success");
         router.push("/dashboard");
