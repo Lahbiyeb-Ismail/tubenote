@@ -18,7 +18,7 @@ import type { IRefreshTokenService } from "../refresh-token";
 
 import type { ICreateAccountDto } from "@/modules/user/features/account/dtos";
 import type { ICreateUserDto } from "@tubenote/dtos";
-import type { IOAuthResponseDto, IOAuthTokenPayloadDto } from "./dtos";
+import type { IOAuthTokenPayloadDto } from "./dtos";
 import type { IOAuthService, IOAuthServiceOptions } from "./oauth.types";
 
 export class OAuthService implements IOAuthService {
@@ -73,67 +73,63 @@ export class OAuthService implements IOAuthService {
   async handleOAuthLogin(
     createUserDto: ICreateUserDto,
     createAccountDto: ICreateAccountDto
-  ): Promise<IOAuthResponseDto> {
-    const oauthResponse =
-      await this._prismaService.transaction<IOAuthResponseDto>(async (tx) => {
-        let userId: string;
+  ): Promise<string> {
+    return this._prismaService.transaction<string>(async (tx) => {
+      let userId: string;
 
-        // Try to find existing account for this OAuth provider
-        const existingAccount =
-          await this._accountService.findAccountByProvider(
-            createAccountDto.provider,
-            createAccountDto.providerAccountId
-          );
+      // Try to find existing account for this OAuth provider
+      const existingAccount = await this._accountService.findAccountByProvider(
+        createAccountDto.provider,
+        createAccountDto.providerAccountId
+      );
 
-        if (existingAccount) {
-          // Account exists, login flow
-          this._loggerService.info(
-            `User with ID ${existingAccount.userId} logged in with ${createAccountDto.provider}.`
-          );
-
-          userId = existingAccount.userId;
-        } else {
-          // Account doesn't exist, create user and account
-          this._loggerService.info(
-            `User with email ${createUserDto.email} signed up with ${createAccountDto.provider}.`
-          );
-
-          const user = await this._userService.createUserWithAccount(
-            tx,
-            createUserDto,
-            createAccountDto
-          );
-
-          userId = user.id;
-        }
-
-        // Generate tokens and save refresh token
+      if (existingAccount) {
+        // Account exists, login flow
         this._loggerService.info(
-          `Generating auth tokens for user with ID ${userId}.`
+          `User with ID ${existingAccount.userId} logged in with ${createAccountDto.provider}.`
         );
 
-        const { accessToken, refreshToken } =
-          this._jwtService.generateAuthTokens(userId);
-
+        userId = existingAccount.userId;
+      } else {
+        // Account doesn't exist, create user and account
         this._loggerService.info(
-          `Saving refresh token for user with ID ${userId}.`
+          `User with email ${createUserDto.email} signed up with ${createAccountDto.provider}.`
         );
 
-        await this._refreshTokenService.createToken(userId, {
-          token: refreshToken,
-          expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
-        });
+        const user = await this._userService.createUserWithAccount(
+          tx,
+          createUserDto,
+          createAccountDto
+        );
 
-        const temporaryCode = await this.generateTemporaryOAuthCode({
-          accessToken,
-          refreshToken,
-          userId,
-        });
+        userId = user.id;
+      }
 
-        return { accessToken, refreshToken, temporaryCode };
+      // Generate tokens and save refresh token
+      this._loggerService.info(
+        `Generating auth tokens for user with ID ${userId}.`
+      );
+
+      const { accessToken, refreshToken } =
+        this._jwtService.generateAuthTokens(userId);
+
+      this._loggerService.info(
+        `Saving refresh token for user with ID ${userId}.`
+      );
+
+      await this._refreshTokenService.createToken(userId, {
+        token: refreshToken,
+        expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
       });
 
-    return oauthResponse;
+      const temporaryOauthCode = await this.generateTemporaryOAuthCode({
+        accessToken,
+        refreshToken,
+        userId,
+      });
+
+      return temporaryOauthCode;
+    });
   }
 
   async exchangeOauthCodeForTokens(code: string): Promise<IAuthResponseDto> {

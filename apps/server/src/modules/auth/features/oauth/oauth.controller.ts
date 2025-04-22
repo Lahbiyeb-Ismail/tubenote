@@ -38,9 +38,9 @@ export class OAuthController implements IOAuthController {
    * @param res - The response object.
    * @param temporaryCode - The temporary code to be sent to the client application.
    */
-  private redirectWithTemporaryCode(res: Response, temporaryCode: string) {
+  private redirectWithTemporaryOauthCode(res: Response, temporaryCode: string) {
     res.redirect(
-      `${envConfig.client.url}/auth/callback?code=${encodeURIComponent(
+      `${envConfig.client.url}/oauth/callback?code=${encodeURIComponent(
         temporaryCode
       )}`
     );
@@ -77,15 +77,12 @@ export class OAuthController implements IOAuthController {
 
     const { createAccountDto, createUserDto } = req.user as IOauthLoginDto;
 
-    const { refreshToken, temporaryCode } =
-      await this._oauthService.handleOAuthLogin(
-        createUserDto,
-        createAccountDto
-      );
+    const temporaryOauthCode = await this._oauthService.handleOAuthLogin(
+      createUserDto,
+      createAccountDto
+    );
 
-    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
-
-    this.redirectWithTemporaryCode(res, temporaryCode);
+    this.redirectWithTemporaryOauthCode(res, temporaryOauthCode);
   }
 
   /**
@@ -110,7 +107,7 @@ export class OAuthController implements IOAuthController {
   ): Promise<void> {
     const { code } = req.body;
 
-    const { accessToken } =
+    const { accessToken, refreshToken } =
       await this._oauthService.exchangeOauthCodeForTokens(code);
 
     const formattedResponse =
@@ -121,6 +118,7 @@ export class OAuthController implements IOAuthController {
         },
       });
 
+    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
     res.cookie(ACCESS_TOKEN_NAME, accessToken, accessTokenCookieConfig);
 
     res.status(formattedResponse.statusCode).json(formattedResponse);

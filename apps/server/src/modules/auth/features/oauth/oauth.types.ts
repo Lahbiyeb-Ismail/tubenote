@@ -21,11 +21,7 @@ import type { IJwtService } from "@/modules/auth/utils";
 
 import type { IRefreshTokenService } from "../refresh-token";
 
-import type {
-  IOAuthAuthorizationCodeDto,
-  IOAuthResponseDto,
-  IOAuthTokenPayloadDto,
-} from "./dtos";
+import type { IOAuthAuthorizationCodeDto, IOAuthTokenPayloadDto } from "./dtos";
 
 export interface IOAuthServiceOptions {
   prismaService: IPrismaService;
@@ -47,7 +43,7 @@ export interface IOAuthService {
   handleOAuthLogin(
     createUserDto: ICreateUserDto,
     createAccountDto: ICreateAccountDto
-  ): Promise<IOAuthResponseDto>;
+  ): Promise<string>;
   generateTemporaryOAuthCode(
     temporaryOAuthCodeDto: IOAuthTokenPayloadDto
   ): Promise<string>;
