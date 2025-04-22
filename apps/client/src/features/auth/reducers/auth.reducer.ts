@@ -1,9 +1,9 @@
-import { getSecureCookie } from "@/utils/secureCookies";
+import { getStorageValue } from "@/utils/localStorage";
 import type { AuthAction, AuthState } from "../types";
 
 export function useAuthReducer() {
   const authInitialState: AuthState = {
-    isAuthenticated: !!getSecureCookie("access_token"),
+    isAuthenticated: getStorageValue("isAuthenticated") ?? false,
     errorMessage: "",
     successMessage: "",
   };

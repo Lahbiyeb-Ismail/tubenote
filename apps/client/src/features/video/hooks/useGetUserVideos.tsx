@@ -4,11 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { IPaginationQueryDto } from "@tubenote/dtos";
 
-import { getSecureCookie } from "@/utils/secureCookies";
+import { getStorageValue } from "@/utils/localStorage";
 import { getUserVideos } from "../services";
 
 export function useGetUserVideos(paginationQuery: IPaginationQueryDto) {
-  const accessToken = getSecureCookie("access_token");
+  const isAuthenticated = getStorageValue<boolean>("isAuthenticated") ?? false;
 
   return useQuery({
     queryKey: ["videos", paginationQuery],
@@ -17,6 +17,6 @@ export function useGetUserVideos(paginationQuery: IPaginationQueryDto) {
     // The data is considered fresh for 5 minutes, after which it will be refetched.
     staleTime: 5 * 60 * 1000,
     // Only run the query if the access token is available
-    enabled: !!accessToken,
+    enabled: isAuthenticated,
   });
 }

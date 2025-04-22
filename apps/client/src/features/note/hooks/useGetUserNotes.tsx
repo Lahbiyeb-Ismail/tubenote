@@ -4,11 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { IPaginationQueryDto } from "@tubenote/dtos";
 
-import { getSecureCookie } from "@/utils/secureCookies";
+import { getStorageValue } from "@/utils/localStorage";
 import { getUserNotes } from "../services";
 
 export function useGetUserNotes(paginationQuery: IPaginationQueryDto) {
-  const accessToken = getSecureCookie("access_token");
+  const isAuthenticated = getStorageValue<boolean>("isAuthenticated") ?? false;
 
   return useQuery({
     queryKey: ["notes", paginationQuery],
@@ -17,7 +17,7 @@ export function useGetUserNotes(paginationQuery: IPaginationQueryDto) {
       notes: data.payload.data,
       paginationMeta: data.payload.paginationMeta,
     }),
-    enabled: !!accessToken,
+    enabled: isAuthenticated,
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
   });
