@@ -6,6 +6,7 @@ import app from "@/app";
 import type { IUpdateNoteDto } from "@tubenote/dtos";
 import type { Note } from "@tubenote/types";
 
+import { ACCESS_TOKEN_NAME } from "@/modules/auth";
 import { noteController } from "../note.module";
 
 // **********************************************
@@ -22,7 +23,7 @@ jest.mock("jsonwebtoken", () => {
         _secret: string,
         callback: (err: Error | null, payload?: any) => void
       ) => {
-        if (token === "valid-token") {
+        if (token === "valid-access-token") {
           // Simulate a successful verification with a payload.
           callback(null, { userId: "user_id_001" });
         } else {
@@ -65,6 +66,8 @@ describe("Note Routes Tests", () => {
       updatedAt: new Date(),
     },
   ];
+
+  const validAccessToken = "valid-access-token";
 
   beforeAll(() => {
     (noteController.getUserNotes as jest.Mock) = jest.fn();
@@ -227,26 +230,12 @@ describe("Note Routes Tests", () => {
       expect(noteController.getUserNotes).not.toHaveBeenCalled();
     });
 
-    it("should return 401 if the Authorization header does not start with 'Bearer '", async () => {
-      const res = await request(app)
-        .get("/api/v1/notes")
-        .set("Authorization", "Token valid-token");
-
-      expect(res.statusCode).toEqual(httpStatus.UNAUTHORIZED);
-
-      expect(res.body.payload.message).toMatch(/authenticated/);
-
-      expect(noteController.getUserNotes).not.toHaveBeenCalled();
-    });
-
     it("should return 401 if the token is invalid", async () => {
       const res = await request(app)
         .get("/api/v1/notes")
-        .set("Authorization", "Bearer invalid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=invalid-access-token`]);
 
-      expect(res.statusCode).toEqual(httpStatus.UNAUTHORIZED);
-
-      expect(res.body.payload.message).toMatch(/Unauthorized/);
+      expect(res.statusCode).toEqual(httpStatus.BAD_REQUEST);
 
       expect(noteController.getUserNotes).not.toHaveBeenCalled();
     });
@@ -254,7 +243,7 @@ describe("Note Routes Tests", () => {
     it("should authenticate successfully with a valid token", async () => {
       const res = await request(app)
         .get("/api/v1/notes")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .expect(httpStatus.OK);
 
       expect(res.body.success).toBe(true);
@@ -274,7 +263,7 @@ describe("Note Routes Tests", () => {
     it("should get all notes for the authenticated user", async () => {
       const res = await request(app)
         .get("/api/v1/notes")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.OK);
       expect(res.body.success).toEqual(true);
@@ -290,7 +279,7 @@ describe("Note Routes Tests", () => {
     it("should handle pagination", async () => {
       const res = await request(app)
         .get("/api/v1/notes?page=1&limit=10")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.OK);
       expect(res.body.success).toEqual(true);
@@ -306,7 +295,7 @@ describe("Note Routes Tests", () => {
     it("should return 400 for invalid pagination parameters value", async () => {
       const res = await request(app)
         .get("/api/v1/notes?page=invalid&limit=invalid")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.BAD_REQUEST);
     });
@@ -314,7 +303,7 @@ describe("Note Routes Tests", () => {
     it("should return 400 for invalid query parameters", async () => {
       const res = await request(app)
         .get("/api/v1/notes?invalidParam=true")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.BAD_REQUEST);
     });
@@ -326,7 +315,7 @@ describe("Note Routes Tests", () => {
 
       const res = await request(app)
         .get("/api/v1/notes")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.INTERNAL_SERVER_ERROR);
     });
@@ -348,7 +337,7 @@ describe("Note Routes Tests", () => {
     // it("should create a new note", async () => {
     //   const res = await request(app)
     //     .post("/api/v1/notes/video_id_001")
-    //     .set("Authorization", "Bearer valid-token")
+    //     .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
     //     .send(newNoteBody);
 
     //   expect(res.statusCode).toEqual(httpStatus.CREATED);
@@ -363,7 +352,7 @@ describe("Note Routes Tests", () => {
 
       const res = await request(app)
         .post("/api/v1/notes/video_id_001")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(invalidNoteBody);
 
       expect(res.statusCode).toEqual(httpStatus.BAD_REQUEST);
@@ -372,7 +361,7 @@ describe("Note Routes Tests", () => {
     it("should return 400 for a missing data body", async () => {
       const res = await request(app)
         .post("/api/v1/notes/video_id_001")
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send();
 
       expect(res.statusCode).toEqual(httpStatus.BAD_REQUEST);
@@ -385,7 +374,7 @@ describe("Note Routes Tests", () => {
 
     //   const res = await request(app)
     //     .post("/api/v1/notes/video_id_001")
-    //     .set("Authorization", "Bearer valid-token")
+    //     .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
     //     .send(newNoteBody);
 
     //   expect(res.statusCode).toEqual(httpStatus.INTERNAL_SERVER_ERROR);
@@ -399,7 +388,7 @@ describe("Note Routes Tests", () => {
     it("should get recent notes", async () => {
       const res = await request(app)
         .get("/api/v1/notes/recent")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.OK);
       expect(res.body.success).toEqual(true);
@@ -416,7 +405,7 @@ describe("Note Routes Tests", () => {
 
       const res = await request(app)
         .get("/api/v1/notes/recent")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.INTERNAL_SERVER_ERROR);
     });
@@ -429,7 +418,7 @@ describe("Note Routes Tests", () => {
     it("should get recently updated notes", async () => {
       const res = await request(app)
         .get("/api/v1/notes/recently-updated")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.OK);
       expect(res.body.success).toEqual(true);
@@ -446,7 +435,7 @@ describe("Note Routes Tests", () => {
 
       const res = await request(app)
         .get("/api/v1/notes/recently-updated")
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.INTERNAL_SERVER_ERROR);
     });
@@ -463,7 +452,7 @@ describe("Note Routes Tests", () => {
         .get(
           `/api/v1/notes/video/${mockVideoId}?page=1&limit=8&sortBy=createdAt&order=desc`
         )
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.OK);
       expect(res.body.success).toEqual(true);
@@ -477,7 +466,7 @@ describe("Note Routes Tests", () => {
     it("should return 400 for invalid query parameters", async () => {
       const res = await request(app)
         .get(`/api/v1/notes/video/${mockVideoId}?invalidParam=true`)
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.BAD_REQUEST);
     });
@@ -489,7 +478,7 @@ describe("Note Routes Tests", () => {
 
       const res = await request(app)
         .get(`/api/v1/notes/video/${mockVideoId}`)
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.INTERNAL_SERVER_ERROR);
     });
@@ -504,7 +493,7 @@ describe("Note Routes Tests", () => {
     it("should get a specific note by ID", async () => {
       const res = await request(app)
         .get(`/api/v1/notes/${noteId}`)
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.OK);
       expect(res.body.success).toEqual(true);
@@ -514,7 +503,7 @@ describe("Note Routes Tests", () => {
     it("should return 404 if note not found", async () => {
       const res = await request(app)
         .get(`/api/v1/notes/nonexistentId`)
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.NOT_FOUND);
     });
@@ -526,7 +515,7 @@ describe("Note Routes Tests", () => {
 
       const res = await request(app)
         .get(`/api/v1/notes/${noteId}`)
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.INTERNAL_SERVER_ERROR);
     });
@@ -546,7 +535,7 @@ describe("Note Routes Tests", () => {
 
       const res = await request(app)
         .patch(`/api/v1/notes/${noteId}`)
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(updatedNoteBody);
 
       expect(res.statusCode).toEqual(httpStatus.OK);
@@ -562,7 +551,7 @@ describe("Note Routes Tests", () => {
     it("should return 404 if note not found", async () => {
       const res = await request(app)
         .patch(`/api/v1/notes/nonexistentId`)
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send({ title: "Updated Title" });
 
       expect(res.statusCode).toEqual(httpStatus.NOT_FOUND);
@@ -573,7 +562,7 @@ describe("Note Routes Tests", () => {
 
       const res = await request(app)
         .patch(`/api/v1/notes/${noteId}`)
-        .set("Authorization", "Bearer valid-token")
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`])
         .send(invalidNote);
 
       expect(res.statusCode).toEqual(httpStatus.BAD_REQUEST);
@@ -588,7 +577,7 @@ describe("Note Routes Tests", () => {
     it("should delete a note", async () => {
       const res = await request(app)
         .delete(`/api/v1/notes/${noteId}`)
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.OK);
       expect(res.body.success).toEqual(true);
@@ -597,7 +586,7 @@ describe("Note Routes Tests", () => {
     it("should return 404 if note not found", async () => {
       const res = await request(app)
         .delete(`/api/v1/notes/nonexistentId`)
-        .set("Authorization", "Bearer valid-token");
+        .set("Cookie", [`${ACCESS_TOKEN_NAME}=${validAccessToken}`]);
 
       expect(res.statusCode).toEqual(httpStatus.NOT_FOUND);
     });

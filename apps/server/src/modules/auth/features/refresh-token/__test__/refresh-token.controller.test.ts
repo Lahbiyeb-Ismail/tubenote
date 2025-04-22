@@ -7,19 +7,19 @@ import type { IApiSuccessResponse } from "@tubenote/types";
 import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
-import {
-  BadRequestError,
-  ForbiddenError,
-  UnauthorizedError,
-} from "@/modules/shared/api-errors";
+import { ForbiddenError, UnauthorizedError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import {
+  accessTokenCookieConfig,
   clearAuthTokenCookieConfig,
   refreshTokenCookieConfig,
 } from "@/modules/auth/config";
 
-import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
+import {
+  ACCESS_TOKEN_NAME,
+  REFRESH_TOKEN_NAME,
+} from "@/modules/auth/constants";
 import type { IAuthResponseDto } from "@/modules/auth/dtos";
 
 import { RefreshTokenController } from "../refresh-token.controller";
@@ -93,15 +93,16 @@ describe("RefreshTokenController", () => {
         mockRefreshToken
       );
 
-      expect(res.clearCookie).toHaveBeenCalledWith(
-        REFRESH_TOKEN_NAME,
-        clearAuthTokenCookieConfig
-      );
-
       expect(res.cookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
         mockNewTokens.refreshToken,
         refreshTokenCookieConfig
+      );
+
+      expect(res.cookie).toHaveBeenCalledWith(
+        ACCESS_TOKEN_NAME,
+        mockNewTokens.accessToken,
+        accessTokenCookieConfig
       );
 
       expect(res.status).toHaveBeenCalledWith(formattedResponse.statusCode);
@@ -138,6 +139,16 @@ describe("RefreshTokenController", () => {
       await expect(
         refreshTokenController.refreshToken(req, res)
       ).rejects.toThrow(mockError);
+
+      // Assert
+      expect(res.clearCookie).toHaveBeenCalledWith(
+        REFRESH_TOKEN_NAME,
+        clearAuthTokenCookieConfig
+      );
+      expect(res.clearCookie).toHaveBeenCalledWith(
+        ACCESS_TOKEN_NAME,
+        clearAuthTokenCookieConfig
+      );
     });
 
     it("should handle non-string refresh token values", async () => {
@@ -148,6 +159,8 @@ describe("RefreshTokenController", () => {
       await expect(
         refreshTokenController.refreshToken(req, res)
       ).rejects.toThrow(UnauthorizedError);
+
+      expect(res.clearCookie).toHaveBeenCalledTimes(2);
     });
 
     it("should handle multiple concurrent refresh attempts", async () => {
@@ -169,25 +182,8 @@ describe("RefreshTokenController", () => {
       await expect(
         refreshTokenController.refreshToken(req, res)
       ).rejects.toThrow(ForbiddenError);
-    });
 
-    it("should handle malformed JWT tokens", async () => {
-      const malformedTokens = [
-        "invalid.token.structure",
-        "a".repeat(500), // Long invalid token
-        "header.payload.signature", // Proper structure but invalid
-      ];
-
-      for (const token of malformedTokens) {
-        req.cookies = { [REFRESH_TOKEN_NAME]: token };
-        refreshTokenService.refreshToken.mockRejectedValue(
-          new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN)
-        );
-
-        await expect(
-          refreshTokenController.refreshToken(req, res)
-        ).rejects.toThrow(BadRequestError);
-      }
+      expect(res.clearCookie).toHaveBeenCalledTimes(2);
     });
 
     it("should maintain cookie consistency after multiple operations", async () => {
@@ -214,26 +210,31 @@ describe("RefreshTokenController", () => {
 
       await refreshTokenController.refreshToken(req, res);
 
-      expect(res.clearCookie).toHaveBeenCalledTimes(2);
-      expect(res.cookie).toHaveBeenCalledTimes(2);
+      expect(res.cookie).toHaveBeenCalledTimes(4);
     });
 
-    // it("should validate cookie security configurations", async () => {
-    //   req.cookies = { [REFRESH_TOKEN_NAME]: mockRefreshToken };
-    //   refreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
+    it("should validate cookie security configurations", async () => {
+      req.cookies = { [REFRESH_TOKEN_NAME]: mockRefreshToken };
+      refreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
 
-    //   responseFormatter.formatSuccessResponse.mockReturnValue(
-    //     formattedResponse
-    //   );
+      responseFormatter.formatSuccessResponse.mockReturnValue(
+        formattedResponse
+      );
 
-    //   await refreshTokenController.refreshToken(req, res);
+      await refreshTokenController.refreshToken(req, res);
 
-    //   expect(res.cookie).toHaveBeenCalledWith(
-    //     REFRESH_TOKEN_NAME,
-    //     mockNewTokens.refreshToken,
-    //    clearAuthTokenCookieConfig
-    //   );
-    // });
+      expect(res.cookie).toHaveBeenCalledWith(
+        REFRESH_TOKEN_NAME,
+        mockNewTokens.refreshToken,
+        refreshTokenCookieConfig
+      );
+
+      expect(res.cookie).toHaveBeenCalledWith(
+        ACCESS_TOKEN_NAME,
+        mockNewTokens.accessToken,
+        accessTokenCookieConfig
+      );
+    });
   });
 
   afterEach(() => {

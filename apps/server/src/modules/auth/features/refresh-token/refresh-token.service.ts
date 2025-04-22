@@ -80,7 +80,7 @@ export class RefreshTokenService implements IRefreshTokenService {
         throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
       }
 
-      await this._refreshTokenRepository.delete(token, tx);
+      await this._refreshTokenRepository.delete(userId, token, tx);
 
       const { accessToken, refreshToken } =
         this._jwtService.generateAuthTokens(userId);
@@ -96,14 +96,18 @@ export class RefreshTokenService implements IRefreshTokenService {
     });
   }
 
-  async deleteAllTokens(userId: string): Promise<void> {
-    await this._refreshTokenRepository.deleteAll(userId);
-  }
-
   async createToken(
     userId: string,
     data: ICreateRefreshTokenDto
   ): Promise<RefreshToken> {
     return this._refreshTokenRepository.create(userId, data);
+  }
+
+  async deleteToken(userId: string, token: string): Promise<void> {
+    await this._refreshTokenRepository.delete(userId, token);
+  }
+
+  async deleteAllTokens(userId: string): Promise<void> {
+    await this._refreshTokenRepository.deleteAll(userId);
   }
 }

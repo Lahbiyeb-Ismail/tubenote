@@ -14,9 +14,13 @@ import type { TypedRequest } from "@/modules/shared/types";
 
 import {
   AUTH_RATE_LIMIT_CONFIG,
+  accessTokenCookieConfig,
   refreshTokenCookieConfig,
 } from "@/modules/auth/config";
-import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
+import {
+  ACCESS_TOKEN_NAME,
+  REFRESH_TOKEN_NAME,
+} from "@/modules/auth/constants";
 
 import type { IAuthResponseDto } from "@/modules/auth/dtos";
 
@@ -212,6 +216,12 @@ describe("LocalAuthController", () => {
         REFRESH_TOKEN_NAME,
         mockAuthResponse.refreshToken,
         refreshTokenCookieConfig
+      );
+
+      expect(res.cookie).toHaveBeenCalledWith(
+        ACCESS_TOKEN_NAME,
+        mockAuthResponse.accessToken,
+        accessTokenCookieConfig
       );
 
       expect(res.status).toHaveBeenCalledWith(formattedLoginRes.statusCode);

@@ -7,6 +7,12 @@ import { envConfig } from "@/modules/shared/config";
 export const REFRESH_TOKEN_NAME = envConfig.jwt.refresh_token.cookie_name;
 
 /**
+ * The name of the access token cookie.
+ * This value is retrieved from the environment configuration.
+ */
+export const ACCESS_TOKEN_NAME = envConfig.jwt.access_token.cookie_name;
+
+/**
  * Secret key used for signing and verifying access tokens.
  * This value is retrieved from the environment configuration.
  */

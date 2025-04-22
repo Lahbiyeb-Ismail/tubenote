@@ -3,6 +3,23 @@ import type { CookieOptions } from "express";
 import { envConfig } from "@/modules/shared/config";
 
 /**
+ * Configuration options for the access token cookie.
+ *
+ * @property httpOnly - Ensures the cookie is only accessible via HTTP(S) requests and not through client-side scripts.
+ * @property sameSite - Specifies the SameSite attribute to control cross-site request behavior. Set to "none" to allow cross-site cookies.
+ * @property secure - Indicates whether the cookie should only be transmitted over secure HTTPS connections.
+ *                    This is determined by the application's environment, enabling it only in production.
+ * @property maxAge - Specifies the maximum age of the cookie in milliseconds.
+ *                    In this case, the cookie will expire after 15 minutes (15 * 60 * 1000).
+ */
+export const accessTokenCookieConfig: CookieOptions = {
+  httpOnly: true,
+  sameSite: "lax",
+  secure: envConfig.node_env === "production",
+  maxAge: 15 * 60 * 1000,
+};
+
+/**
  * Configuration options for the refresh token cookie.
  *
  * @constant
@@ -17,6 +34,7 @@ export const refreshTokenCookieConfig: CookieOptions = {
   sameSite: "none",
   secure: envConfig.node_env === "production",
   maxAge: 24 * 60 * 60 * 1000,
+  // path: "/api/v1/auth/refresh-token",
 };
 
 /**
