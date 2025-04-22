@@ -24,7 +24,8 @@ export function LoginForm() {
     },
   });
 
-  const { login, isLoginPending } = useAuth();
+  const { loginMutationResult } = useAuth();
+  const { mutate: login, isPending } = loginMutationResult;
 
   const handleLogin = (formData: ILoginDto) => login(formData);
 
@@ -51,9 +52,9 @@ export function LoginForm() {
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700"
-          disabled={isLoginPending}
+          disabled={isPending}
         >
-          {isLoginPending ? "Logging in..." : "Login"}
+          {isPending ? "Logging in..." : "Login"}
         </Button>
       </form>
     </Form>

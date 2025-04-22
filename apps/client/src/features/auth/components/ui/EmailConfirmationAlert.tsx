@@ -13,7 +13,10 @@ export function EmailConfirmationAlert({
   emailVerified,
   email,
 }: EmailConfirmationAlertProps) {
-  const { sendVerificationEmail, isVerificationEmailPending } = useAuth();
+  const { sendVerificationEmailMutationResult } = useAuth();
+
+  const { mutate: sendVerificationEmail, isPending } =
+    sendVerificationEmailMutationResult;
 
   if (emailVerified) {
     return (
@@ -37,9 +40,9 @@ export function EmailConfirmationAlert({
           variant="link"
           className="p-0 h-auto font-normal text-yellow-700 hover:text-yellow-900"
           onClick={() => sendVerificationEmail(email)}
-          disabled={isVerificationEmailPending}
+          disabled={isPending}
         >
-          {isVerificationEmailPending
+          {isPending
             ? "Sending..."
             : "Click here to send a verification email."}
         </Button>
