@@ -1,7 +1,6 @@
 "use client";
 
 import { LayoutGrid, List, Search } from "lucide-react";
-import React from "react";
 
 import { Button } from "@/components/ui/button";
 import { useLayout } from "@/context/useLayout";

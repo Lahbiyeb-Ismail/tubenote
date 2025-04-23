@@ -1,4 +1,4 @@
-function parseStringtoHtml(iframePlayer: string) {
+export function parseStringtoHtml(iframePlayer: string) {
   const width = "100%";
   const height = "100%";
 
@@ -13,5 +13,3 @@ function parseStringtoHtml(iframePlayer: string) {
 
   return parsedIframe?.outerHTML;
 }
-
-export default parseStringtoHtml;

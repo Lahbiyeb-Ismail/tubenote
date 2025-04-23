@@ -5,7 +5,7 @@
  * @returns A formatted date string in the "en-US" locale with the following format:
  *          "Month Day, Year, HH:MM:SS AM/PM".
  */
-function formatDate(dateString: string) {
+export function formatDate(dateString: string) {
   const date = new Date(dateString);
   return date.toLocaleString("en-US", {
     year: "numeric",
@@ -16,5 +16,3 @@ function formatDate(dateString: string) {
     second: "2-digit",
   });
 }
-
-export default formatDate;

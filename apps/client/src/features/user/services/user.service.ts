@@ -1,7 +1,5 @@
 import type { AxiosError } from "axios";
 
-import axiosInstance from "@/lib/axios.lib";
-
 import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/dtos";
 import type {
   IApiErrorResponse,
@@ -9,6 +7,8 @@ import type {
   User,
 } from "@tubenote/types";
 import { asyncTryCatch } from "@tubenote/utils";
+
+import { axiosInstance } from "@/lib";
 
 /**
  * Fetches the current user's data from the server.

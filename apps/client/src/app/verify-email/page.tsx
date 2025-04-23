@@ -1,8 +1,9 @@
 "use client";
 
-import HomeButton from "@/components/global/HomeButton";
 import { CheckCircle, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
+
+import HomeButton from "@/components/global/home-button";
 
 export default function VerifyEmail() {
   const [email, setEmail] = useState("");

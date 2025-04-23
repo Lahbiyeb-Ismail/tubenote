@@ -1,14 +1,10 @@
 "use client";
-
-import { Printer } from "lucide-react";
 import Markdown from "markdown-to-jsx";
 import { usePDF } from "react-to-pdf";
 
 import { cn } from "@/lib/utils";
 
 import CodeBlock from "@/components/global/CodeBlock";
-
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import ExportAsPdfButton from "./ExportAsPdfButton";

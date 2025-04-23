@@ -3,14 +3,14 @@
 import { DEFAULT_PAGE } from "@/utils/constants";
 
 import { useGetUserVideos } from "@/features/video/hooks";
-import usePagination from "@/hooks/global/usePagination";
+import { usePagination } from "@/hooks/global";
 
-import Loader from "@/components/global/Loader";
-import PaginationComponent from "@/components/global/Pagination";
+import Loader from "@/components/global/loader";
+import PaginationComponent from "@/components/global/pagination";
 
-import AddNoteForm from "@/components/dashboards/AddNoteForm";
-import Header from "@/components/dashboards/Header";
-import NoDataFound from "@/components/dashboards/NoDataFound";
+import AddNoteForm from "@/components/dashboards/add-note-form";
+import Header from "@/components/dashboards/header";
+import NoDataFound from "@/components/dashboards/no-data-found";
 
 import { VideosList } from "@/features/video/components";
 

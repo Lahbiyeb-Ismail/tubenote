@@ -1,4 +1,3 @@
-import axiosInstance from "@/lib/axios.lib";
 import type { AxiosError } from "axios";
 
 import type {
@@ -12,6 +11,8 @@ import type {
   Note,
 } from "@tubenote/types";
 import { asyncTryCatch } from "@tubenote/utils";
+
+import { axiosInstance } from "@/lib";
 
 /**
  * Creates a new note associated with a specific video.

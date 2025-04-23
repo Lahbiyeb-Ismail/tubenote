@@ -1,10 +1,11 @@
 import type { z } from "zod";
 
-import type { saveNoteFormSchema, videoFormSchema } from "@/lib/schemas";
 import type { ReactNode } from "react";
 
 import type { ICreateNoteDto, IUpdateNoteDto } from "@tubenote/dtos";
 import type { Note } from "@tubenote/types";
+
+import type { saveNoteFormSchema, videoFormSchema } from "@/lib";
 
 export type VideoUrl = z.infer<typeof videoFormSchema>;
 

@@ -2,9 +2,9 @@
 
 import { useGetNoteById } from "@/features/note/hooks";
 
-import Loader from "@/components/global/Loader";
-import MarkdownViewer from "@/components/global/MarkdownViewer";
-import ResizablePanels from "@/components/global/ResizablePanels";
+import Loader from "@/components/global/loader";
+import MarkdownViewer from "@/components/global/markdown-viewer";
+import ResizablePanels from "@/components/global/resizable-panels";
 
 import {
   NoteError,
@@ -13,7 +13,7 @@ import {
 } from "@/features/note/components";
 
 import { VideoPlayer } from "@/features/video/components";
-import useToggleVideoPlayer from "@/hooks/global/useToggleVideoPlayer";
+import { useToggleVideoPlayer } from "@/hooks/global";
 
 type NotePageParams = {
   noteId: string;

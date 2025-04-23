@@ -1,6 +1,6 @@
 import { GOOGLE_CLIENT_ID, GOOGLE_REDIRECT_URI } from "@/utils/constants";
 
-function getGoogleOAuthUrl() {
+export function getGoogleOAuthUrl() {
   const rootUrl = "https://accounts.google.com/o/oauth2/v2/auth";
 
   const options = {
@@ -20,5 +20,3 @@ function getGoogleOAuthUrl() {
 
   return `${rootUrl}?${searchParams.toString()}`;
 }
-
-export default getGoogleOAuthUrl;

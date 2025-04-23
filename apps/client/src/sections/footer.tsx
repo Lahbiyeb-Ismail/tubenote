@@ -2,9 +2,9 @@ import { Facebook, Github, Twitter } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { footerQuickLinks, footerSupportLinks } from "@/utils/constants";
+import { footerQuickLinks, footerSupportLinks } from "@/utils";
 
-function Footer() {
+export function Footer() {
   return (
     <footer className="bg-gradient-to-br from-purple-100 via-pink-100 to-red-100 pt-16 pb-8">
       <div className="max-w-6xl mx-auto px-4">
@@ -104,5 +104,3 @@ function Footer() {
     </footer>
   );
 }
-
-export default Footer;

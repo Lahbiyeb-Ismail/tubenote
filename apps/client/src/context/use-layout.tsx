@@ -1,11 +1,11 @@
 "use client";
 
-import React, {
+import {
+  type ReactNode,
   createContext,
   useContext,
-  useState,
   useEffect,
-  type ReactNode,
+  useState,
 } from "react";
 
 type LayoutContextType = {

@@ -1,16 +1,17 @@
 "use client";
 
 import { useGetUserNotes } from "@/features/note/hooks";
-import usePagination from "@/hooks/global/usePagination";
+import { usePagination } from "@/hooks/global";
 
-import AddNoteForm from "@/components/dashboards/AddNoteForm";
-import Header from "@/components/dashboards/Header";
-import NoDataFound from "@/components/dashboards/NoDataFound";
-import Laoder from "@/components/global/Loader";
-import PaginationComponent from "@/components/global/Pagination";
+import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils";
+
 import { NotesList } from "@/features/note/components";
 
-import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
+import AddNoteForm from "@/components/dashboards/add-note-form";
+import Header from "@/components/dashboards/header";
+import NoDataFound from "@/components/dashboards/no-data-found";
+import Laoder from "@/components/global/loader";
+import PaginationComponent from "@/components/global/pagination";
 
 function NotesPage() {
   const { currentPage, setPage } = usePagination({ defaultPage: DEFAULT_PAGE });

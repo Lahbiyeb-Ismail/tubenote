@@ -1,2 +1,2 @@
-export * from "./GoogleAuthButton";
-export * from "./LogoutButton";
+export * from "./google-auth-button";
+export * from "./logout-button";
