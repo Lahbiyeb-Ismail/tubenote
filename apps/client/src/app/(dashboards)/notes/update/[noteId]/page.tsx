@@ -1,6 +1,6 @@
 "use client";
 
-import EditorPage from "@/components/editor/EditorPage";
+import EditorPage from "@/components/editor/editor-page";
 import { useGetNoteById } from "@/features/note/hooks";
 
 function UpdateNotePage({ params }: { params: { noteId: string } }) {

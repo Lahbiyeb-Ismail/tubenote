@@ -7,12 +7,12 @@ import type { Note } from "@tubenote/types";
 import { DEFAULT_PAGE } from "@/utils/constants";
 
 import { useGetVideoNotes } from "@/features/video/hooks";
-import usePagination from "@/hooks/global/usePagination";
+import { usePagination } from "@/hooks/global";
 
-import Loader from "@/components/global/Loader";
-import MarkdownViewer from "@/components/global/MarkdownViewer";
-import PaginationComponent from "@/components/global/Pagination";
-import ResizablePanels from "@/components/global/ResizablePanels";
+import Loader from "@/components/global/loader";
+import MarkdownViewer from "@/components/global/markdown-viewer";
+import PaginationComponent from "@/components/global/pagination";
+import ResizablePanels from "@/components/global/resizable-panels";
 
 import {
   VideoNotesList,

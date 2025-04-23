@@ -1,4 +1,4 @@
-import { getStorageValue } from "@/utils/localStorage";
+import { getStorageValue } from "@/utils";
 import type { AuthAction, AuthState } from "../types";
 
 export function useAuthReducer() {

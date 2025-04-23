@@ -1,8 +1,9 @@
-import { Button } from "@/components/ui/button";
 import { Pencil, PlayCircle, Rocket } from "lucide-react";
 import Link from "next/link";
 
-export default function Hero() {
+import { Button } from "@/components/ui/button";
+
+export function Hero() {
   return (
     <div className="height_viewport bg-gradient-to-br from-purple-100 via-pink-100 to-red-100 flex items-center">
       <div className="max-w-6xl mx-auto px-4 py-8">

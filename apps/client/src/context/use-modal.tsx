@@ -1,12 +1,7 @@
 "use client";
 
 import type { Video } from "@/types/video.types";
-import React, {
-  createContext,
-  useState,
-  useContext,
-  type ReactNode,
-} from "react";
+import { type ReactNode, createContext, useContext, useState } from "react";
 
 type ModalContent = {
   noteId?: string;

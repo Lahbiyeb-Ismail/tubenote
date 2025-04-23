@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function useToggleVideoPlayer(initialState = false) {
+export function useToggleVideoPlayer(initialState = false) {
   const [isVideoPlayerVisible, setIsVideoPlayerVisible] =
     useState(initialState);
 
@@ -8,5 +8,3 @@ function useToggleVideoPlayer(initialState = false) {
 
   return { isVideoPlayerVisible, toggleVideoPlayer };
 }
-
-export default useToggleVideoPlayer;

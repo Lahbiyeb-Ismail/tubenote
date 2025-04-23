@@ -1,14 +1,17 @@
 "luse client";
 
-import { DEFAULT_PAGE } from "@/utils/constants";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect } from "react";
+
+import { DEFAULT_PAGE } from "@/utils";
 
 interface UsePaginationProps {
   defaultPage?: number;
 }
 
-function usePagination({ defaultPage = DEFAULT_PAGE }: UsePaginationProps) {
+export function usePagination({
+  defaultPage = DEFAULT_PAGE,
+}: UsePaginationProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -35,5 +38,3 @@ function usePagination({ defaultPage = DEFAULT_PAGE }: UsePaginationProps) {
     setPage,
   };
 }
-
-export default usePagination;

@@ -37,7 +37,7 @@ import {
   toolbarPlugin,
 } from "@mdxeditor/editor";
 import { SaveIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import "@mdxeditor/editor/style.css";
 
 import { useModal } from "@/context/useModal";

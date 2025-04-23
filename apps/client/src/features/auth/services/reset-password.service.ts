@@ -3,7 +3,7 @@ import type { AxiosError } from "axios";
 import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
 import { asyncTryCatch } from "@tubenote/utils";
 
-import axiosInstance from "@/lib/axios.lib";
+import { axiosInstance } from "@/lib";
 
 /**
  * Sends a password reset email to the specified email address.

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-function useDirection() {
+export function useDirection() {
   const [direction, setDirection] = useState<"horizontal" | "vertical">(
     "horizontal"
   );
@@ -24,5 +24,3 @@ function useDirection() {
 
   return direction;
 }
-
-export default useDirection;

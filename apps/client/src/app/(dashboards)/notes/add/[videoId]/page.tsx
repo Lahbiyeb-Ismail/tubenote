@@ -2,8 +2,8 @@
 
 import { useGetVideoById } from "@/features/video/hooks";
 
-import EditorPage from "@/components/editor/EditorPage";
-import Loader from "@/components/global/Loader";
+import EditorPage from "@/components/editor/editor-page";
+import Loader from "@/components/global/loader";
 
 function AddNewNotePage({ params }: { params: { videoId: string } }) {
   const { videoId } = params;

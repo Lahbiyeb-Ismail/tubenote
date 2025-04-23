@@ -1,12 +1,11 @@
 import axios, { type AxiosError } from "axios";
 
-import axiosInstance from "@/lib/axios.lib";
-
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
 import { asyncTryCatch } from "@tubenote/utils";
 
-import { API_URL } from "@/utils/constants";
+import { axiosInstance } from "@/lib";
+import { API_URL } from "@/utils";
 
 /**
  * Registers a new user with the provided registration credentials.

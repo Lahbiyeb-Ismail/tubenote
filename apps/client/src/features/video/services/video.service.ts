@@ -8,8 +8,8 @@ import type {
 } from "@tubenote/types";
 import { asyncTryCatch } from "@tubenote/utils";
 
-import extractVideoId from "@/helpers/extractVideoId";
-import axiosInstance from "@/lib/axios.lib";
+import { extractVideoId } from "@/helpers";
+import { axiosInstance } from "@/lib";
 
 /**
  * Fetches video data for a given YouTube video URL.

@@ -1,8 +1,8 @@
 "use client";
 
-import Header from "@/components/dashboards/Header";
-import NoDataFound from "@/components/dashboards/NoDataFound";
-import RecentNoteList from "@/components/dashboards/RecentNotesList";
+import Header from "@/components/dashboards/header";
+import NoDataFound from "@/components/dashboards/no-data-found";
+import RecentNoteList from "@/components/dashboards/recent-notes-list";
 
 import {
   useGetRecentNotes,

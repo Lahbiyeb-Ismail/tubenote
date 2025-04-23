@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export function ForogotPasswordLink() {
+export function ForgotPasswordLink() {
   return (
     <div className="flex justify-end">
       <Link

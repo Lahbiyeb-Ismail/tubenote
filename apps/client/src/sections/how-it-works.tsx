@@ -1,10 +1,9 @@
-import StepsList from "@/components/global/StepsList";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, FileCheck, Globe, PlayCircle } from "lucide-react";
 import Link from "next/link";
 
-export default function HowItWorks() {
+import StepsList from "@/components/global/steps-list";
+import { Button } from "@/components/ui/button";
+
+export function HowItWorks() {
   return (
     <section className="py-16 bg-gradient-to-br from-purple-100 via-pink-100 to-red-100">
       <div className="max-w-6xl mx-auto px-4">
