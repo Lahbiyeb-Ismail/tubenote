@@ -57,7 +57,7 @@ export interface WithAuthOptions {
  *   LoadingComponent: MyCustomLoader
  * });
  */
-function withAuth<P extends object>(
+export function withAuth<P extends object>(
   WrappedComponent: React.ComponentType<P>,
   options: WithAuthOptions = {}
 ) {
@@ -114,5 +114,3 @@ function withAuth<P extends object>(
 
   return WithAuth;
 }
-
-export default withAuth;
