@@ -1,8 +1,8 @@
 import { AlertTriangle, CheckCircle } from "lucide-react";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "../../contexts";
+
+import { Alert, AlertDescription, AlertTitle, Button } from "@/components/ui";
 
 type EmailConfirmationAlertProps = {
   emailVerified: boolean;

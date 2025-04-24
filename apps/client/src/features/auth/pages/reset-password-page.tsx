@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
-
 import { useParams } from "next/navigation";
+
+import { useVerifyPasswordResetToken } from "../hooks";
+
 import {
   AuthPageLayout,
   PasswordResetErrorState,
   PasswordResetLoadingState,
   ResetPasswordForm,
 } from "../components";
-import { useVerifyPasswordResetToken } from "../hooks";
 
 export function ResetPasswordPage() {
   const { token } = useParams();

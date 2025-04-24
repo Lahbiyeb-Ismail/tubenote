@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
-import { setStorageValue } from "@/utils/localStorage";
+import { setStorageValue } from "@/utils";
 
 import { exchangeOauthCodeForAuthTokens } from "../services";
 import type { AuthAction } from "../types";
