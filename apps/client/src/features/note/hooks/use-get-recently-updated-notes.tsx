@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getStorageValue } from "@/utils/localStorage";
+import { getStorageValue } from "@/utils";
 import { getRecentlyUpdatedNotes } from "../services";
 
 export function useGetRecentlyUpdatedNotes() {

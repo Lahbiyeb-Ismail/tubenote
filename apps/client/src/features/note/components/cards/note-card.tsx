@@ -2,15 +2,16 @@
 
 import type { Note } from "@tubenote/types";
 
-import { useLayout } from "@/context/useLayout";
-import { useModal } from "@/context/useModal";
+import { useLayout, useModal } from "@/context";
 import { useNote } from "@/features/note/contexts";
 
-import CardContent from "@/components/global/CardContent";
-import CardFooterWrapper from "@/components/global/CardFooterWrapper";
-import CardImage from "@/components/global/CardImage";
-import CardSettingsButton from "@/components/global/CardSettingsButton";
-import CardWrapper from "@/components/global/CardWrapper";
+import {
+  CardContent,
+  CardFooterWrapper,
+  CardImage,
+  CardSettingsButton,
+  CardWrapper,
+} from "@/components/global";
 
 import { DeleteNoteButton, EditNoteButton } from "../buttons";
 

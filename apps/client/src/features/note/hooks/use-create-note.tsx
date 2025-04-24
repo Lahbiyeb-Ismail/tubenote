@@ -4,10 +4,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { useModal } from "@/context/useModal";
-import { createNote } from "../services";
+import { useModal } from "@/context";
 
-import type { NoteAction } from "@/features/note/types/note.types";
+import { createNote } from "../services";
+import type { NoteAction } from "../types";
 
 export function useCreateNote(dispatch: React.Dispatch<NoteAction>) {
   const queryClient = useQueryClient();

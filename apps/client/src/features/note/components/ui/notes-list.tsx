@@ -2,7 +2,7 @@
 
 import type { Note } from "@tubenote/types";
 
-import { useLayout } from "@/context/useLayout";
+import { useLayout } from "@/context";
 
 import { NoteCard } from "../cards";
 

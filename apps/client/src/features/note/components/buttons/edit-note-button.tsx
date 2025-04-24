@@ -1,9 +1,9 @@
 import { PencilIcon } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
+import { useLayout } from "@/context";
 
-import { useLayout } from "@/context/useLayout";
+import { Button } from "@/components/ui";
 
 type EditNoteButtonProps = {
   noteId: string;

@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { IPaginationQueryDto } from "@tubenote/dtos";
 
-import { getStorageValue } from "@/utils/localStorage";
+import { getStorageValue } from "@/utils";
 import { getUserNotes } from "../services";
 
 export function useGetUserNotes(paginationQuery: IPaginationQueryDto) {
