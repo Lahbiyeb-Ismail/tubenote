@@ -1,7 +1,6 @@
 import { Facebook, Github, Twitter } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button, Input } from "@/components/ui";
 import { footerQuickLinks, footerSupportLinks } from "@/utils";
 
 export function Footer() {
