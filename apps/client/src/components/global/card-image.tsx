@@ -6,7 +6,7 @@ interface CardImageProps {
   isGridLayout: boolean;
 }
 
-function CardImage({ src, alt, isGridLayout }: CardImageProps) {
+export function CardImage({ src, alt, isGridLayout }: CardImageProps) {
   return (
     <div
       className={`relative ${
@@ -17,5 +17,3 @@ function CardImage({ src, alt, isGridLayout }: CardImageProps) {
     </div>
   );
 }
-
-export default CardImage;

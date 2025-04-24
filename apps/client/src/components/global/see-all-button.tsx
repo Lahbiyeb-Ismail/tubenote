@@ -1,14 +1,15 @@
 import { Eye } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
-import { useLayout } from "@/context/useLayout";
+import { useLayout } from "@/context";
+
+import { Button } from "@/components/ui";
 
 type SeeAllButtonProps = {
   href: string;
 };
 
-function SeeAllButton({ href }: SeeAllButtonProps) {
+export function SeeAllButton({ href }: SeeAllButtonProps) {
   const { isGridLayout } = useLayout();
 
   return (
@@ -26,5 +27,3 @@ function SeeAllButton({ href }: SeeAllButtonProps) {
     </Link>
   );
 }
-
-export default SeeAllButton;

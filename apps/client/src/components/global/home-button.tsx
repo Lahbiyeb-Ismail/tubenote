@@ -1,8 +1,9 @@
 import { Home } from "lucide-react";
 import Link from "next/link";
-import { Button } from "../ui/button";
 
-function HomeButton() {
+import { Button } from "@/components/ui";
+
+export function HomeButton() {
   return (
     <Link href="/">
       <Button
@@ -16,5 +17,3 @@ function HomeButton() {
     </Link>
   );
 }
-
-export default HomeButton;

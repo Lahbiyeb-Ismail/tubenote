@@ -8,7 +8,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from "@/components/ui";
 
 interface PaginationProps {
   currentPage: number;
@@ -16,7 +16,7 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-export default function PaginationComponent({
+export function PaginationComponent({
   currentPage,
   totalPages,
   onPageChange,

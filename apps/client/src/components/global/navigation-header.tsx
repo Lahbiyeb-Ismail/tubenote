@@ -9,10 +9,10 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+  Button,
+  Label,
+  Switch,
+} from "@/components/ui";
 
 export type BreadcrumbItemType = {
   href: string;
@@ -39,7 +39,7 @@ type NavigationHeaderProps = {
   toggleOption?: ToggleOption;
 };
 
-function NavigationHeader({
+export function NavigationHeader({
   breadcrumbs,
   actionButton,
   toggleOption,
@@ -108,5 +108,3 @@ function NavigationHeader({
     </header>
   );
 }
-
-export default NavigationHeader;

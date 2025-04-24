@@ -4,16 +4,16 @@ import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
-import { useLayout } from "@/context/useLayout";
+import { useLayout } from "@/context";
 
 import { LogoutButton } from "@/features/auth/components";
 import { UserProfile } from "@/features/user/components";
 
-import SidebarLogo from "./SidebarLogo";
-import SidebarNav from "./SidebarNav";
+import { Button } from "@/components/ui";
 
-function Sidebar() {
+import { SidebarLogo, SidebarNav } from "./";
+
+export function Sidebar() {
   const pathname = usePathname();
   const { isSidebarOpen, toggleSidebar } = useLayout();
 
@@ -44,5 +44,3 @@ function Sidebar() {
     </aside>
   );
 }
-
-export default Sidebar;

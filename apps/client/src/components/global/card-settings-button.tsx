@@ -3,12 +3,8 @@
 import { Download, MoreVertical, PencilIcon, Trash2Icon } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Button } from "@/components/ui";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui";
 
 type CardSettingsButtonProps = {
   noteId: string;
@@ -16,7 +12,7 @@ type CardSettingsButtonProps = {
   onExport: () => void;
 };
 
-function CardSettingsButton({
+export function CardSettingsButton({
   noteId,
   onDelete,
   onExport,
@@ -60,5 +56,3 @@ function CardSettingsButton({
     </Popover>
   );
 }
-
-export default CardSettingsButton;

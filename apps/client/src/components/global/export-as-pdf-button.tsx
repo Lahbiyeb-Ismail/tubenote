@@ -1,11 +1,12 @@
 import { Printer } from "lucide-react";
-import { Button } from "../ui/button";
+
+import { Button } from "@/components/ui";
 
 type ExportAsPdfButtonProps = {
   onExport: () => void;
 };
 
-function ExportAsPdfButton({ onExport }: ExportAsPdfButtonProps) {
+export function ExportAsPdfButton({ onExport }: ExportAsPdfButtonProps) {
   return (
     <Button
       variant="outline"
@@ -18,5 +19,3 @@ function ExportAsPdfButton({ onExport }: ExportAsPdfButtonProps) {
     </Button>
   );
 }
-
-export default ExportAsPdfButton;

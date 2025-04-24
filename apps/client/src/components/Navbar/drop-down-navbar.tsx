@@ -12,17 +12,17 @@ import { useGetCurrentUser } from "@/features/user/hooks";
 
 import { UserAvatar } from "@/features/user/components";
 
-import { Button } from "../ui/button";
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "@/components/ui";
 
-function DropDownNavbar() {
+export function DropDownNavbar() {
   const { data: response } = useGetCurrentUser();
   const { logoutMutationResult } = useAuth();
 
@@ -94,5 +94,3 @@ function DropDownNavbar() {
     </div>
   );
 }
-
-export default DropDownNavbar;

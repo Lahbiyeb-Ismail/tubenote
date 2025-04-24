@@ -2,10 +2,11 @@
 
 import { LayoutGrid, List, Search } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { useLayout } from "@/context/useLayout";
+import { useLayout } from "@/context";
 
-function Header({ title }: { title: string }) {
+import { Button } from "@/components/ui";
+
+export function Header({ title }: { title: string }) {
   const { toggleLayout, isGridLayout } = useLayout();
 
   return (
@@ -39,5 +40,3 @@ function Header({ title }: { title: string }) {
     </header>
   );
 }
-
-export default Header;

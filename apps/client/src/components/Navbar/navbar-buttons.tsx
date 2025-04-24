@@ -2,10 +2,9 @@
 
 import { useGetCurrentUser } from "@/features/user/hooks";
 
-import LoggedInButtons from "./LoggedInButtons";
-import LoggedOutButtons from "./LoggedOutButtons";
+import { LoggedInButtons, LoggedOutButtons } from "./";
 
-function NavbarButtons() {
+export function NavbarButtons() {
   const { data: response, isLoading } = useGetCurrentUser();
 
   const currentUser = response?.payload.data;
@@ -16,5 +15,3 @@ function NavbarButtons() {
     </>
   );
 }
-
-export default NavbarButtons;

@@ -2,10 +2,10 @@ import Link from "next/link";
 
 import type { Note } from "@tubenote/types";
 
-import { useLayout } from "@/context/useLayout";
+import { useLayout } from "@/context";
 
+import { Button } from "@/components/ui";
 import { NoteCard } from "@/features/note/components";
-import { Button } from "../ui/button";
 
 interface RecentNoteListProps {
   title: string;
@@ -13,7 +13,11 @@ interface RecentNoteListProps {
   emptyMessage: string;
 }
 
-function RecentNoteList({ title, notes, emptyMessage }: RecentNoteListProps) {
+export function RecentNoteList({
+  title,
+  notes,
+  emptyMessage,
+}: RecentNoteListProps) {
   const hasNotes = notes.length > 0;
 
   const { isGridLayout } = useLayout();
@@ -40,5 +44,3 @@ function RecentNoteList({ title, notes, emptyMessage }: RecentNoteListProps) {
     </div>
   );
 }
-
-export default RecentNoteList;

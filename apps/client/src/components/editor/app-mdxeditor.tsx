@@ -38,11 +38,14 @@ import {
 } from "@mdxeditor/editor";
 import { SaveIcon } from "lucide-react";
 import { useRef } from "react";
+
 import "@mdxeditor/editor/style.css";
 
-import { useModal } from "@/context/useModal";
-import type { Video } from "@/types/video.types";
-import { Button } from "../ui/button";
+import type { Video } from "@tubenote/types";
+
+import { useModal } from "@/context";
+
+import { Button } from "@/components/ui";
 
 function whenInAdmonition(editorInFocus: EditorInFocus | null) {
   const node = editorInFocus?.rootNode;
@@ -159,13 +162,13 @@ type AppMDXEditorProps = {
   action: "create" | "update";
 };
 
-const AppMDXEditor = ({
+export default function AppMDXEditor({
   video,
   initialNoteContent,
   noteTitle,
   noteId,
   action,
-}: AppMDXEditorProps) => {
+}: AppMDXEditorProps) {
   const ref = useRef<MDXEditorMethods | null>(null);
 
   const { openModal } = useModal();
@@ -201,6 +204,4 @@ const AppMDXEditor = ({
       </Button>
     </>
   );
-};
-
-export default AppMDXEditor;
+}

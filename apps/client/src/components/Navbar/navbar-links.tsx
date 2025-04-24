@@ -2,10 +2,10 @@
 
 import { usePathname } from "next/navigation";
 
-import { navItems } from "@/utils/constants";
-import NavLink from "./NavLink";
+import { navItems } from "@/utils";
+import { NavLink } from "./";
 
-function NavbarLinks() {
+export function NavbarLinks() {
   const pathname = usePathname();
 
   return (
@@ -22,5 +22,3 @@ function NavbarLinks() {
     </div>
   );
 }
-
-export default NavbarLinks;

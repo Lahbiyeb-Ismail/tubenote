@@ -2,7 +2,7 @@ type SidebarLogoProps = {
   isOpen: boolean;
 };
 
-function SidebarLogo({ isOpen }: SidebarLogoProps) {
+export function SidebarLogo({ isOpen }: SidebarLogoProps) {
   return (
     <div>
       <h1 className="flex items-center text-2xl font-bold text-blue-600">
@@ -24,5 +24,3 @@ function SidebarLogo({ isOpen }: SidebarLogoProps) {
     </div>
   );
 }
-
-export default SidebarLogo;

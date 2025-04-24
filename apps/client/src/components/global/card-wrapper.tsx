@@ -1,8 +1,8 @@
-import { Card } from "@/components/ui/card";
+import { useLayout } from "@/context";
 
-import { useLayout } from "@/context/useLayout";
+import { Card } from "@/components/ui";
 
-function CardWrapper({ children }: { children: React.ReactNode }) {
+export function CardWrapper({ children }: { children: React.ReactNode }) {
   const { isGridLayout } = useLayout();
 
   return (
@@ -15,5 +15,3 @@ function CardWrapper({ children }: { children: React.ReactNode }) {
     </Card>
   );
 }
-
-export default CardWrapper;

@@ -1,8 +1,7 @@
-import Logo from "../global/Logo";
-import MaxWidthWrapper from "../global/MaxWidthWrapper";
-import NavbarButtons from "./NavbarButtons";
+import { Logo, MaxWidthWrapper } from "@/components/global";
+import { NavbarButtons } from "./";
 
-function Navbar() {
+export function Navbar() {
   return (
     <header className="sticky inset-x-0 top-0 z-[49] h-14 w-full backdrop-blur-lg transition-all">
       <MaxWidthWrapper>
@@ -14,5 +13,3 @@ function Navbar() {
     </header>
   );
 }
-
-export default Navbar;

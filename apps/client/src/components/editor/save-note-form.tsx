@@ -10,9 +10,9 @@ import { useVideo } from "@/features/video/contexts";
 
 import type { NoteTitle } from "@/features/note/types";
 
-import { saveNoteFormSchema } from "@/lib/schemas";
-// import { getStorageValue } from "@/utils/localStorage";
-import { Button } from "../ui/button";
+// import { getStorageValue } from "@/utils";
+import { Button } from "@/components/ui";
+import { saveNoteFormSchema } from "@/lib";
 
 type SaveNoteFormProps = {
   noteId: string;
@@ -24,7 +24,7 @@ type SaveNoteFormProps = {
   video: Video;
 };
 
-function SaveNoteForm({
+export function SaveNoteForm({
   noteId,
   noteTitle: title,
   noteContent,
@@ -100,5 +100,3 @@ function SaveNoteForm({
     </form>
   );
 }
-
-export default SaveNoteForm;

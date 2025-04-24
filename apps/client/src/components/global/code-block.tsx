@@ -5,14 +5,14 @@ import Prism from "prismjs";
 import "prismjs/components/prism-javascript";
 import "prismjs/themes/prism-tomorrow.css";
 
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib";
 
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui";
 
-const CodeBlock = ({
+export function CodeBlock({
   className,
   children,
-}: { className?: string; children: string }) => {
+}: { className?: string; children: string }) {
   const language = "javascript";
   const highlightedCode = language
     ? Prism.highlight(children, Prism.languages[language], language)
@@ -47,6 +47,4 @@ const CodeBlock = ({
       </pre>
     </div>
   );
-};
-
-export default CodeBlock;
+}

@@ -1,18 +1,19 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useModal } from "@/context";
+
+import { SaveNoteForm } from "@/components/editor";
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { useModal } from "@/context/useModal";
-import SaveNoteForm from "../editor/SaveNoteForm";
+} from "@/components/ui";
 
-function ConfirmationModal() {
+export function ConfirmationModal() {
   const { isOpen, modalContent, closeModal } = useModal();
 
   if (!modalContent) return null;
@@ -68,5 +69,3 @@ function ConfirmationModal() {
     </Dialog>
   );
 }
-
-export default ConfirmationModal;

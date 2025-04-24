@@ -1,6 +1,6 @@
 import { Calendar, LayoutGrid, List, Search } from "lucide-react";
 
-function DashboardHeader() {
+export function DashboardHeader() {
   return (
     <header className="mb-8 flex items-center justify-between rounded-lg bg-white p-4 shadow">
       <Search className="text-gray-400 mr-2" />
@@ -30,5 +30,3 @@ function DashboardHeader() {
     </header>
   );
 }
-
-export default DashboardHeader;

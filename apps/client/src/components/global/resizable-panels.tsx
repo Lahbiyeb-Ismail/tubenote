@@ -1,10 +1,10 @@
+import { useDirection } from "@/hooks";
+
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/components/ui/resizable";
-
-import useDirection from "@/hooks/global/useDirection";
+} from "@/components/ui";
 
 interface ResizablePanelsProps {
   leftPanelSize?: number;
@@ -13,7 +13,7 @@ interface ResizablePanelsProps {
   rightSideContent: React.ReactNode;
 }
 
-function ResizablePanels({
+export function ResizablePanels({
   leftPanelSize = 50,
   rightPanelSize = 50,
   leftSideContent,
@@ -33,5 +33,3 @@ function ResizablePanels({
     </ResizablePanelGroup>
   );
 }
-
-export default ResizablePanels;

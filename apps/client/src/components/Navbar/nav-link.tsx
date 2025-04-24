@@ -8,7 +8,7 @@ type NavLinkProps = {
   icon: React.ElementType;
 };
 
-function NavLink({ name, href, icon: Icon, pathname }: NavLinkProps) {
+export function NavLink({ name, href, icon: Icon, pathname }: NavLinkProps) {
   return (
     <Link
       href={href}
@@ -23,5 +23,3 @@ function NavLink({ name, href, icon: Icon, pathname }: NavLinkProps) {
     </Link>
   );
 }
-
-export default NavLink;

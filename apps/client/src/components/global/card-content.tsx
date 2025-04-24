@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardDescription, CardHeader, CardTitle } from "@/components/ui";
 
 interface CardContentProps {
   cardTitle: string;
@@ -9,7 +9,7 @@ interface CardContentProps {
   isGridLayout: boolean;
 }
 
-function CardContent({
+export function CardContent({
   cardTitle,
   cardDescription,
   href,
