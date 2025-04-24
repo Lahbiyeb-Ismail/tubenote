@@ -7,9 +7,7 @@ import { useForm } from "react-hook-form";
 import type { IUpdateUserDto } from "@tubenote/dtos";
 import { updateUserSchema } from "@tubenote/schemas";
 
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-
+import { Button, Form } from "@/components/ui";
 import { FormInput } from "@/features/auth/components";
 
 import { useUser } from "../../contexts";
