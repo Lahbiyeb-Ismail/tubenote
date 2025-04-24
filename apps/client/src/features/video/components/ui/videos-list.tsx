@@ -2,7 +2,7 @@
 
 import type { Video } from "@tubenote/types";
 
-import { useLayout } from "@/context/useLayout";
+import { useLayout } from "@/context";
 import { VideoCard } from "../cards";
 
 type VideosListProps = {

@@ -2,9 +2,7 @@
 
 import { Plus } from "lucide-react";
 
-import NavigationHeader from "@/components/global/NavigationHeader";
-
-import type { BreadcrumbItemType } from "@/components/global/NavigationHeader";
+import { type BreadcrumbItemType, NavigationHeader } from "@/components/global";
 
 type VideoPageHeaderProps = {
   videoId: string;
