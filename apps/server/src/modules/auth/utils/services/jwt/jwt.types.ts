@@ -8,7 +8,10 @@ import type { ILoggerService } from "@/modules/shared/services";
 export interface IJwtService {
   verify(verifyTokenDto: IVerifyTokenDto): Promise<JwtPayload>;
   sign(signTokenDto: ISignTokenDto): string;
+  generateAccessToken(userId: string): string;
+  generateRefreshToken(userId: string): string;
   generateAuthTokens(userId: string): IAuthResponseDto;
+  isTokenExpiringSoon(exp: number): boolean;
 }
 
 export interface IJwtServiceOptions {
