@@ -3,7 +3,7 @@
 import { CheckCircle, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import HomeButton from "@/components/global/home-button";
+import { HomeButton } from "@/components/global";
 
 export default function VerifyEmail() {
   const [email, setEmail] = useState("");

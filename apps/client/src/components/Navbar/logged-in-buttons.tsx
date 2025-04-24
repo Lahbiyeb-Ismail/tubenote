@@ -1,7 +1,6 @@
-import DropDownNavbar from "./DropDownNavbar";
-import NavbarLinks from "./NavbarLinks";
+import { DropDownNavbar, NavbarLinks } from "./";
 
-function LoggedInButtons() {
+export function LoggedInButtons() {
   return (
     <div className="md:flex-grow flex justify-between gap-4">
       <NavbarLinks />
@@ -9,5 +8,3 @@ function LoggedInButtons() {
     </div>
   );
 }
-
-export default LoggedInButtons;

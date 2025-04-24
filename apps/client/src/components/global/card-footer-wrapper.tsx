@@ -1,15 +1,15 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib";
 
-import { CardFooter } from "@/components/ui/card";
+import { useLayout } from "@/context";
 
-import { useLayout } from "@/context/useLayout";
+import { CardFooter } from "@/components/ui";
 
 type CardFooterProps = {
   children: React.ReactNode;
   className?: string;
 };
 
-function CardFooterWrapper({ children, className }: CardFooterProps) {
+export function CardFooterWrapper({ children, className }: CardFooterProps) {
   const { isGridLayout } = useLayout();
   return (
     <CardFooter
@@ -24,5 +24,3 @@ function CardFooterWrapper({ children, className }: CardFooterProps) {
     </CardFooter>
   );
 }
-
-export default CardFooterWrapper;

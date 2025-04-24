@@ -1,7 +1,6 @@
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 
+import { Alert, AlertDescription, AlertTitle, Button } from "@/components/ui";
 interface NoteErrorProps {
   onRetry: () => void;
 }

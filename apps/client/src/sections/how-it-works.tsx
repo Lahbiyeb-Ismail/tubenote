@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import StepsList from "@/components/global/steps-list";
+import { StepsList } from "@/components/global";
 import { Button } from "@/components/ui/button";
 
 export function HowItWorks() {

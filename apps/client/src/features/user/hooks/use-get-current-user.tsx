@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getStorageValue } from "@/utils/localStorage";
+import { getStorageValue } from "@/utils";
 import { getCurrentUser } from "../services";
 
 export function useGetCurrentUser() {

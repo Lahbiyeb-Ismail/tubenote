@@ -1,12 +1,12 @@
-import { sidebarMenuLinks } from "@/utils/constants";
-import SidebarLink from "./SidebarLink";
+import { sidebarMenuLinks } from "@/utils";
+import { SidebarLink } from "./";
 
 type SidebarNavProps = {
   pathname: string;
   isOpen: boolean;
 };
 
-function SidebarNav({ pathname, isOpen }: SidebarNavProps) {
+export function SidebarNav({ pathname, isOpen }: SidebarNavProps) {
   return (
     <nav
       className={`flex-grow transition-all duration-300 ${
@@ -26,5 +26,3 @@ function SidebarNav({ pathname, isOpen }: SidebarNavProps) {
     </nav>
   );
 }
-
-export default SidebarNav;

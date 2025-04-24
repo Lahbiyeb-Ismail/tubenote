@@ -1,7 +1,7 @@
 "use client";
 
 import { useGetUserNotes } from "@/features/note/hooks";
-import { usePagination } from "@/hooks/global";
+import { usePagination } from "@/hooks";
 
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils";
 

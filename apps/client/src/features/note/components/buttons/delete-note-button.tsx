@@ -2,9 +2,9 @@
 
 import { Trash2Icon } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { useLayout } from "@/context";
 
-import { useLayout } from "@/context/useLayout";
+import { Button } from "@/components/ui";
 
 type DeleteNoteButtonProps = {
   isLoading: boolean;

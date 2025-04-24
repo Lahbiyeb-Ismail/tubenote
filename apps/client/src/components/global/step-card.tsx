@@ -1,7 +1,8 @@
 import type { LucideIcon } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
 
 type StepCardProps = {
   step: {
@@ -12,7 +13,7 @@ type StepCardProps = {
   };
 };
 
-function StepCard({ step }: StepCardProps) {
+export function StepCard({ step }: StepCardProps) {
   return (
     <Card className="h-full bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow duration-300">
       <CardHeader>
@@ -27,5 +28,3 @@ function StepCard({ step }: StepCardProps) {
     </Card>
   );
 }
-
-export default StepCard;

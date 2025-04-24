@@ -1,4 +1,4 @@
-import Header from "@/components/dashboards/header";
+import { Header } from "@/components/dashboards";
 import { UpdatePasswordForm, UpdateUserForm } from "@/features/user/components";
 
 function SettingsPage() {

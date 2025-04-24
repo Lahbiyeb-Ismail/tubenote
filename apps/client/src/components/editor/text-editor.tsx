@@ -1,17 +1,16 @@
 "use client";
 
-import "@blocknote/core/fonts/inter.css";
-
+import type { BlockNoteEditor } from "@blocknote/core";
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";
+import { useState } from "react";
 
 import "@/app/globals.css";
+import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
 
-import { useModal } from "@/context/useModal";
-import type { BlockNoteEditor } from "@blocknote/core";
-import { useState } from "react";
-import SaveNoteForm from "./SaveNoteForm";
+import { useModal } from "@/context";
+import { SaveNoteForm } from "./";
 
 type TextEditorProps = {
   initialNoteContent?: string;
@@ -19,7 +18,7 @@ type TextEditorProps = {
   action?: "update" | "create";
 };
 
-function TextEditor({
+export function TextEditor({
   initialNoteContent,
   noteTitle,
   action = "create",

@@ -7,8 +7,7 @@ import { useForm } from "react-hook-form";
 import type { IEmailBodyDto } from "@tubenote/dtos";
 import { emailBodySchema } from "@tubenote/schemas";
 
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
+import { Button, Form } from "@/components/ui";
 
 import { useAuth } from "../../contexts";
 import { FormInput } from "../inputs";

@@ -5,10 +5,10 @@ import { Suspense } from "react";
 
 import type { Video } from "@tubenote/types";
 
-import ResizablePanels from "@/components/global/ResizablePanels";
+import { ResizablePanels } from "@/components/global";
 import { VideoPlayer } from "@/features/video/components";
 
-const AppMDXEditor = dynamic(() => import("./AppMDXEditor"), { ssr: false });
+const AppMDXEditor = dynamic(() => import("./app-mdxeditor"), { ssr: false });
 
 type EditorPageProps = {
   video: Video;
@@ -18,7 +18,7 @@ type EditorPageProps = {
   action?: "create" | "update";
 };
 
-function EditorPage({
+export function EditorPage({
   noteId,
   video,
   initialNoteContent,
@@ -44,5 +44,3 @@ function EditorPage({
     </div>
   );
 }
-
-export default EditorPage;

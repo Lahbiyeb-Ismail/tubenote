@@ -1,13 +1,13 @@
 import { type PropsWithChildren, type ReactNode } from "react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib";
 
 type MaxWidthWrapperProps = {
   children: PropsWithChildren<ReactNode>;
   className?: string;
 };
 
-function MaxWidthWrapper({ children, className }: MaxWidthWrapperProps) {
+export function MaxWidthWrapper({ children, className }: MaxWidthWrapperProps) {
   return (
     <div
       className={cn(
@@ -19,5 +19,3 @@ function MaxWidthWrapper({ children, className }: MaxWidthWrapperProps) {
     </div>
   );
 }
-
-export default MaxWidthWrapper;

@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Button } from "../ui/button";
 
-function LoggedOutButtons() {
+import { Button } from "@/components/ui";
+
+export function LoggedOutButtons() {
   return (
     <Link href="/login" className="block">
       <Button
@@ -13,5 +14,3 @@ function LoggedOutButtons() {
     </Link>
   );
 }
-
-export default LoggedOutButtons;

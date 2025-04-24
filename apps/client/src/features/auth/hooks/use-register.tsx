@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { setStorageValue } from "@/utils/localStorage";
+import { setStorageValue } from "@/utils";
 
 import { registerUser } from "../services";
 import type { AuthAction } from "../types";

@@ -10,7 +10,7 @@ type SidebarLinkProps = {
   isOpen: boolean;
 };
 
-function SidebarLink({ item, pathname, isOpen }: SidebarLinkProps) {
+export function SidebarLink({ item, pathname, isOpen }: SidebarLinkProps) {
   return (
     <li
       key={item.name}
@@ -38,5 +38,3 @@ function SidebarLink({ item, pathname, isOpen }: SidebarLinkProps) {
     </li>
   );
 }
-
-export default SidebarLink;

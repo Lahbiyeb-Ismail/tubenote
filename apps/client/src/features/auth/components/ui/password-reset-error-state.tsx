@@ -1,7 +1,7 @@
 import { AlertCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
 
 export function PasswordResetErrorState() {
   return (

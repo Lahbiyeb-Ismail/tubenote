@@ -5,12 +5,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui";
 
-import { DividerWithText } from "@/components/global/DividerWithText";
-import HomeButton from "@/components/global/HomeButton";
+import { DividerWithText, HomeButton } from "@/components/global";
+
 import { GoogleAuthButton } from "../buttons";
-
 export interface AuthPageLayoutProps {
   /**
    * The title of the authentication page

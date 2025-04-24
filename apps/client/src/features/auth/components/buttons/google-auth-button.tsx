@@ -1,7 +1,7 @@
 import { GOOGLE_REDIRECT_URI } from "@/utils/constants";
 import Image from "next/image";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
 
 export function GoogleAuthButton() {
   const handleGoogleAuth = () => {

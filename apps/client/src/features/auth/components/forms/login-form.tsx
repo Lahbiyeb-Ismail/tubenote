@@ -7,11 +7,10 @@ import { useForm } from "react-hook-form";
 import type { ILoginDto } from "@tubenote/dtos";
 import { loginSchema } from "@tubenote/schemas";
 
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
+import { Button, Form } from "@/components/ui";
 
 import { FormInput } from "../inputs";
-import { ForogotPasswordLink } from "../links";
+import { ForgotPasswordLink } from "../links";
 
 import { useAuth } from "../../contexts";
 
@@ -48,7 +47,7 @@ export function LoginForm() {
           icon={Lock}
           control={form.control}
         />
-        <ForogotPasswordLink />
+        <ForgotPasswordLink />
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700"

@@ -1,8 +1,8 @@
 "use client";
 
-import type { BreadcrumbItemType } from "@/components/global/NavigationHeader";
-import NavigationHeader from "@/components/global/NavigationHeader";
 import { Edit } from "lucide-react";
+
+import { type BreadcrumbItemType, NavigationHeader } from "@/components/global";
 
 type NotePageHeaderProps = {
   noteId: string;

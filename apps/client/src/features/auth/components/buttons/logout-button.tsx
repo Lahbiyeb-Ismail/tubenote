@@ -1,6 +1,6 @@
 import { LogOut } from "lucide-react";
 
-import { useLayout } from "@/context/useLayout";
+import { useLayout } from "@/context";
 import { useAuth } from "../../contexts";
 
 export function LogoutButton() {

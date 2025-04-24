@@ -1,11 +1,14 @@
-import { useLayout } from "@/context/useLayout";
-
-import CardContent from "@/components/global/CardContent";
-import CardFooterWrapper from "@/components/global/CardFooterWrapper";
-import CardImage from "@/components/global/CardImage";
-import CardWrapper from "@/components/global/CardWrapper";
-import SeeAllButton from "@/components/global/SeeAllButton";
 import type { Video } from "@tubenote/types";
+
+import { useLayout } from "@/context";
+
+import {
+  CardContent,
+  CardFooterWrapper,
+  CardImage,
+  CardWrapper,
+  SeeAllButton,
+} from "@/components/global";
 
 export function VideoCard({ video }: { video: Video }) {
   const { isGridLayout } = useLayout();

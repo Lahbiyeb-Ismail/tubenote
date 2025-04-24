@@ -2,12 +2,10 @@
 import Markdown from "markdown-to-jsx";
 import { usePDF } from "react-to-pdf";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib";
 
-import CodeBlock from "@/components/global/CodeBlock";
-import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import ExportAsPdfButton from "./ExportAsPdfButton";
+import { Card, Separator } from "@/components/ui";
+import { CodeBlock, ExportAsPdfButton } from "./";
 
 interface MarkdownViewerProps {
   content: string;
@@ -15,7 +13,7 @@ interface MarkdownViewerProps {
   className?: string;
 }
 
-function MarkdownViewer({
+export function MarkdownViewer({
   content,
   noteTitle,
   className,
@@ -97,5 +95,3 @@ function MarkdownViewer({
     </Card>
   );
 }
-
-export default MarkdownViewer;

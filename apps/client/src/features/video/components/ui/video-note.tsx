@@ -2,14 +2,16 @@ import { Clock, MoreVertical, Pencil, Trash2 } from "lucide-react";
 
 import type { Note } from "@tubenote/types";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui";
 
 type VideoNoteProps = {
   note: Note;

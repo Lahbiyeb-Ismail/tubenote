@@ -1,19 +1,18 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
-import { Form, FormControl, FormField, FormItem } from "../ui/form";
-import { Input } from "../ui/input";
-
-import type { VideoUrl } from "@/features/note/types/note.types";
+import type { VideoUrl } from "@/features/note/types";
 // import { useNote } from "@/features/note/contexts";
 // import { useVideo } from "@/features/video/contexts";
-import extractVideoId from "@/helpers/extractVideoId";
+import { extractVideoId } from "@/helpers";
 import { videoFormSchema } from "@/lib/schemas";
-import { useRouter } from "next/navigation";
 
-function AddNoteForm() {
+import { Form, FormControl, FormField, FormItem, Input } from "@/components/ui";
+
+export function AddNoteForm() {
   const router = useRouter();
 
   const form = useForm<VideoUrl>({
@@ -78,5 +77,3 @@ function AddNoteForm() {
     </Form>
   );
 }
-
-export default AddNoteForm;

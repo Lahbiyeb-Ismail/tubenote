@@ -1,6 +1,6 @@
 import { FileText, Video } from "lucide-react";
 
-function UserStats() {
+export function UserStats() {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-xl font-semibold mb-4">Your Stats</h2>
@@ -27,5 +27,3 @@ function UserStats() {
     </div>
   );
 }
-
-export default UserStats;
