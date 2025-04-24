@@ -3,7 +3,6 @@ import type { Response } from "express";
 
 import type { TypedRequest } from "@/modules/shared/types";
 
-import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import type {
   ILoggerService,
   IPrismaService,
@@ -85,7 +84,7 @@ export interface IRefreshTokenService {
    *
    * @returns A promise that resolves to an authentication response DTO.
    */
-  refreshToken(userId: string, token: string): Promise<IAuthResponseDto>;
+  refreshToken(userId: string, token: string): Promise<string>;
 
   deleteToken(useId: string, token: string): Promise<void>;
 
