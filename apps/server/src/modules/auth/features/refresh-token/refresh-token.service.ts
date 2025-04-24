@@ -1,15 +1,10 @@
 import { ForbiddenError, UnauthorizedError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import { stringToDate } from "@/modules/shared/utils";
 
 import type { ILoggerService, IPrismaService } from "@/modules/shared/services";
 
-import {
-  REFRESH_TOKEN_EXPIRES_IN,
-  REFRESH_TOKEN_SECRET,
-} from "@/modules/auth/constants";
+import { REFRESH_TOKEN_SECRET } from "@/modules/auth/constants";
 
-import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import type { IJwtService } from "@/modules/auth/utils";
 
 import type { RefreshToken } from "./refresh-token.model";
@@ -46,7 +41,7 @@ export class RefreshTokenService implements IRefreshTokenService {
     return this._instance;
   }
 
-  async refreshToken(userId: string, token: string): Promise<IAuthResponseDto> {
+  async refreshToken(userId: string, token: string): Promise<string> {
     const decodedToken = await this._jwtService.verify({
       token,
       secret: REFRESH_TOKEN_SECRET,
@@ -55,10 +50,8 @@ export class RefreshTokenService implements IRefreshTokenService {
     // Ensure the decoded token contains a valid userId
     if (
       typeof decodedToken.userId !== "string" ||
-      decodedToken.userId !== userId
+      userId !== decodedToken.userId
     ) {
-      await this._refreshTokenRepository.deleteAll(userId);
-
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
@@ -70,7 +63,7 @@ export class RefreshTokenService implements IRefreshTokenService {
       );
 
       // Detected refresh token reuse!
-      if (!refreshTokenFromDB) {
+      if (!refreshTokenFromDB || refreshTokenFromDB.userId !== userId) {
         this._loggerService.warn(
           `Detected refresh token reuse for user ${userId}`
         );
@@ -80,19 +73,11 @@ export class RefreshTokenService implements IRefreshTokenService {
         throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
       }
 
-      await this._refreshTokenRepository.delete(userId, token, tx);
+      const accessToken = this._jwtService.generateAccessToken(
+        decodedToken.userId
+      );
 
-      const { accessToken, refreshToken } =
-        this._jwtService.generateAuthTokens(userId);
-
-      const createTokenDto = {
-        token: refreshToken,
-        expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
-      };
-
-      await this._refreshTokenRepository.create(userId, createTokenDto, tx);
-
-      return { accessToken, refreshToken };
+      return accessToken;
     });
   }
 
