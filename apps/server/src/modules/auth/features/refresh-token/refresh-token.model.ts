@@ -1,7 +1,16 @@
 export interface RefreshToken {
   id: string;
-  token: string;
+  tokenHash: string;
+  previousTokenHash: string | null;
   userId: string;
+  clientType: string;
+  userAgent: string | null;
+  ipAddress: string | null;
   createdAt: Date;
+  updatedAt: Date;
   expiresAt: Date;
+  lastUsedAt: Date | null;
+  isRevoked: boolean;
+  revokedAt: Date | null;
+  revocationReason: string | null;
 }
