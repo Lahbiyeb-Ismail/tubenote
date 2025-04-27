@@ -4,6 +4,7 @@ import type { Response } from "express";
 import type { TypedRequest } from "@/modules/shared/types";
 
 import type {
+  ICryptoService,
   ILoggerService,
   IPrismaService,
   IResponseFormatter,
@@ -11,7 +12,7 @@ import type {
 
 import type { IJwtService } from "../../utils";
 
-import type { ICreateRefreshTokenDto } from "./dtos";
+import type { IClientContext, ICreateRefreshTokenDto } from "./dtos";
 import type { RefreshToken } from "./refresh-token.model";
 
 /**
@@ -105,10 +106,7 @@ export interface IRefreshTokenService {
    *
    * @returns A promise that resolves to the newly created refresh token.
    */
-  createToken(
-    userId: string,
-    data: ICreateRefreshTokenDto
-  ): Promise<RefreshToken>;
+  createToken(userId: string, clientContext: IClientContext): Promise<string>;
 }
 
 /**
@@ -158,6 +156,11 @@ export interface IRefreshTokenServiceOptions {
    * Service for logging application events and errors.
    */
   loggerService: ILoggerService;
+
+  /**
+   * Service for handling cryptographic operations.
+   */
+  cryptoService: ICryptoService;
 }
 
 /**
