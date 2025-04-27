@@ -53,7 +53,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
       () =>
         client.refreshToken.findUnique({
           where: {
-            token,
+            tokenHash: token,
             expiresAt: { gt: new Date() },
           },
         }),
@@ -73,7 +73,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
         client.refreshToken.delete({
           where: {
             userId,
-            token,
+            tokenHash: token,
           },
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_DELETE }
