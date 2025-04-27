@@ -1,15 +1,21 @@
 import { ForbiddenError, UnauthorizedError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
-import type { ILoggerService, IPrismaService } from "@/modules/shared/services";
+import type {
+  ICryptoService,
+  ILoggerService,
+  IPrismaService,
+} from "@/modules/shared/services";
 
-import { REFRESH_TOKEN_SECRET } from "@/modules/auth/constants";
+import {
+  REFRESH_TOKEN_EXPIRES_IN,
+  REFRESH_TOKEN_SECRET,
+} from "@/modules/auth/constants";
 
 import type { IJwtService } from "@/modules/auth/utils";
 
-import type { RefreshToken } from "./refresh-token.model";
-
-import type { ICreateRefreshTokenDto } from "./dtos";
+import { stringToDate } from "@/modules/shared/utils";
+import type { IClientContext } from "./dtos";
 import type {
   IRefreshTokenRepository,
   IRefreshTokenService,
@@ -23,7 +29,8 @@ export class RefreshTokenService implements IRefreshTokenService {
     private readonly _refreshTokenRepository: IRefreshTokenRepository,
     private readonly _prismaService: IPrismaService,
     private readonly _jwtService: IJwtService,
-    private readonly _loggerService: ILoggerService
+    private readonly _loggerService: ILoggerService,
+    private readonly _cryptoService: ICryptoService
   ) {}
 
   public static getInstance(
@@ -34,7 +41,8 @@ export class RefreshTokenService implements IRefreshTokenService {
         options.refreshTokenRepository,
         options.prismaService,
         options.jwtService,
-        options.loggerService
+        options.loggerService,
+        options.cryptoService
       );
     }
 
@@ -83,9 +91,20 @@ export class RefreshTokenService implements IRefreshTokenService {
 
   async createToken(
     userId: string,
-    data: ICreateRefreshTokenDto
-  ): Promise<RefreshToken> {
-    return this._refreshTokenRepository.create(userId, data);
+    clientContext: IClientContext
+  ): Promise<string> {
+    const token = this._cryptoService.generateSecureToken();
+
+    const tokenHash = await this._cryptoService.generateHash(token);
+    const expiresAt = stringToDate(REFRESH_TOKEN_EXPIRES_IN);
+
+    await this._refreshTokenRepository.create(userId, {
+      tokenHash,
+      expiresAt,
+      ...clientContext,
+    });
+
+    return token;
   }
 
   async deleteToken(userId: string, token: string): Promise<void> {
