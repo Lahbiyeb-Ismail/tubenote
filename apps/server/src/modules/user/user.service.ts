@@ -79,7 +79,7 @@ export class UserService implements IUserService {
     tx: Prisma.TransactionClient,
     data: ICreateUserDto
   ): Promise<User> {
-    const hashedPassword = await this._cryptoService.hashPassword(
+    const hashedPassword = await this._cryptoService.generateHash(
       data.password
     );
 
@@ -181,9 +181,9 @@ export class UserService implements IUserService {
     const updatedUser = await this._prismaService.transaction(async (tx) => {
       const user = await this._ensureUserExists(userId, tx);
 
-      const isPasswordValid = await this._cryptoService.comparePasswords({
-        plainText: currentPassword,
-        hash: user.password,
+      const isPasswordValid = await this._cryptoService.validateHashMatch({
+        unhashedValue: currentPassword,
+        hashedValue: user.password,
       });
 
       if (!isPasswordValid) {
@@ -195,7 +195,7 @@ export class UserService implements IUserService {
       }
 
       const hashedPassword =
-        await this._cryptoService.hashPassword(newPassword);
+        await this._cryptoService.generateHash(newPassword);
 
       return this._userRepository.updatePassword(tx, user.id, hashedPassword);
     });
@@ -219,7 +219,7 @@ export class UserService implements IUserService {
       const user = await this._ensureUserExists(userId, tx);
 
       const hashedPassword =
-        await this._cryptoService.hashPassword(newPassword);
+        await this._cryptoService.generateHash(newPassword);
 
       return this._userRepository.updatePassword(tx, user.id, hashedPassword);
     });
