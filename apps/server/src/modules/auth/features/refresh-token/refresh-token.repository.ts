@@ -44,7 +44,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
   }
 
   async findValid(
-    token: string,
+    tokenHash: string,
     tx?: Prisma.TransactionClient
   ): Promise<RefreshToken | null> {
     const client = tx ?? this._db;
@@ -53,8 +53,9 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
       () =>
         client.refreshToken.findUnique({
           where: {
-            tokenHash: token,
+            tokenHash,
             expiresAt: { gt: new Date() },
+            isRevoked: false,
           },
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
