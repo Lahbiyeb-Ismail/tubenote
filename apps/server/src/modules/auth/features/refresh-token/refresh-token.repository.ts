@@ -177,4 +177,39 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
       });
     }
   }
+
+  /**
+   * Revokes all active refresh tokens for a specific user by marking them as revoked
+   * and recording the revocation reason and timestamp.
+   *
+   * @param userId - The ID of the user whose tokens are to be revoked.
+   * @param revocationReason - The reason for revoking the tokens.
+   * @param tx - (Optional) A Prisma transaction client to use for the operation.
+   *             If not provided, the default database client will be used.
+   * @returns A promise that resolves when the operation is complete.
+   * @throws Will throw an error if the update operation fails.
+   */
+  async revokeAllTokens(
+    userId: string,
+    revocationReason: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<void> {
+    const client = tx ?? this._db;
+
+    await handleAsyncOperation(
+      () =>
+        client.refreshToken.updateMany({
+          where: {
+            userId,
+            isRevoked: false,
+          },
+          data: {
+            isRevoked: true,
+            revokedAt: new Date(),
+            revocationReason,
+          },
+        }),
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE }
+    );
+  }
 }
