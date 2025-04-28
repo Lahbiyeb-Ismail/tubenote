@@ -6,6 +6,8 @@ import {
   responseFormatter,
 } from "@/modules/shared/services";
 
+import { refreshTokenService } from "../auth";
+
 import { accountService } from "./features/account/account.module";
 import { UserController } from "./user.controller";
 import { UserRepository } from "./user.repository";
@@ -18,6 +20,7 @@ const userService = UserService.getInstance({
   accountService,
   prismaService,
   cryptoService,
+  refreshTokenService,
 });
 
 const userController = UserController.getInstance({
