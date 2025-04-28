@@ -178,4 +178,24 @@ export class RefreshTokenService implements IRefreshTokenService {
       tx
     );
   }
+
+  /**
+   * Revokes all refresh tokens associated with a specific user.
+   *
+   * @param userId - The unique identifier of the user whose tokens are to be revoked.
+   * @param revocationReason - The reason for revoking the tokens, typically for logging or auditing purposes.
+   * @param tx - (Optional) A Prisma transaction client to execute the operation within a transaction.
+   * @returns A promise that resolves when all tokens have been successfully revoked.
+   */
+  async revokeAllUserTokens(
+    userId: string,
+    revocationReason: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<void> {
+    await this._refreshTokenRepository.revokeAllTokens(
+      userId,
+      revocationReason,
+      tx
+    );
+  }
 }
