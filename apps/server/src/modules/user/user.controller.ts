@@ -16,6 +16,11 @@ import type {
 
 import { USER_RATE_LIMIT_CONFIG } from "./config";
 
+import {
+  ACCESS_TOKEN_NAME,
+  REFRESH_TOKEN_NAME,
+  clearAuthTokenCookieConfig,
+} from "../auth";
 import type {
   IUserController,
   IUserControllerOptions,
@@ -130,6 +135,9 @@ export class UserController implements IUserController {
         });
 
       await this._rateLimitService.reset(req.rateLimitKey);
+
+      res.clearCookie(ACCESS_TOKEN_NAME, clearAuthTokenCookieConfig);
+      res.clearCookie(REFRESH_TOKEN_NAME, clearAuthTokenCookieConfig);
 
       res.status(formattedResponse.statusCode).json(formattedResponse);
     } catch (error: any) {
