@@ -91,6 +91,21 @@ export interface IRefreshTokenRepository {
     count: number,
     tx?: Prisma.TransactionClient
   ): Promise<void>;
+
+  /**
+   * Revokes all refresh tokens for a user.
+   *
+   * @param userId - The ID of the user whose tokens are to be revoked.
+   * @param revocationReason - The reason for revoking the tokens, typically for logging or auditing purposes.
+   * @param tx - Optional transaction client for database operations.
+   *
+   * @returns A promise that resolves when all tokens are successfully revoked.
+   */
+  revokeAllTokens(
+    userId: string,
+    revocationReason: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<void>;
 }
 
 /**
@@ -124,6 +139,20 @@ export interface IRefreshTokenService {
   markTokenAsRevoked(
     userId: string,
     token: string,
+    revocationReason: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<void>;
+
+  /**
+   * Revokes all refresh tokens associated with a specific user.
+   *
+   * @param userId - The unique identifier of the user whose tokens are to be revoked.
+   * @param revocationReason - The reason for revoking the tokens, typically for logging or auditing purposes.
+   * @param tx - (Optional) A Prisma transaction client to execute the operation within a transaction.
+   * @returns A promise that resolves when all tokens have been successfully revoked.
+   */
+  revokeAllUserTokens(
+    userId: string,
     revocationReason: string,
     tx?: Prisma.TransactionClient
   ): Promise<void>;
