@@ -38,13 +38,13 @@ export interface IRefreshTokenRepository {
   /**
    * Finds a valid refresh token by its token string.
    *
-   * @param token - The token string to search for.
+   * @param tokenHash - The hashed token string to search for.
    * @param tx - Optional transaction client for database operations.
    *
    * @returns A promise that resolves to the refresh token if found and valid, or null if not found or invalid.
    */
   findValid(
-    token: string,
+    tokenHash: string,
     tx?: Prisma.TransactionClient
   ): Promise<RefreshToken | null>;
 
