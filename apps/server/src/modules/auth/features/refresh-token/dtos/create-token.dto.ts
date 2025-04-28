@@ -3,6 +3,7 @@
  */
 export interface ICreateRefreshTokenDto extends IClientContext {
   tokenHash: string;
+  hint: string;
   expiresAt: Date;
 }
 
