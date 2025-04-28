@@ -27,6 +27,15 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
     return this._instance;
   }
 
+  /**
+   * Creates a new refresh token for a user.
+   *
+   * @param userId - The ID of the user for whom the refresh token is being created.
+   * @param data - The data required to create the refresh token.
+   * @param tx - Optional transaction client for database operations.
+   *
+   * @returns A promise that resolves to the created refresh token.
+   */
   async create(
     userId: string,
     data: ICreateRefreshTokenDto,
@@ -43,17 +52,28 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
     );
   }
 
-  async findValid(
-    tokenHash: string,
+  /**
+   * Finds refresh tokens by their hint.
+   *
+   * @param userId - The ID of the user whose tokens are to be found.
+   * @param hint - The hint of the refresh token to find.
+   * @param tx - Optional transaction client for database operations.
+   *
+   * @returns A promise that resolves to an array of found refresh tokens.
+   */
+  async findByHint(
+    userId: string,
+    hint: string,
     tx?: Prisma.TransactionClient
-  ): Promise<RefreshToken | null> {
+  ): Promise<RefreshToken[]> {
     const client = tx ?? this._db;
 
     return handleAsyncOperation(
       () =>
-        client.refreshToken.findUnique({
+        client.refreshToken.findMany({
           where: {
-            tokenHash,
+            userId,
+            hint,
             expiresAt: { gt: new Date() },
             isRevoked: false,
           },
@@ -63,15 +83,42 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
   }
 
   /**
+   * Counts the number of active refresh tokens for a user.
+   *
+   * @param userId - The ID of the user whose tokens are to be counted.
+   * @param tx - Optional transaction client for database operations.
+   *
+   * @returns A promise that resolves to the count of active tokens.
+   */
+  async countActiveTokens(
+    userId: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<number> {
+    const client = tx ?? this._db;
+    return handleAsyncOperation(
+      () =>
+        client.refreshToken.count({
+          where: {
+            userId,
+            expiresAt: { gt: new Date() },
+            isRevoked: false,
+          },
+        }),
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_COUNT }
+    );
+  }
+
+  /**
    * Marks a refresh token as revoked in the database.
    *
-   * @param tokenHash - The hashed token string to be marked as revoked.
+   * @param tokenId - The ID of the token to be marked as revoked.
    * @param tx - Optional transaction client for database operations.
    *
    * @returns A promise that resolves when the token is successfully marked as revoked.
    */
   async markAsRevoked(
-    tokenHash: string,
+    tokenId: string,
+    revocationReason: string,
     tx?: Prisma.TransactionClient
   ): Promise<void> {
     const client = tx ?? this._db;
@@ -79,46 +126,55 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
     await handleAsyncOperation(
       () =>
         client.refreshToken.update({
-          where: { tokenHash },
-          data: { isRevoked: true },
+          where: { id: tokenId },
+          data: { isRevoked: true, revokedAt: new Date(), revocationReason },
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE }
     );
   }
 
-  async delete(
+  /**
+   * Revokes the oldest tokens for a user, up to a specified count.
+   *
+   * @param userId - The ID of the user whose tokens are to be revoked.
+   * @param count - The number of oldest tokens to revoke.
+   * @param tx - Optional transaction client for database operations.
+   *
+   * @returns A promise that resolves when the tokens are successfully revoked.
+   */
+  async revokeOldestTokens(
     userId: string,
-    token: string,
+    count: number,
     tx?: Prisma.TransactionClient
   ): Promise<void> {
+    if (count <= 0) return; // Validate input
+
     const client = tx ?? this._db;
 
-    await handleAsyncOperation(
-      () =>
-        client.refreshToken.delete({
-          where: {
-            userId,
-            tokenHash: token,
-          },
-        }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_DELETE }
-    );
-  }
+    // 1. Find oldest tokens first
+    const oldestTokens = await client.refreshToken.findMany({
+      where: {
+        userId,
+        isRevoked: false,
+        expiresAt: { gt: new Date() }, // Only consider active tokens
+      },
+      orderBy: { createdAt: "asc" }, // Oldest first
+      take: count,
+      select: { id: true }, // Optimize payload
+    });
 
-  async deleteAll(
-    userId: string,
-    tx?: Prisma.TransactionClient
-  ): Promise<void> {
-    const client = tx ?? this._db;
-
-    await handleAsyncOperation(
-      () =>
-        client.refreshToken.deleteMany({
-          where: {
-            userId,
-          },
-        }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_DELETE_ALL }
-    );
+    // 2. Revoce in batch if any found
+    if (oldestTokens.length > 0) {
+      await client.refreshToken.updateMany({
+        where: {
+          id: { in: oldestTokens.map((t) => t.id) },
+        },
+        data: {
+          isRevoked: true,
+          revokedAt: new Date(),
+          revocationReason: "max_tokens_per_user",
+        },
+      });
+    }
   }
 }
