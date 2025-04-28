@@ -27,6 +27,10 @@ export class AuthService implements IAuthService {
   async logoutUser(logoutDto: ILogoutDto): Promise<void> {
     const { userId, refreshToken } = logoutDto;
 
-    await this._refreshTokenService.deleteToken(userId, refreshToken);
+    await this._refreshTokenService.markTokenAsRevoked(
+      userId,
+      refreshToken,
+      "user_logged_out"
+    );
   }
 }
