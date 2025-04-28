@@ -12,6 +12,7 @@ import type {
 
 import type { IJwtService } from "../../utils";
 
+import type { IUserService } from "@/modules/user";
 import type { IClientContext, ICreateRefreshTokenDto } from "./dtos";
 import type { RefreshToken } from "./refresh-token.model";
 
@@ -146,6 +147,11 @@ export interface IRefreshTokenServiceOptions {
    * Service for interacting with the Prisma ORM.
    */
   prismaService: IPrismaService;
+
+  /**
+   * Service for handling user-related operations.
+   */
+  userService: IUserService;
 
   /**
    * Service for handling JSON Web Tokens (JWT).

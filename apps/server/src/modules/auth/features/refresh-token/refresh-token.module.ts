@@ -5,6 +5,8 @@ import {
   responseFormatter,
 } from "@/modules/shared/services";
 
+import { userService } from "@/modules/user";
+
 import { RefreshTokenController } from "./refresh-token.controller";
 import { RefreshTokenRepository } from "./refresh-token.repository";
 import { RefreshTokenService } from "./refresh-token.service";
@@ -18,6 +20,7 @@ const refreshTokenRepository = RefreshTokenRepository.getInstance({
 const refreshTokenService = RefreshTokenService.getInstance({
   refreshTokenRepository,
   prismaService,
+  userService,
   jwtService,
   loggerService,
   cryptoService,
