@@ -62,6 +62,30 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
     );
   }
 
+  /**
+   * Marks a refresh token as revoked in the database.
+   *
+   * @param tokenHash - The hashed token string to be marked as revoked.
+   * @param tx - Optional transaction client for database operations.
+   *
+   * @returns A promise that resolves when the token is successfully marked as revoked.
+   */
+  async markAsRevoked(
+    tokenHash: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<void> {
+    const client = tx ?? this._db;
+
+    await handleAsyncOperation(
+      () =>
+        client.refreshToken.update({
+          where: { tokenHash },
+          data: { isRevoked: true },
+        }),
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE }
+    );
+  }
+
   async delete(
     userId: string,
     token: string,

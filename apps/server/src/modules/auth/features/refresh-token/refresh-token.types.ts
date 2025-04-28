@@ -49,6 +49,19 @@ export interface IRefreshTokenRepository {
   ): Promise<RefreshToken | null>;
 
   /**
+   * Marks a refresh token as revoked in the database.
+   *
+   * @param tokenHash - The hashed token string to be marked as revoked.
+   * @param tx - Optional transaction client for database operations.
+   *
+   * @returns A promise that resolves when the token is successfully marked as revoked.
+   */
+  markAsRevoked(
+    tokenHash: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<void>;
+
+  /**
    * Deletes a refresh token by its token string.
    *
    * @param userId - The ID of the user associated with the token.
