@@ -1,4 +1,3 @@
-import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
 import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import type { IJwtService } from "@/modules/auth/utils";
 
@@ -9,7 +8,6 @@ import {
   type ILoggerService,
   type IPrismaService,
 } from "@/modules/shared/services";
-import { stringToDate } from "@/modules/shared/utils";
 
 import type { IUserService } from "@/modules/user";
 import type { IAccountService } from "@/modules/user/features/account/account.types";
@@ -55,7 +53,7 @@ export class OAuthService implements IOAuthService {
   async generateTemporaryOAuthCode(
     temporaryOAuthCodeDto: IOAuthTokenPayloadDto
   ): Promise<string> {
-    const code = this._cryptoService.generateRandomSecureToken();
+    const code = this._cryptoService.generateSecureToken();
 
     const setResult = this._cacheService.set<IOAuthTokenPayloadDto>(code, {
       ...temporaryOAuthCodeDto,
@@ -117,10 +115,10 @@ export class OAuthService implements IOAuthService {
         `Saving refresh token for user with ID ${userId}.`
       );
 
-      await this._refreshTokenService.createToken(userId, {
-        token: refreshToken,
-        expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
-      });
+      // await this._refreshTokenService.createToken(userId, {
+      //   token: refreshToken,
+      //   expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
+      // });
 
       const temporaryOauthCode = await this.generateTemporaryOAuthCode({
         accessToken,

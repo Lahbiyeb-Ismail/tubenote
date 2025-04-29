@@ -98,7 +98,7 @@ export class LocalAuthController implements ILocalAuthController {
 
     try {
       const { accessToken, refreshToken } =
-        await this._localAuthService.loginUser({ ...req.body });
+        await this._localAuthService.loginUser(req.body, req.clientContext);
 
       const formattedResponse =
         this._responseFormatter.formatSuccessResponse<string>({

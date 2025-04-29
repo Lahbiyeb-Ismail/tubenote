@@ -1,12 +1,12 @@
 /**
- * Data Transfer Object (DTO) for comparing passwords.
+ * Data Transfer Object (DTO)
  *
- * @interface ComparePasswordDto
+ * @interface HashValidationDto
  *
- * @property {string} plainText - The plain text password to be compared.
- * @property {string} hash - The hashed password to compare against.
+ * @property {string} plainText - The plain text value to be compared.
+ * @property {string} hash - The hashed value to compare against.
  */
-export interface ComparePasswordDto {
-  plainText: string;
-  hash: string;
+export interface HashValidationDto {
+  unhashedValue: string;
+  hashedValue: string;
 }

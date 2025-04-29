@@ -52,7 +52,7 @@ export class ResetPasswordService implements IResetPasswordService {
       throw new ForbiddenError(ERROR_MESSAGES.NOT_VERIFIED);
     }
 
-    const resetToken = this._cryptoService.generateRandomSecureToken();
+    const resetToken = this._cryptoService.generateSecureToken();
 
     const setResult = this._cacheService.set<{ userId: string }>(resetToken, {
       userId: user.id,

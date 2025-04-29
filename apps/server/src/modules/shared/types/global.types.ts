@@ -1,3 +1,4 @@
+import type { IClientContext } from "@/modules/auth";
 import type { Request } from "express";
 
 /**
@@ -21,6 +22,7 @@ declare global {
     interface Request {
       userId: string;
       rateLimitKey: string;
+      clientContext: IClientContext;
     }
   }
 }

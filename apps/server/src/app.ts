@@ -11,6 +11,7 @@ import express, {
 import session from "express-session";
 import helmet from "helmet";
 import passport from "passport";
+import requestIp from "request-ip";
 
 import { authRoutes, oauthRoutes } from "@/modules/auth";
 import { noteRoutes } from "@/modules/note";
@@ -21,6 +22,7 @@ import { errorHandler, notFoundRoute } from "@/middlewares";
 
 import { envConfig } from "@/modules/shared/config";
 import { loggerService } from "@/modules/shared/services";
+import { clientContextMiddleware } from "./middlewares/client-context.middleware";
 
 const app: Express = express();
 
@@ -29,6 +31,7 @@ app.use(helmet());
 app.use(express.json());
 
 app.use(cookieParser());
+app.use(requestIp.mw());
 
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true }));
@@ -64,6 +67,8 @@ passport.deserializeUser((user, done) => {
   // @ts-ignore
   done(null, user);
 });
+
+app.use(clientContextMiddleware);
 
 // Middleware to log HTTP requests
 app.use((req: Request, _res: Response, next: NextFunction) => {

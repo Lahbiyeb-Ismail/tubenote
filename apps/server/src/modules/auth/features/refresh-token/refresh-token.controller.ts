@@ -6,6 +6,7 @@ import type { TypedRequest } from "@/modules/shared/types";
 
 import {
   accessTokenCookieConfig,
+  refreshTokenCookieConfig,
   // clearAuthTokenCookieConfig,
   // refreshTokenCookieConfig,
 } from "@/modules/auth/config";
@@ -54,6 +55,7 @@ export class RefreshTokenController implements IRefreshTokenController {
   async refreshToken(req: TypedRequest, res: Response): Promise<void> {
     const cookies = req.cookies;
     const userId = req.userId;
+    const clientContext = req.clientContext;
 
     const refreshTokenCookie = cookies[REFRESH_TOKEN_NAME];
 
@@ -61,11 +63,14 @@ export class RefreshTokenController implements IRefreshTokenController {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    const accessToken = await this._refreshTokenService.refreshToken(
-      userId,
-      refreshTokenCookie
-    );
+    const { accessToken, refreshToken } =
+      await this._refreshTokenService.refreshToken(
+        userId,
+        refreshTokenCookie,
+        clientContext
+      );
 
     res.cookie(ACCESS_TOKEN_NAME, accessToken, accessTokenCookieConfig);
+    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
   }
 }

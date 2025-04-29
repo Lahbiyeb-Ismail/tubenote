@@ -1,4 +1,5 @@
 import {
+  cryptoService,
   loggerService,
   prismaService,
   responseFormatter,
@@ -19,6 +20,7 @@ const refreshTokenService = RefreshTokenService.getInstance({
   prismaService,
   jwtService,
   loggerService,
+  cryptoService,
 });
 
 const refreshTokenController = RefreshTokenController.getInstance({
