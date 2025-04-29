@@ -8,7 +8,7 @@ export class CryptoService implements ICryptoService {
   private static _instance: CryptoService;
 
   private readonly SALT_ROUNDS = 12;
-  private readonly TOKEN_BYTES = 32;
+  private readonly TOKEN_BYTES = 64;
 
   private constructor() {}
 
