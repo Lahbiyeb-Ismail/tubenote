@@ -8,8 +8,6 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from "@/modules/shared/api-errors";
-import { stringToDate } from "@/modules/shared/utils";
-
 import type { IUserService } from "@/modules/user";
 
 import type {
@@ -20,11 +18,10 @@ import type {
 } from "@/modules/shared/services";
 
 import type {
+  IClientContext,
   IRefreshTokenService,
   IVerifyEmailService,
 } from "@/modules/auth/features";
-
-import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
 
 import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import type { IJwtService } from "@/modules/auth/utils";
@@ -101,7 +98,10 @@ export class LocalAuthService implements ILocalAuthService {
     return newUser;
   }
 
-  async loginUser(loginDto: ILoginDto): Promise<IAuthResponseDto> {
+  async loginUser(
+    loginDto: ILoginDto,
+    clientContext: IClientContext
+  ): Promise<IAuthResponseDto> {
     const { email, password } = loginDto;
 
     // Get the user first to check if they exist
@@ -119,9 +119,9 @@ export class LocalAuthService implements ILocalAuthService {
       throw new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED);
     }
 
-    const isPasswordMatch = await this._cryptoService.comparePasswords({
-      plainText: password,
-      hash: user.password,
+    const isPasswordMatch = await this._cryptoService.validateHashMatch({
+      unhashedValue: password,
+      hashedValue: user.password,
     });
 
     if (!isPasswordMatch) {
@@ -133,15 +133,13 @@ export class LocalAuthService implements ILocalAuthService {
       throw new ForbiddenError(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
-    const { accessToken, refreshToken } = this._jwtService.generateAuthTokens(
-      user.id
+    // Store refresh token
+    const refreshToken = await this._refreshTokenService.createToken(
+      user.id,
+      clientContext
     );
 
-    // Store refresh token
-    await this._refreshTokenService.createToken(user.id, {
-      token: refreshToken,
-      expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
-    });
+    const accessToken = this._jwtService.generateAccessToken(user.id);
 
     this._loggerService.info("User logged in successfully", {
       userId: user.id,

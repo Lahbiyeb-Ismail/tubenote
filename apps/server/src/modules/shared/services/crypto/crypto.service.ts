@@ -1,14 +1,14 @@
-import { createHash, randomBytes } from "crypto";
+import { randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 
 import type { ICryptoService } from "./crypto.types";
-import type { ComparePasswordDto } from "./dtos";
+import type { HashValidationDto } from "./dtos";
 
 export class CryptoService implements ICryptoService {
   private static _instance: CryptoService;
 
   private readonly SALT_ROUNDS = 12;
-  private readonly TOKEN_BYTES = 32;
+  private readonly TOKEN_BYTES = 64;
 
   private constructor() {}
 
@@ -24,14 +24,10 @@ export class CryptoService implements ICryptoService {
    * @param password - The plain-text password to hash.
    * @returns The hashed password.
    */
-  async hashPassword(password: string): Promise<string> {
-    if (!password) {
-      throw new Error("Password is required for hashing.");
-    }
-
+  async generateHash(rawValue: string): Promise<string> {
     const salt = await bcrypt.genSalt(this.SALT_ROUNDS);
 
-    return await bcrypt.hash(password, salt);
+    return await bcrypt.hash(rawValue, salt);
   }
 
   /**
@@ -40,24 +36,15 @@ export class CryptoService implements ICryptoService {
    * @param hashedPassword - The hashed password to compare with.
    * @returns True if the passwords match, false otherwise.
    */
-  async comparePasswords(
-    comparePasswordDto: ComparePasswordDto
+  async validateHashMatch(
+    hashValidationDto: HashValidationDto
   ): Promise<boolean> {
-    const { plainText, hash } = comparePasswordDto;
+    const { unhashedValue, hashedValue } = hashValidationDto;
 
-    if (!plainText || !hash) {
-      throw new Error(
-        "Both plainText and hashed passwords are required for comparison."
-      );
-    }
-    return await bcrypt.compare(plainText, hash);
+    return await bcrypt.compare(unhashedValue, hashedValue);
   }
 
-  generateRandomSecureToken(): string {
+  generateSecureToken(): string {
     return randomBytes(this.TOKEN_BYTES).toString("hex");
-  }
-
-  async hashToken(token: string): Promise<string> {
-    return createHash("sha256").update(token).digest("hex");
   }
 }

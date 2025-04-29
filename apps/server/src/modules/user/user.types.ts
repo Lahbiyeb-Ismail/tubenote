@@ -19,6 +19,7 @@ import type {
   IResponseFormatter,
 } from "@/modules/shared/services";
 
+import type { IRefreshTokenService } from "../auth";
 import type { IAccountService } from "./features/account/account.types";
 import type { ICreateAccountDto } from "./features/account/dtos";
 
@@ -188,6 +189,7 @@ export interface IUserServiceOptions {
   accountService: IAccountService;
   prismaService: IPrismaService;
   cryptoService: ICryptoService;
+  refreshTokenService: IRefreshTokenService;
 }
 
 export interface IUserControllerOptions {

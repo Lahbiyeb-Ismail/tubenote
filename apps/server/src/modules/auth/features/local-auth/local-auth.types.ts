@@ -19,7 +19,7 @@ import type {
 } from "@/modules/shared/services";
 
 import type { IJwtService } from "../../utils";
-import type { IRefreshTokenService } from "../refresh-token";
+import type { IClientContext, IRefreshTokenService } from "../refresh-token";
 import type { IVerifyEmailService } from "../verify-email";
 
 /**
@@ -40,7 +40,10 @@ export interface ILocalAuthService {
    * @param loginDto - The data transfer object containing user login details.
    * @returns A promise that resolves to an authentication response DTO.
    */
-  loginUser: (loginDto: ILoginDto) => Promise<IAuthResponseDto>;
+  loginUser: (
+    loginDto: ILoginDto,
+    clientContext: IClientContext
+  ) => Promise<IAuthResponseDto>;
 }
 
 /**

@@ -5,7 +5,6 @@ import { isAuthenticated } from "@/middlewares";
 import { authController } from "./auth.module";
 
 import { localAuthRoutes } from "./features/local-auth";
-import { refreshTokenRoutes } from "./features/refresh-token";
 import { resetPasswordRoutes } from "./features/reset-password";
 import { verifyEmailRoutes } from "./features/verify-email";
 
@@ -19,9 +18,6 @@ authRoutes.use("/", resetPasswordRoutes);
 
 // Verify email routes
 authRoutes.use("/", verifyEmailRoutes);
-
-// Refresh token routes
-authRoutes.use("/", refreshTokenRoutes);
 
 // - POST /logout: Log out the current user.
 authRoutes

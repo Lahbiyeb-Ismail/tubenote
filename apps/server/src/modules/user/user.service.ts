@@ -23,6 +23,7 @@ import type {
   IUserServiceOptions,
 } from "./user.types";
 
+import type { IRefreshTokenService } from "../auth";
 import type { IAccountService } from "./features/account/account.types";
 import type { ICreateAccountDto } from "./features/account/dtos";
 
@@ -33,7 +34,8 @@ export class UserService implements IUserService {
     private readonly _userRepository: IUserRepository,
     private readonly _accountService: IAccountService,
     private readonly _prismaService: IPrismaService,
-    private readonly _cryptoService: ICryptoService
+    private readonly _cryptoService: ICryptoService,
+    private readonly _refreshTokenService: IRefreshTokenService
   ) {}
 
   public static getInstance(options: IUserServiceOptions): UserService {
@@ -42,7 +44,8 @@ export class UserService implements IUserService {
         options.userRepository,
         options.accountService,
         options.prismaService,
-        options.cryptoService
+        options.cryptoService,
+        options.refreshTokenService
       );
     }
     return this._instance;
@@ -79,7 +82,7 @@ export class UserService implements IUserService {
     tx: Prisma.TransactionClient,
     data: ICreateUserDto
   ): Promise<User> {
-    const hashedPassword = await this._cryptoService.hashPassword(
+    const hashedPassword = await this._cryptoService.generateHash(
       data.password
     );
 
@@ -178,12 +181,12 @@ export class UserService implements IUserService {
   ): Promise<User> {
     const { currentPassword, newPassword } = data;
 
-    const updatedUser = await this._prismaService.transaction(async (tx) => {
+    return this._prismaService.transaction(async (tx) => {
       const user = await this._ensureUserExists(userId, tx);
 
-      const isPasswordValid = await this._cryptoService.comparePasswords({
-        plainText: currentPassword,
-        hash: user.password,
+      const isPasswordValid = await this._cryptoService.validateHashMatch({
+        unhashedValue: currentPassword,
+        hashedValue: user.password,
       });
 
       if (!isPasswordValid) {
@@ -195,12 +198,22 @@ export class UserService implements IUserService {
       }
 
       const hashedPassword =
-        await this._cryptoService.hashPassword(newPassword);
+        await this._cryptoService.generateHash(newPassword);
 
-      return this._userRepository.updatePassword(tx, user.id, hashedPassword);
+      const updatedUser = this._userRepository.updatePassword(
+        tx,
+        user.id,
+        hashedPassword
+      );
+
+      await this._refreshTokenService.revokeAllUserTokens(
+        user.id,
+        "password_changed",
+        tx
+      );
+
+      return updatedUser;
     });
-
-    return updatedUser;
   }
 
   /**
@@ -219,7 +232,7 @@ export class UserService implements IUserService {
       const user = await this._ensureUserExists(userId, tx);
 
       const hashedPassword =
-        await this._cryptoService.hashPassword(newPassword);
+        await this._cryptoService.generateHash(newPassword);
 
       return this._userRepository.updatePassword(tx, user.id, hashedPassword);
     });
