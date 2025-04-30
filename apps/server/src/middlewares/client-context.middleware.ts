@@ -29,12 +29,6 @@ export const clientContextMiddleware = (
     const userAgent = UAParser(req.headers["user-agent"]);
     const clientType = userAgent.device.type || "web";
 
-    console.log("Client Context Middleware:", {
-      ipAddress,
-      userAgent: userAgent,
-      clientType,
-    });
-
     req.clientContext = {
       ipAddress: anonymizeIp(ipAddress),
       userAgent: JSON.stringify(userAgent),
