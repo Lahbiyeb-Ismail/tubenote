@@ -92,37 +92,41 @@ export class VerifyEmailService implements IVerifyEmailService {
   }
 
   async verifyUserEmail(token: string): Promise<void> {
-    const payload = await this._jwtService.verify({
+    const { jwtPayload, error } = this._jwtService.verify({
       token,
       secret: VERIFY_EMAIL_TOKEN_SECRET,
     });
 
-    await this._prismaService.transaction(async (tx) => {
-      const foundToken = await this._verifyEmailRepository.findByToken(
-        token,
-        tx
-      );
-
-      if (!foundToken) {
-        this._loggerService.warn(
-          `Token reuse attempt for user ${payload.userId}`
+    if (jwtPayload) {
+      await this._prismaService.transaction(async (tx) => {
+        const foundToken = await this._verifyEmailRepository.findByToken(
+          token,
+          tx
         );
 
-        await this._verifyEmailRepository.deleteMany(payload.userId, tx);
-        throw new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
-      }
+        if (!foundToken) {
+          this._loggerService.warn(
+            `Token reuse attempt for user ${jwtPayload.userId}`
+          );
 
-      // Deletes the email verification token from the database.
-      await this._verifyEmailRepository.deleteMany(foundToken.userId, tx);
+          await this._verifyEmailRepository.deleteMany(jwtPayload.userId, tx);
+          throw new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
+        }
 
-      const verifiedUser = await this._userService.verifyUserEmail(
-        foundToken.userId,
-        tx
-      );
+        // Deletes the email verification token from the database.
+        await this._verifyEmailRepository.deleteMany(foundToken.userId, tx);
 
-      this._loggerService.info(
-        `Email verification successful for user ${verifiedUser.id}`
-      );
-    });
+        const verifiedUser = await this._userService.verifyUserEmail(
+          foundToken.userId,
+          tx
+        );
+
+        this._loggerService.info(
+          `Email verification successful for user ${verifiedUser.id}`
+        );
+      });
+    } else {
+      throw error;
+    }
   }
 }
