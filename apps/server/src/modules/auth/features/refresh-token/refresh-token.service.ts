@@ -51,16 +51,12 @@ export class RefreshTokenService implements IRefreshTokenService {
   }
 
   private async validateRefreshToken(
-    userId: string,
     rawToken: string
   ): Promise<RefreshToken | null> {
-    const hint = rawToken.slice(0, 8);
+    const hint = rawToken.slice(0, 16);
 
     // First filter by hint
-    const candidates = await this._refreshTokenRepository.findByHint(
-      userId,
-      hint
-    );
+    const candidates = await this._refreshTokenRepository.findByHint(hint);
 
     // Then compare full hashes
     for (const token of candidates) {
@@ -77,51 +73,58 @@ export class RefreshTokenService implements IRefreshTokenService {
     return null;
   }
 
-  async refreshToken(
-    userId: string,
-    oldToken: string,
+  async refreshTokens(
+    refreshToken: string,
     clientContext: IClientContext
   ): Promise<IAuthResponseDto> {
-    const tokenRecord = await this.validateRefreshToken(userId, oldToken);
+    const tokenRecord = await this.validateRefreshToken(refreshToken);
 
     // Check if the token is valid
     if (!tokenRecord) {
-      this._loggerService.warn(
-        `Invalid refresh token attempt for user ${userId}`
-      );
+      // this._loggerService.warn(
+      //   `Invalid refresh token attempt for user ${userId}`
+      // );
 
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    if (tokenRecord.userId !== userId) {
-      await this._refreshTokenRepository.markAsRevoked(
-        tokenRecord.id,
-        "suspicious_activity"
-      );
+    // if (tokenRecord.userId !== userId) {
+    //   await this._refreshTokenRepository.markAsRevoked(
+    //     tokenRecord.id,
+    //     "suspicious_activity"
+    //   );
 
-      this._loggerService.warn(
-        `Invalid refresh token attempt for user ${userId}`
-      );
+    //   this._loggerService.warn(
+    //     `Invalid refresh token attempt for user ${userId}`
+    //   );
 
-      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
-    }
+    //   throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
+    // }
 
     // Token rotation (revoke old, create new)
-    const refreshToken = await this._prismaService.transaction(async (tx) => {
-      const newToken = await this.createToken(userId, clientContext, tx);
-      await this._refreshTokenRepository.markAsRevoked(
-        tokenRecord.id,
-        "token_refreshing",
-        tx
-      );
+    const newRefreshToken = await this._prismaService.transaction(
+      async (tx) => {
+        const newToken = await this.createToken(
+          tokenRecord.userId,
+          clientContext,
+          tx
+        );
+        await this._refreshTokenRepository.markAsRevoked(
+          tokenRecord.id,
+          "token_refreshing",
+          tx
+        );
 
-      return newToken;
-    });
+        return newToken;
+      }
+    );
 
     // Generate a new access token
-    const accessToken = this._jwtService.generateAccessToken(userId);
+    const newAccessToken = this._jwtService.generateAccessToken(
+      tokenRecord.userId
+    );
 
-    return { accessToken, refreshToken };
+    return { accessToken: newAccessToken, refreshToken: newRefreshToken };
   }
 
   async createToken(
@@ -141,7 +144,7 @@ export class RefreshTokenService implements IRefreshTokenService {
     const token = this._cryptoService.generateSecureToken();
 
     const tokenHash = await this._cryptoService.generateHash(token);
-    const hint = token.slice(0, 8); // First 8 chars as lookup hint
+    const hint = token.slice(0, 16); // First 16 chars as lookup hint
 
     const expiresAt = stringToDate(REFRESH_TOKEN_EXPIRES_IN);
 
@@ -165,7 +168,9 @@ export class RefreshTokenService implements IRefreshTokenService {
     revocationReason: string,
     tx?: Prisma.TransactionClient
   ): Promise<void> {
-    const foundToken = await this.validateRefreshToken(userId, token);
+    const foundToken = await this.validateRefreshToken(token);
+
+    console.log("foundToken:", foundToken);
 
     if (!foundToken) {
       this._loggerService.warn(`Invalid refresh token for user ${userId}`);
