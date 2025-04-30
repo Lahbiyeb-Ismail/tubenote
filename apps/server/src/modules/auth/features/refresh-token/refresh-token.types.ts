@@ -38,14 +38,12 @@ export interface IRefreshTokenRepository {
   /**
    * Finds refresh tokens by their hint.
    *
-   * @param userId - The ID of the user whose tokens are to be found.
    * @param hint - The hint of the refresh token to find.
    * @param tx - Optional transaction client for database operations.
    *
    * @returns A promise that resolves to an array of found refresh tokens.
    */
   findByHint(
-    userId: string,
     hint: string,
     tx?: Prisma.TransactionClient
   ): Promise<RefreshToken[]>;
@@ -126,13 +124,12 @@ export interface IRefreshTokenService {
    * Refreshes the authentication token for a user.
    *
    * @param userId - The ID of the user requesting the token refresh.
-   * @param token - The current refresh token to be validated and replaced.
+   * @param refreshToken - The current refresh token to be validated and replaced.
    *
    * @returns A promise that resolves to an authentication response DTO.
    */
-  refreshToken(
-    userId: string,
-    oldToken: string,
+  refreshTokens(
+    refreshToken: string,
     clientContext: IClientContext
   ): Promise<IAuthResponseDto>;
 
@@ -163,14 +160,14 @@ export interface IRefreshTokenService {
  */
 export interface IRefreshTokenController {
   /**
-   * Handles the refresh token request.
+   * Handles the refresh auth tokens request.
    *
    * @param req - The typed request object containing necessary data for the operation.
    * @param res - The response object used to send the result back to the client.
    *
    * @returns A promise that resolves when the operation is complete.
    */
-  refreshToken(req: TypedRequest, res: Response): Promise<void>;
+  refreshAuthTokens(req: TypedRequest, res: Response): Promise<void>;
 }
 
 /**
