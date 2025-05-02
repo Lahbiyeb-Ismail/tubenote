@@ -12,7 +12,7 @@ import {
 import type { IUserService } from "@/modules/user";
 import type { IAccountService } from "@/modules/user/features/account/account.types";
 
-import type { IRefreshTokenService } from "../refresh-token";
+import type { IClientContext, IRefreshTokenService } from "../refresh-token";
 
 import type { ICreateAccountDto } from "@/modules/user/features/account/dtos";
 import type { ICreateUserDto } from "@tubenote/dtos";
@@ -70,7 +70,10 @@ export class OAuthService implements IOAuthService {
   // New method for OAuth login/signup
   async handleOAuthLogin(
     createUserDto: ICreateUserDto,
-    createAccountDto: ICreateAccountDto
+    createAccountDto: ICreateAccountDto,
+    deviceId: string,
+    ipAddress: string,
+    clientContext: IClientContext
   ): Promise<string> {
     return this._prismaService.transaction<string>(async (tx) => {
       let userId: string;
@@ -103,22 +106,22 @@ export class OAuthService implements IOAuthService {
         userId = user.id;
       }
 
-      // Generate tokens and save refresh token
-      this._loggerService.info(
-        `Generating auth tokens for user with ID ${userId}.`
-      );
-
-      const { accessToken, refreshToken } =
-        this._jwtService.generateAuthTokens(userId);
-
       this._loggerService.info(
         `Saving refresh token for user with ID ${userId}.`
       );
 
-      // await this._refreshTokenService.createToken(userId, {
-      //   token: refreshToken,
-      //   expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
-      // });
+      const refreshToken = await this._refreshTokenService.createToken(
+        userId,
+        deviceId,
+        ipAddress,
+        clientContext
+      );
+
+      this._loggerService.info(
+        `Generating access token for user with ID ${userId}.`
+      );
+
+      const accessToken = this._jwtService.generateAccessToken(userId);
 
       const temporaryOauthCode = await this.generateTemporaryOAuthCode({
         accessToken,

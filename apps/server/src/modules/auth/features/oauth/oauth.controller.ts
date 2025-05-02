@@ -76,10 +76,21 @@ export class OAuthController implements IOAuthController {
     }
 
     const { createAccountDto, createUserDto } = req.user as IOauthLoginDto;
+    const clientContext = req.clientContext;
+    const deviceId = [
+      req.headers["user-agent"],
+      req.headers["accept-language"],
+      req.headers["sec-ch-ua-platform"],
+    ].join("|");
+
+    const ipAddress = req.clientIp as string;
 
     const temporaryOauthCode = await this._oauthService.handleOAuthLogin(
       createUserDto,
-      createAccountDto
+      createAccountDto,
+      deviceId,
+      ipAddress,
+      clientContext
     );
 
     this.redirectWithTemporaryOauthCode(res, temporaryOauthCode);
