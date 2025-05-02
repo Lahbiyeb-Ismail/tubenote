@@ -52,6 +52,6 @@ export class CryptoService implements ICryptoService {
   generateUnsaltedHash(rawValue: string): string {
     const hashAlgorithm = envConfig.crypto.hash_algorithm;
 
-    return crypto.hash(hashAlgorithm, rawValue);
+    return crypto.hash(hashAlgorithm, rawValue, "hex");
   }
 }
