@@ -3,11 +3,12 @@
  */
 export interface ICreateRefreshTokenDto extends IClientContext {
   token: string;
+  deviceId: string;
+  ipAddress: string;
   expiresAt: Date;
 }
 
 export interface IClientContext {
   clientType: string;
   userAgent: string | null;
-  ipAddress: string | null;
 }
