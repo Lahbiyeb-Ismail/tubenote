@@ -35,23 +35,18 @@ export interface IRefreshTokenRepository {
     tx?: Prisma.TransactionClient
   ): Promise<RefreshToken>;
 
+  /**
+   * Finds a refresh token by its token string.
+   *
+   * @param token - The token string to search for.
+   * @param tx - Optional transaction client for database operations.
+   *
+   * @returns A promise that resolves to the found refresh token or null if not found.
+   */
   findByToken(
     token: string,
     tx?: Prisma.TransactionClient
   ): Promise<RefreshToken | null>;
-
-  /**
-   * Counts the number of active refresh tokens for a user.
-   *
-   * @param userId - The ID of the user whose tokens are to be counted.
-   * @param tx - Optional transaction client for database operations.
-   *
-   * @returns A promise that resolves to the count of active tokens.
-   */
-  countActiveTokens(
-    userId: string,
-    tx?: Prisma.TransactionClient
-  ): Promise<number>;
 
   /**
    * Marks a refresh token as revoked in the database.
@@ -64,21 +59,6 @@ export interface IRefreshTokenRepository {
   markAsRevoked(
     tokenId: string,
     revocationReason: string,
-    tx?: Prisma.TransactionClient
-  ): Promise<void>;
-
-  /**
-   * Revokes the oldest tokens for a user, up to a specified count.
-   *
-   * @param userId - The ID of the user whose tokens are to be revoked.
-   * @param count - The number of oldest tokens to revoke.
-   * @param tx - Optional transaction client for database operations.
-   *
-   * @returns A promise that resolves when the tokens are successfully revoked.
-   */
-  revokeOldestTokens(
-    userId: string,
-    count: number,
     tx?: Prisma.TransactionClient
   ): Promise<void>;
 
