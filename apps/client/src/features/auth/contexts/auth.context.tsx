@@ -1,6 +1,7 @@
 "use client";
 import { createContext, useContext, useReducer } from "react";
 
+import { useGetCurrentUser } from "@/features/user/hooks";
 import {
   useExchangeOauthCode,
   useLogin,
@@ -19,6 +20,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const { authInitialState, authReducer } = useAuthReducer();
   const [authState, dispatch] = useReducer(authReducer, authInitialState);
 
+  // Integrate the useGetCurrentUser hook to fetch user data when authenticated
+  const currentUserQueryResult = useGetCurrentUser(
+    authInitialState.isAuthenticated
+  );
+
   const registerMutationResult = useRegister(dispatch);
   const loginMutationResult = useLogin(dispatch);
   const logoutMutationResult = useLogout(dispatch);
@@ -33,6 +39,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const value = {
     authState,
+    currentUserQueryResult,
     loginMutationResult,
     registerMutationResult,
     logoutMutationResult,
