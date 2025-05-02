@@ -35,18 +35,10 @@ export interface IRefreshTokenRepository {
     tx?: Prisma.TransactionClient
   ): Promise<RefreshToken>;
 
-  /**
-   * Finds refresh tokens by their hint.
-   *
-   * @param hint - The hint of the refresh token to find.
-   * @param tx - Optional transaction client for database operations.
-   *
-   * @returns A promise that resolves to an array of found refresh tokens.
-   */
-  findByHint(
-    hint: string,
+  findByToken(
+    token: string,
     tx?: Prisma.TransactionClient
-  ): Promise<RefreshToken[]>;
+  ): Promise<RefreshToken | null>;
 
   /**
    * Counts the number of active refresh tokens for a user.
