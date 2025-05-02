@@ -90,7 +90,13 @@ export interface IRefreshTokenService {
    *
    * @returns A promise that resolves to the newly created refresh token.
    */
-  createToken(userId: string, clientContext: IClientContext): Promise<string>;
+  createToken(
+    userId: string,
+    deviceId: string,
+    ipAddress: string,
+    clientContext: IClientContext,
+    tx?: Prisma.TransactionClient
+  ): Promise<string>;
 
   /**
    * Refreshes the authentication token for a user.
@@ -102,6 +108,8 @@ export interface IRefreshTokenService {
    */
   refreshTokens(
     refreshToken: string,
+    deviceId: string,
+    ipAddress: string,
     clientContext: IClientContext
   ): Promise<IAuthResponseDto>;
 
