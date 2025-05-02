@@ -8,7 +8,6 @@ import {
 import Link from "next/link";
 
 import { useAuth } from "@/features/auth/contexts";
-import { useGetCurrentUser } from "@/features/user/hooks";
 
 import { UserAvatar } from "@/features/user/components";
 
@@ -23,12 +22,12 @@ import {
 } from "@/components/ui";
 
 export function DropDownNavbar() {
-  const { data: response } = useGetCurrentUser();
-  const { logoutMutationResult } = useAuth();
+  const { logoutMutationResult, currentUserQueryResult } = useAuth();
 
+  const { data: currentUserResponse } = currentUserQueryResult;
   const { mutate: logout, isPending } = logoutMutationResult;
 
-  const currentUser = response?.payload.data;
+  const currentUser = currentUserResponse?.payload.data;
 
   return (
     <div className="flex items-center">
