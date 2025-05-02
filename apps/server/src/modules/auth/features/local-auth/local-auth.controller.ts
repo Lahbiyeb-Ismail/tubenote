@@ -95,10 +95,22 @@ export class LocalAuthController implements ILocalAuthController {
    */
   async login(req: TypedRequest<ILoginDto>, res: Response) {
     const rateLimitKey = req.rateLimitKey;
+    const deviceId = [
+      req.headers["user-agent"],
+      req.headers["accept-language"],
+      req.headers["sec-ch-ua-platform"],
+    ].join("|");
+
+    const ipAddress = req.clientIp as string;
 
     try {
       const { accessToken, refreshToken } =
-        await this._localAuthService.loginUser(req.body, req.clientContext);
+        await this._localAuthService.loginUser(
+          req.body,
+          deviceId,
+          ipAddress,
+          req.clientContext
+        );
 
       const formattedResponse =
         this._responseFormatter.formatSuccessResponse<string>({

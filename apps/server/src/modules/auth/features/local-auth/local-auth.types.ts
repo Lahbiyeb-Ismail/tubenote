@@ -42,6 +42,8 @@ export interface ILocalAuthService {
    */
   loginUser: (
     loginDto: ILoginDto,
+    deviceId: string,
+    ipAddress: string,
     clientContext: IClientContext
   ) => Promise<IAuthResponseDto>;
 }
