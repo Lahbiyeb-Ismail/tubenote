@@ -2,18 +2,14 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { useAuth } from "@/features/auth/contexts";
-
 import { getCurrentUser } from "../services";
 
-export function useGetCurrentUser() {
-  const { authState } = useAuth();
-
+export function useGetCurrentUser(isAuthenticated: boolean) {
   return useQuery({
-    queryKey: ["current-user", authState.isAuthenticated],
+    queryKey: ["current-user", isAuthenticated],
     queryFn: getCurrentUser,
     // Enable the query only if the user is authenticated.
-    enabled: authState.isAuthenticated,
+    enabled: isAuthenticated,
     // The data is considered fresh for 5 minutes, after which it will be refetched.
     staleTime: 5 * 60 * 1000,
   });
