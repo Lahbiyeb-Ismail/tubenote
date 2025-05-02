@@ -23,6 +23,7 @@ const envSchema = z.object({
   RESET_PASSWORD_TOKEN_EXPIRES_IN: z.string().default("1h"),
   VERIFY_EMAIL_TOKEN_SECRET: z.string().min(8),
   VERIFY_EMAIL_TOKEN_EXPIRES_IN: z.string().default("1d"),
+  HASH_ALGORITHM: z.enum(["sha256", "sha512"]).default("sha256"),
   YOUTUBE_API_URL: z.string().url().includes("www.googleapis.com"),
   YOUTUBE_API_KEY: z.string(),
   GOOGLE_CLIENT_ID: z.string(),
@@ -85,6 +86,9 @@ export const envConfig = {
       secret: validatedEnv.VERIFY_EMAIL_TOKEN_SECRET,
       expires_in: validatedEnv.VERIFY_EMAIL_TOKEN_EXPIRES_IN,
     },
+  },
+  crypto: {
+    hash_algorithm: validatedEnv.HASH_ALGORITHM,
   },
   youtube: {
     api: {
