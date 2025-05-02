@@ -1,7 +1,6 @@
 export interface RefreshToken {
   id: string;
-  tokenHash: string;
-  hint: string;
+  token: string;
   userId: string;
   clientType: string;
   userAgent: string | null;
