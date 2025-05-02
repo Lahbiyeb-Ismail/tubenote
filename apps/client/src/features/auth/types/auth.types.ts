@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 
-import type { UseMutationResult } from "@tanstack/react-query";
+import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
-import type { IApiSuccessResponse } from "@tubenote/types";
+import type { IApiSuccessResponse, User } from "@tubenote/types";
 
 export type AuthState = {
   isAuthenticated: boolean;
@@ -79,6 +79,7 @@ export type AuthAction =
 
 export type AuthContextType = {
   authState: AuthState;
+  currentUserQueryResult: UseQueryResult<IApiSuccessResponse<User>, Error>;
   loginMutationResult: LoginMutationResult;
   registerMutationResult: RegisterMutationResult;
   logoutMutationResult: LogoutMutationResult;
