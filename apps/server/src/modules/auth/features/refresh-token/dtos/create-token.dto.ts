@@ -2,8 +2,7 @@
  * Interface representing the data transfer object for creating a refresh token.
  */
 export interface ICreateRefreshTokenDto extends IClientContext {
-  tokenHash: string;
-  hint: string;
+  token: string;
   expiresAt: Date;
 }
 
