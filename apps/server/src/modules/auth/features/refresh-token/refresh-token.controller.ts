@@ -56,6 +56,14 @@ export class RefreshTokenController implements IRefreshTokenController {
     const cookies = req.cookies;
     const clientContext = req.clientContext;
 
+    const deviceId = [
+      req.headers["user-agent"],
+      req.headers["accept-language"],
+      req.headers["sec-ch-ua-platform"],
+    ].join("|");
+
+    const ipAddress = req.clientIp as string;
+
     const userRefreshToken = cookies[REFRESH_TOKEN_NAME];
 
     if (!userRefreshToken || typeof userRefreshToken !== "string") {
@@ -65,6 +73,8 @@ export class RefreshTokenController implements IRefreshTokenController {
     const { accessToken, refreshToken } =
       await this._refreshTokenService.refreshTokens(
         userRefreshToken,
+        deviceId,
+        ipAddress,
         clientContext
       );
 
