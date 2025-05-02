@@ -100,6 +100,8 @@ export class LocalAuthService implements ILocalAuthService {
 
   async loginUser(
     loginDto: ILoginDto,
+    deviceId: string,
+    ipAddress: string,
     clientContext: IClientContext
   ): Promise<IAuthResponseDto> {
     const { email, password } = loginDto;
@@ -136,6 +138,8 @@ export class LocalAuthService implements ILocalAuthService {
     // Store refresh token
     const refreshToken = await this._refreshTokenService.createToken(
       user.id,
+      deviceId,
+      ipAddress,
       clientContext
     );
 
