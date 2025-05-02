@@ -1,17 +1,15 @@
 "use client";
 
-import { useGetCurrentUser } from "@/features/user/hooks";
+import { useAuth } from "@/features/auth/contexts";
 
 import { LoggedInButtons, LoggedOutButtons } from "./";
 
 export function NavbarButtons() {
-  const { data: response, isLoading } = useGetCurrentUser();
-
-  const currentUser = response?.payload.data;
+  const { authState } = useAuth();
 
   return (
     <>
-      {currentUser && !isLoading ? <LoggedInButtons /> : <LoggedOutButtons />}
+      {authState.isAuthenticated ? <LoggedInButtons /> : <LoggedOutButtons />}
     </>
   );
 }
