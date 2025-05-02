@@ -52,25 +52,17 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
     );
   }
 
-  /**
-   * Finds refresh tokens by their hint.
-   *
-   * @param hint - The hint of the refresh token to find.
-   * @param tx - Optional transaction client for database operations.
-   *
-   * @returns A promise that resolves to an array of found refresh tokens.
-   */
-  async findByHint(
-    hint: string,
+  async findByToken(
+    token: string,
     tx?: Prisma.TransactionClient
-  ): Promise<RefreshToken[]> {
+  ): Promise<RefreshToken | null> {
     const client = tx ?? this._db;
 
     return handleAsyncOperation(
       () =>
-        client.refreshToken.findMany({
+        client.refreshToken.findUnique({
           where: {
-            hint,
+            token,
             expiresAt: { gt: new Date() },
             isRevoked: false,
           },
