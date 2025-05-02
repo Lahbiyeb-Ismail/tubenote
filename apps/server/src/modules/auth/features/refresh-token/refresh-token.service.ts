@@ -24,7 +24,6 @@ import type {
 
 export class RefreshTokenService implements IRefreshTokenService {
   private static _instance: RefreshTokenService;
-  private MAX_TOKENS_PER_USER = 10;
 
   private constructor(
     private readonly _refreshTokenRepository: IRefreshTokenRepository,
@@ -60,6 +59,8 @@ export class RefreshTokenService implements IRefreshTokenService {
 
   async refreshTokens(
     refreshToken: string,
+    deviceId: string,
+    ipAddress: string,
     clientContext: IClientContext
   ): Promise<IAuthResponseDto> {
     const tokenRecord = await this.validateRefreshToken(refreshToken);
@@ -69,11 +70,29 @@ export class RefreshTokenService implements IRefreshTokenService {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
+    const currentDeviceId = this._cryptoService.generateUnsaltedHash(deviceId);
+    const currentIpAddress =
+      this._cryptoService.generateUnsaltedHash(ipAddress);
+
+    if (
+      tokenRecord.deviceId !== currentDeviceId ||
+      tokenRecord.ipAddress !== currentIpAddress
+    ) {
+      await this.revokeAllUserTokens(
+        tokenRecord.userId,
+        "suspicious_activity_detected"
+      );
+
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
+    }
+
     // Token rotation (revoke old, create new)
     const newRefreshToken = await this._prismaService.transaction(
       async (tx) => {
         const newToken = await this.createToken(
           tokenRecord.userId,
+          deviceId,
+          ipAddress,
           clientContext,
           tx
         );
@@ -97,19 +116,24 @@ export class RefreshTokenService implements IRefreshTokenService {
 
   async createToken(
     userId: string,
+    deviceId: string,
+    ipAddress: string,
     clientContext: IClientContext,
     tx?: Prisma.TransactionClient
   ): Promise<string> {
     const randomToken = this._cryptoService.generateSecureToken();
-
     const tokenHash = this._cryptoService.generateUnsaltedHash(randomToken);
-
     const expiresAt = stringToDate(REFRESH_TOKEN_EXPIRES_IN);
+
+    const deviceIdHash = this._cryptoService.generateUnsaltedHash(deviceId);
+    const ipAddressHash = this._cryptoService.generateUnsaltedHash(ipAddress);
 
     await this._refreshTokenRepository.create(
       userId,
       {
         token: tokenHash,
+        deviceId: deviceIdHash,
+        ipAddress: ipAddressHash,
         expiresAt,
         ...clientContext,
       },
