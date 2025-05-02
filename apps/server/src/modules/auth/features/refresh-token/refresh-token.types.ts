@@ -36,32 +36,17 @@ export interface IRefreshTokenRepository {
   ): Promise<RefreshToken>;
 
   /**
-   * Finds refresh tokens by their hint.
+   * Finds a refresh token by its token string.
    *
-   * @param userId - The ID of the user whose tokens are to be found.
-   * @param hint - The hint of the refresh token to find.
+   * @param token - The token string to search for.
    * @param tx - Optional transaction client for database operations.
    *
-   * @returns A promise that resolves to an array of found refresh tokens.
+   * @returns A promise that resolves to the found refresh token or null if not found.
    */
-  findByHint(
-    userId: string,
-    hint: string,
+  findByToken(
+    token: string,
     tx?: Prisma.TransactionClient
-  ): Promise<RefreshToken[]>;
-
-  /**
-   * Counts the number of active refresh tokens for a user.
-   *
-   * @param userId - The ID of the user whose tokens are to be counted.
-   * @param tx - Optional transaction client for database operations.
-   *
-   * @returns A promise that resolves to the count of active tokens.
-   */
-  countActiveTokens(
-    userId: string,
-    tx?: Prisma.TransactionClient
-  ): Promise<number>;
+  ): Promise<RefreshToken | null>;
 
   /**
    * Marks a refresh token as revoked in the database.
@@ -74,21 +59,6 @@ export interface IRefreshTokenRepository {
   markAsRevoked(
     tokenId: string,
     revocationReason: string,
-    tx?: Prisma.TransactionClient
-  ): Promise<void>;
-
-  /**
-   * Revokes the oldest tokens for a user, up to a specified count.
-   *
-   * @param userId - The ID of the user whose tokens are to be revoked.
-   * @param count - The number of oldest tokens to revoke.
-   * @param tx - Optional transaction client for database operations.
-   *
-   * @returns A promise that resolves when the tokens are successfully revoked.
-   */
-  revokeOldestTokens(
-    userId: string,
-    count: number,
     tx?: Prisma.TransactionClient
   ): Promise<void>;
 
@@ -120,19 +90,26 @@ export interface IRefreshTokenService {
    *
    * @returns A promise that resolves to the newly created refresh token.
    */
-  createToken(userId: string, clientContext: IClientContext): Promise<string>;
+  createToken(
+    userId: string,
+    deviceId: string,
+    ipAddress: string,
+    clientContext: IClientContext,
+    tx?: Prisma.TransactionClient
+  ): Promise<string>;
 
   /**
    * Refreshes the authentication token for a user.
    *
    * @param userId - The ID of the user requesting the token refresh.
-   * @param token - The current refresh token to be validated and replaced.
+   * @param refreshToken - The current refresh token to be validated and replaced.
    *
    * @returns A promise that resolves to an authentication response DTO.
    */
-  refreshToken(
-    userId: string,
-    oldToken: string,
+  refreshTokens(
+    refreshToken: string,
+    deviceId: string,
+    ipAddress: string,
     clientContext: IClientContext
   ): Promise<IAuthResponseDto>;
 
@@ -163,14 +140,14 @@ export interface IRefreshTokenService {
  */
 export interface IRefreshTokenController {
   /**
-   * Handles the refresh token request.
+   * Handles the refresh auth tokens request.
    *
    * @param req - The typed request object containing necessary data for the operation.
    * @param res - The response object used to send the result back to the client.
    *
    * @returns A promise that resolves when the operation is complete.
    */
-  refreshToken(req: TypedRequest, res: Response): Promise<void>;
+  refreshAuthTokens(req: TypedRequest, res: Response): Promise<void>;
 }
 
 /**

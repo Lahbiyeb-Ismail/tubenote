@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import { UAParser } from "ua-parser-js";
 
 // Helper to anonymize IP addresses (GDPR compliance)
-const anonymizeIp = (ip?: string) => {
+export const anonymizeIp = (ip?: string) => {
   if (!ip) return null;
 
   // Handle IPv4
@@ -25,18 +25,10 @@ export const clientContextMiddleware = (
   next: NextFunction
 ) => {
   try {
-    const ipAddress = req.clientIp; // From request-ip
     const userAgent = UAParser(req.headers["user-agent"]);
     const clientType = userAgent.device.type || "web";
 
-    console.log("Client Context Middleware:", {
-      ipAddress,
-      userAgent: userAgent,
-      clientType,
-    });
-
     req.clientContext = {
-      ipAddress: anonymizeIp(ipAddress),
       userAgent: JSON.stringify(userAgent),
       clientType,
     };

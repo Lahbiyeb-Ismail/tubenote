@@ -1,7 +1,5 @@
 import jwt from "jsonwebtoken";
 
-import { BadRequestError } from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import type { ILoggerService } from "@/modules/shared/services";
 import type { JwtPayload } from "@/modules/shared/types";
 
@@ -14,7 +12,11 @@ import {
 import type { IAuthResponseDto } from "@/modules/auth/dtos";
 
 import type { ISignTokenDto, IVerifyTokenDto } from "./dtos";
-import type { IJwtService, IJwtServiceOptions } from "./jwt.types";
+import type {
+  IJwtService,
+  IJwtServiceOptions,
+  IVerifyResult,
+} from "./jwt.types";
 
 export class JwtService implements IJwtService {
   private static _instance: JwtService;
@@ -30,21 +32,24 @@ export class JwtService implements IJwtService {
     return this._instance;
   }
 
-  async verify(verifyTokenDto: IVerifyTokenDto): Promise<JwtPayload> {
+  verify(verifyTokenDto: IVerifyTokenDto): IVerifyResult {
     const { token, secret } = verifyTokenDto;
-    const payload = await new Promise<JwtPayload>((resolve, reject) => {
-      jwt.verify(token, secret, (err, decoded) => {
-        if (err) {
-          this._loggerService.error(`Error verifying token: ${err.message}`);
 
-          reject(new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN));
-        } else {
-          resolve(decoded as JwtPayload);
-        }
-      });
-    });
+    try {
+      const jwtPayload = jwt.verify(token, secret) as JwtPayload;
 
-    return payload;
+      return {
+        jwtPayload,
+        isError: false,
+        error: null,
+      };
+    } catch (err) {
+      return {
+        jwtPayload: null,
+        isError: true,
+        error: err instanceof Error ? err : new Error(String(err)),
+      };
+    }
   }
 
   sign(signTokenDto: ISignTokenDto): string {

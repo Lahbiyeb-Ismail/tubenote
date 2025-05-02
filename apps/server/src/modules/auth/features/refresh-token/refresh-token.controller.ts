@@ -52,21 +52,29 @@ export class RefreshTokenController implements IRefreshTokenController {
    *
    * @throws {UnauthorizedError} If the refresh token is not provided.
    */
-  async refreshToken(req: TypedRequest, res: Response): Promise<void> {
+  async refreshAuthTokens(req: TypedRequest, res: Response): Promise<void> {
     const cookies = req.cookies;
-    const userId = req.userId;
     const clientContext = req.clientContext;
 
-    const refreshTokenCookie = cookies[REFRESH_TOKEN_NAME];
+    const deviceId = [
+      req.headers["user-agent"],
+      req.headers["accept-language"],
+      req.headers["sec-ch-ua-platform"],
+    ].join("|");
 
-    if (!refreshTokenCookie || typeof refreshTokenCookie !== "string") {
+    const ipAddress = req.clientIp as string;
+
+    const userRefreshToken = cookies[REFRESH_TOKEN_NAME];
+
+    if (!userRefreshToken || typeof userRefreshToken !== "string") {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
     const { accessToken, refreshToken } =
-      await this._refreshTokenService.refreshToken(
-        userId,
-        refreshTokenCookie,
+      await this._refreshTokenService.refreshTokens(
+        userRefreshToken,
+        deviceId,
+        ipAddress,
         clientContext
       );
 

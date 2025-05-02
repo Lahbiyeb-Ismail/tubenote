@@ -1,6 +1,7 @@
-import { randomBytes } from "crypto";
+import crypto from "node:crypto";
 import bcrypt from "bcryptjs";
 
+import { envConfig } from "../../config";
 import type { ICryptoService } from "./crypto.types";
 import type { HashValidationDto } from "./dtos";
 
@@ -45,6 +46,12 @@ export class CryptoService implements ICryptoService {
   }
 
   generateSecureToken(): string {
-    return randomBytes(this.TOKEN_BYTES).toString("hex");
+    return crypto.randomBytes(this.TOKEN_BYTES).toString("hex");
+  }
+
+  generateUnsaltedHash(rawValue: string): string {
+    const hashAlgorithm = envConfig.crypto.hash_algorithm;
+
+    return crypto.hash(hashAlgorithm, rawValue, "hex");
   }
 }

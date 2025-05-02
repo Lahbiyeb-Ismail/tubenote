@@ -24,7 +24,6 @@ import type {
 
 export class RefreshTokenService implements IRefreshTokenService {
   private static _instance: RefreshTokenService;
-  private MAX_TOKENS_PER_USER = 10;
 
   private constructor(
     private readonly _refreshTokenRepository: IRefreshTokenRepository,
@@ -51,112 +50,97 @@ export class RefreshTokenService implements IRefreshTokenService {
   }
 
   private async validateRefreshToken(
-    userId: string,
     rawToken: string
   ): Promise<RefreshToken | null> {
-    const hint = rawToken.slice(0, 8);
+    const tokenHash = this._cryptoService.generateUnsaltedHash(rawToken);
 
-    // First filter by hint
-    const candidates = await this._refreshTokenRepository.findByHint(
-      userId,
-      hint
-    );
-
-    // Then compare full hashes
-    for (const token of candidates) {
-      if (
-        await this._cryptoService.validateHashMatch({
-          hashedValue: token.tokenHash,
-          unhashedValue: rawToken,
-        })
-      ) {
-        return token;
-      }
-    }
-
-    return null;
+    return this._refreshTokenRepository.findByToken(tokenHash);
   }
 
-  async refreshToken(
-    userId: string,
-    oldToken: string,
+  async refreshTokens(
+    refreshToken: string,
+    deviceId: string,
+    ipAddress: string,
     clientContext: IClientContext
   ): Promise<IAuthResponseDto> {
-    const tokenRecord = await this.validateRefreshToken(userId, oldToken);
+    const tokenRecord = await this.validateRefreshToken(refreshToken);
 
     // Check if the token is valid
     if (!tokenRecord) {
-      this._loggerService.warn(
-        `Invalid refresh token attempt for user ${userId}`
-      );
-
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    if (tokenRecord.userId !== userId) {
-      await this._refreshTokenRepository.markAsRevoked(
-        tokenRecord.id,
-        "suspicious_activity"
-      );
+    const currentDeviceId = this._cryptoService.generateUnsaltedHash(deviceId);
+    const currentIpAddress =
+      this._cryptoService.generateUnsaltedHash(ipAddress);
 
-      this._loggerService.warn(
-        `Invalid refresh token attempt for user ${userId}`
+    if (
+      tokenRecord.deviceId !== currentDeviceId ||
+      tokenRecord.ipAddress !== currentIpAddress
+    ) {
+      await this.revokeAllUserTokens(
+        tokenRecord.userId,
+        "suspicious_activity_detected"
       );
 
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
     // Token rotation (revoke old, create new)
-    const refreshToken = await this._prismaService.transaction(async (tx) => {
-      const newToken = await this.createToken(userId, clientContext, tx);
-      await this._refreshTokenRepository.markAsRevoked(
-        tokenRecord.id,
-        "token_refreshing",
-        tx
-      );
+    const newRefreshToken = await this._prismaService.transaction(
+      async (tx) => {
+        const newToken = await this.createToken(
+          tokenRecord.userId,
+          deviceId,
+          ipAddress,
+          clientContext,
+          tx
+        );
+        await this._refreshTokenRepository.markAsRevoked(
+          tokenRecord.id,
+          "token_refreshing",
+          tx
+        );
 
-      return newToken;
-    });
+        return newToken;
+      }
+    );
 
     // Generate a new access token
-    const accessToken = this._jwtService.generateAccessToken(userId);
+    const newAccessToken = this._jwtService.generateAccessToken(
+      tokenRecord.userId
+    );
 
-    return { accessToken, refreshToken };
+    return { accessToken: newAccessToken, refreshToken: newRefreshToken };
   }
 
   async createToken(
     userId: string,
+    deviceId: string,
+    ipAddress: string,
     clientContext: IClientContext,
     tx?: Prisma.TransactionClient
   ): Promise<string> {
-    // Enforce token limits
-    const activeTokensCount =
-      await this._refreshTokenRepository.countActiveTokens(userId);
-
-    if (activeTokensCount >= this.MAX_TOKENS_PER_USER) {
-      const excess = activeTokensCount - this.MAX_TOKENS_PER_USER + 1;
-      await this._refreshTokenRepository.revokeOldestTokens(userId, excess, tx);
-    }
-
-    const token = this._cryptoService.generateSecureToken();
-
-    const tokenHash = await this._cryptoService.generateHash(token);
-    const hint = token.slice(0, 8); // First 8 chars as lookup hint
-
+    const randomToken = this._cryptoService.generateSecureToken();
+    const tokenHash = this._cryptoService.generateUnsaltedHash(randomToken);
     const expiresAt = stringToDate(REFRESH_TOKEN_EXPIRES_IN);
+
+    const deviceIdHash = this._cryptoService.generateUnsaltedHash(deviceId);
+    const ipAddressHash = this._cryptoService.generateUnsaltedHash(ipAddress);
 
     await this._refreshTokenRepository.create(
       userId,
       {
-        tokenHash,
+        token: tokenHash,
+        deviceId: deviceIdHash,
+        ipAddress: ipAddressHash,
         expiresAt,
-        hint,
         ...clientContext,
       },
       tx
     );
 
-    return token;
+    return randomToken;
   }
 
   async markTokenAsRevoked(
@@ -165,7 +149,9 @@ export class RefreshTokenService implements IRefreshTokenService {
     revocationReason: string,
     tx?: Prisma.TransactionClient
   ): Promise<void> {
-    const foundToken = await this.validateRefreshToken(userId, token);
+    const foundToken = await this.validateRefreshToken(token);
+
+    console.log("foundToken:", foundToken);
 
     if (!foundToken) {
       this._loggerService.warn(`Invalid refresh token for user ${userId}`);

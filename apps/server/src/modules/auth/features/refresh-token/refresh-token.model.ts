@@ -1,11 +1,11 @@
 export interface RefreshToken {
   id: string;
-  tokenHash: string;
-  hint: string;
+  token: string;
   userId: string;
   clientType: string;
+  deviceId: string;
+  ipAddress: string;
   userAgent: string | null;
-  ipAddress: string | null;
   createdAt: Date;
   updatedAt: Date;
   expiresAt: Date;

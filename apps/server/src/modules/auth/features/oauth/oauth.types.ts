@@ -19,7 +19,7 @@ import type { ICreateAccountDto } from "@/modules/user/features/account/dtos";
 import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import type { IJwtService } from "@/modules/auth/utils";
 
-import type { IRefreshTokenService } from "../refresh-token";
+import type { IClientContext, IRefreshTokenService } from "../refresh-token";
 
 import type { IOAuthAuthorizationCodeDto, IOAuthTokenPayloadDto } from "./dtos";
 
@@ -42,7 +42,10 @@ export interface IOAuthControllerOptions {
 export interface IOAuthService {
   handleOAuthLogin(
     createUserDto: ICreateUserDto,
-    createAccountDto: ICreateAccountDto
+    createAccountDto: ICreateAccountDto,
+    deviceId: string,
+    ipAddress: string,
+    clientContext: IClientContext
   ): Promise<string>;
   generateTemporaryOAuthCode(
     temporaryOAuthCodeDto: IOAuthTokenPayloadDto
