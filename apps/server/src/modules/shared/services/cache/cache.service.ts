@@ -1,6 +1,7 @@
+import { injectable } from "inversify";
 import NodeCache from "node-cache";
 
-import type { ICacheService, ICacheServiceOptions } from "./cache.types";
+import type { ICacheService } from "./cache.types";
 
 /**
  * Service for managing a cache using NodeCache.
@@ -10,30 +11,19 @@ import type { ICacheService, ICacheServiceOptions } from "./cache.types";
  *
  * @implements {ICacheService}
  */
+@injectable()
 export class CacheService implements ICacheService {
-  private static _instance: CacheService;
-
   private cache: NodeCache;
 
   /**
    * Initializes a new instance of the cache service.
-   *
-   * @param ttlSeconds - The time-to-live (TTL) for cached items in seconds.
-   *                     This determines how long an item remains in the cache
-   *                     before it is automatically removed.
+   * Default TTL is set to 500 seconds.
    */
-  private constructor(ttlSeconds: number) {
+  constructor() {
     this.cache = new NodeCache({
-      stdTTL: ttlSeconds,
-      checkperiod: ttlSeconds * 0.2,
+      stdTTL: 500, // Default TTL
+      checkperiod: 100, // Check for expired keys every 100 seconds
     });
-  }
-
-  public static getInstance(options: ICacheServiceOptions): CacheService {
-    if (!this._instance) {
-      this._instance = new CacheService(options.ttlSeconds);
-    }
-    return this._instance;
   }
 
   /**

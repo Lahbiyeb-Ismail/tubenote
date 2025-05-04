@@ -1,8 +1,3 @@
-import { loggerService } from "../logger";
-import { PrismaService } from "./prisma.service";
+import { prismaService } from "@/config/service-provider";
 
-export const prismaService = PrismaService.getInstance({
-  maxRetries: 5,
-  retryDelay: 1000,
-  logger: loggerService,
-});
+export { prismaService };

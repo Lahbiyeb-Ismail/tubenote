@@ -1,6 +1,10 @@
+import type { Prisma } from "@prisma/client";
+import { inject, injectable } from "inversify";
+
 import { UnauthorizedError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
+import { TYPES } from "@/config/inversify/types";
 import type {
   ICryptoService,
   ILoggerService,
@@ -12,42 +16,26 @@ import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
 import type { IJwtService } from "@/modules/auth/utils";
 
 import { stringToDate } from "@/modules/shared/utils";
-import type { Prisma } from "@prisma/client";
 import type { IAuthResponseDto } from "../../dtos";
 import type { IClientContext } from "./dtos";
 import type { RefreshToken } from "./refresh-token.model";
 import type {
   IRefreshTokenRepository,
   IRefreshTokenService,
-  IRefreshTokenServiceOptions,
 } from "./refresh-token.types";
 
+@injectable()
 export class RefreshTokenService implements IRefreshTokenService {
-  private static _instance: RefreshTokenService;
-
-  private constructor(
+  constructor(
+    @inject(TYPES.RefreshTokenRepository)
     private readonly _refreshTokenRepository: IRefreshTokenRepository,
+    @inject(TYPES.PrismaService)
     private readonly _prismaService: IPrismaService,
-    private readonly _jwtService: IJwtService,
+    @inject(TYPES.JwtService) private readonly _jwtService: IJwtService,
+    @inject(TYPES.LoggerService)
     private readonly _loggerService: ILoggerService,
-    private readonly _cryptoService: ICryptoService
+    @inject(TYPES.CryptoService) private readonly _cryptoService: ICryptoService
   ) {}
-
-  public static getInstance(
-    options: IRefreshTokenServiceOptions
-  ): RefreshTokenService {
-    if (!this._instance) {
-      this._instance = new RefreshTokenService(
-        options.refreshTokenRepository,
-        options.prismaService,
-        options.jwtService,
-        options.loggerService,
-        options.cryptoService
-      );
-    }
-
-    return this._instance;
-  }
 
   private async validateRefreshToken(
     rawToken: string

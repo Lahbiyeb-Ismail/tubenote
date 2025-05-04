@@ -4,12 +4,15 @@ import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import type { IPrismaService } from "@/modules/shared/services";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
+import { TYPES } from "@/config/inversify/types";
+import { inject, injectable } from "inversify";
 import type { Account, AccountProviders } from "./account.model";
 import type { IAccountRepository } from "./account.types";
 import type { ICreateAccountDto } from "./dtos";
 
+@injectable()
 export class AccountRepository implements IAccountRepository {
-  constructor(private readonly _db: IPrismaService) {}
+  constructor(@inject(TYPES.PrismaService) private _db: IPrismaService) {}
 
   async create(
     tx: Prisma.TransactionClient,

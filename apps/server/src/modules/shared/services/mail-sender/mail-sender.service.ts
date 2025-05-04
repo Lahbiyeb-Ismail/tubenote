@@ -1,38 +1,20 @@
-import type { Transporter } from "nodemailer";
-
 import { BadRequestError } from "../../api-errors";
 import { envConfig } from "../../config";
 import { ERROR_MESSAGES } from "../../constants";
 import { compileTemplate } from "../../utils";
 
+import { TYPES } from "@/config/inversify/types";
+import { inject, injectable } from "inversify";
 import type { ILoggerService } from "../logger";
 import type { SendMailDto } from "./dtos";
-import type {
-  EmailContent,
-  IMailSenderService,
-  IMailSenderServiceOptions,
-} from "./mail-sender.types";
+import transporter from "./mail-sender.config";
+import type { EmailContent, IMailSenderService } from "./mail-sender.types";
 
+@injectable()
 export class MailSenderService implements IMailSenderService {
-  private static _instance: MailSenderService;
-
-  private constructor(
-    private readonly _transporter: Transporter,
-    private readonly _loggerService: ILoggerService
+  constructor(
+    @inject(TYPES.LoggerService) private _loggerService: ILoggerService
   ) {}
-
-  public static getInstance(
-    options: IMailSenderServiceOptions
-  ): MailSenderService {
-    if (!this._instance) {
-      this._instance = new MailSenderService(
-        options.transporter,
-        options.loggerService
-      );
-    }
-
-    return this._instance;
-  }
 
   async sendMail(sendMailDto: SendMailDto): Promise<void> {
     const mailOptions = {
@@ -50,7 +32,7 @@ export class MailSenderService implements IMailSenderService {
       ],
     };
 
-    this._transporter.sendMail(mailOptions, (error, info) => {
+    transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         this._loggerService.error(
           `Error sending email - ${error.name}: ${error.message}`

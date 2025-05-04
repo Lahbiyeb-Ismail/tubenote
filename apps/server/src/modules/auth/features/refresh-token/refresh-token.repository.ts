@@ -1,31 +1,21 @@
 import type { Prisma } from "@prisma/client";
+import { inject, injectable } from "inversify";
 
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
+import { TYPES } from "@/config/inversify/types";
 import type { IPrismaService } from "@/modules/shared/services";
 
 import type { ICreateRefreshTokenDto } from "./dtos";
 import type { RefreshToken } from "./refresh-token.model";
-import type {
-  IRefreshTokenRepository,
-  IRefreshTokenRepositoryOptions,
-} from "./refresh-token.types";
+import type { IRefreshTokenRepository } from "./refresh-token.types";
 
+@injectable()
 export class RefreshTokenRepository implements IRefreshTokenRepository {
-  private static _instance: RefreshTokenRepository;
-
-  private constructor(private readonly _db: IPrismaService) {}
-
-  public static getInstance(
-    options: IRefreshTokenRepositoryOptions
-  ): RefreshTokenRepository {
-    if (!this._instance) {
-      this._instance = new RefreshTokenRepository(options.db);
-    }
-
-    return this._instance;
-  }
+  constructor(
+    @inject(TYPES.PrismaService) private readonly _db: IPrismaService
+  ) {}
 
   /**
    * Creates a new refresh token for a user.

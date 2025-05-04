@@ -3,14 +3,18 @@ import type { Prisma } from "@prisma/client";
 import { ForbiddenError, NotFoundError } from "@/modules/shared/api-errors";
 import type { IPrismaService } from "@/modules/shared/services";
 
+import { TYPES } from "@/config/inversify/types";
+import { inject, injectable } from "inversify";
 import type { Account, AccountProviders } from "./account.model";
 import type { IAccountRepository, IAccountService } from "./account.types";
 import type { ICreateAccountDto } from "./dtos";
 
+@injectable()
 export class AccountService implements IAccountService {
   constructor(
-    private readonly _accountRepository: IAccountRepository,
-    private readonly _prismaService: IPrismaService
+    @inject(TYPES.AccountRepository)
+    private _accountRepository: IAccountRepository,
+    @inject(TYPES.PrismaService) private _prismaService: IPrismaService
   ) {}
 
   async createAccount(

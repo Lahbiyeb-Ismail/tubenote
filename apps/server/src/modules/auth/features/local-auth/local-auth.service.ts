@@ -1,5 +1,8 @@
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 import type { User } from "@tubenote/types";
+import { inject, injectable } from "inversify";
+
+import { TYPES } from "@/config/inversify/types";
 
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
@@ -27,42 +30,25 @@ import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import type { IJwtService } from "@/modules/auth/utils";
 
 import type { ICreateAccountDto } from "@/modules/user/features/account/dtos";
-import type {
-  ILocalAuthService,
-  ILocalAuthServiceOptions,
-} from "./local-auth.types";
+import type { ILocalAuthService } from "./local-auth.types";
 
+@injectable()
 export class LocalAuthService implements ILocalAuthService {
-  private static _instance: LocalAuthService;
-
-  private constructor(
+  constructor(
+    @inject(TYPES.PrismaService)
     private readonly _prismaService: IPrismaService,
-    private readonly _userService: IUserService,
+    @inject(TYPES.UserService) private readonly _userService: IUserService,
+    @inject(TYPES.VerifyEmailService)
     private readonly _verifyEmailService: IVerifyEmailService,
+    @inject(TYPES.RefreshTokenService)
     private readonly _refreshTokenService: IRefreshTokenService,
-    private readonly _jwtService: IJwtService,
+    @inject(TYPES.JwtService) private readonly _jwtService: IJwtService,
+    @inject(TYPES.CryptoService)
     private readonly _cryptoService: ICryptoService,
+    @inject(TYPES.MailSenderService)
     private readonly _mailSenderService: IMailSenderService,
-    private readonly _loggerService: ILoggerService
+    @inject(TYPES.LoggerService) private readonly _loggerService: ILoggerService
   ) {}
-
-  public static getInstance(
-    options: ILocalAuthServiceOptions
-  ): LocalAuthService {
-    if (!this._instance) {
-      this._instance = new LocalAuthService(
-        options.prismaService,
-        options.userService,
-        options.verifyEmailService,
-        options.refreshTokenService,
-        options.jwtService,
-        options.cryptoService,
-        options.mailSenderService,
-        options.loggerService
-      );
-    }
-    return this._instance;
-  }
 
   async registerUser(registerUserDto: IRegisterDto): Promise<User | undefined> {
     let newUser: User | undefined;

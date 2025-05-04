@@ -1,30 +1,23 @@
 import type { Prisma } from "@prisma/client";
+import { inject, injectable } from "inversify";
 
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
+import { TYPES } from "@/config/inversify/types";
 import type { IPrismaService } from "@/modules/shared/services";
 
 import type { VerifyEmailToken } from "./verify-email.model";
 import type {
   ICreateVerifyEmailTokenDto,
   IVerifyEmailRepository,
-  IVerifyEmailRepositoryOptions,
 } from "./verify-email.types";
 
+@injectable()
 export class VerifyEmailRepository implements IVerifyEmailRepository {
-  private static _instance: VerifyEmailRepository;
-
-  private constructor(private readonly _db: IPrismaService) {}
-
-  public static getInstance(
-    options: IVerifyEmailRepositoryOptions
-  ): VerifyEmailRepository {
-    if (!this._instance) {
-      this._instance = new VerifyEmailRepository(options.db);
-    }
-    return this._instance;
-  }
+  constructor(
+    @inject(TYPES.PrismaService) private readonly _db: IPrismaService
+  ) {}
 
   async findByUserId(
     userId: string,
