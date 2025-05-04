@@ -7,10 +7,13 @@
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "typeRoots": ["./node_modules/@types", "./node_modules/.prisma/client"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+      "@/config/*": ["src/config/*"],
       "@/middlewares/*": ["src/middlewares/*"],
       "@/modules/auth/*": ["src/modules/auth/*"],
       "@/modules/note/*": ["src/modules/note/*"],
