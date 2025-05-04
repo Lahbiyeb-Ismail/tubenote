@@ -1,7 +1,10 @@
 import type { Prisma } from "@prisma/client";
+import { inject, injectable } from "inversify";
 
 import type { IFindManyDto } from "@tubenote/dtos";
 import type { IPaginatedData, Video, YoutubeVideoData } from "@tubenote/types";
+
+import { TYPES } from "@/config/inversify/types";
 
 import {
   ERROR_MESSAGES,
@@ -13,30 +16,14 @@ import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
 
 import type { IPrismaService } from "@/modules/shared/services";
 
-import type {
-  IVideoRepository,
-  IVideoService,
-  IVideoServiceOptions,
-} from "./video.types";
+import type { IVideoRepository, IVideoService } from "./video.types";
 
+@injectable()
 export class VideoService implements IVideoService {
-  private static _instance: VideoService;
-
-  private constructor(
-    private readonly _videoRepository: IVideoRepository,
-    private readonly _prismaService: IPrismaService
+  constructor(
+    @inject(TYPES.VideoRepository) private _videoRepository: IVideoRepository,
+    @inject(TYPES.PrismaService) private _prismaService: IPrismaService
   ) {}
-
-  public static getInstance(options: IVideoServiceOptions): VideoService {
-    if (!this._instance) {
-      this._instance = new VideoService(
-        options.videoRepository,
-        options.prismaService
-      );
-    }
-
-    return this._instance;
-  }
 
   private async _findVideoByYoutubeId(
     tx: Prisma.TransactionClient,
