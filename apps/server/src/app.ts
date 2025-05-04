@@ -1,4 +1,6 @@
 import "express-async-errors";
+// Import reflect-metadata at the top to enable decorators
+import "reflect-metadata";
 
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -12,6 +14,9 @@ import session from "express-session";
 import helmet from "helmet";
 import passport from "passport";
 import requestIp from "request-ip";
+
+// Import from our service provider which uses the DI container
+import "@/config/service-provider";
 
 import { authRoutes, oauthRoutes } from "@/modules/auth";
 import { noteRoutes } from "@/modules/note";
