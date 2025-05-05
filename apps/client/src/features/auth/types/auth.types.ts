@@ -79,7 +79,7 @@ export type AuthAction =
 
 export type AuthContextType = {
   authState: AuthState;
-  currentUserQueryResult: UseQueryResult<IApiSuccessResponse<User>, Error>;
+  currentUserQueryResult: UseQueryResult<User, Error>;
   loginMutationResult: LoginMutationResult;
   registerMutationResult: RegisterMutationResult;
   logoutMutationResult: LogoutMutationResult;
