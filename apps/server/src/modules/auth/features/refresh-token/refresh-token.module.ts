@@ -1,31 +1,7 @@
+// Import initialized services from the service-provider
 import {
-  cryptoService,
-  loggerService,
-  prismaService,
-  responseFormatter,
-} from "@/modules/shared/services";
-
-import { RefreshTokenController } from "./refresh-token.controller";
-import { RefreshTokenRepository } from "./refresh-token.repository";
-import { RefreshTokenService } from "./refresh-token.service";
-
-import { jwtService } from "../../utils";
-
-const refreshTokenRepository = RefreshTokenRepository.getInstance({
-  db: prismaService,
-});
-
-const refreshTokenService = RefreshTokenService.getInstance({
-  refreshTokenRepository,
-  prismaService,
-  jwtService,
-  loggerService,
-  cryptoService,
-});
-
-const refreshTokenController = RefreshTokenController.getInstance({
+  refreshTokenController,
   refreshTokenService,
-  responseFormatter,
-});
+} from "@/config/service-provider";
 
 export { refreshTokenService, refreshTokenController };

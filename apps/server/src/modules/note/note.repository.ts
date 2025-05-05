@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { inject, injectable } from "inversify";
 
 import type {
   ICreateNoteDto,
@@ -7,12 +8,14 @@ import type {
 } from "@tubenote/dtos";
 import type { Note } from "@tubenote/types";
 
+import { TYPES } from "@/config/inversify/types";
+
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import type { IPrismaService } from "@/modules/shared/services";
 
-import type { INoteRepository, INoteRepositoryOptions } from "./note.types";
+import type { INoteRepository } from "./note.types";
 
 /**
  * Repository for performing CRUD operations on Notes.
@@ -21,28 +24,16 @@ import type { INoteRepository, INoteRepositoryOptions } from "./note.types";
  * via the PrismaClient. It uses a utility function for handling asynchronous operations with standardized
  * error messaging.
  */
+@injectable()
 export class NoteRepository implements INoteRepository {
-  private static _instance: NoteRepository;
-
   /**
    * Creates an instance of NoteRepository.
    *
    * @param _db - An instance of PrismaClient for database operations.
    */
-  private constructor(private readonly _db: IPrismaService) {}
-
-  /**
-   * Gets the singleton instance of NoteRepository.
-   *
-   * @param db - An instance of PrismaClient for database operations.
-   * @returns The singleton instance of NoteRepository.
-   */
-  public static getInstance(options: INoteRepositoryOptions): NoteRepository {
-    if (!this._instance) {
-      this._instance = new NoteRepository(options.db);
-    }
-    return this._instance;
-  }
+  constructor(
+    @inject(TYPES.PrismaService) private readonly _db: IPrismaService
+  ) {}
 
   /**
    * Finds a single note based on the provided criteria.

@@ -1,5 +1,3 @@
-import { CryptoService } from "./crypto.service";
-
-const cryptoService = CryptoService.getInstance();
+import { cryptoService } from "@/config/service-provider";
 
 export { cryptoService };

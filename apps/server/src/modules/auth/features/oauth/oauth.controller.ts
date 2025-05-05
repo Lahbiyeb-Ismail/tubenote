@@ -1,4 +1,5 @@
 import type { Response } from "express";
+import { inject, injectable } from "inversify";
 
 import type { TypedRequest } from "@/modules/shared/types";
 
@@ -17,18 +18,16 @@ import {
   REFRESH_TOKEN_NAME,
 } from "@/modules/auth/constants";
 
+import { TYPES } from "@/config/inversify/types";
+
 import type { IOAuthAuthorizationCodeDto, IOauthLoginDto } from "./dtos";
-import type {
-  IOAuthController,
-  IOAuthControllerOptions,
-  IOAuthService,
-} from "./oauth.types";
+import type { IOAuthController, IOAuthService } from "./oauth.types";
 
+@injectable()
 export class OAuthController implements IOAuthController {
-  private static _instance: OAuthController;
-
-  private constructor(
-    private readonly _oauthService: IOAuthService,
+  constructor(
+    @inject(TYPES.OAuthService) private readonly _oauthService: IOAuthService,
+    @inject(TYPES.ResponseFormatter)
     private readonly _responseFormatter: IResponseFormatter
   ) {}
 
@@ -44,17 +43,6 @@ export class OAuthController implements IOAuthController {
         temporaryCode
       )}`
     );
-  }
-
-  public static getInstance(options: IOAuthControllerOptions): OAuthController {
-    if (!this._instance) {
-      this._instance = new OAuthController(
-        options.oauthService,
-        options.responseFormatter
-      );
-    }
-
-    return this._instance;
   }
 
   /**

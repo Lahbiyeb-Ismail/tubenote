@@ -1,7 +1,10 @@
 import type { Prisma } from "@prisma/client";
+import { inject, injectable } from "inversify";
 
 import type { ICreateUserDto, IUpdateUserDto } from "@tubenote/dtos";
 import type { User } from "@tubenote/types";
+
+import { TYPES } from "@/config/inversify/types";
 
 import { ConflictError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
@@ -9,19 +12,11 @@ import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import type { IPrismaService } from "@/modules/shared/services";
 
-import type { IUserRepository, IUserRepositoryOptions } from "./user.types";
+import type { IUserRepository } from "./user.types";
 
+@injectable()
 export class UserRepository implements IUserRepository {
-  private static _instance: UserRepository;
-
-  private constructor(private readonly _db: IPrismaService) {}
-
-  public static getInstance(options: IUserRepositoryOptions): UserRepository {
-    if (!this._instance) {
-      this._instance = new UserRepository(options.db);
-    }
-    return this._instance;
-  }
+  constructor(@inject(TYPES.PrismaService) private _db: IPrismaService) {}
 
   /**
    * Creates a new user in the database.

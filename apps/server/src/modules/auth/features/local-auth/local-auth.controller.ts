@@ -1,7 +1,10 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
+import { inject, injectable } from "inversify";
 
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
+
+import { TYPES } from "@/config/inversify/types";
 
 import {
   AUTH_RATE_LIMIT_CONFIG,
@@ -25,34 +28,20 @@ import type {
 
 import type {
   ILocalAuthController,
-  ILocalAuthControllerOptions,
   ILocalAuthService,
 } from "./local-auth.types";
 
+@injectable()
 export class LocalAuthController implements ILocalAuthController {
-  private static _instance: LocalAuthController;
-
-  private constructor(
+  constructor(
+    @inject(TYPES.LocalAuthService)
     private readonly _localAuthService: ILocalAuthService,
+    @inject(TYPES.RateLimitService)
     private readonly _rateLimiter: IRateLimitService,
-    private readonly _logger: ILoggerService,
+    @inject(TYPES.LoggerService) private readonly _logger: ILoggerService,
+    @inject(TYPES.ResponseFormatter)
     private readonly _responseFormatter: IResponseFormatter
   ) {}
-
-  public static getInstance(
-    options: ILocalAuthControllerOptions
-  ): LocalAuthController {
-    if (!this._instance) {
-      this._instance = new LocalAuthController(
-        options.localAuthService,
-        options.rateLimiter,
-        options.logger,
-        options.responseFormatter
-      );
-    }
-
-    return this._instance;
-  }
 
   /**
    * Registers a new user.

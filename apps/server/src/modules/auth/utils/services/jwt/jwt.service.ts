@@ -1,3 +1,5 @@
+import { TYPES } from "@/config/inversify/types";
+import { inject, injectable } from "inversify";
 import jwt from "jsonwebtoken";
 
 import type { ILoggerService } from "@/modules/shared/services";
@@ -12,25 +14,16 @@ import {
 import type { IAuthResponseDto } from "@/modules/auth/dtos";
 
 import type { ISignTokenDto, IVerifyTokenDto } from "./dtos";
-import type {
-  IJwtService,
-  IJwtServiceOptions,
-  IVerifyResult,
-} from "./jwt.types";
+import type { IJwtService, IVerifyResult } from "./jwt.types";
 
+@injectable()
 export class JwtService implements IJwtService {
-  private static _instance: JwtService;
   // Define the minimum remaining validity time in milliseconds (3 minutes)
   private readonly MIN_TOKEN_VALIDITY_MS: number = 3 * 60 * 1000; // 3 minutes
 
-  private constructor(private readonly _loggerService: ILoggerService) {}
-
-  public static getInstance(options: IJwtServiceOptions): JwtService {
-    if (!this._instance) {
-      this._instance = new JwtService(options.loggerService);
-    }
-    return this._instance;
-  }
+  constructor(
+    @inject(TYPES.LoggerService) private readonly _loggerService: ILoggerService
+  ) {}
 
   verify(verifyTokenDto: IVerifyTokenDto): IVerifyResult {
     const { token, secret } = verifyTokenDto;

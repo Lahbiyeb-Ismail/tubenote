@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { inject, injectable } from "inversify";
 
 import { BadRequestError, ForbiddenError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
@@ -14,37 +15,24 @@ import {
 } from "@/modules/auth/constants";
 import type { IJwtService } from "@/modules/auth/utils";
 
+import { TYPES } from "@/config/inversify/types";
+
 import type {
   IVerifyEmailRepository,
   IVerifyEmailService,
-  IVerifyEmailServiceOptions,
 } from "./verify-email.types";
 
+@injectable()
 export class VerifyEmailService implements IVerifyEmailService {
-  private static _instance: VerifyEmailService;
-
-  private constructor(
+  constructor(
+    @inject(TYPES.VerifyEmailRepository)
     private readonly _verifyEmailRepository: IVerifyEmailRepository,
+    @inject(TYPES.PrismaService)
     private readonly _prismaService: IPrismaService,
-    private readonly _userService: IUserService,
-    private readonly _jwtService: IJwtService,
-    private readonly _loggerService: ILoggerService
+    @inject(TYPES.UserService) private readonly _userService: IUserService,
+    @inject(TYPES.JwtService) private readonly _jwtService: IJwtService,
+    @inject(TYPES.LoggerService) private readonly _loggerService: ILoggerService
   ) {}
-
-  public static getInstance(
-    options: IVerifyEmailServiceOptions
-  ): VerifyEmailService {
-    if (!this._instance) {
-      this._instance = new VerifyEmailService(
-        options.verifyEmailRepository,
-        options.prismaService,
-        options.userService,
-        options.jwtService,
-        options.loggerService
-      );
-    }
-    return this._instance;
-  }
 
   async createToken(
     tx: Prisma.TransactionClient,

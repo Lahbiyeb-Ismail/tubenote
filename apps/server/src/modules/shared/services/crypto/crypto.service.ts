@@ -1,24 +1,15 @@
 import crypto from "node:crypto";
 import bcrypt from "bcryptjs";
 
+import { injectable } from "inversify";
 import { envConfig } from "../../config";
 import type { ICryptoService } from "./crypto.types";
 import type { HashValidationDto } from "./dtos";
 
+@injectable()
 export class CryptoService implements ICryptoService {
-  private static _instance: CryptoService;
-
   private readonly SALT_ROUNDS = 12;
   private readonly TOKEN_BYTES = 64;
-
-  private constructor() {}
-
-  public static getInstance(): CryptoService {
-    if (!this._instance) {
-      this._instance = new CryptoService();
-    }
-    return this._instance;
-  }
 
   /**
    * Hashes a plain-text password.

@@ -11,16 +11,6 @@ import type {
 
 import type { TypedRequest } from "@/modules/shared/types";
 
-import type {
-  ICryptoService,
-  ILoggerService,
-  IPrismaService,
-  IRateLimitService,
-  IResponseFormatter,
-} from "@/modules/shared/services";
-
-import type { IRefreshTokenService } from "../auth";
-import type { IAccountService } from "./features/account/account.types";
 import type { ICreateAccountDto } from "./features/account/dtos";
 
 /**
@@ -178,23 +168,4 @@ export interface IUserController {
     req: TypedRequest<IUpdatePasswordDto>,
     res: Response
   ): Promise<void>;
-}
-
-export interface IUserRepositoryOptions {
-  db: IPrismaService;
-}
-
-export interface IUserServiceOptions {
-  userRepository: IUserRepository;
-  accountService: IAccountService;
-  prismaService: IPrismaService;
-  cryptoService: ICryptoService;
-  refreshTokenService: IRefreshTokenService;
-}
-
-export interface IUserControllerOptions {
-  userService: IUserService;
-  responseFormatter: IResponseFormatter;
-  rateLimitService: IRateLimitService;
-  loggerService: ILoggerService;
 }

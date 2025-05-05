@@ -1,5 +1,6 @@
 import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import type { IJwtService } from "@/modules/auth/utils";
+import { inject, injectable } from "inversify";
 
 import { BadRequestError } from "@/modules/shared/api-errors";
 import {
@@ -12,43 +13,31 @@ import {
 import type { IUserService } from "@/modules/user";
 import type { IAccountService } from "@/modules/user/features/account/account.types";
 
+import { TYPES } from "@/config/inversify/types";
+
 import type { IClientContext, IRefreshTokenService } from "../refresh-token";
 
 import type { ICreateAccountDto } from "@/modules/user/features/account/dtos";
 import type { ICreateUserDto } from "@tubenote/dtos";
 import type { IOAuthTokenPayloadDto } from "./dtos";
-import type { IOAuthService, IOAuthServiceOptions } from "./oauth.types";
+import type { IOAuthService } from "./oauth.types";
 
+@injectable()
 export class OAuthService implements IOAuthService {
-  private static _instance: OAuthService;
-
-  private constructor(
+  constructor(
+    @inject(TYPES.PrismaService)
     private readonly _prismaService: IPrismaService,
-    private readonly _userService: IUserService,
+    @inject(TYPES.UserService) private readonly _userService: IUserService,
+    @inject(TYPES.AccountService)
     private readonly _accountService: IAccountService,
+    @inject(TYPES.RefreshTokenService)
     private readonly _refreshTokenService: IRefreshTokenService,
-    private readonly _jwtService: IJwtService,
+    @inject(TYPES.JwtService) private readonly _jwtService: IJwtService,
+    @inject(TYPES.CryptoService)
     private readonly _cryptoService: ICryptoService,
-    private readonly _cacheService: ICacheService,
-    private readonly _loggerService: ILoggerService
+    @inject(TYPES.CacheService) private readonly _cacheService: ICacheService,
+    @inject(TYPES.LoggerService) private readonly _loggerService: ILoggerService
   ) {}
-
-  public static getInstance(options: IOAuthServiceOptions): OAuthService {
-    if (!this._instance) {
-      this._instance = new OAuthService(
-        options.prismaService,
-        options.userService,
-        options.accountService,
-        options.refreshTokenService,
-        options.jwtService,
-        options.cryptoService,
-        options.cacheService,
-        options.loggerService
-      );
-    }
-
-    return this._instance;
-  }
 
   async generateTemporaryOAuthCode(
     temporaryOAuthCodeDto: IOAuthTokenPayloadDto

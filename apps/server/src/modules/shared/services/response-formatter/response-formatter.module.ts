@@ -1,5 +1,3 @@
-import { ResponseFormatter } from "./response-formatter.service";
-
-const responseFormatter = ResponseFormatter.getInstance();
+import { responseFormatter } from "@/config/service-provider";
 
 export { responseFormatter };

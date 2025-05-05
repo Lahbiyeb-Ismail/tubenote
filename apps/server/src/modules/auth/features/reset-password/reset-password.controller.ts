@@ -1,10 +1,13 @@
 import type { Response } from "express";
+import { inject, injectable } from "inversify";
 
 import type {
   IEmailBodyDto,
   IParamTokenDto,
   IPasswordBodyDto,
 } from "@tubenote/dtos";
+
+import { TYPES } from "@/config/inversify/types";
 
 import { AUTH_RATE_LIMIT_CONFIG } from "@/modules/auth/config";
 
@@ -18,37 +21,23 @@ import type {
 
 import type {
   IResetPasswordController,
-  IResetPasswordControllerOptions,
   IResetPasswordService,
 } from "./reset-password.types";
 
 /**
  * Controller for handling password reset operations.
  */
+@injectable()
 export class ResetPasswordController implements IResetPasswordController {
-  private static _instance: ResetPasswordController;
-
-  private constructor(
-    private readonly _resetPasswordService: IResetPasswordService,
-    private readonly _responseFormatter: IResponseFormatter,
-    private readonly _rateLimitService: IRateLimitService,
-    private readonly _loggerService: ILoggerService
+  constructor(
+    @inject(TYPES.ResetPasswordService)
+    private _resetPasswordService: IResetPasswordService,
+    @inject(TYPES.ResponseFormatter)
+    private _responseFormatter: IResponseFormatter,
+    @inject(TYPES.RateLimitService)
+    private _rateLimitService: IRateLimitService,
+    @inject(TYPES.LoggerService) private _loggerService: ILoggerService
   ) {}
-
-  public static getInstance(
-    options: IResetPasswordControllerOptions
-  ): ResetPasswordController {
-    if (!this._instance) {
-      this._instance = new ResetPasswordController(
-        options.resetPasswordService,
-        options.responseFormatter,
-        options.rateLimitService,
-        options.loggerService
-      );
-    }
-
-    return this._instance;
-  }
 
   /**
    * Handles the forgot password request by sending a reset token to the user's email.

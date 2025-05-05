@@ -1,14 +1,3 @@
-import { responseFormatter } from "@/modules/shared/services";
-
-import { AuthController } from "./auth.controller";
-import { AuthService } from "./auth.service";
-import { refreshTokenService } from "./features";
-
-const authService = AuthService.getInstance({ refreshTokenService });
-
-const authController = AuthController.getInstance({
-  authService,
-  responseFormatter,
-});
-
-export { authController, authService };
+// Re-export initialized services from service-provider
+import { authController, authService } from "@/config/service-provider";
+export { authService, authController };

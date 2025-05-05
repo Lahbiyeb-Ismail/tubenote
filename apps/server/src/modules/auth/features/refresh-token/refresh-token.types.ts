@@ -3,15 +3,6 @@ import type { Response } from "express";
 
 import type { TypedRequest } from "@/modules/shared/types";
 
-import type {
-  ICryptoService,
-  ILoggerService,
-  IPrismaService,
-  IResponseFormatter,
-} from "@/modules/shared/services";
-
-import type { IJwtService } from "../../utils";
-
 import type { IAuthResponseDto } from "../../dtos";
 import type { IClientContext, ICreateRefreshTokenDto } from "./dtos";
 import type { RefreshToken } from "./refresh-token.model";
@@ -148,58 +139,4 @@ export interface IRefreshTokenController {
    * @returns A promise that resolves when the operation is complete.
    */
   refreshAuthTokens(req: TypedRequest, res: Response): Promise<void>;
-}
-
-/**
- * Options for the Refresh Token Repository.
- *
- * @property db - An instance of the Prisma service used for database operations.
- */
-export interface IRefreshTokenRepositoryOptions {
-  db: IPrismaService;
-}
-
-/**
- * Options required to initialize the Refresh Token Service.
- */
-export interface IRefreshTokenServiceOptions {
-  /**
-   * Repository for managing refresh tokens.
-   */
-  refreshTokenRepository: IRefreshTokenRepository;
-
-  /**
-   * Service for interacting with the Prisma ORM.
-   */
-  prismaService: IPrismaService;
-
-  /**
-   * Service for handling JSON Web Tokens (JWT).
-   */
-  jwtService: IJwtService;
-
-  /**
-   * Service for logging application events and errors.
-   */
-  loggerService: ILoggerService;
-
-  /**
-   * Service for handling cryptographic operations.
-   */
-  cryptoService: ICryptoService;
-}
-
-/**
- * Options for configuring the Refresh Token Controller.
- */
-export interface IRefreshTokenControllerOptions {
-  /**
-   * Service responsible for handling refresh token operations.
-   */
-  refreshTokenService: IRefreshTokenService;
-
-  /**
-   * Utility for formatting responses.
-   */
-  responseFormatter: IResponseFormatter;
 }
