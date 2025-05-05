@@ -66,13 +66,25 @@ model Account {
 }
 
 model RefreshToken {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  token     String   @unique
-  userId    String   @db.ObjectId
-  createdAt DateTime @default(now())
-  expiresAt DateTime
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  token            String    @unique
+  userId           String    @db.ObjectId
+  clientType       String    @default("web") // e.g., "web", "mobile-android"
+  deviceId         String
+  ipAddress        String
+  userAgent        String? // Browser/device
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  expiresAt        DateTime
+  lastUsedAt       DateTime?
+  isRevoked        Boolean   @default(false)
+  revokedAt        DateTime?
+  revocationReason String? // Audit logging
 
   user User @relation(fields: [userId], references: [id])
+
+  // Indexes for performance
+  @@index([userId, isRevoked, expiresAt, createdAt])
 }
 
 model EmailVerificationToken {

@@ -31,10 +31,9 @@ export const accessTokenCookieConfig: CookieOptions = {
  */
 export const refreshTokenCookieConfig: CookieOptions = {
   httpOnly: true,
-  sameSite: "none",
+  sameSite: "lax",
   secure: envConfig.node_env === "production",
   maxAge: 24 * 60 * 60 * 1000,
-  // path: "/api/v1/auth/refresh-token",
 };
 
 /**

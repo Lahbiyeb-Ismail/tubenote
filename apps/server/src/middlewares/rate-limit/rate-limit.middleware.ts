@@ -1,8 +1,9 @@
 import type { NextFunction, Request, Response } from "express";
 
+import { rateLimitService } from "@/config/service-provider";
 import { TooManyRequestsError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import { loggerService, rateLimitService } from "@/modules/shared/services";
+import { loggerService } from "@/modules/shared/services";
 import type { IRateLimitMiddlewareOptions } from "./rate-limit.middleware.types";
 
 /**

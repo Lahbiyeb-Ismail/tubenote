@@ -1,7 +1,10 @@
 import type { Response } from "express";
+import { inject, injectable } from "inversify";
 
 import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/dtos";
 import type { User } from "@tubenote/types";
+
+import { TYPES } from "@/config/inversify/types";
 
 import { NotFoundError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
@@ -16,36 +19,26 @@ import type {
 
 import { USER_RATE_LIMIT_CONFIG } from "./config";
 
-import type {
-  IUserController,
-  IUserControllerOptions,
-  IUserService,
-} from "./user.types";
+import {
+  ACCESS_TOKEN_NAME,
+  REFRESH_TOKEN_NAME,
+  clearAuthTokenCookieConfig,
+} from "../auth";
+import type { IUserController, IUserService } from "./user.types";
 
 /**
  * Controller for handling user-related operations.
  */
+@injectable()
 export class UserController implements IUserController {
-  private static _instance: UserController;
-
-  private constructor(
-    private readonly _userService: IUserService,
-    private readonly _responseFormatter: IResponseFormatter,
-    private readonly _rateLimitService: IRateLimitService,
-    private readonly _loggerService: ILoggerService
+  constructor(
+    @inject(TYPES.UserService) private _userService: IUserService,
+    @inject(TYPES.ResponseFormatter)
+    private _responseFormatter: IResponseFormatter,
+    @inject(TYPES.RateLimitService)
+    private _rateLimitService: IRateLimitService,
+    @inject(TYPES.LoggerService) private _loggerService: ILoggerService
   ) {}
-
-  public static getInstance(options: IUserControllerOptions): UserController {
-    if (!this._instance) {
-      this._instance = new UserController(
-        options.userService,
-        options.responseFormatter,
-        options.rateLimitService,
-        options.loggerService
-      );
-    }
-    return this._instance;
-  }
 
   /**
    * Get the current user's information.
@@ -130,6 +123,9 @@ export class UserController implements IUserController {
         });
 
       await this._rateLimitService.reset(req.rateLimitKey);
+
+      res.clearCookie(ACCESS_TOKEN_NAME, clearAuthTokenCookieConfig);
+      res.clearCookie(REFRESH_TOKEN_NAME, clearAuthTokenCookieConfig);
 
       res.status(formattedResponse.statusCode).json(formattedResponse);
     } catch (error: any) {

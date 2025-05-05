@@ -4,12 +4,11 @@ import { Toaster } from "react-hot-toast";
 
 import "./globals.css";
 
-import ReactQueryProvider from "@/providers/ReactQueryProvider";
+import { ReactQueryProvider } from "@/providers";
 
-import ConfirmationModal from "@/components/global/ConfirmationModal";
+import { ConfirmationModal } from "@/components/global";
 
-import { LayoutProvider } from "@/context/useLayout";
-import { ModalProvider } from "@/context/useModal";
+import { LayoutProvider, ModalProvider } from "@/context";
 
 import { AuthProvider } from "@/features/auth/contexts";
 import { NoteProvider } from "@/features/note/contexts";

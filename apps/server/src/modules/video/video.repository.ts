@@ -1,27 +1,21 @@
 import type { Prisma } from "@prisma/client";
+import { inject, injectable } from "inversify";
 
 import type { ICreateVideoDto, IFindManyDto } from "@tubenote/dtos";
 import type { Video } from "@tubenote/types";
+
+import { TYPES } from "@/config/inversify/types";
 
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import type { IPrismaService } from "@/modules/shared/services";
 
-import type { IVideoRepository, IVideoRepositoryOptions } from "./video.types";
+import type { IVideoRepository } from "./video.types";
 
+@injectable()
 export class VideoRepository implements IVideoRepository {
-  private static _instance: VideoRepository;
-
-  private constructor(private readonly _db: IPrismaService) {}
-
-  public static getInstance(options: IVideoRepositoryOptions): VideoRepository {
-    if (!this._instance) {
-      this._instance = new VideoRepository(options.db);
-    }
-
-    return this._instance;
-  }
+  constructor(@inject(TYPES.PrismaService) private _db: IPrismaService) {}
 
   async findByYoutubeId(
     youtubeId: string,

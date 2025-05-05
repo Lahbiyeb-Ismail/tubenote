@@ -1,10 +1,9 @@
 "use client";
 
 import { useGetNoteById } from "@/features/note/hooks";
+import { useToggleVideoPlayer } from "@/hooks";
 
-import Loader from "@/components/global/Loader";
-import MarkdownViewer from "@/components/global/MarkdownViewer";
-import ResizablePanels from "@/components/global/ResizablePanels";
+import { Loader, MarkdownViewer, ResizablePanels } from "@/components/global";
 
 import {
   NoteError,
@@ -13,7 +12,6 @@ import {
 } from "@/features/note/components";
 
 import { VideoPlayer } from "@/features/video/components";
-import useToggleVideoPlayer from "@/hooks/global/useToggleVideoPlayer";
 
 type NotePageParams = {
   noteId: string;

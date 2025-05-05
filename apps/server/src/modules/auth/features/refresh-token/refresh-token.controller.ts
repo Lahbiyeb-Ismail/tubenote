@@ -1,12 +1,13 @@
 import type { Response } from "express";
+import { inject, injectable } from "inversify";
 
+import { TYPES } from "@/config/inversify/types";
 import { UnauthorizedError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import type { TypedRequest } from "@/modules/shared/types";
 
 import {
   accessTokenCookieConfig,
-  clearAuthTokenCookieConfig,
   refreshTokenCookieConfig,
 } from "@/modules/auth/config";
 import {
@@ -18,30 +19,17 @@ import type { IResponseFormatter } from "@/modules/shared/services";
 
 import type {
   IRefreshTokenController,
-  IRefreshTokenControllerOptions,
   IRefreshTokenService,
 } from "./refresh-token.types";
 
+@injectable()
 export class RefreshTokenController implements IRefreshTokenController {
-  private static _instance: RefreshTokenController;
-
-  private constructor(
+  constructor(
+    @inject(TYPES.RefreshTokenService)
     private readonly _refreshTokenService: IRefreshTokenService,
+    @inject(TYPES.ResponseFormatter)
     private readonly _responseFormatter: IResponseFormatter
   ) {}
-
-  public static getInstance(
-    options: IRefreshTokenControllerOptions
-  ): RefreshTokenController {
-    if (!this._instance) {
-      this._instance = new RefreshTokenController(
-        options.refreshTokenService,
-        options.responseFormatter
-      );
-    }
-
-    return this._instance;
-  }
 
   /**
    * Refreshes the access token using the refresh token.
@@ -51,40 +39,33 @@ export class RefreshTokenController implements IRefreshTokenController {
    *
    * @throws {UnauthorizedError} If the refresh token is not provided.
    */
-  async refreshToken(req: TypedRequest, res: Response): Promise<void> {
-    try {
-      const cookies = req.cookies;
-      const userId = req.userId;
+  async refreshAuthTokens(req: TypedRequest, res: Response): Promise<void> {
+    const cookies = req.cookies;
+    const clientContext = req.clientContext;
 
-      const refreshTokenCookie = cookies[REFRESH_TOKEN_NAME];
+    const deviceId = [
+      req.headers["user-agent"],
+      req.headers["accept-language"],
+      req.headers["sec-ch-ua-platform"],
+    ].join("|");
 
-      if (!refreshTokenCookie || typeof refreshTokenCookie !== "string") {
-        throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
-      }
+    const ipAddress = req.clientIp as string;
 
-      const { accessToken, refreshToken } =
-        await this._refreshTokenService.refreshToken(
-          userId,
-          refreshTokenCookie
-        );
+    const userRefreshToken = cookies[REFRESH_TOKEN_NAME];
 
-      const formattedResponse =
-        this._responseFormatter.formatSuccessResponse<string>({
-          responseOptions: {
-            data: accessToken,
-            message: "Access token refreshed successfully.",
-          },
-        });
-
-      res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
-      res.cookie(ACCESS_TOKEN_NAME, accessToken, accessTokenCookieConfig);
-
-      res.status(formattedResponse.statusCode).json(formattedResponse);
-    } catch (error) {
-      res.clearCookie(REFRESH_TOKEN_NAME, clearAuthTokenCookieConfig);
-      res.clearCookie(ACCESS_TOKEN_NAME, clearAuthTokenCookieConfig);
-
-      throw error;
+    if (!userRefreshToken || typeof userRefreshToken !== "string") {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
+
+    const { accessToken, refreshToken } =
+      await this._refreshTokenService.refreshTokens(
+        userRefreshToken,
+        deviceId,
+        ipAddress,
+        clientContext
+      );
+
+    res.cookie(ACCESS_TOKEN_NAME, accessToken, accessTokenCookieConfig);
+    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
   }
 }

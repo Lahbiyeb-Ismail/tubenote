@@ -1,10 +1,3 @@
-import transporter from "./mail-sender.config";
+import { mailSenderService } from "@/config/service-provider";
 
-import { loggerService } from "../logger";
-
-import { MailSenderService } from "./mail-sender.service";
-
-export const mailSenderService = MailSenderService.getInstance({
-  transporter,
-  loggerService,
-});
+export { mailSenderService };

@@ -1,5 +1,8 @@
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 import type { User } from "@tubenote/types";
+import { inject, injectable } from "inversify";
+
+import { TYPES } from "@/config/inversify/types";
 
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
@@ -8,8 +11,6 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from "@/modules/shared/api-errors";
-import { stringToDate } from "@/modules/shared/utils";
-
 import type { IUserService } from "@/modules/user";
 
 import type {
@@ -20,52 +21,34 @@ import type {
 } from "@/modules/shared/services";
 
 import type {
+  IClientContext,
   IRefreshTokenService,
   IVerifyEmailService,
 } from "@/modules/auth/features";
-
-import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
 
 import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import type { IJwtService } from "@/modules/auth/utils";
 
 import type { ICreateAccountDto } from "@/modules/user/features/account/dtos";
-import type {
-  ILocalAuthService,
-  ILocalAuthServiceOptions,
-} from "./local-auth.types";
+import type { ILocalAuthService } from "./local-auth.types";
 
+@injectable()
 export class LocalAuthService implements ILocalAuthService {
-  private static _instance: LocalAuthService;
-
-  private constructor(
+  constructor(
+    @inject(TYPES.PrismaService)
     private readonly _prismaService: IPrismaService,
-    private readonly _userService: IUserService,
+    @inject(TYPES.UserService) private readonly _userService: IUserService,
+    @inject(TYPES.VerifyEmailService)
     private readonly _verifyEmailService: IVerifyEmailService,
+    @inject(TYPES.RefreshTokenService)
     private readonly _refreshTokenService: IRefreshTokenService,
-    private readonly _jwtService: IJwtService,
+    @inject(TYPES.JwtService) private readonly _jwtService: IJwtService,
+    @inject(TYPES.CryptoService)
     private readonly _cryptoService: ICryptoService,
+    @inject(TYPES.MailSenderService)
     private readonly _mailSenderService: IMailSenderService,
-    private readonly _loggerService: ILoggerService
+    @inject(TYPES.LoggerService) private readonly _loggerService: ILoggerService
   ) {}
-
-  public static getInstance(
-    options: ILocalAuthServiceOptions
-  ): LocalAuthService {
-    if (!this._instance) {
-      this._instance = new LocalAuthService(
-        options.prismaService,
-        options.userService,
-        options.verifyEmailService,
-        options.refreshTokenService,
-        options.jwtService,
-        options.cryptoService,
-        options.mailSenderService,
-        options.loggerService
-      );
-    }
-    return this._instance;
-  }
 
   async registerUser(registerUserDto: IRegisterDto): Promise<User | undefined> {
     let newUser: User | undefined;
@@ -101,7 +84,12 @@ export class LocalAuthService implements ILocalAuthService {
     return newUser;
   }
 
-  async loginUser(loginDto: ILoginDto): Promise<IAuthResponseDto> {
+  async loginUser(
+    loginDto: ILoginDto,
+    deviceId: string,
+    ipAddress: string,
+    clientContext: IClientContext
+  ): Promise<IAuthResponseDto> {
     const { email, password } = loginDto;
 
     // Get the user first to check if they exist
@@ -119,9 +107,9 @@ export class LocalAuthService implements ILocalAuthService {
       throw new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED);
     }
 
-    const isPasswordMatch = await this._cryptoService.comparePasswords({
-      plainText: password,
-      hash: user.password,
+    const isPasswordMatch = await this._cryptoService.validateHashMatch({
+      unhashedValue: password,
+      hashedValue: user.password,
     });
 
     if (!isPasswordMatch) {
@@ -133,15 +121,15 @@ export class LocalAuthService implements ILocalAuthService {
       throw new ForbiddenError(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
-    const { accessToken, refreshToken } = this._jwtService.generateAuthTokens(
-      user.id
+    // Store refresh token
+    const refreshToken = await this._refreshTokenService.createToken(
+      user.id,
+      deviceId,
+      ipAddress,
+      clientContext
     );
 
-    // Store refresh token
-    await this._refreshTokenService.createToken(user.id, {
-      token: refreshToken,
-      expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
-    });
+    const accessToken = this._jwtService.generateAccessToken(user.id);
 
     this._loggerService.info("User logged in successfully", {
       userId: user.id,

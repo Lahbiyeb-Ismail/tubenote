@@ -1,12 +1,66 @@
 import type { ReactNode } from "react";
 
+import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
+import type { IApiSuccessResponse, User } from "@tubenote/types";
 
 export type AuthState = {
   isAuthenticated: boolean;
   errorMessage?: string;
   successMessage?: string;
 };
+
+export type LoginMutationResult = UseMutationResult<
+  IApiSuccessResponse<string>,
+  Error,
+  ILoginDto,
+  void
+>;
+
+export type RegisterMutationResult = UseMutationResult<
+  IApiSuccessResponse<string>,
+  Error,
+  IRegisterDto,
+  void
+>;
+
+export type LogoutMutationResult = UseMutationResult<
+  IApiSuccessResponse<null>,
+  Error,
+  void,
+  void
+>;
+
+export type ResetPasswordMutationResult = UseMutationResult<
+  IApiSuccessResponse<null>,
+  Error,
+  {
+    token: string;
+    password: string;
+  },
+  void
+>;
+
+export type SendForgotPasswordEmailMutationResult = UseMutationResult<
+  IApiSuccessResponse<null>,
+  Error,
+  string,
+  void
+>;
+
+export type SendVerificationEmailMutationResult = UseMutationResult<
+  IApiSuccessResponse<null>,
+  Error,
+  string,
+  void
+>;
+
+export type ExchangeOauthCodeMutationResult = UseMutationResult<
+  IApiSuccessResponse<string>,
+  Error,
+  string,
+  void
+>;
 
 export type AuthAction =
   | {
@@ -25,21 +79,14 @@ export type AuthAction =
 
 export type AuthContextType = {
   authState: AuthState;
-  login: (loginDto: ILoginDto) => void;
-  register: (registerDto: IRegisterDto) => void;
-  logout: () => void;
-  resetPassword: ({
-    token,
-    password,
-  }: { token: string; password: string }) => void;
-  sendForgotPasswordEmail: (email: string) => void;
-  sendVerificationEmail: (email: string) => void;
-  isLoginPending: boolean;
-  isRegistrationPending: boolean;
-  isLogoutPending: boolean;
-  isResetPasswordPending: boolean;
-  isForgotPasswordPending: boolean;
-  isVerificationEmailPending: boolean;
+  currentUserQueryResult: UseQueryResult<User, Error>;
+  loginMutationResult: LoginMutationResult;
+  registerMutationResult: RegisterMutationResult;
+  logoutMutationResult: LogoutMutationResult;
+  resetPasswordMutationResult: ResetPasswordMutationResult;
+  sendForgotPasswordEmailMutationResult: SendForgotPasswordEmailMutationResult;
+  sendVerificationEmailMutationResult: SendVerificationEmailMutationResult;
+  exchangeOauthCodeMutationResult: ExchangeOauthCodeMutationResult;
 };
 
 export type AuthProviderProps = {

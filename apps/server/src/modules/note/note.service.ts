@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { inject, injectable } from "inversify";
 
 import type {
   ICreateNoteDto,
@@ -7,16 +8,14 @@ import type {
 } from "@tubenote/dtos";
 import type { IPaginatedData, Note } from "@tubenote/types";
 
+import { TYPES } from "@/config/inversify/types";
+
 import { NotFoundError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import type { IPrismaService } from "@/modules/shared/services";
 
-import type {
-  INoteRepository,
-  INoteService,
-  INoteServiceOptions,
-} from "./note.types";
+import type { INoteRepository, INoteService } from "./note.types";
 
 /**
  * Service class for handling business logic related to Notes.
@@ -25,28 +24,17 @@ import type {
  * options. It utilizes the NoteRepository to interact with the underlying data source and encapsulates
  * additional logic such as error handling and transaction management.
  */
+@injectable()
 export class NoteService implements INoteService {
-  private static _instance: NoteService;
-
   /**
    * Creates an instance of NoteService.
    *
    * @param _noteRepository - An instance of the note repository to delegate data operations.
    */
-  private constructor(
-    private readonly _noteRepository: INoteRepository,
-    private readonly _prismaService: IPrismaService
+  constructor(
+    @inject(TYPES.NoteRepository) private _noteRepository: INoteRepository,
+    @inject(TYPES.PrismaService) private _prismaService: IPrismaService
   ) {}
-
-  public static getInstance(options: INoteServiceOptions): NoteService {
-    if (!this._instance) {
-      this._instance = new NoteService(
-        options.noteRepository,
-        options.prismaService
-      );
-    }
-    return this._instance;
-  }
 
   /**
    * Retrieves a note based on the given criteria.

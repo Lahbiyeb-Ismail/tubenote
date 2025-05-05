@@ -5,22 +5,8 @@ import type { User } from "@tubenote/types";
 
 import type { TypedRequest } from "@/modules/shared/types";
 
-import type { IUserService } from "@/modules/user";
-
 import type { IAuthResponseDto } from "@/modules/auth/dtos";
-
-import type {
-  ICryptoService,
-  ILoggerService,
-  IMailSenderService,
-  IPrismaService,
-  IRateLimitService,
-  IResponseFormatter,
-} from "@/modules/shared/services";
-
-import type { IJwtService } from "../../utils";
-import type { IRefreshTokenService } from "../refresh-token";
-import type { IVerifyEmailService } from "../verify-email";
+import type { IClientContext } from "../refresh-token";
 
 /**
  * Interface representing the local authentication service.
@@ -40,7 +26,12 @@ export interface ILocalAuthService {
    * @param loginDto - The data transfer object containing user login details.
    * @returns A promise that resolves to an authentication response DTO.
    */
-  loginUser: (loginDto: ILoginDto) => Promise<IAuthResponseDto>;
+  loginUser: (
+    loginDto: ILoginDto,
+    deviceId: string,
+    ipAddress: string,
+    clientContext: IClientContext
+  ) => Promise<IAuthResponseDto>;
 }
 
 /**
@@ -66,74 +57,4 @@ export interface ILocalAuthController {
    * @returns A promise that resolves when the login process is complete.
    */
   login(req: TypedRequest<ILoginDto>, res: Response): Promise<void>;
-}
-
-/**
- * Options required to initialize the Local Authentication Service.
- */
-export interface ILocalAuthServiceOptions {
-  /**
-   * Service for interacting with the Prisma database.
-   */
-  prismaService: IPrismaService;
-
-  /**
-   * Service for managing user-related operations.
-   */
-  userService: IUserService;
-
-  /**
-   * Service for handling email verification processes.
-   */
-  verifyEmailService: IVerifyEmailService;
-
-  /**
-   * Service for managing refresh tokens.
-   */
-  refreshTokenService: IRefreshTokenService;
-
-  /**
-   * Service for handling JSON Web Token (JWT) operations.
-   */
-  jwtService: IJwtService;
-
-  /**
-   * Service for cryptographic operations.
-   */
-  cryptoService: ICryptoService;
-
-  /**
-   * Service for sending emails.
-   */
-  mailSenderService: IMailSenderService;
-
-  /**
-   * Service for logging operations.
-   */
-  loggerService: ILoggerService;
-}
-
-/**
- * Options for configuring the Local Authentication Controller.
- */
-export interface ILocalAuthControllerOptions {
-  /**
-   * Service responsible for handling local authentication logic.
-   */
-  localAuthService: ILocalAuthService;
-
-  /**
-   * Service for rate limiting requests to prevent abuse.
-   */
-  rateLimiter: IRateLimitService;
-
-  /**
-   * Service for logging application events and errors.
-   */
-  logger: ILoggerService;
-
-  /**
-   * Utility for formatting responses sent to the client.
-   */
-  responseFormatter: IResponseFormatter;
 }

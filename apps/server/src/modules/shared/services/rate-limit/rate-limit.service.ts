@@ -1,3 +1,5 @@
+import { TYPES } from "@/config/inversify/types";
+import { inject, injectable } from "inversify";
 import { ICacheService } from "../cache/cache.types";
 import { ILoggerService } from "../logger/logger.types";
 import {
@@ -5,7 +7,6 @@ import {
   IRateLimitOptions,
   IRateLimitResult,
   IRateLimitService,
-  type IRateLimitServiceOptions,
 } from "./rate-limit.types";
 
 /**
@@ -14,43 +15,12 @@ import {
  * This service provides methods to check, increment, and reset rate limits
  * for different resources identified by a key.
  */
+@injectable()
 export class RateLimitService implements IRateLimitService {
-  private static instance: RateLimitService | null = null;
-
-  /**
-   * Private constructor to enforce singleton pattern
-   */
-  private constructor(
-    private readonly cacheService: ICacheService,
-    private readonly logger: ILoggerService
+  constructor(
+    @inject(TYPES.CacheService) private readonly cacheService: ICacheService,
+    @inject(TYPES.LoggerService) private readonly logger: ILoggerService
   ) {}
-
-  /**
-   * Get the singleton instance of the rate limit service
-   *
-   * @param options Configuration options including cache and logger services
-   * @returns The singleton instance of RateLimitService
-   */
-  public static getInstance(
-    options: IRateLimitServiceOptions
-  ): RateLimitService {
-    if (!this.instance) {
-      this.instance = new RateLimitService(
-        options.cacheService,
-        options.logger
-      );
-
-      this.instance.logger.info("Rate limit service initialized");
-    }
-    return this.instance;
-  }
-
-  /**
-   * For testing purposes only - reset the singleton instance
-   */
-  public static resetInstance(): void {
-    this.instance = null;
-  }
 
   /**
    * Calculate the reset time based on current data

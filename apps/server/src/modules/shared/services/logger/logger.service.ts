@@ -1,7 +1,8 @@
 import winston from "winston";
 
-import type { ILoggerService, LogMethod, LoggerConfig } from "./logger.types";
+import type { ILoggerService, LogMethod } from "./logger.types";
 
+import { injectable } from "inversify";
 import {
   DEFAULT_COMBINED_LOG_PATH,
   DEFAULT_ERROR_LOG_PATH,
@@ -11,18 +12,11 @@ import {
   LOG_LEVELS,
 } from "./logger.constants";
 
+@injectable()
 export class LoggerService implements ILoggerService {
-  private static _instance: LoggerService;
-
   private logger: winston.Logger;
 
-  private constructor(config: LoggerConfig = {}) {
-    const {
-      level = DEFAULT_LOG_LEVEL,
-      errorLogPath = DEFAULT_ERROR_LOG_PATH,
-      combinedLogPath = DEFAULT_COMBINED_LOG_PATH,
-    } = config;
-
+  constructor() {
     // Add colors to winston
     winston.addColors(LOG_COLORS);
 
@@ -71,30 +65,23 @@ export class LoggerService implements ILoggerService {
 
     // Create logger instance
     this.logger = winston.createLogger({
-      level,
+      level: DEFAULT_LOG_LEVEL,
       levels: LOG_LEVELS,
       transports: [
         new winston.transports.Console({
           format: consoleFormat,
         }),
         new winston.transports.File({
-          filename: errorLogPath,
+          filename: DEFAULT_ERROR_LOG_PATH,
           level: "error",
           format: fileFormat,
         }),
         new winston.transports.File({
-          filename: combinedLogPath,
+          filename: DEFAULT_COMBINED_LOG_PATH,
           format: fileFormat,
         }),
       ],
     });
-  }
-
-  public static getInstance(config?: LoggerConfig): LoggerService {
-    if (!this._instance) {
-      this._instance = new LoggerService(config);
-    }
-    return this._instance;
   }
 
   // Log methods

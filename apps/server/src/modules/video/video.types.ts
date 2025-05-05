@@ -11,11 +11,6 @@ import type { IPaginatedData, Video, YoutubeVideoData } from "@tubenote/types";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
-import type {
-  IPrismaService,
-  IResponseFormatter,
-} from "@/modules/shared/services";
-
 export interface IVideoRepository {
   findByYoutubeId(
     youtubeId: string,
@@ -57,18 +52,4 @@ export interface IVideoController {
     req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ): Promise<void>;
-}
-
-export interface IVideoRepositoryOptions {
-  db: IPrismaService;
-}
-
-export interface IVideoServiceOptions {
-  videoRepository: IVideoRepository;
-  prismaService: IPrismaService;
-}
-
-export interface IVideoControllerOptions {
-  responseFormatter: IResponseFormatter;
-  videoService: IVideoService;
 }

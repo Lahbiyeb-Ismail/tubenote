@@ -1,3 +1,7 @@
+import { inject, injectable } from "inversify";
+
+import { TYPES } from "@/config/inversify/types";
+
 import type { IUserService } from "@/modules/user";
 
 import { BadRequestError, ForbiddenError } from "@/modules/shared/api-errors";
@@ -9,37 +13,18 @@ import type {
   IMailSenderService,
 } from "@/modules/shared/services";
 
-import type {
-  IResetPasswordService,
-  IResetPasswordServiceOptions,
-} from "./reset-password.types";
+import type { IResetPasswordService } from "./reset-password.types";
 
+@injectable()
 export class ResetPasswordService implements IResetPasswordService {
-  private static _instance: ResetPasswordService;
-
-  private constructor(
-    private readonly _userService: IUserService,
-    private readonly _cryptoService: ICryptoService,
-    private readonly _cacheService: ICacheService,
-    private readonly _mailSenderService: IMailSenderService,
-    private readonly _loggerService: ILoggerService
+  constructor(
+    @inject(TYPES.UserService) private _userService: IUserService,
+    @inject(TYPES.CryptoService) private _cryptoService: ICryptoService,
+    @inject(TYPES.CacheService) private _cacheService: ICacheService,
+    @inject(TYPES.MailSenderService)
+    private _mailSenderService: IMailSenderService,
+    @inject(TYPES.LoggerService) private _loggerService: ILoggerService
   ) {}
-
-  public static getInstance(
-    options: IResetPasswordServiceOptions
-  ): ResetPasswordService {
-    if (!this._instance) {
-      this._instance = new ResetPasswordService(
-        options.userService,
-        options.cryptoService,
-        options.cacheService,
-        options.mailSenderService,
-        options.loggerService
-      );
-    }
-
-    return this._instance;
-  }
 
   async sendResetToken(email: string): Promise<void> {
     const user = await this._userService.getUserByEmail(email);
@@ -52,7 +37,7 @@ export class ResetPasswordService implements IResetPasswordService {
       throw new ForbiddenError(ERROR_MESSAGES.NOT_VERIFIED);
     }
 
-    const resetToken = this._cryptoService.generateRandomSecureToken();
+    const resetToken = this._cryptoService.generateSecureToken();
 
     const setResult = this._cacheService.set<{ userId: string }>(resetToken, {
       userId: user.id,

@@ -1,2 +1,2 @@
-export * from "./DeleteNoteButton";
-export * from "./EditNoteButton";
+export * from "./delete-note-button";
+export * from "./edit-note-button";

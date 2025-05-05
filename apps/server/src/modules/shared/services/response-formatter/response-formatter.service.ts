@@ -6,6 +6,7 @@ import type {
 } from "@tubenote/types";
 
 import httpStatus from "http-status";
+import { injectable } from "inversify";
 import type {
   IFormatErrorResponseOptions,
   IFormatPaginatedResponseOptions,
@@ -24,13 +25,8 @@ import type {
  * status, HTTP status codes, messages, and properly sanitized data. It automatically removes
  * sensitive information from response data to prevent accidental exposure of confidential information.
  */
+@injectable()
 export class ResponseFormatter implements IResponseFormatter {
-  /**
-   * Singleton instance of the ResponseFormatter
-   * @private
-   */
-  private static _instance: ResponseFormatter;
-
   /**
    * Default sanitization rules for common sensitive data
    * These rules define patterns for fields that should be removed from responses
@@ -55,35 +51,6 @@ export class ResponseFormatter implements IResponseFormatter {
     sanitize: true,
     sanitizationRules: [...this._defaultSanitizationRules],
   };
-
-  /**
-   * Constructs a new instance of the ResponseFormatterService.
-   *
-   * @param _sanitizationOptions - An optional object containing sanitization options.
-   *                               Defaults to an empty object. These options are merged
-   *                               with the default options to configure the sanitization behavior.
-   */
-  private constructor(
-    private readonly _sanitizationOptions: ISanitizationOptions = {}
-  ) {
-    this._sanitizationOptions = {
-      ...this._defaultOptions,
-      ..._sanitizationOptions,
-    };
-  }
-
-  /**
-   * Retrieves the singleton instance of the `ResponseFormatter` class.
-   * If the instance does not already exist, it creates a new one.
-   *
-   * @returns {ResponseFormatter} The singleton instance of `ResponseFormatter`.
-   */
-  public static getInstance(): ResponseFormatter {
-    if (!this._instance) {
-      this._instance = new ResponseFormatter();
-    }
-    return this._instance;
-  }
 
   /**
    * Sanitizes sensitive data in the provided object or array.
@@ -165,7 +132,7 @@ export class ResponseFormatter implements IResponseFormatter {
     } = responseOptions;
 
     const sanitization = {
-      ...this._sanitizationOptions,
+      ...this._defaultOptions,
       ...sanitizationOptions,
     };
 
@@ -256,7 +223,7 @@ export class ResponseFormatter implements IResponseFormatter {
     const { totalPages, totalItems, data } = paginatedData;
 
     const sanitization = {
-      ...this._sanitizationOptions,
+      ...this._defaultOptions,
       ...sanitizationOptions,
     };
 

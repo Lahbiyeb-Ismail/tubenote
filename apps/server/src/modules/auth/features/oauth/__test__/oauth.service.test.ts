@@ -253,11 +253,7 @@ describe("OAuthService", () => {
           expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
         }
       );
-      expect(result).toEqual({
-        accessToken: "access-token",
-        refreshToken: "refresh-token",
-        temporaryCode: "temporary-oauth-code",
-      });
+      expect(result).toEqual("temporary-oauth-code");
     });
 
     it("should handle OAuth signup when no existing account is found and return tokens and temporary code", async () => {
@@ -290,11 +286,7 @@ describe("OAuthService", () => {
         }
       );
 
-      expect(result).toEqual({
-        accessToken: "access-token",
-        refreshToken: "refresh-token",
-        temporaryCode: "temporary-oauth-code",
-      });
+      expect(result).toEqual("temporary-oauth-code");
     });
 
     it("should propagate errors thrown during the transaction", async () => {

@@ -1,32 +1,11 @@
+// Export the class definitions directly
+export { VerifyEmailService } from "./verify-email.service";
+export { VerifyEmailController } from "./verify-email.controller";
+export { VerifyEmailRepository } from "./verify-email.repository";
+
+// Re-export initialized service from service-provider
 import {
-  loggerService,
-  prismaService,
-  responseFormatter,
-} from "@/modules/shared/services";
-
-import { userService } from "@/modules/user";
-
-import { jwtService } from "../../utils";
-
-import { VerifyEmailController } from "./verify-email.controller";
-import { VerifyEmailRepository } from "./verify-email.repository";
-import { VerifyEmailService } from "./verify-email.service";
-
-const verifyEmailRepository = VerifyEmailRepository.getInstance({
-  db: prismaService,
-});
-
-const verifyEmailService = VerifyEmailService.getInstance({
-  verifyEmailRepository,
-  prismaService,
-  userService,
-  jwtService,
-  loggerService,
-});
-
-const verifyEmailController = VerifyEmailController.getInstance({
+  verifyEmailController,
   verifyEmailService,
-  responseFormatter,
-});
-
-export { verifyEmailController, verifyEmailService };
+} from "@/config/service-provider";
+export { verifyEmailService, verifyEmailController };

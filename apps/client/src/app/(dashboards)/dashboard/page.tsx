@@ -1,13 +1,11 @@
 "use client";
 
-import Header from "@/components/dashboards/Header";
-import NoDataFound from "@/components/dashboards/NoDataFound";
-import RecentNoteList from "@/components/dashboards/RecentNotesList";
-
 import {
   useGetRecentNotes,
   useGetRecentlyUpdatedNotes,
 } from "@/features/note/hooks";
+
+import { Header, NoDataFound, RecentNoteList } from "@/components/dashboards";
 
 function DashboardPage() {
   const { data: recentNotes } = useGetRecentNotes();

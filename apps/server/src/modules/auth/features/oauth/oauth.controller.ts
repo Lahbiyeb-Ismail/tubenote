@@ -1,4 +1,5 @@
 import type { Response } from "express";
+import { inject, injectable } from "inversify";
 
 import type { TypedRequest } from "@/modules/shared/types";
 
@@ -17,18 +18,16 @@ import {
   REFRESH_TOKEN_NAME,
 } from "@/modules/auth/constants";
 
+import { TYPES } from "@/config/inversify/types";
+
 import type { IOAuthAuthorizationCodeDto, IOauthLoginDto } from "./dtos";
-import type {
-  IOAuthController,
-  IOAuthControllerOptions,
-  IOAuthService,
-} from "./oauth.types";
+import type { IOAuthController, IOAuthService } from "./oauth.types";
 
+@injectable()
 export class OAuthController implements IOAuthController {
-  private static _instance: OAuthController;
-
-  private constructor(
-    private readonly _oauthService: IOAuthService,
+  constructor(
+    @inject(TYPES.OAuthService) private readonly _oauthService: IOAuthService,
+    @inject(TYPES.ResponseFormatter)
     private readonly _responseFormatter: IResponseFormatter
   ) {}
 
@@ -38,23 +37,12 @@ export class OAuthController implements IOAuthController {
    * @param res - The response object.
    * @param temporaryCode - The temporary code to be sent to the client application.
    */
-  private redirectWithTemporaryCode(res: Response, temporaryCode: string) {
+  private redirectWithTemporaryOauthCode(res: Response, temporaryCode: string) {
     res.redirect(
-      `${envConfig.client.url}/auth/callback?code=${encodeURIComponent(
+      `${envConfig.client.url}/oauth/callback?code=${encodeURIComponent(
         temporaryCode
       )}`
     );
-  }
-
-  public static getInstance(options: IOAuthControllerOptions): OAuthController {
-    if (!this._instance) {
-      this._instance = new OAuthController(
-        options.oauthService,
-        options.responseFormatter
-      );
-    }
-
-    return this._instance;
   }
 
   /**
@@ -76,16 +64,24 @@ export class OAuthController implements IOAuthController {
     }
 
     const { createAccountDto, createUserDto } = req.user as IOauthLoginDto;
+    const clientContext = req.clientContext;
+    const deviceId = [
+      req.headers["user-agent"],
+      req.headers["accept-language"],
+      req.headers["sec-ch-ua-platform"],
+    ].join("|");
 
-    const { refreshToken, temporaryCode } =
-      await this._oauthService.handleOAuthLogin(
-        createUserDto,
-        createAccountDto
-      );
+    const ipAddress = req.clientIp as string;
 
-    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+    const temporaryOauthCode = await this._oauthService.handleOAuthLogin(
+      createUserDto,
+      createAccountDto,
+      deviceId,
+      ipAddress,
+      clientContext
+    );
 
-    this.redirectWithTemporaryCode(res, temporaryCode);
+    this.redirectWithTemporaryOauthCode(res, temporaryOauthCode);
   }
 
   /**
@@ -110,7 +106,7 @@ export class OAuthController implements IOAuthController {
   ): Promise<void> {
     const { code } = req.body;
 
-    const { accessToken } =
+    const { accessToken, refreshToken } =
       await this._oauthService.exchangeOauthCodeForTokens(code);
 
     const formattedResponse =
@@ -121,6 +117,7 @@ export class OAuthController implements IOAuthController {
         },
       });
 
+    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
     res.cookie(ACCESS_TOKEN_NAME, accessToken, accessTokenCookieConfig);
 
     res.status(formattedResponse.statusCode).json(formattedResponse);

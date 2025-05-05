@@ -1,38 +1,29 @@
 import type { Response } from "express";
+import { inject, injectable } from "inversify";
 
 import type { IParamTokenDto } from "@tubenote/dtos";
+
+import { TYPES } from "@/config/inversify/types";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type { IResponseFormatter } from "@/modules/shared/services";
 import type {
   IVerifyEmailController,
-  IVerifyEmailControllerOptions,
   IVerifyEmailService,
 } from "./verify-email.types";
 
 /**
  * Controller for handling email verification operations.
  */
+@injectable()
 export class VerifyEmailController implements IVerifyEmailController {
-  private static _instance: VerifyEmailController;
-
-  private constructor(
-    private readonly _verifyEmailService: IVerifyEmailService,
-    private readonly _responseFormatter: IResponseFormatter
+  constructor(
+    @inject(TYPES.VerifyEmailService)
+    private _verifyEmailService: IVerifyEmailService,
+    @inject(TYPES.ResponseFormatter)
+    private _responseFormatter: IResponseFormatter
   ) {}
-
-  public static getInstance(
-    options: IVerifyEmailControllerOptions
-  ): VerifyEmailController {
-    if (!this._instance) {
-      this._instance = new VerifyEmailController(
-        options.verifyEmailService,
-        options.responseFormatter
-      );
-    }
-    return this._instance;
-  }
 
   /**
    * Verify the user's email using the token.

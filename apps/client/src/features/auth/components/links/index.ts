@@ -1,1 +1,1 @@
-export * from "./ForogotPasswordLink";
+export * from "./forgot-password-link";

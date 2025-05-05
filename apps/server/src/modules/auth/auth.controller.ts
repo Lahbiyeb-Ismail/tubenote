@@ -1,13 +1,12 @@
 import type { Response } from "express";
+import { inject, injectable } from "inversify";
+
+import { TYPES } from "@/config/inversify/types";
 
 import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
-import type {
-  IAuthController,
-  IAuthControllerOptions,
-  IAuthService,
-} from "./auth.types";
+import type { IAuthController, IAuthService } from "./auth.types";
 
 import { UnauthorizedError } from "../shared/api-errors";
 import { ERROR_MESSAGES } from "../shared/constants";
@@ -17,31 +16,13 @@ import { ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } from "./constants";
 /**
  * Controller for handling authentication-related operations.
  */
+@injectable()
 export class AuthController implements IAuthController {
-  private static _instance: AuthController;
-
-  private constructor(
-    private readonly _authService: IAuthService,
+  constructor(
+    @inject(TYPES.AuthService) private readonly _authService: IAuthService,
+    @inject(TYPES.ResponseFormatter)
     private readonly _responseFormatter: IResponseFormatter
   ) {}
-
-  /**
-   * Retrieves the singleton instance of the `AuthController` class.
-   * If the instance does not already exist, it creates a new one using the provided options.
-   *
-   * @param options - Configuration options for initializing the `AuthController` instance.
-   * @returns The singleton instance of the `AuthController`.
-   */
-  public static getInstance(options: IAuthControllerOptions): AuthController {
-    if (!this._instance) {
-      this._instance = new AuthController(
-        options.authService,
-        options.responseFormatter
-      );
-    }
-
-    return this._instance;
-  }
 
   /**
    * Logs out a user by invalidating their refresh token and clearing auth cookies.

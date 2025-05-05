@@ -1,39 +1,27 @@
 import type { Response } from "express";
+import { inject, injectable } from "inversify";
 
 import type { IPaginationQueryDto, IParamIdDto } from "@tubenote/dtos";
 import type { Video } from "@tubenote/types";
+
+import { TYPES } from "@/config/inversify/types";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import type { IResponseFormatter } from "@/modules/shared/services";
 
-import type {
-  IVideoController,
-  IVideoControllerOptions,
-  IVideoService,
-} from "./video.types";
+import type { IVideoController, IVideoService } from "./video.types";
 
 /**
  * Controller for handling video-related operations.
  */
+@injectable()
 export class VideoController implements IVideoController {
-  private static _instance: VideoController;
-
-  private constructor(
-    private readonly _responseFormatter: IResponseFormatter,
-    private readonly _videoService: IVideoService
+  constructor(
+    @inject(TYPES.VideoService) private _videoService: IVideoService,
+    @inject(TYPES.ResponseFormatter)
+    private _responseFormatter: IResponseFormatter
   ) {}
-
-  public static getInstance(options: IVideoControllerOptions): VideoController {
-    if (!this._instance) {
-      this._instance = new VideoController(
-        options.responseFormatter,
-        options.videoService
-      );
-    }
-
-    return this._instance;
-  }
 
   /**
    * Retrieves a paginated list of videos for a specific user.

@@ -13,8 +13,6 @@ import type {
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
-import type { IPrismaService, IResponseFormatter } from "../shared/services";
-
 /**
  * Interface defining the repository methods for interacting with note data.
  */
@@ -332,18 +330,4 @@ export interface INoteController {
     req: TypedRequest<EmptyRecord, IParamIdDto, IPaginationQueryDto>,
     res: Response
   ): Promise<void>;
-}
-
-export interface INoteRepositoryOptions {
-  db: IPrismaService;
-}
-
-export interface INoteServiceOptions {
-  noteRepository: INoteRepository;
-  prismaService: IPrismaService;
-}
-
-export interface INoteControllerOptions {
-  noteService: INoteService;
-  responseFormatter: IResponseFormatter;
 }

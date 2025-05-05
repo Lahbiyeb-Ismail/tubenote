@@ -3,8 +3,6 @@ import { mock, mockReset } from "jest-mock-extended";
 
 import type { TypedRequest } from "@/modules/shared/types";
 
-import { refreshTokenCookieConfig } from "@/modules/auth/config";
-import { REFRESH_TOKEN_NAME } from "@/modules/auth/constants";
 import { UnauthorizedError } from "@/modules/shared/api-errors";
 import { envConfig } from "@/modules/shared/config";
 import { OAuthController } from "../oauth.controller";
@@ -12,11 +10,7 @@ import { OAuthController } from "../oauth.controller";
 import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import type { IResponseFormatter } from "@/modules/shared/services";
 
-import type {
-  IOAuthAuthorizationCodeDto,
-  IOAuthResponseDto,
-  IOauthLoginDto,
-} from "../dtos";
+import type { IOAuthAuthorizationCodeDto, IOauthLoginDto } from "../dtos";
 import type { IOAuthControllerOptions, IOAuthService } from "../oauth.types";
 
 describe("OAuthController", () => {
@@ -39,19 +33,20 @@ describe("OAuthController", () => {
     refreshToken: "test-refresh-token",
   };
 
-  const oauthResponse: IOAuthResponseDto = {
-    ...authResponse,
-    temporaryCode: "test-temp-code",
-  };
-
   beforeEach(() => {
     mockReset(oauthService);
     mockReset(responseFormatter);
+    mockReset(res);
 
     // Create fresh mocks for the oauthService methods.
-    oauthService.handleOAuthLogin.mockResolvedValue(oauthResponse);
+    oauthService.handleOAuthLogin.mockResolvedValue("temporary-oauth-code");
 
     oauthService.exchangeOauthCodeForTokens.mockResolvedValue(authResponse);
+
+    // Create a mocked response object with chainable methods.
+    res.cookie.mockReturnThis();
+    res.redirect.mockReturnThis();
+    res.json.mockReturnThis();
 
     // Reset the singleton instance for isolation.
     // @ts-ignore: resetting private static property for testing purposes.
@@ -60,10 +55,7 @@ describe("OAuthController", () => {
     // Create an instance of the OAuthController.
     controller = OAuthController.getInstance(controllerOptions);
 
-    // Create a mocked response object with chainable methods.
-    res.cookie.mockReturnThis();
-    res.redirect.mockReturnThis();
-    res.json.mockReturnThis();
+    jest.clearAllMocks();
   });
 
   describe("Singleton Behavior", () => {
@@ -116,28 +108,23 @@ describe("OAuthController", () => {
         oauthLoginDto.createUserDto,
         oauthLoginDto.createAccountDto
       );
-      // Verify that the refresh token cookie is set.
-      expect(res.cookie).toHaveBeenCalledWith(
-        REFRESH_TOKEN_NAME,
-        "test-refresh-token",
-        refreshTokenCookieConfig
-      );
+
       // Verify that the user is redirected with a temporary code.
-      const expectedRedirectUrl = `${envConfig.client.url}/auth/callback?code=${encodeURIComponent(
-        "test-temp-code"
+      const expectedRedirectUrl = `${envConfig.client.url}/oauth/callback?code=${encodeURIComponent(
+        "temporary-oauth-code"
       )}`;
       expect(res.redirect).toHaveBeenCalledWith(expectedRedirectUrl);
     });
   });
 
   describe("exchangeOauthCodeForTokens", () => {
-    // const formattedResponse: IApiResponse<{ accessToken: string }> = {
+    // const formattedResponse: IApiSuccessResponse<string> = {
     //   success: true,
-    //   status: httpStatus.OK,
-    //   message: "Access token exchanged successfully.",
-    //   data: {
-    //     accessToken: "test-access-token",
-    //   },
+    //   statusCode: httpStatus.OK,
+    //   payload:{
+    //     message: "Access token exchanged successfully.",
+    //     data: "test-access-token"
+    //   }
     // };
 
     // it("should exchange a valid OAuth code for tokens and return an access token", async () => {
@@ -146,10 +133,15 @@ describe("OAuthController", () => {
     //     code: "valid-oauth-code",
     //   };
 
-    //   responseFormatter.formatResponse.mockReturnValue(formattedResponse);
+    //   oauthService.exchangeOauthCodeForTokens.mockResolvedValue(
+    //     authResponse
+    //   );
+
+    //   responseFormatter.formatSuccessResponse.mockReturnValue(formattedResponse);
 
     //   // Act
     //   await controller.exchangeOauthCodeForTokens(oauthCodeReq, res);
+
     //   // Assert: verify that exchangeOauthCodeForTokens is called with the provided code.
     //   expect(oauthService.exchangeOauthCodeForTokens).toHaveBeenCalledWith(
     //     "valid-oauth-code"

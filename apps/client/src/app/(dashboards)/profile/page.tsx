@@ -1,16 +1,17 @@
 "use client";
 
-import { useGetCurrentUser } from "@/features/user/hooks";
+import { useAuth } from "@/features/auth/contexts";
 
 import { EmailConfirmationAlert } from "@/features/auth/components";
 import { AccountActions, UserInfo } from "@/features/user/components";
 
 export default function ProfilePage() {
-  const { data: response } = useGetCurrentUser();
+  const { currentUserQueryResult } = useAuth();
 
-  if (!response?.success) return null;
+  const { data: user } = currentUserQueryResult;
 
-  const user = response.payload.data;
+  if (!user) return null;
+
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
       <EmailConfirmationAlert

@@ -1,7 +1,9 @@
 "use client";
 import { createContext, useContext, useReducer } from "react";
 
+import { useGetCurrentUser } from "@/features/user/hooks";
 import {
+  useExchangeOauthCode,
   useLogin,
   useLogout,
   useRegister,
@@ -18,28 +20,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const { authInitialState, authReducer } = useAuthReducer();
   const [authState, dispatch] = useReducer(authReducer, authInitialState);
 
-  const registerMutation = useRegister(dispatch);
-  const loginMutation = useLogin(dispatch);
-  const logoutMutation = useLogout(dispatch);
+  // Integrate the useGetCurrentUser hook to fetch user data when authenticated
+  const currentUserQueryResult = useGetCurrentUser(
+    authInitialState.isAuthenticated
+  );
 
-  const resetPasswordMutation = useResetPassword(dispatch);
-  const sendForgotPasswordEmailMutation = useSendForgotPasswordEmail(dispatch);
-  const sendVerificationEmailMutation = useSendVerificationEmail(dispatch);
+  const registerMutationResult = useRegister(dispatch);
+  const loginMutationResult = useLogin(dispatch);
+  const logoutMutationResult = useLogout(dispatch);
+
+  const resetPasswordMutationResult = useResetPassword(dispatch);
+  const sendForgotPasswordEmailMutationResult =
+    useSendForgotPasswordEmail(dispatch);
+  const sendVerificationEmailMutationResult =
+    useSendVerificationEmail(dispatch);
+
+  const exchangeOauthCodeMutationResult = useExchangeOauthCode(dispatch);
 
   const value = {
     authState,
-    login: loginMutation.mutate,
-    register: registerMutation.mutate,
-    logout: logoutMutation.mutate,
-    resetPassword: resetPasswordMutation.mutate,
-    sendForgotPasswordEmail: sendForgotPasswordEmailMutation.mutate,
-    sendVerificationEmail: sendVerificationEmailMutation.mutate,
-    isLoginPending: loginMutation.isPending,
-    isRegistrationPending: registerMutation.isPending,
-    isLogoutPending: logoutMutation.isPending,
-    isResetPasswordPending: resetPasswordMutation.isPending,
-    isForgotPasswordPending: sendForgotPasswordEmailMutation.isPending,
-    isVerificationEmailPending: sendVerificationEmailMutation.isPending,
+    currentUserQueryResult,
+    loginMutationResult,
+    registerMutationResult,
+    logoutMutationResult,
+    resetPasswordMutationResult,
+    sendForgotPasswordEmailMutationResult,
+    sendVerificationEmailMutationResult,
+    exchangeOauthCodeMutationResult,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

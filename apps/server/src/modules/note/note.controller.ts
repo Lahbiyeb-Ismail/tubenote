@@ -1,5 +1,6 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
+import { inject, injectable } from "inversify";
 
 import type {
   ICreateNoteDto,
@@ -9,14 +10,12 @@ import type {
 } from "@tubenote/dtos";
 import type { Note } from "@tubenote/types";
 
+import { TYPES } from "@/config/inversify/types";
+
 import type { IResponseFormatter } from "@/modules/shared/services";
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
-import type {
-  INoteController,
-  INoteControllerOptions,
-  INoteService,
-} from "./note.types";
+import type { INoteController, INoteService } from "./note.types";
 
 /**
  * Controller for handling note-related operations.
@@ -25,36 +24,19 @@ import type {
  * and retrieving notes for an authenticated user.
  * It also supports pagination for list endpoints.
  */
+@injectable()
 export class NoteController implements INoteController {
-  private static _instance: NoteController;
-
   /**
    * Creates an instance of NoteController.
    *
    * @param _noteService - An instance of the note service that handles business logic.
    * @param _responseFormatter - An instance of the response formatter service.
    */
-  private constructor(
-    private readonly _noteService: INoteService,
-    private readonly _responseFormatter: IResponseFormatter
+  constructor(
+    @inject(TYPES.NoteService) private _noteService: INoteService,
+    @inject(TYPES.ResponseFormatter)
+    private _responseFormatter: IResponseFormatter
   ) {}
-
-  /**
-   * Gets the singleton instance of NoteController.
-   *
-   * @param noteService - An instance of the note service that handles business logic.
-   * @param responseFormatter - An instance of the response formatter service.
-   * @returns The singleton instance of NoteController.
-   */
-  public static getInstance(options: INoteControllerOptions): NoteController {
-    if (!this._instance) {
-      this._instance = new NoteController(
-        options.noteService,
-        options.responseFormatter
-      );
-    }
-    return this._instance;
-  }
 
   /**
    * Adds a new note for the authenticated user.

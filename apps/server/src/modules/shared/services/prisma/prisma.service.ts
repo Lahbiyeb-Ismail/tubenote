@@ -1,8 +1,11 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 
+import { TYPES } from "@/config/inversify/types";
+import { inject, injectable } from "inversify";
 import type { ILoggerService } from "../logger";
-import type { IPrismaService, PrismaServiceOptions } from "./prisma.types";
+import type { IPrismaService } from "./prisma.types";
 
+@injectable()
 export class PrismaService
   extends PrismaClient<
     Prisma.PrismaClientOptions,
@@ -13,11 +16,10 @@ export class PrismaService
   private static instance: PrismaService;
   private retryCount = 0;
   private isConnected = false;
-  private readonly maxRetries: number;
-  private readonly retryDelay: number;
-  private readonly logger?: ILoggerService;
+  private readonly maxRetries: number = 3;
+  private readonly retryDelay: number = 500;
 
-  private constructor(options?: PrismaServiceOptions) {
+  constructor(@inject(TYPES.LoggerService) private logger: ILoggerService) {
     super({
       log: [
         { level: "warn", emit: "event" },
@@ -25,12 +27,7 @@ export class PrismaService
         { level: "error", emit: "event" },
         { level: "query", emit: "event" },
       ],
-      ...options?.prismaOptions,
     });
-
-    this.maxRetries = options?.maxRetries ?? 3;
-    this.retryDelay = options?.retryDelay ?? 500;
-    this.logger = options?.logger;
 
     this.setupEventListeners();
   }
@@ -107,20 +104,6 @@ export class PrismaService
    */
   private isTransactionInProgress(): boolean {
     return this.retryCount > 0;
-  }
-
-  /**
-   * Retrieves the singleton instance of the `PrismaService`.
-   * If the instance does not exist, it creates a new one with the provided options.
-   *
-   * @param options - Optional configuration options for the `PrismaService`.
-   * @returns The singleton instance of the `PrismaService`.
-   */
-  public static getInstance(options?: PrismaServiceOptions): PrismaService {
-    if (!PrismaService.instance) {
-      PrismaService.instance = new PrismaService(options);
-    }
-    return PrismaService.instance;
   }
 
   /**
