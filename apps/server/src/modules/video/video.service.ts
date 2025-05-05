@@ -26,8 +26,8 @@ export class VideoService implements IVideoService {
   ) {}
 
   private async _findVideoByYoutubeId(
-    tx: Prisma.TransactionClient,
-    youtubeId: string
+    youtubeId: string,
+    tx?: Prisma.TransactionClient
   ): Promise<Video | null> {
     return this._videoRepository.findByYoutubeId(youtubeId, tx);
   }
@@ -99,18 +99,15 @@ export class VideoService implements IVideoService {
     });
   }
 
-  async findVideoOrCreate(
-    userId: string,
-    videoYoutubeId: string
-  ): Promise<Video> {
+  async saveVideo(userId: string, videoYoutubeId: string): Promise<Video> {
     if (!videoYoutubeId || !userId) {
       throw new BadRequestError(ERROR_MESSAGES.BAD_REQUEST);
     }
 
     return this._prismaService.transaction(async (tx) => {
       const existingVideo = await this._findVideoByYoutubeId(
-        tx,
-        videoYoutubeId
+        videoYoutubeId,
+        tx
       );
 
       if (!existingVideo) {
@@ -126,5 +123,9 @@ export class VideoService implements IVideoService {
       // Otherwise, link the existing video to the user.
       return this._linkVideoToUser(tx, existingVideo, userId);
     });
+  }
+
+  async getVideoByYoutubeId(videoYoutubeId: string): Promise<Video | null> {
+    return this._findVideoByYoutubeId(videoYoutubeId);
   }
 }
