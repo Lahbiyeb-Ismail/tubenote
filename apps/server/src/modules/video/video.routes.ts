@@ -22,7 +22,10 @@ videoRoutes
 videoRoutes
   .route("/:id")
   .post(validateRequest({ params: idParamSchema }), (req, res) =>
-    videoController.getVideoByIdOrCreate(req, res)
+    videoController.saveVideoData(req, res)
+  )
+  .get(validateRequest({ params: idParamSchema }), (req, res) =>
+    videoController.getVideoByYoutubeId(req, res)
   );
 
 export { videoRoutes };
