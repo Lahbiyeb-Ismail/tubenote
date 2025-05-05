@@ -7,20 +7,23 @@ import { useForm } from "react-hook-form";
 import type { IUpdateUserDto } from "@tubenote/dtos";
 import { updateUserSchema } from "@tubenote/schemas";
 
+import { useAuth } from "@/features/auth/contexts";
+
 import { Button, Form } from "@/components/ui";
 import { FormInput } from "@/features/auth/components";
 
 import { useUser } from "../../contexts";
-import { useGetCurrentUser } from "../../hooks";
 
 export function UpdateUserForm() {
-  const { data: response } = useGetCurrentUser();
+  const { currentUserQueryResult } = useAuth();
+
+  const { data: user } = currentUserQueryResult;
 
   const form = useForm<IUpdateUserDto>({
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
-      username: response?.payload.data.username ?? "",
-      email: response?.payload.data.email ?? "",
+      username: user?.username ?? "",
+      email: user?.email ?? "",
     },
   });
 

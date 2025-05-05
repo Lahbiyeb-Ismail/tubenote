@@ -1,18 +1,18 @@
+import type { User } from "@tubenote/types";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { useGetCurrentUser } from "../../hooks";
+type UserAvatarProps = {
+  user: User;
+};
 
-export function UserAvatar() {
-  const { data: response } = useGetCurrentUser();
-
-  const currentUser = response?.payload.data;
-
+export function UserAvatar({ user }: UserAvatarProps) {
   const src = "https://github.com/shadcn.png";
-  const avatarFallback =
-    (currentUser?.username?.[0]?.toUpperCase() ?? "") +
-    (currentUser?.username?.[1]?.toUpperCase() ?? "");
 
-  const imgSrc = currentUser?.profilePicture ?? src;
+  const avatarFallback =
+    user.username[0].toUpperCase() + user.username[1].toUpperCase();
+
+  const imgSrc = user.profilePicture ?? src;
 
   return (
     <Avatar>
