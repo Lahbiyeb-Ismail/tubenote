@@ -8,7 +8,6 @@ import { z } from "zod";
  * - **content**: Must be a string with a minimum length of 10 characters.
  * - **videoTitle**: Must be a string with a minimum length of 3 characters.
  * - **thumbnail**: Must be a string with a minimum length of 3 characters.
- * - **videoId**: Must be a string with a minimum length of 3 characters.
  * - **youtubeId**: Must be a string with a minimum length of 3 characters.
  * - **timestamp**: Must be a number.
  *
@@ -28,9 +27,6 @@ export const createNoteSchema = z
     thumbnail: z
       .string()
       .min(3, { message: "Thumbnail must be at least 3 characters long." }),
-    videoId: z
-      .string()
-      .min(3, { message: "Video id must be at least 3 characters long." }),
     youtubeId: z
       .string()
       .min(3, { message: "Youtube id must be at least 3 characters long." }),
