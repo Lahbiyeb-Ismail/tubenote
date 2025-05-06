@@ -1,6 +1,6 @@
 "use client";
 
-import type { Video } from "@/types/video.types";
+import type { Video } from "@tubenote/types";
 import { type ReactNode, createContext, useContext, useState } from "react";
 
 type ModalContent = {
