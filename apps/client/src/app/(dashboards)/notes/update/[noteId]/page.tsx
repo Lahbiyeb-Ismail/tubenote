@@ -1,14 +1,26 @@
 "use client";
 
-import EditorPage from "@/components/editor/editor-page";
+import type { MDXEditorMethods } from "@mdxeditor/editor";
+import { Suspense, useRef } from "react";
+
+import AppMDXEditor from "@/components/editor/mdx-editor";
+
+import { Loader, ResizablePanels } from "@/components/global";
 import { useGetNoteById } from "@/features/note/hooks";
+import { VideoPlayer } from "@/features/video/components";
 
 function UpdateNotePage({ params }: { params: { noteId: string } }) {
   const { noteId } = params;
-  const { data, isLoading, isError } = useGetNoteById(noteId);
+  const editorRef = useRef<MDXEditorMethods | null>(null);
 
-  if (isLoading || !data) {
-    return <div>Loading...</div>;
+  const { data: note, isLoading, isError } = useGetNoteById(noteId);
+
+  if (isLoading || !note) {
+    return (
+      <div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
+        <Loader />
+      </div>
+    );
   }
 
   if (isError) {
@@ -16,13 +28,16 @@ function UpdateNotePage({ params }: { params: { noteId: string } }) {
   }
 
   return (
-    <EditorPage
-      action="update"
-      initialNoteContent={data.content}
-      noteTitle={data.title}
-      noteId={data.id}
-      video={data.videoId}
-    />
+    <div className="flex h-screen bg-white">
+      <ResizablePanels
+        leftSideContent={
+          <Suspense fallback={null}>
+            <AppMDXEditor editorRef={editorRef} noteContent={note.content} />
+          </Suspense>
+        }
+        rightSideContent={<VideoPlayer videoId={note.youtubeId} />}
+      />
+    </div>
   );
 }
 

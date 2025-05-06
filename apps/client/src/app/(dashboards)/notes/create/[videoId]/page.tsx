@@ -5,7 +5,7 @@ import { useGetVideoById } from "@/features/video/hooks";
 import { EditorPage } from "@/components/editor";
 import { Loader } from "@/components/global";
 
-function AddNewNotePage({ params }: { params: { videoId: string } }) {
+function CreateNotePage({ params }: { params: { videoId: string } }) {
   const { videoId } = params;
 
   const { data, isLoading } = useGetVideoById(videoId);
@@ -21,4 +21,4 @@ function AddNewNotePage({ params }: { params: { videoId: string } }) {
   return <EditorPage video={data} />;
 }
 
-export default AddNewNotePage;
+export default CreateNotePage;
