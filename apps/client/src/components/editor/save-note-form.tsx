@@ -1,12 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import type { Video } from "@tubenote/types";
+// import type { Video } from "@tubenote/types";
 
-import { useNote } from "@/features/note/contexts";
-import { useVideo } from "@/features/video/contexts";
+// import { useNote } from "@/features/note/contexts";
+// import { useVideo } from "@/features/video/contexts";
 
 import type { NoteTitle } from "@/features/note/types";
 
@@ -15,23 +15,17 @@ import { Button } from "@/components/ui";
 import { saveNoteFormSchema } from "@/lib";
 
 type SaveNoteFormProps = {
-  noteId: string;
-  noteTitle: string;
-  noteContent: string;
-  cancelText: string;
-  action: "update" | "create";
+  isLoading: boolean;
   closeModal: () => void;
-  video: Video;
+  handleSaveSubmit: (noteTitle: string) => void;
+  noteTitle?: string;
 };
 
 export function SaveNoteForm({
-  noteId,
-  noteTitle: title,
-  noteContent,
-  action,
-  cancelText,
+  isLoading,
   closeModal,
-  video,
+  handleSaveSubmit,
+  noteTitle = "",
 }: SaveNoteFormProps) {
   const {
     register,
@@ -40,42 +34,18 @@ export function SaveNoteForm({
   } = useForm<NoteTitle>({
     resolver: zodResolver(saveNoteFormSchema),
     defaultValues: {
-      noteTitle: title || "",
+      noteTitle,
     },
   });
 
-  const { videoCurrentTime } = useVideo();
-
-  const { createNote, isLoading, updateNote } = useNote();
-
-  const handleNoteSave: SubmitHandler<NoteTitle> = (data: NoteTitle) => {
-    if (action === "create") {
-      createNote({
-        videoId: video.id,
-        createNoteData: {
-          title: data.noteTitle,
-          content: noteContent,
-          thumbnail: video.thumbnails.medium.url,
-          videoTitle: video.title,
-          youtubeId: video.youtubeId,
-          timestamp: videoCurrentTime,
-        },
-      });
-    } else {
-      updateNote({
-        noteId,
-        updateData: {
-          title: data.noteTitle,
-          content: noteContent,
-          timestamp: videoCurrentTime,
-        },
-      });
-    }
-  };
+  function handleOnSubmit(data: NoteTitle) {
+    handleSaveSubmit(data.noteTitle);
+    closeModal();
+  }
 
   return (
     <form
-      onSubmit={handleSubmit(handleNoteSave)}
+      onSubmit={handleSubmit(handleOnSubmit)}
       className="mb-1 flex flex-col items-center justify-center gap-4"
     >
       <input
@@ -87,7 +57,7 @@ export function SaveNoteForm({
 
       <div className="flex items-center justify-between w-full">
         <Button variant="outline" onClick={closeModal}>
-          {cancelText}
+          Cancel
         </Button>
         <button
           type="submit"
