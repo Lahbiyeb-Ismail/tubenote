@@ -152,23 +152,16 @@ type AppMDXEditorProps = {
   noteContent?: string;
 };
 
-export default function AppMDXEditor({
+export function AppMDXEditor({
   editorRef,
   noteContent = "",
 }: AppMDXEditorProps) {
-  // const ref = useRef<MDXEditorMethods | null>(null);
-
-  // const markdownValue = ref.current?.getMarkdown() || "";
-
-  // console.log(markdownValue);
-
   return (
     <MDXEditor
       ref={editorRef}
       markdown={noteContent}
       plugins={myPlugins}
       className="mdxeditor"
-      // onChange={() => setNoteMarkDownContent(ref.current?.getMarkdown() || "")}
     />
   );
 }
