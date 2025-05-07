@@ -1,4 +1,5 @@
 import { AUTH_ERRORS } from "./auth.errors";
+import { CSRF_ERRORS } from "./csrf.errors";
 import { DATABASE_ERRORS } from "./database.errors";
 import { EMAIL_ERRORS } from "./email.errors";
 import { HTTP_ERRORS } from "./http.errors";
@@ -14,4 +15,5 @@ export const ERROR_MESSAGES = {
   ...TOKEN_ERRORS,
   ...NOTIFICATION_ERRORS,
   ...HTTP_ERRORS,
+  ...CSRF_ERRORS,
 } as const;
