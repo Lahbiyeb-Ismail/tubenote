@@ -23,22 +23,26 @@ import { noteRoutes } from "@/modules/note";
 import { userRoutes } from "@/modules/user";
 import { videoRoutes } from "@/modules/video";
 
-import { errorHandler, notFoundRoute } from "@/middlewares";
+import {
+  createCsrfMiddleware,
+  errorHandler,
+  notFoundRoute,
+} from "@/middlewares";
 
 import { envConfig } from "@/modules/shared/config";
+import { DEFAULT_CSRF_CONFIG } from "@/modules/shared/config/csrf.config";
 import { loggerService } from "@/modules/shared/services";
 import { clientContextMiddleware } from "./middlewares/client-context.middleware";
 
 const app: Express = express();
 
+// Security middlewares
 app.use(helmet());
 
+// Basic request parsing
 app.use(express.json());
-
 app.use(cookieParser());
 app.use(requestIp.mw());
-
-// parse urlencoded request body
 app.use(express.urlencoded({ extended: true }));
 
 // Configure CORS middleware
@@ -59,6 +63,7 @@ app.use(
   })
 );
 
+// Authentication setup
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -80,6 +85,9 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   loggerService.http(`${req.method} ${req.url}`);
   next();
 });
+
+// Apply CSRF protection to all routes
+app.use(createCsrfMiddleware(DEFAULT_CSRF_CONFIG));
 
 app.get("/", (_req, res) => {
   res.json({ message: "Hello from the server!" });
