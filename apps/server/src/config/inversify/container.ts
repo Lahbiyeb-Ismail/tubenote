@@ -6,8 +6,10 @@ import { TYPES } from "./types";
 import {
   CacheService,
   CryptoService,
+  CsrfService,
   type ICacheService,
   type ICryptoService,
+  type ICsrfService,
   type ILoggerService,
   type IMailSenderService,
   type IPrismaService,
@@ -146,6 +148,10 @@ function bootstrapContainer() {
   container
     .bind<IRateLimitService>(TYPES.RateLimitService)
     .to(RateLimitService)
+    .inSingletonScope();
+  container
+    .bind<ICsrfService>(TYPES.CsrfService)
+    .to(CsrfService)
     .inSingletonScope();
 
   // Bind JWT service

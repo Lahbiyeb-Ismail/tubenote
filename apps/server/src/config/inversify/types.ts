@@ -7,6 +7,7 @@ export const TYPES = {
   RateLimitService: Symbol.for("RateLimitService"),
   MailSenderService: Symbol.for("MailSenderService"),
   CacheService: Symbol.for("CacheService"),
+  CsrfService: Symbol.for("CsrfService"),
 
   // Auth Module
   JwtService: Symbol.for("JwtService"),

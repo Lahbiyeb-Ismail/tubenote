@@ -35,6 +35,7 @@ import type {
 import type {
   ICacheService,
   ICryptoService,
+  ICsrfService,
   ILoggerService,
   IMailSenderService,
   IPrismaService,
@@ -145,6 +146,7 @@ export const rateLimitService = container.get<IRateLimitService>(
 export const prismaService = container.get<IPrismaService>(TYPES.PrismaService);
 export const loggerService = container.get<ILoggerService>(TYPES.LoggerService);
 export const cryptoService = container.get<ICryptoService>(TYPES.CryptoService);
+export const csrfService = container.get<ICsrfService>(TYPES.CsrfService);
 export const responseFormatter = container.get<IResponseFormatter>(
   TYPES.ResponseFormatter
 );
