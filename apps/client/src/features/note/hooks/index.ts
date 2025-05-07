@@ -5,3 +5,5 @@ export * from "./use-get-recent-notes";
 export * from "./use-get-recently-updated-notes";
 export * from "./use-get-user-notes";
 export * from "./use-update-note";
+
+export * from "./use-editor-content";
