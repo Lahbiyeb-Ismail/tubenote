@@ -1,39 +1,13 @@
 "use client";
 
-import { type ReactNode, createContext, useContext, useState } from "react";
-
-interface ModalContextType {
-  isOpen: boolean;
-  openModal: () => void;
-  closeModal: () => void;
-}
-
-const ModalContext = createContext<ModalContextType | undefined>(undefined);
+import { type ReactNode } from "react";
+// No need for useState or useContext anymore since we're using Zustand store
 
 export function ModalProvider({ children }: { children: ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const openModal = () => {
-    setIsOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsOpen(false);
-  };
-
-  return (
-    <ModalContext.Provider value={{ isOpen, openModal, closeModal }}>
-      {children}
-    </ModalContext.Provider>
-  );
+  // This is now just a wrapper for compatibility
+  // The actual state is managed by the Zustand store
+  return children;
 }
 
-export function useModal() {
-  const context = useContext(ModalContext);
-
-  if (context === undefined) {
-    throw new Error("useModal must be used within a ModalProvider");
-  }
-
-  return context;
-}
+// We're exporting the hook from our hooks directory that now uses Zustand
+export { useModal } from "@/hooks/use-modal";
