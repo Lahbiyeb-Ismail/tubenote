@@ -16,6 +16,7 @@ export function useUpdateNote(dispatch: React.Dispatch<NoteAction>) {
   const { closeModal } = useModal();
 
   return useMutation({
+    mutationKey: ["update-note"],
     mutationFn: updateNote,
     onMutate: () => {
       toast.loading("Updating note...", { id: "loadingToast" });
@@ -24,14 +25,14 @@ export function useUpdateNote(dispatch: React.Dispatch<NoteAction>) {
       const { payload } = response;
 
       toast.dismiss("loadingToast");
-
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
       toast.success(payload.message);
 
       dispatch({
         type: "UPDATE_NOTE_SUCCESS",
         payload: { note: payload.data, success: true },
       });
+
+      queryClient.invalidateQueries({ queryKey: ["update-note", "notes"] });
 
       closeModal();
 
