@@ -4,7 +4,7 @@ import { Toaster } from "react-hot-toast";
 
 import "./globals.css";
 
-import { ReactQueryProvider } from "@/providers";
+import { ReactQueryProvider, StoreProvider } from "@/providers";
 
 import { LayoutProvider, ModalProvider } from "@/context";
 
@@ -40,20 +40,22 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ReactQueryProvider>
-          <LayoutProvider>
-            <ModalProvider>
-              <AuthProvider>
-                <UserProvider>
-                  <VideoProvider>
-                    <NoteProvider>
-                      <Toaster />
-                      {children}
-                    </NoteProvider>
-                  </VideoProvider>
-                </UserProvider>
-              </AuthProvider>
-            </ModalProvider>
-          </LayoutProvider>
+          <StoreProvider>
+            <LayoutProvider>
+              <ModalProvider>
+                <AuthProvider>
+                  <UserProvider>
+                    <VideoProvider>
+                      <NoteProvider>
+                        <Toaster />
+                        {children}
+                      </NoteProvider>
+                    </VideoProvider>
+                  </UserProvider>
+                </AuthProvider>
+              </ModalProvider>
+            </LayoutProvider>
+          </StoreProvider>
         </ReactQueryProvider>
       </body>
     </html>
