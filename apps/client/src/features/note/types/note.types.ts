@@ -33,7 +33,7 @@ export type NoteContextType = {
     noteId,
     updateData,
   }: { noteId: string; updateData: IUpdateNoteDto }) => void;
-  clearNoteState: () => void;
+  // clearNoteState: () => void;
 };
 
 export type NoteAction =
