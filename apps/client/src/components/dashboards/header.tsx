@@ -1,13 +1,13 @@
 "use client";
 
+import { Button } from "@/components/ui";
+import { useUIStore } from "@/stores";
 import { LayoutGrid, List, Search } from "lucide-react";
 
-import { useLayout } from "@/context";
-
-import { Button } from "@/components/ui";
-
 export function Header({ title }: { title: string }) {
-  const { toggleLayout, isGridLayout } = useLayout();
+  // Use the Zustand store directly
+  const isGridLayout = useUIStore((state) => state.layout.isGridLayout);
+  const toggleLayout = useUIStore((state) => state.actions.toggleLayout);
 
   return (
     <header className="bg-white px-4 py-6 shadow sm:px-6 lg:px-8 flex flex-row items-center justify-between gap-4">
