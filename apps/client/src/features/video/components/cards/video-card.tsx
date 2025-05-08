@@ -1,7 +1,3 @@
-import type { Video } from "@tubenote/types";
-
-import { useLayout } from "@/context";
-
 import {
   CardContent,
   CardFooterWrapper,
@@ -9,9 +5,13 @@ import {
   CardWrapper,
   SeeAllButton,
 } from "@/components/global";
+import { useUIStore } from "@/stores";
+import type { Video } from "@tubenote/types";
 
 export function VideoCard({ video }: { video: Video }) {
-  const { isGridLayout } = useLayout();
+  // Using Zustand store directly instead of context
+  const isGridLayout = useUIStore((state) => state.layout.isGridLayout);
+
   return (
     <CardWrapper>
       <CardImage
