@@ -3,3 +3,5 @@ export * from "./use-local-storage";
 export * from "./use-pagination-query";
 export * from "./use-sort-by-query";
 export * from "./use-toggle-video-player";
+export * from "./use-combined-state";
+export * from "./use-video-note-selector";
