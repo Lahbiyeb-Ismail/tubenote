@@ -23,7 +23,7 @@ export function NotePageHeader({
   ];
 
   const actionButton = {
-    href: `/editor/update/${noteId}`,
+    href: `/notes/update/${noteId}`,
     label: "Edit Note",
     icon: <Edit className="h-4 w-4" />,
   };
