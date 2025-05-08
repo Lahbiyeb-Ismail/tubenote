@@ -1,33 +1,20 @@
 "use client";
 
-import {
-  type ReactNode,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-
-type LayoutContextType = {
-  isGridLayout: boolean;
-  isSidebarOpen: boolean;
-  toggleLayout: () => void;
-  toggleSidebar: () => void;
-};
-
-const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
+import { useUIStore } from "@/stores/ui-store";
+import { type ReactNode, useEffect } from "react";
 
 export function LayoutProvider({ children }: { children: ReactNode }) {
-  const [isGridLayout, setIsGridLayout] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const toggleLayout = () => setIsGridLayout((prev) => !prev);
-  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
+  // Initialize the responsive behavior that was previously in the context
+  const actions = useUIStore((state) => state.actions);
 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
-        setIsSidebarOpen(false);
+        // Access the Zustand store directly for this effect
+        const isSidebarOpen = useUIStore.getState().layout.isSidebarOpen;
+        if (isSidebarOpen) {
+          actions.toggleSidebar();
+        }
       }
     };
 
@@ -39,26 +26,12 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
 
     // Clean up
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [actions]);
 
-  return (
-    <LayoutContext.Provider
-      value={{
-        isGridLayout,
-        toggleLayout,
-        isSidebarOpen,
-        toggleSidebar,
-      }}
-    >
-      {children}
-    </LayoutContext.Provider>
-  );
+  // This is now just a wrapper for compatibility
+  // The actual state is managed by the Zustand store
+  return children;
 }
 
-export function useLayout() {
-  const context = useContext(LayoutContext);
-  if (context === undefined) {
-    throw new Error("useLayout must be used within a LayoutProvider");
-  }
-  return context;
-}
+// We're exporting the hook from our hooks directory that now uses Zustand
+export { useLayout } from "@/hooks/use-layout";
