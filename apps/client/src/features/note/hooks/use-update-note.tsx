@@ -32,11 +32,13 @@ export function useUpdateNote(dispatch: React.Dispatch<NoteAction>) {
         payload: { note: payload.data, success: true },
       });
 
-      queryClient.invalidateQueries({ queryKey: ["update-note", "notes"] });
+      queryClient.invalidateQueries({
+        queryKey: ["update-note", "notes"],
+      });
 
       closeModal();
 
-      router.push("/notes");
+      router.push(`/notes/${payload.data.id}`);
     },
     onError: (error) => {
       toast.dismiss("loadingToast");
