@@ -1,7 +1,14 @@
 "use client";
-import { createContext, useContext, useReducer } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+} from "react";
 
 import { useGetCurrentUser } from "@/features/user/hooks";
+import { useAuthStore } from "@/stores/auth-store";
 import {
   useExchangeOauthCode,
   useLogin,
@@ -20,34 +27,66 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const { authInitialState, authReducer } = useAuthReducer();
   const [authState, dispatch] = useReducer(authReducer, authInitialState);
 
+  // Access auth store actions
+  const authActions = useAuthStore((state) => state.actions);
+
   // Integrate the useGetCurrentUser hook to fetch user data when authenticated
   const currentUserQueryResult = useGetCurrentUser(
     authInitialState.isAuthenticated
   );
 
+  // Update Zustand store when auth state changes
+  useEffect(() => {
+    if (authState.isAuthenticated && currentUserQueryResult.data) {
+      authActions.setAuthenticated(currentUserQueryResult.data);
+    } else if (authState.isLoading) {
+      authActions.setLoading();
+    } else {
+      authActions.setUnauthenticated();
+    }
+  }, [
+    authState.isAuthenticated,
+    authState.isLoading,
+    currentUserQueryResult.data,
+    authActions,
+  ]);
+
+  // Create memoized mutation results to prevent unnecessary re-renders
   const registerMutationResult = useRegister(dispatch);
   const loginMutationResult = useLogin(dispatch);
   const logoutMutationResult = useLogout(dispatch);
-
   const resetPasswordMutationResult = useResetPassword(dispatch);
   const sendForgotPasswordEmailMutationResult =
     useSendForgotPasswordEmail(dispatch);
   const sendVerificationEmailMutationResult =
     useSendVerificationEmail(dispatch);
-
   const exchangeOauthCodeMutationResult = useExchangeOauthCode(dispatch);
 
-  const value = {
-    authState,
-    currentUserQueryResult,
-    loginMutationResult,
-    registerMutationResult,
-    logoutMutationResult,
-    resetPasswordMutationResult,
-    sendForgotPasswordEmailMutationResult,
-    sendVerificationEmailMutationResult,
-    exchangeOauthCodeMutationResult,
-  };
+  // Memoize the context value to prevent unnecessary re-renders
+  const value = useMemo(
+    () => ({
+      authState,
+      currentUserQueryResult,
+      loginMutationResult,
+      registerMutationResult,
+      logoutMutationResult,
+      resetPasswordMutationResult,
+      sendForgotPasswordEmailMutationResult,
+      sendVerificationEmailMutationResult,
+      exchangeOauthCodeMutationResult,
+    }),
+    [
+      authState,
+      currentUserQueryResult,
+      loginMutationResult,
+      registerMutationResult,
+      logoutMutationResult,
+      resetPasswordMutationResult,
+      sendForgotPasswordEmailMutationResult,
+      sendVerificationEmailMutationResult,
+      exchangeOauthCodeMutationResult,
+    ]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
@@ -60,4 +99,10 @@ export function useAuth() {
   }
 
   return context;
+}
+
+// Create a simpler hook for components that only need auth status
+export function useAuthStatus() {
+  const { status, user, error } = useAuthStore();
+  return { status, user, error };
 }
