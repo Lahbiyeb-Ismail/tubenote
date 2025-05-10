@@ -36,11 +36,12 @@ export interface IVideoRepository {
 
 export interface IVideoService {
   getYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData>;
-  findVideoOrCreate(userId: string, videoYoutubeId: string): Promise<Video>;
   getUserVideos(
     userId: string,
     findManyDto: IFindManyDto
   ): Promise<IPaginatedData<Video>>;
+  saveVideo(userId: string, videoYoutubeId: string): Promise<Video>;
+  getVideoByYoutubeId(videoYoutubeId: string): Promise<Video | null>;
 }
 
 export interface IVideoController {
@@ -48,7 +49,11 @@ export interface IVideoController {
     req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
     res: Response
   ): Promise<void>;
-  getVideoByIdOrCreate(
+  saveVideoData(
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
+    res: Response
+  ): Promise<void>;
+  getVideoByYoutubeId(
     req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ): Promise<void>;

@@ -36,16 +36,9 @@ import {
   thematicBreakPlugin,
   toolbarPlugin,
 } from "@mdxeditor/editor";
-import { SaveIcon } from "lucide-react";
-import { useRef } from "react";
+import { type MutableRefObject } from "react";
 
 import "@mdxeditor/editor/style.css";
-
-import type { Video } from "@tubenote/types";
-
-import { useModal } from "@/context";
-
-import { Button } from "@/components/ui";
 
 function whenInAdmonition(editorInFocus: EditorInFocus | null) {
   const node = editorInFocus?.rootNode;
@@ -155,53 +148,20 @@ const myPlugins = [
 ];
 
 type AppMDXEditorProps = {
-  video: Video;
-  initialNoteContent?: string;
-  noteTitle?: string;
-  noteId?: string;
-  action: "create" | "update";
+  editorRef: MutableRefObject<MDXEditorMethods | null>;
+  noteContent?: string;
 };
 
-export default function AppMDXEditor({
-  video,
-  initialNoteContent,
-  noteTitle,
-  noteId,
-  action,
+export function AppMDXEditor({
+  editorRef,
+  noteContent = "",
 }: AppMDXEditorProps) {
-  const ref = useRef<MDXEditorMethods | null>(null);
-
-  const { openModal } = useModal();
-
-  const handleSaveClick = () => {
-    openModal({
-      title: "Confirm Save Note",
-      description: "Are you sure you want to save this note?",
-      cancelText: "Cancel",
-      confirmText: "Save",
-      noteContent: ref.current?.getMarkdown() || "",
-      noteTitle,
-      action,
-      noteId,
-      video,
-    });
-  };
-
   return (
-    <>
-      <MDXEditor
-        ref={ref}
-        markdown={initialNoteContent || ""}
-        plugins={myPlugins}
-        className="mdxeditor"
-      />
-      <Button
-        size="icon"
-        className="absolute bottom-3 right-9 bg-slate-900 hover:bg-slate-100 hover:text-slate-900 border-2 border-slate-100 hover:border-slate-900 hover:shadow-lg"
-        onClick={handleSaveClick}
-      >
-        <SaveIcon />
-      </Button>
-    </>
+    <MDXEditor
+      ref={editorRef}
+      markdown={noteContent}
+      plugins={myPlugins}
+      className="mdxeditor"
+    />
   );
 }

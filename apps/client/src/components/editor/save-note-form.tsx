@@ -1,102 +1,69 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type SubmitHandler, useForm } from "react-hook-form";
-
-import type { Video } from "@tubenote/types";
-
-import { useNote } from "@/features/note/contexts";
-import { useVideo } from "@/features/video/contexts";
+import { useForm } from "react-hook-form";
 
 import type { NoteTitle } from "@/features/note/types";
 
-// import { getStorageValue } from "@/utils";
-import { Button } from "@/components/ui";
+import { FormInput } from "@/components/global";
+import { Button, Form } from "@/components/ui";
+import { useModal } from "@/context";
 import { saveNoteFormSchema } from "@/lib";
 
 type SaveNoteFormProps = {
-  noteId: string;
-  noteTitle: string;
-  noteContent: string;
-  cancelText: string;
-  action: "update" | "create";
-  closeModal: () => void;
-  video: Video;
+  isLoading: boolean;
+  handleSaveSubmit: (noteTitle: string) => void;
+  noteTitle?: string;
 };
 
 export function SaveNoteForm({
-  noteId,
-  noteTitle: title,
-  noteContent,
-  action,
-  cancelText,
-  closeModal,
-  video,
+  isLoading,
+  handleSaveSubmit,
+  noteTitle = "",
 }: SaveNoteFormProps) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<NoteTitle>({
+  const form = useForm<NoteTitle>({
     resolver: zodResolver(saveNoteFormSchema),
     defaultValues: {
-      noteTitle: title || "",
+      noteTitle,
     },
   });
 
-  const { videoCurrentTime } = useVideo();
+  const { handleSubmit, control, formState } = form;
 
-  const { createNote, isLoading, updateNote } = useNote();
+  const { closeModal } = useModal();
 
-  const handleNoteSave: SubmitHandler<NoteTitle> = (data: NoteTitle) => {
-    if (action === "create") {
-      createNote({
-        videoId: video.id,
-        createNoteData: {
-          title: data.noteTitle,
-          content: noteContent,
-          thumbnail: video.thumbnails.medium.url,
-          videoTitle: video.title,
-          youtubeId: video.youtubeId,
-          timestamp: videoCurrentTime,
-        },
-      });
-    } else {
-      updateNote({
-        noteId,
-        updateData: {
-          title: data.noteTitle,
-          content: noteContent,
-          timestamp: videoCurrentTime,
-        },
-      });
-    }
-  };
+  function handleOnSubmit(data: NoteTitle) {
+    handleSaveSubmit(data.noteTitle);
+    closeModal();
+  }
 
   return (
-    <form
-      onSubmit={handleSubmit(handleNoteSave)}
-      className="mb-1 flex flex-col items-center justify-center gap-4"
-    >
-      <input
-        type="text"
-        placeholder="Enter Note Title"
-        className={`w-full rounded-md border-2 border-gray-300 px-4 py-2 text-sm font-medium ${errors.noteTitle ? "outline-red-600" : ""}`}
-        {...register("noteTitle")}
-      />
+    <Form {...form}>
+      <form
+        onSubmit={handleSubmit(handleOnSubmit)}
+        className="mb-1 flex flex-col items-center justify-center gap-4"
+      >
+        <FormInput
+          name="noteTitle"
+          placeholder="Enter Note Title"
+          label="Note Title"
+          inputStyle={`rounded-md border-2 border-gray-300 px-4 py-2 text-sm font-medium ${formState.errors.noteTitle ? "outline-red-600" : ""}`}
+          control={control}
+        />
 
-      <div className="flex items-center justify-between w-full">
-        <Button variant="outline" onClick={closeModal}>
-          {cancelText}
-        </Button>
-        <button
-          type="submit"
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-md border-2 bg-[#282828] px-4 py-2 text-center text-sm font-medium text-white transition-all hover:border-[#282828] hover:bg-white hover:text-[#282828] focus:ring-[#282828] focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 dark:focus:ring-[#282828]"
-          disabled={isLoading}
-        >
-          {isLoading ? "Saving..." : "Save"}
-        </button>
-      </div>
-    </form>
+        <div className="flex items-center justify-between w-full">
+          <Button variant="outline" onClick={closeModal} type="button">
+            Cancel
+          </Button>
+          <button
+            type="submit"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md border-2 bg-[#282828] px-4 py-2 text-center text-sm font-medium text-white transition-all hover:border-[#282828] hover:bg-white hover:text-[#282828] focus:ring-[#282828] focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 dark:focus:ring-[#282828]"
+            disabled={isLoading}
+          >
+            {isLoading ? "Saving..." : "Save"}
+          </button>
+        </div>
+      </form>
+    </Form>
   );
 }

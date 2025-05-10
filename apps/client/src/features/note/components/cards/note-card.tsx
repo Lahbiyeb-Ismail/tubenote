@@ -17,24 +17,17 @@ import { DeleteNoteButton, EditNoteButton } from "../buttons";
 
 type NoteCardProps = {
   note: Note;
+  onDeleteClick: () => void;
 };
 
-export function NoteCard({ note }: NoteCardProps) {
-  const { deleteNote, isLoading } = useNote();
+export function NoteCard({ note, onDeleteClick }: NoteCardProps) {
   const { isGridLayout } = useLayout();
+  const { isLoading: isDeletingNote } = useNote();
   const { openModal } = useModal();
 
-  const handleDeleteClick = () => {
-    openModal({
-      title: "Confirm Deletion",
-      description:
-        "Are you sure you want to delete this note? This action cannot be undone.",
-      confirmText: "Delete",
-      cancelText: "Cancel",
-      action: "delete",
-      onConfirm: () => deleteNote(note.id),
-      noteId: note.id,
-    });
+  const handleDelete = () => {
+    onDeleteClick();
+    openModal();
   };
 
   return (
@@ -45,14 +38,12 @@ export function NoteCard({ note }: NoteCardProps) {
         isGridLayout={isGridLayout}
       />
       <div
-        className={`flex-grow ${
-          isGridLayout ? "" : "flex flex-col justify-between"
-        }`}
+        className={`flex-grow ${isGridLayout ? "" : "flex flex-col justify-between"}`}
       >
         <div className="flex justify-end p-2">
           <CardSettingsButton
             noteId={note.id}
-            onDelete={handleDeleteClick}
+            onDelete={handleDelete}
             onExport={() => {
               console.log("Export as PDF");
             }}
@@ -65,10 +56,10 @@ export function NoteCard({ note }: NoteCardProps) {
           isGridLayout={isGridLayout}
         />
         <CardFooterWrapper>
-          <EditNoteButton noteId={note.id} isLoading={isLoading} />
+          <EditNoteButton noteId={note.id} isLoading={isDeletingNote} />
           <DeleteNoteButton
-            isLoading={isLoading}
-            onDelete={handleDeleteClick}
+            isLoading={isDeletingNote}
+            onDelete={handleDelete}
           />
         </CardFooterWrapper>
       </div>

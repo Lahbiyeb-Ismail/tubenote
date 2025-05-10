@@ -4,15 +4,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { getVideoData } from "../services";
+import { saveVideoData } from "../services";
 import type { VideoAction } from "../types";
 
-export function useGetVideoData(dispatch: React.Dispatch<VideoAction>) {
+export function useSaveVideoData(dispatch: React.Dispatch<VideoAction>) {
   const queryClient = useQueryClient();
   const router = useRouter();
 
   return useMutation({
-    mutationFn: getVideoData,
+    mutationFn: saveVideoData,
     onMutate: () => {
       toast.loading("Getting Video Data...", { id: "loadingToast" });
     },
@@ -33,7 +33,7 @@ export function useGetVideoData(dispatch: React.Dispatch<VideoAction>) {
         },
       });
 
-      router.push(`/editor/create/${payload.data.youtubeId}`);
+      router.push(`/notes/create/${payload.data.youtubeId}`);
     },
     onError: (error) => {
       toast.dismiss("loadingToast");

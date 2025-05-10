@@ -18,7 +18,7 @@ import { axiosInstance } from "@/lib";
  * @returns A promise that resolves to an API success response containing the video data.
  * @throws An error if the request fails, with a message from the API response or a default error message.
  */
-export async function getVideoData(
+export async function saveVideoData(
   youtubeVideoUrl: string
 ): Promise<IApiSuccessResponse<Video>> {
   const youtubeVideoId = extractVideoId(youtubeVideoUrl);
@@ -92,8 +92,6 @@ export async function getVideoById(
         "An error occurred while fetching the video by ID."
     );
   }
-
-  // setStorageValue("video", response.data.payload.data);
 
   return response.data;
 }

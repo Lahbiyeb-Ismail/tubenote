@@ -8,7 +8,7 @@ import type { Video } from "@tubenote/types";
 import { ResizablePanels } from "@/components/global";
 import { VideoPlayer } from "@/features/video/components";
 
-const AppMDXEditor = dynamic(() => import("./app-mdxeditor"), { ssr: false });
+const AppMDXEditor = dynamic(() => import("./mdx-editor"), { ssr: false });
 
 type EditorPageProps = {
   video: Video;

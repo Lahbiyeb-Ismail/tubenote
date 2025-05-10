@@ -1,27 +1,44 @@
 "use client";
 
-import EditorPage from "@/components/editor/editor-page";
+import { useNote } from "@/features/note/contexts";
 import { useGetNoteById } from "@/features/note/hooks";
+import { useVideo } from "@/features/video/contexts";
+
+import { NotePageLayout } from "@/features/note/components";
 
 function UpdateNotePage({ params }: { params: { noteId: string } }) {
   const { noteId } = params;
-  const { data, isLoading, isError } = useGetNoteById(noteId);
+  const { updateNote, isLoading: isUpdatingNote } = useNote();
+  const { videoCurrentTime } = useVideo();
+  const { data: note, isLoading, isError } = useGetNoteById(noteId);
 
-  if (isLoading || !data) {
-    return <div>Loading...</div>;
-  }
+  const handleUpdateNote = (noteTitle: string, content: string) => {
+    if (!note) return;
+
+    updateNote({
+      noteId: note.id,
+      updateData: {
+        title: noteTitle,
+        content: content,
+        timestamp: videoCurrentTime,
+      },
+    });
+  };
 
   if (isError) {
     return <div>Error...</div>;
   }
 
   return (
-    <EditorPage
-      action="update"
-      initialNoteContent={data.content}
-      noteTitle={data.title}
-      noteId={data.id}
-      video={data.videoId}
+    <NotePageLayout
+      videoId={note?.youtubeId || ""}
+      noteContent={note?.content}
+      noteTitle={note?.title}
+      isLoading={isLoading || !note}
+      isSavingNote={isUpdatingNote}
+      modalTitle="Confirm Update Note"
+      modalDescription="Are you sure you want to update this note?"
+      handleSaveNote={handleUpdateNote}
     />
   );
 }

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useReducer, useState } from "react";
 
-import { useGetVideoData } from "../hooks";
+import { useSaveVideoData } from "../hooks";
 import { videoInitialState, videoReducer } from "../reducers";
 import type { VideoContextType, VideoProviderProps } from "../types";
 
@@ -12,12 +12,11 @@ export function VideoProvider({ children }: VideoProviderProps) {
   const [state, dispatch] = useReducer(videoReducer, videoInitialState);
   const [videoCurrentTime, setVideoCurrentTime] = useState(0);
 
-  const getVideoMutation = useGetVideoData(dispatch);
+  const saveVideoMutationResult = useSaveVideoData(dispatch);
 
   const value = {
     state,
-    saveVideo: getVideoMutation.mutate,
-    isLoading: getVideoMutation.isPending,
+    saveVideoMutationResult,
     setVideoCurrentTime,
     videoCurrentTime,
   };

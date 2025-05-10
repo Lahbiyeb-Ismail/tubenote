@@ -1,20 +1,15 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 import type { VideoUrl } from "@/features/note/types";
-// import { useNote } from "@/features/note/contexts";
-// import { useVideo } from "@/features/video/contexts";
-import { extractVideoId } from "@/helpers";
 import { videoFormSchema } from "@/lib/schemas";
 
 import { Form, FormControl, FormField, FormItem, Input } from "@/components/ui";
+import { useVideo } from "@/features/video/contexts";
 
 export function AddNoteForm() {
-  const router = useRouter();
-
   const form = useForm<VideoUrl>({
     resolver: zodResolver(videoFormSchema),
     defaultValues: {
@@ -22,13 +17,12 @@ export function AddNoteForm() {
     },
   });
 
-  // const { isLoading, saveVideo } = useVideo();
-  // const { clearNoteState } = useNote();
+  const { saveVideoMutationResult } = useVideo();
+
+  const { mutate: saveVideo, isPending } = saveVideoMutationResult;
 
   const handleAddNote = async (formData: VideoUrl) => {
-    const videoId = extractVideoId(formData.videoUrl);
-
-    router.push(`/notes/add/${videoId}`);
+    saveVideo(formData.videoUrl);
   };
 
   return (
@@ -68,7 +62,7 @@ export function AddNoteForm() {
           <button
             className="flex-shrink-0 rounded border-4 border-[#171215] bg-[#171215] px-2 py-1 text-sm text-white hover:border-[#2c2326] hover:bg-[#2c2326]"
             type="submit"
-            disabled={form.formState.isSubmitting}
+            disabled={isPending}
           >
             Add New Note
           </button>

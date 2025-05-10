@@ -6,8 +6,6 @@ import "./globals.css";
 
 import { ReactQueryProvider } from "@/providers";
 
-import { ConfirmationModal } from "@/components/global";
-
 import { LayoutProvider, ModalProvider } from "@/context";
 
 import { AuthProvider } from "@/features/auth/contexts";
@@ -50,7 +48,6 @@ export default function RootLayout({
                     <NoteProvider>
                       <Toaster />
                       {children}
-                      <ConfirmationModal />
                     </NoteProvider>
                   </VideoProvider>
                 </UserProvider>

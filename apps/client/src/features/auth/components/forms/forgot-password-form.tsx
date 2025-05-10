@@ -9,8 +9,8 @@ import { emailBodySchema } from "@tubenote/schemas";
 
 import { Button, Form } from "@/components/ui";
 
+import { FormInput } from "@/components/global";
 import { useAuth } from "../../contexts";
-import { FormInput } from "../inputs";
 
 export function ForgotPasswordForm() {
   const form = useForm<IEmailBodyDto>({

@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import type React from "react";
+import type { Dispatch } from "react";
 import toast from "react-hot-toast";
 
 import { useModal } from "@/context";
@@ -10,9 +10,10 @@ import { useModal } from "@/context";
 import { updateNote } from "../services";
 import type { NoteAction } from "../types";
 
-export function useUpdateNote(dispatch: React.Dispatch<NoteAction>) {
+export function useUpdateNote(dispatch: Dispatch<NoteAction>) {
   const queryClient = useQueryClient();
   const router = useRouter();
+
   const { closeModal } = useModal();
 
   return useMutation({
@@ -22,11 +23,18 @@ export function useUpdateNote(dispatch: React.Dispatch<NoteAction>) {
     },
     onSuccess: (response) => {
       const { payload } = response;
+      const noteId = payload.data.id;
 
       toast.dismiss("loadingToast");
-
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
       toast.success(payload.message);
+
+      queryClient.invalidateQueries({
+        queryKey: ["note", noteId],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["notes"],
+      });
 
       dispatch({
         type: "UPDATE_NOTE_SUCCESS",
@@ -35,7 +43,7 @@ export function useUpdateNote(dispatch: React.Dispatch<NoteAction>) {
 
       closeModal();
 
-      router.push("/notes");
+      router.push(`/notes/${noteId}`);
     },
     onError: (error) => {
       toast.dismiss("loadingToast");

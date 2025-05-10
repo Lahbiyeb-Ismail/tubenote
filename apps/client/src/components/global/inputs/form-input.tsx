@@ -13,20 +13,22 @@ import {
 
 type FormInputProps<T extends FieldValues> = {
   name: FieldPath<T>;
-  type?: string;
   placeholder: string;
   label: string;
   control: Control<T>;
-  icon: LucideIcon;
+  type?: string;
+  icon?: LucideIcon;
+  inputStyle?: string;
 };
 
 export function FormInput<T extends FieldValues>({
   name,
   label,
   placeholder,
-  type = "text",
-  icon: Icon,
   control,
+  icon: Icon,
+  inputStyle,
+  type = "text",
 }: FormInputProps<T>) {
   const [showPassword, setShowPassword] = React.useState(false);
 
@@ -36,7 +38,7 @@ export function FormInput<T extends FieldValues>({
       name={name}
       control={control}
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="w-full">
           <FormLabel>{label}</FormLabel>
           <FormControl>
             <div className="relative">
@@ -51,6 +53,7 @@ export function FormInput<T extends FieldValues>({
                     : type
                 }
                 placeholder={placeholder}
+                className={inputStyle}
               />
               {type === "password" ? (
                 <button
@@ -65,7 +68,9 @@ export function FormInput<T extends FieldValues>({
                   )}
                 </button>
               ) : (
-                <Icon className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                !!Icon && (
+                  <Icon className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                )
               )}
             </div>
           </FormControl>

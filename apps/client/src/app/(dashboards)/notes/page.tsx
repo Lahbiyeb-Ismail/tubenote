@@ -1,27 +1,29 @@
 "use client";
 
 import { useGetUserNotes } from "@/features/note/hooks";
-import { usePagination } from "@/hooks";
+import { usePaginationQuery, useSortByQueries } from "@/hooks";
 
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils";
 
+import { AddNoteForm, Header, NoDataFound } from "@/components/dashboards";
+import { Loader, PaginationComponent } from "@/components/global";
 import { NotesList } from "@/features/note/components";
 
-import AddNoteForm from "@/components/dashboards/add-note-form";
-import Header from "@/components/dashboards/header";
-import NoDataFound from "@/components/dashboards/no-data-found";
-import Laoder from "@/components/global/loader";
-import PaginationComponent from "@/components/global/pagination";
-
 function NotesPage() {
-  const { currentPage, setPage } = usePagination({ defaultPage: DEFAULT_PAGE });
+  const { currentPage, setPage } = usePaginationQuery({
+    defaultPage: DEFAULT_PAGE,
+  });
+
+  const { order, sortBy } = useSortByQueries({});
 
   const { data, isLoading } = useGetUserNotes({
     page: currentPage,
     limit: PAGE_LIMIT,
+    sortBy,
+    order,
   });
 
-  if (isLoading) return <Laoder />;
+  if (isLoading) return <Loader />;
 
   if (!data || !data.notes || !data.paginationMeta)
     return <NoDataFound title="You don't have any notes yet." />;

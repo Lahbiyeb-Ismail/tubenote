@@ -9,7 +9,7 @@ interface UsePaginationProps {
   defaultPage?: number;
 }
 
-export function usePagination({
+export function usePaginationQuery({
   defaultPage = DEFAULT_PAGE,
 }: UsePaginationProps) {
   const router = useRouter();

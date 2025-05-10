@@ -6,7 +6,7 @@ import { getNoteById } from "../services";
 
 export function useGetNoteById(noteId: string) {
   return useQuery({
-    queryKey: [noteId],
+    queryKey: ["note", noteId],
     queryFn: () => getNoteById(noteId),
     select: (data) => data.payload.data,
     enabled: !!noteId,

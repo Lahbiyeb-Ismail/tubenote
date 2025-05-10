@@ -41,7 +41,7 @@ export function useCreateNote(dispatch: React.Dispatch<NoteAction>) {
 
       closeModal();
 
-      router.push("/notes");
+      router.push(`/notes/${payload.data.id}`);
     },
     onError: (error) => {
       // Dismiss loading toast

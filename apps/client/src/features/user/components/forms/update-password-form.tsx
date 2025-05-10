@@ -9,7 +9,7 @@ import { updatePasswordSchema } from "@tubenote/schemas";
 
 import { Button, Form } from "@/components/ui";
 
-import { FormInput } from "@/features/auth/components";
+import { FormInput } from "@/components/global";
 
 import { useUpdatePassword } from "../../hooks";
 

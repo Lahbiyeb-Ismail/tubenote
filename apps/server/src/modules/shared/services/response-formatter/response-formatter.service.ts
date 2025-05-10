@@ -35,6 +35,7 @@ export class ResponseFormatter implements IResponseFormatter {
    */
   private readonly _defaultSanitizationRules: ISanitizationRule[] = [
     { fieldPattern: /password/i },
+    { fieldPattern: /userIds/i },
     // { fieldPattern: /token|api[_-]?key|secret/i },
     { fieldPattern: /credit[_-]?card|card[_-]?number/i },
     { fieldPattern: /ssn|social[_-]?security/i },

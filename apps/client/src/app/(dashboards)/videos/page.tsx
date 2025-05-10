@@ -1,9 +1,9 @@
 "use client";
 
-import { DEFAULT_PAGE } from "@/utils/constants";
+import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
 
 import { useGetUserVideos } from "@/features/video/hooks";
-import { usePagination } from "@/hooks";
+import { usePaginationQuery, useSortByQueries } from "@/hooks";
 
 import { Loader, PaginationComponent } from "@/components/global";
 
@@ -12,16 +12,21 @@ import { AddNoteForm, Header, NoDataFound } from "@/components/dashboards";
 import { VideosList } from "@/features/video/components";
 
 function VideosPage() {
-  const { currentPage, setPage } = usePagination({ defaultPage: DEFAULT_PAGE });
+  const { currentPage, setPage } = usePaginationQuery({
+    defaultPage: DEFAULT_PAGE,
+  });
+
+  const { order, sortBy } = useSortByQueries({});
+
   const {
     data: response,
     isLoading,
     isError,
-  } = useGetUserVideos({ page: currentPage });
-
-  if (isError) return <div>Something went wrong</div>;
+  } = useGetUserVideos({ page: currentPage, limit: PAGE_LIMIT, sortBy, order });
 
   if (isLoading) return <Loader />;
+
+  if (isError) return <div>Something went wrong</div>;
 
   if (!response || !response.data || !response.paginationMeta) {
     return <NoDataFound title="You don't have any videos yet." />;

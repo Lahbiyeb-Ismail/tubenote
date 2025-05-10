@@ -226,6 +226,36 @@ export async function getRecentlyUpdatedNotes(): Promise<
   return response.data;
 }
 
+/**
+ * Fetches notes associated with a specific video ID.
+ *
+ * @param videoId - The unique identifier of the video for which notes are to be retrieved.
+ * @returns A promise that resolves to an API success response containing an array of notes.
+ * @throws An error if the request fails, including a specific error message if available.
+ */
+export async function getNotesByVideoId(
+  videoId: string,
+  paginationQuery: IPaginationQueryDto
+): Promise<IApiSuccessResponse<Note[]>> {
+  const { data: response, error } = await asyncTryCatch(
+    axiosInstance.get<IApiSuccessResponse<Note[]>>(`/notes/video/${videoId}`, {
+      params: paginationQuery,
+    })
+  );
+
+  if (error) {
+    const axiosError = error as AxiosError<IApiErrorResponse>;
+
+    if (axiosError.response) {
+      throw new Error(axiosError.response.data.payload.message);
+    }
+
+    throw new Error("Failed to fetch notes for video.");
+  }
+
+  return response.data;
+}
+
 // export async function exportNoteAsPDF(noteId: string): Promise<Blob> {
 //   const { data: response, error } = await asyncTryCatch(
 //     axiosInstance.post<Blob>(

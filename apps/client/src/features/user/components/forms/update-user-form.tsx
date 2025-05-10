@@ -9,8 +9,8 @@ import { updateUserSchema } from "@tubenote/schemas";
 
 import { useAuth } from "@/features/auth/contexts";
 
+import { FormInput } from "@/components/global";
 import { Button, Form } from "@/components/ui";
-import { FormInput } from "@/features/auth/components";
 
 import { useUser } from "../../contexts";
 
