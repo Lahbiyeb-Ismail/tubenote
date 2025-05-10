@@ -1,28 +1,31 @@
 "use client";
 
-import usePagination from "@/hooks/global/usePagination";
-import useGetUserNotes from "@/hooks/note/useGetUserNotes";
+import { useGetUserNotes } from "@/features/note/hooks";
+import { usePaginationQuery, useSortByQueries } from "@/hooks";
 
-import AddNoteForm from "@/components/dashboards/AddNoteForm";
-import Header from "@/components/dashboards/Header";
-import NoDataFound from "@/components/dashboards/NoDataFound";
-import Laoder from "@/components/global/Loader";
-import PaginationComponent from "@/components/global/Pagination";
-import NotesList from "@/components/note/NotesList";
+import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils";
 
-import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
+import { AddNoteForm, Header, NoDataFound } from "@/components/dashboards";
+import { Loader, PaginationComponent } from "@/components/global";
+import { NotesList } from "@/features/note/components";
 
 function NotesPage() {
-  const { currentPage, setPage } = usePagination({ defaultPage: DEFAULT_PAGE });
+  const { currentPage, setPage } = usePaginationQuery({
+    defaultPage: DEFAULT_PAGE,
+  });
+
+  const { order, sortBy } = useSortByQueries({});
 
   const { data, isLoading } = useGetUserNotes({
     page: currentPage,
     limit: PAGE_LIMIT,
+    sortBy,
+    order,
   });
 
-  if (isLoading) return <Laoder />;
+  if (isLoading) return <Loader />;
 
-  if (!data || data.notes.length === 0)
+  if (!data || !data.notes || !data.paginationMeta)
     return <NoDataFound title="You don't have any notes yet." />;
 
   return (
@@ -35,7 +38,7 @@ function NotesPage() {
         <NotesList notes={data.notes} />
         <PaginationComponent
           currentPage={currentPage}
-          totalPages={data.pagination.totalPages}
+          totalPages={data.paginationMeta.totalPages}
           onPageChange={setPage}
         />
       </main>

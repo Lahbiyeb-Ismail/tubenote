@@ -1,34 +1,27 @@
 import type { Response } from "express";
-import httpStatus from "http-status";
+import { inject, injectable } from "inversify";
 
-import type { EmptyRecord, TypedRequest } from "../../types";
+import type { IPaginationQueryDto, IParamIdDto } from "@tubenote/dtos";
+import type { Video } from "@tubenote/types";
 
-import { IVideoService } from "./video.service";
+import { TYPES } from "@/config/inversify/types";
 
-import type { FindManyDto } from "../../common/dtos/find-many.dto";
-import type { IdParamDto } from "../../common/dtos/id-param.dto";
-import type { QueryPaginationDto } from "../../common/dtos/query-pagination.dto";
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
-export interface IVideoController {
-  getUserVideos(
-    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
-    res: Response
-  ): Promise<void>;
-  getVideoByIdOrCreate(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
-    res: Response
-  ): Promise<void>;
-}
+import type { IResponseFormatter } from "@/modules/shared/services";
+
+import type { IVideoController, IVideoService } from "./video.types";
 
 /**
  * Controller for handling video-related operations.
  */
+@injectable()
 export class VideoController implements IVideoController {
-  private videoService: IVideoService;
-
-  constructor(videoService: IVideoService) {
-    this.videoService = videoService;
-  }
+  constructor(
+    @inject(TYPES.VideoService) private _videoService: IVideoService,
+    @inject(TYPES.ResponseFormatter)
+    private _responseFormatter: IResponseFormatter
+  ) {}
 
   /**
    * Retrieves a paginated list of videos for a specific user.
@@ -39,36 +32,30 @@ export class VideoController implements IVideoController {
    * @returns A JSON response with the list of videos and pagination details.
    */
   async getUserVideos(
-    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
     res: Response
   ) {
     const userId = req.userId;
 
-    const page = Number(req.query.page);
-    const limit = Number(req.query.limit);
+    const findManyDto = this._responseFormatter.getPaginationQueries({
+      reqQuery: req.query,
+      itemsPerPage: 8,
+    });
 
-    const skip = (page - 1) * limit;
-
-    const findManyDto: FindManyDto = {
+    const paginatedData = await this._videoService.getUserVideos(
       userId,
-      limit,
-      skip,
-      sort: { by: "createdAt", order: "desc" },
-    };
+      findManyDto
+    );
 
-    const { totalPages, videos, videosCount } =
-      await this.videoService.getUserVideos(findManyDto);
-
-    res.status(httpStatus.OK).json({
-      videos,
-      pagination: {
-        totalPages,
-        currentPage: page,
-        totalVideos: videosCount,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1,
+    const formattedResponse = this._responseFormatter.formatPaginatedResponse({
+      page: req.query.page || 1,
+      paginatedData,
+      responseOptions: {
+        message: "Videos retrieved successfully.",
       },
     });
+
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
@@ -79,18 +66,50 @@ export class VideoController implements IVideoController {
    *
    * @returns A JSON response with the video details.
    */
-  async getVideoByIdOrCreate(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
+  async saveVideoData(
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ) {
-    const { id } = req.params;
+    const videoYoutubeId = req.params.id;
     const userId = req.userId;
 
-    const video = await this.videoService.findVideoOrCreate({
-      userId,
-      youtubeVideoId: id,
-    });
+    const video = await this._videoService.saveVideo(userId, videoYoutubeId);
 
-    res.status(httpStatus.OK).json(video);
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<Video>({
+        responseOptions: {
+          data: video,
+          message: "Video retrieved successfully.",
+        },
+      });
+
+    res.status(formattedResponse.statusCode).json(formattedResponse);
+  }
+
+  /**
+   * Retrieves a specific video by its ID for a specific user.
+   *
+   * @param req - The request object containing user ID and video ID parameters.
+   * @param res - The response object to send the result.
+   *
+   * @returns A JSON response with the video details.
+   */
+  async getVideoByYoutubeId(
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
+    res: Response
+  ) {
+    const videoYoutubeId = req.params.id;
+
+    const video = await this._videoService.getVideoByYoutubeId(videoYoutubeId);
+
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<Video | null>({
+        responseOptions: {
+          data: video,
+          message: "Video retrieved successfully.",
+        },
+      });
+
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 }

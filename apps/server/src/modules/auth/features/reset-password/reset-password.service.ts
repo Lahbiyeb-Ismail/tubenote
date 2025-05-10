@@ -1,0 +1,83 @@
+import { inject, injectable } from "inversify";
+
+import { TYPES } from "@/config/inversify/types";
+
+import type { IUserService } from "@/modules/user";
+
+import { BadRequestError, ForbiddenError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type {
+  ICacheService,
+  ICryptoService,
+  ILoggerService,
+  IMailSenderService,
+} from "@/modules/shared/services";
+
+import type { IResetPasswordService } from "./reset-password.types";
+
+@injectable()
+export class ResetPasswordService implements IResetPasswordService {
+  constructor(
+    @inject(TYPES.UserService) private _userService: IUserService,
+    @inject(TYPES.CryptoService) private _cryptoService: ICryptoService,
+    @inject(TYPES.CacheService) private _cacheService: ICacheService,
+    @inject(TYPES.MailSenderService)
+    private _mailSenderService: IMailSenderService,
+    @inject(TYPES.LoggerService) private _loggerService: ILoggerService
+  ) {}
+
+  async sendResetToken(email: string): Promise<void> {
+    const user = await this._userService.getUserByEmail(email);
+    if (!user) {
+      this._loggerService.error(`User not found with email: ${email}`);
+      throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
+    }
+
+    if (!user.isEmailVerified) {
+      throw new ForbiddenError(ERROR_MESSAGES.NOT_VERIFIED);
+    }
+
+    const resetToken = this._cryptoService.generateSecureToken();
+
+    const setResult = this._cacheService.set<{ userId: string }>(resetToken, {
+      userId: user.id,
+    });
+
+    this._loggerService.info(
+      `Reset token generated for user ${user.id} and set in cache: ${setResult}`
+    );
+
+    await this._mailSenderService.sendResetPasswordEmail(
+      user.email,
+      resetToken
+    );
+  }
+
+  async resetPassword(token: string, password: string): Promise<void> {
+    const userId = await this.verifyResetToken(token);
+
+    const deleteResult = this._cacheService.del(token);
+    this._loggerService.warn(
+      `Remove reset token ${token} from cache: ${deleteResult}`
+    );
+
+    await this._userService.resetUserPassword(userId, password);
+
+    this._loggerService.info(`Password reset for user ${userId}`);
+  }
+
+  async verifyResetToken(token: string): Promise<string> {
+    const tokenData = this._cacheService.get<{ userId: string }>(token);
+
+    if (
+      !tokenData ||
+      !tokenData.userId ||
+      typeof tokenData.userId !== "string"
+    ) {
+      this._loggerService.error(`Invalid reset token: ${token}`);
+      throw new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);
+    }
+
+    return tokenData.userId;
+  }
+}

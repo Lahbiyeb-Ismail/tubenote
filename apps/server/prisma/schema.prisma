@@ -5,8 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["omitApi"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -19,46 +18,81 @@ model User {
   username        String
   email           String   @unique
   password        String
-  profilePicture  String   @default("")
-  googleId        String   @default("")
+  profilePicture  String?
   isEmailVerified Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   notes                   Note[]
+  accounts                Account[]
   refreshTokens           RefreshToken[]
   emailVerificationTokens EmailVerificationToken[]
-  resetPasswordTokens     ResetPasswordToken[]
 
   videoIds String[] @db.ObjectId
   videos   Video[]  @relation(fields: [videoIds], references: [id])
 }
 
+enum AccountType {
+  oauth
+  email
+}
+
+enum Providers {
+  google
+  credentials
+}
+
+model Account {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String   @unique @db.ObjectId
+  providerAccountId String   @unique // The account ID from the provider
+  // refreshToken      String? // OAuth refresh token
+  // accessToken       String? // OAuth access token
+  // expiresAt         Int? // OAuth token expiry date
+  // tokenType         String? // OAuth token type
+  // scope             String? // OAuth scopes
+  // idToken           String? // OAuth ID token
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  type     AccountType // 'oauth', 'email', etc.
+  provider Providers // 'google', 'github', 'credentials', etc.
+
+  // Relation to user
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Unique constraint for one account per provider per user
+  @@unique([provider, providerAccountId])
+}
+
 model RefreshToken {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  token     String   @unique
-  userId    String   @db.ObjectId
-  createdAt DateTime @default(now())
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  token            String    @unique
+  userId           String    @db.ObjectId
+  clientType       String    @default("web") // e.g., "web", "mobile-android"
+  deviceId         String
+  ipAddress        String
+  userAgent        String? // Browser/device
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  expiresAt        DateTime
+  lastUsedAt       DateTime?
+  isRevoked        Boolean   @default(false)
+  revokedAt        DateTime?
+  revocationReason String? // Audit logging
 
   user User @relation(fields: [userId], references: [id])
+
+  // Indexes for performance
+  @@index([userId, isRevoked, expiresAt, createdAt])
 }
 
 model EmailVerificationToken {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   token     String   @unique
   userId    String   @db.ObjectId
-  expiresAt DateTime
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id])
-}
-
-model ResetPasswordToken {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  token     String   @unique
-  userId    String   @db.ObjectId
   expiresAt DateTime
-  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
 }
@@ -76,33 +110,26 @@ model Note {
   userId     String   @db.ObjectId
   videoId    String   @db.ObjectId
 
-  user  User?  @relation(fields: [userId], references: [id])
-  video Video? @relation(fields: [videoId], references: [id])
+  video Video @relation(fields: [videoId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
 }
 
 model Video {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  youtubeId String @unique
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  youtubeId       String   @unique
+  title           String
+  description     String
+  channelTitle    String
+  embedHtmlPlayer String
+  tags            String[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  snippet    Snippet
-  statistics Statistics
-  player     Player
+  thumbnails Thumbnails
   notes      Note[]
 
   userIds String[] @db.ObjectId
   users   User[]   @relation(fields: [userIds], references: [id])
-}
-
-type Snippet {
-  publishedAt          String
-  channelId            String
-  title                String
-  description          String
-  channelTitle         String
-  categoryId           String
-  liveBroadcastContent String
-  tags                 String[]   @default([])
-  thumbnails           Thumbnails
 }
 
 type Thumbnails {
@@ -117,15 +144,4 @@ type ThumbnailSize {
   url    String
   width  Int
   height Int
-}
-
-type Statistics {
-  viewCount     String
-  likeCount     String
-  favoriteCount String
-  commentCount  String
-}
-
-type Player {
-  embedHtml String
 }

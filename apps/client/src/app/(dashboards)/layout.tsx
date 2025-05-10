@@ -1,8 +1,9 @@
 "use client";
 
-import withAuth from "@/HOC/withAuth";
-import Sidebar from "@/components/dashboards/Sidebar";
-import { useLayout } from "@/context/useLayout";
+import { withAuth } from "@/HOC";
+import { useLayout } from "@/context";
+
+import { Sidebar } from "@/components/dashboards";
 
 type LayoutProps = {
   children: React.ReactNode;

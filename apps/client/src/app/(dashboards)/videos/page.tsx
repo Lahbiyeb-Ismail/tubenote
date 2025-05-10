@@ -1,42 +1,48 @@
 "use client";
 
-import { DEFAULT_PAGE } from "@/utils/constants";
+import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
 
-import usePagination from "@/hooks/global/usePagination";
-import useGetUserVideos from "@/hooks/video/useGetUserVideos";
+import { useGetUserVideos } from "@/features/video/hooks";
+import { usePaginationQuery, useSortByQueries } from "@/hooks";
 
-import Loader from "@/components/global/Loader";
-import PaginationComponent from "@/components/global/Pagination";
+import { Loader, PaginationComponent } from "@/components/global";
 
-import AddNoteForm from "@/components/dashboards/AddNoteForm";
-import Header from "@/components/dashboards/Header";
-import NoDataFound from "@/components/dashboards/NoDataFound";
+import { AddNoteForm, Header, NoDataFound } from "@/components/dashboards";
 
-import VideosList from "@/components/video/VideosList";
+import { VideosList } from "@/features/video/components";
 
 function VideosPage() {
-  const { currentPage, setPage } = usePagination({ defaultPage: DEFAULT_PAGE });
-  const { data, isLoading, isError } = useGetUserVideos({ page: currentPage });
+  const { currentPage, setPage } = usePaginationQuery({
+    defaultPage: DEFAULT_PAGE,
+  });
 
-  if (isError) return <div>Something went wrong</div>;
+  const { order, sortBy } = useSortByQueries({});
+
+  const {
+    data: response,
+    isLoading,
+    isError,
+  } = useGetUserVideos({ page: currentPage, limit: PAGE_LIMIT, sortBy, order });
 
   if (isLoading) return <Loader />;
 
-  if (!data || !data.videos) {
+  if (isError) return <div>Something went wrong</div>;
+
+  if (!response || !response.data || !response.paginationMeta) {
     return <NoDataFound title="You don't have any videos yet." />;
   }
 
   return (
     <div className="min-h-screen flex-1 bg-gray-100">
-      <Header title="Your Video" />
+      <Header title="Your Videos" />
       <main className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
         <div className="flex justify-end">
           <AddNoteForm />
         </div>
-        <VideosList videos={data.videos} />
+        <VideosList videos={response.data} />
         <PaginationComponent
           currentPage={currentPage}
-          totalPages={data.pagination.totalPages}
+          totalPages={response.paginationMeta.totalPages}
           onPageChange={setPage}
         />
       </main>

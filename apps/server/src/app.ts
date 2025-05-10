@@ -1,4 +1,6 @@
 import "express-async-errors";
+// Import reflect-metadata at the top to enable decorators
+import "reflect-metadata";
 
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -8,18 +10,24 @@ import express, {
   type Request,
   type Response,
 } from "express";
+import session from "express-session";
 import helmet from "helmet";
-import passport from "./lib/passportAuth";
+import passport from "passport";
+import requestIp from "request-ip";
 
-import authRoutes from "./modules/auth/auth.route";
-import noteRoutes from "./modules/note/note.route";
-import resetPasswordRoutes from "./modules/resetPasswordToken/reset-password.route";
-import userRoutes from "./modules/user/user.route";
-import verifyEmailRoutes from "./modules/verifyEmailToken/verify-email.route";
-import videoRoutes from "./modules/video/video.route";
+// Import from our service provider which uses the DI container
+import "@/config/service-provider";
 
-import { errorHandler, notFoundRoute } from "./middlewares/errorsMiddleware";
-import logger from "./utils/logger";
+import { authRoutes, oauthRoutes } from "@/modules/auth";
+import { noteRoutes } from "@/modules/note";
+import { userRoutes } from "@/modules/user";
+import { videoRoutes } from "@/modules/video";
+
+import { errorHandler, notFoundRoute } from "@/middlewares";
+
+import { envConfig } from "@/modules/shared/config";
+import { loggerService } from "@/modules/shared/services";
+import { clientContextMiddleware } from "./middlewares/client-context.middleware";
 
 const app: Express = express();
 
@@ -28,8 +36,7 @@ app.use(helmet());
 app.use(express.json());
 
 app.use(cookieParser());
-
-app.use(passport.initialize());
+app.use(requestIp.mw());
 
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true }));
@@ -42,9 +49,35 @@ app.use(
   })
 );
 
+// Add session middleware
+app.use(
+  session({
+    secret: envConfig.server.session_secret,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: envConfig.node_env === "production" },
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Serialize user into the session
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+// Deserialize user from the session
+passport.deserializeUser((user, done) => {
+  // @ts-ignore
+  done(null, user);
+});
+
+app.use(clientContextMiddleware);
+
 // Middleware to log HTTP requests
 app.use((req: Request, _res: Response, next: NextFunction) => {
-  logger.http(`${req.method} ${req.url}`);
+  loggerService.http(`${req.method} ${req.url}`);
   next();
 });
 
@@ -53,11 +86,10 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/oauth", oauthRoutes);
 app.use("/api/v1/videos", videoRoutes);
 app.use("/api/v1/notes", noteRoutes);
 app.use("/api/v1/users", userRoutes);
-app.use("/api/v1", verifyEmailRoutes);
-app.use("/api/v1", resetPasswordRoutes);
 
 // ?: Global Error middleware
 app.use(notFoundRoute);

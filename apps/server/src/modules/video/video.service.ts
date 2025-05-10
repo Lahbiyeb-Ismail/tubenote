@@ -1,33 +1,56 @@
-import { YOUTUBE_API_KEY, YOUTUBE_API_URL } from "../../constants";
-import { ERROR_MESSAGES } from "../../constants/errorMessages";
+import type { Prisma } from "@prisma/client";
+import { inject, injectable } from "inversify";
 
-import { BadRequestError, NotFoundError } from "../../errors";
+import type { IFindManyDto } from "@tubenote/dtos";
+import type { IPaginatedData, Video, YoutubeVideoData } from "@tubenote/types";
 
-import { IVideoDatabase } from "./video.db";
+import { TYPES } from "@/config/inversify/types";
 
-import type { VideoDto, YoutubeVideoData } from "./dtos/video.dto";
-import type { UserVideos } from "./video.type";
+import {
+  ERROR_MESSAGES,
+  YOUTUBE_API_KEY,
+  YOUTUBE_API_URL,
+} from "@/modules/shared/constants";
 
-import type { FindManyDto } from "../../common/dtos/find-many.dto";
-import type { FindVideoDto } from "./dtos/find-video.dto";
+import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
 
-export interface IVideoService {
-  fetchYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData>;
-  findVideoByYoutubeId(youtubeId: string): Promise<VideoDto | null>;
-  createVideo(userId: string, youtubeVideoId: string): Promise<VideoDto>;
-  linkVideoToUser(video: VideoDto, userId: string): Promise<VideoDto>;
-  getUserVideos(findManyDto: FindManyDto): Promise<UserVideos>;
-  findVideoOrCreate(findVideoDto: FindVideoDto): Promise<VideoDto>;
-}
+import type { IPrismaService } from "@/modules/shared/services";
 
+import type { IVideoRepository, IVideoService } from "./video.types";
+
+@injectable()
 export class VideoService implements IVideoService {
-  private videoDB: IVideoDatabase;
+  constructor(
+    @inject(TYPES.VideoRepository) private _videoRepository: IVideoRepository,
+    @inject(TYPES.PrismaService) private _prismaService: IPrismaService
+  ) {}
 
-  constructor(videoDB: IVideoDatabase) {
-    this.videoDB = videoDB;
+  private async _findVideoByYoutubeId(
+    youtubeId: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<Video | null> {
+    return this._videoRepository.findByYoutubeId(youtubeId, tx);
   }
 
-  async fetchYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData> {
+  private async _createVideo(
+    tx: Prisma.TransactionClient,
+    userId: string,
+    youtubeVideoId: string
+  ): Promise<Video> {
+    const videoData = await this.getYoutubeVideoData(youtubeVideoId);
+
+    return this._videoRepository.create(userId, videoData, tx);
+  }
+
+  private async _linkVideoToUser(
+    tx: Prisma.TransactionClient,
+    video: Video,
+    userId: string
+  ): Promise<Video> {
+    return this._videoRepository.connectVideoToUser(video.id, userId, tx);
+  }
+
+  async getYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData> {
     const response = await fetch(
       `${YOUTUBE_API_URL}/videos?id=${youtubeId}&key=${YOUTUBE_API_KEY}&part=snippet,statistics,player`
     );
@@ -38,66 +61,71 @@ export class VideoService implements IVideoService {
 
     const data = await response.json();
 
-    if (!data.items.length) {
+    if (!data?.items?.length) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
-    return data.items[0];
+    const { title, description, channelTitle, thumbnails, tags } =
+      data.items[0].snippet;
+
+    const { embedHtml: embedHtmlPlayer } = data.items[0].player;
+
+    return {
+      youtubeId: data.items[0].id,
+      title,
+      description,
+      channelTitle,
+      embedHtmlPlayer,
+      tags,
+      thumbnails,
+    };
   }
 
-  async findVideoByYoutubeId(youtubeId: string): Promise<VideoDto | null> {
-    const video = await this.videoDB.findByYoutubeId(youtubeId);
+  async getUserVideos(
+    userId: string,
+    findManyDto: IFindManyDto
+  ): Promise<IPaginatedData<Video>> {
+    return this._prismaService.transaction(async (tx) => {
+      const data = await this._videoRepository.findMany(
+        userId,
+        findManyDto,
+        tx
+      );
 
-    return video;
-  }
+      const totalItems = await this._videoRepository.count(userId, tx);
 
-  async createVideo(userId: string, youtubeVideoId: string): Promise<VideoDto> {
-    const videoData = await this.fetchYoutubeVideoData(youtubeVideoId);
-
-    const newVideo = await this.videoDB.create({
-      userId,
-      youtubeVideoId,
-      videoData,
+      const totalPages = Math.ceil(totalItems / findManyDto.limit);
+      return { data, totalItems, totalPages };
     });
-
-    return newVideo;
   }
 
-  async linkVideoToUser(video: VideoDto, userId: string): Promise<VideoDto> {
-    const updatedVideo = await this.videoDB.connectVideoToUser(
-      video.id,
-      userId
-    );
-
-    return updatedVideo;
-  }
-
-  async getUserVideos(findManyDto: FindManyDto): Promise<UserVideos> {
-    const [videos, videosCount] = await Promise.all([
-      this.videoDB.findMany(findManyDto),
-      this.videoDB.count(findManyDto.userId),
-    ]);
-
-    const totalPages = Math.ceil(videosCount / findManyDto.limit);
-
-    return { videos, videosCount, totalPages };
-  }
-
-  async findVideoOrCreate(findVideoDto: FindVideoDto): Promise<VideoDto> {
-    const { userId, youtubeVideoId } = findVideoDto;
-
-    if (!youtubeVideoId || !userId) {
+  async saveVideo(userId: string, videoYoutubeId: string): Promise<Video> {
+    if (!videoYoutubeId || !userId) {
       throw new BadRequestError(ERROR_MESSAGES.BAD_REQUEST);
     }
 
-    const video = await this.findVideoByYoutubeId(youtubeVideoId);
+    return this._prismaService.transaction(async (tx) => {
+      const existingVideo = await this._findVideoByYoutubeId(
+        videoYoutubeId,
+        tx
+      );
 
-    if (!video) {
-      return await this.createVideo(userId, youtubeVideoId);
-    }
+      if (!existingVideo) {
+        // If video doesn't exist, create it.
+        return this._createVideo(tx, userId, videoYoutubeId);
+      }
 
-    if (video && video.userIds && video.userIds.includes(userId)) return video;
+      if (existingVideo.userIds?.includes(userId)) {
+        // If video is already linked to the user, return it.
+        return existingVideo;
+      }
 
-    return await this.linkVideoToUser(video, userId);
+      // Otherwise, link the existing video to the user.
+      return this._linkVideoToUser(tx, existingVideo, userId);
+    });
+  }
+
+  async getVideoByYoutubeId(videoYoutubeId: string): Promise<Video | null> {
+    return this._findVideoByYoutubeId(videoYoutubeId);
   }
 }

@@ -7,8 +7,32 @@
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
-    "typeRoots": ["./node_modules/@types", "./node_modules/.prisma/client"]
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "typeRoots": ["./node_modules/@types", "./node_modules/.prisma/client"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@/config/*": ["src/config/*"],
+      "@/middlewares/*": ["src/middlewares/*"],
+      "@/modules/auth/*": ["src/modules/auth/*"],
+      "@/modules/note/*": ["src/modules/note/*"],
+      "@/modules/user/*": ["src/modules/user/*"],
+      "@/modules/video/*": ["src/modules/video/*"],
+      "@/modules/shared/api-errors/*": ["src/modules/shared/api-errors/*"],
+      "@/modules/shared/config/*": ["src/modules/shared/config/*"],
+      "@/modules/shared/constants/*": ["src/modules/shared/constants/*"],
+      "@/modules/shared/dtos/*": ["src/modules/shared/dtos/*"],
+      "@/modules/shared/schemas/*": ["src/modules/shared/schemas/*"],
+      "@/modules/shared/services/*": ["src/modules/shared/services/*"],
+      "@/modules/shared/types/*": ["src/modules/shared/types/*"],
+      "@/modules/shared/utils/*": ["src/modules/shared/utils/*"],
+      "@/templates/*": ["src/templates/*"]
+    }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  }
 }

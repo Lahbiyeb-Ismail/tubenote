@@ -1,39 +1,50 @@
 "use client";
 
-import Loader from "@/components/global/Loader";
-import MarkdownViewer from "@/components/global/MarkdownViewer";
-import PaginationComponent from "@/components/global/Pagination";
-import ResizablePanels from "@/components/global/ResizablePanels";
-import VideoNotesList from "@/components/video/VideoNotesList";
-import VideoPageHeader from "@/components/video/VideoPageHeader";
-import VideoPlayer from "@/components/video/VideoPlayer";
-import usePagination from "@/hooks/global/usePagination";
-import useGetVideoNotes from "@/hooks/video/useGetVideoNotes";
-import type { Note } from "@/types/note.types";
-import { DEFAULT_PAGE } from "@/utils/constants";
 import { useState } from "react";
+
+import type { Note } from "@tubenote/types";
+
+import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
+
+import { useGetNotesByVideoId } from "@/features/note/hooks";
+import { usePaginationQuery, useSortByQueries } from "@/hooks";
+
+import {
+  Loader,
+  MarkdownViewer,
+  PaginationComponent,
+  ResizablePanels,
+} from "@/components/global";
+
+import { NoDataFound } from "@/components/dashboards";
+
+import {
+  VideoNotesList,
+  VideoPageHeader,
+  VideoPlayer,
+} from "@/features/video/components";
 
 function VideoPage({ params }: { params: { videoId: string } }) {
   const { videoId } = params;
   const [openMarkdownViewer, setOpenMarkdownViewer] = useState(false);
   const [note, setNote] = useState<Note | null>(null);
 
-  const { currentPage, setPage } = usePagination({ defaultPage: DEFAULT_PAGE });
-
-  const { data, isLoading, isError } = useGetVideoNotes({
-    videoId,
-    page: currentPage,
+  const { currentPage, setPage } = usePaginationQuery({
+    defaultPage: DEFAULT_PAGE,
   });
 
-  if (isError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
-        <h2>Failed to load video notes.</h2>
-      </div>
-    );
-  }
+  const { sortBy, order } = useSortByQueries({});
 
-  if (isLoading || !data) {
+  const {
+    data: notesResponse,
+    isLoading: isNotesLoading,
+    isError: isNotesError,
+  } = useGetNotesByVideoId({
+    videoId,
+    paginationQuery: { page: currentPage, limit: PAGE_LIMIT, sortBy, order },
+  });
+
+  if (isNotesLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
         <Loader />
@@ -41,25 +52,29 @@ function VideoPage({ params }: { params: { videoId: string } }) {
     );
   }
 
-  // if (!data.notes.length) {
-  // 	return (
-  // 		<div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
-  // 			<h2>No notes found for this video.</h2>
-  // 		</div>
-  // 	);
-  // }
+  if (isNotesError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
+        <h2>Failed to load video notes.</h2>
+      </div>
+    );
+  }
+
+  if (!notesResponse || !notesResponse.notes || !notesResponse.paginationMeta) {
+    return <NoDataFound title="You don't have any notes yet for this video." />;
+  }
 
   return (
     <main className="min-h-screen bg-white">
       <VideoPageHeader
         videoId={videoId}
-        videoTitle={data.video.snippet.title}
+        videoTitle={notesResponse.notes[0].videoTitle}
         isVideoVisible={true}
         onToggleVideo={() => setOpenMarkdownViewer(!openMarkdownViewer)}
       />
 
       <div className="container h-screen mx-auto px-2 py-6 overflow-auto">
-        {data.notes.length === 0 ? (
+        {notesResponse.notes.length === 0 ? (
           <ResizablePanels
             leftSideContent={<h2>No notes found for this video.</h2>}
             rightSideContent={<VideoPlayer videoId={videoId} />}
@@ -71,7 +86,7 @@ function VideoPage({ params }: { params: { videoId: string } }) {
                 <MarkdownViewer content={note.content} noteTitle={note.title} />
               ) : (
                 <VideoNotesList
-                  notes={data.notes}
+                  notes={notesResponse.notes}
                   setOpenMarkdownViewer={() => setOpenMarkdownViewer(true)}
                   setNote={setNote}
                 />
@@ -85,7 +100,7 @@ function VideoPage({ params }: { params: { videoId: string } }) {
       <PaginationComponent
         currentPage={currentPage}
         onPageChange={setPage}
-        totalPages={data.pagination.totalPages}
+        totalPages={notesResponse.paginationMeta.totalPages}
       />
     </main>
   );

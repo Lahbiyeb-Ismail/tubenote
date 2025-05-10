@@ -1,11 +1,11 @@
 "use client";
 
-import Header from "@/components/dashboards/Header";
-import NoDataFound from "@/components/dashboards/NoDataFound";
-import RecentNoteList from "@/components/dashboards/RecentNotesList";
+import {
+  useGetRecentNotes,
+  useGetRecentlyUpdatedNotes,
+} from "@/features/note/hooks";
 
-import useGetRecentNotes from "@/hooks/note/useGetRecentNotes";
-import useGetRecentlyUpdatedNotes from "@/hooks/note/useGetRecentlyUpdatedNotes";
+import { Header, NoDataFound, RecentNoteList } from "@/components/dashboards";
 
 function DashboardPage() {
   const { data: recentNotes } = useGetRecentNotes();
@@ -14,7 +14,10 @@ function DashboardPage() {
   return (
     <div className="min-h-screen flex-grow p-4 md:p-8">
       <Header title="Dashboard" />
-      {!recentNotes || recentNotes.length === 0 ? (
+      {!recentNotes ||
+      recentNotes.length === 0 ||
+      !recentlyUpdatedNotes ||
+      recentlyUpdatedNotes.length === 0 ? (
         <NoDataFound title="You don't have any notes yet." />
       ) : (
         <div className="mt-8 grid gap-6 md:grid-cols-2">

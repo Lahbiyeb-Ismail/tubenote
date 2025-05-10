@@ -1,140 +1,80 @@
 import type { Response } from "express";
-import httpStatus from "http-status";
-import type { Profile } from "passport-google-oauth20";
+import { inject, injectable } from "inversify";
 
-import {
-  clearRefreshTokenCookieConfig,
-  refreshTokenCookieConfig,
-} from "../../config/cookie.config";
-import envConfig from "../../config/envConfig";
+import { TYPES } from "@/config/inversify/types";
 
-import { REFRESH_TOKEN_NAME } from "../../constants/auth";
+import type { IResponseFormatter } from "@/modules/shared/services";
+import type { TypedRequest } from "@/modules/shared/types";
 
-import { UnauthorizedError } from "../../errors";
+import type { IAuthController, IAuthService } from "./auth.types";
 
-import { IAuthService } from "./auth.service";
-
-import { ERROR_MESSAGES } from "../../constants/errorMessages";
-import type { TypedRequest } from "../../types";
-import type { GoogleUser } from "./auth.type";
-import type { LoginUserDto } from "./dtos/login-user.dto";
-import type { RegisterUserDto } from "./dtos/register-user.dto";
-
-export interface IAuthController {
-  register(req: TypedRequest<RegisterUserDto>, res: Response): Promise<void>;
-  login(req: TypedRequest<LoginUserDto>, res: Response): Promise<void>;
-  logout(req: TypedRequest, res: Response): Promise<void>;
-  refresh(req: TypedRequest, res: Response): Promise<void>;
-  loginWithGoogle(req: TypedRequest, res: Response): Promise<void>;
-}
+import { UnauthorizedError } from "../shared/api-errors";
+import { ERROR_MESSAGES } from "../shared/constants";
+import { clearAuthTokenCookieConfig } from "./config";
+import { ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } from "./constants";
 
 /**
  * Controller for handling authentication-related operations.
  */
+@injectable()
 export class AuthController implements IAuthController {
-  private authService: IAuthService;
-
-  constructor(authService: IAuthService) {
-    this.authService = authService;
-  }
-
-  /**
-   * Registers a new user.
-   * @param req - The request object containing user registration credentials.
-   * @param res - The response object.
-   */
-  async register(req: TypedRequest<RegisterUserDto>, res: Response) {
-    const user = await this.authService.registerUser(req.body);
-
-    res.status(httpStatus.CREATED).json({
-      message: "A verification email has been sent to your email.",
-      email: user.email,
-    });
-  }
+  constructor(
+    @inject(TYPES.AuthService) private readonly _authService: IAuthService,
+    @inject(TYPES.ResponseFormatter)
+    private readonly _responseFormatter: IResponseFormatter
+  ) {}
 
   /**
-   * Logs in a user.
-   * @param req - The request object containing user login credentials.
-   * @param res - The response object.
+   * Logs out a user by invalidating their refresh token and clearing auth cookies.
+   *
+   * @param req - The request object containing cookies and user ID
+   * @param res - The response object for clearing cookies and sending response
+   * @returns Promise resolving when the logout operation is complete
+   *
+   * @throws {UnauthorizedError} If the user is not authenticated
+   * @throws {InternalServerError} If logout fails unexpectedly
    */
-  async login(req: TypedRequest<LoginUserDto>, res: Response) {
-    const { accessToken, refreshToken } = await this.authService.loginUser(
-      req.body
-    );
+  async logout(req: TypedRequest, res: Response): Promise<void> {
+    try {
+      const { cookies, userId } = req;
+      const refreshToken = cookies[REFRESH_TOKEN_NAME];
 
-    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+      // Validate that the user is authenticated
+      if (!userId || !refreshToken) {
+        throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
+      }
 
-    res.status(httpStatus.OK).json({
-      message: "Login successful",
-      accessToken,
-    });
-  }
+      await this._authService.logoutUser({ refreshToken, userId });
 
-  /**
-   * Logs out a user.
-   * @param req - The request object.
-   * @param res - The response object.
-   */
-  async logout(req: TypedRequest, res: Response) {
-    const cookies = req.cookies;
-    const userId = req.userId;
+      // Format and send the response
+      const formattedResponse =
+        this._responseFormatter.formatSuccessResponse<null>({
+          responseOptions: {
+            message: "User logged out successfully",
+            data: null,
+          },
+        });
 
-    const refreshToken = cookies[REFRESH_TOKEN_NAME];
+      // Clear authentication cookies
+      this.clearAuthCookies(res);
 
-    await this.authService.logoutUser({ refreshToken, userId });
+      res.status(formattedResponse.statusCode).json(formattedResponse);
+    } catch (error) {
+      // Always clear cookies on logout, even if there's an error
+      this.clearAuthCookies(res);
 
-    res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
-
-    res.sendStatus(httpStatus.NO_CONTENT);
-  }
-
-  /**
-   * Refreshes the access token using the refresh token.
-   * @param req - The request object.
-   * @param res - The response object.
-   * @throws {UnauthorizedError} If the refresh token is not provided.
-   */
-  async refresh(req: TypedRequest, res: Response) {
-    const cookies = req.cookies;
-    const userId = req.userId;
-
-    const token: string | null = cookies[REFRESH_TOKEN_NAME];
-
-    if (!token) {
-      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
+      // Let the global error handler take care of the response
+      throw error;
     }
-
-    res.clearCookie(REFRESH_TOKEN_NAME, clearRefreshTokenCookieConfig);
-
-    const { accessToken, refreshToken } = await this.authService.refreshToken({
-      token,
-      userId,
-    });
-
-    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
-
-    res.status(httpStatus.OK).json({
-      accessToken,
-    });
   }
 
   /**
-   * Logs in a user using Google authentication.
-   * @param req - The request object containing the Google user profile.
-   * @param res - The response object.
+   * Clears authentication cookies from the response.
+   *
+   * @param res - The response object
    */
-  async loginWithGoogle(req: TypedRequest, res: Response) {
-    const user = req.user as Profile;
-
-    const googleUser = user._json as GoogleUser;
-
-    const { accessToken, refreshToken } =
-      await this.authService.googleLogin(googleUser);
-
-    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
-
-    res.redirect(
-      `${envConfig.client.url}/auth/callback?access_token=${encodeURIComponent(JSON.stringify(accessToken))}`
-    );
+  private clearAuthCookies(res: Response): void {
+    res.clearCookie(REFRESH_TOKEN_NAME, clearAuthTokenCookieConfig);
+    res.clearCookie(ACCESS_TOKEN_NAME, clearAuthTokenCookieConfig);
   }
 }

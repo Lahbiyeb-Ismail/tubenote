@@ -1,28 +1,44 @@
 import type { Response } from "express";
-import httpStatus from "http-status";
+import { inject, injectable } from "inversify";
 
-import type { TypedRequest } from "../../types";
+import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/dtos";
+import type { User } from "@tubenote/types";
 
-import type { UpdateUserDto } from "./dtos/update-user.dto";
-import { IUserService } from "./user.service";
+import { TYPES } from "@/config/inversify/types";
 
-export interface IUserController {
-  getCurrentUser(req: TypedRequest, res: Response): Promise<void>;
-  updateCurrentUser(
-    req: TypedRequest<UpdateUserDto>,
-    res: Response
-  ): Promise<void>;
-}
+import { NotFoundError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+
+import type { TypedRequest } from "@/modules/shared/types";
+
+import type {
+  ILoggerService,
+  IRateLimitService,
+  IResponseFormatter,
+} from "@/modules/shared/services";
+
+import { USER_RATE_LIMIT_CONFIG } from "./config";
+
+import {
+  ACCESS_TOKEN_NAME,
+  REFRESH_TOKEN_NAME,
+  clearAuthTokenCookieConfig,
+} from "../auth";
+import type { IUserController, IUserService } from "./user.types";
 
 /**
  * Controller for handling user-related operations.
  */
+@injectable()
 export class UserController implements IUserController {
-  private userService: IUserService;
-
-  constructor(userService: IUserService) {
-    this.userService = userService;
-  }
+  constructor(
+    @inject(TYPES.UserService) private _userService: IUserService,
+    @inject(TYPES.ResponseFormatter)
+    private _responseFormatter: IResponseFormatter,
+    @inject(TYPES.RateLimitService)
+    private _rateLimitService: IRateLimitService,
+    @inject(TYPES.LoggerService) private _loggerService: ILoggerService
+  ) {}
 
   /**
    * Get the current user's information.
@@ -33,19 +49,21 @@ export class UserController implements IUserController {
   async getCurrentUser(req: TypedRequest, res: Response): Promise<void> {
     const userId = req.userId;
 
-    const user = await this.userService.getUserById(userId);
+    const user = await this._userService.getUserById(userId);
 
-    res.status(httpStatus.OK).json({
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        profilePicture: user.profilePicture,
-        isEmailVerified: user.isEmailVerified,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      },
-    });
+    if (!user) {
+      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
+    }
+
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<User>({
+        responseOptions: {
+          data: user,
+          message: "User retrieved successfully.",
+        },
+      });
+
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
@@ -55,13 +73,70 @@ export class UserController implements IUserController {
    * @param res - The response object to confirm the update.
    */
   async updateCurrentUser(
-    req: TypedRequest<UpdateUserDto>,
+    req: TypedRequest<IUpdateUserDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
 
-    await this.userService.updateUser(userId, req.body);
+    const user = await this._userService.updateUser(userId, {
+      ...req.body,
+    });
 
-    res.status(httpStatus.OK).json({ message: "User updated successfully." });
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<User>({
+        responseOptions: {
+          data: user,
+          message: "User updated successfully.",
+        },
+      });
+
+    res.status(formattedResponse.statusCode).json(formattedResponse);
+  }
+
+  /**
+   * Updates the password of the authenticated user.
+   *
+   * @param req - The request object containing the user ID and the password update details.
+   * @param res - The response object used to send the status and result back to the client.
+   *
+   * @returns A promise that resolves to a response indicating the success of the password update.
+   *
+   * @remarks
+   * This method expects the request body to contain the current password and the new password.
+   * It uses the user ID from the request to identify the user whose password is to be updated.
+   * The response will include a success message and the updated user details.
+   */
+  async updatePassword(req: TypedRequest<IUpdatePasswordDto>, res: Response) {
+    try {
+      const userId = req.userId;
+
+      const user = await this._userService.updateUserPassword(userId, {
+        ...req.body,
+      });
+
+      const formattedResponse =
+        this._responseFormatter.formatSuccessResponse<User>({
+          responseOptions: {
+            data: user,
+            message: "User password updated successfully.",
+          },
+        });
+
+      await this._rateLimitService.reset(req.rateLimitKey);
+
+      res.clearCookie(ACCESS_TOKEN_NAME, clearAuthTokenCookieConfig);
+      res.clearCookie(REFRESH_TOKEN_NAME, clearAuthTokenCookieConfig);
+
+      res.status(formattedResponse.statusCode).json(formattedResponse);
+    } catch (error: any) {
+      await this._rateLimitService.increment({
+        key: req.rateLimitKey,
+        ...USER_RATE_LIMIT_CONFIG.updatePassword,
+      });
+
+      this._loggerService.error("Error updating password", error);
+
+      throw error;
+    }
   }
 }

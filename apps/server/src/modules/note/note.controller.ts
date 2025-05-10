@@ -1,268 +1,286 @@
 import type { Response } from "express";
 import httpStatus from "http-status";
+import { inject, injectable } from "inversify";
 
-import { INoteService } from "./note.service";
+import type {
+  ICreateNoteDto,
+  IPaginationQueryDto,
+  IParamIdDto,
+  IUpdateNoteDto,
+} from "@tubenote/dtos";
+import type { Note } from "@tubenote/types";
 
-import type { EmptyRecord, TypedRequest } from "../../types";
+import { TYPES } from "@/config/inversify/types";
 
-import type { FindManyDto } from "../../common/dtos/find-many.dto";
-import type { IdParamDto } from "../../common/dtos/id-param.dto";
-import type { QueryPaginationDto } from "../../common/dtos/query-pagination.dto";
-import type { CreateNoteDto } from "./dtos/create-note.dto";
-import type { DeleteNoteDto } from "./dtos/delete-note.dto";
-import type { FindNoteDto } from "./dtos/find-note.dto";
-import type { UpdateNoteDto } from "./dtos/update-note.dto";
+import type { IResponseFormatter } from "@/modules/shared/services";
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
-export interface INoteController {
-  createNote(req: TypedRequest<CreateNoteDto>, res: Response): Promise<void>;
-  updateNote(
-    req: TypedRequest<UpdateNoteDto, IdParamDto>,
-    res: Response
-  ): Promise<void>;
-  deleteNote(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
-    res: Response
-  ): Promise<void>;
-  getNoteById(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
-    res: Response
-  ): Promise<void>;
-  getUserNotes(
-    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
-    res: Response
-  ): Promise<void>;
-  getUserRecentNotes(req: TypedRequest, res: Response): Promise<void>;
-  getRecentlyUpatedNotes(req: TypedRequest, res: Response): Promise<void>;
-  getNotesByVideoId(
-    req: TypedRequest<EmptyRecord, IdParamDto, QueryPaginationDto>,
-    res: Response
-  ): Promise<void>;
-}
+import type { INoteController, INoteService } from "./note.types";
 
 /**
  * Controller for handling note-related operations.
+ *
+ * This controller provides endpoints for creating, updating, deleting,
+ * and retrieving notes for an authenticated user.
+ * It also supports pagination for list endpoints.
  */
+@injectable()
 export class NoteController implements INoteController {
-  private noteService: INoteService;
-
-  constructor(noteService: INoteService) {
-    this.noteService = noteService;
-  }
+  /**
+   * Creates an instance of NoteController.
+   *
+   * @param _noteService - An instance of the note service that handles business logic.
+   * @param _responseFormatter - An instance of the response formatter service.
+   */
+  constructor(
+    @inject(TYPES.NoteService) private _noteService: INoteService,
+    @inject(TYPES.ResponseFormatter)
+    private _responseFormatter: IResponseFormatter
+  ) {}
 
   /**
    * Adds a new note for the authenticated user.
    *
-   * @param req - The request object containing the note data and user ID.
-   * @param res - The response object used to send the status and result.
+   * @param req - The request object containing note data (excluding userId) in the body and the userId on the request.
+   * @param res - The response object used to send the HTTP status and result.
    * @returns A promise that resolves to void.
    */
   async createNote(
-    req: TypedRequest<CreateNoteDto>,
+    req: TypedRequest<ICreateNoteDto, IParamIdDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
+    const videoId = req.params.id;
 
-    const note = await this.noteService.createNote(userId, req.body);
+    const note = await this._noteService.createNote(userId, videoId, req.body);
 
-    res
-      .status(httpStatus.CREATED)
-      .json({ message: "Note created successfully.", note });
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<Note>({
+        responseOptions: {
+          statusCode: httpStatus.CREATED,
+          data: note,
+          message: "Note created successfully.",
+        },
+      });
+
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
    * Updates an existing note for the authenticated user.
    *
-   * @param req - The request object containing the note ID in the parameters and the updated note data in the body.
-   * @param res - The response object used to send the status and updated note data.
+   * @param req - The request object containing the note ID in the parameters and updated note data in the body.
+   * @param res - The response object used to send the HTTP status and updated note data.
    * @returns A promise that resolves to void.
    */
   async updateNote(
-    req: TypedRequest<UpdateNoteDto, IdParamDto>,
+    req: TypedRequest<IUpdateNoteDto, IParamIdDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-    const { id } = req.params;
+    const noteId = req.params.id;
 
-    const updateNoteDto = req.body;
-    const findNoteDto: FindNoteDto = { id, userId };
-
-    const updatedNote = await this.noteService.updateNote(
-      findNoteDto,
-      updateNoteDto
+    const updatedNote = await this._noteService.updateNote(
+      userId,
+      noteId,
+      req.body
     );
 
-    res
-      .status(httpStatus.OK)
-      .json({ message: "Note updated successfully.", note: updatedNote });
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<Note>({
+        responseOptions: {
+          data: updatedNote,
+          message: "Note updated successfully.",
+        },
+      });
+
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
    * Deletes a note based on the provided note ID and user ID.
    *
-   * @param req - The request object containing the user ID and note ID.
-   * @param res - The response object used to send the status and message.
+   * @param req - The request object containing the note ID in the parameters and the userId.
+   * @param res - The response object used to send the HTTP status and confirmation message.
    * @returns A promise that resolves to void.
    */
   async deleteNote(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-    const { id } = req.params;
+    const noteId = req.params.id;
 
-    const deleteNoteDto: DeleteNoteDto = { id, userId };
+    await this._noteService.deleteNote(userId, noteId);
 
-    await this.noteService.deleteNote(deleteNoteDto);
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<null>({
+        responseOptions: {
+          message: "Note deleted successfully.",
+          data: null,
+        },
+      });
 
-    res.status(httpStatus.OK).json({ message: "Note deleted successfully." });
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
    * Retrieves a note by its ID for the authenticated user.
    *
-   * @param req - The request object containing the user ID and note ID parameters.
-   * @param res - The response object used to send the note data.
+   * @param req - The request object containing the note ID in the parameters and the userId.
+   * @param res - The response object used to send the HTTP status and note data.
    * @returns A promise that resolves to void.
    */
   async getNoteById(
-    req: TypedRequest<EmptyRecord, IdParamDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
-    const { id } = req.params;
+    const noteId = req.params.id;
 
-    const findNoteDto: FindNoteDto = { id, userId };
+    const note = await this._noteService.findNote(userId, noteId);
 
-    const note = await this.noteService.findNote(findNoteDto);
+    const formattedResponse =
+      this._responseFormatter.formatSuccessResponse<Note>({
+        responseOptions: {
+          data: note,
+          message: "Note retrieved successfully.",
+        },
+      });
 
-    res.status(httpStatus.OK).json({ note });
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
    * Retrieves the notes of a user with pagination.
    *
-   * @param req - The request object containing user ID and pagination query parameters.
-   * @param res - The response object used to send the notes and pagination details.
+   * @param req - The request object containing the userId and pagination query parameters.
+   * @param res - The response object used to send the HTTP status, notes data, and pagination metadata.
    * @returns A promise that resolves to void.
    */
   async getUserNotes(
-    req: TypedRequest<EmptyRecord, EmptyRecord, QueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
 
-    const page = Number(req.query.page);
-    const limit = Number(req.query.limit);
+    const findManyDto = this._responseFormatter.getPaginationQueries({
+      reqQuery: req.query,
+      itemsPerPage: 8,
+    });
 
-    const skip = (page - 1) * limit;
-
-    const findManyDto: FindManyDto = {
+    const paginatedData = await this._noteService.fetchUserNotes(
       userId,
-      skip,
-      limit,
-      sort: { by: "createdAt", order: "desc" },
-    };
+      findManyDto
+    );
 
-    const { notes, notesCount, totalPages } =
-      await this.noteService.fetchUserNotes(findManyDto);
-
-    res.status(httpStatus.OK).json({
-      notes,
-      pagination: {
-        totalPages,
-        currentPage: page,
-        totalNotes: notesCount,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1,
+    const formattedResponse = this._responseFormatter.formatPaginatedResponse({
+      page: req.query.page ?? 1,
+      paginatedData,
+      responseOptions: {
+        message: "User notes retrieved successfully.",
       },
     });
+
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
    * Retrieves the most recent notes for a specific user.
    *
-   * @param req - The request object containing user information.
-   * @param res - The response object used to send back the notes.
+   * @param req - The request object containing the userId and pagination query parameters.
+   * @param res - The response object used to send the HTTP status and recent notes data.
    * @returns A promise that resolves to void.
    */
-  async getUserRecentNotes(req: TypedRequest, res: Response): Promise<void> {
+  async getUserRecentNotes(
+    req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
+    res: Response
+  ): Promise<void> {
     const userId = req.userId;
+    const findManyDto = this._responseFormatter.getPaginationQueries({
+      reqQuery: req.query,
+      itemsPerPage: 2,
+    });
 
-    const findManyDto: FindManyDto = {
-      userId,
-      limit: 2,
-      sort: { by: "createdAt", order: "desc" },
-    };
+    const notes = await this._noteService.fetchRecentNotes(userId, findManyDto);
 
-    const notes = await this.noteService.fetchRecentNotes(findManyDto);
+    const formattedResponse = this._responseFormatter.formatSuccessResponse<
+      Note[]
+    >({
+      responseOptions: {
+        data: notes,
+        message: "Recent notes retrieved successfully.",
+      },
+    });
 
-    res.status(httpStatus.OK).json({ notes });
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
    * Retrieves the most recently updated notes for the authenticated user.
    *
-   * @param req - The request object, containing the authenticated user's ID.
-   * @param res - The response object used to send the JSON response.
+   * @param req - The request object containing the userId and pagination query parameters.
+   * @param res - The response object used to send the HTTP status and recently updated notes data.
    * @returns A promise that resolves to void.
    */
-  async getRecentlyUpatedNotes(
-    req: TypedRequest,
+  async getRecentlyUpdatedNotes(
+    req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
     res: Response
   ): Promise<void> {
     const userId = req.userId;
 
-    const findManyDto: FindManyDto = {
-      userId,
-      limit: 2,
-      sort: { by: "updatedAt", order: "desc" },
-    };
+    const findManyDto = this._responseFormatter.getPaginationQueries({
+      reqQuery: req.query,
+      itemsPerPage: 2,
+    });
 
-    const notes = await this.noteService.fetchRecentNotes(findManyDto);
+    const notes = await this._noteService.fetchRecentNotes(userId, findManyDto);
 
-    res.status(httpStatus.OK).json({ notes });
+    const formattedResponse = this._responseFormatter.formatSuccessResponse<
+      Note[]
+    >({
+      responseOptions: {
+        data: notes,
+        message: "Recent updated notes retrieved successfully.",
+      },
+    });
+
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**
    * Retrieves notes associated with a specific video ID, with pagination support.
    *
-   * @param req - The request object containing user ID, video ID parameter, and pagination query.
-   * @param res - The response object used to send back the notes and pagination details.
-   *
-   * @returns A JSON response containing the notes and pagination information.
-   *
+   * @param req - The request object containing the video ID as a parameter, the userId, and pagination query parameters.
+   * @param res - The response object used to send the HTTP status, notes data, and pagination metadata.
+   * @returns A promise that resolves to void.
    */
   async getNotesByVideoId(
-    req: TypedRequest<EmptyRecord, IdParamDto, QueryPaginationDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto, IPaginationQueryDto>,
     res: Response
-  ) {
+  ): Promise<void> {
     const userId = req.userId;
-    const { id } = req.params;
+    const videoId = req.params.id;
 
-    const page = Number(req.query.page);
-    const limit = Number(req.query.limit);
+    const findManyDto = this._responseFormatter.getPaginationQueries({
+      reqQuery: req.query,
+      itemsPerPage: 8,
+    });
 
-    const skip = (page - 1) * limit;
-
-    const findManyDto: FindManyDto = {
+    const paginatedData = await this._noteService.fetchNotesByVideoId(
       userId,
-      skip,
-      limit,
-      sort: { by: "createdAt", order: "desc" },
-    };
+      videoId,
+      findManyDto
+    );
 
-    const { notes, notesCount, totalPages } =
-      await this.noteService.fetchNotesByVideoId(id, findManyDto);
-
-    res.status(httpStatus.OK).json({
-      notes,
-      pagination: {
-        totalPages,
-        currentPage: page,
-        totalNotes: notesCount,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1,
+    const formattedResponse = this._responseFormatter.formatPaginatedResponse({
+      page: req.query.page ?? 1,
+      paginatedData,
+      responseOptions: {
+        message: "Notes retrieved successfully.",
       },
     });
+
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 }

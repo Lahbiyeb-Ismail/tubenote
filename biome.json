@@ -102,7 +102,9 @@
         "useIsNan": "error",
         "useJsxKeyInIterable": "off",
         "useValidForDirection": "error",
-        "useYield": "error"
+        "useYield": "error",
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error"
       },
       "security": {
         "noDangerouslySetInnerHtml": "warn",
@@ -209,7 +211,7 @@
         "noDuplicateJsxProps": "error",
         "noDuplicateObjectKeys": "error",
         "noDuplicateParameters": "error",
-        "noEmptyBlockStatements": "error",
+        "noEmptyBlockStatements": "off",
         "noFallthroughSwitchClause": "error",
         "noFunctionAssign": "error",
         "noGlobalAssign": "error",
@@ -247,6 +249,9 @@
       "bracketSameLine": false,
       "quoteStyle": "double",
       "attributePosition": "auto"
+    },
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
     }
   },
   "overrides": [
@@ -263,7 +268,8 @@
             "noUndeclaredVariables": "off",
             "noUnreachable": "off",
             "noUnreachableSuper": "off",
-            "noUnusedVariables": "error"
+            "noUnusedVariables": "error",
+            "noUnusedImports": "error"
           },
           "suspicious": {
             "noDuplicateClassMembers": "off",
