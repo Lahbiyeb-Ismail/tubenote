@@ -15,6 +15,7 @@ import { VideoPlayer } from "@/features/video/components";
 export interface NotePageLayoutProps {
   videoId: string;
   noteContent?: string;
+  noteTitle?: string;
   isLoading: boolean;
   isSavingNote: boolean;
   modalTitle: string;
@@ -25,6 +26,7 @@ export interface NotePageLayoutProps {
 export function NotePageLayout({
   videoId,
   noteContent,
+  noteTitle,
   isLoading,
   isSavingNote,
   modalTitle,
@@ -64,6 +66,7 @@ export function NotePageLayout({
       </div>
       <ConfirmationModal title={modalTitle} description={modalDescription}>
         <SaveNoteForm
+          noteTitle={noteTitle}
           isLoading={isSavingNote}
           closeModal={closeModal}
           handleSaveSubmit={handleSaveSubmit}

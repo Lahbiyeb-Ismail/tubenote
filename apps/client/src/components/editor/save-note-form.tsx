@@ -3,14 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-// import type { Video } from "@tubenote/types";
-
-// import { useNote } from "@/features/note/contexts";
-// import { useVideo } from "@/features/video/contexts";
-
 import type { NoteTitle } from "@/features/note/types";
 
-// import { getStorageValue } from "@/utils";
 import { Button } from "@/components/ui";
 import { saveNoteFormSchema } from "@/lib";
 

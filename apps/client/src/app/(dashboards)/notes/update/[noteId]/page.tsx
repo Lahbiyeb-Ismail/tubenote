@@ -33,6 +33,7 @@ function UpdateNotePage({ params }: { params: { noteId: string } }) {
     <NotePageLayout
       videoId={note?.youtubeId || ""}
       noteContent={note?.content}
+      noteTitle={note?.title}
       isLoading={isLoading || !note}
       isSavingNote={isUpdatingNote}
       modalTitle="Confirm Update Note"
