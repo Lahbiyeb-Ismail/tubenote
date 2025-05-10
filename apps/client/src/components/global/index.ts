@@ -1,3 +1,5 @@
+export * from "./inputs";
+
 export * from "./card-content";
 export * from "./card-footer-wrapper";
 export * from "./card-image";
