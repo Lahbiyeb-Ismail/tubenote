@@ -34,7 +34,7 @@ export function NotePageLayout({
   handleSaveNote,
 }: NotePageLayoutProps) {
   const { editorRef, getContent } = useEditorContent();
-  const { openModal, closeModal } = useModal();
+  const { openModal } = useModal();
 
   if (isLoading) {
     return (
@@ -68,7 +68,6 @@ export function NotePageLayout({
         <SaveNoteForm
           noteTitle={noteTitle}
           isLoading={isSavingNote}
-          closeModal={closeModal}
           handleSaveSubmit={handleSaveSubmit}
         />
       </ConfirmationModal>
