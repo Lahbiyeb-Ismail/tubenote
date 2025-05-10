@@ -2,7 +2,7 @@
 
 import { Trash2Icon } from "lucide-react";
 
-import { useLayout } from "@/context";
+import { useUIStore } from "@/stores";
 
 import { Button } from "@/components/ui";
 
@@ -15,20 +15,23 @@ export function DeleteNoteButton({
   isLoading,
   onDelete,
 }: DeleteNoteButtonProps) {
-  const { isGridLayout } = useLayout();
+  const { layout } = useUIStore();
+
   return (
     <Button
       variant="outline"
-      size={!isGridLayout ? "icon" : "sm"}
+      size={!layout.isGridLayout ? "icon" : "sm"}
       className={`text-red-700 hover:text-red-800 hover:bg-red-50 disabled:opacity-50
               disabled:cursor-not-allowed ${
-                !isGridLayout ? "w-10 h-10 p-0" : ""
+                !layout.isGridLayout ? "w-10 h-10 p-0" : ""
               }`}
       onClick={onDelete}
       disabled={isLoading}
     >
-      <Trash2Icon className={`h-4 w-4 ${!isGridLayout ? "m-0" : "mr-2"}`} />
-      {isGridLayout && "Delete"}
+      <Trash2Icon
+        className={`h-4 w-4 ${!layout.isGridLayout ? "m-0" : "mr-2"}`}
+      />
+      {layout.isGridLayout && "Delete"}
     </Button>
   );
 }

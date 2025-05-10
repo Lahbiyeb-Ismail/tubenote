@@ -1,10 +1,10 @@
 import { LogOut } from "lucide-react";
 
-import { useLayout } from "@/context";
+import { useUIStore } from "@/stores";
 import { useAuth } from "../../contexts";
 
 export function LogoutButton() {
-  const { isSidebarOpen } = useLayout();
+  const { layout } = useUIStore();
   const { logoutMutationResult } = useAuth();
   const { mutate: logout, isPending } = logoutMutationResult;
 
@@ -14,18 +14,18 @@ export function LogoutButton() {
         type="button"
         disabled={isPending}
         onClick={() => logout()}
-        className={`flex items-center ${isSidebarOpen ? "" : "justify-center"} h-full w-full text-left`}
+        className={`flex items-center ${layout.isSidebarOpen ? "" : "justify-center"} h-full w-full text-left`}
       >
         <div
           className={`flex items-center justify-center ${
-            isSidebarOpen ? "mr-3" : "w-full h-full"
+            layout.isSidebarOpen ? "mr-3" : "w-full h-full"
           }`}
         >
           <LogOut
-            className={`transition-all duration-300 ${isSidebarOpen ? "" : "w-6 h-6"}`}
+            className={`transition-all duration-300 ${layout.isSidebarOpen ? "" : "w-6 h-6"}`}
           />
         </div>
-        {isSidebarOpen && <span>Logout</span>}
+        {layout.isSidebarOpen && <span>Logout</span>}
       </button>
     </li>
   );
