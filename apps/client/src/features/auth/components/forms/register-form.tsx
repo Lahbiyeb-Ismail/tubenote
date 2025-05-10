@@ -9,8 +9,8 @@ import { registerSchema } from "@tubenote/schemas";
 
 import { Button, Form } from "@/components/ui";
 
+import { FormInput } from "@/components/global";
 import { useAuth } from "../../contexts";
-import { FormInput } from "../inputs";
 
 export function RegisterForm() {
   const form = useForm<IRegisterDto>({

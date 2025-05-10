@@ -9,9 +9,9 @@ import { loginSchema } from "@tubenote/schemas";
 
 import { Button, Form } from "@/components/ui";
 
-import { FormInput } from "../inputs";
 import { ForgotPasswordLink } from "../links";
 
+import { FormInput } from "@/components/global";
 import { useAuth } from "../../contexts";
 
 export function LoginForm() {
