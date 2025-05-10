@@ -7,8 +7,8 @@ import type { NoteTitle } from "@/features/note/types";
 
 import { FormInput } from "@/components/global";
 import { Button, Form } from "@/components/ui";
-import { useModal } from "@/context";
 import { saveNoteFormSchema } from "@/lib";
+import { useUIStore } from "@/stores";
 
 type SaveNoteFormProps = {
   isLoading: boolean;
@@ -30,11 +30,11 @@ export function SaveNoteForm({
 
   const { handleSubmit, control, formState } = form;
 
-  const { closeModal } = useModal();
+  const { actions } = useUIStore();
 
   function handleOnSubmit(data: NoteTitle) {
     handleSaveSubmit(data.noteTitle);
-    closeModal();
+    actions.closeModal();
   }
 
   return (
@@ -52,7 +52,7 @@ export function SaveNoteForm({
         />
 
         <div className="flex items-center justify-between w-full">
-          <Button variant="outline" onClick={closeModal} type="button">
+          <Button variant="outline" onClick={actions.closeModal} type="button">
             Cancel
           </Button>
           <button

@@ -9,7 +9,7 @@ import "@/app/globals.css";
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
 
-import { useModal } from "@/context";
+import { useUIStore } from "@/stores";
 import { SaveNoteForm } from "./";
 
 type TextEditorProps = {
@@ -34,7 +34,7 @@ export function TextEditor({
     initialNoteContent || ""
   );
 
-  const { closeModal } = useModal();
+  const { actions } = useUIStore();
 
   return (
     <div className="h-full overflow-auto">
@@ -43,7 +43,7 @@ export function TextEditor({
         noteTitle={noteTitle}
         action={action}
         cancelText="Cancel"
-        closeModal={closeModal}
+        closeModal={actions.closeModal}
       />
       <BlockNoteView
         editor={editor}

@@ -1,6 +1,6 @@
 import { cn } from "@/lib";
 
-import { useLayout } from "@/context";
+import { useUIStore } from "@/stores";
 
 import { CardFooter } from "@/components/ui";
 
@@ -10,12 +10,12 @@ type CardFooterProps = {
 };
 
 export function CardFooterWrapper({ children, className }: CardFooterProps) {
-  const { isGridLayout } = useLayout();
+  const { layout } = useUIStore();
   return (
     <CardFooter
       className={cn(
         `flex justify-between ${
-          isGridLayout ? "flex-row p-4 pt-4" : "flex-col p-4 space-y-1"
+          layout.isGridLayout ? "flex-row p-4 pt-4" : "flex-col p-4 space-y-1"
         }`,
         className
       )}

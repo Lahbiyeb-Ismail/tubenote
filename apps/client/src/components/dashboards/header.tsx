@@ -2,12 +2,12 @@
 
 import { LayoutGrid, List, Search } from "lucide-react";
 
-import { useLayout } from "@/context";
+import { useUIStore } from "@/stores";
 
 import { Button } from "@/components/ui";
 
 export function Header({ title }: { title: string }) {
-  const { toggleLayout, isGridLayout } = useLayout();
+  const { layout, actions } = useUIStore();
 
   return (
     <header className="bg-white px-4 py-6 shadow sm:px-6 lg:px-8 flex flex-row items-center justify-between gap-4">
@@ -20,11 +20,11 @@ export function Header({ title }: { title: string }) {
           className="flex-grow outline-none"
         />
       </form>
-      {!isGridLayout ? (
+      {!layout.isGridLayout ? (
         <Button
           aria-label="Switch to row layout"
           className="bg-blue-500 text-white px-3 py-1 rounded-l-md"
-          onClick={toggleLayout}
+          onClick={actions.toggleLayout}
         >
           <LayoutGrid size={18} />
         </Button>
@@ -32,7 +32,7 @@ export function Header({ title }: { title: string }) {
         <Button
           aria-label="Switch to column layout"
           className="bg-gray-200 text-gray-600 px-3 py-1 rounded-r-md"
-          onClick={toggleLayout}
+          onClick={actions.toggleLayout}
         >
           <List size={18} />
         </Button>
