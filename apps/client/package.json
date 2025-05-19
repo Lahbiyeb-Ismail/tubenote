@@ -10,9 +10,6 @@
     "lint:fix": "biome check . --apply"
   },
   "dependencies": {
-    "@blocknote/core": "^0.16.0",
-    "@blocknote/mantine": "^0.16.0",
-    "@blocknote/react": "^0.16.0",
     "@hookform/resolvers": "^3.9.0",
     "@mdxeditor/editor": "^3.14.0",
     "@radix-ui/react-avatar": "^1.1.1",
