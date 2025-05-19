@@ -1,6 +1,6 @@
 "use client";
 
-import { getStorageValue, setStorageValue } from "@/utils";
+import { getAuthStatusFromCookie, setAuthStatusCookie } from "@/utils";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
@@ -24,7 +24,7 @@ interface AuthStore extends AuthState {
 
 export const useAuthStore = create<AuthStore>()(
   immer((set) => ({
-    status: getStorageValue<AuthStatus>("auth_status") ?? "loading",
+    status: getAuthStatusFromCookie() ?? "unauthenticated",
     user: null,
     error: null,
 
@@ -33,26 +33,27 @@ export const useAuthStore = create<AuthStore>()(
         set((state) => {
           state.status = "authenticated";
           state.error = null;
-          setStorageValue<AuthStatus>("auth_status", "authenticated");
+          setAuthStatusCookie("authenticated");
         }),
 
       setUnauthenticated: (error) =>
         set((state) => {
           state.status = "unauthenticated";
           state.error = error || null;
-          setStorageValue<AuthStatus>("auth_status", "unauthenticated");
+          setAuthStatusCookie("unauthenticated");
         }),
 
       setError: (error) =>
         set((state) => {
           state.error = error;
           state.status = "unauthenticated";
-          setStorageValue<AuthStatus>("auth_status", "unauthenticated");
+          setAuthStatusCookie("unauthenticated");
         }),
 
       setLoading: () =>
         set((state) => {
           state.status = "loading";
+          setAuthStatusCookie("loading");
         }),
 
       clearError: () =>
