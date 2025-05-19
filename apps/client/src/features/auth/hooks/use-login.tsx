@@ -21,7 +21,7 @@ export function useLogin() {
     retry: false,
     onMutate: () => {
       // Cancel any outgoing refetches
-      queryClient.cancelQueries({ queryKey: ["user", "current-user"] });
+      queryClient.cancelQueries({ queryKey: ["current-user"] });
 
       setLoading();
 
@@ -34,7 +34,7 @@ export function useLogin() {
 
       setAuthenticated();
 
-      queryClient.invalidateQueries({ queryKey: ["user", "current-user"] });
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
 
       // Redirect to dashboard after successful login
       router.push("/dashboard");

@@ -13,7 +13,7 @@ export function useGetCurrentUser(): UseQueryResult<User, Error> {
   const isAuthenticated = status === "authenticated";
 
   return useQuery({
-    queryKey: ["current-user", isAuthenticated],
+    queryKey: ["current-user"],
     queryFn: getCurrentUser,
     select: (response) => response.payload.data,
     // Enable the query only if the user is authenticated.
