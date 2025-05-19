@@ -1,7 +1,7 @@
 "use client";
 
-import { useModal } from "@/context";
 import { useEditorContent } from "@/features/note/hooks";
+import { useUIStore } from "@/stores";
 
 import { AppMDXEditor, SaveNoteForm } from "@/components/editor";
 import {
@@ -34,7 +34,7 @@ export function NotePageLayout({
   handleSaveNote,
 }: NotePageLayoutProps) {
   const { editorRef, getContent } = useEditorContent();
-  const { openModal } = useModal();
+  const { actions } = useUIStore();
 
   if (isLoading) {
     return (
@@ -61,7 +61,7 @@ export function NotePageLayout({
 
         <SaveButton
           className="absolute bottom-3 right-[48%]"
-          onClick={openModal}
+          onClick={actions.openModal}
         />
       </div>
       <ConfirmationModal title={modalTitle} description={modalDescription}>

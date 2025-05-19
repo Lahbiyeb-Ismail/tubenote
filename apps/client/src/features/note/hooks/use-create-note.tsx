@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { useModal } from "@/context";
+import { useUIStore } from "@/stores";
 
 import { createNote } from "../services";
 import type { NoteAction } from "../types";
@@ -12,7 +12,7 @@ import type { NoteAction } from "../types";
 export function useCreateNote(dispatch: React.Dispatch<NoteAction>) {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const { closeModal } = useModal();
+  const { actions } = useUIStore();
 
   return useMutation({
     mutationFn: createNote,
@@ -39,7 +39,7 @@ export function useCreateNote(dispatch: React.Dispatch<NoteAction>) {
         },
       });
 
-      closeModal();
+      actions.closeModal();
 
       router.push(`/notes/${payload.data.id}`);
     },

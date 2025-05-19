@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Dispatch } from "react";
 import toast from "react-hot-toast";
 
-import { useModal } from "@/context";
+import { useUIStore } from "@/stores";
 
 import { updateNote } from "../services";
 import type { NoteAction } from "../types";
@@ -14,7 +14,7 @@ export function useUpdateNote(dispatch: Dispatch<NoteAction>) {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const { closeModal } = useModal();
+  const { actions } = useUIStore();
 
   return useMutation({
     mutationFn: updateNote,
@@ -41,7 +41,7 @@ export function useUpdateNote(dispatch: Dispatch<NoteAction>) {
         payload: { note: payload.data, success: true },
       });
 
-      closeModal();
+      actions.closeModal();
 
       router.push(`/notes/${noteId}`);
     },

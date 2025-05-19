@@ -6,8 +6,6 @@ import "./globals.css";
 
 import { ReactQueryProvider } from "@/providers";
 
-import { LayoutProvider, ModalProvider } from "@/context";
-
 import { AuthProvider } from "@/features/auth/contexts";
 import { NoteProvider } from "@/features/note/contexts";
 import { UserProvider } from "@/features/user/contexts";
@@ -40,20 +38,16 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ReactQueryProvider>
-          <LayoutProvider>
-            <ModalProvider>
-              <AuthProvider>
-                <UserProvider>
-                  <VideoProvider>
-                    <NoteProvider>
-                      <Toaster />
-                      {children}
-                    </NoteProvider>
-                  </VideoProvider>
-                </UserProvider>
-              </AuthProvider>
-            </ModalProvider>
-          </LayoutProvider>
+          <AuthProvider>
+            <UserProvider>
+              <VideoProvider>
+                <NoteProvider>
+                  <Toaster />
+                  {children}
+                </NoteProvider>
+              </VideoProvider>
+            </UserProvider>
+          </AuthProvider>
         </ReactQueryProvider>
       </body>
     </html>
