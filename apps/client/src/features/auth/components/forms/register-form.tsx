@@ -10,7 +10,7 @@ import { registerSchema } from "@tubenote/schemas";
 import { Button, Form } from "@/components/ui";
 
 import { FormInput } from "@/components/global";
-import { useAuth } from "../../contexts";
+import { useRegister } from "../../hooks";
 
 export function RegisterForm() {
   const form = useForm<IRegisterDto>({
@@ -22,8 +22,7 @@ export function RegisterForm() {
     },
   });
 
-  const { registerMutationResult } = useAuth();
-  const { mutate: register, isPending } = registerMutationResult;
+  const { mutate: register, isPending } = useRegister();
 
   const handleRegister = (formData: IRegisterDto) => register(formData);
 

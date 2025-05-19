@@ -3,23 +3,19 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 
-import { useAuth } from "@/features/auth/contexts";
+import { useExchangeOauthCode } from "@/features/auth/hooks";
 
 export default function AuthCallback() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { exchangeOauthCodeMutationResult } = useAuth();
 
   const {
     isPending,
     isSuccess,
     isError,
     mutate: exchangeOauthCode,
-  } = exchangeOauthCodeMutationResult;
+  } = useExchangeOauthCode();
 
-  // const [status, setStatus] = useState<"loading" | "success" | "error">(
-  //   "loading"
-  // );
   const exchangeAttempted = useRef(false);
 
   useEffect(() => {

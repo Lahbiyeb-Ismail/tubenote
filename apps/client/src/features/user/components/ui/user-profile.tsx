@@ -1,4 +1,4 @@
-import { useAuth } from "@/features/auth/contexts";
+import { useGetCurrentUser } from "../../hooks";
 import { UserAvatar } from "./";
 
 type UserProfileProps = {
@@ -6,9 +6,7 @@ type UserProfileProps = {
 };
 
 export function UserProfile({ isOpen }: UserProfileProps) {
-  const { currentUserQueryResult } = useAuth();
-
-  const { data: user } = currentUserQueryResult;
+  const { data: user } = useGetCurrentUser();
 
   return (
     <div className="p-4">

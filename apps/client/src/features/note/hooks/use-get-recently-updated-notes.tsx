@@ -2,18 +2,18 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { useAuth } from "@/features/auth/contexts";
+import { useAuthStore } from "@/features/auth/store";
 
 import { getRecentlyUpdatedNotes } from "../services";
 
 export function useGetRecentlyUpdatedNotes() {
-  const { authState } = useAuth();
+  const { status } = useAuthStore();
 
   return useQuery({
     queryKey: ["notes", "recently_updated_notes"],
     queryFn: () => getRecentlyUpdatedNotes(),
     select: (data) => data.payload.data,
-    enabled: authState.isAuthenticated,
+    enabled: status === "authenticated",
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
   });

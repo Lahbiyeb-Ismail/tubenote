@@ -1,14 +1,11 @@
 "use client";
 
-import { useAuth } from "@/features/auth/contexts";
-
 import { EmailConfirmationAlert } from "@/features/auth/components";
 import { AccountActions, UserInfo } from "@/features/user/components";
+import { useGetCurrentUser } from "@/features/user/hooks";
 
 export default function ProfilePage() {
-  const { currentUserQueryResult } = useAuth();
-
-  const { data: user } = currentUserQueryResult;
+  const { data: user } = useGetCurrentUser();
 
   if (!user) return null;
 

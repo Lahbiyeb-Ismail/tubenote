@@ -10,7 +10,7 @@ import { emailBodySchema } from "@tubenote/schemas";
 import { Button, Form } from "@/components/ui";
 
 import { FormInput } from "@/components/global";
-import { useAuth } from "../../contexts";
+import { useSendForgotPasswordEmail } from "../../hooks";
 
 export function ForgotPasswordForm() {
   const form = useForm<IEmailBodyDto>({
@@ -20,9 +20,8 @@ export function ForgotPasswordForm() {
     },
   });
 
-  const { sendForgotPasswordEmailMutationResult } = useAuth();
   const { mutate: sendForgotPasswordEmail, isPending } =
-    sendForgotPasswordEmailMutationResult;
+    useSendForgotPasswordEmail();
 
   const handleForgotPassword = async (formData: IEmailBodyDto) => {
     sendForgotPasswordEmail(formData.email);

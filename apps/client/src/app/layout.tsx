@@ -6,7 +6,6 @@ import "./globals.css";
 
 import { ReactQueryProvider } from "@/providers";
 
-import { AuthProvider } from "@/features/auth/contexts";
 import { NoteProvider } from "@/features/note/contexts";
 import { UserProvider } from "@/features/user/contexts";
 import { VideoProvider } from "@/features/video/contexts";
@@ -38,16 +37,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ReactQueryProvider>
-          <AuthProvider>
-            <UserProvider>
-              <VideoProvider>
-                <NoteProvider>
-                  <Toaster />
-                  {children}
-                </NoteProvider>
-              </VideoProvider>
-            </UserProvider>
-          </AuthProvider>
+          <UserProvider>
+            <VideoProvider>
+              <NoteProvider>
+                <Toaster />
+                {children}
+              </NoteProvider>
+            </VideoProvider>
+          </UserProvider>
         </ReactQueryProvider>
       </body>
     </html>

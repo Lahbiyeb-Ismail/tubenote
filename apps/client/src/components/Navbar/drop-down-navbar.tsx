@@ -7,8 +7,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import { useAuth } from "@/features/auth/contexts";
-
 import { UserAvatar } from "@/features/user/components";
 
 import {
@@ -20,12 +18,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui";
+import { useLogout } from "@/features/auth/hooks";
+import { useGetCurrentUser } from "@/features/user/hooks";
 
 export function DropDownNavbar() {
-  const { logoutMutationResult, currentUserQueryResult } = useAuth();
-
-  const { data: currentUser } = currentUserQueryResult;
-  const { mutate: logout, isPending } = logoutMutationResult;
+  const { data: currentUser } = useGetCurrentUser();
+  const { mutate: logout, isPending } = useLogout();
 
   return (
     <div className="flex items-center">

@@ -1,12 +1,11 @@
 import { LogOut } from "lucide-react";
 
 import { useUIStore } from "@/stores";
-import { useAuth } from "../../contexts";
+import { useLogout } from "../../hooks";
 
 export function LogoutButton() {
   const { layout } = useUIStore();
-  const { logoutMutationResult } = useAuth();
-  const { mutate: logout, isPending } = logoutMutationResult;
+  const { mutate: logout, isPending } = useLogout();
 
   return (
     <li className="rounded-lg p-2 transition duration-150 ease-in-out text-gray-600 hover:bg-gray-100">

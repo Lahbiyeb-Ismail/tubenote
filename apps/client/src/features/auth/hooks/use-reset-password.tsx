@@ -5,9 +5,8 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 import { resetPassword } from "../services";
-import type { AuthAction } from "../types";
 
-export function useResetPassword(dispatch: React.Dispatch<AuthAction>) {
+export function useResetPassword() {
   const router = useRouter();
 
   return useMutation({
@@ -22,11 +21,6 @@ export function useResetPassword(dispatch: React.Dispatch<AuthAction>) {
 
       toast.success(payload.message);
 
-      dispatch({
-        type: "SET_SUCCESS_RESET_PASSWORD",
-        payload: { message: payload.message },
-      });
-
       // Redirect to login page with success message
       router.push("/login?resetSuccess=true");
     },
@@ -34,11 +28,6 @@ export function useResetPassword(dispatch: React.Dispatch<AuthAction>) {
       toast.dismiss("loadingToast");
 
       toast.error(error.message);
-
-      dispatch({
-        type: "SET_AUTH_ERROR",
-        payload: { message: error.message },
-      });
     },
   });
 }

@@ -1,8 +1,7 @@
 import { AlertTriangle, CheckCircle } from "lucide-react";
 
-import { useAuth } from "../../contexts";
-
 import { Alert, AlertDescription, AlertTitle, Button } from "@/components/ui";
+import { useSendVerificationEmail } from "../../hooks";
 
 type EmailConfirmationAlertProps = {
   emailVerified: boolean;
@@ -13,10 +12,8 @@ export function EmailConfirmationAlert({
   emailVerified,
   email,
 }: EmailConfirmationAlertProps) {
-  const { sendVerificationEmailMutationResult } = useAuth();
-
   const { mutate: sendVerificationEmail, isPending } =
-    sendVerificationEmailMutationResult;
+    useSendVerificationEmail();
 
   if (emailVerified) {
     return (

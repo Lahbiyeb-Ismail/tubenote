@@ -2,14 +2,17 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import type React from "react";
 import toast from "react-hot-toast";
 
 import { logoutUser } from "../services";
-import type { AuthAction } from "../types";
+import { useAuthStore } from "../store";
 
-export function useLogout(dispatch: React.Dispatch<AuthAction>) {
+export function useLogout() {
   const router = useRouter();
+
+  const { authActions } = useAuthStore();
+
+  const { setLoading, setUnauthenticated, setError } = authActions;
 
   return useMutation({
     // The query key is used to identify the mutation
@@ -17,6 +20,8 @@ export function useLogout(dispatch: React.Dispatch<AuthAction>) {
     mutationFn: logoutUser,
     onMutate: () => {
       toast.loading("Logging out...", { id: "loadingToast" });
+
+      setLoading();
     },
     onSuccess: (responseData) => {
       const { payload } = responseData;
@@ -25,10 +30,7 @@ export function useLogout(dispatch: React.Dispatch<AuthAction>) {
 
       toast.success(payload.message);
 
-      dispatch({
-        type: "SET_SUCCESS_LOGOUT",
-        payload: { message: responseData.payload.message },
-      });
+      setUnauthenticated();
 
       localStorage.clear();
 
@@ -40,10 +42,7 @@ export function useLogout(dispatch: React.Dispatch<AuthAction>) {
 
       toast.error(error.message);
 
-      dispatch({
-        type: "SET_AUTH_ERROR",
-        payload: { message: error.message },
-      });
+      setError(error);
     },
   });
 }

@@ -4,14 +4,16 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { setStorageValue } from "@/utils";
-
 import { loginUser } from "../services";
-import type { AuthAction } from "../types";
+import { useAuthStore } from "../store";
 
-export function useLogin(dispatch: React.Dispatch<AuthAction>) {
+export function useLogin() {
   const queryClient = useQueryClient();
   const router = useRouter();
+
+  const { authActions } = useAuthStore();
+
+  const { setLoading, setAuthenticated, setError } = authActions;
 
   return useMutation({
     mutationKey: ["login-user"],
@@ -21,6 +23,8 @@ export function useLogin(dispatch: React.Dispatch<AuthAction>) {
       // Cancel any outgoing refetches
       queryClient.cancelQueries({ queryKey: ["user", "current-user"] });
 
+      setLoading();
+
       toast.loading("Logging in...", { id: "loadingToast" });
     },
     onSuccess: async (responseData) => {
@@ -28,15 +32,7 @@ export function useLogin(dispatch: React.Dispatch<AuthAction>) {
 
       toast.success(payload.message);
 
-      dispatch({
-        type: "SET_SUCCESS_LOGIN",
-        payload: {
-          isAuthenticated: true,
-          message: payload.message,
-        },
-      });
-
-      setStorageValue("isAuthenticated", true);
+      setAuthenticated();
 
       queryClient.invalidateQueries({ queryKey: ["user", "current-user"] });
 
@@ -46,10 +42,7 @@ export function useLogin(dispatch: React.Dispatch<AuthAction>) {
     onError: (error) => {
       toast.error(error.message);
 
-      dispatch({
-        type: "SET_AUTH_ERROR",
-        payload: { message: error.message },
-      });
+      setError(error);
     },
     onSettled: () => {
       // Clean up loading states regardless of outcome

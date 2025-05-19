@@ -4,11 +4,14 @@ import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 
 import type { User } from "@tubenote/types";
 
+import { useAuthStore } from "@/features/auth/store";
 import { getCurrentUser } from "../services";
 
-export function useGetCurrentUser(
-  isAuthenticated: boolean
-): UseQueryResult<User, Error> {
+export function useGetCurrentUser(): UseQueryResult<User, Error> {
+  const { status } = useAuthStore();
+
+  const isAuthenticated = status === "authenticated";
+
   return useQuery({
     queryKey: ["current-user", isAuthenticated],
     queryFn: getCurrentUser,
