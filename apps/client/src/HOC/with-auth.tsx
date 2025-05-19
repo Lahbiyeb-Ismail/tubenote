@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 
 import { LoadingSpinner } from "@/components/ui";
 import { useAuthStore } from "@/features/auth/store";
+import { useGetCurrentUser } from "@/features/user/hooks";
+import { useUserStore } from "@/features/user/store";
 
 /**
  * Configuration options for the withAuth HOC
@@ -78,6 +80,9 @@ export function withAuth<P extends object>(
     const { status } = useAuthStore();
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
+    const { userActions } = useUserStore();
+    const { data: user } = useGetCurrentUser();
+
     useEffect(() => {
       // Check if user is authenticated
       if (status !== "authenticated") {
@@ -93,7 +98,8 @@ export function withAuth<P extends object>(
       }
 
       setIsAuthorized(true);
-    }, [status, router, pathname]);
+      userActions.setUser(user);
+    }, [status, router, pathname, user, userActions]);
 
     // Show loading state while checking authentication
     if (isAuthorized === null) {

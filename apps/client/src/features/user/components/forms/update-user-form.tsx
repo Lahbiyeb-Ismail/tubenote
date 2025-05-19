@@ -10,18 +10,18 @@ import { updateUserSchema } from "@tubenote/schemas";
 import { FormInput } from "@/components/global";
 import { Button, Form } from "@/components/ui";
 
-import { useUser } from "../../contexts";
-import { useGetCurrentUser } from "../../hooks";
+import { useUpdateUser } from "../../hooks";
+import { useUserStore } from "../../store";
 
 export function UpdateUserForm() {
-  const { data: user } = useGetCurrentUser();
-  const { updateUser, isLoading } = useUser();
+  const { currentUser } = useUserStore();
+  const { mutate: updateUser, isPending } = useUpdateUser();
 
   const form = useForm<IUpdateUserDto>({
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
-      username: user?.username ?? "",
-      email: user?.email ?? "",
+      username: currentUser?.username ?? "",
+      email: currentUser?.email ?? "",
     },
   });
 
@@ -59,9 +59,9 @@ export function UpdateUserForm() {
             type="submit"
             className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white
 						hover:from-red-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isLoading}
+            disabled={isPending}
           >
-            {isLoading ? "Updating..." : "Update Profile"}
+            {isPending ? "Updating..." : "Update Profile"}
           </Button>
         </form>
       </Form>

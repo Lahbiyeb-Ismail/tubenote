@@ -19,10 +19,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui";
 import { useLogout } from "@/features/auth/hooks";
-import { useGetCurrentUser } from "@/features/user/hooks";
+import { useUserStore } from "@/features/user/store";
 
 export function DropDownNavbar() {
-  const { data: currentUser } = useGetCurrentUser();
+  const { currentUser } = useUserStore();
   const { mutate: logout, isPending } = useLogout();
 
   return (

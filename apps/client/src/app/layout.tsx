@@ -7,7 +7,6 @@ import "./globals.css";
 import { ReactQueryProvider } from "@/providers";
 
 import { NoteProvider } from "@/features/note/contexts";
-import { UserProvider } from "@/features/user/contexts";
 import { VideoProvider } from "@/features/video/contexts";
 
 const geistSans = localFont({
@@ -37,14 +36,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ReactQueryProvider>
-          <UserProvider>
-            <VideoProvider>
-              <NoteProvider>
-                <Toaster />
-                {children}
-              </NoteProvider>
-            </VideoProvider>
-          </UserProvider>
+          <VideoProvider>
+            <NoteProvider>
+              <Toaster />
+              {children}
+            </NoteProvider>
+          </VideoProvider>
         </ReactQueryProvider>
       </body>
     </html>
