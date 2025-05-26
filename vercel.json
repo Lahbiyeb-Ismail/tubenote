@@ -1,4 +1,13 @@
 {
-  "buildCommand": "./build.sh",
-  "outputDirectory": "apps/client/.next"
+  "framework": "nextjs",
+  "monorepoManager": "pnpm",
+  "buildCommand": "pnpm -w run build:types && pnpm -w run build:schemas && pnpm -w run build:utils && pnpm -w run build:dtos && pnpm -w run build:client",
+  "outputDirectory": "apps/client/.next",
+  "installCommand": "pnpm install",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/apps/client/$1"
+    }
+  ]
 }
