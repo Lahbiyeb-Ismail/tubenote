@@ -1,13 +1,17 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { use, useEffect, useRef } from "react";
 
 import { useExchangeOauthCode } from "@/features/auth/hooks";
 
-export default function AuthCallback() {
+interface IPageProps {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}
+
+export default function AuthCallback({ searchParams }: IPageProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const { code } = use(searchParams);
 
   const {
     isPending,
@@ -24,8 +28,6 @@ export default function AuthCallback() {
 
       exchangeAttempted.current = true;
 
-      const code = searchParams.get("code");
-
       if (!code) {
         setTimeout(() => router.push("/"), 2000);
         return;
@@ -40,7 +42,7 @@ export default function AuthCallback() {
     }
 
     exchangeOauthCodeWithAccessToken();
-  }, [searchParams, router, exchangeOauthCode, isError]);
+  }, [code, router, exchangeOauthCode, isError]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">
