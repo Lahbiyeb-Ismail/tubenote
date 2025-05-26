@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
 
-import type { UseMutationResult } from "@tanstack/react-query";
-
-import type { IApiSuccessResponse, Video } from "@tubenote/types";
+import type { Video } from "@tubenote/types";
 
 export type VideoProviderProps = {
   children: ReactNode;
@@ -16,12 +14,6 @@ export type VideoState = {
 
 export type VideoContextType = {
   state: VideoState;
-  saveVideoMutationResult: UseMutationResult<
-    IApiSuccessResponse<Video>,
-    Error,
-    string,
-    void
-  >;
   videoCurrentTime: number;
   setVideoCurrentTime: (time: number) => void;
 };

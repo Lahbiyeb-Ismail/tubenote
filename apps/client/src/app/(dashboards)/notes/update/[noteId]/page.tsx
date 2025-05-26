@@ -2,14 +2,14 @@
 
 import { useNote } from "@/features/note/contexts";
 import { useGetNoteById } from "@/features/note/hooks";
-import { useVideo } from "@/features/video/contexts";
 
 import { NotePageLayout } from "@/features/note/components";
+import { useVideoStore } from "@/features/video/store";
 
 function UpdateNotePage({ params }: { params: { noteId: string } }) {
   const { noteId } = params;
   const { updateNote, isLoading: isUpdatingNote } = useNote();
-  const { videoCurrentTime } = useVideo();
+  const { videoCurrentTime } = useVideoStore();
   const { data: note, isLoading, isError } = useGetNoteById(noteId);
 
   const handleUpdateNote = (noteTitle: string, content: string) => {

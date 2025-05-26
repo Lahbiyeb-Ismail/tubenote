@@ -4,7 +4,7 @@ import { useRef } from "react";
 import YouTube, { type YouTubeProps } from "react-youtube";
 
 import { useNote } from "@/features/note/contexts";
-import { useVideo } from "../../contexts";
+import { useVideoStore } from "../../store";
 
 type VideoPlayerProps = {
   videoId?: string;
@@ -12,7 +12,9 @@ type VideoPlayerProps = {
 
 export function VideoPlayer({ videoId }: VideoPlayerProps) {
   const playerRef = useRef<any | null>(null);
-  const { setVideoCurrentTime } = useVideo();
+  const {
+    videoActions: { setVideoCurrentTime },
+  } = useVideoStore();
   const {
     state: { note },
   } = useNote();
