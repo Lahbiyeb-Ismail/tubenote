@@ -1,21 +1,21 @@
-import path from 'path';
+import path from "path";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Enable output file tracing for monorepos
-  output: 'standalone',
-  
+  output: "standalone",
+
   // Set the tracing root to include the entire monorepo
-  outputFileTracingRoot: path.join(__dirname, '../../'),
+  outputFileTracingRoot: path.join(__dirname, "../../"),
 
   // Transpile shared packages
   transpilePackages: [
-    '@tubenote/types',
-    '@tubenote/dtos',
-    '@tubenote/utils',
-    '@tubenote/schemas'
+    "@tubenote/types",
+    "@tubenote/dtos",
+    "@tubenote/utils",
+    "@tubenote/schemas",
   ],
-  
+
   // Experimental features for better monorepo support
   experimental: {
     // Enable external directory support
