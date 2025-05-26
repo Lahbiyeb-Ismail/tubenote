@@ -1,45 +1,13 @@
-"use client";
+import { UpdateNotePage } from "@/features/note/pages";
 
-import { useGetNoteById, useUpdateNote } from "@/features/note/hooks";
-
-import { NotePageLayout } from "@/features/note/components";
-import { useVideoStore } from "@/features/video/store";
-
-function UpdateNotePage({ params }: { params: { noteId: string } }) {
-  const { noteId } = params;
-  const { mutate: updateNote, isPending: isUpdatingNote } = useUpdateNote();
-  const { videoCurrentTime } = useVideoStore();
-  const { data: note, isLoading, isError } = useGetNoteById(noteId);
-
-  const handleUpdateNote = (noteTitle: string, content: string) => {
-    if (!note) return;
-
-    updateNote({
-      noteId: note.id,
-      updateData: {
-        title: noteTitle,
-        content: content,
-        timestamp: videoCurrentTime,
-      },
-    });
-  };
-
-  if (isError) {
-    return <div>Error...</div>;
-  }
-
-  return (
-    <NotePageLayout
-      videoId={note?.youtubeId || ""}
-      noteContent={note?.content}
-      noteTitle={note?.title}
-      isLoading={isLoading || !note}
-      isSavingNote={isUpdatingNote}
-      modalTitle="Confirm Update Note"
-      modalDescription="Are you sure you want to update this note?"
-      handleSaveNote={handleUpdateNote}
-    />
-  );
+interface IPageProps {
+  params: Promise<{ noteId: string }>;
 }
 
-export default UpdateNotePage;
+async function Page({ params }: IPageProps) {
+  const { noteId } = await params;
+
+  return <UpdateNotePage noteId={noteId} />;
+}
+
+export default Page;
