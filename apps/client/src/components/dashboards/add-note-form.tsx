@@ -3,14 +3,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-import type { VideoUrl } from "@/features/note/types";
 import { videoFormSchema } from "@/lib/schemas";
 
 import { Form, FormControl, FormField, FormItem, Input } from "@/components/ui";
 import { useSaveVideoData } from "@/features/video/hooks";
 
 export function AddNoteForm() {
-  const form = useForm<VideoUrl>({
+  const form = useForm<{ videoUrl: string }>({
     resolver: zodResolver(videoFormSchema),
     defaultValues: {
       videoUrl: "",
@@ -19,7 +18,7 @@ export function AddNoteForm() {
 
   const { mutate: saveVideo, isPending } = useSaveVideoData();
 
-  const handleAddNote = async (formData: VideoUrl) => {
+  const handleAddNote = async (formData: { videoUrl: string }) => {
     saveVideo(formData.videoUrl);
   };
 

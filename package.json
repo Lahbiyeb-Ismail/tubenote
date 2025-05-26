@@ -10,6 +10,7 @@
   "scripts": {
     "dev:server": "pnpm run --filter server dev",
     "dev:client": "pnpm run --filter client dev",
+    "start:client": "pnpm run --filter client start",
     "build:server": "pnpm run --filter server build",
     "build:client": "pnpm run --filter client build",
     "build:types": "pnpm run --filter types build",
