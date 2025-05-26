@@ -2,7 +2,6 @@
 
 import type { Note } from "@tubenote/types";
 
-import { useNote } from "@/features/note/contexts";
 import { useUIStore } from "@/stores";
 
 import {
@@ -13,6 +12,7 @@ import {
   CardWrapper,
 } from "@/components/global";
 
+import { useNoteStore } from "../../store";
 import { DeleteNoteButton, EditNoteButton } from "../buttons";
 
 type NoteCardProps = {
@@ -22,7 +22,7 @@ type NoteCardProps = {
 
 export function NoteCard({ note, onDeleteClick }: NoteCardProps) {
   const { layout, actions } = useUIStore();
-  const { isLoading: isDeletingNote } = useNote();
+  const { isDeleting, isUpdating } = useNoteStore();
 
   const handleDelete = () => {
     onDeleteClick();
@@ -55,11 +55,8 @@ export function NoteCard({ note, onDeleteClick }: NoteCardProps) {
           isGridLayout={layout.isGridLayout}
         />
         <CardFooterWrapper>
-          <EditNoteButton noteId={note.id} isLoading={isDeletingNote} />
-          <DeleteNoteButton
-            isLoading={isDeletingNote}
-            onDelete={handleDelete}
-          />
+          <EditNoteButton noteId={note.id} isLoading={isUpdating} />
+          <DeleteNoteButton isLoading={isDeleting} onDelete={handleDelete} />
         </CardFooterWrapper>
       </div>
     </CardWrapper>

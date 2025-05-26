@@ -1,14 +1,13 @@
 "use client";
 
-import { useNote } from "@/features/note/contexts";
-import { useGetNoteById } from "@/features/note/hooks";
+import { useGetNoteById, useUpdateNote } from "@/features/note/hooks";
 
 import { NotePageLayout } from "@/features/note/components";
 import { useVideoStore } from "@/features/video/store";
 
 function UpdateNotePage({ params }: { params: { noteId: string } }) {
   const { noteId } = params;
-  const { updateNote, isLoading: isUpdatingNote } = useNote();
+  const { mutate: updateNote, isPending: isUpdatingNote } = useUpdateNote();
   const { videoCurrentTime } = useVideoStore();
   const { data: note, isLoading, isError } = useGetNoteById(noteId);
 

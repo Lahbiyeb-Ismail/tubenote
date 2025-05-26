@@ -5,11 +5,10 @@ import { useState } from "react";
 
 import { useUIStore } from "@/stores";
 
-import { useNote } from "@/features/note/contexts";
-
 import { ConfirmationModal } from "@/components/global";
 import { Button, DialogFooter } from "@/components/ui";
 
+import { useDeleteNote } from "../../hooks";
 import { NoteCard } from "../cards";
 
 type NotesListProps = {
@@ -18,7 +17,7 @@ type NotesListProps = {
 
 export function NotesList({ notes }: NotesListProps) {
   const { layout, actions } = useUIStore();
-  const { deleteNote, isLoading: isDeletingNote } = useNote();
+  const { mutate: deleteNote, isPending: isDeletingNote } = useDeleteNote();
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
 
   const handleOpenDeleteModal = (noteId: string) => {

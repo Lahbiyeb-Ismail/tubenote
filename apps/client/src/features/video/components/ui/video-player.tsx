@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import YouTube, { type YouTubeProps } from "react-youtube";
 
-import { useNote } from "@/features/note/contexts";
+import { useNoteStore } from "@/features/note/store";
 import { useVideoStore } from "../../store";
 
 type VideoPlayerProps = {
@@ -15,9 +15,7 @@ export function VideoPlayer({ videoId }: VideoPlayerProps) {
   const {
     videoActions: { setVideoCurrentTime },
   } = useVideoStore();
-  const {
-    state: { note },
-  } = useNote();
+  const { note } = useNoteStore();
 
   const onPlayerReady: YouTubeProps["onReady"] = (event) => {
     playerRef.current = event.target;
