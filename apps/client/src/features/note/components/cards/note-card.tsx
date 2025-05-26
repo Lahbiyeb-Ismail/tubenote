@@ -17,7 +17,7 @@ import { DeleteNoteButton, EditNoteButton } from "../buttons";
 
 type NoteCardProps = {
   note: Note;
-  onDeleteClick: () => void;
+  onDeleteClick?: () => void;
 };
 
 export function NoteCard({ note, onDeleteClick }: NoteCardProps) {
@@ -25,7 +25,7 @@ export function NoteCard({ note, onDeleteClick }: NoteCardProps) {
   const { isDeleting, isUpdating } = useNoteStore();
 
   const handleDelete = () => {
-    onDeleteClick();
+    onDeleteClick?.();
     actions.openModal();
   };
 
