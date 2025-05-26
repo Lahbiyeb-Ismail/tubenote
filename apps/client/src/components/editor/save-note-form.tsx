@@ -3,8 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-import type { NoteTitle } from "@/features/note/types";
-
 import { FormInput } from "@/components/global";
 import { Button, Form } from "@/components/ui";
 import { saveNoteFormSchema } from "@/lib";
@@ -15,6 +13,10 @@ type SaveNoteFormProps = {
   handleSaveSubmit: (noteTitle: string) => void;
   noteTitle?: string;
 };
+
+interface NoteTitle {
+  noteTitle: string;
+}
 
 export function SaveNoteForm({
   isLoading,
