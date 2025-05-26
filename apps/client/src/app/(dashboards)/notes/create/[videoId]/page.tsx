@@ -1,15 +1,15 @@
 "use client";
 
-import { useNote } from "@/features/note/contexts";
-import { useVideo } from "@/features/video/contexts";
+import { useCreateNote } from "@/features/note/hooks";
 import { useGetVideoById } from "@/features/video/hooks";
 
 import { NotePageLayout } from "@/features/note/components";
+import { useVideoStore } from "@/features/video/store";
 
 function CreateNotePage({ params }: { params: { videoId: string } }) {
   const { videoId } = params;
-  const { createNote, isLoading: isSavingNote } = useNote();
-  const { videoCurrentTime } = useVideo();
+  const { mutate: createNote, isPending: isSavingNote } = useCreateNote();
+  const { videoCurrentTime } = useVideoStore();
   const { data: videoData, isLoading } = useGetVideoById(videoId);
 
   const handleCreateNote = (noteTitle: string, content: string) => {

@@ -6,13 +6,6 @@ import "./globals.css";
 
 import { ReactQueryProvider } from "@/providers";
 
-import { LayoutProvider, ModalProvider } from "@/context";
-
-import { AuthProvider } from "@/features/auth/contexts";
-import { NoteProvider } from "@/features/note/contexts";
-import { UserProvider } from "@/features/user/contexts";
-import { VideoProvider } from "@/features/video/contexts";
-
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -40,20 +33,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ReactQueryProvider>
-          <LayoutProvider>
-            <ModalProvider>
-              <AuthProvider>
-                <UserProvider>
-                  <VideoProvider>
-                    <NoteProvider>
-                      <Toaster />
-                      {children}
-                    </NoteProvider>
-                  </VideoProvider>
-                </UserProvider>
-              </AuthProvider>
-            </ModalProvider>
-          </LayoutProvider>
+          <Toaster />
+          {children}
         </ReactQueryProvider>
       </body>
     </html>

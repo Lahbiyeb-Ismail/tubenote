@@ -6,7 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { LoadingSpinner } from "@/components/ui";
-import { useAuth } from "@/features/auth/contexts";
+import { useAuthStore } from "@/features/auth/store";
+import { useGetCurrentUser } from "@/features/user/hooks";
+import { useUserStore } from "@/features/user/store";
 
 /**
  * Configuration options for the withAuth HOC
@@ -75,13 +77,15 @@ export function withAuth<P extends object>(
     const router = useRouter();
     const pathname = usePathname();
 
-    const { authState } = useAuth();
-    const { isAuthenticated } = authState;
+    const { status } = useAuthStore();
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+
+    const { userActions } = useUserStore();
+    const { data: user } = useGetCurrentUser();
 
     useEffect(() => {
       // Check if user is authenticated
-      if (!isAuthenticated) {
+      if (status !== "authenticated") {
         // Build redirect URL with return path if needed
         let redirectPath = redirectTo;
         if (includeReturnUrl && pathname) {
@@ -94,7 +98,8 @@ export function withAuth<P extends object>(
       }
 
       setIsAuthorized(true);
-    }, [isAuthenticated, router, pathname]);
+      userActions.setUser(user);
+    }, [status, router, pathname, user, userActions]);
 
     // Show loading state while checking authentication
     if (isAuthorized === null) {

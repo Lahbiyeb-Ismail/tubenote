@@ -1,6 +1,6 @@
 "use client";
 
-import { useModal } from "@/context";
+import { useUIStore } from "@/stores";
 
 import {
   Dialog,
@@ -21,10 +21,10 @@ export function ConfirmationModal({
   description,
   children,
 }: ConfirmationModalProps) {
-  const { isOpen, closeModal } = useModal();
+  const { modal, actions } = useUIStore();
 
   return (
-    <Dialog open={isOpen} onOpenChange={closeModal}>
+    <Dialog open={modal.isOpen} onOpenChange={actions.closeModal}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

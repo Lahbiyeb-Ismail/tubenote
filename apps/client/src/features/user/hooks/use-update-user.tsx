@@ -2,9 +2,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 import { updateCurrentUser } from "../services";
-import type { UserAction } from "../types";
 
-export function useUpdateUser(dispatch: React.Dispatch<UserAction>) {
+export function useUpdateUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -21,21 +20,11 @@ export function useUpdateUser(dispatch: React.Dispatch<UserAction>) {
 
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
 
-      dispatch({
-        type: "UPDATE_USER",
-        payload: { message: payload.message },
-      });
-
       window.location.reload();
     },
     onError(error) {
       toast.dismiss("loadingToast");
       toast.error(error.message);
-
-      dispatch({
-        type: "UPDATE_USER_FAILD",
-        payload: { message: error.message },
-      });
     },
   });
 }

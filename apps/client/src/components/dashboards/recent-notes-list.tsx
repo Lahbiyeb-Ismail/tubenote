@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import type { Note } from "@tubenote/types";
 
-import { useLayout } from "@/context";
+import { useUIStore } from "@/stores";
 
 import { Button } from "@/components/ui";
 import { NoteCard } from "@/features/note/components";
@@ -20,14 +20,14 @@ export function RecentNoteList({
 }: RecentNoteListProps) {
   const hasNotes = notes.length > 0;
 
-  const { isGridLayout } = useLayout();
+  const { layout } = useUIStore();
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-xl font-semibold mb-4">{title}</h2>
       {hasNotes ? (
         <div
-          className={`${isGridLayout ? "grid grid-cols-1 gap-6 lg:grid-cols-2" : "space-y-4"}`}
+          className={`${layout.isGridLayout ? "grid grid-cols-1 gap-6 lg:grid-cols-2" : "space-y-4"}`}
         >
           {notes?.map((note) => (
             <NoteCard key={note.id} note={note} />

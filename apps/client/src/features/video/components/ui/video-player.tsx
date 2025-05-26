@@ -3,8 +3,8 @@
 import { useRef } from "react";
 import YouTube, { type YouTubeProps } from "react-youtube";
 
-import { useNote } from "@/features/note/contexts";
-import { useVideo } from "../../contexts";
+import { useNoteStore } from "@/features/note/store";
+import { useVideoStore } from "../../store";
 
 type VideoPlayerProps = {
   videoId?: string;
@@ -12,10 +12,10 @@ type VideoPlayerProps = {
 
 export function VideoPlayer({ videoId }: VideoPlayerProps) {
   const playerRef = useRef<any | null>(null);
-  const { setVideoCurrentTime } = useVideo();
   const {
-    state: { note },
-  } = useNote();
+    videoActions: { setVideoCurrentTime },
+  } = useVideoStore();
+  const { note } = useNoteStore();
 
   const onPlayerReady: YouTubeProps["onReady"] = (event) => {
     playerRef.current = event.target;

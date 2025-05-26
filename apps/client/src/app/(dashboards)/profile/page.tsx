@@ -1,31 +1,28 @@
 "use client";
 
-import { useAuth } from "@/features/auth/contexts";
-
 import { EmailConfirmationAlert } from "@/features/auth/components";
 import { AccountActions, UserInfo } from "@/features/user/components";
+import { useUserStore } from "@/features/user/store";
 
 export default function ProfilePage() {
-  const { currentUserQueryResult } = useAuth();
+  const { currentUser } = useUserStore();
 
-  const { data: user } = currentUserQueryResult;
-
-  if (!user) return null;
+  if (!currentUser) return null;
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
       <EmailConfirmationAlert
-        emailVerified={user.isEmailVerified}
-        email={user.email}
+        emailVerified={currentUser.isEmailVerified}
+        email={currentUser.email}
       />
 
       <h1 className="text-3xl font-bold mb-8">Profile</h1>
 
       <UserInfo
-        username={user.username}
-        email={user.email}
-        isEmailVerified={user.isEmailVerified}
-        createdAt={user.createdAt}
+        username={currentUser.username}
+        email={currentUser.email}
+        isEmailVerified={currentUser.isEmailVerified}
+        createdAt={currentUser.createdAt}
       />
 
       <AccountActions />

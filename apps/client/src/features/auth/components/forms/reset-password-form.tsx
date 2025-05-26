@@ -10,7 +10,7 @@ import { passwordBodySchema } from "@tubenote/schemas";
 import { Button, Form } from "@/components/ui";
 
 import { FormInput } from "@/components/global";
-import { useAuth } from "../../contexts";
+import { useResetPassword } from "../../hooks";
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const form = useForm<IPasswordBodyDto>({
@@ -21,8 +21,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
     },
   });
 
-  const { resetPasswordMutationResult } = useAuth();
-  const { mutate: resetPassword, isPending } = resetPasswordMutationResult;
+  const { mutate: resetPassword, isPending } = useResetPassword();
 
   const handleResetPassword = async (formData: IPasswordBodyDto) => {
     resetPassword({ token, password: formData.password });

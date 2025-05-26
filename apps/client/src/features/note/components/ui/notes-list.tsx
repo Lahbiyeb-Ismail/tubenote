@@ -3,13 +3,12 @@
 import type { Note } from "@tubenote/types";
 import { useState } from "react";
 
-import { useLayout, useModal } from "@/context";
-
-import { useNote } from "@/features/note/contexts";
+import { useUIStore } from "@/stores";
 
 import { ConfirmationModal } from "@/components/global";
 import { Button, DialogFooter } from "@/components/ui";
 
+import { useDeleteNote } from "../../hooks";
 import { NoteCard } from "../cards";
 
 type NotesListProps = {
@@ -17,9 +16,8 @@ type NotesListProps = {
 };
 
 export function NotesList({ notes }: NotesListProps) {
-  const { isGridLayout } = useLayout();
-  const { deleteNote, isLoading: isDeletingNote } = useNote();
-  const { closeModal } = useModal();
+  const { layout, actions } = useUIStore();
+  const { mutate: deleteNote, isPending: isDeletingNote } = useDeleteNote();
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
 
   const handleOpenDeleteModal = (noteId: string) => {
@@ -30,14 +28,14 @@ export function NotesList({ notes }: NotesListProps) {
     if (noteToDelete) {
       deleteNote(noteToDelete);
       setNoteToDelete(null);
-      closeModal();
+      actions.closeModal();
     }
   };
 
   return (
     <div className="md:px-4 py-6">
       <div
-        className={`${isGridLayout ? "grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4" : "space-y-4"}`}
+        className={`${layout.isGridLayout ? "grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4" : "space-y-4"}`}
       >
         {notes.map((note) => (
           <NoteCard
@@ -53,7 +51,7 @@ export function NotesList({ notes }: NotesListProps) {
         description="Are you sure you want to delete this note? This action cannot be undone."
       >
         <DialogFooter>
-          <Button variant="outline" onClick={closeModal}>
+          <Button variant="outline" onClick={actions.closeModal}>
             Cancel
           </Button>
           <Button

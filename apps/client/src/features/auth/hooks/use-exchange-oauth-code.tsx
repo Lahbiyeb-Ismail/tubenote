@@ -6,11 +6,15 @@ import { useRouter } from "next/navigation";
 import { setStorageValue } from "@/utils";
 
 import { exchangeOauthCodeForAuthTokens } from "../services";
-import type { AuthAction } from "../types";
+import { useAuthStore } from "../store";
 
-export function useExchangeOauthCode(dispatch: React.Dispatch<AuthAction>) {
+export function useExchangeOauthCode() {
   const queryClient = useQueryClient();
   const router = useRouter();
+
+  const { authActions } = useAuthStore();
+
+  const { setError, setLoading, setAuthenticated } = authActions;
 
   return useMutation({
     mutationKey: ["exchange-oauth-code"],
@@ -19,17 +23,12 @@ export function useExchangeOauthCode(dispatch: React.Dispatch<AuthAction>) {
     onMutate: () => {
       // Cancel any outgoing refetches
       queryClient.cancelQueries({ queryKey: ["current-user"] });
-    },
-    onSuccess: async (responseData) => {
-      const { payload } = responseData;
 
-      dispatch({
-        type: "SET_SUCCESS_LOGIN",
-        payload: {
-          isAuthenticated: true,
-          message: payload.message,
-        },
-      });
+      setLoading();
+    },
+    onSuccess: async () => {
+      // Set the authentication state
+      setAuthenticated();
 
       setStorageValue("isAuthenticated", true);
 
@@ -39,10 +38,7 @@ export function useExchangeOauthCode(dispatch: React.Dispatch<AuthAction>) {
       router.push("/dashboard");
     },
     onError: (error) => {
-      dispatch({
-        type: "SET_AUTH_ERROR",
-        payload: { message: error.message },
-      });
+      setError(error);
     },
   });
 }

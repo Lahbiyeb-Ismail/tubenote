@@ -2,8 +2,7 @@
 
 import type { Note } from "@tubenote/types";
 
-import { useLayout, useModal } from "@/context";
-import { useNote } from "@/features/note/contexts";
+import { useUIStore } from "@/stores";
 
 import {
   CardContent,
@@ -13,6 +12,7 @@ import {
   CardWrapper,
 } from "@/components/global";
 
+import { useNoteStore } from "../../store";
 import { DeleteNoteButton, EditNoteButton } from "../buttons";
 
 type NoteCardProps = {
@@ -21,13 +21,12 @@ type NoteCardProps = {
 };
 
 export function NoteCard({ note, onDeleteClick }: NoteCardProps) {
-  const { isGridLayout } = useLayout();
-  const { isLoading: isDeletingNote } = useNote();
-  const { openModal } = useModal();
+  const { layout, actions } = useUIStore();
+  const { isDeleting, isUpdating } = useNoteStore();
 
   const handleDelete = () => {
     onDeleteClick();
-    openModal();
+    actions.openModal();
   };
 
   return (
@@ -35,10 +34,10 @@ export function NoteCard({ note, onDeleteClick }: NoteCardProps) {
       <CardImage
         src={note.thumbnail}
         alt={note.title}
-        isGridLayout={isGridLayout}
+        isGridLayout={layout.isGridLayout}
       />
       <div
-        className={`flex-grow ${isGridLayout ? "" : "flex flex-col justify-between"}`}
+        className={`flex-grow ${layout.isGridLayout ? "" : "flex flex-col justify-between"}`}
       >
         <div className="flex justify-end p-2">
           <CardSettingsButton
@@ -53,14 +52,11 @@ export function NoteCard({ note, onDeleteClick }: NoteCardProps) {
           cardTitle={note.videoTitle}
           cardDescription={`Note Title: ${note.title}`}
           href={`/notes/${note.id}`}
-          isGridLayout={isGridLayout}
+          isGridLayout={layout.isGridLayout}
         />
         <CardFooterWrapper>
-          <EditNoteButton noteId={note.id} isLoading={isDeletingNote} />
-          <DeleteNoteButton
-            isLoading={isDeletingNote}
-            onDelete={handleDelete}
-          />
+          <EditNoteButton noteId={note.id} isLoading={isUpdating} />
+          <DeleteNoteButton isLoading={isDeleting} onDelete={handleDelete} />
         </CardFooterWrapper>
       </div>
     </CardWrapper>

@@ -1,6 +1,6 @@
 import type { Video } from "@tubenote/types";
 
-import { useLayout } from "@/context";
+import { useUIStore } from "@/stores";
 
 import {
   CardContent,
@@ -11,24 +11,25 @@ import {
 } from "@/components/global";
 
 export function VideoCard({ video }: { video: Video }) {
-  const { isGridLayout } = useLayout();
+  const { layout } = useUIStore();
+
   return (
     <CardWrapper>
       <CardImage
         src={video.thumbnails.medium.url}
         alt={video.title}
-        isGridLayout={isGridLayout}
+        isGridLayout={layout.isGridLayout}
       />
 
       <div
         className={`flex-grow p-2 ${
-          isGridLayout ? "" : "flex flex-col justify-between"
+          layout.isGridLayout ? "" : "flex flex-col justify-between"
         }`}
       >
         <CardContent
           cardTitle={video.title}
           href={`/videos/${video.youtubeId}`}
-          isGridLayout={isGridLayout}
+          isGridLayout={layout.isGridLayout}
         />
         <CardFooterWrapper className="items-center justify-center">
           <SeeAllButton href={`/videos/${video.youtubeId}`} />

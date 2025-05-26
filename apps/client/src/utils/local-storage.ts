@@ -12,8 +12,10 @@ export function getStorageValue<T>(key: string): T | null {
   }
 
   try {
-    const item = localStorage.getItem(key);
-    return item ? (JSON.parse(item) as T) : null;
+    const value = localStorage.getItem(key);
+    if (value && typeof value === "string") return value as T;
+
+    return value ? (JSON.parse(value) as T) : null;
   } catch (error) {
     console.error("Error reading from localStorage:", error);
     return null;
@@ -35,7 +37,11 @@ export function setStorageValue<T>(key: string, value: T): void {
   }
 
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    if (typeof value === "string") {
+      localStorage.setItem(key, value);
+    } else {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
   } catch (error) {
     console.error("Error setting localStorage:", error);
   }

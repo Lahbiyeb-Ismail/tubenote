@@ -12,7 +12,7 @@ import { Button, Form } from "@/components/ui";
 import { ForgotPasswordLink } from "../links";
 
 import { FormInput } from "@/components/global";
-import { useAuth } from "../../contexts";
+import { useLogin } from "../../hooks";
 
 export function LoginForm() {
   const form = useForm<ILoginDto>({
@@ -23,8 +23,7 @@ export function LoginForm() {
     },
   });
 
-  const { loginMutationResult } = useAuth();
-  const { mutate: login, isPending } = loginMutationResult;
+  const { mutate: login, isPending } = useLogin();
 
   const handleLogin = (formData: ILoginDto) => login(formData);
 

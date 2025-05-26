@@ -5,11 +5,8 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 import { sendForgotPasswordEmail } from "../services";
-import type { AuthAction } from "../types";
 
-export function useSendForgotPasswordEmail(
-  dispatch: React.Dispatch<AuthAction>
-) {
+export function useSendForgotPasswordEmail() {
   const router = useRouter();
 
   return useMutation({
@@ -24,21 +21,11 @@ export function useSendForgotPasswordEmail(
 
       toast.success(payload.message);
 
-      dispatch({
-        type: "SET_SUCCESS_FORGOT_EMAIL_SENT",
-        payload: { message: payload.message },
-      });
-
       router.push("/forgot-password/done");
     },
     onError: (error) => {
       toast.dismiss("loadingToast");
       toast.error(error.message);
-
-      dispatch({
-        type: "SET_AUTH_ERROR",
-        payload: { message: error.message },
-      });
     },
   });
 }

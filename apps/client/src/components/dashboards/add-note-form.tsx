@@ -7,7 +7,7 @@ import type { VideoUrl } from "@/features/note/types";
 import { videoFormSchema } from "@/lib/schemas";
 
 import { Form, FormControl, FormField, FormItem, Input } from "@/components/ui";
-import { useVideo } from "@/features/video/contexts";
+import { useSaveVideoData } from "@/features/video/hooks";
 
 export function AddNoteForm() {
   const form = useForm<VideoUrl>({
@@ -17,9 +17,7 @@ export function AddNoteForm() {
     },
   });
 
-  const { saveVideoMutationResult } = useVideo();
-
-  const { mutate: saveVideo, isPending } = saveVideoMutationResult;
+  const { mutate: saveVideo, isPending } = useSaveVideoData();
 
   const handleAddNote = async (formData: VideoUrl) => {
     saveVideo(formData.videoUrl);

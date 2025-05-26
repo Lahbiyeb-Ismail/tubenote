@@ -1,12 +1,11 @@
 import { LogOut } from "lucide-react";
 
-import { useLayout } from "@/context";
-import { useAuth } from "../../contexts";
+import { useUIStore } from "@/stores";
+import { useLogout } from "../../hooks";
 
 export function LogoutButton() {
-  const { isSidebarOpen } = useLayout();
-  const { logoutMutationResult } = useAuth();
-  const { mutate: logout, isPending } = logoutMutationResult;
+  const { layout } = useUIStore();
+  const { mutate: logout, isPending } = useLogout();
 
   return (
     <li className="rounded-lg p-2 transition duration-150 ease-in-out text-gray-600 hover:bg-gray-100">
@@ -14,18 +13,18 @@ export function LogoutButton() {
         type="button"
         disabled={isPending}
         onClick={() => logout()}
-        className={`flex items-center ${isSidebarOpen ? "" : "justify-center"} h-full w-full text-left`}
+        className={`flex items-center ${layout.isSidebarOpen ? "" : "justify-center"} h-full w-full text-left`}
       >
         <div
           className={`flex items-center justify-center ${
-            isSidebarOpen ? "mr-3" : "w-full h-full"
+            layout.isSidebarOpen ? "mr-3" : "w-full h-full"
           }`}
         >
           <LogOut
-            className={`transition-all duration-300 ${isSidebarOpen ? "" : "w-6 h-6"}`}
+            className={`transition-all duration-300 ${layout.isSidebarOpen ? "" : "w-6 h-6"}`}
           />
         </div>
-        {isSidebarOpen && <span>Logout</span>}
+        {layout.isSidebarOpen && <span>Logout</span>}
       </button>
     </li>
   );

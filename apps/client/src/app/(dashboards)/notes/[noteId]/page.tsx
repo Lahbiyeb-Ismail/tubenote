@@ -11,7 +11,9 @@ import {
   NotePageHeader,
 } from "@/features/note/components";
 
+import { useNoteStore } from "@/features/note/store";
 import { VideoPlayer } from "@/features/video/components";
+import { useEffect } from "react";
 
 type NotePageParams = {
   noteId: string;
@@ -19,8 +21,13 @@ type NotePageParams = {
 
 function NotePage({ params }: { params: NotePageParams }) {
   const { noteId } = params;
+  const { noteActions } = useNoteStore();
   const { data: note, isLoading, isError, refetch } = useGetNoteById(noteId);
   const { isVideoPlayerVisible, toggleVideoPlayer } = useToggleVideoPlayer();
+
+  useEffect(() => {
+    noteActions.setNote(note);
+  }, [note, noteActions]);
 
   if (isLoading) {
     return (
