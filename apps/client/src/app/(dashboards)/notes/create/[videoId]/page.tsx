@@ -1,43 +1,13 @@
-"use client";
+import { CreateNotePage } from "@/features/note/pages";
 
-import { useCreateNote } from "@/features/note/hooks";
-import { useGetVideoById } from "@/features/video/hooks";
-
-import { NotePageLayout } from "@/features/note/components";
-import { useVideoStore } from "@/features/video/store";
-
-function CreateNotePage({ params }: { params: { videoId: string } }) {
-  const { videoId } = params;
-  const { mutate: createNote, isPending: isSavingNote } = useCreateNote();
-  const { videoCurrentTime } = useVideoStore();
-  const { data: videoData, isLoading } = useGetVideoById(videoId);
-
-  const handleCreateNote = (noteTitle: string, content: string) => {
-    if (!videoData) return;
-
-    createNote({
-      videoId: videoData.id,
-      createNoteData: {
-        title: noteTitle,
-        content: content,
-        thumbnail: videoData.thumbnails.medium.url,
-        videoTitle: videoData.title,
-        youtubeId: videoData.youtubeId,
-        timestamp: videoCurrentTime,
-      },
-    });
-  };
-
-  return (
-    <NotePageLayout
-      videoId={videoId}
-      isLoading={isLoading || !videoData}
-      isSavingNote={isSavingNote}
-      modalTitle="Confirm Save Note"
-      modalDescription="Are you sure you want to save this note?"
-      handleSaveNote={handleCreateNote}
-    />
-  );
+interface IPageProps {
+  params: Promise<{ videoId: string }>;
 }
 
-export default CreateNotePage;
+async function Page({ params }: IPageProps) {
+  const { videoId } = await params;
+
+  return <CreateNotePage videoId={videoId} />;
+}
+
+export default Page;
