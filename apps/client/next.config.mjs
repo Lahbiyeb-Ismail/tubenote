@@ -1,11 +1,13 @@
+import path from 'path';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Enable output file tracing for monorepos
   output: 'standalone',
   
   // Set the tracing root to include the entire monorepo
-  outputFileTracingRoot: require('path').join(__dirname, '../../'),
-  
+  outputFileTracingRoot: path.join(__dirname, '../../'),
+
   // Transpile shared packages
   transpilePackages: [
     '@tubenote/types',
