@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "build": "rm -rf dist && tsup",
+    "build": "tsup",
     "dev": "tsup --watch",
     "clean": "rm -rf dist"
   },
