@@ -1,30 +1,5 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable output file tracing for monorepos
-  output: "standalone",
-
-  // Set the tracing root to include the entire monorepo
-  outputFileTracingRoot: path.join(__dirname, "../../"),
-
-  // Transpile shared packages
-  transpilePackages: [
-    "@tubenote/types",
-    "@tubenote/dtos",
-    "@tubenote/utils",
-    "@tubenote/schemas",
-  ],
-
-  // Experimental features for better monorepo support
-  experimental: {
-    // Enable external directory support
-    externalDir: true,
-  },
   images: {
     remotePatterns: [
       {
