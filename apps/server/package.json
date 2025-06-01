@@ -1,20 +1,19 @@
 {
   "name": "@tubenote/server",
   "version": "1.0.0",
-  "module": "commonjs",
   "license": "MIT",
   "private": true,
+  "type": "module",
+  "main": "src/index.ts",
   "scripts": {
-    "dev": "ts-node-dev -r tsconfig-paths/register src/index.ts",
+    "dev": "tsx watch src/index.ts",
     "build": "tsc && tsc-alias",
     "start": "node dist/index.js",
-    "test": "jest",
-    "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push",
-    "postinstall": "prisma generate"
+    "test": "jest"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
+    "@tubenote/db": "workspace:*",
     "@tubenote/dtos": "workspace:*",
     "@tubenote/schemas": "workspace:*",
     "@tubenote/types": "workspace:*",
@@ -46,6 +45,7 @@
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
+    "@tubenote/config-typescript": "workspace:*",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
@@ -63,9 +63,9 @@
     "jest-mock-extended": "4.0.0-beta1",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
-    "ts-node-dev": "^2.0.0",
     "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.19.4",
     "typescript": "^5.7.2"
   }
 }

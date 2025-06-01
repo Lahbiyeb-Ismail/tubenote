@@ -49,6 +49,7 @@
     "zustand": "^5.0.4"
   },
   "devDependencies": {
+    "@tubenote/config-typescript": "workspace:*",
     "@biomejs/biome": "1.9.3",
     "@tailwindcss/typography": "^0.5.15",
     "@types/js-cookie": "^3.0.6",

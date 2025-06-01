@@ -8,7 +8,7 @@ import { envConfig } from "../config";
  *
  * @constant {string} TEMPLATES_DIR - The path to the templates directory.
  */
-export const TEMPLATES_DIR = path.join(__dirname, "../../../templates");
+export const TEMPLATES_DIR = path.join(process.cwd(), "public/templates");
 
 /**
  * The path to the Tubenote logo image.
