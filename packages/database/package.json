@@ -9,15 +9,12 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "dev": "tsup src/* --watch",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:seed": "tsx src/seed.ts",
     "db:generate": "prisma generate",
-    "db:studio": "prisma studio",
-    "prebuild": "pnpm run generate",
-    "predev": "pnpm run generate"
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -26,6 +23,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.29",
+    "@tubenote/config-typescript": "workspace:*",
     "prisma": "^5.22.0"
   }
 }
