@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@tubenote/db";
 
 import { TYPES } from "@/config/inversify/types";
 import { inject, injectable } from "inversify";

@@ -4,20 +4,20 @@
   "module": "commonjs",
   "license": "MIT",
   "private": true,
+  "type": "module",
+  "main": "src/index.ts",
   "scripts": {
     "dev": "ts-node-dev -r tsconfig-paths/register src/index.ts",
     "build": "tsc && tsc-alias",
     "start": "node dist/index.js",
-    "test": "jest",
-    "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push",
-    "postinstall": "prisma generate"
+    "test": "jest"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
     "@tubenote/dtos": "workspace:*",
     "@tubenote/schemas": "workspace:*",
     "@tubenote/types": "workspace:*",
+    "@tubenote/db": "workspace:*",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
