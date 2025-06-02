@@ -1,5 +1,3 @@
-import type { Note } from "../note";
-
 interface Thumbnails {
   default: ThumbnailSize;
   medium: ThumbnailSize;
@@ -22,12 +20,4 @@ export interface YoutubeVideoData {
   tags: string[];
   embedHtmlPlayer: string;
   thumbnails: Thumbnails;
-}
-
-export interface Video extends YoutubeVideoData {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  userIds: string[];
-  notes?: Note[];
 }
