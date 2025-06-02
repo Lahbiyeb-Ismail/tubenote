@@ -1,6 +1,5 @@
-import type { Prisma } from "@prisma/client";
+import type { Account, Prisma, Providers } from "@tubenote/db";
 
-import type { Account, AccountProviders } from "./account.model";
 import type { ICreateAccountDto } from "./dtos";
 
 export interface IAccountRepository {
@@ -11,7 +10,7 @@ export interface IAccountRepository {
   ): Promise<Account>;
   findById(id: string): Promise<Account | null>;
   findByProvider(
-    provider: AccountProviders,
+    provider: Providers,
     providerAccountId: string,
     tx?: Prisma.TransactionClient
   ): Promise<Account | null>;
@@ -28,7 +27,7 @@ export interface IAccountService {
   ): Promise<Account>;
   findAccountById(id: string): Promise<Account | null>;
   findAccountByProvider(
-    provider: AccountProviders,
+    provider: Providers,
     providerAccountId: string
   ): Promise<Account | null>;
   findAccountsByUserId(userId: string): Promise<Account[]>;

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import type { Note } from "@tubenote/types";
+import type { Note } from "@tubenote/db";
 
 import { useUIStore } from "@/stores";
 

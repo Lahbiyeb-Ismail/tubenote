@@ -1,6 +1,6 @@
 "use client";
 
-import { User } from "@tubenote/types";
+import type { User } from "@tubenote/db";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 

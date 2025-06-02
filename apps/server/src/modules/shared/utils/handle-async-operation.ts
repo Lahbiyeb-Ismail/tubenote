@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@tubenote/db";
 
 import { ConflictError, DatabaseError } from "../api-errors";
 import { ERROR_MESSAGES } from "../constants";

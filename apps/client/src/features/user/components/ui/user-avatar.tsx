@@ -1,4 +1,4 @@
-import type { User } from "@tubenote/types";
+import type { User } from "@tubenote/db";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 

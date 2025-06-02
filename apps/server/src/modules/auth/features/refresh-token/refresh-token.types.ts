@@ -1,11 +1,10 @@
-import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
 import type { TypedRequest } from "@/modules/shared/types";
+import type { Prisma, RefreshToken } from "@tubenote/db";
 
 import type { IAuthResponseDto } from "../../dtos";
 import type { IClientContext, ICreateRefreshTokenDto } from "./dtos";
-import type { RefreshToken } from "./refresh-token.model";
 
 /**
  * Interface for managing refresh tokens in the repository.

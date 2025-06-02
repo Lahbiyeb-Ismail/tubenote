@@ -3,8 +3,8 @@ import request from "supertest";
 
 import app from "@/app";
 
+import type { Note } from "@tubenote/db";
 import type { IUpdateNoteDto } from "@tubenote/dtos";
-import type { Note } from "@tubenote/types";
 
 import { ACCESS_TOKEN_NAME } from "@/modules/auth";
 import { noteController } from "../note.module";

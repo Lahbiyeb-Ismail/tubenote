@@ -2,7 +2,7 @@
 
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 
-import type { User } from "@tubenote/types";
+import type { User } from "@tubenote/db";
 
 import { useAuthStore } from "@/features/auth/store";
 import { getCurrentUser } from "../services";

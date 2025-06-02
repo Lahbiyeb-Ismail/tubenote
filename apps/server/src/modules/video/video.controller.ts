@@ -1,8 +1,8 @@
 import type { Response } from "express";
 import { inject, injectable } from "inversify";
 
+import type { Video } from "@tubenote/db";
 import type { IPaginationQueryDto, IParamIdDto } from "@tubenote/dtos";
-import type { Video } from "@tubenote/types";
 
 import { TYPES } from "@/config/inversify/types";
 

@@ -1,5 +1,4 @@
 export * from "./verify-email.types";
-export * from "./verify-email.model";
 
 export * from "./verify-email.repository";
 export * from "./verify-email.service";

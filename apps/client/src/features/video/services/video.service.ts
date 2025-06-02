@@ -1,11 +1,8 @@
 import type { AxiosError } from "axios";
 
+import type { Video } from "@tubenote/db";
 import type { IPaginationQueryDto } from "@tubenote/dtos";
-import type {
-  IApiErrorResponse,
-  IApiSuccessResponse,
-  Video,
-} from "@tubenote/types";
+import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
 import { asyncTryCatch } from "@tubenote/utils";
 
 import { extractVideoId } from "@/helpers";

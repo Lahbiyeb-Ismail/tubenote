@@ -1,13 +1,12 @@
-import type { Prisma } from "@prisma/client";
 import { inject, injectable } from "inversify";
 
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";
+import type { EmailVerificationToken, Prisma } from "@tubenote/db";
 
 import { TYPES } from "@/config/inversify/types";
 import type { IPrismaService } from "@/modules/shared/services";
 
-import type { VerifyEmailToken } from "./verify-email.model";
 import type {
   ICreateVerifyEmailTokenDto,
   IVerifyEmailRepository,
@@ -22,7 +21,7 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
   async findByUserId(
     userId: string,
     tx?: Prisma.TransactionClient
-  ): Promise<VerifyEmailToken | null> {
+  ): Promise<EmailVerificationToken | null> {
     const client = tx ?? this._db;
 
     return handleAsyncOperation(
@@ -40,7 +39,7 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
   async findByToken(
     token: string,
     tx?: Prisma.TransactionClient
-  ): Promise<VerifyEmailToken | null> {
+  ): Promise<EmailVerificationToken | null> {
     const client = tx ?? this._db;
 
     return handleAsyncOperation(
@@ -59,7 +58,7 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
     userId: string,
     data: ICreateVerifyEmailTokenDto,
     tx?: Prisma.TransactionClient
-  ): Promise<VerifyEmailToken> {
+  ): Promise<EmailVerificationToken> {
     const client = tx ?? this._db;
 
     return handleAsyncOperation(

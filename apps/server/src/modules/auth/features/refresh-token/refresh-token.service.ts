@@ -1,8 +1,8 @@
-import type { Prisma } from "@prisma/client";
 import { inject, injectable } from "inversify";
 
 import { UnauthorizedError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type { Prisma, RefreshToken } from "@tubenote/db";
 
 import { TYPES } from "@/config/inversify/types";
 import type {
@@ -18,7 +18,6 @@ import type { IJwtService } from "@/modules/auth/utils";
 import { stringToDate } from "@/modules/shared/utils";
 import type { IAuthResponseDto } from "../../dtos";
 import type { IClientContext } from "./dtos";
-import type { RefreshToken } from "./refresh-token.model";
 import type {
   IRefreshTokenRepository,
   IRefreshTokenService,

@@ -5,8 +5,6 @@
     "rootDir": "src",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
     "target": "ES2022",
     "allowSyntheticDefaultImports": true,
     "typeRoots": ["./node_modules/@types", "./node_modules/.prisma/client"],

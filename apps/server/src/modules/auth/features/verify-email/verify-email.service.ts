@@ -1,9 +1,9 @@
-import type { Prisma } from "@prisma/client";
 import { inject, injectable } from "inversify";
 
 import { BadRequestError, ForbiddenError } from "@/modules/shared/api-errors";
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { stringToDate } from "@/modules/shared/utils";
+import type { Prisma } from "@tubenote/db";
 
 import type { ILoggerService, IPrismaService } from "@/modules/shared/services";
 

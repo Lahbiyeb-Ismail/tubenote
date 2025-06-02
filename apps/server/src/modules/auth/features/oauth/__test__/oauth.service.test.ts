@@ -1,6 +1,6 @@
 import { mock } from "jest-mock-extended";
 
-import type { User } from "@tubenote/types";
+import type { User } from "@tubenote/db";
 
 import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
 

@@ -1,13 +1,13 @@
-import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
+import type { Prisma, Video } from "@tubenote/db";
 import type {
   ICreateVideoDto,
   IFindManyDto,
   IPaginationQueryDto,
   IParamIdDto,
 } from "@tubenote/dtos";
-import type { IPaginatedData, Video, YoutubeVideoData } from "@tubenote/types";
+import type { IPaginatedData, YoutubeVideoData } from "@tubenote/types";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 

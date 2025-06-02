@@ -1,8 +1,8 @@
 import type { Response } from "express";
 import { inject, injectable } from "inversify";
 
+import type { User } from "@tubenote/db";
 import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/dtos";
-import type { User } from "@tubenote/types";
 
 import { TYPES } from "@/config/inversify/types";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Note } from "@tubenote/types";
+import type { Note } from "@tubenote/db";
 import { useState } from "react";
 
 import { useUIStore } from "@/stores";

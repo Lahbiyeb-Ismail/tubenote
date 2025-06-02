@@ -1,8 +1,7 @@
-import type { Prisma } from "@prisma/client";
 import { inject, injectable } from "inversify";
 
+import type { Prisma, User } from "@tubenote/db";
 import type { ICreateUserDto, IUpdateUserDto } from "@tubenote/dtos";
-import type { User } from "@tubenote/types";
 
 import { TYPES } from "@/config/inversify/types";
 

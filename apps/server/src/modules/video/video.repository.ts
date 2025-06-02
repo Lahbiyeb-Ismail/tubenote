@@ -1,8 +1,7 @@
-import type { Prisma } from "@prisma/client";
 import { inject, injectable } from "inversify";
 
+import type { Prisma, Video } from "@tubenote/db";
 import type { ICreateVideoDto, IFindManyDto } from "@tubenote/dtos";
-import type { Video } from "@tubenote/types";
 
 import { TYPES } from "@/config/inversify/types";
 

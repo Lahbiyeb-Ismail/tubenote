@@ -1,12 +1,12 @@
-import type { Prisma } from "@prisma/client";
 import { inject, injectable } from "inversify";
 
+import type { Note, Prisma } from "@tubenote/db";
 import type {
   ICreateNoteDto,
   IFindManyDto,
   IUpdateNoteDto,
 } from "@tubenote/dtos";
-import type { IPaginatedData, Note } from "@tubenote/types";
+import type { IPaginatedData } from "@tubenote/types";
 
 import { TYPES } from "@/config/inversify/types";
 

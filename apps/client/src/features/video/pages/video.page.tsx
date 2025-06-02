@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import type { Note } from "@tubenote/types";
+import type { Note } from "@tubenote/db";
 
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
 
