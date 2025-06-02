@@ -3,7 +3,7 @@
 import { useGetNoteById, useUpdateNote } from "@/features/note/hooks";
 
 import { NotePageLayout } from "@/features/note/components";
-import { useVideoStore } from "@/features/video/store";
+import { useNoteStore } from "../store";
 
 interface IPageProps {
   noteId: string;
@@ -11,7 +11,7 @@ interface IPageProps {
 
 export function UpdateNotePage({ noteId }: IPageProps) {
   const { mutate: updateNote, isPending: isUpdatingNote } = useUpdateNote();
-  const { videoCurrentTime } = useVideoStore();
+  const { noteTimestamp } = useNoteStore();
   const { data: note, isLoading, isError } = useGetNoteById(noteId);
 
   const handleUpdateNote = (noteTitle: string, content: string) => {
@@ -22,7 +22,7 @@ export function UpdateNotePage({ noteId }: IPageProps) {
       updateData: {
         title: noteTitle,
         content: content,
-        timestamp: videoCurrentTime,
+        timestamp: noteTimestamp,
       },
     });
   };

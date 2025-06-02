@@ -66,7 +66,12 @@ export function VideoNote({
         </div>
         <div className="flex items-center space-x-2 text-sm text-muted-foreground mt-2">
           <Clock className="h-4 w-4" />
-          <span>{note.timestamp}</span>
+          <span>
+            Start Timestamp: {Math.floor(note.timestamp.start * 100) / 100}
+          </span>
+          <span>
+            End Timestamp: {Math.floor(note.timestamp.end * 100) / 100}
+          </span>
         </div>
       </CardHeader>
     </Card>

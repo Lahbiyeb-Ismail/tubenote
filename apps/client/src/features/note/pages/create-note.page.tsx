@@ -4,7 +4,7 @@ import { useCreateNote } from "@/features/note/hooks";
 import { useGetVideoById } from "@/features/video/hooks";
 
 import { NotePageLayout } from "@/features/note/components";
-import { useVideoStore } from "@/features/video/store";
+import { useNoteStore } from "../store";
 
 interface IPageProps {
   videoId: string;
@@ -12,11 +12,13 @@ interface IPageProps {
 
 export function CreateNotePage({ videoId }: IPageProps) {
   const { mutate: createNote, isPending: isSavingNote } = useCreateNote();
-  const { videoCurrentTime } = useVideoStore();
+  const { noteTimestamp } = useNoteStore();
   const { data: videoData, isLoading } = useGetVideoById(videoId);
 
   const handleCreateNote = (noteTitle: string, content: string) => {
     if (!videoData) return;
+
+    console.log("Note Timestamp:", noteTimestamp);
 
     createNote({
       videoId: videoData.id,
@@ -26,7 +28,7 @@ export function CreateNotePage({ videoId }: IPageProps) {
         thumbnail: videoData.thumbnails.medium.url,
         videoTitle: videoData.title,
         youtubeId: videoData.youtubeId,
-        timestamp: videoCurrentTime,
+        timestamp: noteTimestamp,
       },
     });
   };

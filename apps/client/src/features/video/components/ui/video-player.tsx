@@ -1,41 +1,41 @@
 "use client";
 
-import { useRef } from "react";
+import { useState } from "react";
 import YouTube, { type YouTubeProps } from "react-youtube";
 
 import { useNoteStore } from "@/features/note/store";
-import { useVideoStore } from "../../store";
 
 type VideoPlayerProps = {
   videoId?: string;
 };
 
 export function VideoPlayer({ videoId }: VideoPlayerProps) {
-  const playerRef = useRef<any | null>(null);
+  const [startTime, setStartTime] = useState<number>(0);
+
   const {
-    videoActions: { setVideoCurrentTime },
-  } = useVideoStore();
-  const { note } = useNoteStore();
+    note,
+    noteActions: { setNoteTimestamp },
+  } = useNoteStore();
 
-  const onPlayerReady: YouTubeProps["onReady"] = (event) => {
-    playerRef.current = event.target;
-
-    if (playerRef.current && note) {
-      playerRef.current.seekTo(note.timestamp);
+  const onPlayerReady: YouTubeProps["onReady"] = ({ target }) => {
+    if (note) {
+      target.seekTo(note.timestamp.start);
     }
   };
 
-  const onStateChange: YouTubeProps["onStateChange"] = (event) => {
-    // Check if the player is playing (state 1)
-    if (event.data === 1) {
-      const time = playerRef.current?.getCurrentTime() || 0;
-      setVideoCurrentTime(time);
-    }
+  const onPlay: YouTubeProps["onPlay"] = ({ target }) => {
+    const time = target.getCurrentTime();
+
+    setStartTime(time);
   };
 
-  const onPause: YouTubeProps["onPause"] = () => {
-    const time = playerRef.current?.getCurrentTime() || 0;
-    setVideoCurrentTime(time);
+  const onPause: YouTubeProps["onPause"] = ({ target }) => {
+    const time = target.getCurrentTime();
+
+    setNoteTimestamp({
+      start: startTime,
+      end: time,
+    });
   };
 
   const opts = {
@@ -54,8 +54,8 @@ export function VideoPlayer({ videoId }: VideoPlayerProps) {
         style={{ height: "100%" }}
         opts={opts}
         onReady={onPlayerReady}
-        onStateChange={onStateChange}
         onPause={onPause}
+        onPlay={onPlay}
       />
     </div>
   );
