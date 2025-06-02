@@ -21,6 +21,15 @@ export const updateNoteSchema = z
       .string()
       .min(10, { message: "Content must be at least 10 characters long." })
       .optional(),
-    timestamp: z.number().optional(),
+    timestamp: z
+      .object({
+        start: z
+          .number()
+          .min(0, { message: "Start time must be a positive number." }),
+        end: z
+          .number()
+          .min(0, { message: "End time must be a positive number." }),
+      })
+      .optional(),
   })
   .strict();
