@@ -30,6 +30,13 @@ export const createNoteSchema = z
     youtubeId: z
       .string()
       .min(3, { message: "Youtube id must be at least 3 characters long." }),
-    timestamp: z.number(),
+    timestamp: z.object({
+      start: z
+        .number()
+        .min(0, { message: "Start time must be a positive number." }),
+      end: z
+        .number()
+        .min(0, { message: "End time must be a positive number." }),
+    }),
   })
   .strict();
