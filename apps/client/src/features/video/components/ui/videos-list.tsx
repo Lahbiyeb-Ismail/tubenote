@@ -1,6 +1,6 @@
 "use client";
 
-import type { Video } from "@tubenote/types";
+import type { Video } from "@tubenote/db";
 
 import { useUIStore } from "@/stores";
 import { VideoCard } from "../cards";

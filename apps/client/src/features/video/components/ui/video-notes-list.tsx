@@ -1,4 +1,4 @@
-import type { Note } from "@tubenote/types";
+import type { Note } from "@tubenote/db";
 
 import { VideoNote } from "./";
 

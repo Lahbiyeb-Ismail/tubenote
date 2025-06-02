@@ -1,11 +1,8 @@
 import type { AxiosError } from "axios";
 
+import type { User } from "@tubenote/db";
 import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/dtos";
-import type {
-  IApiErrorResponse,
-  IApiSuccessResponse,
-  User,
-} from "@tubenote/types";
+import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
 import { asyncTryCatch } from "@tubenote/utils";
 
 import { axiosInstance } from "@/lib";

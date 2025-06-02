@@ -1,6 +1,6 @@
 import { Clock, MoreVertical, Pencil, Trash2 } from "lucide-react";
 
-import type { Note } from "@tubenote/types";
+import type { Note } from "@tubenote/db";
 
 import {
   Button,

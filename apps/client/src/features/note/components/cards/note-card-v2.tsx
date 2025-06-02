@@ -1,7 +1,7 @@
 import { CalendarIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import Image from "next/image";
 
-import type { Note } from "@tubenote/types";
+import type { Note } from "@tubenote/db";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
