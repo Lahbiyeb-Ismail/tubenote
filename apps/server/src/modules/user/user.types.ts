@@ -1,7 +1,6 @@
-import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
-import type { User } from "@tubenote/types";
+import type { Prisma, User } from "@tubenote/db";
 
 import type {
   ICreateUserDto,

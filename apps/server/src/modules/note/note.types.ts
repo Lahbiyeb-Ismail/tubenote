@@ -1,7 +1,7 @@
-import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
-import type { IPaginatedData, Note } from "@tubenote/types";
+import type { Note, Prisma } from "@tubenote/db";
+import type { IPaginatedData } from "@tubenote/types";
 
 import type {
   ICreateNoteDto,

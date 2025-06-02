@@ -1,7 +1,7 @@
 import type { Response } from "express";
 
+import type { User } from "@tubenote/db";
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
-import type { User } from "@tubenote/types";
 
 import type { TypedRequest } from "@/modules/shared/types";
 

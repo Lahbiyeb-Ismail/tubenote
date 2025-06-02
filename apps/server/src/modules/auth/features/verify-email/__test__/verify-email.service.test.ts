@@ -1,6 +1,6 @@
 import { mock, mockReset } from "jest-mock-extended";
 
-import type { User } from "@tubenote/types";
+import type { User } from "@tubenote/db";
 
 import {
   VERIFY_EMAIL_TOKEN_EXPIRES_IN,

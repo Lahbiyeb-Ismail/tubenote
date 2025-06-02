@@ -1,7 +1,6 @@
 export * from "./dtos";
 
 export * from "./refresh-token.types";
-export * from "./refresh-token.model";
 
 export * from "./refresh-token.repository";
 export * from "./refresh-token.service";

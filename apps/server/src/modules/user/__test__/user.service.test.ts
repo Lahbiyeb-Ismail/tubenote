@@ -1,12 +1,12 @@
 import type { Prisma } from "@prisma/client";
 import { mock, mockReset } from "jest-mock-extended";
 
+import type { User } from "@tubenote/db";
 import type {
   ICreateUserDto,
   IUpdatePasswordDto,
   IUpdateUserDto,
 } from "@tubenote/dtos";
-import type { User } from "@tubenote/types";
 
 import {
   BadRequestError,

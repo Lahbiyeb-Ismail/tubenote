@@ -1,7 +1,7 @@
 import { mock, mockReset } from "jest-mock-extended";
 
+import type { User } from "@tubenote/db";
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
-import type { User } from "@tubenote/types";
 
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 

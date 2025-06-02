@@ -1,6 +1,7 @@
-import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
-import type { User } from "@tubenote/types";
 import { inject, injectable } from "inversify";
+
+import type { User } from "@tubenote/db";
+import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 
 import { TYPES } from "@/config/inversify/types";
 

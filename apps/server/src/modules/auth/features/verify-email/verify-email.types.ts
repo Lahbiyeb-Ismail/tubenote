@@ -1,10 +1,8 @@
-import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
+import type { EmailVerificationToken, Prisma } from "@tubenote/db";
 import type { IParamTokenDto } from "@tubenote/dtos";
-
-import type { VerifyEmailToken } from "./verify-email.model";
 
 export interface ICreateVerifyEmailTokenDto {
   token: string;
@@ -14,18 +12,18 @@ export interface IVerifyEmailRepository {
   findByUserId(
     userId: string,
     tx?: Prisma.TransactionClient
-  ): Promise<VerifyEmailToken | null>;
+  ): Promise<EmailVerificationToken | null>;
 
   findByToken(
     token: string,
     tx?: Prisma.TransactionClient
-  ): Promise<VerifyEmailToken | null>;
+  ): Promise<EmailVerificationToken | null>;
 
   createToken(
     userId: string,
     data: ICreateVerifyEmailTokenDto,
     tx?: Prisma.TransactionClient
-  ): Promise<VerifyEmailToken>;
+  ): Promise<EmailVerificationToken>;
 
   deleteMany(userId: string, tx?: Prisma.TransactionClient): Promise<void>;
 }

@@ -2,13 +2,13 @@ import type { Response } from "express";
 import httpStatus from "http-status";
 import { inject, injectable } from "inversify";
 
+import type { Note } from "@tubenote/db";
 import type {
   ICreateNoteDto,
   IPaginationQueryDto,
   IParamIdDto,
   IUpdateNoteDto,
 } from "@tubenote/dtos";
-import type { Note } from "@tubenote/types";
 
 import { TYPES } from "@/config/inversify/types";
 

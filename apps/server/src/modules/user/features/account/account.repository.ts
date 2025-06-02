@@ -1,12 +1,12 @@
-import { type Prisma } from "@prisma/client";
+import { inject, injectable } from "inversify";
+
+import type { Account, Prisma, Providers } from "@tubenote/db";
 
 import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import type { IPrismaService } from "@/modules/shared/services";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import { TYPES } from "@/config/inversify/types";
-import { inject, injectable } from "inversify";
-import type { Account, AccountProviders } from "./account.model";
 import type { IAccountRepository } from "./account.types";
 import type { ICreateAccountDto } from "./dtos";
 
@@ -50,7 +50,7 @@ export class AccountRepository implements IAccountRepository {
   }
 
   async findByProvider(
-    provider: AccountProviders,
+    provider: Providers,
     providerAccountId: string,
     tx?: Prisma.TransactionClient
   ): Promise<Account | null> {

@@ -1,7 +1,7 @@
-import type { AccountProviders, AccountType } from "../account.model";
+import type { AccountType, Providers } from "@tubenote/db";
 
 export interface ICreateAccountDto {
   type: AccountType;
-  provider: AccountProviders;
+  provider: Providers;
   providerAccountId: string;
 }
