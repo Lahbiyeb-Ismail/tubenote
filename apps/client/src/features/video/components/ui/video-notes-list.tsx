@@ -1,6 +1,7 @@
 import type { Note } from "@tubenote/db";
 
-import { VideoNote } from "./";
+import { NotesListContainer } from "@/components/dashboards";
+import { VideoNoteCard } from "./";
 
 type VideoNotesListProps = {
   notes: Note[];
@@ -14,15 +15,16 @@ export function VideoNotesList({
   setNote,
 }: VideoNotesListProps) {
   return (
-    <div className="md:px-4 py-6 space-y-4">
-      {notes.map((note) => (
-        <VideoNote
+    <NotesListContainer notes={notes}>
+      {(note, onDeleteClick) => (
+        <VideoNoteCard
           key={note.id}
           note={note}
+          onDeleteClick={() => onDeleteClick(note.id)}
           setOpenMarkdownViewer={setOpenMarkdownViewer}
           setNote={setNote}
         />
-      ))}
-    </div>
+      )}
+    </NotesListContainer>
   );
 }

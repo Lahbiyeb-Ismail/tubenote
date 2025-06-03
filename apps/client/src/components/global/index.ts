@@ -9,6 +9,7 @@ export * from "./card-wrapper";
 export * from "./code-block";
 
 export * from "./confirmation-modal";
+export * from "./delete-confirmation-dialog";
 export * from "./divider-with-text";
 
 export * from "./export-as-pdf-button";
