@@ -1,14 +1,13 @@
-import type { Response } from "express";
-import { inject, injectable } from "inversify";
-
 import type { Video } from "@tubenote/db";
 import type { IPaginationQueryDto, IParamIdDto } from "@tubenote/dtos";
+import type { Response } from "express";
 
-import { TYPES } from "@/config/inversify/types";
-
-import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
+import { inject, injectable } from "inversify";
 
 import type { IResponseFormatter } from "@/modules/shared/services";
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
+
+import { TYPES } from "@/config/inversify/types";
 
 import type { IVideoController, IVideoService } from "./video.types";
 
@@ -20,7 +19,7 @@ export class VideoController implements IVideoController {
   constructor(
     @inject(TYPES.VideoService) private _videoService: IVideoService,
     @inject(TYPES.ResponseFormatter)
-    private _responseFormatter: IResponseFormatter
+    private _responseFormatter: IResponseFormatter,
   ) {}
 
   /**
@@ -33,7 +32,7 @@ export class VideoController implements IVideoController {
    */
   async getUserVideos(
     req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
-    res: Response
+    res: Response,
   ) {
     const userId = req.userId;
 
@@ -44,7 +43,7 @@ export class VideoController implements IVideoController {
 
     const paginatedData = await this._videoService.getUserVideos(
       userId,
-      findManyDto
+      findManyDto,
     );
 
     const formattedResponse = this._responseFormatter.formatPaginatedResponse({
@@ -68,15 +67,15 @@ export class VideoController implements IVideoController {
    */
   async saveVideoData(
     req: TypedRequest<EmptyRecord, IParamIdDto>,
-    res: Response
+    res: Response,
   ) {
     const videoYoutubeId = req.params.id;
     const userId = req.userId;
 
     const video = await this._videoService.saveVideo(userId, videoYoutubeId);
 
-    const formattedResponse =
-      this._responseFormatter.formatSuccessResponse<Video>({
+    const formattedResponse
+      = this._responseFormatter.formatSuccessResponse<Video>({
         responseOptions: {
           data: video,
           message: "Video retrieved successfully.",
@@ -96,14 +95,14 @@ export class VideoController implements IVideoController {
    */
   async getVideoByYoutubeId(
     req: TypedRequest<EmptyRecord, IParamIdDto>,
-    res: Response
+    res: Response,
   ) {
     const videoYoutubeId = req.params.id;
 
     const video = await this._videoService.getVideoByYoutubeId(videoYoutubeId);
 
-    const formattedResponse =
-      this._responseFormatter.formatSuccessResponse<Video | null>({
+    const formattedResponse
+      = this._responseFormatter.formatSuccessResponse({
         responseOptions: {
           data: video,
           message: "Video retrieved successfully.",

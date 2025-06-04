@@ -1,5 +1,3 @@
-import type { Response } from "express";
-
 import type { Prisma, Video } from "@tubenote/db";
 import type {
   ICreateVideoDto,
@@ -7,54 +5,54 @@ import type {
   IPaginationQueryDto,
   IParamIdDto,
 } from "@tubenote/dtos";
-import type { IPaginatedData, YoutubeVideoData } from "@tubenote/types";
+import type { IPaginatedData } from "@tubenote/types";
+import type { Response } from "express";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 export interface IVideoRepository {
-  findByYoutubeId(
+  findByYoutubeId: (
     youtubeId: string,
     tx?: Prisma.TransactionClient
-  ): Promise<Video | null>;
-  findMany(
+  ) => Promise<Video | null>;
+  findMany: (
     userId: string,
     findManyDto: IFindManyDto,
     tx?: Prisma.TransactionClient
-  ): Promise<Video[]>;
-  count(userId: string, tx?: Prisma.TransactionClient): Promise<number>;
-  create(
+  ) => Promise<Video[]>;
+  count: (userId: string, tx?: Prisma.TransactionClient) => Promise<number>;
+  create: (
     userId: string,
     data: ICreateVideoDto,
     tx?: Prisma.TransactionClient
-  ): Promise<Video>;
-  connectVideoToUser(
+  ) => Promise<Video>;
+  connectVideoToUser: (
     videoId: string,
     userId: string,
     tx?: Prisma.TransactionClient
-  ): Promise<Video>;
+  ) => Promise<Video>;
 }
 
 export interface IVideoService {
-  getYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData>;
-  getUserVideos(
+  getUserVideos: (
     userId: string,
     findManyDto: IFindManyDto
-  ): Promise<IPaginatedData<Video>>;
-  saveVideo(userId: string, videoYoutubeId: string): Promise<Video>;
-  getVideoByYoutubeId(videoYoutubeId: string): Promise<Video | null>;
+  ) => Promise<IPaginatedData<Video>>;
+  saveVideo: (userId: string, videoYoutubeId: string) => Promise<Video>;
+  getVideoByYoutubeId: (videoYoutubeId: string) => Promise<Video | null>;
 }
 
 export interface IVideoController {
-  getUserVideos(
+  getUserVideos: (
     req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
     res: Response
-  ): Promise<void>;
-  saveVideoData(
+  ) => Promise<void>;
+  saveVideoData: (
     req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
-  ): Promise<void>;
-  getVideoByYoutubeId(
+  ) => Promise<void>;
+  getVideoByYoutubeId: (
     req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
-  ): Promise<void>;
+  ) => Promise<void>;
 }
