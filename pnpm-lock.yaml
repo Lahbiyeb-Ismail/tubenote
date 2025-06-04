@@ -229,6 +229,9 @@ importers:
       '@tubenote/types':
         specifier: workspace:*
         version: link:../../packages/types
+      '@tubenote/youtube-api':
+        specifier: workspace:*
+        version: link:../../packages/youtube-api
       axios:
         specifier: ^1.7.7
         version: 1.9.0
@@ -456,6 +459,28 @@ importers:
       '@tubenote/config-typescript':
         specifier: workspace:*
         version: link:../config-typescript
+
+  packages/youtube-api:
+    dependencies:
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.5.0
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.0(jiti@2.4.2)(postcss@8.5.4)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0)
+      typescript:
+        specifier: ^5.7.2
+        version: 5.8.3
+      zod:
+        specifier: ^3.25.49
+        version: 3.25.49
+    devDependencies:
+      '@tubenote/config-typescript':
+        specifier: workspace:*
+        version: link:../config-typescript
+      '@types/node':
+        specifier: ^22.15.29
+        version: 22.15.29
 
 packages:
 
