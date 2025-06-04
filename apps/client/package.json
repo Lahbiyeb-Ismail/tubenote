@@ -6,8 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "biome check .",
-    "lint:fix": "biome check . --apply"
+    "lint": "next lint"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -50,9 +49,8 @@
     "zustand": "^5.0.4"
   },
   "devDependencies": {
-    "@tubenote/config-typescript": "workspace:*",
-    "@biomejs/biome": "1.9.3",
     "@tailwindcss/typography": "^0.5.15",
+    "@tubenote/config-typescript": "workspace:*",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
     "@types/prismjs": "^1.26.5",
