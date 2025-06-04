@@ -1,20 +1,17 @@
-import { inject, injectable } from "inversify";
-
 import type { Prisma, Video } from "@tubenote/db";
 import type { IFindManyDto } from "@tubenote/dtos";
-import type { IPaginatedData, YoutubeVideoData } from "@tubenote/types";
+import type { IPaginatedData } from "@tubenote/types";
 
-import { TYPES } from "@/config/inversify/types";
-
-import {
-  ERROR_MESSAGES,
-  YOUTUBE_API_KEY,
-  YOUTUBE_API_URL,
-} from "@/modules/shared/constants";
-
-import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
+import { youtubeApiService } from "@tubenote/youtube-api";
+import { inject, injectable } from "inversify";
 
 import type { IPrismaService } from "@/modules/shared/services";
+
+import { TYPES } from "@/config/inversify/types";
+import { BadRequestError } from "@/modules/shared/api-errors";
+import {
+  ERROR_MESSAGES,
+} from "@/modules/shared/constants";
 
 import type { IVideoRepository, IVideoService } from "./video.types";
 
@@ -22,12 +19,12 @@ import type { IVideoRepository, IVideoService } from "./video.types";
 export class VideoService implements IVideoService {
   constructor(
     @inject(TYPES.VideoRepository) private _videoRepository: IVideoRepository,
-    @inject(TYPES.PrismaService) private _prismaService: IPrismaService
+    @inject(TYPES.PrismaService) private _prismaService: IPrismaService,
   ) {}
 
   private async _findVideoByYoutubeId(
     youtubeId: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<Video | null> {
     return this._videoRepository.findByYoutubeId(youtubeId, tx);
   }
@@ -35,9 +32,9 @@ export class VideoService implements IVideoService {
   private async _createVideo(
     tx: Prisma.TransactionClient,
     userId: string,
-    youtubeVideoId: string
+    youtubeVideoId: string,
   ): Promise<Video> {
-    const videoData = await this.getYoutubeVideoData(youtubeVideoId);
+    const videoData = await youtubeApiService.getYoutubeVideoData(youtubeVideoId);
 
     return this._videoRepository.create(userId, videoData, tx);
   }
@@ -45,51 +42,20 @@ export class VideoService implements IVideoService {
   private async _linkVideoToUser(
     tx: Prisma.TransactionClient,
     video: Video,
-    userId: string
+    userId: string,
   ): Promise<Video> {
     return this._videoRepository.connectVideoToUser(video.id, userId, tx);
   }
 
-  async getYoutubeVideoData(youtubeId: string): Promise<YoutubeVideoData> {
-    const response = await fetch(
-      `${YOUTUBE_API_URL}/videos?id=${youtubeId}&key=${YOUTUBE_API_KEY}&part=snippet,statistics,player`
-    );
-
-    if (!response.ok) {
-      throw new BadRequestError(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (!data?.items?.length) {
-      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
-    }
-
-    const { title, description, channelTitle, thumbnails, tags } =
-      data.items[0].snippet;
-
-    const { embedHtml: embedHtmlPlayer } = data.items[0].player;
-
-    return {
-      youtubeId: data.items[0].id,
-      title,
-      description,
-      channelTitle,
-      embedHtmlPlayer,
-      tags,
-      thumbnails,
-    };
-  }
-
   async getUserVideos(
     userId: string,
-    findManyDto: IFindManyDto
+    findManyDto: IFindManyDto,
   ): Promise<IPaginatedData<Video>> {
     return this._prismaService.transaction(async (tx) => {
       const data = await this._videoRepository.findMany(
         userId,
         findManyDto,
-        tx
+        tx,
       );
 
       const totalItems = await this._videoRepository.count(userId, tx);
@@ -107,7 +73,7 @@ export class VideoService implements IVideoService {
     return this._prismaService.transaction(async (tx) => {
       const existingVideo = await this._findVideoByYoutubeId(
         videoYoutubeId,
-        tx
+        tx,
       );
 
       if (!existingVideo) {

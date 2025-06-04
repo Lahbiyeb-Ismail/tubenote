@@ -16,6 +16,7 @@
     "@tubenote/dtos": "workspace:*",
     "@tubenote/schemas": "workspace:*",
     "@tubenote/types": "workspace:*",
+    "@tubenote/youtube-api": "workspace:*",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",

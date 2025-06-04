@@ -1,12 +1,11 @@
-import { Router } from "express";
-
 import { idParamSchema, paginationQuerySchema } from "@tubenote/schemas";
+import { Router } from "express";
 
 import { isAuthenticated, validateRequest } from "@/middlewares";
 
 import { videoController } from "./video.module";
 
-const videoRoutes = Router();
+const videoRoutes: Router = Router();
 
 // - isAuthenticated: Ensures the user is authenticated before accessing any video routes.
 videoRoutes.use(isAuthenticated);
@@ -16,16 +15,13 @@ videoRoutes.use(isAuthenticated);
 videoRoutes
   .route("/")
   .get(validateRequest({ query: paginationQuerySchema }), (req, res) =>
-    videoController.getUserVideos(req, res)
-  );
+    videoController.getUserVideos(req, res));
 
 videoRoutes
   .route("/:id")
   .post(validateRequest({ params: idParamSchema }), (req, res) =>
-    videoController.saveVideoData(req, res)
-  )
+    videoController.saveVideoData(req, res))
   .get(validateRequest({ params: idParamSchema }), (req, res) =>
-    videoController.getVideoByYoutubeId(req, res)
-  );
+    videoController.getVideoByYoutubeId(req, res));
 
 export { videoRoutes };
