@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import { useGetCurrentUser } from "@/features/user/hooks";
 import { useUserStore } from "@/features/user/store";
-import { Features, Footer, Header, Hero, HowItWorks } from "@/sections";
+import { Features, Footer, Header, Hero, HowItWorks, Pricing } from "@/sections";
 
 export default function Home() {
   const { data: currentUser } = useGetCurrentUser();
@@ -20,6 +20,7 @@ export default function Home() {
       <Hero />
       <Features />
       <HowItWorks />
+      <Pricing />
       <Footer />
     </main>
   );
