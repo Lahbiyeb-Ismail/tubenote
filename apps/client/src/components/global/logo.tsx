@@ -1,17 +1,12 @@
-import Image from "next/image";
-import Link from "next/link";
-
 export function Logo() {
   return (
-    <div className="w-[150px]">
-      <Link href="/">
-        <Image
-          src="/images/logo.png"
-          alt="tubenote logo"
-          width={232}
-          height={72}
-        />
-      </Link>
+    <div className="flex items-center space-x-2">
+      <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
+        <span className="text-white font-bold text-sm">T</span>
+      </div>
+      <span className="text-xl font-bold bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">
+        TUBENOTE
+      </span>
     </div>
   );
 }
