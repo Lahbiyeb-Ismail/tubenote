@@ -1,103 +1,71 @@
-import { Facebook, Github, Twitter } from "lucide-react";
+import { Mail } from "lucide-react";
+import Link from "next/link";
 
-import { Button, Input } from "@/components/ui";
-import { footerQuickLinks, footerSupportLinks } from "@/utils";
+import { Logo } from "@/components/global";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export function Footer() {
   return (
-    <footer className="bg-gradient-to-br from-purple-100 via-pink-100 to-red-100 pt-16 pb-8">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-          <div>
-            <h2 className="text-2xl font-bold mb-4">
-              <span className="text-red-600">TUBE</span>
-              <span className="text-gray-800">NOTE</span>
-            </h2>
-            <p className="text-gray-600">
+    <footer className="bg-gray-900 text-white py-16 px-4">
+      <div className="container mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          {/* Brand */}
+          <div className="space-y-4">
+            <Logo />
+            <p className="text-gray-400 leading-relaxed">
               Enhancing your learning experience with smart video note-taking.
             </p>
           </div>
 
+          {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-800">
-              Quick Links
-            </h3>
-            <ul className="space-y-2">
-              {footerQuickLinks.map(({ icon: Icon, link, text }) => (
-                <li key={text}>
-                  <a
-                    href={link}
-                    className="text-gray-600 hover:text-red-600 transition-colors duration-200 flex items-center"
-                  >
-                    <Icon className="w-4 h-4 mr-2" />
-                    {text}
-                  </a>
-                </li>
-              ))}
+            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <ul className="space-y-3">
+              <li><Link href="#" className="text-gray-400 hover:text-white transition-colors">Home</Link></li>
+              <li><Link href="#" className="text-gray-400 hover:text-white transition-colors">Dashboard</Link></li>
+              <li><Link href="#" className="text-gray-400 hover:text-white transition-colors">Notes</Link></li>
+              <li><Link href="#" className="text-gray-400 hover:text-white transition-colors">Video</Link></li>
             </ul>
           </div>
 
+          {/* Support */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-800">
-              Support
-            </h3>
-            <ul className="space-y-2">
-              {footerSupportLinks.map(({ text, link, icon: Icon }) => (
-                <li key={text}>
-                  <a
-                    href={link}
-                    className="text-gray-600 hover:text-red-600 transition-colors duration-200 flex items-center"
-                  >
-                    <Icon className="w-4 h-4 mr-2" />
-                    {text}
-                  </a>
-                </li>
-              ))}
+            <h3 className="text-lg font-semibold mb-4">Support</h3>
+            <ul className="space-y-3">
+              <li><Link href="#" className="text-gray-400 hover:text-white transition-colors">FAQ</Link></li>
+              <li><Link href="#" className="text-gray-400 hover:text-white transition-colors">Contact Us</Link></li>
+              <li><Link href="#" className="text-gray-400 hover:text-white transition-colors">Help Center</Link></li>
+              <li><Link href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
 
+          {/* Newsletter */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-800">
-              Stay Updated
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Subscribe to our newsletter for tips and updates.
-            </p>
-            <form className="space-y-2">
+            <h3 className="text-lg font-semibold mb-4">Stay Updated</h3>
+            <p className="text-gray-400 mb-4">Subscribe to our newsletter for tips and updates.</p>
+            <div className="space-y-3">
               <Input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full"
+                className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
               />
-              <Button className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700">
+              <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600">
+                <Mail className="mr-2 h-4 w-4" />
                 Subscribe
               </Button>
-            </form>
+            </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <div className="flex space-x-4 mb-4 md:mb-0">
-            <a
-              href="/facebook"
-              className="text-gray-400 hover:text-red-600 transition-colors duration-200"
-            >
-              <Facebook className="w-6 h-6" />
-            </a>
-            <a
-              href="/twitter"
-              className="text-gray-400 hover:text-red-600 transition-colors duration-200"
-            >
-              <Twitter className="w-6 h-6" />
-            </a>
-            <a
-              href="/github"
-              className="text-gray-400 hover:text-red-600 transition-colors duration-200"
-            >
-              <Github className="w-6 h-6" />
-            </a>
-          </div>
-          <p className="text-gray-600">© 2024 TubeNote. All rights reserved.</p>
+        <div className="border-t border-gray-800 pt-8 text-center">
+          <p className="text-gray-400">
+            ©
+            {" "}
+            {new Date().getFullYear()}
+            {" "}
+            TubeNote. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
