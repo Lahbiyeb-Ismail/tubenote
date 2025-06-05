@@ -1,5 +1,8 @@
 import type { Config } from "tailwindcss";
 
+import tailwindcssTypographyPlugin from "@tailwindcss/typography";
+import tailwindcssAnimatePlugin from "tailwindcss-animate";
+
 const config = {
   darkMode: ["class"],
   content: [
@@ -60,12 +63,20 @@ const config = {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
+          from: {
+            height: "0",
+          },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+          },
         },
         "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
+          from: {
+            height: "var(--radix-accordion-content-height)",
+          },
+          to: {
+            height: "0",
+          },
         },
       },
       animation: {
@@ -74,7 +85,7 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  plugins: [tailwindcssAnimatePlugin, tailwindcssTypographyPlugin],
 } satisfies Config;
 
 export default config;
