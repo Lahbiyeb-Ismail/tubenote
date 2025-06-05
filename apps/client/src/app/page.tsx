@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import { useGetCurrentUser } from "@/features/user/hooks";
 import { useUserStore } from "@/features/user/store";
-import { Footer, Header, Hero, HowItWorks } from "@/sections";
+import { Features, Footer, Header, Hero, HowItWorks } from "@/sections";
 
 export default function Home() {
   const { data: currentUser } = useGetCurrentUser();
@@ -18,6 +18,7 @@ export default function Home() {
     <main className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
       <Header />
       <Hero />
+      <Features />
       <HowItWorks />
       <Footer />
     </main>
