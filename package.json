@@ -58,6 +58,6 @@
     "turbo": "^2.5.3"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,mjs,cjs,json}": "pnpm lint:fix"
+    "**/src/**": "pnpm lint:fix"
   }
 }
