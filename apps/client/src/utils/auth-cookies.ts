@@ -1,5 +1,6 @@
-import type { AuthStatus } from "@/features/auth/store";
 import Cookies from "js-cookie";
+
+import type { AuthStatus } from "@/features/auth/store";
 
 /**
  * Cookie utilities for authentication state management using js-cookie
@@ -14,7 +15,7 @@ const DEFAULT_COOKIE_OPTIONS = {
   path: "/",
   // js-cookie does not support httpOnly (it's only for server-side)
   secure: process.env.NODE_ENV === "production",
-  expires: 30,
+  expires: 1, // 1 day expiration
   sameSite: "lax" as const,
 };
 
