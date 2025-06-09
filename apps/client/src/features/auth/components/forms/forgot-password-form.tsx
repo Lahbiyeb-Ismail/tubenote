@@ -1,16 +1,17 @@
 "use client";
 
+import type { IEmailBodyDto } from "@tubenote/dtos";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { emailBodySchema } from "@tubenote/schemas";
 import { Mail } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import type { IEmailBodyDto } from "@tubenote/dtos";
-import { emailBodySchema } from "@tubenote/schemas";
-
-import { Button, Form } from "@/components/ui";
-
 import { FormInput } from "@/components/global";
+import { Form } from "@/components/ui";
+
 import { useSendForgotPasswordEmail } from "../../hooks";
+import { AuthSubmitButton } from "../buttons";
 
 export function ForgotPasswordForm() {
   const form = useForm<IEmailBodyDto>({
@@ -20,8 +21,8 @@ export function ForgotPasswordForm() {
     },
   });
 
-  const { mutate: sendForgotPasswordEmail, isPending } =
-    useSendForgotPasswordEmail();
+  const { mutate: sendForgotPasswordEmail, isPending }
+    = useSendForgotPasswordEmail();
 
   const handleForgotPassword = async (formData: IEmailBodyDto) => {
     sendForgotPasswordEmail(formData.email);
@@ -36,18 +37,12 @@ export function ForgotPasswordForm() {
         <FormInput
           name="email"
           type="email"
-          label="Email"
-          placeholder="you@example.com"
+          label="Email Address"
+          placeholder="Enter your email"
           icon={Mail}
           control={form.control}
         />
-        <Button
-          type="submit"
-          className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={isPending}
-        >
-          {isPending ? "Sending..." : "Reset Password"}
-        </Button>
+        <AuthSubmitButton isLoading={isPending} buttonLabel="Send Reset Link" loadingLabel="Sending..." />
       </form>
     </Form>
   );
