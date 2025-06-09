@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { Button } from "./ui";
 
@@ -8,7 +9,8 @@ interface IProps {
 }
 
 export function NavLink({ href, children }: IProps) {
-  const isActive = href === window.location.pathname;
+  const isActive = href === usePathname();
+
   return (
     <Link href={href}>
       <Button variant="ghost" className={`gap-2  dark:bg-slate-800 ${isActive ? "bg-slate-100" : ""}`}>
