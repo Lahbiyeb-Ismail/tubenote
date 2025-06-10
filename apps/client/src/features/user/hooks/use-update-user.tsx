@@ -19,8 +19,6 @@ export function useUpdateUser() {
       toast.success(payload.message);
 
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
-
-      window.location.reload();
     },
     onError(error) {
       toast.dismiss("loadingToast");
