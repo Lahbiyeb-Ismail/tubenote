@@ -1,6 +1,5 @@
-import { NavigateBackButton } from "@/components";
+import { Fragment } from "react";
 
-import { ProfilePageContainer } from "../profile-page-container";
 import { ProfileHeaderSkeleton } from "./profile-header-skeleton";
 import { UserAchievementsSkeleton } from "./user-achievements-skeleton";
 import { UserLearningProgressSkeleton } from "./user-learning-progress-skeleton";
@@ -9,10 +8,7 @@ import { UserStatisticsSkeleton } from "./user-statistics-skeleton";
 
 export function UserProfileSkeleton() {
   return (
-    <ProfilePageContainer>
-      {/* Header */}
-      <NavigateBackButton href="/dashboard" btnText="Back to Dashboard" />
-
+    <Fragment>
       {/* Profile Header Card - Skeleton */}
       <ProfileHeaderSkeleton />
 
@@ -30,6 +26,6 @@ export function UserProfileSkeleton() {
 
       {/* Recent Activity Card - Skeleton */}
       <UserRecentActivitySkeleton />
-    </ProfilePageContainer>
+    </Fragment>
   );
 }

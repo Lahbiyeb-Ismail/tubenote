@@ -2,11 +2,8 @@
 
 import { Fragment, useState } from "react";
 
-import { NavigateBackButton } from "@/components";
-
 import {
   EditProfileContainer,
-  ProfilePageContainer,
   UserAchievementsOverview,
   UserLearningProgress,
   UserProfileHeader,
@@ -25,10 +22,7 @@ export function UserProfilePage() {
     return <UserProfileSkeleton />;
 
   return (
-    <ProfilePageContainer>
-      {/* Header */}
-      <NavigateBackButton href="/dashboard" btnText="Back to Dashboard" />
-
+    <Fragment>
       {/* Profile Header Card */}
       <UserProfileHeader user={user} isEditing={isEditing} setIsEditing={setIsEditing} />
 
@@ -54,6 +48,6 @@ export function UserProfilePage() {
               <UserRecentActivity />
             </Fragment>
           )}
-    </ProfilePageContainer>
+    </Fragment>
   );
 }

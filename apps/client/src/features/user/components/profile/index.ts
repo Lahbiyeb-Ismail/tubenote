@@ -1,6 +1,5 @@
 export * from "./edit-profile-container";
 export * from "./edit-profile-form";
-export * from "./profile-page-container";
 export * from "./skeletons";
 export * from "./user-achievements-overview";
 export * from "./user-learning-progress";
