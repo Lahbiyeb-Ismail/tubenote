@@ -18,7 +18,7 @@ export function UpdatePasswordForm() {
     defaultValues: {
       currentPassword: "",
       newPassword: "",
-      // confirmPassword: "",
+      confirmPassword: "",
     },
   });
 
@@ -50,14 +50,14 @@ export function UpdatePasswordForm() {
           icon={Lock}
           control={form.control}
         />
-        {/* <FormInput
-        name="confirmPassword"
-        type="password"
-        label="Confirm New Password"
-        placeholder="Confirm new password"
-        icon={Lock}
-        control={form.control}
-      /> */}
+        <FormInput
+          name="confirmPassword"
+          type="password"
+          label="Confirm New Password"
+          placeholder="Confirm new password"
+          icon={Lock}
+          control={form.control}
+        />
 
         <Button
           type="submit"
