@@ -4,7 +4,7 @@ import { Badge, Button } from "@/components/ui";
 
 export function Hero() {
   return (
-    <section className="pt-24 pb-16 px-4 min-h-screen flex items-center">
+    <section className="pb-16 px-4 min-h-screen flex items-center">
       <div className="container mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6 text-center lg:space-y-8 lg:text-left">
