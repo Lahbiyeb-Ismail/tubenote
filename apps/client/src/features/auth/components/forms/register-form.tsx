@@ -1,16 +1,17 @@
 "use client";
 
+import type { IRegisterDto } from "@tubenote/dtos";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { registerSchema } from "@tubenote/schemas";
 import { Lock, Mail, User } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import type { IRegisterDto } from "@tubenote/dtos";
-import { registerSchema } from "@tubenote/schemas";
-
-import { Button, Form } from "@/components/ui";
-
 import { FormInput } from "@/components/global";
+import { Form } from "@/components/ui";
+
 import { useRegister } from "../../hooks";
+import { AuthSubmitButton } from "../buttons";
 
 export function RegisterForm() {
   const form = useForm<IRegisterDto>({
@@ -32,16 +33,16 @@ export function RegisterForm() {
         <FormInput
           name="username"
           type="username"
-          label="Username"
-          placeholder="You Username"
+          label="Full Name"
+          placeholder="Enter your full name"
           icon={User}
           control={form.control}
         />
         <FormInput
           name="email"
           type="email"
-          label="Email"
-          placeholder="you@example.com"
+          label="Email Address"
+          placeholder="Enter your email"
           icon={Mail}
           control={form.control}
         />
@@ -49,17 +50,15 @@ export function RegisterForm() {
           name="password"
           type="password"
           label="Password"
-          placeholder="********"
+          placeholder="Enter your password"
           icon={Lock}
           control={form.control}
         />
-        <Button
-          type="submit"
-          className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700"
-          disabled={isPending}
-        >
-          {isPending ? "Registering..." : "Register"}
-        </Button>
+        <AuthSubmitButton
+          isLoading={isPending}
+          buttonLabel="Create Account"
+          loadingLabel="Creating Account..."
+        />
       </form>
     </Form>
   );

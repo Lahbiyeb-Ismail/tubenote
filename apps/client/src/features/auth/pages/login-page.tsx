@@ -8,16 +8,17 @@ export function LoginPage() {
   return (
     <AuthPageLayout
       title="Welcome Back"
-      description="Login to your account to access your notes"
+      description="Sign in to continue your video note journey"
       pageContent={<LoginForm />}
-      pageFooter={
+      pageFooter={(
         <p className="text-sm text-gray-600">
-          Don't have an account?{" "}
+          Don't have an account?
+          {" "}
           <Link href="/register" className="text-red-600 hover:underline">
-            Register here
+            Sign Up
           </Link>
         </p>
-      }
+      )}
     />
   );
 }

@@ -1,18 +1,18 @@
 "use client";
 
+import type { ILoginDto } from "@tubenote/dtos";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema } from "@tubenote/schemas";
 import { Lock, Mail } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import type { ILoginDto } from "@tubenote/dtos";
-import { loginSchema } from "@tubenote/schemas";
-
-import { Button, Form } from "@/components/ui";
-
-import { ForgotPasswordLink } from "../links";
-
 import { FormInput } from "@/components/global";
+import { Form } from "@/components/ui";
+
 import { useLogin } from "../../hooks";
+import { AuthSubmitButton } from "../buttons";
+import { ForgotPasswordLink } from "../links";
 
 export function LoginForm() {
   const form = useForm<ILoginDto>({
@@ -33,8 +33,8 @@ export function LoginForm() {
         <FormInput
           name="email"
           type="email"
-          label="Email"
-          placeholder="you@example.com"
+          label="Email Address"
+          placeholder="Enter your email"
           icon={Mail}
           control={form.control}
         />
@@ -42,18 +42,14 @@ export function LoginForm() {
           name="password"
           type="password"
           label="Password"
-          placeholder="********"
+          placeholder="Enter your password"
           icon={Lock}
           control={form.control}
         />
+
         <ForgotPasswordLink />
-        <Button
-          type="submit"
-          className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700"
-          disabled={isPending}
-        >
-          {isPending ? "Logging in..." : "Login"}
-        </Button>
+
+        <AuthSubmitButton isLoading={isPending} buttonLabel="Sign In" loadingLabel="Signing In..." />
       </form>
     </Form>
   );

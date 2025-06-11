@@ -1,16 +1,17 @@
 "use client";
 
+import type { IPasswordBodyDto } from "@tubenote/dtos";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { passwordBodySchema } from "@tubenote/schemas";
 import { Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import type { IPasswordBodyDto } from "@tubenote/dtos";
-import { passwordBodySchema } from "@tubenote/schemas";
-
-import { Button, Form } from "@/components/ui";
-
 import { FormInput } from "@/components/global";
+import { Form } from "@/components/ui";
+
 import { useResetPassword } from "../../hooks";
+import { AuthSubmitButton } from "../buttons";
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const form = useForm<IPasswordBodyDto>({
@@ -41,21 +42,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
           icon={Lock}
           control={form.control}
         />
-        {/* <FormInput
-              name="confirmPassword"
-              type="password"
-              label="Confirm New Password"
-              placeholder="Confirm your new password"
-              icon={Lock}
-              control={form.control}
-            /> */}
-        <Button
-          type="submit"
-          className="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={isPending}
-        >
-          {isPending ? "Resetting..." : "Reset Password"}
-        </Button>
+        <AuthSubmitButton isLoading={isPending} buttonLabel="Reset Password" loadingLabel="Resetting..." />
       </form>
     </Form>
   );

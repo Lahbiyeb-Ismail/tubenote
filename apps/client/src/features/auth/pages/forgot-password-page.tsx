@@ -9,16 +9,17 @@ export function ForgotPasswordPage() {
     <AuthPageLayout
       title="Reset Your Password"
       description="Enter your email to reset your password"
-      showGoogleAuth={false}
+      showSocialLoginOptions={false}
       pageContent={<ForgotPasswordForm />}
-      pageFooter={
+      pageFooter={(
         <p className="text-sm text-gray-600">
-          Remember your password?{" "}
+          Remember your password?
+          {" "}
           <Link href="/login" className="text-red-600 hover:underline">
-            Log in here
+            Sign In
           </Link>
         </p>
-      }
+      )}
     />
   );
 }
