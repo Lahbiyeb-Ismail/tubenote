@@ -11,4 +11,9 @@ export interface IUpdatePasswordDto {
    * The new password that the user wants to set.
    */
   newPassword: string;
+
+  /**
+   * The confirmation of the new password to ensure it matches.
+   */
+  confirmPassword: string;
 }
