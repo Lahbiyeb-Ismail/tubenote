@@ -37,12 +37,13 @@ export function setAuthStatusCookie(status: AuthStatus, options = {}) {
  *
  * @returns The authentication status or undefined if not found
  */
-export function getAuthStatusFromCookie(): AuthStatus | undefined {
+export function getAuthStatusFromCookie(): AuthStatus {
   const status = Cookies.get(AUTH_STATUS_COOKIE);
-  if (["authenticated", "unauthenticated", "loading"].includes(status ?? "")) {
-    return status as AuthStatus;
-  }
-  return undefined;
+
+  if (status === undefined)
+    return "unauthenticated";
+
+  return status as AuthStatus;
 }
 
 /**

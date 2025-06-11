@@ -13,7 +13,7 @@ export function useLogin() {
 
   const { authActions } = useAuthStore();
 
-  const { setLoading, setAuthenticated, setError } = authActions;
+  const { setAuthenticated, setError } = authActions;
 
   return useMutation({
     mutationKey: ["login-user"],
@@ -22,8 +22,6 @@ export function useLogin() {
     onMutate: () => {
       // Cancel any outgoing refetches
       queryClient.cancelQueries({ queryKey: ["current-user"] });
-
-      setLoading();
 
       toast.loading("Logging in...", { id: "loadingToast" });
     },

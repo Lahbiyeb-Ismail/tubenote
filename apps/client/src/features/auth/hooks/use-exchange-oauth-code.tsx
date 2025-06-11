@@ -14,7 +14,7 @@ export function useExchangeOauthCode() {
 
   const { authActions } = useAuthStore();
 
-  const { setError, setLoading, setAuthenticated } = authActions;
+  const { setError, setAuthenticated } = authActions;
 
   return useMutation({
     mutationKey: ["exchange-oauth-code"],
@@ -23,8 +23,6 @@ export function useExchangeOauthCode() {
     onMutate: () => {
       // Cancel any outgoing refetches
       queryClient.cancelQueries({ queryKey: ["current-user"] });
-
-      setLoading();
     },
     onSuccess: async () => {
       // Set the authentication state

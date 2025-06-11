@@ -13,14 +13,12 @@ export function useRegister() {
   const router = useRouter();
   const { authActions } = useAuthStore();
 
-  const { setLoading, setError } = authActions;
+  const { setError } = authActions;
 
   return useMutation({
     mutationFn: registerUser,
     onMutate: () => {
       toast.loading("Registering...", { id: "loadingToast" });
-
-      setLoading();
     },
     onSuccess: (responseData) => {
       const { payload } = responseData;

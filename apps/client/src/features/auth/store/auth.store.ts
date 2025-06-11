@@ -1,11 +1,12 @@
 "use client";
 
-import { getAuthStatusFromCookie, setAuthStatusCookie } from "@/utils";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
+import { getAuthStatusFromCookie, setAuthStatusCookie } from "@/utils";
+
 // Define authentication state types
-export type AuthStatus = "authenticated" | "unauthenticated" | "loading";
+export type AuthStatus = "authenticated" | "unauthenticated";
 
 interface AuthState {
   status: AuthStatus;
@@ -17,14 +18,13 @@ interface AuthStore extends AuthState {
     setAuthenticated: () => void;
     setUnauthenticated: (error?: Error) => void;
     setError: (error: Error) => void;
-    setLoading: () => void;
     clearError: () => void;
   };
 }
 
 export const useAuthStore = create<AuthStore>()(
-  immer((set) => ({
-    status: getAuthStatusFromCookie() ?? "unauthenticated",
+  immer(set => ({
+    status: getAuthStatusFromCookie(),
     user: null,
     error: null,
 
@@ -36,24 +36,18 @@ export const useAuthStore = create<AuthStore>()(
           setAuthStatusCookie("authenticated");
         }),
 
-      setUnauthenticated: (error) =>
+      setUnauthenticated: error =>
         set((state) => {
           state.status = "unauthenticated";
           state.error = error || null;
           setAuthStatusCookie("unauthenticated");
         }),
 
-      setError: (error) =>
+      setError: error =>
         set((state) => {
           state.error = error;
           state.status = "unauthenticated";
           setAuthStatusCookie("unauthenticated");
-        }),
-
-      setLoading: () =>
-        set((state) => {
-          state.status = "loading";
-          setAuthStatusCookie("loading");
         }),
 
       clearError: () =>
@@ -61,5 +55,5 @@ export const useAuthStore = create<AuthStore>()(
           state.error = null;
         }),
     },
-  }))
+  })),
 );
