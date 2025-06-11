@@ -1,11 +1,10 @@
 import { BookOpen, LayoutDashboard, User, Video } from "lucide-react";
-import { Fragment } from "react";
 
 import { NavLink } from "@/components";
 
 export function DashboardNavLinks() {
   return (
-    <Fragment>
+    <nav className="hidden md:flex items-center gap-6 ml-8">
       <NavLink href="/dashboard">
         <LayoutDashboard className="h-4 w-4" />
         Dashboard
@@ -22,6 +21,6 @@ export function DashboardNavLinks() {
         <User className="h-4 w-4" />
         Profile
       </NavLink>
-    </Fragment>
+    </nav>
   );
 }
