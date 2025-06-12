@@ -1,3 +1,3 @@
-import { AllNotesPage } from "@/features/note/pages";
+import { NotesDashboardPage } from "@/features/note/pages";
 
-export default AllNotesPage;
+export default NotesDashboardPage;

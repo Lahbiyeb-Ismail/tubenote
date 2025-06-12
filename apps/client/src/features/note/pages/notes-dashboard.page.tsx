@@ -7,7 +7,7 @@ import { useGetUserNotes } from "@/features/note/hooks";
 import { usePaginationQuery, useSortByQueries } from "@/hooks";
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils";
 
-export function AllNotesPage() {
+export function NotesDashboardPage() {
   const { currentPage, setPage } = usePaginationQuery({
     defaultPage: DEFAULT_PAGE,
   });
