@@ -1,5 +1,5 @@
 export * from "./charts";
-export * from "./dashboard-header";
+export * from "./dashboard-navigation-header";
 export * from "./key-metric-card";
 export * from "./key-metrics";
 export * from "./monthly-progress";
