@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { useGetUserVideos } from "@/features/video/hooks";
 import { extractVideoId } from "@/helpers";
+import { useDialogStore } from "@/stores";
 import { validateYouTubeUrl } from "@/utils";
 
 import { NoteCreationDialogFooter } from "./note-creation-dialog-footer";
@@ -19,19 +20,15 @@ import { NoteCreationDialogOptions } from "./note-creation-dialog-options";
 import { NoteCreationDialogUrlInput } from "./note-creation-dialog-url-input";
 import { NoteCreationDialogVideoSelection } from "./note-creation-dialog-video-slelection";
 
-interface IProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export function NoteCreationDialog({
-  open,
-  onOpenChange,
-}: IProps) {
+export function NoteCreationDialog() {
   const [option, setOption] = useState<"new" | "existing">("new");
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [selectedVideoId, setSelectedVideoId] = useState("");
   const [urlError, setUrlError] = useState("");
+
+  const { type, isOpen, closeDialog } = useDialogStore();
+
+  const isCreateNoteDialogOpen = isOpen && type === "create-note";
 
   const router = useRouter();
 
@@ -76,7 +73,7 @@ export function NoteCreationDialog({
     setSelectedVideoId("");
     setUrlError("");
     setOption("new");
-    onOpenChange(false);
+    closeDialog();
   };
 
   const handleCancel = () => {
@@ -84,7 +81,7 @@ export function NoteCreationDialog({
     setSelectedVideoId("");
     setUrlError("");
     setOption("new");
-    onOpenChange(false);
+    closeDialog();
   };
 
   const isSubmitDisabled = () => {
@@ -95,7 +92,7 @@ export function NoteCreationDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isCreateNoteDialogOpen} onOpenChange={open => !open && closeDialog()}>
       <DialogContent className="sm:max-w-md">
         <NoteCreationDialogHeader />
 
