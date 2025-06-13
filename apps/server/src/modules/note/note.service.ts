@@ -1,5 +1,3 @@
-import { inject, injectable } from "inversify";
-
 import type { Note, Prisma } from "@tubenote/db";
 import type {
   ICreateNoteDto,
@@ -8,12 +6,13 @@ import type {
 } from "@tubenote/dtos";
 import type { IPaginatedData } from "@tubenote/types";
 
-import { TYPES } from "@/config/inversify/types";
-
-import { NotFoundError } from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import { inject, injectable } from "inversify";
 
 import type { IPrismaService } from "@/modules/shared/services";
+
+import { TYPES } from "@/config/inversify/types";
+import { NotFoundError } from "@/modules/shared/api-errors";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import type { INoteRepository, INoteService } from "./note.types";
 
@@ -33,7 +32,7 @@ export class NoteService implements INoteService {
    */
   constructor(
     @inject(TYPES.NoteRepository) private _noteRepository: INoteRepository,
-    @inject(TYPES.PrismaService) private _prismaService: IPrismaService
+    @inject(TYPES.PrismaService) private _prismaService: IPrismaService,
   ) {}
 
   /**
@@ -49,7 +48,7 @@ export class NoteService implements INoteService {
   async findNote(
     userId: string,
     noteId: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<Note> {
     const note = await this._noteRepository.find(userId, noteId, tx);
 
@@ -74,7 +73,7 @@ export class NoteService implements INoteService {
     userId: string,
     videoId: string,
     data: ICreateNoteDto,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<Note> {
     return await this._noteRepository.create(userId, videoId, data, tx);
   }
@@ -92,7 +91,7 @@ export class NoteService implements INoteService {
   async updateNote(
     userId: string,
     noteId: string,
-    data: IUpdateNoteDto
+    data: IUpdateNoteDto,
   ): Promise<Note> {
     return await this._prismaService.transaction(async (tx) => {
       await this.findNote(userId, noteId, tx);
@@ -131,7 +130,7 @@ export class NoteService implements INoteService {
    */
   async fetchUserNotes(
     userId: string,
-    findManyDto: IFindManyDto
+    findManyDto: IFindManyDto,
   ): Promise<IPaginatedData<Note>> {
     return await this._prismaService.transaction(async (tx) => {
       const data = await this._noteRepository.findMany(userId, findManyDto, tx);
@@ -154,7 +153,7 @@ export class NoteService implements INoteService {
    */
   async fetchRecentNotes(
     userId: string,
-    findManyDto: IFindManyDto
+    findManyDto: IFindManyDto,
   ): Promise<Note[]> {
     return await this._noteRepository.findMany(userId, findManyDto);
   }
@@ -171,7 +170,7 @@ export class NoteService implements INoteService {
    */
   async fetchRecentlyUpdatedNotes(
     userId: string,
-    findManyDto: IFindManyDto
+    findManyDto: IFindManyDto,
   ): Promise<Note[]> {
     return await this._noteRepository.findMany(userId, findManyDto);
   }
@@ -179,7 +178,9 @@ export class NoteService implements INoteService {
   /**
    * Fetches notes associated with a specific video ID.
    *
-   * @param dto - Data transfer object containing the video ID and pagination information.
+   * @param userId - The unique identifier of the user.
+   * @param videoId - The unique identifier of the video.
+   * @param findManyDto - The data transfer object containing pagination and sorting options.
    * @returns A promise that resolves to an object containing the paginated notes, total number of notes, and total pages.
    *
    * @template IFindManyDto - Interface for the data transfer object that includes pagination and user information.
@@ -189,14 +190,14 @@ export class NoteService implements INoteService {
   async fetchNotesByVideoId(
     userId: string,
     videoId: string,
-    findManyDto: IFindManyDto
+    findManyDto: IFindManyDto,
   ): Promise<IPaginatedData<Note>> {
     return await this._prismaService.transaction(async (tx) => {
       const data = await this._noteRepository.findManyByVideoId(
         userId,
         videoId,
         findManyDto,
-        tx
+        tx,
       );
 
       const totalItems = await this._noteRepository.count(userId, tx);

@@ -1,5 +1,3 @@
-import { inject, injectable } from "inversify";
-
 import type { Note, Prisma } from "@tubenote/db";
 import type {
   ICreateNoteDto,
@@ -7,12 +5,13 @@ import type {
   IUpdateNoteDto,
 } from "@tubenote/dtos";
 
-import { TYPES } from "@/config/inversify/types";
-
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import { handleAsyncOperation } from "@/modules/shared/utils";
+import { inject, injectable } from "inversify";
 
 import type { IPrismaService } from "@/modules/shared/services";
+
+import { TYPES } from "@/config/inversify/types";
+import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import type { INoteRepository } from "./note.types";
 
@@ -31,7 +30,7 @@ export class NoteRepository implements INoteRepository {
    * @param _db - An instance of PrismaClient for database operations.
    */
   constructor(
-    @inject(TYPES.PrismaService) private readonly _db: IPrismaService
+    @inject(TYPES.PrismaService) private readonly _db: IPrismaService,
   ) {}
 
   /**
@@ -46,7 +45,7 @@ export class NoteRepository implements INoteRepository {
   async find(
     userId: string,
     noteId: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<Note | null> {
     const client = tx ?? this._db;
 
@@ -58,7 +57,7 @@ export class NoteRepository implements INoteRepository {
             userId,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND },
     );
   }
 
@@ -76,7 +75,7 @@ export class NoteRepository implements INoteRepository {
     userId: string,
     videoId: string,
     data: ICreateNoteDto,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<Note> {
     const client = tx ?? this._db;
 
@@ -89,7 +88,7 @@ export class NoteRepository implements INoteRepository {
             ...data,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE },
     );
   }
 
@@ -108,7 +107,7 @@ export class NoteRepository implements INoteRepository {
     userId: string,
     noteId: string,
     data: IUpdateNoteDto,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<Note> {
     const client = tx ?? this._db;
 
@@ -121,7 +120,7 @@ export class NoteRepository implements INoteRepository {
           },
           data,
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE },
     );
   }
 
@@ -130,14 +129,14 @@ export class NoteRepository implements INoteRepository {
    *
    * @param userId - The ID of the user who owns the note.
    * @param noteId - The ID of the note to delete.
-   * @param tx: Optional transaction client for database operations.
+   * @param tx - Optional transaction client for database operations.
    *
    * @returns A Promise that resolves with the deleted Note.
    */
   async delete(
     userId: string,
     noteId: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<Note> {
     const client = tx ?? this._db;
 
@@ -146,7 +145,7 @@ export class NoteRepository implements INoteRepository {
         client.note.delete({
           where: { id: noteId, userId },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_DELETE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_DELETE },
     );
   }
 
@@ -161,7 +160,7 @@ export class NoteRepository implements INoteRepository {
   async findMany(
     userId: string,
     findManyDto: IFindManyDto,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<Note[]> {
     const client = tx ?? this._db;
 
@@ -179,7 +178,7 @@ export class NoteRepository implements INoteRepository {
             [sort.by]: sort.order,
           },
         }),
-      { errorMessage: "Failed to fetch user notes." }
+      { errorMessage: "Failed to fetch user notes." },
     );
   }
 
@@ -196,7 +195,7 @@ export class NoteRepository implements INoteRepository {
     userId: string,
     videoId: string,
     findManyDto: IFindManyDto,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<Note[]> {
     const client = tx ?? this._db;
 
@@ -215,7 +214,7 @@ export class NoteRepository implements INoteRepository {
             [sort.by]: sort.order,
           },
         }),
-      { errorMessage: "Failed to fetch user notes." }
+      { errorMessage: "Failed to fetch user notes." },
     );
   }
 
@@ -235,7 +234,7 @@ export class NoteRepository implements INoteRepository {
             userId,
           },
         }),
-      { errorMessage: "Failed to count notes." }
+      { errorMessage: "Failed to count notes." },
     );
   }
 }
