@@ -2,6 +2,7 @@ export * from "./charts";
 export * from "./dashboard-navigation-header";
 export * from "./key-metric-card";
 export * from "./key-metrics";
+export * from "./learning-goals";
 export * from "./monthly-progress";
 export * from "./quick-actions";
 export * from "./recent-activity";
