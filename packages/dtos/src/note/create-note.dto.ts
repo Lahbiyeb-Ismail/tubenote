@@ -4,7 +4,10 @@ export interface ICreateNoteDto {
   videoTitle: string;
   youtubeId: string;
   thumbnail: string;
+  tags: string[];
+  category: string | null;
   timestamp: Timestamp;
+  isPublic?: boolean;
 }
 
 export interface Timestamp {
