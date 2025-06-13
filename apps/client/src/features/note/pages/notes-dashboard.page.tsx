@@ -1,18 +1,30 @@
 "use client";
 
-import { AddNoteForm, Header } from "@/components/dashboards";
-import { Loader, PaginationComponent } from "@/components/global";
-import { NoNotesFound, NotesList } from "@/features/note/components";
+import { useState } from "react";
+
+import { DashboardHeader } from "@/components/dashboards";
+import { PaginationComponent } from "@/components/global";
+import { NoNotesFound } from "@/features/note/components";
 import { useGetUserNotes } from "@/features/note/hooks";
 import { usePaginationQuery, useSortByQueries } from "@/hooks";
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils";
 
+import { NotesDashboardSkeleton, NotesList, NotesSearchAndFilter } from "../components/notes-dashboard";
+
 export function NotesDashboardPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  // const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  // const [selectedNotes, setSelectedNotes] = useState<string[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
+  // const [activeTab, setActiveTab] = useState("all");
+
   const { currentPage, setPage } = usePaginationQuery({
     defaultPage: DEFAULT_PAGE,
   });
 
-  const { order, sortBy } = useSortByQueries({});
+  const { order } = useSortByQueries({});
 
   const { data, isLoading: isNotesLoading } = useGetUserNotes({
     page: currentPage,
@@ -22,26 +34,33 @@ export function NotesDashboardPage() {
   });
 
   if (isNotesLoading || !data)
-    return <Loader />;
+    return <NotesDashboardSkeleton />;
 
   if (data.notes.length === 0 || !data.paginationMeta) {
     return <NoNotesFound />;
   }
 
   return (
-    <div className="min-h-screen flex-1 bg-gray-100">
-      <Header title="Your Video Notes" />
-      <main className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
-        <div className="flex justify-end">
-          <AddNoteForm />
-        </div>
-        <NotesList notes={data.notes} />
-        <PaginationComponent
-          currentPage={currentPage}
-          totalPages={data.paginationMeta.totalPages}
-          onPageChange={setPage}
-        />
-      </main>
-    </div>
+    <main className="container py-6">
+      {/* Page Header */}
+      <DashboardHeader title="Your Notes 🗒" description="Manage and organize all your video notes in one place." />
+
+      {/* Search and Filter Component */}
+      <NotesSearchAndFilter searchQuery={searchQuery} setSearchQuery={setSearchQuery} showFilters={showFilters} setShowFilters={setShowFilters} sortBy={sortBy} setSortBy={setSortBy} viewMode={viewMode} setViewMode={setViewMode} />
+
+      {/* Notes List */}
+      <NotesList viewMode={viewMode} notes={data.notes} />
+
+      {/* Pagination Component */}
+      {data.notes.length >= PAGE_LIMIT
+        ? (
+            <PaginationComponent
+              currentPage={currentPage}
+              totalPages={data.paginationMeta.totalPages}
+              onPageChange={setPage}
+            />
+          )
+        : null}
+    </main>
   );
 }
