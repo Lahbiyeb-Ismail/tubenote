@@ -1,13 +1,11 @@
 import { Clock, FileText, Plus, Sparkles, Youtube } from "lucide-react";
-import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-
-import { NoteCreationDialog } from "../note-creation-dialog";
+import { useDialogStore } from "@/stores";
 
 export function NoNotesFound() {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const { openDialog } = useDialogStore();
 
   return (
     <div className="min-h-screen flex-1 bg-gray-100">
@@ -35,7 +33,7 @@ export function NoNotesFound() {
               </div>
 
               <Button
-                onClick={() => setIsCreateDialogOpen(true)}
+                onClick={() => openDialog("create-note")}
                 className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-8 py-3 text-lg font-medium"
               >
                 <Plus className="h-5 w-5 mr-2" />
@@ -106,8 +104,6 @@ export function NoNotesFound() {
           </Card>
         </div>
       </div>
-
-      <NoteCreationDialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} />
     </div>
   );
 }
