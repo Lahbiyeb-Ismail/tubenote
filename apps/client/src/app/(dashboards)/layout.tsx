@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardNavigationHeader } from "@/features/dashboard/components";
+import { NoteCreationDialog } from "@/features/note/components";
 import { withAuth } from "@/HOC";
 
 interface LayoutProps {
@@ -12,6 +13,7 @@ function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       <DashboardNavigationHeader />
       {children}
+      <NoteCreationDialog />
     </div>
   );
 }
