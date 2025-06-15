@@ -1,40 +1,45 @@
 "use client";
 
-import { useEditorContent } from "@/features/note/hooks";
-import { useUIStore } from "@/stores";
+import dynamic from "next/dynamic";
 
-import { AppMDXEditor, SaveNoteForm } from "@/components/editor";
+import { AppMDXEditor } from "@/components/editor";
 import {
-  ConfirmationModal,
   Loader,
   ResizablePanels,
   SaveButton,
 } from "@/components/global";
+import { useEditorContent } from "@/features/note/hooks";
 import { VideoPlayer } from "@/features/video/components";
+import { useDialogStore } from "@/stores";
 
-export interface NotePageLayoutProps {
+const SaveNoteDialog = dynamic(
+  () => import("../save-note-dialog").then(mod => mod.SaveNoteDialog),
+  { ssr: false, loading: () => <div className="hidden">Loading...</div> },
+);
+
+interface IProps {
   videoId: string;
-  noteContent?: string;
-  noteTitle?: string;
   isLoading: boolean;
   isSavingNote: boolean;
-  modalTitle: string;
-  modalDescription: string;
-  handleSaveNote: (noteTitle: string, content: string) => void;
+  handleSaveNote: (title: string, content: string, category: string, tags: string[]) => void;
+  noteTitle?: string;
+  noteContent?: string;
+  noteTags?: string[];
+  noteCategory?: string;
 }
 
 export function NotePageLayout({
   videoId,
-  noteContent,
-  noteTitle,
   isLoading,
   isSavingNote,
-  modalTitle,
-  modalDescription,
   handleSaveNote,
-}: NotePageLayoutProps) {
+  noteTitle,
+  noteContent,
+  noteTags,
+  noteCategory,
+}: IProps) {
   const { editorRef, getContent } = useEditorContent();
-  const { actions } = useUIStore();
+  const { openDialog } = useDialogStore();
 
   if (isLoading) {
     return (
@@ -44,9 +49,9 @@ export function NotePageLayout({
     );
   }
 
-  const handleSaveSubmit = (noteTitle: string) => {
+  const handleSaveSubmit = (title: string, category: string, tags: string[]) => {
     const content = getContent();
-    handleSaveNote(noteTitle, content);
+    handleSaveNote(title, content, category, tags);
   };
 
   return (
@@ -61,16 +66,11 @@ export function NotePageLayout({
 
         <SaveButton
           className="absolute bottom-3 right-[48%]"
-          onClick={actions.openModal}
+          onClick={() => openDialog("save-note")}
         />
       </div>
-      <ConfirmationModal title={modalTitle} description={modalDescription}>
-        <SaveNoteForm
-          noteTitle={noteTitle}
-          isLoading={isSavingNote}
-          handleSaveSubmit={handleSaveSubmit}
-        />
-      </ConfirmationModal>
+
+      <SaveNoteDialog noteTitle={noteTitle} noteTags={noteTags} noteCategory={noteCategory} isSaving={isSavingNote} onSaveNote={handleSaveSubmit} />
     </>
   );
 }
