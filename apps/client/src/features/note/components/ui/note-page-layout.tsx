@@ -6,11 +6,11 @@ import { AppMDXEditor } from "@/components/editor";
 import {
   Loader,
   ResizablePanels,
-  SaveButton,
 } from "@/components/global";
 import { useEditorContent } from "@/features/note/hooks";
 import { VideoPlayer } from "@/features/video/components";
-import { useDialogStore } from "@/stores";
+
+import { NoteActionHeader } from "../note-action-header";
 
 const SaveNoteDialog = dynamic(
   () => import("../save-note-dialog").then(mod => mod.SaveNoteDialog),
@@ -39,38 +39,61 @@ export function NotePageLayout({
   noteCategory,
 }: IProps) {
   const { editorRef, getContent } = useEditorContent();
-  const { openDialog } = useDialogStore();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
-        <Loader />
-      </div>
-    );
-  }
 
   const handleSaveSubmit = (title: string, category: string, tags: string[]) => {
     const content = getContent();
     handleSaveNote(title, content, category, tags);
   };
 
+  if (isLoading) {
+    return (
+      <Loader />
+    );
+  }
+
+  // const renderEditor = () => (
+  //   <ResizablePanel defaultSize={50} minSize={30} maxSize={70} className="px-2 relative">
+  //     <AppMDXEditor editorRef={editorRef} noteContent={noteContent} />
+  //   </ResizablePanel>
+  // );
+  // ;
+
+  // const renderVideoPlayer = () => (
+  //   <ResizablePanel defaultSize={50} minSize={30} maxSize={70} className="px-2 relative">
+  //     <VideoPlayer videoId={videoId} />
+  //   </ResizablePanel>
+  // );
+
   return (
-    <>
-      <div className="flex h-screen bg-white">
+    <div className="h-screen bg-white">
+      <NoteActionHeader />
+
+      <div className="h-[calc(100vh-60px)] p-2">
         <ResizablePanels
-          leftSideContent={
-            <AppMDXEditor editorRef={editorRef} noteContent={noteContent} />
-          }
+          leftSideContent={<AppMDXEditor editorRef={editorRef} noteContent={noteContent} />}
           rightSideContent={<VideoPlayer videoId={videoId} />}
         />
 
-        <SaveButton
-          className="absolute bottom-3 right-[48%]"
-          onClick={() => openDialog("save-note")}
-        />
+        {/* <ResizablePanelGroup direction="horizontal" className="rounded-lg border">
+          {editorPosition === "left"
+            ? (
+                <>
+                  {renderEditor()}
+                  <ResizableHandle withHandle />
+                  {renderVideoPlayer()}
+                </>
+              )
+            : (
+                <>
+                  {renderVideoPlayer()}
+                  <ResizableHandle withHandle />
+                  {renderEditor()}
+                </>
+              )}
+        </ResizablePanelGroup> */}
       </div>
 
       <SaveNoteDialog noteTitle={noteTitle} noteTags={noteTags} noteCategory={noteCategory} isSaving={isSavingNote} onSaveNote={handleSaveSubmit} />
-    </>
+    </div>
   );
 }

@@ -1,10 +1,9 @@
-import { useDirection } from "@/hooks";
-
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui";
+import { useDirection } from "@/hooks";
 
 interface ResizablePanelsProps {
   leftPanelSize?: number;
@@ -22,12 +21,12 @@ export function ResizablePanels({
   const direction = useDirection();
 
   return (
-    <ResizablePanelGroup direction={direction} className="flex w-full">
-      <ResizablePanel defaultSize={leftPanelSize} className="px-2 relative">
+    <ResizablePanelGroup direction={direction} className="rounded-lg border">
+      <ResizablePanel defaultSize={leftPanelSize} minSize={30} maxSize={70} className="px-2 relative">
         {leftSideContent}
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={rightPanelSize} className="px-2">
+      <ResizablePanel defaultSize={rightPanelSize} minSize={30} maxSize={70} className="px-2">
         {rightSideContent}
       </ResizablePanel>
     </ResizablePanelGroup>

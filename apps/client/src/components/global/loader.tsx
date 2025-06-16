@@ -2,7 +2,7 @@ import BounceLoader from "react-spinners/BounceLoader";
 
 export function Loader() {
   return (
-    <div className="height_viewport flex w-full items-center justify-center bg-gray-100">
+    <div className="h-screen bg-white flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
       <BounceLoader color="#FF0000" />
     </div>
   );
