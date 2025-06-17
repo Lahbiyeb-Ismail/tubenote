@@ -1,7 +1,6 @@
 import type { Note } from "@tubenote/db";
 
 import { Card } from "@/components/ui/card";
-// import { Checkbox } from "@/components/ui/checkbox";
 
 import { NoteCardContent } from "./note-card-content";
 import { NoteCardHeader } from "./note-card-header";

@@ -19,12 +19,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useDialogStore } from "@/stores";
 
 interface IProps {
   note: Note;
 }
 
 export function NoteCardActionsMenu({ note }: IProps) {
+  const { openNoteDeletionDialog } = useDialogStore();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -69,7 +72,7 @@ export function NoteCardActionsMenu({ note }: IProps) {
           {note.isArchived ? "Unarchive" : "Archive"}
         </DropdownMenuItem>
 
-        <DropdownMenuItem className="text-red-600">
+        <DropdownMenuItem className="text-red-600 cursor-pointer" onClick={() => openNoteDeletionDialog(note.id)}>
           <Trash2 className="mr-2 h-4 w-4" />
           Delete
         </DropdownMenuItem>
