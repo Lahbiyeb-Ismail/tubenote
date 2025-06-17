@@ -1,6 +1,6 @@
 import type { Note } from "@tubenote/db";
 
-import { NoteCard } from "./note-card";
+import { NoteCard } from "../note-card";
 
 interface IProps {
   viewMode: "grid" | "list";
