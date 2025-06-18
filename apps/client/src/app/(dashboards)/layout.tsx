@@ -2,7 +2,6 @@
 
 import { DashboardNavigationHeader } from "@/features/dashboard/components";
 import { NoteCreationDialog } from "@/features/note/components";
-import { withAuth } from "@/HOC";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -18,4 +17,4 @@ function Layout({ children }: LayoutProps) {
   );
 }
 
-export default withAuth(Layout);
+export default Layout;
