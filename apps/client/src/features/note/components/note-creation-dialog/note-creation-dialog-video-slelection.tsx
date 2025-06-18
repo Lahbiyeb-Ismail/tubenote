@@ -30,7 +30,7 @@ export function NoteCreationDialogVideoSelection({ videos, selectedVideoId, setS
               <SelectContent>
                 {videos.map(video => (
                   <SelectItem key={video.id} value={video.youtubeId}>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 max-w-[300px]">
                       <Youtube className="h-4 w-4 text-red-500" />
                       <span className="truncate">{video.title}</span>
                     </div>
