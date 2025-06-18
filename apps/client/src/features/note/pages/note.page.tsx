@@ -1,77 +1,60 @@
 "use client";
 
-import { useGetNoteById } from "@/features/note/hooks";
-import { useToggleVideoPlayer } from "@/hooks";
-
 import { Loader, MarkdownViewer, ResizablePanels } from "@/components/global";
-
 import {
-  NoteError,
-  NotePageFooter,
+  NoteNotFound,
   NotePageHeader,
 } from "@/features/note/components";
-
-import { useNoteStore } from "@/features/note/store";
+import { useGetNoteById } from "@/features/note/hooks";
 import { VideoPlayer } from "@/features/video/components";
-import { useEffect } from "react";
+import { useToggleVideoPlayer } from "@/hooks";
 
 interface IPageProps {
   noteId: string;
 }
 
 export function NotePage({ noteId }: IPageProps) {
-  const { noteActions } = useNoteStore();
-  const { data: note, isLoading, isError, refetch } = useGetNoteById(noteId);
-  const { isVideoPlayerVisible, toggleVideoPlayer } = useToggleVideoPlayer();
-
-  useEffect(() => {
-    noteActions.setNote(note);
-  }, [note, noteActions]);
+  const { data: note, isLoading } = useGetNoteById(noteId);
+  const { isVideoPlayerVisible, toggleVideoPlayer } = useToggleVideoPlayer(true);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
+      <div className="min-h-screen flex items-center justify-center">
         <Loader />
       </div>
     );
   }
 
-  if (isError) {
+  if (!note) {
     return (
-      <div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
-        <NoteError onRetry={() => refetch()} />
-      </div>
+      <NoteNotFound />
     );
   }
-
-  if (!note) return null;
 
   return (
     <main className="min-h-screen bg-white">
       {/* Header */}
       <NotePageHeader
         noteId={note.id}
-        noteTitle={note.title}
         isVideoVisible={isVideoPlayerVisible}
         onToggleVideo={toggleVideoPlayer}
       />
 
       {/* Content */}
-      <article className="container h-screen mx-auto px-2 py-6 overflow-auto">
-        {isVideoPlayerVisible ? (
-          <ResizablePanels
-            leftSideContent={
+      <div className="container h-screen mx-auto px-2 py-6 overflow-auto">
+        {isVideoPlayerVisible
+          ? (
+              <ResizablePanels
+                leftSideContent={
+                  <MarkdownViewer content={note.content} noteTitle={note.title} />
+                }
+                rightSideContent={<VideoPlayer videoId={note.youtubeId} />}
+              />
+            )
+          : (
               <MarkdownViewer content={note.content} noteTitle={note.title} />
-            }
-            rightSideContent={<VideoPlayer videoId={note.youtubeId} />}
-          />
-        ) : (
-          <MarkdownViewer content={note.content} noteTitle={note.title} />
-        )}
-      </article>
-
-      {/* Footer */}
-      <NotePageFooter />
+            )}
+      </div>
     </main>
   );
 }
