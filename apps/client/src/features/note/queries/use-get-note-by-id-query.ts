@@ -4,11 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getNoteById } from "../services";
 
-export function useGetNoteById(noteId: string) {
+export function useGetNoteByIdQuery(noteId: string) {
   return useQuery({
     queryKey: ["note", noteId],
     queryFn: () => getNoteById(noteId),
-    select: (data) => data.payload.data,
+    select: data => data.payload.data,
     enabled: !!noteId,
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,

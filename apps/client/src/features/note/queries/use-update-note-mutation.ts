@@ -1,34 +1,45 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 import { useDialogStore } from "@/stores";
 
-import { deleteNote } from "../services";
+import { updateNote } from "../services";
 import { useNoteStore } from "../store";
 
-export function useDeleteNote() {
+export function useUpdateNoteMutation() {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
-  const { noteActions } = useNoteStore();
   const { closeDialog } = useDialogStore();
+  const { noteActions } = useNoteStore();
 
   return useMutation({
-    mutationFn: deleteNote,
+    mutationFn: updateNote,
     onMutate: () => {
-      toast.loading("Deleting note...", { id: "loadingToast" });
+      toast.loading("Updating note...", { id: "loadingToast" });
 
-      noteActions.setDeleting(true);
+      noteActions.setUpdating(true);
     },
     onSuccess: (response) => {
       const { payload } = response;
-
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      const noteId = payload.data.id;
 
       toast.success(payload.message);
 
+      queryClient.invalidateQueries({
+        queryKey: ["note", noteId],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["notes"],
+      });
+
       closeDialog();
+
+      router.push(`/notes/${noteId}`);
     },
     onError: (error) => {
       toast.error(error.message);
@@ -37,7 +48,7 @@ export function useDeleteNote() {
     },
     onSettled: () => {
       toast.dismiss("loadingToast");
-      noteActions.setDeleting(false);
+      noteActions.setUpdating(false);
     },
   });
 }

@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { createNote } from "../services";
 import { useNoteStore } from "../store";
 
-export function useCreateNote() {
+export function useCreateNoteMutation() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
