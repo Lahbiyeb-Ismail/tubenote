@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { FormInput } from "@/components/global";
 import { Form } from "@/components/ui";
 
-import { useRegister } from "../../hooks";
+import { useAuth } from "../../hooks";
 import { AuthSubmitButton } from "../buttons";
 
 export function RegisterForm() {
@@ -23,7 +23,7 @@ export function RegisterForm() {
     },
   });
 
-  const { mutate: register, isPending } = useRegister();
+  const { register, isRegisterLoading } = useAuth();
 
   const handleRegister = (formData: IRegisterDto) => register(formData);
 
@@ -55,7 +55,7 @@ export function RegisterForm() {
           control={form.control}
         />
         <AuthSubmitButton
-          isLoading={isPending}
+          isLoading={isRegisterLoading}
           buttonLabel="Create Account"
           loadingLabel="Creating Account..."
         />
