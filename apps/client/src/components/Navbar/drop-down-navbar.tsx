@@ -7,8 +7,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import { UserAvatar } from "@/features/user/components";
-
 import {
   Button,
   DropdownMenu,
@@ -18,76 +16,74 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui";
-import { useLogout } from "@/features/auth/hooks";
+import { useAuth } from "@/features/auth/hooks";
+import { UserAvatar } from "@/features/user/components";
 import { useUserStore } from "@/features/user/store";
 
 export function DropDownNavbar() {
   const { currentUser } = useUserStore();
-  const { mutate: logout, isPending } = useLogout();
+  const { logout, isLogoutLoading } = useAuth();
 
   return (
     <div className="flex items-center">
-      {currentUser ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-              <UserAvatar user={currentUser} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 mt-2" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  {currentUser?.username}
-                </p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {currentUser?.email}
-                </p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator className="block md:hidden" />
-            <Link href="/dashboard">
-              <DropdownMenuItem className="flex items-center cursor-pointer md:hidden">
-                <LayoutDashboard className="mr-2 h-4 w-4" />
-                <span>Dashboard</span>
-              </DropdownMenuItem>
-            </Link>
-            <Link href="/notes">
-              <DropdownMenuItem className="flex items-center cursor-pointer md:hidden">
-                <FileText className="mr-2 h-4 w-4" />
-                <span>Notes</span>
-              </DropdownMenuItem>
-            </Link>
-            <Link href="/videos">
-              <DropdownMenuItem className="flex items-center cursor-pointer md:hidden">
-                <Video className="mr-2 h-4 w-4" />
-                <span>Videos</span>
-              </DropdownMenuItem>
-            </Link>
-            <DropdownMenuSeparator />
-            {/* <DropdownMenuItem className="flex items-center cursor-pointer">
-						<User className="mr-2 h-4 w-4" />
-						<span>Profile</span>
-					</DropdownMenuItem> */}
-            <Link href="/settings">
-              <DropdownMenuItem className="flex items-center cursor-pointer">
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-              </DropdownMenuItem>
-            </Link>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="flex items-center cursor-pointer text-red-600 
-					focus:text-red-600 focus:bg-red-50"
-              disabled={isPending}
-              onClick={() => logout()}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : null}
+      {currentUser
+        ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <UserAvatar user={currentUser} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 mt-2" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {currentUser?.username}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {currentUser?.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="block md:hidden" />
+                <Link href="/dashboard">
+                  <DropdownMenuItem className="flex items-center cursor-pointer md:hidden">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/notes">
+                  <DropdownMenuItem className="flex items-center cursor-pointer md:hidden">
+                    <FileText className="mr-2 h-4 w-4" />
+                    <span>Notes</span>
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/videos">
+                  <DropdownMenuItem className="flex items-center cursor-pointer md:hidden">
+                    <Video className="mr-2 h-4 w-4" />
+                    <span>Videos</span>
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuSeparator />
+                <Link href="/settings">
+                  <DropdownMenuItem className="flex items-center cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="flex items-center cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                  disabled={isLogoutLoading}
+                  onClick={() => logout()}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )
+        : null}
     </div>
   );
 }
