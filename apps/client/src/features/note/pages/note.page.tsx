@@ -1,20 +1,21 @@
 "use client";
 
 import { Loader, MarkdownViewer, ResizablePanels } from "@/components/global";
+import { VideoPlayer } from "@/features/video/components";
+import { useToggleVideoPlayer } from "@/hooks";
+
 import {
   NoteNotFound,
   NotePageHeader,
-} from "@/features/note/components";
-import { useGetNoteById } from "@/features/note/hooks";
-import { VideoPlayer } from "@/features/video/components";
-import { useToggleVideoPlayer } from "@/hooks";
+} from "../components";
+import { useGetNoteByIdQuery } from "../queries";
 
 interface IPageProps {
   noteId: string;
 }
 
 export function NotePage({ noteId }: IPageProps) {
-  const { data: note, isLoading } = useGetNoteById(noteId);
+  const { data: note, isLoading } = useGetNoteByIdQuery(noteId);
   const { isVideoPlayerVisible, toggleVideoPlayer } = useToggleVideoPlayer(true);
 
   if (isLoading) {

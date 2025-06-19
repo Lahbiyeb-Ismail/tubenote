@@ -1,7 +1,7 @@
 "use client";
 
 import { NotePageLayout } from "@/features/note/components";
-import { useCreateNote } from "@/features/note/hooks";
+import { useNote } from "@/features/note/hooks";
 import { useGetVideoById } from "@/features/video/hooks";
 
 import { useNoteStore } from "../store";
@@ -11,8 +11,8 @@ interface IPageProps {
 }
 
 export function CreateNotePage({ videoId }: IPageProps) {
-  const { mutate: createNote, isPending: isSavingNote } = useCreateNote();
   const { noteTimestamp } = useNoteStore();
+  const { createNote, isCreatingNote } = useNote();
   const { data: videoData, isLoading } = useGetVideoById(videoId);
 
   const handleCreateNote = (title: string, content: string, category: string, tags: string[]) => {
@@ -38,7 +38,7 @@ export function CreateNotePage({ videoId }: IPageProps) {
     <NotePageLayout
       videoId={videoId}
       isLoading={isLoading || !videoData}
-      isSavingNote={isSavingNote}
+      isSavingNote={isCreatingNote}
       handleSaveNote={handleCreateNote}
     />
   );
