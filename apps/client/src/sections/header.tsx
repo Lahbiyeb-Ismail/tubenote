@@ -27,9 +27,7 @@ const navLinks = [
 ];
 
 export function Header() {
-  const { status } = useAuthStore();
-
-  const isAuthenticated = status === "authenticated";
+  const { isAuthenticated } = useAuthStore();
 
   if (isAuthenticated) {
     return (

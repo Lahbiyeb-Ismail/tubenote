@@ -11,9 +11,7 @@ export function useLogin() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const { authActions } = useAuthStore();
-
-  const { setAuthenticated, setError } = authActions;
+  const { setAuthenticated, setError } = useAuthStore();
 
   return useMutation({
     mutationKey: ["login-user"],
@@ -40,7 +38,7 @@ export function useLogin() {
     onError: (error) => {
       toast.error(error.message);
 
-      setError(error);
+      setError(error.message);
     },
     onSettled: () => {
       // Clean up loading states regardless of outcome
