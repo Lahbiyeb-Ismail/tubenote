@@ -9,11 +9,9 @@ import { setStorageValue } from "@/utils";
 import { registerUser } from "../services";
 import { useAuthStore } from "../store";
 
-export function useRegister() {
+export function useRegisterMutation() {
   const router = useRouter();
-  const { authActions } = useAuthStore();
-
-  const { setError } = authActions;
+  const { setError } = useAuthStore();
 
   return useMutation({
     mutationFn: registerUser,
@@ -32,7 +30,7 @@ export function useRegister() {
     onError: (error) => {
       toast.error(error.message);
 
-      setError(error);
+      setError(error.message);
     },
     onSettled: () => {
       // Clean up loading states regardless of outcome

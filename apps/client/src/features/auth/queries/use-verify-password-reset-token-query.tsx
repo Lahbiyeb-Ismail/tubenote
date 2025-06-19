@@ -1,9 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+
 import { verifyPasswordResetToken } from "../services";
 
-export function useVerifyPasswordResetToken(token: string) {
+export function useVerifyPasswordResetTokenQuery(token: string) {
   return useQuery({
     queryKey: ["reset-password-token", token],
     queryFn: () => verifyPasswordResetToken(token),

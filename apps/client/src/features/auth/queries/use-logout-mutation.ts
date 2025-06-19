@@ -9,7 +9,7 @@ import { useUserStore } from "@/features/user/store";
 import { logoutUser } from "../services";
 import { useAuthStore } from "../store";
 
-export function useLogout() {
+export function useLogoutMutation() {
   const router = useRouter();
 
   const { userActions } = useUserStore();
@@ -18,8 +18,6 @@ export function useLogout() {
   const { setUser } = userActions;
 
   return useMutation({
-    // The query key is used to identify the mutation
-    mutationKey: ["logout-user"],
     mutationFn: logoutUser,
     onMutate: () => {
       toast.loading("Logging out...", { id: "loadingToast" });

@@ -2,33 +2,32 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
-import { setStorageValue } from "@/utils";
-
-import { exchangeOauthCodeForAuthTokens } from "../services";
+import { loginUser } from "../services";
 import { useAuthStore } from "../store";
 
-export function useExchangeOauthCode() {
+export function useLoginMutation() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const { authActions } = useAuthStore();
-
-  const { setError, setAuthenticated } = authActions;
+  const { setAuthenticated, setError } = useAuthStore();
 
   return useMutation({
-    mutationKey: ["exchange-oauth-code"],
-    mutationFn: exchangeOauthCodeForAuthTokens,
+    mutationFn: loginUser,
     retry: false,
     onMutate: () => {
       // Cancel any outgoing refetches
       queryClient.cancelQueries({ queryKey: ["current-user"] });
-    },
-    onSuccess: async () => {
-      // Set the authentication state
-      setAuthenticated();
 
-      setStorageValue("isAuthenticated", true);
+      toast.loading("Logging in...", { id: "loadingToast" });
+    },
+    onSuccess: async (responseData) => {
+      const { payload } = responseData;
+
+      toast.success(payload.message);
+
+      setAuthenticated();
 
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
 
@@ -36,7 +35,13 @@ export function useExchangeOauthCode() {
       router.push("/dashboard");
     },
     onError: (error) => {
-      setError(error);
+      toast.error(error.message);
+
+      setError(error.message);
+    },
+    onSettled: () => {
+      // Clean up loading states regardless of outcome
+      toast.dismiss("loadingToast");
     },
   });
 }
