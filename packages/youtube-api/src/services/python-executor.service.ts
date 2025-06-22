@@ -3,15 +3,34 @@ import path from "node:path";
 
 import type { PythonScriptResult } from "../types";
 
+import { envConfig } from "../env.config";
+
+/**
+ * Executes Python scripts with specified arguments and returns the result.
+ * This class is primarily used for running the YouTube transcript extraction script.
+ */
 export class PythonExecutor {
   private scriptPath: string;
   private pythonExecutable: string;
 
+  /**
+   * Creates a new PythonExecutor instance.
+   *
+   * @param pythonExecutable - The Python executable to use (defaults to "python3")
+   */
   constructor(pythonExecutable = "python3") {
     this.scriptPath = path.join(__dirname, "../scripts/youtube-transcript.py");
     this.pythonExecutable = pythonExecutable;
   }
 
+  /**
+   * Executes the Python script with the provided arguments.
+   *
+   * @param args - Command line arguments to pass to the Python script
+   * @returns A promise that resolves to a PythonScriptResult containing
+   *          success status, output (if successful), or error information (if failed)
+   * @throws Never throws, all errors are handled and returned in the result object
+   */
   async executeScript(args: string[]): Promise<PythonScriptResult> {
     return new Promise((resolve) => {
       const child = spawn(this.pythonExecutable, [this.scriptPath, ...args], {
@@ -38,7 +57,7 @@ export class PythonExecutor {
             code: -1,
           });
         },
-        Number.parseInt(process.env.SCRIPT_TIMEOUT || "30000"),
+        envConfig.python.scriptTimeout || 30000, // Default to 30 seconds if not set
       );
 
       child.on("close", (code) => {
