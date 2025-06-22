@@ -323,6 +323,9 @@ importers:
       '@jest/globals':
         specifier: ^29.7.0
         version: 29.7.0
+      '@tubenote/api-errors':
+        specifier: workspace:*
+        version: link:../../packages/api-errors
       '@tubenote/config-typescript':
         specifier: workspace:*
         version: link:../../packages/config-typescript
@@ -389,6 +392,22 @@ importers:
       tsx:
         specifier: ^4.19.4
         version: 4.20.3
+      typescript:
+        specifier: ^5.7.2
+        version: 5.8.3
+
+  packages/api-errors:
+    dependencies:
+      http-status:
+        specifier: ^1.7.4
+        version: 1.8.1
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.0(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.3)(typescript@5.8.3)(yaml@2.8.0)
+    devDependencies:
+      '@tubenote/config-typescript':
+        specifier: workspace:*
+        version: link:../config-typescript
       typescript:
         specifier: ^5.7.2
         version: 5.8.3
@@ -493,6 +512,9 @@ importers:
         specifier: ^3.25.49
         version: 3.25.67
     devDependencies:
+      '@tubenote/api-errors':
+        specifier: workspace:*
+        version: link:../api-errors
       '@tubenote/config-typescript':
         specifier: workspace:*
         version: link:../config-typescript
