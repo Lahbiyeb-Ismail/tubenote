@@ -1,0 +1,24 @@
+{
+  "name": "@tubenote/api-errors",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "tsup": "^8.4.0",
+    "http-status": "^1.7.4"
+  },
+  "devDependencies": {
+    "@tubenote/config-typescript": "workspace:*",
+    "typescript": "^5.7.2"
+  }
+}
