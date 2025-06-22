@@ -1,3 +1,4 @@
+import { BadRequestError, ERROR_NAMES, InternalServerError, NotFoundError } from "@tubenote/api-errors";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -7,32 +8,56 @@ import { envConfig } from "../env.config";
 import { validateLanguageCode, validateTimeFormat } from "../utils/validators";
 import { PythonExecutor } from "./python-executor.service";
 
-export class TranscriptService {
+/**
+ * Service responsible for fetching and processing YouTube video transcripts.
+ * Uses a Python executor to run transcript extraction scripts.
+ */
+export class YoutubeTranscriptService {
   private pythonExecutor: PythonExecutor;
 
+  /**
+   * Initializes a new instance of the YoutubeTranscriptService.
+   * Sets up the Python executor using the configured Python executable path.
+   */
   constructor() {
     this.pythonExecutor = new PythonExecutor(envConfig.python.executable);
   }
 
+  /**
+   * Retrieves and processes a transcript for a YouTube video.
+   *
+   * @param request - The transcript request containing YouTube video ID and optional parameters
+   * @returns A promise resolving to a TranscriptResponse containing the transcript data
+   * @throws {BadRequestError} When input parameters are invalid
+   * @throws {NotFoundError} When transcript is not available or disabled
+   * @throws {InternalServerError} When an unexpected error occurs during processing
+   *
+   * The method performs the following steps:
+   * 1. Validates the input parameters
+   * 2. Builds command line arguments for the Python script
+   * 3. Executes the Python script to extract transcript data
+   * 4. Processes and formats the output
+   * 5. Cleans up temporary files
+   */
   async getTranscript(request: TranscriptRequest): Promise<TranscriptResponse> {
     try {
       // Validate and extract video ID
       const ytVideoId = request.ytVideoId;
       if (!ytVideoId) {
-        throw new Error("Invalid YouTube video ID or URL");
+        throw new BadRequestError("Invalid YouTube video ID or URL", ERROR_NAMES.INVALID_VIDEO_ID);
       }
 
       // Validate optional parameters
       if (request.language && !validateLanguageCode(request.language)) {
-        throw new Error("Invalid language code");
+        throw new BadRequestError("Invalid language code", ERROR_NAMES.INVALID_LANGUAGE);
       }
 
       if (request.startTime && !validateTimeFormat(request.startTime)) {
-        throw new Error("Invalid start time format");
+        throw new BadRequestError("Invalid start time format", ERROR_NAMES.INVALID_TIME_FORMAT);
       }
 
       if (request.endTime && !validateTimeFormat(request.endTime)) {
-        throw new Error("Invalid end time format");
+        throw new BadRequestError("Invalid end time format", ERROR_NAMES.INVALID_TIME_FORMAT);
       }
 
       // Build Python script arguments
@@ -70,18 +95,18 @@ export class TranscriptService {
         const errorMessage = result.error || "Unknown error";
 
         if (errorMessage.includes("Subtitles are disabled")) {
-          throw new Error("Subtitles are disabled for this video");
+          throw new NotFoundError("Subtitles are disabled for this video", ERROR_NAMES.TRANSCRIPTS_DISABLED);
         }
 
         if (errorMessage.includes("No transcript available")) {
-          throw new Error("No transcript available for the requested language");
+          throw new NotFoundError("No transcript available for the requested language", ERROR_NAMES.TRANSCRIPT_NOT_FOUND);
         }
 
         if (errorMessage.includes("Video is unavailable")) {
-          throw new Error("Video is unavailable or private");
+          throw new NotFoundError("Video is unavailable or private", ERROR_NAMES.VIDEO_UNAVAILABLE);
         }
 
-        throw new Error("Failed to retrieve transcript");
+        throw new InternalServerError("Failed to retrieve transcript");
       }
 
       // Read the generated file
@@ -126,7 +151,7 @@ export class TranscriptService {
         throw error;
       }
 
-      throw new Error("Internal server error");
+      throw new InternalServerError("Internal server error");
     }
   }
 }
