@@ -1,11 +1,12 @@
 import type { Response } from "express";
+
+import { ERROR_MESSAGES, UnauthorizedError } from "@tubenote/api-errors";
 import { inject, injectable } from "inversify";
 
-import { TYPES } from "@/config/inversify/types";
-import { UnauthorizedError } from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
+import { TYPES } from "@/config/inversify/types";
 import {
   accessTokenCookieConfig,
   refreshTokenCookieConfig,
@@ -14,8 +15,6 @@ import {
   ACCESS_TOKEN_NAME,
   REFRESH_TOKEN_NAME,
 } from "@/modules/auth/constants";
-
-import type { IResponseFormatter } from "@/modules/shared/services";
 
 import type {
   IRefreshTokenController,
@@ -28,7 +27,7 @@ export class RefreshTokenController implements IRefreshTokenController {
     @inject(TYPES.RefreshTokenService)
     private readonly _refreshTokenService: IRefreshTokenService,
     @inject(TYPES.ResponseFormatter)
-    private readonly _responseFormatter: IResponseFormatter
+    private readonly _responseFormatter: IResponseFormatter,
   ) {}
 
   /**
@@ -57,12 +56,12 @@ export class RefreshTokenController implements IRefreshTokenController {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    const { accessToken, refreshToken } =
-      await this._refreshTokenService.refreshTokens(
+    const { accessToken, refreshToken }
+      = await this._refreshTokenService.refreshTokens(
         userRefreshToken,
         deviceId,
         ipAddress,
-        clientContext
+        clientContext,
       );
 
     res.cookie(ACCESS_TOKEN_NAME, accessToken, accessTokenCookieConfig);

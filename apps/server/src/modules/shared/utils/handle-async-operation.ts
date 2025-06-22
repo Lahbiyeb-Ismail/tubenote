@@ -1,7 +1,6 @@
+import { ConflictError, DatabaseError, ERROR_MESSAGES } from "@tubenote/api-errors";
 import { Prisma } from "@tubenote/db";
 
-import { ConflictError, DatabaseError } from "../api-errors";
-import { ERROR_MESSAGES } from "../constants";
 import { loggerService } from "../services";
 
 /**
@@ -30,26 +29,28 @@ interface ErrorHandlerOptions {
  */
 export async function handleAsyncOperation<T>(
   operation: AsyncOperation<T>,
-  options: ErrorHandlerOptions
+  options: ErrorHandlerOptions,
 ): Promise<T> {
   const { errorMessage } = options;
 
   try {
     return await operation();
-  } catch (error) {
-    if (error instanceof ConflictError) throw error;
+  }
+  catch (error) {
+    if (error instanceof ConflictError)
+      throw error;
 
     if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      (error.code === "P2002" || error.code === "P2034") // Unique constraint violation
+      error instanceof Prisma.PrismaClientKnownRequestError
+      && (error.code === "P2002" || error.code === "P2034") // Unique constraint violation
     ) {
       throw new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS);
     }
 
     if (
-      error instanceof Prisma.PrismaClientKnownRequestError ||
-      error instanceof Prisma.PrismaClientValidationError ||
-      error instanceof Prisma.PrismaClientUnknownRequestError
+      error instanceof Prisma.PrismaClientKnownRequestError
+      || error instanceof Prisma.PrismaClientValidationError
+      || error instanceof Prisma.PrismaClientUnknownRequestError
     ) {
       // Log the detailed error for debugging
       console.error("Prisma error details:", {
@@ -63,14 +64,14 @@ export async function handleAsyncOperation<T>(
     }
 
     if (
-      error instanceof Prisma.PrismaClientInitializationError ||
-      error instanceof Prisma.PrismaClientRustPanicError
+      error instanceof Prisma.PrismaClientInitializationError
+      || error instanceof Prisma.PrismaClientRustPanicError
     ) {
       // Log the critical error
       console.error("Critical Prisma error:", error);
 
       throw new DatabaseError(
-        `A critical database error occurred: ${errorMessage}`
+        `A critical database error occurred: ${errorMessage}`,
       );
     }
 

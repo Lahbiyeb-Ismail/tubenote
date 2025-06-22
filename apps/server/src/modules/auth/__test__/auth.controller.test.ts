@@ -1,23 +1,17 @@
+import type { IApiSuccessResponse } from "@tubenote/types";
 import type { Response } from "express";
+
+import { UnauthorizedError } from "@tubenote/api-errors";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
-import type { IApiSuccessResponse } from "@tubenote/types";
-
+import type { ACCESS_TOKEN_NAME, clearAuthTokenCookieConfig, type IAuthControllerOptions, IAuthService, REFRESH_TOKEN_NAME } from "@/modules/auth";
 import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
-import {
-  ACCESS_TOKEN_NAME,
-  type IAuthControllerOptions,
-  REFRESH_TOKEN_NAME,
-  clearAuthTokenCookieConfig,
-} from "@/modules/auth";
+import { AuthController } from "@/modules/auth";
 
-import { AuthController, IAuthService } from "@/modules/auth";
-import { UnauthorizedError } from "@/modules/shared/api-errors";
-
-describe("AuthController", () => {
+describe("authController", () => {
   let controller: AuthController;
   const authService = mock<IAuthService>();
   const responseFormatter = mock<IResponseFormatter>();
@@ -41,7 +35,7 @@ describe("AuthController", () => {
     authService.logoutUser.mockResolvedValue(undefined);
 
     // Reset singleton instance for isolation.
-    // @ts-ignore: Resetting private static property for testing purposes.
+    // @ts-expect-error: Resetting private static property for testing purposes.
     AuthController._instance = undefined;
 
     // Initialize the controller instance.
@@ -59,7 +53,7 @@ describe("AuthController", () => {
     res.status.mockReturnThis();
   });
 
-  describe("Singleton Behavior", () => {
+  describe("singleton Behavior", () => {
     it("should create a new instance if none exists", () => {
       const instance = AuthController.getInstance(controllerOptions);
       expect(instance).toBeInstanceOf(AuthController);
@@ -85,7 +79,7 @@ describe("AuthController", () => {
     it("should call logoutUser with correct parameters, clear the refresh token cookie, and send OK status", async () => {
       // Arrange: mock the response formatter to return the expected response.
       responseFormatter.formatSuccessResponse.mockReturnValue(
-        formattedResponse
+        formattedResponse,
       );
 
       // Act
@@ -99,12 +93,12 @@ describe("AuthController", () => {
 
       expect(res.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
-        clearAuthTokenCookieConfig
+        clearAuthTokenCookieConfig,
       );
 
       expect(res.clearCookie).toHaveBeenCalledWith(
         ACCESS_TOKEN_NAME,
-        clearAuthTokenCookieConfig
+        clearAuthTokenCookieConfig,
       );
 
       expect(res.json).toHaveBeenCalledWith(formattedResponse);
@@ -117,17 +111,17 @@ describe("AuthController", () => {
 
       // Act & Assert
       await expect(controller.logout(req, res)).rejects.toThrow(
-        "Logout failed"
+        "Logout failed",
       );
 
       expect(res.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
-        clearAuthTokenCookieConfig
+        clearAuthTokenCookieConfig,
       );
 
       expect(res.clearCookie).toHaveBeenCalledWith(
         ACCESS_TOKEN_NAME,
-        clearAuthTokenCookieConfig
+        clearAuthTokenCookieConfig,
       );
     });
 
@@ -137,7 +131,7 @@ describe("AuthController", () => {
 
       // Act & Assert
       await expect(controller.logout(req, res)).rejects.toThrow(
-        UnauthorizedError
+        UnauthorizedError,
       );
 
       // Assert: logoutUser should not be called.
@@ -146,12 +140,12 @@ describe("AuthController", () => {
 
       expect(res.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
-        clearAuthTokenCookieConfig
+        clearAuthTokenCookieConfig,
       );
 
       expect(res.clearCookie).toHaveBeenCalledWith(
         ACCESS_TOKEN_NAME,
-        clearAuthTokenCookieConfig
+        clearAuthTokenCookieConfig,
       );
     });
   });

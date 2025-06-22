@@ -1,11 +1,12 @@
-import { inject, injectable } from "inversify";
-
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import { handleAsyncOperation } from "@/modules/shared/utils";
 import type { Prisma, RefreshToken } from "@tubenote/db";
 
-import { TYPES } from "@/config/inversify/types";
+import { ERROR_MESSAGES } from "@tubenote/api-errors";
+import { inject, injectable } from "inversify";
+
 import type { IPrismaService } from "@/modules/shared/services";
+
+import { TYPES } from "@/config/inversify/types";
+import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import type { ICreateRefreshTokenDto } from "./dtos";
 import type { IRefreshTokenRepository } from "./refresh-token.types";
@@ -13,7 +14,7 @@ import type { IRefreshTokenRepository } from "./refresh-token.types";
 @injectable()
 export class RefreshTokenRepository implements IRefreshTokenRepository {
   constructor(
-    @inject(TYPES.PrismaService) private readonly _db: IPrismaService
+    @inject(TYPES.PrismaService) private readonly _db: IPrismaService,
   ) {}
 
   /**
@@ -28,7 +29,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
   async create(
     userId: string,
     data: ICreateRefreshTokenDto,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<RefreshToken> {
     const client = tx ?? this._db;
 
@@ -37,7 +38,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
         client.refreshToken.create({
           data: { userId, ...data },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE },
     );
   }
 
@@ -51,7 +52,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
    */
   async findByToken(
     token: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<RefreshToken | null> {
     const client = tx ?? this._db;
 
@@ -64,7 +65,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
             isRevoked: false,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND },
     );
   }
 
@@ -79,7 +80,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
   async markAsRevoked(
     tokenId: string,
     revocationReason: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<void> {
     const client = tx ?? this._db;
 
@@ -89,7 +90,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
           where: { id: tokenId },
           data: { isRevoked: true, revokedAt: new Date(), revocationReason },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE },
     );
   }
 
@@ -107,7 +108,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
   async revokeAllTokens(
     userId: string,
     revocationReason: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<void> {
     const client = tx ?? this._db;
 
@@ -124,7 +125,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
             revocationReason,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE },
     );
   }
 }

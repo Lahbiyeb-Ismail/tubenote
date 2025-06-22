@@ -1,32 +1,29 @@
+import type { IApiSuccessResponse } from "@tubenote/types";
 import type { Response } from "express";
+
+import { ERROR_MESSAGES, ForbiddenError, UnauthorizedError } from "@tubenote/api-errors";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
-import type { IApiSuccessResponse } from "@tubenote/types";
-
+import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
-
-import { ForbiddenError, UnauthorizedError } from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import {
   accessTokenCookieConfig,
   clearAuthTokenCookieConfig,
   refreshTokenCookieConfig,
 } from "@/modules/auth/config";
-
 import {
   ACCESS_TOKEN_NAME,
   REFRESH_TOKEN_NAME,
 } from "@/modules/auth/constants";
-import type { IAuthResponseDto } from "@/modules/auth/dtos";
-
-import { RefreshTokenController } from "../refresh-token.controller";
 
 import type { IRefreshTokenService } from "../refresh-token.types";
 
-describe("RefreshTokenController", () => {
+import { RefreshTokenController } from "../refresh-token.controller";
+
+describe("refreshTokenController", () => {
   // Mock the refresh token service
   const refreshTokenService = mock<IRefreshTokenService>();
   const responseFormatter = mock<IResponseFormatter>();
@@ -63,7 +60,7 @@ describe("RefreshTokenController", () => {
     res.header.mockReturnThis();
   });
 
-  describe("RefreshTokenController - refreshToken", () => {
+  describe("refreshTokenController - refreshToken", () => {
     const formattedResponse: IApiSuccessResponse<string> = {
       success: true,
       statusCode: httpStatus.OK,
@@ -81,7 +78,7 @@ describe("RefreshTokenController", () => {
       refreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
 
       responseFormatter.formatSuccessResponse.mockReturnValue(
-        formattedResponse
+        formattedResponse,
       );
 
       // Act
@@ -90,19 +87,19 @@ describe("RefreshTokenController", () => {
       // Assert
       expect(refreshTokenService.refreshToken).toHaveBeenCalledWith(
         mockUserId,
-        mockRefreshToken
+        mockRefreshToken,
       );
 
       expect(res.cookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
         mockNewTokens.refreshToken,
-        refreshTokenCookieConfig
+        refreshTokenCookieConfig,
       );
 
       expect(res.cookie).toHaveBeenCalledWith(
         ACCESS_TOKEN_NAME,
         mockNewTokens.accessToken,
-        accessTokenCookieConfig
+        accessTokenCookieConfig,
       );
 
       expect(res.status).toHaveBeenCalledWith(formattedResponse.statusCode);
@@ -120,7 +117,7 @@ describe("RefreshTokenController", () => {
       req.cookies = cookies;
 
       await expect(
-        refreshTokenController.refreshToken(req, res)
+        refreshTokenController.refreshToken(req, res),
       ).rejects.toThrow(new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED));
     });
 
@@ -137,17 +134,17 @@ describe("RefreshTokenController", () => {
 
       // Act
       await expect(
-        refreshTokenController.refreshToken(req, res)
+        refreshTokenController.refreshToken(req, res),
       ).rejects.toThrow(mockError);
 
       // Assert
       expect(res.clearCookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
-        clearAuthTokenCookieConfig
+        clearAuthTokenCookieConfig,
       );
       expect(res.clearCookie).toHaveBeenCalledWith(
         ACCESS_TOKEN_NAME,
-        clearAuthTokenCookieConfig
+        clearAuthTokenCookieConfig,
       );
     });
 
@@ -157,7 +154,7 @@ describe("RefreshTokenController", () => {
       };
 
       await expect(
-        refreshTokenController.refreshToken(req, res)
+        refreshTokenController.refreshToken(req, res),
       ).rejects.toThrow(UnauthorizedError);
 
       expect(res.clearCookie).toHaveBeenCalledTimes(2);
@@ -170,17 +167,17 @@ describe("RefreshTokenController", () => {
       refreshTokenService.refreshToken.mockResolvedValueOnce(mockNewTokens);
 
       responseFormatter.formatSuccessResponse.mockReturnValue(
-        formattedResponse
+        formattedResponse,
       );
 
       await refreshTokenController.refreshToken(req, res);
 
       // Second concurrent attempt with same token
       refreshTokenService.refreshToken.mockRejectedValueOnce(
-        new ForbiddenError(ERROR_MESSAGES.FORBIDDEN)
+        new ForbiddenError(ERROR_MESSAGES.FORBIDDEN),
       );
       await expect(
-        refreshTokenController.refreshToken(req, res)
+        refreshTokenController.refreshToken(req, res),
       ).rejects.toThrow(ForbiddenError);
 
       expect(res.clearCookie).toHaveBeenCalledTimes(2);
@@ -193,7 +190,7 @@ describe("RefreshTokenController", () => {
       refreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
 
       responseFormatter.formatSuccessResponse.mockReturnValue(
-        formattedResponse
+        formattedResponse,
       );
 
       await refreshTokenController.refreshToken(req, res);
@@ -218,7 +215,7 @@ describe("RefreshTokenController", () => {
       refreshTokenService.refreshToken.mockResolvedValue(mockNewTokens);
 
       responseFormatter.formatSuccessResponse.mockReturnValue(
-        formattedResponse
+        formattedResponse,
       );
 
       await refreshTokenController.refreshToken(req, res);
@@ -226,13 +223,13 @@ describe("RefreshTokenController", () => {
       expect(res.cookie).toHaveBeenCalledWith(
         REFRESH_TOKEN_NAME,
         mockNewTokens.refreshToken,
-        refreshTokenCookieConfig
+        refreshTokenCookieConfig,
       );
 
       expect(res.cookie).toHaveBeenCalledWith(
         ACCESS_TOKEN_NAME,
         mockNewTokens.accessToken,
-        accessTokenCookieConfig
+        accessTokenCookieConfig,
       );
     });
   });

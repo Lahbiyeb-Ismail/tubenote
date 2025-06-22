@@ -1,11 +1,12 @@
-import { inject, injectable } from "inversify";
-
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import { handleAsyncOperation } from "@/modules/shared/utils";
 import type { EmailVerificationToken, Prisma } from "@tubenote/db";
 
-import { TYPES } from "@/config/inversify/types";
+import { ERROR_MESSAGES } from "@tubenote/api-errors";
+import { inject, injectable } from "inversify";
+
 import type { IPrismaService } from "@/modules/shared/services";
+
+import { TYPES } from "@/config/inversify/types";
+import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import type {
   ICreateVerifyEmailTokenDto,
@@ -15,12 +16,12 @@ import type {
 @injectable()
 export class VerifyEmailRepository implements IVerifyEmailRepository {
   constructor(
-    @inject(TYPES.PrismaService) private readonly _db: IPrismaService
+    @inject(TYPES.PrismaService) private readonly _db: IPrismaService,
   ) {}
 
   async findByUserId(
     userId: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<EmailVerificationToken | null> {
     const client = tx ?? this._db;
 
@@ -32,13 +33,13 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
             expiresAt: { gte: new Date() },
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND },
     );
   }
 
   async findByToken(
     token: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<EmailVerificationToken | null> {
     const client = tx ?? this._db;
 
@@ -50,14 +51,14 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
             expiresAt: { gte: new Date() },
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND },
     );
   }
 
   async createToken(
     userId: string,
     data: ICreateVerifyEmailTokenDto,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<EmailVerificationToken> {
     const client = tx ?? this._db;
 
@@ -69,13 +70,13 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
             ...data,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE },
     );
   }
 
   async deleteMany(
     userId: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<void> {
     const client = tx ?? this._db;
 
@@ -84,7 +85,7 @@ export class VerifyEmailRepository implements IVerifyEmailRepository {
         client.emailVerificationToken.deleteMany({
           where: { userId },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_DELETE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_DELETE },
     );
   }
 }

@@ -1,13 +1,12 @@
+import type { IApiSuccessResponse, Video } from "@tubenote/types";
+
+import { ERROR_MESSAGES, NotFoundError } from "@tubenote/api-errors";
 import httpStatus from "http-status";
 import request from "supertest";
 
-import type { IApiSuccessResponse, Video } from "@tubenote/types";
-
 import app from "@/app";
-
 import { ACCESS_TOKEN_NAME } from "@/modules/auth";
-import { NotFoundError } from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
+
 import { videoController } from "../video.module";
 
 // **********************************************
@@ -21,19 +20,20 @@ jest.mock("jsonwebtoken", () => {
       (
         token: string,
         _secret: string,
-        callback: (err: Error | null, payload?: any) => void
+        callback: (err: Error | null, payload?: any) => void,
       ) => {
         if (token === "valid-access-token") {
           callback(null, { userId: "user_id_001" });
-        } else {
+        }
+        else {
           callback(new Error("Invalid token"), null);
         }
-      }
+      },
     ),
   };
 });
 
-describe("Video routes tests", () => {
+describe("video routes tests", () => {
   const mockUserOneId = "user_id_001";
   const mockUserTwoId = "user_id_002";
   const thumbnails = {
@@ -80,8 +80,8 @@ describe("Video routes tests", () => {
     (videoController.getUserVideos as jest.Mock) = jest
       .fn()
       .mockImplementation((req, res) => {
-        const videos = mockVideos.filter((video) =>
-          video.userIds?.includes(req.userId)
+        const videos = mockVideos.filter(video =>
+          video.userIds?.includes(req.userId),
         );
         const currentPage = Number(req.query.page) || 1;
         const totalPages = Math.ceil(videos.length / 10);
@@ -111,7 +111,7 @@ describe("Video routes tests", () => {
       .mockImplementation((req, res) => {
         // Only return the video if it belongs to the authenticated user.
         const video = mockVideos.find(
-          (v) => v.id === req.params.id && v.userIds?.includes(req.userId)
+          v => v.id === req.params.id && v.userIds?.includes(req.userId),
         );
 
         if (!video) {
@@ -139,7 +139,7 @@ describe("Video routes tests", () => {
   // **********************************************
   // Authentication Middleware Tests
   // **********************************************
-  describe("Authentication Middleware", () => {
+  describe("authentication Middleware", () => {
     it("should return 401 if the Authorization header is missing", async () => {
       const res = await request(app).get("/api/v1/videos");
 
@@ -177,7 +177,7 @@ describe("Video routes tests", () => {
   // **********************************************
   // GET /api/v1/videos
   // **********************************************
-  describe("GET /api/v1/videos", () => {
+  describe("gET /api/v1/videos", () => {
     it("should get all videos for the authenticated user", async () => {
       const res = await request(app)
         .get("/api/v1/videos")
@@ -263,7 +263,7 @@ describe("Video routes tests", () => {
       (videoController.getVideoByIdOrCreate as jest.Mock).mockImplementation(
         () => {
           throw new Error("Test error");
-        }
+        },
       );
 
       const res = await request(app)

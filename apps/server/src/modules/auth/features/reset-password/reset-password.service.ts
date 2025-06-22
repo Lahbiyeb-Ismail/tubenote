@@ -1,17 +1,15 @@
+import { BadRequestError, ERROR_MESSAGES, ForbiddenError } from "@tubenote/api-errors";
 import { inject, injectable } from "inversify";
 
-import { TYPES } from "@/config/inversify/types";
-
-import type { IUserService } from "@/modules/user";
-
-import { BadRequestError, ForbiddenError } from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import type {
   ICacheService,
   ICryptoService,
   ILoggerService,
   IMailSenderService,
 } from "@/modules/shared/services";
+import type { IUserService } from "@/modules/user";
+
+import { TYPES } from "@/config/inversify/types";
 
 import type { IResetPasswordService } from "./reset-password.types";
 
@@ -23,7 +21,7 @@ export class ResetPasswordService implements IResetPasswordService {
     @inject(TYPES.CacheService) private _cacheService: ICacheService,
     @inject(TYPES.MailSenderService)
     private _mailSenderService: IMailSenderService,
-    @inject(TYPES.LoggerService) private _loggerService: ILoggerService
+    @inject(TYPES.LoggerService) private _loggerService: ILoggerService,
   ) {}
 
   async sendResetToken(email: string): Promise<void> {
@@ -44,12 +42,12 @@ export class ResetPasswordService implements IResetPasswordService {
     });
 
     this._loggerService.info(
-      `Reset token generated for user ${user.id} and set in cache: ${setResult}`
+      `Reset token generated for user ${user.id} and set in cache: ${setResult}`,
     );
 
     await this._mailSenderService.sendResetPasswordEmail(
       user.email,
-      resetToken
+      resetToken,
     );
   }
 
@@ -58,7 +56,7 @@ export class ResetPasswordService implements IResetPasswordService {
 
     const deleteResult = this._cacheService.del(token);
     this._loggerService.warn(
-      `Remove reset token ${token} from cache: ${deleteResult}`
+      `Remove reset token ${token} from cache: ${deleteResult}`,
     );
 
     await this._userService.resetUserPassword(userId, password);
@@ -70,9 +68,9 @@ export class ResetPasswordService implements IResetPasswordService {
     const tokenData = this._cacheService.get<{ userId: string }>(token);
 
     if (
-      !tokenData ||
-      !tokenData.userId ||
-      typeof tokenData.userId !== "string"
+      !tokenData
+      || !tokenData.userId
+      || typeof tokenData.userId !== "string"
     ) {
       this._loggerService.error(`Invalid reset token: ${token}`);
       throw new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN);

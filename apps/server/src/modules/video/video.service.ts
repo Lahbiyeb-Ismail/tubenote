@@ -2,16 +2,13 @@ import type { Prisma, Video } from "@tubenote/db";
 import type { IFindManyDto } from "@tubenote/dtos";
 import type { IPaginatedData } from "@tubenote/types";
 
+import { BadRequestError, ERROR_MESSAGES } from "@tubenote/api-errors";
 import { youtubeApiService } from "@tubenote/youtube-api";
 import { inject, injectable } from "inversify";
 
 import type { IPrismaService } from "@/modules/shared/services";
 
 import { TYPES } from "@/config/inversify/types";
-import { BadRequestError } from "@/modules/shared/api-errors";
-import {
-  ERROR_MESSAGES,
-} from "@/modules/shared/constants";
 
 import type { IVideoRepository, IVideoService } from "./video.types";
 

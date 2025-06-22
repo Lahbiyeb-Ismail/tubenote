@@ -1,13 +1,13 @@
+import type { IEmailBodyDto } from "@tubenote/dtos";
+
+import { UnauthorizedError } from "@tubenote/api-errors";
 import httpStatus from "http-status";
 import request from "supertest";
 
 import app from "@/app";
 
-import type { IEmailBodyDto } from "@tubenote/dtos";
-
-import { UnauthorizedError } from "@/modules/shared/api-errors";
 import { resetPasswordController } from "../reset-password.module";
-// import { BadRequestError } from "@/modules/shared/api-errors";
+// import { BadRequestError } from "@tubenote/api-errors";
 
 jest.mock("../reset-password.module", () => ({
   resetPasswordController: {
@@ -17,7 +17,7 @@ jest.mock("../reset-password.module", () => ({
   },
 }));
 
-describe("Reset password Routes", () => {
+describe("reset password Routes", () => {
   const mockEmail = "user@test.com";
 
   const mockValidEmailBody: IEmailBodyDto = {
@@ -40,7 +40,7 @@ describe("Reset password Routes", () => {
     jest.clearAllMocks();
   });
 
-  describe("POST /api/v1/auth/forgot-password", () => {
+  describe("pOST /api/v1/auth/forgot-password", () => {
     it("should return 200 status code and send a reset link for a valid email", async () => {
       // Arrange
       const message = "Password reset link sent to your email.";
@@ -48,7 +48,7 @@ describe("Reset password Routes", () => {
       (resetPasswordController.forgotPassword as jest.Mock).mockImplementation(
         (_req, res) => {
           res.status(httpStatus.OK).json({ message });
-        }
+        },
       );
 
       const response = await request(app)
@@ -85,7 +85,7 @@ describe("Reset password Routes", () => {
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
 
       expect(response.body.payload.message).toBe(
-        "Validation error in email field: Required"
+        "Validation error in email field: Required",
       );
 
       expect(response.body.statusCode).toBe(httpStatus.BAD_REQUEST);
@@ -110,7 +110,7 @@ describe("Reset password Routes", () => {
     });
   });
 
-  describe("GET /api/v1/auth/reset-password/:token/verify", () => {
+  describe("gET /api/v1/auth/reset-password/:token/verify", () => {
     const validResetToken = "valid-token";
 
     it("should return a 200 status code for a valid token", async () => {
@@ -123,7 +123,7 @@ describe("Reset password Routes", () => {
       });
 
       const response = await request(app).get(
-        `/api/v1/auth/reset-password/${validResetToken}/verify`
+        `/api/v1/auth/reset-password/${validResetToken}/verify`,
       );
 
       expect(response.status).toBe(httpStatus.OK);
@@ -133,20 +133,20 @@ describe("Reset password Routes", () => {
 
     it("should return 404 for empty token in verify endpoint", async () => {
       const response = await request(app).get(
-        "/api/v1/auth/reset-password//verify"
+        "/api/v1/auth/reset-password//verify",
       );
       expect(response.status).toBe(httpStatus.NOT_FOUND);
     });
   });
 
-  describe("POST /api/v1/auth/reset-password/:token", () => {
+  describe("pOST /api/v1/auth/reset-password/:token", () => {
     it("should return a 200 status code for a valid token and password", async () => {
       const message = "Password reset successfully";
 
       (resetPasswordController.resetPassword as jest.Mock).mockImplementation(
         (_req, res) => {
           res.status(httpStatus.OK).json({ message });
-        }
+        },
       );
       const response = await request(app)
         .post(`/api/v1/auth/reset-password/${mockValidToken}`)
@@ -298,7 +298,7 @@ describe("Reset password Routes", () => {
   //   });
   // });
 
-  describe("Input Validation Security", () => {
+  describe("input Validation Security", () => {
     it("should reject overly long emails", async () => {
       // Arrange
       const longEmail = `${"a".repeat(1000)}@${"b".repeat(1000)}.com`;
@@ -311,7 +311,7 @@ describe("Reset password Routes", () => {
       // Assert
       expect(response.status).toBe(400);
       expect(response.body.payload.message).toContain(
-        "Email must be at most 255 characters long."
+        "Email must be at most 255 characters long.",
       );
       expect(resetPasswordController.forgotPassword).not.toHaveBeenCalled();
     });
@@ -328,7 +328,7 @@ describe("Reset password Routes", () => {
       // Assert
       expect(response.status).toBe(400);
       expect(response.body.payload.message).toContain(
-        "Validation error in password field"
+        "Validation error in password field",
       );
       expect(resetPasswordController.resetPassword).not.toHaveBeenCalled();
     });
@@ -339,19 +339,19 @@ describe("Reset password Routes", () => {
 
       // Act
       const response = await request(app).get(
-        `/api/v1/auth/reset-password/${longToken}/verify`
+        `/api/v1/auth/reset-password/${longToken}/verify`,
       );
 
       // Assert
       expect(response.status).toBe(400);
       expect(response.body.payload.message).toContain(
-        "The provided token is invalid."
+        "The provided token is invalid.",
       );
       expect(resetPasswordController.verifyResetToken).not.toHaveBeenCalled();
     });
   });
 
-  describe("Token Security", () => {
+  describe("token Security", () => {
     it("should not expose token generation details in responses", async () => {
       // Arrange
       (resetPasswordController.forgotPassword as jest.Mock).mockImplementation(
@@ -361,7 +361,7 @@ describe("Reset password Routes", () => {
             message: "Password reset link sent to your email.",
             // No token should be included here
           });
-        }
+        },
       );
 
       // Act
@@ -372,7 +372,7 @@ describe("Reset password Routes", () => {
       // Assert
       expect(response.status).toBe(200);
       expect(response.body.message).toBe(
-        "Password reset link sent to your email."
+        "Password reset link sent to your email.",
       );
       // Ensure no token is in the response
       expect(response.body).not.toHaveProperty("token");
@@ -380,7 +380,7 @@ describe("Reset password Routes", () => {
     });
   });
 
-  describe("SQL Injection Prevention", () => {
+  describe("sQL Injection Prevention", () => {
     it("should handle SQL injection attempts in email field", async () => {
       // Arrange
       const sqlInjectionPayloads = [
@@ -412,19 +412,19 @@ describe("Reset password Routes", () => {
       // Act & Assert
       for (const payload of sqlInjectionPayloads) {
         const response = await request(app).get(
-          `/api/v1/auth/reset-password/${payload}/verify`
+          `/api/v1/auth/reset-password/${payload}/verify`,
         );
 
         expect(response.status).toBe(400);
         expect(response.body.payload.message).toContain(
-          "Invalid token format."
+          "Invalid token format.",
         );
         expect(resetPasswordController.verifyResetToken).not.toHaveBeenCalled();
       }
     });
   });
 
-  describe("NoSQL Injection Prevention", () => {
+  describe("noSQL Injection Prevention", () => {
     it("should handle NoSQL injection attempts in password field", async () => {
       // Arrange
       const nosqlInjectionPayloads = [
@@ -440,7 +440,7 @@ describe("Reset password Routes", () => {
 
         expect(response.status).toBe(400);
         expect(response.body.payload.message).toContain(
-          "Validation error in password field"
+          "Validation error in password field",
         );
         expect(resetPasswordController.resetPassword).not.toHaveBeenCalled();
       }
@@ -460,7 +460,7 @@ describe("Reset password Routes", () => {
 
         expect(response.status).toBe(400);
         expect(response.body.payload.message).toContain(
-          "Validation error in email field"
+          "Validation error in email field",
         );
         expect(resetPasswordController.forgotPassword).not.toHaveBeenCalled();
       }
@@ -476,19 +476,19 @@ describe("Reset password Routes", () => {
       // Act & Assert
       for (const payload of nosqlInjectionPayloads) {
         const response = await request(app).get(
-          `/api/v1/auth/reset-password/${payload.token}/verify`
+          `/api/v1/auth/reset-password/${payload.token}/verify`,
         );
 
         expect(response.status).toBe(400);
         expect(response.body.payload.message).toContain(
-          "Invalid token format."
+          "Invalid token format.",
         );
         expect(resetPasswordController.verifyResetToken).not.toHaveBeenCalled();
       }
     });
   });
 
-  describe("Complete Password Reset Flow", () => {
+  describe("complete Password Reset Flow", () => {
     it("should handle the entire password reset flow successfully", async () => {
       // Step 1: Request password reset
       (resetPasswordController.forgotPassword as jest.Mock).mockImplementation(
@@ -496,7 +496,7 @@ describe("Reset password Routes", () => {
           res.status(httpStatus.OK).json({
             message: "Password reset link sent to your email.",
           });
-        }
+        },
       );
 
       const forgotPasswordResponse = await request(app)
@@ -505,7 +505,7 @@ describe("Reset password Routes", () => {
 
       expect(forgotPasswordResponse.status).toBe(httpStatus.OK);
       expect(forgotPasswordResponse.body.message).toBe(
-        "Password reset link sent to your email."
+        "Password reset link sent to your email.",
       );
       expect(resetPasswordController.forgotPassword).toHaveBeenCalled();
 
@@ -519,12 +519,12 @@ describe("Reset password Routes", () => {
       });
 
       const verifyTokenResponse = await request(app).get(
-        "/api/v1/auth/reset-password/valid-token-123/verify"
+        "/api/v1/auth/reset-password/valid-token-123/verify",
       );
 
       expect(verifyTokenResponse.status).toBe(httpStatus.OK);
       expect(verifyTokenResponse.body.message).toBe(
-        "Reset password token is valid."
+        "Reset password token is valid.",
       );
       expect(resetPasswordController.verifyResetToken).toHaveBeenCalled();
 
@@ -534,7 +534,7 @@ describe("Reset password Routes", () => {
           res.status(httpStatus.OK).json({
             message: "Password reset successfully.",
           });
-        }
+        },
       );
 
       const resetPasswordResponse = await request(app)
@@ -543,7 +543,7 @@ describe("Reset password Routes", () => {
 
       expect(resetPasswordResponse.status).toBe(httpStatus.OK);
       expect(resetPasswordResponse.body.message).toBe(
-        "Password reset successfully."
+        "Password reset successfully.",
       );
       expect(resetPasswordController.resetPassword).toHaveBeenCalled();
     });
@@ -555,7 +555,7 @@ describe("Reset password Routes", () => {
           res.status(httpStatus.OK).json({
             message: "Password reset link sent to your email.",
           });
-        }
+        },
       );
 
       const forgotPasswordResponse = await request(app)
@@ -566,18 +566,18 @@ describe("Reset password Routes", () => {
 
       // Step 2: Verify token (fails)
       (resetPasswordController.verifyResetToken as jest.Mock).mockRejectedValue(
-        new UnauthorizedError("Invalid reset token")
+        new UnauthorizedError("Invalid reset token"),
       );
 
       const verifyTokenResponse = await request(app).get(
-        "/api/v1/auth/reset-password/invalid-token/verify"
+        "/api/v1/auth/reset-password/invalid-token/verify",
       );
 
       expect(verifyTokenResponse.status).toBe(httpStatus.UNAUTHORIZED);
 
       // Step 3: Attempt to reset password (should also fail)
       (resetPasswordController.resetPassword as jest.Mock).mockRejectedValue(
-        new UnauthorizedError("Invalid reset token")
+        new UnauthorizedError("Invalid reset token"),
       );
 
       const resetPasswordResponse = await request(app)
@@ -594,7 +594,7 @@ describe("Reset password Routes", () => {
           res.status(httpStatus.OK).json({
             message: "Password reset link sent to your email.",
           });
-        }
+        },
       );
 
       const forgotPasswordResponse = await request(app)
@@ -605,18 +605,18 @@ describe("Reset password Routes", () => {
 
       // Step 2: Verify token (fails due to expiration)
       (resetPasswordController.verifyResetToken as jest.Mock).mockRejectedValue(
-        new UnauthorizedError("Reset token has expired")
+        new UnauthorizedError("Reset token has expired"),
       );
 
       const verifyTokenResponse = await request(app).get(
-        "/api/v1/auth/reset-password/expired-token/verify"
+        "/api/v1/auth/reset-password/expired-token/verify",
       );
 
       expect(verifyTokenResponse.status).toBe(httpStatus.UNAUTHORIZED);
 
       // Step 3: Attempt to reset password (should also fail)
       (resetPasswordController.resetPassword as jest.Mock).mockRejectedValue(
-        new UnauthorizedError("Reset token has expired")
+        new UnauthorizedError("Reset token has expired"),
       );
 
       const resetPasswordResponse = await request(app)
@@ -627,7 +627,7 @@ describe("Reset password Routes", () => {
     });
   });
 
-  describe("Security Considerations", () => {
+  describe("security Considerations", () => {
     beforeEach(() => {
       jest.clearAllMocks();
 
@@ -636,7 +636,7 @@ describe("Reset password Routes", () => {
           res.status(httpStatus.OK).json({
             message: "Password reset link sent to your email.",
           });
-        }
+        },
       );
     });
 

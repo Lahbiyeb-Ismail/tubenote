@@ -1,36 +1,32 @@
-import { inject, injectable } from "inversify";
-
 import type { User } from "@tubenote/db";
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 
-import { TYPES } from "@/config/inversify/types";
-
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
-
 import {
+  ERROR_MESSAGES,
   ForbiddenError,
   NotFoundError,
   UnauthorizedError,
-} from "@/modules/shared/api-errors";
-import type { IUserService } from "@/modules/user";
+} from "@tubenote/api-errors";
+import { inject, injectable } from "inversify";
 
+import type { IAuthResponseDto } from "@/modules/auth/dtos";
+import type {
+  IClientContext,
+  IRefreshTokenService,
+  IVerifyEmailService,
+} from "@/modules/auth/features";
+import type { IJwtService } from "@/modules/auth/utils";
 import type {
   ICryptoService,
   ILoggerService,
   IMailSenderService,
   IPrismaService,
 } from "@/modules/shared/services";
-
-import type {
-  IClientContext,
-  IRefreshTokenService,
-  IVerifyEmailService,
-} from "@/modules/auth/features";
-
-import type { IAuthResponseDto } from "@/modules/auth/dtos";
-import type { IJwtService } from "@/modules/auth/utils";
-
+import type { IUserService } from "@/modules/user";
 import type { ICreateAccountDto } from "@/modules/user/features/account/dtos";
+
+import { TYPES } from "@/config/inversify/types";
+
 import type { ILocalAuthService } from "./local-auth.types";
 
 @injectable()
@@ -48,7 +44,7 @@ export class LocalAuthService implements ILocalAuthService {
     private readonly _cryptoService: ICryptoService,
     @inject(TYPES.MailSenderService)
     private readonly _mailSenderService: IMailSenderService,
-    @inject(TYPES.LoggerService) private readonly _loggerService: ILoggerService
+    @inject(TYPES.LoggerService) private readonly _loggerService: ILoggerService,
   ) {}
 
   async registerUser(registerUserDto: IRegisterDto): Promise<User | undefined> {
@@ -65,12 +61,12 @@ export class LocalAuthService implements ILocalAuthService {
       newUser = await this._userService.createUserWithAccount(
         tx,
         registerUserDto,
-        createAccountDto
+        createAccountDto,
       );
 
       verifyEmailToken = await this._verifyEmailService.createToken(
         tx,
-        newUser.email
+        newUser.email,
       );
     });
 
@@ -78,7 +74,7 @@ export class LocalAuthService implements ILocalAuthService {
     if (newUser && verifyEmailToken) {
       await this._mailSenderService.sendVerificationEmail(
         newUser.email,
-        verifyEmailToken
+        verifyEmailToken,
       );
     }
 
@@ -89,7 +85,7 @@ export class LocalAuthService implements ILocalAuthService {
     loginDto: ILoginDto,
     deviceId: string,
     ipAddress: string,
-    clientContext: IClientContext
+    clientContext: IClientContext,
   ): Promise<IAuthResponseDto> {
     const { email, password } = loginDto;
 
@@ -127,7 +123,7 @@ export class LocalAuthService implements ILocalAuthService {
       user.id,
       deviceId,
       ipAddress,
-      clientContext
+      clientContext,
     );
 
     const accessToken = this._jwtService.generateAccessToken(user.id);

@@ -1,24 +1,18 @@
-import type { IAuthResponseDto } from "@/modules/auth/dtos";
-import type { IJwtService } from "@/modules/auth/utils";
+import type { ICreateUserDto } from "@tubenote/dtos";
+
+import { BadRequestError } from "@tubenote/api-errors";
 import { inject, injectable } from "inversify";
 
-import { BadRequestError } from "@/modules/shared/api-errors";
-import {
-  type ICacheService,
-  type ICryptoService,
-  type ILoggerService,
-  type IPrismaService,
-} from "@/modules/shared/services";
-
+import type { IAuthResponseDto } from "@/modules/auth/dtos";
+import type { IJwtService } from "@/modules/auth/utils";
+import type { ICacheService, ICryptoService, ILoggerService, IPrismaService } from "@/modules/shared/services";
 import type { IUserService } from "@/modules/user";
 import type { IAccountService } from "@/modules/user/features/account/account.types";
+import type { ICreateAccountDto } from "@/modules/user/features/account/dtos";
 
 import { TYPES } from "@/config/inversify/types";
 
 import type { IClientContext, IRefreshTokenService } from "../refresh-token";
-
-import type { ICreateAccountDto } from "@/modules/user/features/account/dtos";
-import type { ICreateUserDto } from "@tubenote/dtos";
 import type { IOAuthTokenPayloadDto } from "./dtos";
 import type { IOAuthService } from "./oauth.types";
 
@@ -36,11 +30,11 @@ export class OAuthService implements IOAuthService {
     @inject(TYPES.CryptoService)
     private readonly _cryptoService: ICryptoService,
     @inject(TYPES.CacheService) private readonly _cacheService: ICacheService,
-    @inject(TYPES.LoggerService) private readonly _loggerService: ILoggerService
+    @inject(TYPES.LoggerService) private readonly _loggerService: ILoggerService,
   ) {}
 
   async generateTemporaryOAuthCode(
-    temporaryOAuthCodeDto: IOAuthTokenPayloadDto
+    temporaryOAuthCodeDto: IOAuthTokenPayloadDto,
   ): Promise<string> {
     const code = this._cryptoService.generateSecureToken();
 
@@ -50,7 +44,7 @@ export class OAuthService implements IOAuthService {
 
     this._loggerService.info(`Code ${code} set in cache: ${setResult}`);
     this._loggerService.info(
-      `Cache stats after set: ${this._cacheService.getStats()}`
+      `Cache stats after set: ${this._cacheService.getStats()}`,
     );
 
     return code;
@@ -62,7 +56,7 @@ export class OAuthService implements IOAuthService {
     createAccountDto: ICreateAccountDto,
     deviceId: string,
     ipAddress: string,
-    clientContext: IClientContext
+    clientContext: IClientContext,
   ): Promise<string> {
     return this._prismaService.transaction<string>(async (tx) => {
       let userId: string;
@@ -70,44 +64,45 @@ export class OAuthService implements IOAuthService {
       // Try to find existing account for this OAuth provider
       const existingAccount = await this._accountService.findAccountByProvider(
         createAccountDto.provider,
-        createAccountDto.providerAccountId
+        createAccountDto.providerAccountId,
       );
 
       if (existingAccount) {
         // Account exists, login flow
         this._loggerService.info(
-          `User with ID ${existingAccount.userId} logged in with ${createAccountDto.provider}.`
+          `User with ID ${existingAccount.userId} logged in with ${createAccountDto.provider}.`,
         );
 
         userId = existingAccount.userId;
-      } else {
+      }
+      else {
         // Account doesn't exist, create user and account
         this._loggerService.info(
-          `User with email ${createUserDto.email} signed up with ${createAccountDto.provider}.`
+          `User with email ${createUserDto.email} signed up with ${createAccountDto.provider}.`,
         );
 
         const user = await this._userService.createUserWithAccount(
           tx,
           createUserDto,
-          createAccountDto
+          createAccountDto,
         );
 
         userId = user.id;
       }
 
       this._loggerService.info(
-        `Saving refresh token for user with ID ${userId}.`
+        `Saving refresh token for user with ID ${userId}.`,
       );
 
       const refreshToken = await this._refreshTokenService.createToken(
         userId,
         deviceId,
         ipAddress,
-        clientContext
+        clientContext,
       );
 
       this._loggerService.info(
-        `Generating access token for user with ID ${userId}.`
+        `Generating access token for user with ID ${userId}.`,
       );
 
       const accessToken = this._jwtService.generateAccessToken(userId);
