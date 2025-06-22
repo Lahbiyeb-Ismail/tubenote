@@ -20,6 +20,7 @@
     "zod": "^3.25.49"
   },
   "devDependencies": {
+    "@tubenote/api-errors": "workspace:*",
     "@tubenote/config-typescript": "workspace:*",
     "@types/node": "^22.15.29"
   }
