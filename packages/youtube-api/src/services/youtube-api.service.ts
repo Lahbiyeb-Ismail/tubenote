@@ -1,6 +1,6 @@
-import type { IYoutubeApiService, VideoChapter, YoutubeVideoData } from "./types";
+import type { IYoutubeApiService, VideoChapter, YoutubeVideoData } from "../types";
 
-import { envConfig } from "./env.config";
+import { envConfig } from "../env.config";
 
 /**
  * Service for interacting with the YouTube API to retrieve video data.

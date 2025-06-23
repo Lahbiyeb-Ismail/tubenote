@@ -87,3 +87,50 @@ export interface IYoutubeApiService {
    */
   getYoutubeVideoData: (youtubeId: string) => Promise<YoutubeVideoData>;
 }
+
+export interface TranscriptEntry {
+  text: string;
+  start: number;
+  duration: number;
+}
+
+export interface TranscriptRequest {
+  ytVideoId: string;
+  language?: string;
+  format?: "text" | "json";
+  timestamps?: boolean;
+  startTime?: string;
+  endTime?: string;
+}
+
+export interface TranscriptResponse {
+  success: boolean;
+  data?: {
+    ytVideoId: string;
+    transcript: string;
+    format: string;
+    language?: string;
+    timestamps: boolean;
+    entryCount: number;
+    timeRange?: {
+      start?: string;
+      end?: string;
+    };
+  };
+  error?: {
+    code: string;
+    message: string;
+  };
+}
+
+export interface ApiError extends Error {
+  statusCode: number;
+  code: string;
+}
+
+export interface PythonScriptResult {
+  success: boolean;
+  output?: string;
+  error?: string;
+  code?: number;
+}
