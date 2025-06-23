@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type DialogType = "create-note" | "delete-note" | "edit-note" | "save-note" | "create-video";
+export type DialogType = "create-note" | "delete-note" | "edit-note" | "save-note" | "add-video";
 
 interface DialogState {
   type: DialogType | null;
