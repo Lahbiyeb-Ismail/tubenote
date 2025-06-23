@@ -111,7 +111,7 @@ model Note {
   thumbnail  String
   youtubeId  String
   category   String?
-  tags       String[]
+  tags       String[]  @default([])
   timestamp  Timestamp
   isPublic   Boolean   @default(false)
   isPinned   Boolean   @default(false)
