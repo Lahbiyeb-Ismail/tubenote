@@ -1,14 +1,12 @@
 import type { Response } from "express";
+
+import { ERROR_MESSAGES, UnauthorizedError } from "@tubenote/api-errors";
 import { inject, injectable } from "inversify";
 
+import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
-import { UnauthorizedError } from "@/modules/shared/api-errors";
-import { envConfig } from "@/modules/shared/config";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
-
-import type { IResponseFormatter } from "@/modules/shared/services";
-
+import { TYPES } from "@/config/inversify/types";
 import {
   accessTokenCookieConfig,
   refreshTokenCookieConfig,
@@ -17,8 +15,7 @@ import {
   ACCESS_TOKEN_NAME,
   REFRESH_TOKEN_NAME,
 } from "@/modules/auth/constants";
-
-import { TYPES } from "@/config/inversify/types";
+import { envConfig } from "@/modules/shared/config";
 
 import type { IOAuthAuthorizationCodeDto, IOauthLoginDto } from "./dtos";
 import type { IOAuthController, IOAuthService } from "./oauth.types";
@@ -28,7 +25,7 @@ export class OAuthController implements IOAuthController {
   constructor(
     @inject(TYPES.OAuthService) private readonly _oauthService: IOAuthService,
     @inject(TYPES.ResponseFormatter)
-    private readonly _responseFormatter: IResponseFormatter
+    private readonly _responseFormatter: IResponseFormatter,
   ) {}
 
   /**
@@ -40,8 +37,8 @@ export class OAuthController implements IOAuthController {
   private redirectWithTemporaryOauthCode(res: Response, temporaryCode: string) {
     res.redirect(
       `${envConfig.client.url}/oauth/callback?code=${encodeURIComponent(
-        temporaryCode
-      )}`
+        temporaryCode,
+      )}`,
     );
   }
 
@@ -78,7 +75,7 @@ export class OAuthController implements IOAuthController {
       createAccountDto,
       deviceId,
       ipAddress,
-      clientContext
+      clientContext,
     );
 
     this.redirectWithTemporaryOauthCode(res, temporaryOauthCode);
@@ -102,15 +99,15 @@ export class OAuthController implements IOAuthController {
    */
   async exchangeOauthCodeForTokens(
     req: TypedRequest<IOAuthAuthorizationCodeDto>,
-    res: Response
+    res: Response,
   ): Promise<void> {
     const { code } = req.body;
 
-    const { accessToken, refreshToken } =
-      await this._oauthService.exchangeOauthCodeForTokens(code);
+    const { accessToken, refreshToken }
+      = await this._oauthService.exchangeOauthCodeForTokens(code);
 
-    const formattedResponse =
-      this._responseFormatter.formatSuccessResponse<string>({
+    const formattedResponse
+      = this._responseFormatter.formatSuccessResponse<string>({
         responseOptions: {
           message: "Access token exchanged successfully.",
           data: accessToken,

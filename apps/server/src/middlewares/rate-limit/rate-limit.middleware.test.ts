@@ -1,10 +1,14 @@
-import express, { NextFunction, Request, Response, Express } from "express";
+import type { Express, NextFunction, Request, Response } from "express";
+
+import { ERROR_MESSAGES, TooManyRequestsError } from "@tubenote/api-errors";
+import express from "express";
 import request from "supertest";
 
-import { TooManyRequestsError } from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { loggerService, rateLimitService } from "@/modules/shared/services";
-import { type IRateLimitConfig, createRateLimitMiddleware } from "./index";
+
+import type { IRateLimitConfig } from "./index";
+
+import { createRateLimitMiddleware } from "./index";
 
 // Mock dependencies
 jest.mock("@/modules/shared/services", () => ({
@@ -16,7 +20,7 @@ jest.mock("@/modules/shared/services", () => ({
   },
 }));
 
-describe("Rate Limit Middleware", () => {
+describe("rate Limit Middleware", () => {
   // Common test variables
   let req: Partial<Request>;
   let res: Partial<Response>;
@@ -55,7 +59,7 @@ describe("Rate Limit Middleware", () => {
     });
   });
 
-  describe("Basic Rate Limiting", () => {
+  describe("basic Rate Limiting", () => {
     it("should allow requests when under the rate limit", async () => {
       // Arrange
       const middleware = createRateLimitMiddleware({
@@ -89,7 +93,7 @@ describe("Rate Limit Middleware", () => {
 
       // Act & Assert
       await expect(
-        middleware(req as Request, res as Response, next)
+        middleware(req as Request, res as Response, next),
       ).rejects.toThrow(TooManyRequestsError);
       expect(next).not.toHaveBeenCalled();
       expect(res.set).toHaveBeenCalledWith("X-RateLimit-Limit", "10");
@@ -114,21 +118,22 @@ describe("Rate Limit Middleware", () => {
       // Act
       try {
         await middleware(req as Request, res as Response, next);
-      } catch (_error: any) {
-        // Expected error
+      }
+      catch (error: any) {
+        console.log(error);
       }
 
       // Assert
       const resetTime = Math.ceil(resetAt.getTime() / 1000);
       expect(res.set).toHaveBeenCalledWith(
         "X-RateLimit-Reset",
-        resetTime.toString()
+        resetTime.toString(),
       );
       expect(res.set).toHaveBeenCalledWith("Retry-After", expect.any(String));
     });
   });
 
-  describe("Keying Strategies", () => {
+  describe("keying Strategies", () => {
     it("should use IP address as the key when configured", async () => {
       // Arrange
       const middleware = createRateLimitMiddleware({
@@ -143,7 +148,7 @@ describe("Rate Limit Middleware", () => {
       expect(rateLimitService.check).toHaveBeenCalledWith(
         expect.objectContaining({
           key: "127.0.0.1",
-        })
+        }),
       );
     });
 
@@ -163,7 +168,7 @@ describe("Rate Limit Middleware", () => {
       expect(rateLimitService.check).toHaveBeenCalledWith(
         expect.objectContaining({
           key: "user123",
-        })
+        }),
       );
     });
 
@@ -184,7 +189,7 @@ describe("Rate Limit Middleware", () => {
       expect(rateLimitService.check).toHaveBeenCalledWith(
         expect.objectContaining({
           key: "api-key-123",
-        })
+        }),
       );
     });
 
@@ -205,12 +210,12 @@ describe("Rate Limit Middleware", () => {
       expect(rateLimitService.check).toHaveBeenCalledWith(
         expect.objectContaining({
           key: "127.0.0.1:/api/users",
-        })
+        }),
       );
     });
   });
 
-  describe("Time Windows", () => {
+  describe("time Windows", () => {
     it("should use the configured time window", async () => {
       // Arrange
       const customConfig = {
@@ -230,7 +235,7 @@ describe("Rate Limit Middleware", () => {
       expect(rateLimitService.check).toHaveBeenCalledWith(
         expect.objectContaining({
           windowMs: 3600000,
-        })
+        }),
       );
     });
 
@@ -255,12 +260,12 @@ describe("Rate Limit Middleware", () => {
       const resetTime = Math.ceil(resetAt.getTime() / 1000);
       expect(res.set).toHaveBeenCalledWith(
         "X-RateLimit-Reset",
-        resetTime.toString()
+        resetTime.toString(),
       );
     });
   });
 
-  describe("Error Handling", () => {
+  describe("error Handling", () => {
     it("should pass non-rate-limit errors to next", async () => {
       // Arrange
       const testError = new Error("Test error");
@@ -293,7 +298,7 @@ describe("Rate Limit Middleware", () => {
 
       // Act & Assert
       await expect(
-        middleware(req as Request, res as Response, next)
+        middleware(req as Request, res as Response, next),
       ).rejects.toThrow(TooManyRequestsError);
       expect(loggerService.warn).toHaveBeenCalled();
     });
@@ -319,7 +324,8 @@ describe("Rate Limit Middleware", () => {
         };
         await middleware(req as Request, res as Response, next);
         fail();
-      } catch (error: any) {
+      }
+      catch (error: any) {
         // Assert
         expect(error).toBeInstanceOf(TooManyRequestsError);
         expect(error.message).toBe(ERROR_MESSAGES.TOO_MANY_ATTEMPTS);
@@ -327,7 +333,7 @@ describe("Rate Limit Middleware", () => {
     });
   });
 
-  describe("Customization", () => {
+  describe("customization", () => {
     it("should use custom rate limit configuration", async () => {
       // Arrange
       const customConfig = {
@@ -350,18 +356,18 @@ describe("Rate Limit Middleware", () => {
           maxAttempts: 5,
           windowMs: 30000,
           blockDurationMs: 60000,
-        })
+        }),
       );
     });
   });
 
-  describe("Edge Cases", () => {
+  describe("edge Cases", () => {
     it("should handle requests with missing keys", async () => {
       // Arrange
       req = { ip: undefined };
 
       const middleware = createRateLimitMiddleware({
-        keyGenerator: (req) => req.ip || "unknown",
+        keyGenerator: req => req.ip || "unknown",
         rateLimitConfig: defaultConfig,
       });
 
@@ -372,7 +378,7 @@ describe("Rate Limit Middleware", () => {
       expect(rateLimitService.check).toHaveBeenCalledWith(
         expect.objectContaining({
           key: "unknown",
-        })
+        }),
       );
     });
 
@@ -416,12 +422,13 @@ describe("Rate Limit Middleware", () => {
       try {
         await middleware(req as Request, res as Response, next);
         fail("Expected middleware to throw");
-      } catch (error) {
+      }
+      catch (error) {
         // Assert
         expect(error).toBeInstanceOf(TooManyRequestsError);
         expect(res.set).not.toHaveBeenCalledWith(
           "X-RateLimit-Reset",
-          expect.any(String)
+          expect.any(String),
         );
         expect(res.set).toHaveBeenCalledWith("Retry-After", expect.any(String));
       }
@@ -429,7 +436,7 @@ describe("Rate Limit Middleware", () => {
   });
 });
 
-describe("Rate Limit Middleware Integration Tests", () => {
+describe("rate Limit Middleware Integration Tests", () => {
   let app: Express;
 
   beforeEach(() => {
@@ -458,7 +465,7 @@ describe("Rate Limit Middleware Integration Tests", () => {
     });
 
     const rateLimitMiddleware = createRateLimitMiddleware({
-      keyGenerator: (req) => req.ip!,
+      keyGenerator: req => req.ip!,
       rateLimitConfig: {
         maxAttempts: 10,
         windowMs: 60000,
@@ -533,7 +540,7 @@ describe("Rate Limit Middleware Integration Tests", () => {
     });
 
     const rateLimitMiddleware = createRateLimitMiddleware({
-      keyGenerator: (req) => req.ip!,
+      keyGenerator: req => req.ip!,
       rateLimitConfig: {
         maxAttempts: 10,
         windowMs: 60000,
@@ -570,11 +577,11 @@ describe("Rate Limit Middleware Integration Tests", () => {
         blocked: false,
         remaining: maxAttempts - 1,
         resetAt: new Date(Date.now() + 60000),
-      })
+      }),
     );
 
     const strictLimitMiddleware = createRateLimitMiddleware({
-      keyGenerator: (req) => req.ip!,
+      keyGenerator: req => req.ip!,
       rateLimitConfig: {
         maxAttempts: 5,
         windowMs: 60000,
@@ -583,7 +590,7 @@ describe("Rate Limit Middleware Integration Tests", () => {
     });
 
     const relaxedLimitMiddleware = createRateLimitMiddleware({
-      keyGenerator: (req) => req.ip!,
+      keyGenerator: req => req.ip!,
       rateLimitConfig: {
         maxAttempts: 20,
         windowMs: 60000,
@@ -620,7 +627,7 @@ describe("Rate Limit Middleware Integration Tests", () => {
     });
 
     const rateLimitMiddleware = createRateLimitMiddleware({
-      keyGenerator: (_req) => "test-key",
+      keyGenerator: _req => "test-key",
       rateLimitConfig: {
         maxAttempts: 10,
         windowMs: 60000,
@@ -644,7 +651,7 @@ describe("Rate Limit Middleware Integration Tests", () => {
   });
 });
 
-describe("Rate Limit Middleware Concurrency Tests", () => {
+describe("rate Limit Middleware Concurrency Tests", () => {
   let req: Partial<Request>;
   let res: Partial<Response>;
   let next: NextFunction;
@@ -679,7 +686,7 @@ describe("Rate Limit Middleware Concurrency Tests", () => {
     });
 
     const middleware = createRateLimitMiddleware({
-      keyGenerator: (req) => req.ip!,
+      keyGenerator: req => req.ip!,
       rateLimitConfig: {
         maxAttempts: 5,
         windowMs: 60000,
@@ -688,7 +695,7 @@ describe("Rate Limit Middleware Concurrency Tests", () => {
     });
 
     // Act - simulate 10 concurrent requests
-    const promises = Array(10)
+    const promises = Array.from({ length: 10 })
       .fill(0)
       .map(async () => {
         const nextClone = jest.fn();
@@ -701,8 +708,8 @@ describe("Rate Limit Middleware Concurrency Tests", () => {
     const results = await Promise.all(promises);
 
     // Assert
-    const successCount = results.filter((r) => r.success).length;
-    const failureCount = results.filter((r) => !r.success).length;
+    const successCount = results.filter(r => r.success).length;
+    const failureCount = results.filter(r => !r.success).length;
 
     expect(successCount).toBe(5); // First 5 requests should succeed
     expect(failureCount).toBe(5); // Last 5 requests should fail
@@ -711,7 +718,8 @@ describe("Rate Limit Middleware Concurrency Tests", () => {
     results.forEach((result) => {
       if (result.success) {
         expect(result.next).toHaveBeenCalled();
-      } else {
+      }
+      else {
         expect(result.next).not.toHaveBeenCalled();
       }
     });
@@ -724,7 +732,7 @@ describe("Rate Limit Middleware Concurrency Tests", () => {
     let requestsBlocked = 0;
     (rateLimitService.check as jest.Mock).mockImplementation(async () => {
       // Simulate some processing time to increase chance of race conditions
-      await new Promise((resolve) => setTimeout(resolve, 5));
+      await new Promise(resolve => setTimeout(resolve, 5));
 
       attemptsMade++;
       const remaining = maxAttempts - attemptsMade;
@@ -742,7 +750,7 @@ describe("Rate Limit Middleware Concurrency Tests", () => {
     });
 
     const middleware = createRateLimitMiddleware({
-      keyGenerator: (req) => req.ip!,
+      keyGenerator: req => req.ip!,
       rateLimitConfig: {
         maxAttempts,
         windowMs: 60000,
@@ -752,7 +760,7 @@ describe("Rate Limit Middleware Concurrency Tests", () => {
 
     // Act - simulate 20 concurrent requests
     const concurrentRequests = 20;
-    const promises = Array(concurrentRequests)
+    const promises = Array.from({ length: concurrentRequests })
       .fill(0)
       .map(async () => {
         return middleware(req as Request, res as Response, next)

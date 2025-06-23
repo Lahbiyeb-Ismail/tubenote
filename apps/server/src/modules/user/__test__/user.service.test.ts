@@ -1,6 +1,4 @@
 import type { Prisma } from "@prisma/client";
-import { mock, mockReset } from "jest-mock-extended";
-
 import type { User } from "@tubenote/db";
 import type {
   ICreateUserDto,
@@ -11,19 +9,20 @@ import type {
 import {
   BadRequestError,
   ConflictError,
+  ERROR_MESSAGES,
   NotFoundError,
-} from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
+} from "@tubenote/api-errors";
+import { mock, mockReset } from "jest-mock-extended";
 
 import type { ICryptoService, IPrismaService } from "@/modules/shared/services";
-
-import { UserService } from "../user.service";
 
 import type { IAccountService } from "../features/account/account.types";
 import type { ICreateAccountDto } from "../features/account/dtos";
 import type { IUserRepository, IUserServiceOptions } from "../user.types";
 
-describe("UserService", () => {
+import { UserService } from "../user.service";
+
+describe("userService", () => {
   let userService: UserService;
   let mockTx: Prisma.TransactionClient;
 
@@ -66,13 +65,13 @@ describe("UserService", () => {
       async (fn: (tx: Prisma.TransactionClient) => Promise<any>) => {
         const tx = {};
         return fn(tx as Prisma.TransactionClient);
-      }
+      },
     );
 
     mockTx = {} as Prisma.TransactionClient;
 
     // Reset singleton instance before each test to ensure a clean state.
-    // @ts-ignore: resetting the private _instance for testing purposes
+    // @ts-expect-error: resetting the private _instance for testing purposes
     UserService._instance = undefined;
 
     // Create a new instance for each test
@@ -83,7 +82,7 @@ describe("UserService", () => {
     jest.clearAllMocks();
   });
 
-  describe("Singleton behavior", () => {
+  describe("singleton behavior", () => {
     it("should create a new instance when none exists", () => {
       const instance1 = UserService.getInstance(serviceOptions);
       expect(instance1).toBeInstanceOf(UserService);
@@ -96,7 +95,7 @@ describe("UserService", () => {
     });
   });
 
-  describe("UserService - getUserById", () => {
+  describe("userService - getUserById", () => {
     afterEach(() => jest.clearAllMocks());
 
     it("should return user when found by id", async () => {
@@ -106,7 +105,7 @@ describe("UserService", () => {
 
       expect(userRepository.getById).toHaveBeenCalledWith(
         mockUserId,
-        undefined
+        undefined,
       );
       expect(result).toEqual(mockUser);
     });
@@ -128,7 +127,7 @@ describe("UserService", () => {
     });
   });
 
-  describe("UserService - getUserByEmail", () => {
+  describe("userService - getUserByEmail", () => {
     afterEach(() => jest.clearAllMocks());
 
     it("should return user when found by email", async () => {
@@ -138,7 +137,7 @@ describe("UserService", () => {
 
       expect(userRepository.getByEmail).toHaveBeenCalledWith(
         mockUserEmail,
-        undefined
+        undefined,
       );
       expect(result).toEqual(mockUser);
     });
@@ -157,12 +156,12 @@ describe("UserService", () => {
       userRepository.getByEmail.mockRejectedValue(error);
 
       await expect(userService.getUserByEmail(mockUserEmail)).rejects.toThrow(
-        error
+        error,
       );
     });
   });
 
-  describe("UserService - createUserWithAccount", () => {
+  describe("userService - createUserWithAccount", () => {
     const createUserDto: ICreateUserDto = {
       email: "new@example.com",
       password: "ValidPass123!",
@@ -185,7 +184,7 @@ describe("UserService", () => {
       const result = await userService.createUserWithAccount(
         mockTx,
         createUserDto,
-        createAccountDto
+        createAccountDto,
       );
 
       expect(userRepository.create).toHaveBeenCalledWith(
@@ -193,31 +192,31 @@ describe("UserService", () => {
         expect.objectContaining({
           ...createUserDto,
           password: "hashed123",
-        })
+        }),
       );
       expect(accountService.createAccount).toHaveBeenCalledWith(
         mockTx,
         mockUser.id,
-        createAccountDto
+        createAccountDto,
       );
       expect(result).toEqual(mockUser);
     });
 
     it("should rollback transaction on account creation failure", async () => {
-      prismaService.transaction.mockImplementation(async (fn) => fn(mockTx));
+      prismaService.transaction.mockImplementation(async fn => fn(mockTx));
       userRepository.create.mockResolvedValue(mockUser);
       cryptoService.hashPassword.mockResolvedValue("hashed123");
 
       accountService.createAccount.mockRejectedValue(
-        new Error("Account creation failed")
+        new Error("Account creation failed"),
       );
 
       await expect(
         userService.createUserWithAccount(
           mockTx,
           createUserDto,
-          createAccountDto
-        )
+          createAccountDto,
+        ),
       ).rejects.toThrow("Account creation failed");
 
       // Verify transaction was attempted
@@ -226,7 +225,7 @@ describe("UserService", () => {
     });
   });
 
-  describe("UserService - updateUser", () => {
+  describe("userService - updateUser", () => {
     const updateUserDto: IUpdateUserDto = {
       username: "newuser",
       email: "new@example.com",
@@ -248,12 +247,12 @@ describe("UserService", () => {
       expect(userRepository.getById).toHaveBeenCalledWith(mockUserId, mockTx);
       expect(userRepository.getByEmail).toHaveBeenCalledWith(
         "new@example.com",
-        mockTx
+        mockTx,
       );
       expect(userRepository.update).toHaveBeenCalledWith(
         mockTx,
         mockUserId,
-        updateUserDto
+        updateUserDto,
       );
       expect(result).toEqual(updatedUser);
     });
@@ -280,7 +279,7 @@ describe("UserService", () => {
 
       // Act & Assert
       await expect(
-        userService.updateUser(mockUserId, updateUserDto)
+        userService.updateUser(mockUserId, updateUserDto),
       ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
 
       expect(prismaService.transaction).toHaveBeenCalled();
@@ -296,14 +295,14 @@ describe("UserService", () => {
 
       // Act & Assert
       await expect(
-        userService.updateUser(mockUserId, updateUserDto)
+        userService.updateUser(mockUserId, updateUserDto),
       ).rejects.toThrow(new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS));
 
       expect(prismaService.transaction).toHaveBeenCalled();
       expect(userRepository.getById).toHaveBeenCalledWith(mockUserId, mockTx);
       expect(userRepository.getByEmail).toHaveBeenCalledWith(
         "new@example.com",
-        mockTx
+        mockTx,
       );
     });
 
@@ -315,25 +314,19 @@ describe("UserService", () => {
 
       // Mock transaction to properly simulate rollback
       prismaService.transaction.mockImplementation(async (callback) => {
-        try {
-          return await callback(mockTx);
-        } catch (error) {
-          // Simulate transaction rollback
-          // biome-ignore lint/complexity/noUselessCatch: <explanation>
-          throw error;
-        }
+        return await callback(mockTx);
       });
 
       // Act & Assert
       await expect(
-        userService.updateUser(mockUserId, updateUserDto)
+        userService.updateUser(mockUserId, updateUserDto),
       ).rejects.toThrow("Update failed");
 
       expect(prismaService.transaction).toHaveBeenCalled();
     });
   });
 
-  describe("UserService - updateUserPassword", () => {
+  describe("userService - updateUserPassword", () => {
     const existingUser = mockUser;
 
     const updatePasswordDto: IUpdatePasswordDto = {
@@ -356,7 +349,7 @@ describe("UserService", () => {
       // Act
       const result = await userService.updateUserPassword(
         mockUserId,
-        updatePasswordDto
+        updatePasswordDto,
       );
 
       // Assert
@@ -370,7 +363,7 @@ describe("UserService", () => {
       expect(userRepository.updatePassword).toHaveBeenCalledWith(
         mockTx,
         mockUserId,
-        "hashed_new_password"
+        "hashed_new_password",
       );
       expect(result).toEqual(updatedUser);
     });
@@ -387,9 +380,9 @@ describe("UserService", () => {
 
       // Act & Assert
       await expect(
-        userService.updateUserPassword(mockUserId, updatePasswordDto)
+        userService.updateUserPassword(mockUserId, updatePasswordDto),
       ).rejects.toThrow(
-        new BadRequestError(ERROR_MESSAGES.INVALID_CREDENTIALS)
+        new BadRequestError(ERROR_MESSAGES.INVALID_CREDENTIALS),
       );
 
       expect(prismaService.transaction).toHaveBeenCalled();
@@ -411,9 +404,9 @@ describe("UserService", () => {
 
       // Act & Assert
       await expect(
-        userService.updateUserPassword(mockUserId, updatePasswordDto)
+        userService.updateUserPassword(mockUserId, updatePasswordDto),
       ).rejects.toThrow(
-        new BadRequestError(ERROR_MESSAGES.PASSWORD_SAME_AS_CURRENT)
+        new BadRequestError(ERROR_MESSAGES.PASSWORD_SAME_AS_CURRENT),
       );
 
       expect(prismaService.transaction).toHaveBeenCalled();
@@ -434,7 +427,7 @@ describe("UserService", () => {
 
       // Act & Assert
       await expect(
-        userService.updateUserPassword("999", updatePasswordDto)
+        userService.updateUserPassword("999", updatePasswordDto),
       ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
 
       expect(prismaService.transaction).toHaveBeenCalled();
@@ -442,7 +435,7 @@ describe("UserService", () => {
     });
   });
 
-  describe("UserService - resetUserPassword", () => {
+  describe("userService - resetUserPassword", () => {
     const existingUser = mockUser;
     it("should reset password successfully", async () => {
       // Arrange
@@ -458,7 +451,7 @@ describe("UserService", () => {
       // Act
       const result = await userService.resetUserPassword(
         mockUserId,
-        "new_password"
+        "new_password",
       );
 
       // Assert
@@ -468,7 +461,7 @@ describe("UserService", () => {
       expect(userRepository.updatePassword).toHaveBeenCalledWith(
         mockTx,
         mockUserId,
-        "hashed_new_password"
+        "hashed_new_password",
       );
       expect(result).toEqual(updatedUser);
     });
@@ -479,7 +472,7 @@ describe("UserService", () => {
 
       // Act & Assert
       await expect(
-        userService.resetUserPassword("999", "new_password")
+        userService.resetUserPassword("999", "new_password"),
       ).rejects.toThrow(new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND));
 
       expect(prismaService.transaction).toHaveBeenCalled();
@@ -487,7 +480,7 @@ describe("UserService", () => {
     });
   });
 
-  describe("UserService - verifyUserEmail", () => {
+  describe("userService - verifyUserEmail", () => {
     it("should verify email successfully", async () => {
       // Arrange
       const existingUser = {
@@ -508,11 +501,11 @@ describe("UserService", () => {
       // Assert
       expect(userRepository.getById).toHaveBeenCalledWith(
         mockUserId,
-        undefined
+        undefined,
       );
       expect(userRepository.verifyEmail).toHaveBeenCalledWith(
         mockUserId,
-        undefined
+        undefined,
       );
       expect(result).toEqual(verifiedUser);
     });
@@ -523,7 +516,7 @@ describe("UserService", () => {
 
       // Act & Assert
       await expect(userService.verifyUserEmail("999")).rejects.toThrow(
-        new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
+        new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND),
       );
     });
 
@@ -538,7 +531,7 @@ describe("UserService", () => {
 
       // Act & Assert
       await expect(userService.verifyUserEmail(mockUserId)).rejects.toThrow(
-        new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED)
+        new BadRequestError(ERROR_MESSAGES.ALREADY_VERIFIED),
       );
     });
 
@@ -564,7 +557,7 @@ describe("UserService", () => {
       expect(userRepository.getById).toHaveBeenCalledWith(mockUserId, mockTx);
       expect(userRepository.verifyEmail).toHaveBeenCalledWith(
         mockUserId,
-        mockTx
+        mockTx,
       );
     });
 

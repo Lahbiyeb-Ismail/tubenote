@@ -1,10 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
-import { ZodError, type ZodSchema } from "zod";
+import type { ZodSchema } from "zod";
 
 import {
   BadRequestError,
   InternalServerError,
-} from "@/modules/shared/api-errors";
+} from "@tubenote/api-errors";
+import { ZodError } from "zod";
 
 /**
  * Defines the schema for validating different parts of an HTTP request.
@@ -17,15 +18,15 @@ import {
  * @property {P} [params] - Optional schema for the request parameters.
  * @property {Q} [query] - Optional schema for the request query.
  */
-type RequestSchema<
+interface RequestSchema<
   B extends ZodSchema,
   P extends ZodSchema,
   Q extends ZodSchema,
-> = {
+> {
   body?: B;
   params?: P;
   query?: Q;
-};
+}
 
 /**
  * Middleware to validate the request body, params, and query using Zod schemas.
@@ -45,7 +46,7 @@ export function validateRequest<
   P extends ZodSchema,
   Q extends ZodSchema,
 >(
-  schema: RequestSchema<B, P, Q>
+  schema: RequestSchema<B, P, Q>,
 ): (req: Request, res: Response, next: NextFunction) => void {
   return (req: Request, _res: Response, next: NextFunction) => {
     try {
@@ -59,19 +60,21 @@ export function validateRequest<
         req.query = schema.query.parse(req.query);
       }
       next();
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof ZodError) {
-        const errors = error.errors.map((err) => ({
+        const errors = error.errors.map(err => ({
           field: err.path.join(", "),
           message: err.message,
         }));
 
         throw new BadRequestError(
-          `Validation error in ${errors[0]?.field} field: ${errors[0]?.message}`
+          `Validation error in ${errors[0]?.field} field: ${errors[0]?.message}`,
         );
-      } else {
+      }
+      else {
         throw new InternalServerError(
-          `Unexpected error during request validation: ${error}`
+          `Unexpected error during request validation: ${error}`,
         );
       }
     }

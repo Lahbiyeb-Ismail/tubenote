@@ -1,35 +1,34 @@
-import { mock } from "jest-mock-extended";
-
 import type { User } from "@tubenote/db";
 
-import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
+import { BadRequestError } from "@tubenote/api-errors";
+import { mock } from "jest-mock-extended";
 
 import type { IJwtService } from "@/modules/auth/utils";
-import { BadRequestError } from "@/modules/shared/api-errors";
 import type {
   ICacheService,
   ICryptoService,
   ILoggerService,
   IPrismaService,
 } from "@/modules/shared/services";
-import { stringToDate } from "@/modules/shared/utils";
-
 import type { IUserService } from "@/modules/user";
 import type { Account } from "@/modules/user/features/account/account.model";
 import type { IAccountService } from "@/modules/user/features/account/account.types";
 
+import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
+import { stringToDate } from "@/modules/shared/utils";
+
 import type { IRefreshTokenService, RefreshToken } from "../../refresh-token";
 import type { IOauthLoginDto } from "../dtos";
+import type { IOAuthServiceOptions } from "../oauth.types";
 
 import { OAuthService } from "../oauth.service";
-import type { IOAuthServiceOptions } from "../oauth.types";
 
 jest.mock("@/modules/shared/utils", () => ({
   ...jest.requireActual("@/modules/shared/utils"),
   stringToDate: jest.fn(),
 }));
 
-describe("OAuthService", () => {
+describe("oAuthService", () => {
   let oauthService: OAuthService;
 
   const prismaService = mock<IPrismaService>();
@@ -115,21 +114,21 @@ describe("OAuthService", () => {
     });
 
     cryptoService.generateRandomSecureToken.mockReturnValue(
-      "temporary-oauth-code"
+      "temporary-oauth-code",
     );
 
     cacheService.set.mockReturnValue(true);
     cacheService.del.mockReturnValue(1);
 
     // Reset singleton instance for isolation.
-    // @ts-ignore: resetting private static property for testing purposes.
+    // @ts-expect-error: resetting private static property for testing purposes.
     OAuthService._instance = undefined;
 
     // Create an instance of OAuthService using the mocks.
     oauthService = OAuthService.getInstance(serviceOptions);
   });
 
-  describe("Singleton Behavior", () => {
+  describe("singleton Behavior", () => {
     it("should create a new instance if none exists", () => {
       const instance = OAuthService.getInstance({
         prismaService,
@@ -182,10 +181,10 @@ describe("OAuthService", () => {
       expect(cryptoService.generateRandomSecureToken).toHaveBeenCalled();
       expect(cacheService.set).toHaveBeenCalledWith(
         "temporary-oauth-code",
-        payload
+        payload,
       );
       expect(loggerService.info).toHaveBeenCalledWith(
-        expect.stringContaining("Code temporary-oauth-code set in cache: true")
+        expect.stringContaining("Code temporary-oauth-code set in cache: true"),
       );
 
       expect(code).toBe("temporary-oauth-code");
@@ -230,28 +229,28 @@ describe("OAuthService", () => {
       // Act
       const result = await oauthService.handleOAuthLogin(
         oauthLoginDtoExisting.createUserDto,
-        oauthLoginDtoExisting.createAccountDto
+        oauthLoginDtoExisting.createAccountDto,
       );
 
       // Assert
       expect(accountService.findAccountByProvider).toHaveBeenCalledWith(
         "google",
-        "provider-id-123"
+        "provider-id-123",
       );
       expect(loggerService.info).toHaveBeenCalledWith(
         expect.stringContaining(
-          `User with ID ${mockExistingUserId} logged in with google.`
-        )
+          `User with ID ${mockExistingUserId} logged in with google.`,
+        ),
       );
       expect(jwtService.generateAuthTokens).toHaveBeenCalledWith(
-        mockExistingUserId
+        mockExistingUserId,
       );
       expect(refreshTokenService.createToken).toHaveBeenCalledWith(
         mockExistingUserId,
         {
           token: "refresh-token",
           expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
-        }
+        },
       );
       expect(result).toEqual("temporary-oauth-code");
     });
@@ -264,18 +263,18 @@ describe("OAuthService", () => {
       // Act
       const result = await oauthService.handleOAuthLogin(
         oauthLoginDtoNew.createUserDto,
-        oauthLoginDtoNew.createAccountDto
+        oauthLoginDtoNew.createAccountDto,
       );
 
       // Assert
       expect(accountService.findAccountByProvider).toHaveBeenCalledWith(
         "google",
-        "provider-id-new"
+        "provider-id-new",
       );
       expect(userService.createUserWithAccount).toHaveBeenCalled();
 
       expect(jwtService.generateAuthTokens).toHaveBeenCalledWith(
-        mockNewUser.id
+        mockNewUser.id,
       );
 
       expect(refreshTokenService.createToken).toHaveBeenCalledWith(
@@ -283,7 +282,7 @@ describe("OAuthService", () => {
         {
           token: "refresh-token",
           expiresAt: stringToDate(REFRESH_TOKEN_EXPIRES_IN),
-        }
+        },
       );
 
       expect(result).toEqual("temporary-oauth-code");
@@ -292,15 +291,15 @@ describe("OAuthService", () => {
     it("should propagate errors thrown during the transaction", async () => {
       // Arrange: simulate an error in the transaction callback.
       prismaService.transaction.mockRejectedValueOnce(
-        new Error("Transaction failed")
+        new Error("Transaction failed"),
       );
 
       // Act & Assert
       await expect(
         oauthService.handleOAuthLogin(
           oauthLoginDtoExisting.createUserDto,
-          oauthLoginDtoExisting.createAccountDto
-        )
+          oauthLoginDtoExisting.createAccountDto,
+        ),
       ).rejects.toThrow("Transaction failed");
     });
   });
@@ -322,11 +321,11 @@ describe("OAuthService", () => {
       // Assert
       expect(cacheService.get).toHaveBeenCalledWith(code);
       expect(loggerService.info).toHaveBeenCalledWith(
-        expect.stringContaining("Retrieved codeData:")
+        expect.stringContaining("Retrieved codeData:"),
       );
       expect(cacheService.del).toHaveBeenCalledWith(code);
       expect(loggerService.warn).toHaveBeenCalledWith(
-        expect.stringContaining("Deleted 1 items from cache")
+        expect.stringContaining("Deleted 1 items from cache"),
       );
       expect(result).toEqual({
         accessToken: "access-token",
@@ -341,10 +340,10 @@ describe("OAuthService", () => {
 
       // Act & Assert
       await expect(
-        oauthService.exchangeOauthCodeForTokens(code)
+        oauthService.exchangeOauthCodeForTokens(code),
       ).rejects.toThrow(BadRequestError);
       expect(loggerService.error).toHaveBeenCalledWith(
-        expect.stringContaining(`Code ${code} not found in cache`)
+        expect.stringContaining(`Code ${code} not found in cache`),
       );
     });
   });

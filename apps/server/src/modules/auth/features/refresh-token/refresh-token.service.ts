@@ -1,21 +1,19 @@
-import { inject, injectable } from "inversify";
-
-import { UnauthorizedError } from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import type { Prisma, RefreshToken } from "@tubenote/db";
 
-import { TYPES } from "@/config/inversify/types";
+import { ERROR_MESSAGES, UnauthorizedError } from "@tubenote/api-errors";
+import { inject, injectable } from "inversify";
+
+import type { IJwtService } from "@/modules/auth/utils";
 import type {
   ICryptoService,
   ILoggerService,
   IPrismaService,
 } from "@/modules/shared/services";
 
+import { TYPES } from "@/config/inversify/types";
 import { REFRESH_TOKEN_EXPIRES_IN } from "@/modules/auth/constants";
-
-import type { IJwtService } from "@/modules/auth/utils";
-
 import { stringToDate } from "@/modules/shared/utils";
+
 import type { IAuthResponseDto } from "../../dtos";
 import type { IClientContext } from "./dtos";
 import type {
@@ -33,11 +31,11 @@ export class RefreshTokenService implements IRefreshTokenService {
     @inject(TYPES.JwtService) private readonly _jwtService: IJwtService,
     @inject(TYPES.LoggerService)
     private readonly _loggerService: ILoggerService,
-    @inject(TYPES.CryptoService) private readonly _cryptoService: ICryptoService
+    @inject(TYPES.CryptoService) private readonly _cryptoService: ICryptoService,
   ) {}
 
   private async validateRefreshToken(
-    rawToken: string
+    rawToken: string,
   ): Promise<RefreshToken | null> {
     const tokenHash = this._cryptoService.generateUnsaltedHash(rawToken);
 
@@ -48,7 +46,7 @@ export class RefreshTokenService implements IRefreshTokenService {
     refreshToken: string,
     deviceId: string,
     ipAddress: string,
-    clientContext: IClientContext
+    clientContext: IClientContext,
   ): Promise<IAuthResponseDto> {
     const tokenRecord = await this.validateRefreshToken(refreshToken);
 
@@ -58,16 +56,16 @@ export class RefreshTokenService implements IRefreshTokenService {
     }
 
     const currentDeviceId = this._cryptoService.generateUnsaltedHash(deviceId);
-    const currentIpAddress =
-      this._cryptoService.generateUnsaltedHash(ipAddress);
+    const currentIpAddress
+      = this._cryptoService.generateUnsaltedHash(ipAddress);
 
     if (
-      tokenRecord.deviceId !== currentDeviceId ||
-      tokenRecord.ipAddress !== currentIpAddress
+      tokenRecord.deviceId !== currentDeviceId
+      || tokenRecord.ipAddress !== currentIpAddress
     ) {
       await this.revokeAllUserTokens(
         tokenRecord.userId,
-        "suspicious_activity_detected"
+        "suspicious_activity_detected",
       );
 
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
@@ -81,21 +79,21 @@ export class RefreshTokenService implements IRefreshTokenService {
           deviceId,
           ipAddress,
           clientContext,
-          tx
+          tx,
         );
         await this._refreshTokenRepository.markAsRevoked(
           tokenRecord.id,
           "token_refreshing",
-          tx
+          tx,
         );
 
         return newToken;
-      }
+      },
     );
 
     // Generate a new access token
     const newAccessToken = this._jwtService.generateAccessToken(
-      tokenRecord.userId
+      tokenRecord.userId,
     );
 
     return { accessToken: newAccessToken, refreshToken: newRefreshToken };
@@ -106,7 +104,7 @@ export class RefreshTokenService implements IRefreshTokenService {
     deviceId: string,
     ipAddress: string,
     clientContext: IClientContext,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<string> {
     const randomToken = this._cryptoService.generateSecureToken();
     const tokenHash = this._cryptoService.generateUnsaltedHash(randomToken);
@@ -124,7 +122,7 @@ export class RefreshTokenService implements IRefreshTokenService {
         expiresAt,
         ...clientContext,
       },
-      tx
+      tx,
     );
 
     return randomToken;
@@ -134,7 +132,7 @@ export class RefreshTokenService implements IRefreshTokenService {
     userId: string,
     token: string,
     revocationReason: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<void> {
     const foundToken = await this.validateRefreshToken(token);
 
@@ -148,7 +146,7 @@ export class RefreshTokenService implements IRefreshTokenService {
     await this._refreshTokenRepository.markAsRevoked(
       foundToken.id,
       revocationReason,
-      tx
+      tx,
     );
   }
 
@@ -163,12 +161,12 @@ export class RefreshTokenService implements IRefreshTokenService {
   async revokeAllUserTokens(
     userId: string,
     revocationReason: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<void> {
     await this._refreshTokenRepository.revokeAllTokens(
       userId,
       revocationReason,
-      tx
+      tx,
     );
   }
 }

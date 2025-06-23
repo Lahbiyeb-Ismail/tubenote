@@ -1,17 +1,15 @@
-import httpStatus from "http-status";
-import request from "supertest";
-
-import app from "@/app";
-
 import type { User } from "@tubenote/db";
 import type { IUpdatePasswordDto } from "@tubenote/dtos";
 
+import { BadRequestError, ERROR_MESSAGES } from "@tubenote/api-errors";
+import httpStatus from "http-status";
+import request from "supertest";
+
 import type { TypedRequest } from "@/modules/shared/types";
 
-import { BadRequestError } from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
-
+import app from "@/app";
 import { ACCESS_TOKEN_NAME } from "@/modules/auth";
+
 import { userController } from "../user.module";
 
 const MOCK_USER_ID = "user_id_001";
@@ -28,27 +26,30 @@ jest.mock("jsonwebtoken", () => {
       (
         token: string,
         _secret: string,
-        callback: (err: Error | null, payload?: any) => void
+        callback: (err: Error | null, payload?: any) => void,
       ) => {
         if (token === "valid-access-token") {
           // Simulate a successful verification with a payload.
           callback(null, { userId: MOCK_USER_ID });
-        } else if (token === "expired-access-token") {
+        }
+        else if (token === "expired-access-token") {
           // Simulate an expired token
           callback(new Error("Expired token"), null);
-        } else if (token === "malformed-access-token") {
+        }
+        else if (token === "malformed-access-token") {
           // Simulate a malformed token
           callback(new Error("Malformed token"), null);
-        } else {
+        }
+        else {
           // Simulate an error during verification.
           callback(new Error("Invalid token"), null);
         }
-      }
+      },
     ),
   };
 });
 
-describe("User Routes", () => {
+describe("user Routes", () => {
   const MOCK_USER: Omit<User, "password"> = {
     id: "user_id_001",
     username: "testuser",
@@ -72,7 +73,7 @@ describe("User Routes", () => {
         return res
           .status(httpStatus.OK)
           .json({ message: "User retrieved successfully.", user: MOCK_USER });
-      }
+      },
     );
 
     // Mock the updateCurrentUser function to return a mock user with updated data.
@@ -83,7 +84,7 @@ describe("User Routes", () => {
           message: "User updated successfully.",
           user: { ...MOCK_USER, ...req.body },
         });
-      }
+      },
     );
 
     // Mock the updatePassword function to return a success message.
@@ -102,7 +103,7 @@ describe("User Routes", () => {
         return res
           .status(httpStatus.OK)
           .json({ message: "User password updated successfully." });
-      }
+      },
     );
   });
 
@@ -113,7 +114,7 @@ describe("User Routes", () => {
 
   // ---
   // 1. Authentication middleware tests
-  describe("Authentication Middleware", () => {
+  describe("authentication Middleware", () => {
     it("should return 401 if no accessToken is provided", async () => {
       const res = await request(app).get("/api/v1/users/me");
       expect(res.statusCode).toBe(httpStatus.UNAUTHORIZED);
@@ -137,7 +138,7 @@ describe("User Routes", () => {
 
       expect(res.body).toHaveProperty(
         "message",
-        "User retrieved successfully."
+        "User retrieved successfully.",
       );
       expect(res.body).toHaveProperty("user");
     });
@@ -161,7 +162,7 @@ describe("User Routes", () => {
 
   // ---
   // 2. GET /me endpoint tests
-  describe("GET /api/v1/users/me", () => {
+  describe("gET /api/v1/users/me", () => {
     it("should return 401 when unauthenticated", async () => {
       const res = await request(app).get("/api/v1/users/me");
       expect(res.statusCode).toBe(httpStatus.UNAUTHORIZED);
@@ -199,7 +200,7 @@ describe("User Routes", () => {
 
   // ---
   // 3. PATCH /api/v1/users/me endpoint tests (update current user information)
-  describe("PATCH /api/v1/users/me", () => {
+  describe("pATCH /api/v1/users/me", () => {
     it("should return 401 when unauthenticated", async () => {
       const res = await request(app)
         .patch("/api/v1/users/me")
@@ -333,7 +334,7 @@ describe("User Routes", () => {
 
   // ---
   // 4. PATCH /api/v1/users/update-password endpoint tests (update password)
-  describe("PATCH /api/v1/users/update-password", () => {
+  describe("pATCH /api/v1/users/update-password", () => {
     beforeEach(() => jest.clearAllMocks());
 
     it("should update password with valid data", async () => {
@@ -350,7 +351,7 @@ describe("User Routes", () => {
 
       expect(res.body).toHaveProperty(
         "message",
-        "User password updated successfully."
+        "User password updated successfully.",
       );
 
       expect(userController.updatePassword).toHaveBeenCalled();
@@ -413,7 +414,7 @@ describe("User Routes", () => {
       expect(res.statusCode).toBe(httpStatus.BAD_REQUEST);
 
       expect(res.body.payload.message).toMatch(
-        /New password must be different/
+        /New password must be different/,
       );
     });
 
@@ -517,7 +518,7 @@ describe("User Routes", () => {
 
   // ---
   // 5. Additional security and edge case tests
-  describe("Security and Edge Cases", () => {
+  describe("security and Edge Cases", () => {
     it("should handle malformed JSON in request body", async () => {
       const res = await request(app)
         .patch("/api/v1/users/me")

@@ -1,30 +1,27 @@
+import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 import type { Response } from "express";
+
+import { BadRequestError } from "@tubenote/api-errors";
 import httpStatus from "http-status";
 import { inject, injectable } from "inversify";
-
-import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
-
-import { TYPES } from "@/config/inversify/types";
-
-import {
-  AUTH_RATE_LIMIT_CONFIG,
-  accessTokenCookieConfig,
-  refreshTokenCookieConfig,
-} from "@/modules/auth/config";
-import {
-  ACCESS_TOKEN_NAME,
-  REFRESH_TOKEN_NAME,
-} from "@/modules/auth/constants";
-
-import { BadRequestError } from "@/modules/shared/api-errors";
-
-import type { TypedRequest } from "@/modules/shared/types";
 
 import type {
   ILoggerService,
   IRateLimitService,
   IResponseFormatter,
 } from "@/modules/shared/services";
+import type { TypedRequest } from "@/modules/shared/types";
+
+import { TYPES } from "@/config/inversify/types";
+import {
+  accessTokenCookieConfig,
+  AUTH_RATE_LIMIT_CONFIG,
+  refreshTokenCookieConfig,
+} from "@/modules/auth/config";
+import {
+  ACCESS_TOKEN_NAME,
+  REFRESH_TOKEN_NAME,
+} from "@/modules/auth/constants";
 
 import type {
   ILocalAuthController,
@@ -40,7 +37,7 @@ export class LocalAuthController implements ILocalAuthController {
     private readonly _rateLimiter: IRateLimitService,
     @inject(TYPES.LoggerService) private readonly _logger: ILoggerService,
     @inject(TYPES.ResponseFormatter)
-    private readonly _responseFormatter: IResponseFormatter
+    private readonly _responseFormatter: IResponseFormatter,
   ) {}
 
   /**
@@ -52,10 +49,11 @@ export class LocalAuthController implements ILocalAuthController {
     try {
       const user = await this._localAuthService.registerUser(req.body);
 
-      if (!user) throw new BadRequestError("User registration failed.");
+      if (!user)
+        throw new BadRequestError("User registration failed.");
 
-      const formattedResponse =
-        this._responseFormatter.formatSuccessResponse<string>({
+      const formattedResponse
+        = this._responseFormatter.formatSuccessResponse<string>({
           responseOptions: {
             statusCode: httpStatus.CREATED,
             message: "A verification email has been sent to your email.",
@@ -67,7 +65,8 @@ export class LocalAuthController implements ILocalAuthController {
       await this._rateLimiter.reset(req.rateLimitKey);
 
       res.status(formattedResponse.statusCode).json(formattedResponse);
-    } catch (error: any) {
+    }
+    catch (error: any) {
       await this._rateLimiter.increment({
         key: req.rateLimitKey,
         ...AUTH_RATE_LIMIT_CONFIG.registration,
@@ -93,16 +92,16 @@ export class LocalAuthController implements ILocalAuthController {
     const ipAddress = req.clientIp as string;
 
     try {
-      const { accessToken, refreshToken } =
-        await this._localAuthService.loginUser(
+      const { accessToken, refreshToken }
+        = await this._localAuthService.loginUser(
           req.body,
           deviceId,
           ipAddress,
-          req.clientContext
+          req.clientContext,
         );
 
-      const formattedResponse =
-        this._responseFormatter.formatSuccessResponse<string>({
+      const formattedResponse
+        = this._responseFormatter.formatSuccessResponse<string>({
           responseOptions: {
             message: "Login successful",
             data: accessToken,
@@ -116,7 +115,8 @@ export class LocalAuthController implements ILocalAuthController {
       res.cookie(ACCESS_TOKEN_NAME, accessToken, accessTokenCookieConfig);
 
       res.status(formattedResponse.statusCode).json(formattedResponse);
-    } catch (error: any) {
+    }
+    catch (error: any) {
       await this._rateLimiter.increment({
         key: rateLimitKey,
         ...AUTH_RATE_LIMIT_CONFIG.login,

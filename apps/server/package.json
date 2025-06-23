@@ -12,6 +12,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@tubenote/api-errors": "workspace:*",
     "@tubenote/db": "workspace:*",
     "@tubenote/dtos": "workspace:*",
     "@tubenote/schemas": "workspace:*",

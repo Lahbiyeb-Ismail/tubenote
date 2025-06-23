@@ -1,14 +1,13 @@
-import { inject, injectable } from "inversify";
-
 import type { Prisma, Video } from "@tubenote/db";
 import type { ICreateVideoDto, IFindManyDto } from "@tubenote/dtos";
 
-import { TYPES } from "@/config/inversify/types";
-
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import { handleAsyncOperation } from "@/modules/shared/utils";
+import { ERROR_MESSAGES } from "@tubenote/api-errors";
+import { inject, injectable } from "inversify";
 
 import type { IPrismaService } from "@/modules/shared/services";
+
+import { TYPES } from "@/config/inversify/types";
+import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import type { IVideoRepository } from "./video.types";
 
@@ -18,7 +17,7 @@ export class VideoRepository implements IVideoRepository {
 
   async findByYoutubeId(
     youtubeId: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<Video | null> {
     const client = tx ?? this._db;
 
@@ -27,14 +26,14 @@ export class VideoRepository implements IVideoRepository {
         client.video.findUnique({
           where: { youtubeId },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND },
     );
   }
 
   async findMany(
     userId: string,
     findManyDto: IFindManyDto,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<Video[]> {
     const client = tx ?? this._db;
 
@@ -50,7 +49,7 @@ export class VideoRepository implements IVideoRepository {
             [sort.by]: sort.order,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND },
     );
   }
 
@@ -64,14 +63,14 @@ export class VideoRepository implements IVideoRepository {
             userIds: { has: userId },
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_COUNT }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_COUNT },
     );
   }
 
   async create(
     userId: string,
     data: ICreateVideoDto,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<Video> {
     const client = tx ?? this._db;
 
@@ -83,14 +82,14 @@ export class VideoRepository implements IVideoRepository {
             ...data,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE },
     );
   }
 
   async connectVideoToUser(
     videoId: string,
     userId: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<Video> {
     const client = tx ?? this._db;
 
@@ -106,7 +105,7 @@ export class VideoRepository implements IVideoRepository {
         }),
       {
         errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE,
-      }
+      },
     );
   }
 }

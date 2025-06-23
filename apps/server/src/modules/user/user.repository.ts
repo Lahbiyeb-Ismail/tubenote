@@ -1,15 +1,13 @@
-import { inject, injectable } from "inversify";
-
 import type { Prisma, User } from "@tubenote/db";
 import type { ICreateUserDto, IUpdateUserDto } from "@tubenote/dtos";
 
-import { TYPES } from "@/config/inversify/types";
-
-import { ConflictError } from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
-import { handleAsyncOperation } from "@/modules/shared/utils";
+import { ConflictError, ERROR_MESSAGES } from "@tubenote/api-errors";
+import { inject, injectable } from "inversify";
 
 import type { IPrismaService } from "@/modules/shared/services";
+
+import { TYPES } from "@/config/inversify/types";
+import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import type { IUserRepository } from "./user.types";
 
@@ -28,7 +26,7 @@ export class UserRepository implements IUserRepository {
    */
   async create(
     tx: Prisma.TransactionClient,
-    data: ICreateUserDto
+    data: ICreateUserDto,
   ): Promise<User> {
     return handleAsyncOperation(
       async () => {
@@ -52,7 +50,7 @@ export class UserRepository implements IUserRepository {
 
         return user;
       },
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE },
     );
   }
 
@@ -66,7 +64,7 @@ export class UserRepository implements IUserRepository {
    */
   async getByEmail(
     email: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<User | null> {
     const client = tx ?? this._db;
 
@@ -77,7 +75,7 @@ export class UserRepository implements IUserRepository {
             email,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND },
     );
   }
 
@@ -91,7 +89,7 @@ export class UserRepository implements IUserRepository {
    */
   async getById(
     id: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<User | null> {
     const client = tx ?? this._db;
 
@@ -102,7 +100,7 @@ export class UserRepository implements IUserRepository {
             id,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND },
     );
   }
 
@@ -119,7 +117,7 @@ export class UserRepository implements IUserRepository {
   async update(
     tx: Prisma.TransactionClient,
     userId: string,
-    data: IUpdateUserDto
+    data: IUpdateUserDto,
   ): Promise<User> {
     return handleAsyncOperation(
       () =>
@@ -127,7 +125,7 @@ export class UserRepository implements IUserRepository {
           where: { id: userId },
           data: { ...data },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE },
     );
   }
 
@@ -144,7 +142,7 @@ export class UserRepository implements IUserRepository {
   async updatePassword(
     tx: Prisma.TransactionClient,
     userId: string,
-    hashedPassword: string
+    hashedPassword: string,
   ): Promise<User> {
     return handleAsyncOperation(
       () =>
@@ -154,7 +152,7 @@ export class UserRepository implements IUserRepository {
             password: hashedPassword,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE },
     );
   }
 
@@ -168,7 +166,7 @@ export class UserRepository implements IUserRepository {
    */
   async verifyEmail(
     userId: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<User> {
     const client = tx ?? this._db;
 
@@ -180,7 +178,7 @@ export class UserRepository implements IUserRepository {
             isEmailVerified: true,
           },
         }),
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_UPDATE },
     );
   }
 }

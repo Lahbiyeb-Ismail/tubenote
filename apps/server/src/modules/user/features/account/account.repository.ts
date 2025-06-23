@@ -1,12 +1,13 @@
-import { inject, injectable } from "inversify";
-
 import type { Account, Prisma, Providers } from "@tubenote/db";
 
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import { ERROR_MESSAGES } from "@tubenote/api-errors";
+import { inject, injectable } from "inversify";
+
 import type { IPrismaService } from "@/modules/shared/services";
-import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import { TYPES } from "@/config/inversify/types";
+import { handleAsyncOperation } from "@/modules/shared/utils";
+
 import type { IAccountRepository } from "./account.types";
 import type { ICreateAccountDto } from "./dtos";
 
@@ -17,7 +18,7 @@ export class AccountRepository implements IAccountRepository {
   async create(
     tx: Prisma.TransactionClient,
     userId: string,
-    createAccountDto: ICreateAccountDto
+    createAccountDto: ICreateAccountDto,
   ): Promise<Account> {
     return handleAsyncOperation(
       async () => {
@@ -30,7 +31,7 @@ export class AccountRepository implements IAccountRepository {
 
         return account;
       },
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_CREATE },
     );
   }
 
@@ -45,14 +46,14 @@ export class AccountRepository implements IAccountRepository {
 
         return account;
       },
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND },
     );
   }
 
   async findByProvider(
     provider: Providers,
     providerAccountId: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<Account | null> {
     const client = tx ?? this._db;
 
@@ -69,7 +70,7 @@ export class AccountRepository implements IAccountRepository {
 
         return account;
       },
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND },
     );
   }
 
@@ -84,7 +85,7 @@ export class AccountRepository implements IAccountRepository {
 
         return accounts;
       },
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND },
     );
   }
 
@@ -122,7 +123,7 @@ export class AccountRepository implements IAccountRepository {
           },
         });
       },
-      { errorMessage: ERROR_MESSAGES.FAILED_TO_DELETE }
+      { errorMessage: ERROR_MESSAGES.FAILED_TO_DELETE },
     );
   }
 }
