@@ -5,23 +5,19 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 import { useUserStore } from "@/features/user/store";
-import { removeAuthStatusCookie } from "@/utils";
 
 import { logoutUser } from "../services";
 import { useAuthStore } from "../store";
 
-export function useLogout() {
+export function useLogoutMutation() {
   const router = useRouter();
 
-  const { authActions } = useAuthStore();
   const { userActions } = useUserStore();
 
-  const { setUnauthenticated, setError } = authActions;
+  const { setUnAuthenticated, setError } = useAuthStore();
   const { setUser } = userActions;
 
   return useMutation({
-    // The query key is used to identify the mutation
-    mutationKey: ["logout-user"],
     mutationFn: logoutUser,
     onMutate: () => {
       toast.loading("Logging out...", { id: "loadingToast" });
@@ -33,11 +29,8 @@ export function useLogout() {
 
       toast.success(payload.message);
 
-      setUnauthenticated();
+      setUnAuthenticated();
       setUser(undefined);
-
-      // Clear cookies
-      removeAuthStatusCookie();
 
       // Redirect to Home page after successful logout
       router.push("/");
@@ -47,7 +40,7 @@ export function useLogout() {
 
       toast.error(error.message);
 
-      setError(error);
+      setError(error.message);
     },
   });
 }

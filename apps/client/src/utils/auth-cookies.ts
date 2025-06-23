@@ -1,14 +1,14 @@
 import Cookies from "js-cookie";
 
-import type { AuthStatus } from "@/features/auth/store";
-
 /**
  * Cookie utilities for authentication state management using js-cookie
  * These functions work in both client and server contexts
  */
 
+export type AuthStatus = "authenticated" | "unauthenticated";
+
 // Cookie names
-export const AUTH_STATUS_COOKIE = "auth_status";
+export const AUTH_STATUS_COOKIE = "isAuthenticated";
 
 // Cookie default options
 const DEFAULT_COOKIE_OPTIONS = {
@@ -37,13 +37,13 @@ export function setAuthStatusCookie(status: AuthStatus, options = {}) {
  *
  * @returns The authentication status or undefined if not found
  */
-export function getAuthStatusFromCookie(): AuthStatus {
-  const status = Cookies.get(AUTH_STATUS_COOKIE);
+export function getAuthStatusFromCookie(): boolean {
+  const isAuthenticated = Cookies.get(AUTH_STATUS_COOKIE);
 
-  if (status === undefined)
-    return "unauthenticated";
+  if (isAuthenticated === undefined)
+    return false;
 
-  return status as AuthStatus;
+  return isAuthenticated === "authenticated";
 }
 
 /**

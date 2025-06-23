@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { use, useEffect, useRef } from "react";
 
-import { useExchangeOauthCode } from "@/features/auth/hooks";
+import { useAuth } from "@/features/auth/hooks";
 
 interface IPageProps {
   searchParams: Promise<{ [key: string]: string | undefined }>;
@@ -14,17 +14,17 @@ export default function AuthCallback({ searchParams }: IPageProps) {
   const { code } = use(searchParams);
 
   const {
-    isPending,
-    isSuccess,
-    isError,
-    mutate: exchangeOauthCode,
-  } = useExchangeOauthCode();
+    oauthExchangeToken,
+    isOauthExchangeTokenLoading,
+    oauthExchangeTokenError,
+  } = useAuth();
 
   const exchangeAttempted = useRef(false);
 
   useEffect(() => {
     function exchangeOauthCodeWithAccessToken() {
-      if (exchangeAttempted.current) return;
+      if (exchangeAttempted.current)
+        return;
 
       exchangeAttempted.current = true;
 
@@ -33,23 +33,22 @@ export default function AuthCallback({ searchParams }: IPageProps) {
         return;
       }
 
-      exchangeOauthCode(code);
+      oauthExchangeToken(code);
 
-      if (isError) {
+      if (oauthExchangeTokenError) {
         setTimeout(() => router.push("/"), 2000);
-        return;
       }
     }
 
     exchangeOauthCodeWithAccessToken();
-  }, [code, router, exchangeOauthCode, isError]);
+  }, [code, router, oauthExchangeToken, oauthExchangeTokenError]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="rounded-lg bg-white p-8 shadow-lg">
-        {isPending && "Processing authentication..."}
-        {isError && "Authentication failed. Please try again."}
-        {isSuccess && "Authentication successful. Redirecting..."}
+        {isOauthExchangeTokenLoading && "Processing authentication..."}
+        {oauthExchangeTokenError && "Authentication failed. Please try again."}
+        {!oauthExchangeTokenError && "Authentication successful. Redirecting..."}
       </div>
     </div>
   );

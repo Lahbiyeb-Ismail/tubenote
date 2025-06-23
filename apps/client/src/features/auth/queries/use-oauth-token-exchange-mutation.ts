@@ -3,21 +3,16 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
-import { setStorageValue } from "@/utils";
-
 import { exchangeOauthCodeForAuthTokens } from "../services";
 import { useAuthStore } from "../store";
 
-export function useExchangeOauthCode() {
+export function useOauthTokenExchangeMutation() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const { authActions } = useAuthStore();
-
-  const { setError, setAuthenticated } = authActions;
+  const { setError, setAuthenticated } = useAuthStore();
 
   return useMutation({
-    mutationKey: ["exchange-oauth-code"],
     mutationFn: exchangeOauthCodeForAuthTokens,
     retry: false,
     onMutate: () => {
@@ -28,15 +23,13 @@ export function useExchangeOauthCode() {
       // Set the authentication state
       setAuthenticated();
 
-      setStorageValue("isAuthenticated", true);
-
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
 
       // Redirect to dashboard after successful login
       router.push("/dashboard");
     },
     onError: (error) => {
-      setError(error);
+      setError(error.message);
     },
   });
 }

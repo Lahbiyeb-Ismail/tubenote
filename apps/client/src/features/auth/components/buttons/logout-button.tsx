@@ -1,17 +1,18 @@
 import { LogOut } from "lucide-react";
 
 import { useUIStore } from "@/stores";
-import { useLogout } from "../../hooks";
+
+import { useAuth } from "../../hooks";
 
 export function LogoutButton() {
   const { layout } = useUIStore();
-  const { mutate: logout, isPending } = useLogout();
+  const { logout, isLogoutLoading } = useAuth();
 
   return (
     <li className="rounded-lg p-2 transition duration-150 ease-in-out text-gray-600 hover:bg-gray-100">
       <button
         type="button"
-        disabled={isPending}
+        disabled={isLogoutLoading}
         onClick={() => logout()}
         className={`flex items-center ${layout.isSidebarOpen ? "" : "justify-center"} h-full w-full text-left`}
       >
