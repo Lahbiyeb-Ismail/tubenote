@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 import { sendVerificationEmail } from "../services";
 
-export function useSendVerificationEmail() {
+export function useSendVerificationEmailMutation() {
   return useMutation({
     mutationFn: sendVerificationEmail,
     onMutate: () => {

@@ -4,13 +4,13 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { sendForgotPasswordEmail } from "../services";
+import { resetPassword } from "../services";
 
-export function useSendForgotPasswordEmail() {
+export function useResetPasswordMutation() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: sendForgotPasswordEmail,
+    mutationFn: resetPassword,
     onMutate: () => {
       toast.loading("Sending...", { id: "loadingToast" });
     },
@@ -21,10 +21,12 @@ export function useSendForgotPasswordEmail() {
 
       toast.success(payload.message);
 
-      router.push("/forgot-password/done");
+      // Redirect to login page with success message
+      router.push("/login?resetSuccess=true");
     },
     onError: (error) => {
       toast.dismiss("loadingToast");
+
       toast.error(error.message);
     },
   });

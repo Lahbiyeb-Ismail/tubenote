@@ -9,12 +9,12 @@ import {
   PasswordResetLoadingState,
   ResetPasswordForm,
 } from "../components";
-import { useVerifyPasswordResetToken } from "../hooks";
+import { useVerifyPasswordResetTokenQuery } from "../queries";
 
 export function ResetPasswordPage() {
   const { token } = useParams();
 
-  const { isError, isLoading } = useVerifyPasswordResetToken(token as string);
+  const { isError, isLoading } = useVerifyPasswordResetTokenQuery(token as string);
 
   if (isLoading)
     return <PasswordResetLoadingState />;

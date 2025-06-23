@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { FormInput } from "@/components/global";
 import { Form } from "@/components/ui";
 
-import { useSendForgotPasswordEmail } from "../../hooks";
+import { useAuth } from "../../hooks";
 import { AuthSubmitButton } from "../buttons";
 
 export function ForgotPasswordForm() {
@@ -21,8 +21,8 @@ export function ForgotPasswordForm() {
     },
   });
 
-  const { mutate: sendForgotPasswordEmail, isPending }
-    = useSendForgotPasswordEmail();
+  const { sendForgotPasswordEmail, isSendForgotPasswordEmailLoading }
+    = useAuth();
 
   const handleForgotPassword = async (formData: IEmailBodyDto) => {
     sendForgotPasswordEmail(formData.email);
@@ -42,7 +42,7 @@ export function ForgotPasswordForm() {
           icon={Mail}
           control={form.control}
         />
-        <AuthSubmitButton isLoading={isPending} buttonLabel="Send Reset Link" loadingLabel="Sending..." />
+        <AuthSubmitButton isLoading={isSendForgotPasswordEmailLoading} buttonLabel="Send Reset Link" loadingLabel="Sending..." />
       </form>
     </Form>
   );

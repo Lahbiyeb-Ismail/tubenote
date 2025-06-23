@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { FormInput } from "@/components/global";
 import { Form } from "@/components/ui";
 
-import { useResetPassword } from "../../hooks";
+import { useAuth } from "../../hooks";
 import { AuthSubmitButton } from "../buttons";
 
 export function ResetPasswordForm({ token }: { token: string }) {
@@ -22,7 +22,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
     },
   });
 
-  const { mutate: resetPassword, isPending } = useResetPassword();
+  const { resetPassword, isResetPasswordLoading } = useAuth();
 
   const handleResetPassword = async (formData: IPasswordBodyDto) => {
     resetPassword({ token, password: formData.password });
@@ -42,7 +42,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
           icon={Lock}
           control={form.control}
         />
-        <AuthSubmitButton isLoading={isPending} buttonLabel="Reset Password" loadingLabel="Resetting..." />
+        <AuthSubmitButton isLoading={isResetPasswordLoading} buttonLabel="Reset Password" loadingLabel="Resetting..." />
       </form>
     </Form>
   );

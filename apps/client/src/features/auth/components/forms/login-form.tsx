@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { FormInput } from "@/components/global";
 import { Form } from "@/components/ui";
 
-import { useLogin } from "../../hooks";
+import { useAuth } from "../../hooks";
 import { AuthSubmitButton } from "../buttons";
 import { ForgotPasswordLink } from "../links";
 
@@ -23,7 +23,7 @@ export function LoginForm() {
     },
   });
 
-  const { mutate: login, isPending } = useLogin();
+  const { login, isLoginLoading } = useAuth();
 
   const handleLogin = (formData: ILoginDto) => login(formData);
 
@@ -49,7 +49,7 @@ export function LoginForm() {
 
         <ForgotPasswordLink />
 
-        <AuthSubmitButton isLoading={isPending} buttonLabel="Sign In" loadingLabel="Signing In..." />
+        <AuthSubmitButton isLoading={isLoginLoading} buttonLabel="Sign In" loadingLabel="Signing In..." />
       </form>
     </Form>
   );

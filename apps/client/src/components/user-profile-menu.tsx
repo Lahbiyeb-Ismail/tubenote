@@ -3,7 +3,7 @@
 import { ChevronDown, LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
 
-import { useLogout } from "@/features/auth/hooks";
+import { useAuth } from "@/features/auth/hooks";
 import { useGetCurrentUser } from "@/features/user/hooks";
 
 import { Avatar, AvatarFallback, AvatarImage, Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui";
@@ -15,7 +15,7 @@ const FALLBACK_PROFILE_IMAGE_URL = "https://github.com/shadcn.png";
 export function UserProfileMenu() {
   const { data: user, isPending: isLoadingUser } = useGetCurrentUser();
 
-  const { mutate: logout, isPending: isLoggingOut } = useLogout();
+  const { logout, isLogoutLoading } = useAuth();
 
   if (isLoadingUser || !user)
     return <UserProfileMenuSkeleton />;
@@ -47,7 +47,7 @@ export function UserProfileMenu() {
             Settings
           </DropdownMenuItem>
         </Link>
-        <DropdownMenuItem className="cursor-pointer" onClick={() => logout()} disabled={isLoggingOut}>
+        <DropdownMenuItem className="cursor-pointer" onClick={() => logout()} disabled={isLogoutLoading}>
           <LogOut className="mr-2 h-4 w-4" />
           Logout
         </DropdownMenuItem>

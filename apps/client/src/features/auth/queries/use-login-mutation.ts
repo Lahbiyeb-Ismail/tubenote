@@ -7,16 +7,13 @@ import toast from "react-hot-toast";
 import { loginUser } from "../services";
 import { useAuthStore } from "../store";
 
-export function useLogin() {
+export function useLoginMutation() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const { authActions } = useAuthStore();
-
-  const { setAuthenticated, setError } = authActions;
+  const { setAuthenticated, setError } = useAuthStore();
 
   return useMutation({
-    mutationKey: ["login-user"],
     mutationFn: loginUser,
     retry: false,
     onMutate: () => {
@@ -40,7 +37,7 @@ export function useLogin() {
     onError: (error) => {
       toast.error(error.message);
 
-      setError(error);
+      setError(error.message);
     },
     onSettled: () => {
       // Clean up loading states regardless of outcome
