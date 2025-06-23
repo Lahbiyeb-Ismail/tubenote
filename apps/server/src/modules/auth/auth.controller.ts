@@ -1,15 +1,15 @@
 import type { Response } from "express";
-import { inject, injectable } from "inversify";
 
-import { TYPES } from "@/config/inversify/types";
+import { ERROR_MESSAGES, UnauthorizedError } from "@tubenote/api-errors";
+import { inject, injectable } from "inversify";
 
 import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
+import { TYPES } from "@/config/inversify/types";
+
 import type { IAuthController, IAuthService } from "./auth.types";
 
-import { UnauthorizedError } from "../shared/api-errors";
-import { ERROR_MESSAGES } from "../shared/constants";
 import { clearAuthTokenCookieConfig } from "./config";
 import { ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } from "./constants";
 
@@ -21,7 +21,7 @@ export class AuthController implements IAuthController {
   constructor(
     @inject(TYPES.AuthService) private readonly _authService: IAuthService,
     @inject(TYPES.ResponseFormatter)
-    private readonly _responseFormatter: IResponseFormatter
+    private readonly _responseFormatter: IResponseFormatter,
   ) {}
 
   /**
@@ -47,8 +47,8 @@ export class AuthController implements IAuthController {
       await this._authService.logoutUser({ refreshToken, userId });
 
       // Format and send the response
-      const formattedResponse =
-        this._responseFormatter.formatSuccessResponse<null>({
+      const formattedResponse
+        = this._responseFormatter.formatSuccessResponse<null>({
           responseOptions: {
             message: "User logged out successfully",
             data: null,
@@ -59,7 +59,8 @@ export class AuthController implements IAuthController {
       this.clearAuthCookies(res);
 
       res.status(formattedResponse.statusCode).json(formattedResponse);
-    } catch (error) {
+    }
+    catch (error) {
       // Always clear cookies on logout, even if there's an error
       this.clearAuthCookies(res);
 

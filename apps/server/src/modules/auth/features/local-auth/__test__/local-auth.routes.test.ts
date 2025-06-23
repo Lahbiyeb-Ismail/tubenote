@@ -1,13 +1,11 @@
+import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
+import type { IApiSuccessResponse } from "@tubenote/types";
+
+import { BadRequestError, ConflictError, ERROR_MESSAGES } from "@tubenote/api-errors";
 import httpStatus from "http-status";
 import request from "supertest";
 
 import app from "@/app";
-
-import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
-import type { IApiSuccessResponse } from "@tubenote/types";
-
-import { BadRequestError, ConflictError } from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import { localAuthController } from "../local-auth.module";
 
@@ -18,7 +16,7 @@ jest.mock("../local-auth.module", () => ({
   },
 }));
 
-describe("Local Auth Routes", () => {
+describe("local Auth Routes", () => {
   const validRegisterPayload: IRegisterDto = {
     email: "test@example.com",
     password: "Password123!",
@@ -34,7 +32,7 @@ describe("Local Auth Routes", () => {
     jest.clearAllMocks();
   });
 
-  describe("POST api/v1/auth/register", () => {
+  describe("pOST api/v1/auth/register", () => {
     const registerRes: IApiSuccessResponse<string> = {
       success: true,
       statusCode: httpStatus.CREATED,
@@ -48,7 +46,7 @@ describe("Local Auth Routes", () => {
       (localAuthController.register as jest.Mock).mockImplementation(
         (_req, res) => {
           res.status(httpStatus.CREATED).json(registerRes);
-        }
+        },
       );
 
       const response = await request(app)
@@ -127,19 +125,19 @@ describe("Local Auth Routes", () => {
             throw new ConflictError(ERROR_MESSAGES.ALREADY_EXISTS);
           }
           res.status(httpStatus.CREATED).json(registerRes);
-        }
+        },
       );
 
       const concurrentRequests = Array.from({ length: 5 }).map(() =>
-        request(app).post("/api/v1/auth/register").send(validRegisterPayload)
+        request(app).post("/api/v1/auth/register").send(validRegisterPayload),
       );
 
       const responses = await Promise.all(concurrentRequests);
       const successResponses = responses.filter(
-        (res) => res.status === httpStatus.CREATED
+        res => res.status === httpStatus.CREATED,
       );
       const conflictResponses = responses.filter(
-        (res) => res.status === httpStatus.CONFLICT
+        res => res.status === httpStatus.CONFLICT,
       );
 
       expect(successResponses.length).toBeLessThanOrEqual(1); // Only one should succeed
@@ -159,7 +157,7 @@ describe("Local Auth Routes", () => {
       expect(res.status).toBe(httpStatus.BAD_REQUEST);
       expect(res.body.payload).toHaveProperty(
         "message",
-        "Email already exists"
+        "Email already exists",
       );
     });
 
@@ -181,8 +179,7 @@ describe("Local Auth Routes", () => {
         .post("/api/v1/auth/register")
         .send(validRegisterPayload);
 
-      const registerCall = (localAuthController.register as jest.Mock).mock
-        .calls[0];
+      const registerCall = (localAuthController.register as jest.Mock).mock.calls[0];
       const req = registerCall[0];
 
       expect(req).toHaveProperty("rateLimitKey");
@@ -190,7 +187,7 @@ describe("Local Auth Routes", () => {
     });
   });
 
-  describe("POST api/v1/auth/login", () => {
+  describe("pOST api/v1/auth/login", () => {
     it("should successfully login user with valid credentials", async () => {
       const loginRes: IApiSuccessResponse<string> = {
         success: true,
@@ -210,7 +207,7 @@ describe("Local Auth Routes", () => {
               secure: true,
             })
             .json(loginRes);
-        }
+        },
       );
 
       const response = await request(app)
@@ -292,7 +289,7 @@ describe("Local Auth Routes", () => {
     });
   });
 
-  describe("Route Configuration", () => {
+  describe("route Configuration", () => {
     it("should only allow POST method for /register", async () => {
       const getRes = await request(app).get("/api/v1/auth/register");
       expect(getRes.status).toBe(httpStatus.NOT_FOUND);
@@ -321,7 +318,7 @@ describe("Local Auth Routes", () => {
     });
   });
 
-  describe("Content Type Handling", () => {
+  describe("content Type Handling", () => {
     it("should reject non-JSON content types", async () => {
       const res = await request(app)
         .post("/api/v1/auth/login")
@@ -341,7 +338,7 @@ describe("Local Auth Routes", () => {
     });
   });
 
-  describe("Request Validation", () => {
+  describe("request Validation", () => {
     it("should validate maximum length of username in registration", async () => {
       const invalidPayload = {
         ...validRegisterPayload,
@@ -354,7 +351,7 @@ describe("Local Auth Routes", () => {
 
       expect(response.statusCode).toBe(httpStatus.BAD_REQUEST);
       expect(response.body.payload.message).toBe(
-        "Validation error in username field: Username must be at most 20 characters long."
+        "Validation error in username field: Username must be at most 20 characters long.",
       );
     });
 
@@ -384,7 +381,7 @@ describe("Local Auth Routes", () => {
     });
   });
 
-  describe("SQL Injection Prevention", () => {
+  describe("sQL Injection Prevention", () => {
     it("should handle SQL injection attempts in email field", async () => {
       // Arrange
       const sqlInjectionPayloads = [
@@ -421,7 +418,7 @@ describe("Local Auth Routes", () => {
 
         expect(response.status).toBe(400);
         expect(response.body.payload.message).toContain(
-          "Invalid username format."
+          "Invalid username format.",
         );
         expect(localAuthController.register).not.toHaveBeenCalled();
       }
@@ -443,14 +440,14 @@ describe("Local Auth Routes", () => {
 
         expect(response.status).toBe(400);
         expect(response.body.payload.message).toContain(
-          "Validation error in password field"
+          "Validation error in password field",
         );
         expect(localAuthController.register).not.toHaveBeenCalled();
       }
     });
   });
 
-  describe("NoSQL Injection Prevention", () => {
+  describe("noSQL Injection Prevention", () => {
     it("should handle NoSQL injection attempts in email field", async () => {
       // Arrange
       const nosqlInjectionPayloads = [
@@ -466,7 +463,7 @@ describe("Local Auth Routes", () => {
 
         expect(response.status).toBe(400);
         expect(response.body.payload.message).toContain(
-          "Validation error in email field"
+          "Validation error in email field",
         );
         expect(localAuthController.register).not.toHaveBeenCalled();
       }
@@ -487,7 +484,7 @@ describe("Local Auth Routes", () => {
 
         expect(response.status).toBe(400);
         expect(response.body.payload.message).toContain(
-          "Validation error in password field"
+          "Validation error in password field",
         );
         expect(localAuthController.register).not.toHaveBeenCalled();
       }
@@ -508,14 +505,14 @@ describe("Local Auth Routes", () => {
 
         expect(response.status).toBe(400);
         expect(response.body.payload.message).toContain(
-          "Validation error in username field"
+          "Validation error in username field",
         );
         expect(localAuthController.register).not.toHaveBeenCalled();
       }
     });
   });
 
-  describe("Security Tests", () => {
+  describe("security Tests", () => {
     it("should handle SQL injection attempts", async () => {
       const sqlInjectionPayload = {
         email: "' OR 1=1 --",
@@ -543,12 +540,12 @@ describe("Local Auth Routes", () => {
 
       expect(res.status).toBe(httpStatus.BAD_REQUEST);
       expect(res.body.payload.message).toMatch(
-        /must be at most 20 characters long/
+        /must be at most 20 characters long/,
       );
     });
   });
 
-  describe("Edge Cases", () => {
+  describe("edge Cases", () => {
     it("should handle empty request body", async () => {
       const res = await request(app).post("/api/v1/auth/login").send({});
 

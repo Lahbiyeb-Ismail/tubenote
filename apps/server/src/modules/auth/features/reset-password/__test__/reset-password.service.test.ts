@@ -1,21 +1,21 @@
-import { mock, mockReset } from "jest-mock-extended";
-
 import type { User } from "@tubenote/db";
 
-import { BadRequestError, ForbiddenError } from "@/modules/shared/api-errors";
+import { BadRequestError, ForbiddenError } from "@tubenote/api-errors";
+import { mock, mockReset } from "jest-mock-extended";
+
 import type {
   ICacheService,
   ICryptoService,
   ILoggerService,
   IMailSenderService,
 } from "@/modules/shared/services";
-
 import type { IUserService } from "@/modules/user";
 
-import { ResetPasswordService } from "../reset-password.service";
 import type { IResetPasswordServiceOptions } from "../reset-password.types";
 
-describe("ResetPasswordService", () => {
+import { ResetPasswordService } from "../reset-password.service";
+
+describe("resetPasswordService", () => {
   const userService = mock<IUserService>();
   const cryptoService = mock<ICryptoService>();
   const cacheService = mock<ICacheService>();
@@ -56,7 +56,7 @@ describe("ResetPasswordService", () => {
     mockReset(loggerService);
 
     // Reset the singleton instance for isolation.
-    // @ts-ignore: resetting private static property for testing purposes.
+    // @ts-expect-error: resetting private static property for testing purposes.
     ResetPasswordService._instance = undefined;
 
     resetPasswordService = ResetPasswordService.getInstance(serviceOptions);
@@ -72,7 +72,7 @@ describe("ResetPasswordService", () => {
 
       // Act & Assert
       await expect(
-        resetPasswordService.sendResetToken(mockEmail)
+        resetPasswordService.sendResetToken(mockEmail),
       ).rejects.toThrow(ForbiddenError);
 
       expect(userService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
@@ -98,10 +98,10 @@ describe("ResetPasswordService", () => {
 
       expect(mailSenderService.sendResetPasswordEmail).toHaveBeenCalledWith(
         mockEmail,
-        mockValidToken
+        mockValidToken,
       );
       expect(loggerService.info).toHaveBeenCalledWith(
-        expect.stringContaining(`Reset token generated for user ${mockUserId}`)
+        expect.stringContaining(`Reset token generated for user ${mockUserId}`),
       );
     });
 
@@ -115,7 +115,7 @@ describe("ResetPasswordService", () => {
       mailSenderService.sendResetPasswordEmail.mockRejectedValue(error);
 
       await expect(
-        resetPasswordService.sendResetToken(mockEmail)
+        resetPasswordService.sendResetToken(mockEmail),
       ).rejects.toThrow(error);
     });
   });
@@ -127,10 +127,10 @@ describe("ResetPasswordService", () => {
 
       // Act & Assert
       await expect(
-        resetPasswordService.verifyResetToken("nonexistent-token")
+        resetPasswordService.verifyResetToken("nonexistent-token"),
       ).rejects.toThrow(BadRequestError);
       expect(loggerService.error).toHaveBeenCalledWith(
-        expect.stringContaining("Invalid reset token: nonexistent-token")
+        expect.stringContaining("Invalid reset token: nonexistent-token"),
       );
     });
 
@@ -140,10 +140,10 @@ describe("ResetPasswordService", () => {
 
       // Act & Assert
       await expect(
-        resetPasswordService.verifyResetToken("bad-token")
+        resetPasswordService.verifyResetToken("bad-token"),
       ).rejects.toThrow(BadRequestError);
       expect(loggerService.error).toHaveBeenCalledWith(
-        expect.stringContaining("Invalid reset token: bad-token")
+        expect.stringContaining("Invalid reset token: bad-token"),
       );
     });
 
@@ -163,13 +163,13 @@ describe("ResetPasswordService", () => {
       cacheService.get.mockReturnValue({});
 
       await expect(
-        resetPasswordService.verifyResetToken(mockValidToken)
+        resetPasswordService.verifyResetToken(mockValidToken),
       ).rejects.toThrow(BadRequestError);
 
       // Invalid userId type
       cacheService.get.mockReturnValue({ userId: 12345 });
       await expect(
-        resetPasswordService.verifyResetToken(mockValidToken)
+        resetPasswordService.verifyResetToken(mockValidToken),
       ).rejects.toThrow(BadRequestError);
     });
 
@@ -180,7 +180,7 @@ describe("ResetPasswordService", () => {
       });
 
       await expect(
-        resetPasswordService.verifyResetToken(mockValidToken)
+        resetPasswordService.verifyResetToken(mockValidToken),
       ).rejects.toThrow(error);
     });
   });
@@ -201,13 +201,13 @@ describe("ResetPasswordService", () => {
       expect(cacheService.del).toHaveBeenCalledWith(testToken);
       expect(userService.resetUserPassword).toHaveBeenCalledWith(
         mockUserId,
-        newPassword
+        newPassword,
       );
       expect(loggerService.warn).toHaveBeenCalledWith(
-        expect.stringContaining(`Remove reset token ${testToken} from cache`)
+        expect.stringContaining(`Remove reset token ${testToken} from cache`),
       );
       expect(loggerService.info).toHaveBeenCalledWith(
-        expect.stringContaining(`Password reset for user ${mockUserId}`)
+        expect.stringContaining(`Password reset for user ${mockUserId}`),
       );
     });
 
@@ -219,7 +219,7 @@ describe("ResetPasswordService", () => {
 
       // Act & Assert
       await expect(
-        resetPasswordService.resetPassword(testToken, newPassword)
+        resetPasswordService.resetPassword(testToken, newPassword),
       ).rejects.toThrow(BadRequestError);
       // Ensure that if verifyResetToken fails, resetUserPassword is never called.
       expect(userService.resetUserPassword).not.toHaveBeenCalled();

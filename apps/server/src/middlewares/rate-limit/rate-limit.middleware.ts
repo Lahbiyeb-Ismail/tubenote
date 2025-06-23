@@ -1,23 +1,24 @@
 import type { NextFunction, Request, Response } from "express";
 
+import { ERROR_MESSAGES, TooManyRequestsError } from "@tubenote/api-errors";
+
 import { rateLimitService } from "@/config/service-provider";
-import { TooManyRequestsError } from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { loggerService } from "@/modules/shared/services";
+
 import type { IRateLimitMiddlewareOptions } from "./rate-limit.middleware.types";
 
 /**
  * Creates a rate limiting middleware for Express
  *
- * @param {Object} options - Rate limiting options
+ * @param {object} options - Rate limiting options
  * @param {Function} options.keyGenerator - Function to generate rate limit key from request
- * @param {Object} options.rateLimitConfig - Rate limit configuration
+ * @param {object} options.rateLimitConfig - Rate limit configuration
  * @param {number} options.rateLimitConfig.maxAttempts - Maximum number of attempts allowed
  * @param {number} options.rateLimitConfig.windowMs - Time window in milliseconds
  * @param {number} options.rateLimitConfig.blockDurationMs - Duration to block after exceeding limit
  */
 export function createRateLimitMiddleware(
-  options: IRateLimitMiddlewareOptions
+  options: IRateLimitMiddlewareOptions,
 ) {
   const { keyGenerator, rateLimitConfig } = options;
 
@@ -68,7 +69,8 @@ export function createRateLimitMiddleware(
 
       // Continue to the next middleware
       next();
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof TooManyRequestsError) {
         throw error;
       }

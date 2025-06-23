@@ -1,35 +1,35 @@
-import type { Response } from "express";
-import httpStatus from "http-status";
-import { mock, mockReset } from "jest-mock-extended";
-
-import type { IApiSuccessResponse } from "@tubenote/types";
-
 import type {
   IEmailBodyDto,
   IParamTokenDto,
   IPasswordBodyDto,
 } from "@tubenote/dtos";
+import type { IApiSuccessResponse } from "@tubenote/types";
+import type { Response } from "express";
+
+import {
+  BadRequestError,
+  UnauthorizedError,
+} from "@tubenote/api-errors";
+import httpStatus from "http-status";
+import { mock, mockReset } from "jest-mock-extended";
 
 import type {
   ILoggerService,
   IRateLimitService,
   IResponseFormatter,
 } from "@/modules/shared/services";
-
-import type { TypedRequest } from "@/modules/shared/types";
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
 import { AUTH_RATE_LIMIT_CONFIG } from "@/modules/auth/config";
-import {
-  BadRequestError,
-  UnauthorizedError,
-} from "@/modules/shared/api-errors";
-import { ResetPasswordController } from "../reset-password.controller";
+
 import type {
   IResetPasswordControllerOptions,
   IResetPasswordService,
 } from "../reset-password.types";
 
-describe("ResetPasswordController", () => {
+import { ResetPasswordController } from "../reset-password.controller";
+
+describe("resetPasswordController", () => {
   let controller: ResetPasswordController;
 
   const resetPasswordService = mock<IResetPasswordService>();
@@ -46,7 +46,7 @@ describe("ResetPasswordController", () => {
 
   const forgotReq = mock<TypedRequest<IEmailBodyDto>>();
   const resetReq = mock<TypedRequest<IPasswordBodyDto, IParamTokenDto>>();
-  const verifyReq = mock<TypedRequest<{}, IParamTokenDto>>();
+  const verifyReq = mock<TypedRequest<EmptyRecord, IParamTokenDto>>();
 
   const res = mock<Response>();
 
@@ -79,7 +79,7 @@ describe("ResetPasswordController", () => {
     resetPasswordService.verifyResetToken.mockResolvedValue("user_id_001");
 
     // Reset the singleton instance for isolation.
-    // @ts-ignore: resetting private static property for testing purposes.
+    // @ts-expect-error: resetting private static property for testing purposes.
     ResetPasswordController._instance = undefined;
 
     // Create the controller instance using the provided controllerOptions.
@@ -98,7 +98,7 @@ describe("ResetPasswordController", () => {
     jest.clearAllMocks();
   });
 
-  describe("Singleton behavior", () => {
+  describe("singleton behavior", () => {
     it("should create a new instance if none exists", () => {
       const instance = ResetPasswordController.getInstance(controllerOptions);
       expect(instance).toBeInstanceOf(ResetPasswordController);
@@ -113,11 +113,11 @@ describe("ResetPasswordController", () => {
 
   describe("forgotPassword", () => {
     // 2. Success Scenarios
-    describe("Success Scenarios", () => {
+    describe("success Scenarios", () => {
       it("should successfully send a reset password token to a valid email", async () => {
         // Arrange
         responseFormatter.formatSuccessResponse.mockReturnValue(
-          formattedForgotRes
+          formattedForgotRes,
         );
 
         // Act
@@ -125,7 +125,7 @@ describe("ResetPasswordController", () => {
 
         // Assert
         expect(resetPasswordService.sendResetToken).toHaveBeenCalledWith(
-          forgotReq.body.email
+          forgotReq.body.email,
         );
 
         expect(responseFormatter.formatSuccessResponse).toHaveBeenCalledWith({
@@ -136,7 +136,7 @@ describe("ResetPasswordController", () => {
         });
 
         expect(rateLimitService.reset).toHaveBeenCalledWith(
-          forgotReq.rateLimitKey
+          forgotReq.rateLimitKey,
         );
 
         expect(res.status).toHaveBeenCalledWith(formattedForgotRes.statusCode);
@@ -145,7 +145,7 @@ describe("ResetPasswordController", () => {
     });
 
     // 2. Error Scenarios
-    describe("Error Scenarios", () => {
+    describe("error Scenarios", () => {
       it("should propagate service errors during forgotPassword", async () => {
         // Arrange
         const serviceError = new Error("Service error");
@@ -153,11 +153,11 @@ describe("ResetPasswordController", () => {
 
         // Act & Assert
         await expect(controller.forgotPassword(forgotReq, res)).rejects.toThrow(
-          serviceError
+          serviceError,
         );
 
         expect(resetPasswordService.sendResetToken).toHaveBeenCalledWith(
-          forgotReq.body.email
+          forgotReq.body.email,
         );
         expect(rateLimitService.increment).toHaveBeenCalledWith({
           key: forgotReq.rateLimitKey,
@@ -166,19 +166,19 @@ describe("ResetPasswordController", () => {
 
         expect(loggerService.error).toHaveBeenCalledWith(
           "Error in forgotPassword",
-          serviceError
+          serviceError,
         );
       });
     });
 
     // 3. Rate Limiting
-    describe("Rate Limiting", () => {
+    describe("rate Limiting", () => {
       it("should reset rate limiter on successful forgotPassword", async () => {
         // Arrange
         resetPasswordService.sendResetToken.mockResolvedValue(undefined);
 
         responseFormatter.formatSuccessResponse.mockReturnValue(
-          formattedForgotRes
+          formattedForgotRes,
         );
 
         // Act
@@ -186,19 +186,19 @@ describe("ResetPasswordController", () => {
 
         // Assert
         expect(rateLimitService.reset).toHaveBeenCalledWith(
-          forgotReq.rateLimitKey
+          forgotReq.rateLimitKey,
         );
       });
 
       it("should increment rate limiter on failed forgotPassword", async () => {
         // Arrange
         resetPasswordService.sendResetToken.mockRejectedValue(
-          new Error("Service error")
+          new Error("Service error"),
         );
 
         // Act & Assert
         await expect(
-          controller.forgotPassword(forgotReq, res)
+          controller.forgotPassword(forgotReq, res),
         ).rejects.toThrow();
 
         expect(rateLimitService.increment).toHaveBeenCalledWith({
@@ -211,11 +211,11 @@ describe("ResetPasswordController", () => {
 
   describe("resetPassword", () => {
     // 1. Success Scenarios
-    describe("Success Scenarios", () => {
+    describe("success Scenarios", () => {
       it("should successfully reset password with valid token and password", async () => {
         // Arrange
         responseFormatter.formatSuccessResponse.mockReturnValue(
-          formattedResetRes
+          formattedResetRes,
         );
 
         // Act
@@ -224,11 +224,11 @@ describe("ResetPasswordController", () => {
         // Assert
         expect(resetPasswordService.resetPassword).toHaveBeenCalledWith(
           resetReq.params.token,
-          resetReq.body.password
+          resetReq.body.password,
         );
 
         expect(rateLimitService.reset).toHaveBeenCalledWith(
-          resetReq.rateLimitKey
+          resetReq.rateLimitKey,
         );
 
         expect(res.status).toHaveBeenCalledWith(formattedResetRes.statusCode);
@@ -237,24 +237,24 @@ describe("ResetPasswordController", () => {
     });
 
     // 2. Error Scenarios
-    describe("Error Scenarios", () => {
+    describe("error Scenarios", () => {
       it("should handle invalid token errors", async () => {
         // Arrange
         resetReq.params.token = "invalid-token";
 
         const tokenError = new UnauthorizedError(
-          "Invalid or expired reset token"
+          "Invalid or expired reset token",
         );
         resetPasswordService.resetPassword.mockRejectedValue(tokenError);
 
         // Act & Assert
         await expect(controller.resetPassword(resetReq, res)).rejects.toThrow(
-          tokenError
+          tokenError,
         );
 
         expect(resetPasswordService.resetPassword).toHaveBeenCalledWith(
           resetReq.params.token,
-          resetReq.body.password
+          resetReq.body.password,
         );
         expect(rateLimitService.increment).toHaveBeenCalledWith({
           key: resetReq.rateLimitKey,
@@ -272,11 +272,11 @@ describe("ResetPasswordController", () => {
 
         // Act & Assert
         await expect(controller.resetPassword(resetReq, res)).rejects.toThrow(
-          tokenError
+          tokenError,
         );
         expect(resetPasswordService.resetPassword).toHaveBeenCalledWith(
           resetReq.params.token,
-          resetReq.body.password
+          resetReq.body.password,
         );
         expect(rateLimitService.increment).toHaveBeenCalled();
         expect(loggerService.error).toHaveBeenCalled();
@@ -287,17 +287,17 @@ describe("ResetPasswordController", () => {
         resetReq.params.token = "already-used-token";
 
         const tokenError = new UnauthorizedError(
-          "Reset token has already been used"
+          "Reset token has already been used",
         );
         resetPasswordService.resetPassword.mockRejectedValue(tokenError);
 
         // Act & Assert
         await expect(controller.resetPassword(resetReq, res)).rejects.toThrow(
-          tokenError
+          tokenError,
         );
         expect(resetPasswordService.resetPassword).toHaveBeenCalledWith(
           resetReq.params.token,
-          resetReq.body.password
+          resetReq.body.password,
         );
         expect(rateLimitService.increment).toHaveBeenCalled();
         expect(loggerService.error).toHaveBeenCalled();
@@ -308,18 +308,18 @@ describe("ResetPasswordController", () => {
         resetReq.body.password = "weak";
 
         const passwordError = new BadRequestError(
-          "Password does not meet security requirements"
+          "Password does not meet security requirements",
         );
 
         resetPasswordService.resetPassword.mockRejectedValue(passwordError);
 
         // Act & Assert
         await expect(controller.resetPassword(resetReq, res)).rejects.toThrow(
-          passwordError
+          passwordError,
         );
         expect(resetPasswordService.resetPassword).toHaveBeenCalledWith(
           resetReq.params.token,
-          resetReq.body.password
+          resetReq.body.password,
         );
         expect(rateLimitService.increment).toHaveBeenCalled();
         expect(loggerService.error).toHaveBeenCalled();
@@ -332,11 +332,11 @@ describe("ResetPasswordController", () => {
 
         // Act & Assert
         await expect(controller.resetPassword(resetReq, res)).rejects.toThrow(
-          dbError
+          dbError,
         );
         expect(resetPasswordService.resetPassword).toHaveBeenCalledWith(
           resetReq.params.token,
-          resetReq.body.password
+          resetReq.body.password,
         );
         expect(rateLimitService.increment).toHaveBeenCalled();
         expect(loggerService.error).toHaveBeenCalled();
@@ -344,13 +344,13 @@ describe("ResetPasswordController", () => {
     });
 
     // 3. Rate Limiting
-    describe("Rate Limiting", () => {
+    describe("rate Limiting", () => {
       it("should reset rate limiter on successful password reset", async () => {
         // Arrange
         resetPasswordService.resetPassword.mockResolvedValue(undefined);
 
         responseFormatter.formatSuccessResponse.mockReturnValue(
-          formattedResetRes
+          formattedResetRes,
         );
 
         // Act
@@ -358,14 +358,14 @@ describe("ResetPasswordController", () => {
 
         // Assert
         expect(rateLimitService.reset).toHaveBeenCalledWith(
-          resetReq.rateLimitKey
+          resetReq.rateLimitKey,
         );
       });
 
       it("should increment rate limiter on failed password reset", async () => {
         // Arrange
         resetPasswordService.resetPassword.mockRejectedValue(
-          new Error("Service error")
+          new Error("Service error"),
         );
 
         // Act & Assert
@@ -390,11 +390,11 @@ describe("ResetPasswordController", () => {
     };
 
     // 1. Success Scenarios
-    describe("Success Scenarios", () => {
+    describe("success Scenarios", () => {
       it("should successfully verify a valid token", async () => {
         // Arrange
         responseFormatter.formatSuccessResponse.mockReturnValue(
-          formattedVerifyRes
+          formattedVerifyRes,
         );
 
         // Act
@@ -402,7 +402,7 @@ describe("ResetPasswordController", () => {
 
         // Assert
         expect(resetPasswordService.verifyResetToken).toHaveBeenCalledWith(
-          verifyReq.params.token
+          verifyReq.params.token,
         );
         expect(res.status).toHaveBeenCalledWith(formattedVerifyRes.statusCode);
         expect(res.json).toHaveBeenCalledWith(formattedVerifyRes);
@@ -410,7 +410,7 @@ describe("ResetPasswordController", () => {
     });
 
     // 2. Error Scenarios
-    describe("Error Scenarios", () => {
+    describe("error Scenarios", () => {
       it("should propagate service errors during verifyResetToken", async () => {
         // Arrange
         const error = new Error("Token invalid");
@@ -418,20 +418,20 @@ describe("ResetPasswordController", () => {
 
         // Act & Assert
         await expect(
-          controller.verifyResetToken(verifyReq, res)
+          controller.verifyResetToken(verifyReq, res),
         ).rejects.toThrow(error);
       });
     });
   });
 
-  describe("ResetPasswordController Security Tests", () => {
-    describe("Token Security", () => {
+  describe("resetPasswordController Security Tests", () => {
+    describe("token Security", () => {
       it("should not expose token generation details in responses", async () => {
         // Arrange
         resetPasswordService.sendResetToken.mockResolvedValue(undefined);
 
         responseFormatter.formatSuccessResponse.mockReturnValue(
-          formattedForgotRes
+          formattedForgotRes,
         );
 
         // Act
@@ -446,21 +446,21 @@ describe("ResetPasswordController", () => {
         });
 
         // Ensure token is not included in the response
-        const formatResponseArgs =
-          responseFormatter.formatSuccessResponse.mock.calls[0][0];
+        const formatResponseArgs
+          = responseFormatter.formatSuccessResponse.mock.calls[0][0];
         expect(JSON.stringify(formatResponseArgs)).not.toContain(
-          "secret-token"
+          "secret-token",
         );
       });
     });
 
-    describe("Password Security", () => {
+    describe("password Security", () => {
       it("should not log or expose passwords", async () => {
         // Arrange
         resetPasswordService.resetPassword.mockResolvedValue(undefined);
 
         responseFormatter.formatSuccessResponse.mockReturnValue(
-          formattedResetRes
+          formattedResetRes,
         );
 
         // Act
@@ -469,34 +469,34 @@ describe("ResetPasswordController", () => {
         // Assert
         // Check that password is not logged
         expect(loggerService.info).not.toHaveBeenCalledWith(
-          expect.stringContaining(resetReq.body.password)
+          expect.stringContaining(resetReq.body.password),
         );
         expect(loggerService.debug).not.toHaveBeenCalledWith(
-          expect.stringContaining(resetReq.body.password)
+          expect.stringContaining(resetReq.body.password),
         );
 
         // Check that password is not included in the response
-        const formatResponseArgs =
-          responseFormatter.formatSuccessResponse.mock.calls[0][0];
+        const formatResponseArgs
+          = responseFormatter.formatSuccessResponse.mock.calls[0][0];
         expect(JSON.stringify(formatResponseArgs)).not.toContain(
-          resetReq.body.password
+          resetReq.body.password,
         );
       });
     });
 
-    describe("Brute Force Protection", () => {
+    describe("brute Force Protection", () => {
       it("should implement rate limiting for forgotPassword", async () => {
         // First call succeeds
         resetPasswordService.sendResetToken.mockResolvedValue(undefined);
 
         responseFormatter.formatSuccessResponse.mockReturnValue(
-          formattedForgotRes
+          formattedForgotRes,
         );
 
         await controller.forgotPassword(forgotReq, res);
 
         expect(rateLimitService.reset).toHaveBeenCalledWith(
-          forgotReq.rateLimitKey
+          forgotReq.rateLimitKey,
         );
 
         // Reset mocks
@@ -504,10 +504,10 @@ describe("ResetPasswordController", () => {
 
         // Second call fails
         resetPasswordService.sendResetToken.mockRejectedValue(
-          new Error("Service error")
+          new Error("Service error"),
         );
         await expect(controller.forgotPassword(forgotReq, res)).rejects.toThrow(
-          "Service error"
+          "Service error",
         );
 
         expect(rateLimitService.increment).toHaveBeenCalledWith({
@@ -521,13 +521,13 @@ describe("ResetPasswordController", () => {
         resetPasswordService.resetPassword.mockResolvedValue(undefined);
 
         responseFormatter.formatSuccessResponse.mockReturnValue(
-          formattedResetRes
+          formattedResetRes,
         );
 
         await controller.resetPassword(resetReq, res);
 
         expect(rateLimitService.reset).toHaveBeenCalledWith(
-          resetReq.rateLimitKey
+          resetReq.rateLimitKey,
         );
 
         // Reset mocks
@@ -535,10 +535,10 @@ describe("ResetPasswordController", () => {
 
         // Second call fails
         resetPasswordService.resetPassword.mockRejectedValue(
-          new Error("Service error")
+          new Error("Service error"),
         );
         await expect(controller.resetPassword(resetReq, res)).rejects.toThrow(
-          "Service error"
+          "Service error",
         );
         expect(rateLimitService.increment).toHaveBeenCalledWith({
           key: resetReq.rateLimitKey,

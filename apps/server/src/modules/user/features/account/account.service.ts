@@ -1,11 +1,12 @@
-import { inject, injectable } from "inversify";
-
 import type { Account, Prisma, Providers } from "@tubenote/db";
 
-import { ForbiddenError, NotFoundError } from "@/modules/shared/api-errors";
+import { ForbiddenError, NotFoundError } from "@tubenote/api-errors";
+import { inject, injectable } from "inversify";
+
 import type { IPrismaService } from "@/modules/shared/services";
 
 import { TYPES } from "@/config/inversify/types";
+
 import type { IAccountRepository, IAccountService } from "./account.types";
 import type { ICreateAccountDto } from "./dtos";
 
@@ -14,13 +15,13 @@ export class AccountService implements IAccountService {
   constructor(
     @inject(TYPES.AccountRepository)
     private _accountRepository: IAccountRepository,
-    @inject(TYPES.PrismaService) private _prismaService: IPrismaService
+    @inject(TYPES.PrismaService) private _prismaService: IPrismaService,
   ) {}
 
   async createAccount(
     tx: Prisma.TransactionClient,
     userId: string,
-    createAccountDto: ICreateAccountDto
+    createAccountDto: ICreateAccountDto,
   ): Promise<Account> {
     const { provider, providerAccountId } = createAccountDto;
 
@@ -28,7 +29,7 @@ export class AccountService implements IAccountService {
     const existingAccount = await this._accountRepository.findByProvider(
       provider,
       providerAccountId,
-      tx
+      tx,
     );
 
     if (existingAccount) {
@@ -44,7 +45,7 @@ export class AccountService implements IAccountService {
 
   async findAccountByProvider(
     provider: Providers,
-    providerAccountId: string
+    providerAccountId: string,
   ): Promise<Account | null> {
     return this._accountRepository.findByProvider(provider, providerAccountId);
   }
@@ -55,24 +56,25 @@ export class AccountService implements IAccountService {
 
   async linkAccountToUser(
     userId: string,
-    createAccountDto: ICreateAccountDto
+    createAccountDto: ICreateAccountDto,
   ): Promise<Account> {
     return this._prismaService.transaction(async (tx) => {
       // Verify that this provider account isn't already linked to another user
       const existingAccount = await this._accountRepository.findByProvider(
         createAccountDto.provider,
         createAccountDto.providerAccountId,
-        tx
+        tx,
       );
 
       if (existingAccount) {
         if (existingAccount.userId === userId) {
           // Account already linked to this user, return it
           return existingAccount;
-        } else {
+        }
+        else {
           // Account linked to different user, cannot link
           throw new ForbiddenError(
-            "This provider account is already linked to another user"
+            "This provider account is already linked to another user",
           );
         }
       }

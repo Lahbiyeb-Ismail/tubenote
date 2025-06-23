@@ -1,7 +1,8 @@
+import type { BaseError } from "@tubenote/api-errors";
 import type { NextFunction, Request, Response } from "express";
-import httpStatus from "http-status";
 
-import { type BaseError, NotFoundError } from "@/modules/shared/api-errors";
+import { NotFoundError } from "@tubenote/api-errors";
+import httpStatus from "http-status";
 
 import { envConfig } from "@/modules/shared/config";
 import { loggerService, responseFormatter } from "@/modules/shared/services";
@@ -23,7 +24,7 @@ function errorHandler(
   err: BaseError,
   _req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const statusCode = err.httpCode
     ? err.httpCode

@@ -1,24 +1,23 @@
-import type { Response } from "express";
-import httpStatus from "http-status";
-import { mock, mockReset } from "jest-mock-extended";
-
 import type {
   IFindManyDto,
   IPaginationQueryDto,
   IParamIdDto,
 } from "@tubenote/dtos";
 import type { IApiSuccessResponse, Video } from "@tubenote/types";
+import type { Response } from "express";
 
-import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
-
-import { BadRequestError, NotFoundError } from "@/modules/shared/api-errors";
+import { BadRequestError, NotFoundError } from "@tubenote/api-errors";
+import httpStatus from "http-status";
+import { mock, mockReset } from "jest-mock-extended";
 
 import type { IResponseFormatter } from "@/modules/shared/services";
+import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
-import { VideoController } from "../video.controller";
 import type { IVideoService } from "../video.types";
 
-describe("VideoController", () => {
+import { VideoController } from "../video.controller";
+
+describe("videoController", () => {
   const responseFormatter = mock<IResponseFormatter>();
   const videoService = mock<IVideoService>();
 
@@ -30,8 +29,8 @@ describe("VideoController", () => {
   const mockUserId = "user_id_123";
   const mockVideoId = "video_id_456";
 
-  const mockRequest =
-    mock<TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>>();
+  const mockRequest
+    = mock<TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>>();
   const mockFindOrCreateReq = mock<TypedRequest<EmptyRecord, IParamIdDto>>();
   const mockResponse = mock<Response>();
 
@@ -100,7 +99,7 @@ describe("VideoController", () => {
     mockResponse.json.mockReturnThis();
   });
 
-  describe("VideoController - getUserVideos", () => {
+  describe("videoController - getUserVideos", () => {
     const paginationQueries: IFindManyDto = {
       limit: 10,
       skip: 0,
@@ -130,14 +129,14 @@ describe("VideoController", () => {
       responseFormatter.getPaginationQueries.mockReturnValue(paginationQueries);
 
       responseFormatter.formatPaginatedResponse.mockReturnValue(
-        mockPaginatedVideos
+        mockPaginatedVideos,
       );
 
       await videoController.getUserVideos(mockRequest, mockResponse);
 
       expect(videoService.getUserVideos).toHaveBeenCalledWith(
         mockUserId,
-        paginationQueries
+        paginationQueries,
       );
 
       expect(responseFormatter.formatPaginatedResponse).toHaveBeenCalled();
@@ -182,7 +181,7 @@ describe("VideoController", () => {
       videoService.getUserVideos.mockRejectedValue(testError);
 
       await expect(
-        videoController.getUserVideos(mockRequest, mockResponse)
+        videoController.getUserVideos(mockRequest, mockResponse),
       ).rejects.toThrow(testError);
     });
 
@@ -213,7 +212,7 @@ describe("VideoController", () => {
     // });
   });
 
-  describe("VideoController - getVideoByIdOrCreate", () => {
+  describe("videoController - getVideoByIdOrCreate", () => {
     const formattedRes: IApiSuccessResponse<Video> = {
       success: true,
       statusCode: httpStatus.OK,
@@ -235,12 +234,12 @@ describe("VideoController", () => {
     it("should return formatted video response with valid parameters", async () => {
       await videoController.getVideoByIdOrCreate(
         mockFindOrCreateReq,
-        mockResponse
+        mockResponse,
       );
 
       expect(videoService.findVideoOrCreate).toHaveBeenCalledWith(
         mockUserId,
-        mockVideoId
+        mockVideoId,
       );
 
       expect(responseFormatter.formatSuccessResponse).toHaveBeenCalledWith({
@@ -259,7 +258,7 @@ describe("VideoController", () => {
       videoService.findVideoOrCreate.mockRejectedValue(notFoundError);
 
       await expect(
-        videoController.getVideoByIdOrCreate(mockFindOrCreateReq, mockResponse)
+        videoController.getVideoByIdOrCreate(mockFindOrCreateReq, mockResponse),
       ).rejects.toThrow(notFoundError);
 
       expect(mockResponse.json).not.toHaveBeenCalled();
@@ -271,14 +270,14 @@ describe("VideoController", () => {
       videoService.findVideoOrCreate.mockRejectedValue(youtubeError);
 
       await expect(
-        videoController.getVideoByIdOrCreate(mockFindOrCreateReq, mockResponse)
+        videoController.getVideoByIdOrCreate(mockFindOrCreateReq, mockResponse),
       ).rejects.toThrow(youtubeError);
 
       expect(mockResponse.json).not.toHaveBeenCalled();
     });
   });
 
-  describe("VideoController - Edge Cases", () => {
+  describe("videoController - Edge Cases", () => {
     // it("should handle extremely large numeric values", async () => {
     //   mockRequest.query = {
     //     page: 9999999999,
@@ -338,12 +337,12 @@ describe("VideoController", () => {
 
       await videoController.getVideoByIdOrCreate(
         mockFindOrCreateReq,
-        mockResponse
+        mockResponse,
       );
 
       expect(videoService.findVideoOrCreate).toHaveBeenCalledWith(
         mockFindOrCreateReq.userId,
-        mockFindOrCreateReq.params.id
+        mockFindOrCreateReq.params.id,
       );
     });
 

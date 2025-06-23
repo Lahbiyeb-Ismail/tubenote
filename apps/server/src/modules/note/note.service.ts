@@ -6,13 +6,12 @@ import type {
 } from "@tubenote/dtos";
 import type { IPaginatedData } from "@tubenote/types";
 
+import { ERROR_MESSAGES, NotFoundError } from "@tubenote/api-errors";
 import { inject, injectable } from "inversify";
 
 import type { IPrismaService } from "@/modules/shared/services";
 
 import { TYPES } from "@/config/inversify/types";
-import { NotFoundError } from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
 
 import type { INoteRepository, INoteService } from "./note.types";
 

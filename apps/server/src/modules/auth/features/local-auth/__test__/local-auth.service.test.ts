@@ -1,39 +1,28 @@
-import { mock, mockReset } from "jest-mock-extended";
-
 import type { User } from "@tubenote/db";
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
+import { ERROR_MESSAGES, ForbiddenError, NotFoundError, UnauthorizedError } from "@tubenote/api-errors";
+import { mock, mockReset } from "jest-mock-extended";
 
-import {
-  ForbiddenError,
-  NotFoundError,
-  UnauthorizedError,
-} from "@/modules/shared/api-errors";
-
+import type { IAuthResponseDto } from "@/modules/auth/dtos";
+import type {
+  ILocalAuthServiceOptions,
+  IRefreshTokenService,
+  IVerifyEmailService,
+} from "@/modules/auth/features";
+import type { IJwtService } from "@/modules/auth/utils";
 import type {
   ICryptoService,
   ILoggerService,
   IMailSenderService,
   IPrismaService,
 } from "@/modules/shared/services";
-
 import type { IUserService } from "@/modules/user";
-
-import type { IAuthResponseDto } from "@/modules/auth/dtos";
-
-import type {
-  ILocalAuthServiceOptions,
-  IRefreshTokenService,
-  IVerifyEmailService,
-} from "@/modules/auth/features";
-
-import type { IJwtService } from "@/modules/auth/utils";
-
 import type { ICreateAccountDto } from "@/modules/user/features/account/dtos";
+
 import { LocalAuthService } from "../local-auth.service";
 
-describe("LocalAuthService", () => {
+describe("localAuthService", () => {
   let localAuthService: LocalAuthService;
 
   // Mock dependencies
@@ -109,7 +98,7 @@ describe("LocalAuthService", () => {
     jest.clearAllMocks();
 
     // Reset singleton instance before each test to ensure a clean state.
-    // @ts-ignore: resetting the private _instance for testing purposes
+    // @ts-expect-error: resetting the private _instance for testing purposes
     LocalAuthService._instance = undefined;
 
     localAuthService = LocalAuthService.getInstance(serviceOptions);
@@ -119,7 +108,7 @@ describe("LocalAuthService", () => {
     jest.clearAllMocks();
   });
 
-  describe("Singleton behavior", () => {
+  describe("singleton behavior", () => {
     it("should create a new instance when none exists", () => {
       const instance1 = LocalAuthService.getInstance(serviceOptions);
       expect(instance1).toBeInstanceOf(LocalAuthService);
@@ -132,7 +121,7 @@ describe("LocalAuthService", () => {
     });
   });
 
-  describe("LocalAuthService - loginUser method", () => {
+  describe("localAuthService - loginUser method", () => {
     const loginDto: ILoginDto = {
       email: "test@example.com",
       password: "password123",
@@ -141,7 +130,7 @@ describe("LocalAuthService", () => {
     beforeEach(() => {
       (jwtService.generateAuthTokens as jest.Mock).mockReturnValue(mockTokens);
       (refreshTokenService.createToken as jest.Mock).mockResolvedValue(
-        undefined
+        undefined,
       );
     });
 
@@ -163,17 +152,17 @@ describe("LocalAuthService", () => {
         {
           token: mockTokens.refreshToken,
           expiresAt: expect.any(Date),
-        }
+        },
       );
     });
 
     it("should throw NotFoundError if user does not exist", async () => {
       (userService.getUserByEmail as jest.Mock).mockRejectedValue(
-        new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
+        new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND),
       );
 
       await expect(localAuthService.loginUser(loginDto)).rejects.toThrow(
-        new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND)
+        new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND),
       );
       expect(cryptoService.comparePasswords).not.toHaveBeenCalled();
     });
@@ -185,7 +174,7 @@ describe("LocalAuthService", () => {
       });
 
       await expect(localAuthService.loginUser(loginDto)).rejects.toThrow(
-        new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED)
+        new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED),
       );
       expect(cryptoService.comparePasswords).not.toHaveBeenCalled();
     });
@@ -195,7 +184,7 @@ describe("LocalAuthService", () => {
       (cryptoService.comparePasswords as jest.Mock).mockResolvedValue(false);
 
       await expect(localAuthService.loginUser(loginDto)).rejects.toThrow(
-        new ForbiddenError(ERROR_MESSAGES.INVALID_CREDENTIALS)
+        new ForbiddenError(ERROR_MESSAGES.INVALID_CREDENTIALS),
       );
       expect(jwtService.generateAuthTokens).not.toHaveBeenCalled();
     });
@@ -219,7 +208,7 @@ describe("LocalAuthService", () => {
       });
 
       await expect(localAuthService.loginUser(loginDto)).rejects.toThrow(
-        "Token generation failed"
+        "Token generation failed",
       );
     });
 
@@ -245,7 +234,7 @@ describe("LocalAuthService", () => {
         localAuthService.loginUser({
           email: "test@example.com",
           password: "password123",
-        })
+        }),
       ).rejects.toThrow(error);
     });
 
@@ -258,7 +247,7 @@ describe("LocalAuthService", () => {
         localAuthService.loginUser({
           email: "test@example.com",
           password: "password123",
-        })
+        }),
       ).rejects.toThrow(error);
     });
   });
@@ -315,7 +304,7 @@ describe("LocalAuthService", () => {
   //   // });
   // });
 
-  describe("LocalAuthService - registerUser method with transaction handling", () => {
+  describe("localAuthService - registerUser method with transaction handling", () => {
     const verifyEmailToken = "verify-email-token";
     const mockTransaction = jest.fn();
 
@@ -324,21 +313,21 @@ describe("LocalAuthService", () => {
       (prismaService.transaction as jest.Mock).mockImplementation(
         (callback) => {
           return callback(mockTransaction);
-        }
+        },
       );
     });
 
     it("should register a user within a transaction", async () => {
       (userService.createUserWithAccount as jest.Mock).mockResolvedValue(
-        mockUser
+        mockUser,
       );
 
       (verifyEmailService.createToken as jest.Mock).mockResolvedValue(
-        verifyEmailToken
+        verifyEmailToken,
       );
 
       (mailSenderService.sendVerificationEmail as jest.Mock).mockResolvedValue(
-        undefined
+        undefined,
       );
 
       await localAuthService.registerUser(createUserDto);
@@ -348,17 +337,17 @@ describe("LocalAuthService", () => {
       expect(userService.createUserWithAccount).toHaveBeenCalledWith(
         mockTransaction,
         createUserDto,
-        createAccountDto
+        createAccountDto,
       );
 
       expect(verifyEmailService.createToken).toHaveBeenCalledWith(
         mockTransaction,
-        mockUser.email
+        mockUser.email,
       );
 
       expect(mailSenderService.sendVerificationEmail).toHaveBeenCalledWith(
         mockUser.email,
-        verifyEmailToken
+        verifyEmailToken,
       );
     });
 
@@ -411,7 +400,7 @@ describe("LocalAuthService", () => {
       (prismaService.transaction as jest.Mock).mockRejectedValue(error);
 
       await expect(
-        localAuthService.registerUser(createUserDto)
+        localAuthService.registerUser(createUserDto),
       ).rejects.toThrow(error);
       expect(mailSenderService.sendVerificationEmail).not.toHaveBeenCalled();
     });
@@ -420,17 +409,17 @@ describe("LocalAuthService", () => {
       const emailError = new Error("Email sending failed");
 
       (userService.createUserWithAccount as jest.Mock).mockResolvedValue(
-        mockUser
+        mockUser,
       );
       (verifyEmailService.createToken as jest.Mock).mockResolvedValue(
-        verifyEmailToken
+        verifyEmailToken,
       );
       (mailSenderService.sendVerificationEmail as jest.Mock).mockRejectedValue(
-        emailError
+        emailError,
       );
 
       await expect(
-        localAuthService.registerUser(createUserDto)
+        localAuthService.registerUser(createUserDto),
       ).rejects.toThrow(emailError);
 
       // Even though email sending failed, transaction should have completed
@@ -440,10 +429,10 @@ describe("LocalAuthService", () => {
     });
   });
 
-  describe("LocalAuthService - registerUser data validation", () => {
+  describe("localAuthService - registerUser data validation", () => {
     beforeEach(() => {
-      (prismaService.transaction as jest.Mock).mockImplementation((callback) =>
-        callback("tx")
+      (prismaService.transaction as jest.Mock).mockImplementation(callback =>
+        callback("tx"),
       );
     });
 
@@ -456,7 +445,7 @@ describe("LocalAuthService", () => {
       };
 
       await expect(
-        localAuthService.registerUser(invalidDto as any)
+        localAuthService.registerUser(invalidDto as any),
       ).rejects.toThrow();
       expect(prismaService.transaction).toHaveBeenCalled();
     });
@@ -470,7 +459,7 @@ describe("LocalAuthService", () => {
       };
 
       await expect(
-        localAuthService.registerUser(invalidDto as any)
+        localAuthService.registerUser(invalidDto as any),
       ).rejects.toThrow();
       expect(prismaService.transaction).toHaveBeenCalled();
     });
@@ -478,25 +467,25 @@ describe("LocalAuthService", () => {
     it("should propagate validation errors from userService", async () => {
       const validationError = new Error("Validation failed");
       (userService.createUserWithAccount as jest.Mock).mockRejectedValue(
-        validationError
+        validationError,
       );
 
       await expect(
-        localAuthService.registerUser(createUserDto)
+        localAuthService.registerUser(createUserDto),
       ).rejects.toThrow(validationError);
     });
   });
 
-  describe("LocalAuthService - registerUser integration scenarios", () => {
+  describe("localAuthService - registerUser integration scenarios", () => {
     beforeEach(() => {
-      (prismaService.transaction as jest.Mock).mockImplementation((callback) =>
-        callback("tx")
+      (prismaService.transaction as jest.Mock).mockImplementation(callback =>
+        callback("tx"),
       );
     });
 
     it("should handle retry scenario when first email attempt fails", async () => {
       (userService.createUserWithAccount as jest.Mock).mockResolvedValue(
-        mockUser
+        mockUser,
       );
       (verifyEmailService.createToken as jest.Mock).mockResolvedValue("token");
 
@@ -506,7 +495,7 @@ describe("LocalAuthService", () => {
         .mockResolvedValueOnce(undefined);
 
       await expect(
-        localAuthService.registerUser(createUserDto)
+        localAuthService.registerUser(createUserDto),
       ).rejects.toThrow("Email temporary failure");
 
       // The transaction should have completed successfully
@@ -525,7 +514,7 @@ describe("LocalAuthService", () => {
       (prismaService.transaction as jest.Mock).mockRejectedValue(dbError);
 
       await expect(
-        localAuthService.registerUser(createUserDto)
+        localAuthService.registerUser(createUserDto),
       ).rejects.toThrow(dbError);
       expect(userService.createUserWithAccount).not.toHaveBeenCalled();
       expect(verifyEmailService.createToken).not.toHaveBeenCalled();
@@ -540,16 +529,16 @@ describe("LocalAuthService", () => {
       });
 
       (prismaService.transaction as jest.Mock).mockImplementation(
-        mockRetryableTx
+        mockRetryableTx,
       );
       (userService.createUserWithAccount as jest.Mock).mockResolvedValue(
-        mockUser
+        mockUser,
       );
 
       (verifyEmailService.createToken as jest.Mock).mockResolvedValue("token");
 
       (mailSenderService.sendVerificationEmail as jest.Mock).mockResolvedValue(
-        undefined
+        undefined,
       );
 
       await localAuthService.registerUser(createUserDto);

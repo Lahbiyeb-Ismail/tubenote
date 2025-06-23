@@ -1,19 +1,20 @@
-import { BadRequestError } from "../../api-errors";
-import { envConfig } from "../../config";
-import { ERROR_MESSAGES } from "../../constants";
-import { compileTemplate } from "../../utils";
+import { BadRequestError, ERROR_MESSAGES } from "@tubenote/api-errors";
+import { inject, injectable } from "inversify";
 
 import { TYPES } from "@/config/inversify/types";
-import { inject, injectable } from "inversify";
+
 import type { ILoggerService } from "../logger";
 import type { SendMailDto } from "./dtos";
-import transporter from "./mail-sender.config";
 import type { EmailContent, IMailSenderService } from "./mail-sender.types";
+
+import { envConfig } from "../../config";
+import { compileTemplate } from "../../utils";
+import transporter from "./mail-sender.config";
 
 @injectable()
 export class MailSenderService implements IMailSenderService {
   constructor(
-    @inject(TYPES.LoggerService) private _loggerService: ILoggerService
+    @inject(TYPES.LoggerService) private _loggerService: ILoggerService,
   ) {}
 
   async sendMail(sendMailDto: SendMailDto): Promise<void> {
@@ -35,10 +36,11 @@ export class MailSenderService implements IMailSenderService {
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         this._loggerService.error(
-          `Error sending email - ${error.name}: ${error.message}`
+          `Error sending email - ${error.name}: ${error.message}`,
         );
         throw new BadRequestError(ERROR_MESSAGES.MAIL_SENDING_FAILED);
-      } else {
+      }
+      else {
         this._loggerService.info(`Verify email sent: ${info.response}`);
       }
     });
@@ -46,10 +48,10 @@ export class MailSenderService implements IMailSenderService {
 
   async sendVerificationEmail(
     email: string,
-    verifyEmailToken: string
+    verifyEmailToken: string,
   ): Promise<void> {
-    const { htmlContent, logoPath, textContent } =
-      await this.buildVerificationEmail(verifyEmailToken);
+    const { htmlContent, logoPath, textContent }
+      = await this.buildVerificationEmail(verifyEmailToken);
 
     await this.sendMail({
       emailRecipient: email,
@@ -62,10 +64,10 @@ export class MailSenderService implements IMailSenderService {
 
   async sendResetPasswordEmail(
     email: string,
-    resetPasswordToken: string
+    resetPasswordToken: string,
   ): Promise<void> {
-    const { htmlContent, logoPath, textContent } =
-      await this.buildResetPasswordEmail(resetPasswordToken);
+    const { htmlContent, logoPath, textContent }
+      = await this.buildResetPasswordEmail(resetPasswordToken);
 
     await this.sendMail({
       emailRecipient: email,

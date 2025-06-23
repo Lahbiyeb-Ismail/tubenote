@@ -5,12 +5,12 @@ import type {
   IUpdateNoteDto,
 } from "@tubenote/dtos";
 
+import { ERROR_MESSAGES } from "@tubenote/api-errors";
 import { inject, injectable } from "inversify";
 
 import type { IPrismaService } from "@/modules/shared/services";
 
 import { TYPES } from "@/config/inversify/types";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import { handleAsyncOperation } from "@/modules/shared/utils";
 
 import type { INoteRepository } from "./note.types";

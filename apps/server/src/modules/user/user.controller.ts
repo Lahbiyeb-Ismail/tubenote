@@ -1,30 +1,27 @@
-import type { Response } from "express";
-import { inject, injectable } from "inversify";
-
 import type { User } from "@tubenote/db";
 import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/dtos";
+import type { Response } from "express";
 
-import { TYPES } from "@/config/inversify/types";
-
-import { NotFoundError } from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
-
-import type { TypedRequest } from "@/modules/shared/types";
+import { ERROR_MESSAGES, NotFoundError } from "@tubenote/api-errors";
+import { inject, injectable } from "inversify";
 
 import type {
   ILoggerService,
   IRateLimitService,
   IResponseFormatter,
 } from "@/modules/shared/services";
+import type { TypedRequest } from "@/modules/shared/types";
 
-import { USER_RATE_LIMIT_CONFIG } from "./config";
+import { TYPES } from "@/config/inversify/types";
+
+import type { IUserController, IUserService } from "./user.types";
 
 import {
   ACCESS_TOKEN_NAME,
-  REFRESH_TOKEN_NAME,
   clearAuthTokenCookieConfig,
+  REFRESH_TOKEN_NAME,
 } from "../auth";
-import type { IUserController, IUserService } from "./user.types";
+import { USER_RATE_LIMIT_CONFIG } from "./config";
 
 /**
  * Controller for handling user-related operations.
@@ -37,7 +34,7 @@ export class UserController implements IUserController {
     private _responseFormatter: IResponseFormatter,
     @inject(TYPES.RateLimitService)
     private _rateLimitService: IRateLimitService,
-    @inject(TYPES.LoggerService) private _loggerService: ILoggerService
+    @inject(TYPES.LoggerService) private _loggerService: ILoggerService,
   ) {}
 
   /**
@@ -55,8 +52,8 @@ export class UserController implements IUserController {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
-    const formattedResponse =
-      this._responseFormatter.formatSuccessResponse<User>({
+    const formattedResponse
+      = this._responseFormatter.formatSuccessResponse<User>({
         responseOptions: {
           data: user,
           message: "User retrieved successfully.",
@@ -74,7 +71,7 @@ export class UserController implements IUserController {
    */
   async updateCurrentUser(
     req: TypedRequest<IUpdateUserDto>,
-    res: Response
+    res: Response,
   ): Promise<void> {
     const userId = req.userId;
 
@@ -82,8 +79,8 @@ export class UserController implements IUserController {
       ...req.body,
     });
 
-    const formattedResponse =
-      this._responseFormatter.formatSuccessResponse<User>({
+    const formattedResponse
+      = this._responseFormatter.formatSuccessResponse<User>({
         responseOptions: {
           data: user,
           message: "User updated successfully.",
@@ -114,8 +111,8 @@ export class UserController implements IUserController {
         ...req.body,
       });
 
-      const formattedResponse =
-        this._responseFormatter.formatSuccessResponse<User>({
+      const formattedResponse
+        = this._responseFormatter.formatSuccessResponse<User>({
           responseOptions: {
             data: user,
             message: "User password updated successfully.",
@@ -128,7 +125,8 @@ export class UserController implements IUserController {
       res.clearCookie(REFRESH_TOKEN_NAME, clearAuthTokenCookieConfig);
 
       res.status(formattedResponse.statusCode).json(formattedResponse);
-    } catch (error: any) {
+    }
+    catch (error: any) {
       await this._rateLimitService.increment({
         key: req.rateLimitKey,
         ...USER_RATE_LIMIT_CONFIG.updatePassword,

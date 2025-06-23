@@ -1,13 +1,12 @@
+import { BadRequestError, ERROR_MESSAGES } from "@tubenote/api-errors";
 import { mock, mockReset } from "jest-mock-extended";
 import jwt from "jsonwebtoken";
 
-import { BadRequestError } from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
 import type { ILoggerService } from "@/modules/shared/services";
 
 import { JwtService } from "../jwt.service";
 
-describe("JwtService", () => {
+describe("jwtService", () => {
   const loggerService = mock<ILoggerService>();
   const jwtService = JwtService.getInstance({ loggerService });
 
@@ -38,7 +37,7 @@ describe("JwtService", () => {
         jwtService.verify({
           token: mockInvalidToken,
           secret: mockValidTokenSecret,
-        })
+        }),
       ).rejects.toThrow(new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN));
     });
 
@@ -48,11 +47,11 @@ describe("JwtService", () => {
         mockValidTokenSecret,
         {
           expiresIn: "-1s",
-        }
+        },
       );
 
       await expect(
-        jwtService.verify({ token: expiredToken, secret: mockValidTokenSecret })
+        jwtService.verify({ token: expiredToken, secret: mockValidTokenSecret }),
       ).rejects.toThrow(new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN));
     });
 
@@ -62,7 +61,7 @@ describe("JwtService", () => {
       });
 
       await expect(
-        jwtService.verify({ token, secret: "invalid-secret" })
+        jwtService.verify({ token, secret: "invalid-secret" }),
       ).rejects.toThrow(new BadRequestError(ERROR_MESSAGES.INVALID_TOKEN));
     });
   });
@@ -81,7 +80,7 @@ describe("JwtService", () => {
 
     it("should throw Error for an invalid secret", () => {
       expect(() =>
-        jwtService.sign({ userId: mockUserId, secret: "", expiresIn: "1h" })
+        jwtService.sign({ userId: mockUserId, secret: "", expiresIn: "1h" }),
       ).toThrow();
     });
   });
@@ -103,7 +102,7 @@ describe("JwtService", () => {
       });
 
       expect(() => jwtService.generateAuthTokens(mockUserId)).toThrow(
-        new Error("Token generation failed")
+        new Error("Token generation failed"),
       );
     });
   });

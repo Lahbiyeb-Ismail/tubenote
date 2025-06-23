@@ -1,29 +1,26 @@
-import { inject, injectable } from "inversify";
-
 import type { Prisma, User } from "@tubenote/db";
-
 import type {
   ICreateUserDto,
   IUpdatePasswordDto,
   IUpdateUserDto,
 } from "@tubenote/dtos";
 
-import { TYPES } from "@/config/inversify/types";
-
 import {
   BadRequestError,
   ConflictError,
+  ERROR_MESSAGES,
   NotFoundError,
-} from "@/modules/shared/api-errors";
-import { ERROR_MESSAGES } from "@/modules/shared/constants";
+} from "@tubenote/api-errors";
+import { inject, injectable } from "inversify";
 
 import type { ICryptoService, IPrismaService } from "@/modules/shared/services";
 
-import type { IUserRepository, IUserService } from "./user.types";
+import { TYPES } from "@/config/inversify/types";
 
 import type { IRefreshTokenService } from "../auth";
 import type { IAccountService } from "./features/account/account.types";
 import type { ICreateAccountDto } from "./features/account/dtos";
+import type { IUserRepository, IUserService } from "./user.types";
 
 @injectable()
 export class UserService implements IUserService {
@@ -33,7 +30,7 @@ export class UserService implements IUserService {
     @inject(TYPES.PrismaService) private _prismaService: IPrismaService,
     @inject(TYPES.CryptoService) private _cryptoService: ICryptoService,
     @inject(TYPES.RefreshTokenService)
-    private _refreshTokenService: IRefreshTokenService
+    private _refreshTokenService: IRefreshTokenService,
   ) {}
 
   /**
@@ -45,7 +42,7 @@ export class UserService implements IUserService {
    */
   private async _ensureEmailIsUnique(
     email: string,
-    tx: Prisma.TransactionClient
+    tx: Prisma.TransactionClient,
   ): Promise<null> {
     const existingUser = await this._userRepository.getByEmail(email, tx);
 
@@ -65,10 +62,10 @@ export class UserService implements IUserService {
    */
   private async _createUser(
     tx: Prisma.TransactionClient,
-    data: ICreateUserDto
+    data: ICreateUserDto,
   ): Promise<User> {
     const hashedPassword = await this._cryptoService.generateHash(
-      data.password
+      data.password,
     );
 
     return this._userRepository.create(tx, {
@@ -86,7 +83,7 @@ export class UserService implements IUserService {
    */
   private async _ensureUserExists(
     id: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<User> {
     const user = await this._userRepository.getById(id, tx);
 
@@ -100,7 +97,7 @@ export class UserService implements IUserService {
   async createUserWithAccount(
     tx: Prisma.TransactionClient,
     userData: ICreateUserDto,
-    accountData: ICreateAccountDto
+    accountData: ICreateAccountDto,
   ): Promise<User> {
     const user = await this._createUser(tx, userData);
 
@@ -111,14 +108,14 @@ export class UserService implements IUserService {
 
   async getUserByEmail(
     email: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<User | null> {
     return this._userRepository.getByEmail(email, tx);
   }
 
   async getUserById(
     id: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<User | null> {
     return this._userRepository.getById(id, tx);
   }
@@ -162,7 +159,7 @@ export class UserService implements IUserService {
    */
   async updateUserPassword(
     userId: string,
-    data: IUpdatePasswordDto
+    data: IUpdatePasswordDto,
   ): Promise<User> {
     const { currentPassword, newPassword } = data;
 
@@ -182,19 +179,19 @@ export class UserService implements IUserService {
         throw new BadRequestError(ERROR_MESSAGES.PASSWORD_SAME_AS_CURRENT);
       }
 
-      const hashedPassword =
-        await this._cryptoService.generateHash(newPassword);
+      const hashedPassword
+        = await this._cryptoService.generateHash(newPassword);
 
       const updatedUser = this._userRepository.updatePassword(
         tx,
         user.id,
-        hashedPassword
+        hashedPassword,
       );
 
       await this._refreshTokenService.revokeAllUserTokens(
         user.id,
         "password_changed",
-        tx
+        tx,
       );
 
       return updatedUser;
@@ -216,8 +213,8 @@ export class UserService implements IUserService {
     const updatedUser = await this._prismaService.transaction(async (tx) => {
       const user = await this._ensureUserExists(userId, tx);
 
-      const hashedPassword =
-        await this._cryptoService.generateHash(newPassword);
+      const hashedPassword
+        = await this._cryptoService.generateHash(newPassword);
 
       return this._userRepository.updatePassword(tx, user.id, hashedPassword);
     });
@@ -242,7 +239,7 @@ export class UserService implements IUserService {
    */
   async verifyUserEmail(
     userId: string,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ): Promise<User> {
     const user = await this._ensureUserExists(userId, tx);
 

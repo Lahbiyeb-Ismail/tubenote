@@ -1,19 +1,20 @@
 import type { Response } from "express";
+
+import { UnauthorizedError } from "@tubenote/api-errors";
 import { mock, mockReset } from "jest-mock-extended";
-
-import type { TypedRequest } from "@/modules/shared/types";
-
-import { UnauthorizedError } from "@/modules/shared/api-errors";
-import { envConfig } from "@/modules/shared/config";
-import { OAuthController } from "../oauth.controller";
 
 import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import type { IResponseFormatter } from "@/modules/shared/services";
+import type { TypedRequest } from "@/modules/shared/types";
+
+import { envConfig } from "@/modules/shared/config";
 
 import type { IOAuthAuthorizationCodeDto, IOauthLoginDto } from "../dtos";
 import type { IOAuthControllerOptions, IOAuthService } from "../oauth.types";
 
-describe("OAuthController", () => {
+import { OAuthController } from "../oauth.controller";
+
+describe("oAuthController", () => {
   let controller: OAuthController;
   const oauthService = mock<IOAuthService>();
   const responseFormatter = mock<IResponseFormatter>();
@@ -49,7 +50,7 @@ describe("OAuthController", () => {
     res.json.mockReturnThis();
 
     // Reset the singleton instance for isolation.
-    // @ts-ignore: resetting private static property for testing purposes.
+    // @ts-expect-error: resetting private static property for testing purposes.
     OAuthController._instance = undefined;
 
     // Create an instance of the OAuthController.
@@ -58,7 +59,7 @@ describe("OAuthController", () => {
     jest.clearAllMocks();
   });
 
-  describe("Singleton Behavior", () => {
+  describe("singleton Behavior", () => {
     it("should create a new instance if none exists", () => {
       const instance = OAuthController.getInstance(controllerOptions);
       expect(instance).toBeInstanceOf(OAuthController);
@@ -92,7 +93,7 @@ describe("OAuthController", () => {
       oauthLoginreq.user = undefined;
       // Act & Assert: expecting an UnauthorizedError.
       await expect(controller.oauthLogin(oauthLoginreq, res)).rejects.toThrow(
-        UnauthorizedError
+        UnauthorizedError,
       );
     });
 
@@ -106,12 +107,12 @@ describe("OAuthController", () => {
       // Assert: verify that handleOAuthLogin is called with oauthLoginreq.user.
       expect(oauthService.handleOAuthLogin).toHaveBeenCalledWith(
         oauthLoginDto.createUserDto,
-        oauthLoginDto.createAccountDto
+        oauthLoginDto.createAccountDto,
       );
 
       // Verify that the user is redirected with a temporary code.
       const expectedRedirectUrl = `${envConfig.client.url}/oauth/callback?code=${encodeURIComponent(
-        "temporary-oauth-code"
+        "temporary-oauth-code",
       )}`;
       expect(res.redirect).toHaveBeenCalledWith(expectedRedirectUrl);
     });
@@ -161,7 +162,7 @@ describe("OAuthController", () => {
 
       // Act & Assert: expecting the error to be thrown.
       await expect(
-        controller.exchangeOauthCodeForTokens(oauthCodeReq, res)
+        controller.exchangeOauthCodeForTokens(oauthCodeReq, res),
       ).rejects.toThrow(error);
     });
   });
