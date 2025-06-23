@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { useUIStore } from "@/stores";
+import { useDialogStore } from "@/stores";
 
 import { updateNote } from "../services";
 import { useNoteStore } from "../store";
@@ -13,7 +13,7 @@ export function useUpdateNote() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const { actions } = useUIStore();
+  const { closeDialog } = useDialogStore();
   const { noteActions } = useNoteStore();
 
   return useMutation({
@@ -37,8 +37,6 @@ export function useUpdateNote() {
         queryKey: ["notes"],
       });
 
-      actions.closeModal();
-
       router.push(`/notes/${noteId}`);
     },
     onError: (error) => {
@@ -49,6 +47,7 @@ export function useUpdateNote() {
     onSettled: () => {
       toast.dismiss("loadingToast");
       noteActions.setUpdating(false);
+      closeDialog();
     },
   });
 }

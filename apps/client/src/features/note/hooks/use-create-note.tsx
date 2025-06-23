@@ -4,6 +4,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
+import { useDialogStore } from "@/stores";
+
 import { createNote } from "../services";
 import { useNoteStore } from "../store";
 
@@ -12,6 +14,7 @@ export function useCreateNote() {
   const router = useRouter();
 
   const { noteActions } = useNoteStore();
+  const { closeDialog } = useDialogStore();
 
   return useMutation({
     mutationFn: createNote,
@@ -39,6 +42,7 @@ export function useCreateNote() {
     onSettled: () => {
       toast.dismiss("loadingToast");
       noteActions.setCreating(false);
+      closeDialog();
     },
   });
 }

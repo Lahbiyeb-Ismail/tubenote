@@ -25,13 +25,23 @@ export function SaveNoteDialog({ onSaveNote, isSaving, noteTitle, noteTags, note
       <DialogContent className="sm:max-w-[500px]">
         <SaveNoteDialogHeader />
 
-        <SaveNoteDialogForm
-          noteTitle={noteTitle}
-          noteCategory={noteCategory}
-          noteTags={noteTags}
-          onSaveNote={onSaveNote}
-          isSaving={isSaving}
-        />
+        {
+          isSaving
+            ? (
+                <div className="flex items-center justify-center h-32">
+                  <p>Saving note...</p>
+                </div>
+              )
+            : (
+                <SaveNoteDialogForm
+                  noteTitle={noteTitle}
+                  noteCategory={noteCategory}
+                  noteTags={noteTags}
+                  onSaveNote={onSaveNote}
+                  isSaving={isSaving}
+                />
+              )
+        }
       </DialogContent>
     </Dialog>
   );

@@ -65,8 +65,6 @@ export function SaveNoteDialogForm({ noteTitle, noteCategory, noteTags, onSaveNo
     setTitle("");
     setCategory("");
     setTags([]);
-
-    closeDialog();
   };
 
   return (
