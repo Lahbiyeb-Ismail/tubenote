@@ -6,38 +6,33 @@ import toast from "react-hot-toast";
 
 import { useDialogStore } from "@/stores";
 
-import { updateNote } from "../services";
+import { createNote } from "../services";
 import { useNoteStore } from "../store";
 
-export function useUpdateNote() {
+export function useCreateNoteMutation() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const { closeDialog } = useDialogStore();
   const { noteActions } = useNoteStore();
+  const { closeDialog } = useDialogStore();
 
   return useMutation({
-    mutationFn: updateNote,
+    mutationFn: createNote,
     onMutate: () => {
-      toast.loading("Updating note...", { id: "loadingToast" });
+      // Show a loading toast
+      toast.loading("Saving note...", { id: "loadingToast" });
 
-      noteActions.setUpdating(true);
+      noteActions.setCreating(true);
     },
     onSuccess: (response) => {
       const { payload } = response;
-      const noteId = payload.data.id;
 
+      // Show success toast
       toast.success(payload.message);
+      // Invalidate notes query to refetch notes
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
 
-      queryClient.invalidateQueries({
-        queryKey: ["note", noteId],
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["notes"],
-      });
-
-      router.push(`/notes/${noteId}`);
+      router.push(`/notes/${payload.data.id}`);
     },
     onError: (error) => {
       toast.error(error.message);
@@ -46,7 +41,7 @@ export function useUpdateNote() {
     },
     onSettled: () => {
       toast.dismiss("loadingToast");
-      noteActions.setUpdating(false);
+      noteActions.setCreating(false);
       closeDialog();
     },
   });
