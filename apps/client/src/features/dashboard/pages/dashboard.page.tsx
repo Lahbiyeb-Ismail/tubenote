@@ -1,10 +1,25 @@
 "use client";
 
 import { DashboardHeader } from "@/components/dashboards";
+import { Loader } from "@/components/global";
+import { useGetUserVideos } from "@/features/video/hooks";
 
 import { Charts, KeyMetrics, LearningGoals, MonthlyProgress, QuickActions, RecentActivity, StudyStreak } from "../components";
+import { DashboardEmptyState } from "../components/dashboard-empty-state";
 
 export function DashboardPage() {
+  const {
+    data: response,
+    isLoading,
+  } = useGetUserVideos({ page: 1, limit: 1, sortBy: "createdAt", order: "desc" });
+
+  if (isLoading)
+    return <Loader />;
+
+  if (!response || !response.data || !response.paginationMeta) {
+    return <DashboardEmptyState />;
+  }
+
   return (
     <main className="container py-6">
       {/* Welcome Section */}
