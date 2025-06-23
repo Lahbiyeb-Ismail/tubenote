@@ -229,6 +229,9 @@ importers:
 
   apps/server:
     dependencies:
+      '@tubenote/api-errors':
+        specifier: workspace:*
+        version: link:../../packages/api-errors
       '@tubenote/db':
         specifier: workspace:*
         version: link:../../packages/database
@@ -323,9 +326,6 @@ importers:
       '@jest/globals':
         specifier: ^29.7.0
         version: 29.7.0
-      '@tubenote/api-errors':
-        specifier: workspace:*
-        version: link:../../packages/api-errors
       '@tubenote/config-typescript':
         specifier: workspace:*
         version: link:../../packages/config-typescript
