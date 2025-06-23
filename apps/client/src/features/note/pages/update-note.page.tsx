@@ -1,8 +1,8 @@
 "use client";
 
-import { NotePageLayout } from "@/features/note/components";
-import { useGetNoteById, useUpdateNote } from "@/features/note/hooks";
-
+import { NotePageLayout } from "../components";
+import { useNote } from "../hooks";
+import { useGetNoteByIdQuery } from "../queries";
 import { useNoteStore } from "../store";
 
 interface IPageProps {
@@ -10,9 +10,9 @@ interface IPageProps {
 }
 
 export function UpdateNotePage({ noteId }: IPageProps) {
-  const { mutate: updateNote, isPending: isUpdatingNote } = useUpdateNote();
   const { noteTimestamp } = useNoteStore();
-  const { data: note, isLoading, isError } = useGetNoteById(noteId);
+  const { updateNote, isUpdatingNote } = useNote();
+  const { data: note, isLoading, isError } = useGetNoteByIdQuery(noteId);
 
   const handleUpdateNote = (title: string, content: string, category: string, tags: string[]) => {
     if (!note)

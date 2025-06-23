@@ -12,18 +12,18 @@ import {
 } from "@/components/ui";
 import { useDialogStore } from "@/stores";
 
-import { useDeleteNote } from "../../hooks";
+import { useNote } from "../../hooks";
 
 export function NoteDeletionDialog() {
   const { isOpen, closeDialog, type, noteId } = useDialogStore();
-  const { mutate: deleteNote, isPending: isNoteDeleting } = useDeleteNote();
+  const { deleteNote, isDeletingNote } = useNote();
 
   const isNoteDeletionDialogOpen = isOpen && type === "delete-note";
 
   return (
     <Dialog open={isNoteDeletionDialogOpen} onOpenChange={open => !open && closeDialog()}>
       <DialogContent className="sm:max-w-md">
-        {isNoteDeleting
+        {isDeletingNote
           ? (
               <div className="flex items-center justify-center space-x-2">
                 <Loader2 className="h-5 w-5 animate-spin" />

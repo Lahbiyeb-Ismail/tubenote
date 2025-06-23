@@ -1,28 +1,24 @@
 "use client";
 
-import { useState } from "react";
-
 import type { Note } from "@tubenote/db";
 
-import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
+import { useState } from "react";
 
-import { useGetNotesByVideoId } from "@/features/note/hooks";
-import { usePaginationQuery, useSortByQueries } from "@/hooks";
-
+import { NoDataFound } from "@/components/dashboards";
 import {
   Loader,
   MarkdownViewer,
   PaginationComponent,
   ResizablePanels,
 } from "@/components/global";
-
-import { NoDataFound } from "@/components/dashboards";
-
+import { useGetNotesByVideoIdQuery } from "@/features/note/queries";
 import {
   VideoNotesList,
   VideoPageHeader,
   VideoPlayer,
 } from "@/features/video/components";
+import { usePaginationQuery, useSortByQueries } from "@/hooks";
+import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
 
 interface IPageProps {
   videoId: string;
@@ -42,7 +38,7 @@ export function VideoPage({ videoId }: IPageProps) {
     data: notesResponse,
     isLoading: isNotesLoading,
     isError: isNotesError,
-  } = useGetNotesByVideoId({
+  } = useGetNotesByVideoIdQuery({
     videoId,
     paginationQuery: { page: currentPage, limit: PAGE_LIMIT, sortBy, order },
   });
@@ -77,27 +73,31 @@ export function VideoPage({ videoId }: IPageProps) {
       />
 
       <div className="container h-screen mx-auto px-2 py-6 overflow-auto">
-        {notesResponse.notes.length === 0 ? (
-          <ResizablePanels
-            leftSideContent={<h2>No notes found for this video.</h2>}
-            rightSideContent={<VideoPlayer videoId={videoId} />}
-          />
-        ) : (
-          <ResizablePanels
-            leftSideContent={
-              openMarkdownViewer && note ? (
-                <MarkdownViewer content={note.content} noteTitle={note.title} />
-              ) : (
-                <VideoNotesList
-                  notes={notesResponse.notes}
-                  setOpenMarkdownViewer={() => setOpenMarkdownViewer(true)}
-                  setNote={setNote}
-                />
-              )
-            }
-            rightSideContent={<VideoPlayer videoId={videoId} />}
-          />
-        )}
+        {notesResponse.notes.length === 0
+          ? (
+              <ResizablePanels
+                leftSideContent={<h2>No notes found for this video.</h2>}
+                rightSideContent={<VideoPlayer videoId={videoId} />}
+              />
+            )
+          : (
+              <ResizablePanels
+                leftSideContent={
+                  openMarkdownViewer && note
+                    ? (
+                        <MarkdownViewer content={note.content} noteTitle={note.title} />
+                      )
+                    : (
+                        <VideoNotesList
+                          notes={notesResponse.notes}
+                          setOpenMarkdownViewer={() => setOpenMarkdownViewer(true)}
+                          setNote={setNote}
+                        />
+                      )
+                }
+                rightSideContent={<VideoPlayer videoId={videoId} />}
+              />
+            )}
       </div>
 
       <PaginationComponent

@@ -5,8 +5,8 @@ import type { ReactNode } from "react";
 
 import { useState } from "react";
 
-import { useDeleteNote } from "@/features/note/hooks";
-import { useUIStore } from "@/stores";
+import { useNote } from "@/features/note/hooks";
+import { useDialogStore } from "@/stores";
 
 import { DeleteConfirmationDialog } from "../global";
 
@@ -25,8 +25,8 @@ export function NotesListContainer({
   deleteDialogTitle,
   deleteDialogDescription,
 }: NotesListContainerProps) {
-  const { actions } = useUIStore();
-  const { mutate: deleteNote, isPending: isDeletingNote } = useDeleteNote();
+  const { closeDialog } = useDialogStore();
+  const { deleteNote, isDeletingNote } = useNote();
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
 
   const handleOpenDeleteModal = (noteId: string) => {
@@ -37,13 +37,13 @@ export function NotesListContainer({
     if (noteToDelete) {
       deleteNote(noteToDelete);
       setNoteToDelete(null);
-      actions.closeModal();
+      closeDialog();
     }
   };
 
   const handleCancelDelete = () => {
     setNoteToDelete(null);
-    actions.closeModal();
+    closeDialog();
   };
 
   return (

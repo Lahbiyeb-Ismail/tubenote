@@ -4,12 +4,12 @@ import { useState } from "react";
 
 import { DashboardHeader } from "@/components/dashboards";
 import { PaginationComponent } from "@/components/global";
-import { NoNotesFound } from "@/features/note/components";
-import { useGetUserNotes } from "@/features/note/hooks";
 import { usePaginationQuery, useSortByQueries } from "@/hooks";
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils";
 
+import { NoNotesFound } from "../components";
 import { NotesDashboardSkeleton, NotesList, NotesSearchAndFilter } from "../components/notes-dashboard";
+import { useGetUserNotesQuery } from "../queries";
 
 export function NotesDashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,7 +26,7 @@ export function NotesDashboardPage() {
 
   const { order } = useSortByQueries({});
 
-  const { data, isLoading: isNotesLoading } = useGetUserNotes({
+  const { data, isLoading: isNotesLoading } = useGetUserNotesQuery({
     page: currentPage,
     limit: PAGE_LIMIT,
     sortBy,

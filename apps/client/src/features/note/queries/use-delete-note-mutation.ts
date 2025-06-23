@@ -8,7 +8,7 @@ import { useDialogStore } from "@/stores";
 import { deleteNote } from "../services";
 import { useNoteStore } from "../store";
 
-export function useDeleteNote() {
+export function useDeleteNoteMutation() {
   const queryClient = useQueryClient();
 
   const { noteActions } = useNoteStore();
