@@ -1,5 +1,5 @@
 {
-  "name": "@tubenote/youtube-api",
+  "name": "@tubenote/api-errors",
   "version": "1.0.0",
   "description": "",
   "main": "./dist/index.js",
@@ -14,14 +14,11 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "dotenv": "^16.5.0",
     "tsup": "^8.4.0",
-    "typescript": "^5.7.2",
-    "zod": "^3.25.49"
+    "http-status": "^1.7.4"
   },
   "devDependencies": {
-    "@tubenote/api-errors": "workspace:*",
     "@tubenote/config-typescript": "workspace:*",
-    "@types/node": "^22.15.29"
+    "typescript": "^5.7.2"
   }
 }

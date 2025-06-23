@@ -6,6 +6,10 @@ dotenv.config();
 const envSchema = z.object({
   YOUTUBE_API_URL: z.string().url().includes("www.googleapis.com"),
   YOUTUBE_API_KEY: z.string(),
+  PYTHON_EXECUTABLE: z.string().default("python3"),
+  SCRIPT_TIMEOUT: z.string().default("30000").transform(Number).refine(
+    value => value > 0,
+  ),
 });
 
 type EnvSchema = z.infer<typeof envSchema>;
@@ -33,5 +37,9 @@ export const envConfig = {
   api: {
     url: validatedEnv.YOUTUBE_API_URL,
     key: validatedEnv.YOUTUBE_API_KEY,
+  },
+  python: {
+    executable: validatedEnv.PYTHON_EXECUTABLE,
+    scriptTimeout: validatedEnv.SCRIPT_TIMEOUT,
   },
 } as const;

@@ -7,6 +7,11 @@ import { videoController } from "./video.module";
 
 const videoRoutes: Router = Router();
 
+videoRoutes.route("/transcript/:id").get(
+  validateRequest({ params: idParamSchema }),
+  (req, res) => videoController.getYoutubeVideoTranscript(req, res),
+);
+
 // - isAuthenticated: Ensures the user is authenticated before accessing any video routes.
 videoRoutes.use(isAuthenticated);
 
