@@ -9,7 +9,10 @@ import { z } from "zod";
  * - **videoTitle**: Must be a string with a minimum length of 3 characters.
  * - **thumbnail**: Must be a string with a minimum length of 3 characters.
  * - **youtubeId**: Must be a string with a minimum length of 3 characters.
- * - **timestamp**: Must be a number.
+ * - **tags**: Optional array of strings (min length 3), defaults to `[]` if not provided.
+ * - **category**: Optional string (min length 3), defaults to `null` if not provided.
+ * - **isPublic**: Optional boolean that defaults to `false`.
+ * - **timestamp**: Object containing `start` and `end` numbers (both ≥ 0).
  *
  * The `.strict()` method is used to ensure that no additional properties are allowed.
  */
@@ -30,6 +33,18 @@ export const createNoteSchema = z
     youtubeId: z
       .string()
       .min(3, { message: "Youtube id must be at least 3 characters long." }),
+    tags: z
+      .array(
+        z.string().min(3, { message: "Each tag must be at least 3 characters long." }),
+      )
+      .optional()
+      .default([]),
+    category: z
+      .string()
+      .optional()
+      .nullable()
+      .default(null),
+    isPublic: z.boolean().optional().default(false),
     timestamp: z.object({
       start: z
         .number()

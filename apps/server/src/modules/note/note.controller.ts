@@ -1,7 +1,3 @@
-import type { Response } from "express";
-import httpStatus from "http-status";
-import { inject, injectable } from "inversify";
-
 import type { Note } from "@tubenote/db";
 import type {
   ICreateNoteDto,
@@ -9,11 +5,15 @@ import type {
   IParamIdDto,
   IUpdateNoteDto,
 } from "@tubenote/dtos";
+import type { Response } from "express";
 
-import { TYPES } from "@/config/inversify/types";
+import httpStatus from "http-status";
+import { inject, injectable } from "inversify";
 
 import type { IResponseFormatter } from "@/modules/shared/services";
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
+
+import { TYPES } from "@/config/inversify/types";
 
 import type { INoteController, INoteService } from "./note.types";
 
@@ -35,7 +35,7 @@ export class NoteController implements INoteController {
   constructor(
     @inject(TYPES.NoteService) private _noteService: INoteService,
     @inject(TYPES.ResponseFormatter)
-    private _responseFormatter: IResponseFormatter
+    private _responseFormatter: IResponseFormatter,
   ) {}
 
   /**
@@ -47,15 +47,15 @@ export class NoteController implements INoteController {
    */
   async createNote(
     req: TypedRequest<ICreateNoteDto, IParamIdDto>,
-    res: Response
+    res: Response,
   ): Promise<void> {
     const userId = req.userId;
     const videoId = req.params.id;
 
     const note = await this._noteService.createNote(userId, videoId, req.body);
 
-    const formattedResponse =
-      this._responseFormatter.formatSuccessResponse<Note>({
+    const formattedResponse
+      = this._responseFormatter.formatSuccessResponse<Note>({
         responseOptions: {
           statusCode: httpStatus.CREATED,
           data: note,
@@ -75,7 +75,7 @@ export class NoteController implements INoteController {
    */
   async updateNote(
     req: TypedRequest<IUpdateNoteDto, IParamIdDto>,
-    res: Response
+    res: Response,
   ): Promise<void> {
     const userId = req.userId;
     const noteId = req.params.id;
@@ -83,11 +83,11 @@ export class NoteController implements INoteController {
     const updatedNote = await this._noteService.updateNote(
       userId,
       noteId,
-      req.body
+      req.body,
     );
 
-    const formattedResponse =
-      this._responseFormatter.formatSuccessResponse<Note>({
+    const formattedResponse
+      = this._responseFormatter.formatSuccessResponse<Note>({
         responseOptions: {
           data: updatedNote,
           message: "Note updated successfully.",
@@ -106,15 +106,15 @@ export class NoteController implements INoteController {
    */
   async deleteNote(
     req: TypedRequest<EmptyRecord, IParamIdDto>,
-    res: Response
+    res: Response,
   ): Promise<void> {
     const userId = req.userId;
     const noteId = req.params.id;
 
     await this._noteService.deleteNote(userId, noteId);
 
-    const formattedResponse =
-      this._responseFormatter.formatSuccessResponse<null>({
+    const formattedResponse
+      = this._responseFormatter.formatSuccessResponse<null>({
         responseOptions: {
           message: "Note deleted successfully.",
           data: null,
@@ -133,15 +133,15 @@ export class NoteController implements INoteController {
    */
   async getNoteById(
     req: TypedRequest<EmptyRecord, IParamIdDto>,
-    res: Response
+    res: Response,
   ): Promise<void> {
     const userId = req.userId;
     const noteId = req.params.id;
 
     const note = await this._noteService.findNote(userId, noteId);
 
-    const formattedResponse =
-      this._responseFormatter.formatSuccessResponse<Note>({
+    const formattedResponse
+      = this._responseFormatter.formatSuccessResponse<Note>({
         responseOptions: {
           data: note,
           message: "Note retrieved successfully.",
@@ -160,7 +160,7 @@ export class NoteController implements INoteController {
    */
   async getUserNotes(
     req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
-    res: Response
+    res: Response,
   ): Promise<void> {
     const userId = req.userId;
 
@@ -171,10 +171,10 @@ export class NoteController implements INoteController {
 
     const paginatedData = await this._noteService.fetchUserNotes(
       userId,
-      findManyDto
+      findManyDto,
     );
 
-    const formattedResponse = this._responseFormatter.formatPaginatedResponse({
+    const formattedResponse = this._responseFormatter.formatPaginatedResponse<Note>({
       page: req.query.page ?? 1,
       paginatedData,
       responseOptions: {
@@ -194,7 +194,7 @@ export class NoteController implements INoteController {
    */
   async getUserRecentNotes(
     req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
-    res: Response
+    res: Response,
   ): Promise<void> {
     const userId = req.userId;
     const findManyDto = this._responseFormatter.getPaginationQueries({
@@ -225,7 +225,7 @@ export class NoteController implements INoteController {
    */
   async getRecentlyUpdatedNotes(
     req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
-    res: Response
+    res: Response,
   ): Promise<void> {
     const userId = req.userId;
 
@@ -257,7 +257,7 @@ export class NoteController implements INoteController {
    */
   async getNotesByVideoId(
     req: TypedRequest<EmptyRecord, IParamIdDto, IPaginationQueryDto>,
-    res: Response
+    res: Response,
   ): Promise<void> {
     const userId = req.userId;
     const videoId = req.params.id;
@@ -270,7 +270,7 @@ export class NoteController implements INoteController {
     const paginatedData = await this._noteService.fetchNotesByVideoId(
       userId,
       videoId,
-      findManyDto
+      findManyDto,
     );
 
     const formattedResponse = this._responseFormatter.formatPaginatedResponse({

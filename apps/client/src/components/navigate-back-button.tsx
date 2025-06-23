@@ -10,7 +10,7 @@ interface IProps {
 
 export function NavigateBackButton({ href = "/", btnText = "Back to Home" }: IProps) {
   return (
-    <div className="mb-8 animate-fade-in">
+    <div className="animate-fade-in">
       <Link href={href}>
         <Button
           variant="ghost"

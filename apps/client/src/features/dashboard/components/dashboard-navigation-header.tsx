@@ -21,7 +21,7 @@ const dashboardNavLinks = [{
   icon: User,
 }];
 
-export function DashboardHeader() {
+export function DashboardNavigationHeader() {
   return (
     <NavigationHeader navLinks={dashboardNavLinks}>
       <div className="flex items-center gap-4">

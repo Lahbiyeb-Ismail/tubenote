@@ -8,6 +8,8 @@ import { z } from "zod";
  * - **title**: Must be a string with a minimum length of 3 characters.
  * - **content**: Must be a string with a minimum length of 10 characters.
  * - **timestamp**: Must be a number.
+ * - **tags**: Optional array of strings, each with a minimum length of 3 characters.
+ * - **category**: Optional string that can be `null`, defaults to `null` if not provided.
  *
  * The `.strict()` method ensures that no additional properties are allowed in the object.
  */
@@ -31,5 +33,16 @@ export const updateNoteSchema = z
           .min(0, { message: "End time must be a positive number." }),
       })
       .optional(),
+    tags: z
+      .array(
+        z.string().min(3, { message: "Each tag must be at least 3 characters long." }),
+      )
+      .optional()
+      .default([]),
+    category: z
+      .string()
+      .optional()
+      .nullable()
+      .default(null),
   })
   .strict();

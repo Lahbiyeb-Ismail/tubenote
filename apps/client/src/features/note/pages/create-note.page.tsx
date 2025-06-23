@@ -1,9 +1,9 @@
 "use client";
 
+import { NotePageLayout } from "@/features/note/components";
 import { useCreateNote } from "@/features/note/hooks";
 import { useGetVideoById } from "@/features/video/hooks";
 
-import { NotePageLayout } from "@/features/note/components";
 import { useNoteStore } from "../store";
 
 interface IPageProps {
@@ -15,16 +15,17 @@ export function CreateNotePage({ videoId }: IPageProps) {
   const { noteTimestamp } = useNoteStore();
   const { data: videoData, isLoading } = useGetVideoById(videoId);
 
-  const handleCreateNote = (noteTitle: string, content: string) => {
-    if (!videoData) return;
-
-    console.log("Note Timestamp:", noteTimestamp);
+  const handleCreateNote = (title: string, content: string, category: string, tags: string[]) => {
+    if (!videoData)
+      return;
 
     createNote({
       videoId: videoData.id,
       createNoteData: {
-        title: noteTitle,
-        content: content,
+        title,
+        content,
+        tags,
+        category,
         thumbnail: videoData.thumbnails.medium.url,
         videoTitle: videoData.title,
         youtubeId: videoData.youtubeId,
@@ -38,8 +39,6 @@ export function CreateNotePage({ videoId }: IPageProps) {
       videoId={videoId}
       isLoading={isLoading || !videoData}
       isSavingNote={isSavingNote}
-      modalTitle="Confirm Save Note"
-      modalDescription="Are you sure you want to save this note?"
       handleSaveNote={handleCreateNote}
     />
   );

@@ -99,18 +99,24 @@ model EmailVerificationToken {
 }
 
 type Timestamp {
-  start Float
-  end   Float
+  start Float // Start time in seconds
+  end   Float // End time in seconds
 }
 
 model Note {
   id         String    @id @default(auto()) @map("_id") @db.ObjectId
   title      String
   content    String
-  timestamp  Timestamp
   videoTitle String
   thumbnail  String
   youtubeId  String
+  category   String?
+  tags       String[]  @default([])
+  timestamp  Timestamp
+  isPublic   Boolean   @default(false)
+  isPinned   Boolean   @default(false)
+  isArchived Boolean   @default(false)
+  isFavorite Boolean   @default(false)
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   userId     String    @db.ObjectId

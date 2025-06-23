@@ -67,11 +67,11 @@ export const sidebarMenuLinks = [
   { name: "Settings", icon: Settings, href: "/settings" },
 ] as const;
 
-type NavItem = {
+interface NavItem {
   name: string;
   href: string;
   icon: React.ElementType;
-};
+}
 
 export const navItems: NavItem[] = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -85,6 +85,6 @@ export const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
 export const GOOGLE_REDIRECT_URI = `${API_URL}/oauth/google`;
 
-export const PAGE_LIMIT = 8;
+export const PAGE_LIMIT = 9;
 
 export const DEFAULT_PAGE = 1;

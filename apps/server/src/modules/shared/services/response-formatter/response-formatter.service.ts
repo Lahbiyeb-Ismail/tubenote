@@ -7,6 +7,7 @@ import type {
 
 import httpStatus from "http-status";
 import { injectable } from "inversify";
+
 import type {
   IFormatErrorResponseOptions,
   IFormatPaginatedResponseOptions,
@@ -36,10 +37,9 @@ export class ResponseFormatter implements IResponseFormatter {
   private readonly _defaultSanitizationRules: ISanitizationRule[] = [
     { fieldPattern: /password/i },
     { fieldPattern: /userIds/i },
-    // { fieldPattern: /token|api[_-]?key|secret/i },
     { fieldPattern: /credit[_-]?card|card[_-]?number/i },
     { fieldPattern: /ssn|social[_-]?security/i },
-    { fieldPattern: /auth|authorization/i },
+    { fieldPattern: /auth/i },
     { fieldPattern: /key/i },
     { fieldPattern: /private[_-]?key/i },
     { fieldPattern: /secret[_-]?key/i },
@@ -62,13 +62,19 @@ export class ResponseFormatter implements IResponseFormatter {
    */
   sanitizeData<T>(
     data: T,
-    rules: ISanitizationRule[] = this._defaultSanitizationRules
+    rules: ISanitizationRule[] = this._defaultSanitizationRules,
   ): T {
-    if (!data) return data;
+    if (!data)
+      return data;
+
+    // If it's a Date, return it directly (avoid stripping it to an empty object)
+    if (data instanceof Date) {
+      return data;
+    }
 
     // Handle arrays
     if (Array.isArray(data)) {
-      return data.map((item) => this.sanitizeData(item, rules)) as unknown as T;
+      return data.map(item => this.sanitizeData(item, rules)) as unknown as T;
     }
 
     // Handle objects
@@ -79,14 +85,15 @@ export class ResponseFormatter implements IResponseFormatter {
         // Check if the current field matches any sensitive data pattern
         if (this.isFieldSensitive(key, rules)) {
           delete (sanitized as any)[key];
-        } else if (
-          typeof (sanitized as any)[key] === "object" &&
-          (sanitized as any)[key] !== null
+        }
+        else if (
+          typeof (sanitized as any)[key] === "object"
+          && (sanitized as any)[key] !== null
         ) {
           // Recursively sanitize nested objects
           (sanitized as any)[key] = this.sanitizeData(
             (sanitized as any)[key],
-            rules
+            rules,
           );
         }
       }
@@ -116,12 +123,11 @@ export class ResponseFormatter implements IResponseFormatter {
   /**
    * Returns a standardized API response object.
    *
-   * @param responseOptions - The response options including status, message, data, and pagination.
-   * @param sanitizationOptions - Optional sanitization options to override default settings.
+   * @param formatOptions - The options for formatting the response.
    * @returns A standardized response object with the provided options.
    */
   formatResponse<T>(
-    formatOptions: IFormatResponseOptions<T>
+    formatOptions: IFormatResponseOptions<T>,
   ): IApiSuccessResponse<T> {
     const { responseOptions, sanitizationOptions } = formatOptions;
 
@@ -169,7 +175,7 @@ export class ResponseFormatter implements IResponseFormatter {
    * });
    */
   formatSuccessResponse<T = null>(
-    options: IFormatResponseOptions<T>
+    options: IFormatResponseOptions<T>,
   ): IApiSuccessResponse<T> {
     return this.formatResponse(options);
   }
@@ -216,10 +222,10 @@ export class ResponseFormatter implements IResponseFormatter {
    * @returns A formatted API response with pagination information.
    */
   formatPaginatedResponse<T>(
-    formatOptions: IFormatPaginatedResponseOptions<T>
+    formatOptions: IFormatPaginatedResponseOptions<T>,
   ): IApiSuccessResponse<T[]> {
-    const { page, paginatedData, responseOptions, sanitizationOptions } =
-      formatOptions;
+    const { page, paginatedData, responseOptions, sanitizationOptions }
+      = formatOptions;
 
     const { totalPages, totalItems, data } = paginatedData;
 

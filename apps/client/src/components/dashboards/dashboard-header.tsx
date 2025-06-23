@@ -1,32 +1,37 @@
-import { Calendar, LayoutGrid, List, Search } from "lucide-react";
+import { Download, Plus } from "lucide-react";
 
-export function DashboardHeader() {
+import { useDialogStore } from "@/stores";
+
+import { Button } from "../ui";
+
+interface IProps {
+  title: string;
+  description: string;
+}
+
+export function DashboardHeader({ title, description }: IProps) {
+  const { openDialog } = useDialogStore();
+
   return (
-    <header className="mb-8 flex items-center justify-between rounded-lg bg-white p-4 shadow">
-      <Search className="text-gray-400 mr-2" />
-      <input
-        type="text"
-        placeholder="Search"
-        className="flex-grow outline-none"
-      />
-      <div className="flex items-center ml-4">
-        <span className="text-gray-600 mr-2">Monday, 6th March</span>
-        <Calendar className="text-gray-400" />
+    <div className="mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-1">
+            {description}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button className="gap-2 bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700" onClick={() => openDialog("create-note")}>
+            <Plus className="h-4 w-4" />
+            New Note
+          </Button>
+          <Button variant="outline" className="gap-2">
+            <Download className="h-4 w-4" />
+            Export Data
+          </Button>
+        </div>
       </div>
-      <div className="flex items-center ml-4">
-        <button
-          type="button"
-          className="bg-blue-500 text-white px-3 py-1 rounded-l-md"
-        >
-          <LayoutGrid size={18} />
-        </button>
-        <button
-          type="button"
-          className="bg-gray-200 text-gray-600 px-3 py-1 rounded-r-md"
-        >
-          <List size={18} />
-        </button>
-      </div>
-    </header>
+    </div>
   );
 }

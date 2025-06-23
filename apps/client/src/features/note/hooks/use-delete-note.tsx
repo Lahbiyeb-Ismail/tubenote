@@ -3,6 +3,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
+import { useDialogStore } from "@/stores";
+
 import { deleteNote } from "../services";
 import { useNoteStore } from "../store";
 
@@ -10,6 +12,7 @@ export function useDeleteNote() {
   const queryClient = useQueryClient();
 
   const { noteActions } = useNoteStore();
+  const { closeDialog } = useDialogStore();
 
   return useMutation({
     mutationFn: deleteNote,
@@ -24,6 +27,8 @@ export function useDeleteNote() {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
 
       toast.success(payload.message);
+
+      closeDialog();
     },
     onError: (error) => {
       toast.error(error.message);

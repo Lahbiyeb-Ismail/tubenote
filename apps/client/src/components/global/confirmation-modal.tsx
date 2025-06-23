@@ -1,7 +1,5 @@
 "use client";
 
-import { useUIStore } from "@/stores";
-
 import {
   Dialog,
   DialogContent,
@@ -9,22 +7,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui";
+import { useDialogStore } from "@/stores";
 
-type ConfirmationModalProps = {
+interface ConfirmationModalProps {
   title: string;
   description: string;
   children: React.ReactNode;
-};
+}
 
 export function ConfirmationModal({
   title,
   description,
   children,
 }: ConfirmationModalProps) {
-  const { modal, actions } = useUIStore();
+  const { isOpen, closeDialog } = useDialogStore();
 
   return (
-    <Dialog open={modal.isOpen} onOpenChange={actions.closeModal}>
+    <Dialog open={isOpen} onOpenChange={closeDialog}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

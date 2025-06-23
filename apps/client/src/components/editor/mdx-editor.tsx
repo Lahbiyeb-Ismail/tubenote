@@ -1,43 +1,44 @@
 "use client";
 
+import type { DirectiveNode, EditorInFocus, MDXEditorMethods } from "@mdxeditor/editor";
+import type { MutableRefObject } from "react";
+
 import {
   AdmonitionDirectiveDescriptor,
   BlockTypeSelect,
   BoldItalicUnderlineToggles,
   ChangeAdmonitionType,
   ChangeCodeMirrorLanguage,
+  codeBlockPlugin,
+  codeMirrorPlugin,
   CodeToggle,
   ConditionalContents,
   CreateLink,
+  diffSourcePlugin,
   DiffSourceToggleWrapper,
-  type DirectiveNode,
-  type EditorInFocus,
+
+  directivesPlugin,
+
+  headingsPlugin,
   InsertAdmonition,
   InsertCodeBlock,
   InsertTable,
   InsertThematicBreak,
-  ListsToggle,
-  MDXEditor,
-  type MDXEditorMethods,
-  Separator,
-  ShowSandpackInfo,
-  UndoRedo,
-  codeBlockPlugin,
-  codeMirrorPlugin,
-  diffSourcePlugin,
-  directivesPlugin,
-  headingsPlugin,
   linkDialogPlugin,
   linkPlugin,
   listsPlugin,
+  ListsToggle,
   markdownShortcutPlugin,
+  MDXEditor,
+
   quotePlugin,
+  Separator,
+  ShowSandpackInfo,
   tablePlugin,
   thematicBreakPlugin,
   toolbarPlugin,
+  UndoRedo,
 } from "@mdxeditor/editor";
-import { type MutableRefObject } from "react";
-
 import "@mdxeditor/editor/style.css";
 
 function whenInAdmonition(editorInFocus: EditorInFocus | null) {
@@ -47,21 +48,21 @@ function whenInAdmonition(editorInFocus: EditorInFocus | null) {
   }
 
   return ["note", "tip", "danger", "info", "caution"].includes(
-    (node as DirectiveNode).getMdastNode().name
+    (node as DirectiveNode).getMdastNode().name,
   );
 }
 
-const MyToolbar = () => {
+function MyToolbar() {
   return (
     <DiffSourceToggleWrapper>
       <ConditionalContents
         options={[
           {
-            when: (editor) => editor?.editorType === "codeblock",
+            when: editor => editor?.editorType === "codeblock",
             contents: () => <ChangeCodeMirrorLanguage />,
           },
           {
-            when: (editor) => editor?.editorType === "sandpack",
+            when: editor => editor?.editorType === "sandpack",
             contents: () => <ShowSandpackInfo />,
           },
           {
@@ -100,7 +101,7 @@ const MyToolbar = () => {
                 <ConditionalContents
                   options={[
                     {
-                      when: (editorInFocus) => !whenInAdmonition(editorInFocus),
+                      when: editorInFocus => !whenInAdmonition(editorInFocus),
                       contents: () => (
                         <>
                           <Separator />
@@ -119,7 +120,7 @@ const MyToolbar = () => {
       />
     </DiffSourceToggleWrapper>
   );
-};
+}
 
 const myPlugins = [
   toolbarPlugin({ toolbarContents: () => <MyToolbar /> }),
@@ -147,21 +148,45 @@ const myPlugins = [
   markdownShortcutPlugin(),
 ];
 
-type AppMDXEditorProps = {
+interface AppMDXEditorProps {
   editorRef: MutableRefObject<MDXEditorMethods | null>;
   noteContent?: string;
-};
+}
 
 export function AppMDXEditor({
   editorRef,
   noteContent = "",
 }: AppMDXEditorProps) {
   return (
-    <MDXEditor
-      ref={editorRef}
-      markdown={noteContent}
-      plugins={myPlugins}
-      className="mdxeditor"
-    />
+    <div className="h-full">
+      <MDXEditor
+        ref={editorRef}
+        markdown={noteContent}
+        plugins={myPlugins}
+        className="mdxeditor"
+      />
+
+      <div className="flex items-center justify-between text-sm text-muted-foreground pt-2 border-t">
+        <div className="flex items-center space-x-4">
+          <span>
+            {noteContent.length}
+            {" "}
+            characters
+          </span>
+          <span>
+            {noteContent.split(/\s+/).filter(word => word.length > 0).length}
+            {" "}
+            words
+          </span>
+        </div>
+        <div className="text-xs">
+          💡 Use
+          {" "}
+          <kbd className="px-1 py-0.5 bg-muted rounded text-xs">Ctrl+Z</kbd>
+          {" "}
+          to undo
+        </div>
+      </div>
+    </div>
   );
 }

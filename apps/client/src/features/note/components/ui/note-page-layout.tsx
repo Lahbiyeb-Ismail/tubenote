@@ -1,76 +1,99 @@
 "use client";
 
-import { useEditorContent } from "@/features/note/hooks";
-import { useUIStore } from "@/stores";
+import dynamic from "next/dynamic";
 
-import { AppMDXEditor, SaveNoteForm } from "@/components/editor";
+import { AppMDXEditor } from "@/components/editor";
 import {
-  ConfirmationModal,
   Loader,
   ResizablePanels,
-  SaveButton,
 } from "@/components/global";
+import { useEditorContent } from "@/features/note/hooks";
 import { VideoPlayer } from "@/features/video/components";
 
-export interface NotePageLayoutProps {
+import { NoteActionHeader } from "../note-action-header";
+
+const SaveNoteDialog = dynamic(
+  () => import("../save-note-dialog").then(mod => mod.SaveNoteDialog),
+  { ssr: false, loading: () => <div className="hidden">Loading...</div> },
+);
+
+interface IProps {
   videoId: string;
-  noteContent?: string;
-  noteTitle?: string;
   isLoading: boolean;
   isSavingNote: boolean;
-  modalTitle: string;
-  modalDescription: string;
-  handleSaveNote: (noteTitle: string, content: string) => void;
+  handleSaveNote: (title: string, content: string, category: string, tags: string[]) => void;
+  noteTitle?: string;
+  noteContent?: string;
+  noteTags?: string[];
+  noteCategory?: string;
 }
 
 export function NotePageLayout({
   videoId,
-  noteContent,
-  noteTitle,
   isLoading,
   isSavingNote,
-  modalTitle,
-  modalDescription,
   handleSaveNote,
-}: NotePageLayoutProps) {
+  noteTitle,
+  noteContent,
+  noteTags,
+  noteCategory,
+}: IProps) {
   const { editorRef, getContent } = useEditorContent();
-  const { actions } = useUIStore();
+
+  const handleSaveSubmit = (title: string, category: string, tags: string[]) => {
+    const content = getContent();
+    handleSaveNote(title, content, category, tags);
+  };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
-        <Loader />
-      </div>
+      <Loader />
     );
   }
 
-  const handleSaveSubmit = (noteTitle: string) => {
-    const content = getContent();
-    handleSaveNote(noteTitle, content);
-  };
+  // const renderEditor = () => (
+  //   <ResizablePanel defaultSize={50} minSize={30} maxSize={70} className="px-2 relative">
+  //     <AppMDXEditor editorRef={editorRef} noteContent={noteContent} />
+  //   </ResizablePanel>
+  // );
+  // ;
+
+  // const renderVideoPlayer = () => (
+  //   <ResizablePanel defaultSize={50} minSize={30} maxSize={70} className="px-2 relative">
+  //     <VideoPlayer videoId={videoId} />
+  //   </ResizablePanel>
+  // );
 
   return (
-    <>
-      <div className="flex h-screen bg-white">
+    <div className="h-screen bg-white">
+      <NoteActionHeader />
+
+      <div className="h-[calc(100vh-60px)] p-2">
         <ResizablePanels
-          leftSideContent={
-            <AppMDXEditor editorRef={editorRef} noteContent={noteContent} />
-          }
+          leftSideContent={<AppMDXEditor editorRef={editorRef} noteContent={noteContent} />}
           rightSideContent={<VideoPlayer videoId={videoId} />}
         />
 
-        <SaveButton
-          className="absolute bottom-3 right-[48%]"
-          onClick={actions.openModal}
-        />
+        {/* <ResizablePanelGroup direction="horizontal" className="rounded-lg border">
+          {editorPosition === "left"
+            ? (
+                <>
+                  {renderEditor()}
+                  <ResizableHandle withHandle />
+                  {renderVideoPlayer()}
+                </>
+              )
+            : (
+                <>
+                  {renderVideoPlayer()}
+                  <ResizableHandle withHandle />
+                  {renderEditor()}
+                </>
+              )}
+        </ResizablePanelGroup> */}
       </div>
-      <ConfirmationModal title={modalTitle} description={modalDescription}>
-        <SaveNoteForm
-          noteTitle={noteTitle}
-          isLoading={isSavingNote}
-          handleSaveSubmit={handleSaveSubmit}
-        />
-      </ConfirmationModal>
-    </>
+
+      <SaveNoteDialog noteTitle={noteTitle} noteTags={noteTags} noteCategory={noteCategory} isSaving={isSavingNote} onSaveNote={handleSaveSubmit} />
+    </div>
   );
 }
