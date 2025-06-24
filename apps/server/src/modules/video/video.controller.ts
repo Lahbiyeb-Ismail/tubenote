@@ -79,6 +79,34 @@ export class VideoController implements IVideoController {
   }
 
   /**
+   * Retrieves the total count of videos for the authenticated user.
+   *
+   * @param req - The typed request object containing user authentication information
+   * @param res - The Express response object used to send the response
+   * @returns A Promise that resolves when the response is sent with the video count
+   *
+   * @throws Will return an error response if the user is not authenticated or if there's an issue retrieving the count
+   *
+   */
+  async getUserVideosCount(
+    req: TypedRequest<EmptyRecord>,
+    res: Response,
+  ) {
+    const userId = req.userId;
+
+    const count = await this._videoService.getUserVideosCount(userId);
+
+    const formattedResponse = this._responseFormatter.formatSuccessResponse({
+      responseOptions: {
+        data: count,
+        message: "Videos count retrieved successfully.",
+      },
+    });
+
+    res.status(formattedResponse.statusCode).json(formattedResponse);
+  }
+
+  /**
    * Retrieves a specific video by its ID for a specific user.
    *
    * @param req - The request object containing user ID and video ID parameters.

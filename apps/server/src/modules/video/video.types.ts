@@ -38,6 +38,7 @@ export interface IVideoService {
     userId: string,
     findManyDto: IFindManyDto
   ) => Promise<IPaginatedData<Video>>;
+  getUserVideosCount: (userId: string) => Promise<number>;
   saveVideo: (userId: string, videoYoutubeId: string) => Promise<Video>;
   getVideoByYoutubeId: (videoYoutubeId: string) => Promise<Video | null>;
 }
@@ -49,6 +50,10 @@ export interface IVideoController {
   ) => Promise<void>;
   getUserVideos: (
     req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
+    res: Response
+  ) => Promise<void>;
+  getUserVideosCount: (
+    req: TypedRequest<EmptyRecord>,
     res: Response
   ) => Promise<void>;
   saveVideoData: (

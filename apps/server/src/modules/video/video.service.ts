@@ -62,6 +62,10 @@ export class VideoService implements IVideoService {
     });
   }
 
+  async getUserVideosCount(userId: string): Promise<number> {
+    return this._videoRepository.count(userId);
+  }
+
   async saveVideo(userId: string, videoYoutubeId: string): Promise<Video> {
     if (!videoYoutubeId || !userId) {
       throw new BadRequestError(ERROR_MESSAGES.BAD_REQUEST);
