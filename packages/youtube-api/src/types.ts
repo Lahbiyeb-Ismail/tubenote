@@ -51,6 +51,33 @@ export interface VideoChapter {
 }
 
 /**
+ * Statistics for a YouTube video including engagement metrics.
+ *
+ * @remarks
+ * All count values are returned as strings from the YouTube API to handle
+ * large numbers that may exceed JavaScript's safe integer limit.
+ *
+ */
+interface VideoStatistics {
+  viewCount: string; // Total views of the video
+  likeCount: string; // Total likes on the video
+  commentCount: string; // Total comments on the video
+}
+
+/**
+ * Represents information about a YouTube channel.
+ *
+ * @interface ChannelInfo
+ */
+export interface ChannelInfo {
+  id: string; // The unique identifier of the channel
+  title: string; // The name of the channel
+  customUrl: string; // The custom URL of the channel
+  description: string; // Description of the channel
+  thumbnails: Thumbnails; // Thumbnails for the channel
+}
+
+/**
  * Represents structured data from a YouTube video.
  *
  * @interface YoutubeVideoData
@@ -60,8 +87,10 @@ export interface VideoChapter {
  * @property {string} channelTitle - The title of the channel that uploaded the video
  * @property {string[]} tags - The list of tags associated with the video
  * @property {string} embedHtmlPlayer - HTML code for embedding the video player
+ * @property {number} videoDuration - The duration of the video in seconds
  * @property {Thumbnails} thumbnails - Object containing different thumbnail sizes for the video
  * @property {VideoChapter[]} videoChapters - Array of chapters/segments in the video
+ * @property {VideoStatistics} videoStatistics - Statistics about the video (views, likes, comments)
  */
 export interface YoutubeVideoData {
   youtubeId: string;
@@ -70,8 +99,11 @@ export interface YoutubeVideoData {
   channelTitle: string;
   tags: string[];
   embedHtmlPlayer: string;
+  videoDuration: number;
   thumbnails: Thumbnails;
   videoChapters: VideoChapter[];
+  videoStatistics: VideoStatistics;
+  channelInfo: ChannelInfo;
 }
 
 /**

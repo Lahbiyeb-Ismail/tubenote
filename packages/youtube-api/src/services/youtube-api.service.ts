@@ -1,4 +1,4 @@
-import type { IYoutubeApiService, VideoChapter, YoutubeVideoData } from "../types";
+import type { ChannelInfo, IYoutubeApiService, VideoChapter, YoutubeVideoData } from "../types";
 
 import { envConfig } from "../env.config";
 
@@ -161,6 +161,29 @@ export class YoutubeApiService implements IYoutubeApiService {
     return chapters;
   }
 
+  private async getVideoChannelInfo(channelId: string): Promise<ChannelInfo> {
+    const res = await fetch(
+      `${this.YOUTUBE_API_URL}/channels?id=${channelId}&key=${this.YOUTUBE_API_KEY}&part=snippet`,
+    );
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch channel: ${res.status} ${res.statusText}`);
+    }
+
+    const data = await res.json();
+    if (!data.items?.length) {
+      throw new Error(`No channel found for ID "${channelId}"`);
+    }
+
+    return {
+      id: data.items[0].id,
+      title: data.items[0].snippet.title,
+      customUrl: data.items[0].snippet.customUrl,
+      description: data.items[0].snippet.description,
+      thumbnails: data.items[0].snippet.thumbnails,
+    };
+  }
+
   /**
    * Retrieves detailed information about a YouTube video using the YouTube API.
    *
@@ -179,7 +202,7 @@ export class YoutubeApiService implements IYoutubeApiService {
    */
   async getYoutubeVideoData(ytVideoId: string): Promise<YoutubeVideoData> {
     const response = await fetch(
-      `${this.YOUTUBE_API_URL}/videos?id=${ytVideoId}&key=${this.YOUTUBE_API_KEY}&part=snippet,player,contentDetails`,
+      `${this.YOUTUBE_API_URL}/videos?id=${ytVideoId}&key=${this.YOUTUBE_API_KEY}&part=snippet,player,contentDetails,statistics`,
     );
 
     if (!response.ok) {
@@ -192,15 +215,16 @@ export class YoutubeApiService implements IYoutubeApiService {
       throw new Error("Video not found or no data available");
     }
 
-    const { title, description, channelTitle, thumbnails, tags }
+    const { title, description, channelTitle, channelId, thumbnails, tags }
       = data.items[0].snippet;
 
     const { embedHtml: embedHtmlPlayer } = data.items[0].player;
 
     const isoDuration = data.items[0].contentDetails?.duration || "PT0S";
-    const videoLengthSec = this.parseISO8601Duration(isoDuration);
+    const videoDuration = this.parseISO8601Duration(isoDuration);
 
-    const videoChapters = this.extractVideoChapters(description, videoLengthSec);
+    const videoChapters = this.extractVideoChapters(description, videoDuration);
+    const channelInfo = await this.getVideoChannelInfo(channelId);
 
     return {
       youtubeId: data.items[0].id,
@@ -210,7 +234,10 @@ export class YoutubeApiService implements IYoutubeApiService {
       channelTitle,
       embedHtmlPlayer,
       tags,
+      videoDuration,
       thumbnails,
+      channelInfo,
+      videoStatistics: data.items[0].statistics,
     };
   }
 }
