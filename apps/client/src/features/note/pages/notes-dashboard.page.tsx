@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 
-import { DashboardHeader } from "@/components/dashboards";
+import { DashboardHeader, SearchAndFilterPanel } from "@/components/dashboards";
 import { PaginationComponent } from "@/components/global";
 import { usePaginationQuery, useSortByQueries } from "@/hooks";
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils";
 
 import { NoNotesFound } from "../components";
-import { NotesDashboardSkeleton, NotesList, NotesSearchAndFilter } from "../components/notes-dashboard";
+import { NotesDashboardSkeleton, NotesList } from "../components/notes-dashboard";
 import { useGetUserNotesQuery } from "../queries";
 
 export function NotesDashboardPage() {
@@ -46,7 +46,7 @@ export function NotesDashboardPage() {
       <DashboardHeader title="Your Notes 🗒" description="Manage and organize all your video notes in one place." />
 
       {/* Search and Filter Component */}
-      <NotesSearchAndFilter searchQuery={searchQuery} setSearchQuery={setSearchQuery} showFilters={showFilters} setShowFilters={setShowFilters} sortBy={sortBy} setSortBy={setSortBy} viewMode={viewMode} setViewMode={setViewMode} />
+      <SearchAndFilterPanel inputSearchPlaceholder="Search notes, tags, or content..." searchQuery={searchQuery} setSearchQuery={setSearchQuery} showFilters={showFilters} setShowFilters={setShowFilters} sortBy={sortBy} setSortBy={setSortBy} viewMode={viewMode} setViewMode={setViewMode} />
 
       {/* Notes List */}
       <NotesList viewMode={viewMode} notes={data.notes} />

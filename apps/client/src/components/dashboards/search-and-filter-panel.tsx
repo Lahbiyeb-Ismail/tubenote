@@ -26,6 +26,7 @@ const sortOptions = [
 ];
 
 interface IProps {
+  inputSearchPlaceholder: string;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   showFilters: boolean;
@@ -36,7 +37,8 @@ interface IProps {
   setViewMode: (mode: "grid" | "list") => void;
 }
 
-export function NotesSearchAndFilter({
+export function SearchAndFilterPanel({
+  inputSearchPlaceholder,
   searchQuery,
   setSearchQuery,
   showFilters,
@@ -52,7 +54,8 @@ export function NotesSearchAndFilter({
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input
-            placeholder="Search notes, tags, or content..."
+            placeholder={inputSearchPlaceholder}
+            // placeholder="Search notes, tags, or content..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             className="pl-10"
