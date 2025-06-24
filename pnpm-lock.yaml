@@ -499,6 +499,9 @@ importers:
 
   packages/youtube-api:
     dependencies:
+      '@tubenote/api-errors':
+        specifier: workspace:*
+        version: link:../api-errors
       dotenv:
         specifier: ^16.5.0
         version: 16.5.0
@@ -512,9 +515,6 @@ importers:
         specifier: ^3.25.49
         version: 3.25.67
     devDependencies:
-      '@tubenote/api-errors':
-        specifier: workspace:*
-        version: link:../api-errors
       '@tubenote/config-typescript':
         specifier: workspace:*
         version: link:../config-typescript
