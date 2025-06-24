@@ -3,11 +3,11 @@
 import { AddNoteForm, Header } from "@/components/dashboards";
 import { Loader, PaginationComponent } from "@/components/global";
 import { VideosList } from "@/features/video/components";
-import { useGetUserVideos } from "@/features/video/hooks";
 import { usePaginationQuery, useSortByQueries } from "@/hooks";
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
 
 import { NoVideosFound } from "../components";
+import { useGetUserVideosQuery } from "../queries";
 
 export function VideosDashboardPage() {
   const { currentPage, setPage } = usePaginationQuery({
@@ -17,10 +17,10 @@ export function VideosDashboardPage() {
   const { order, sortBy } = useSortByQueries({});
 
   const {
-    data: response,
+    data,
     isLoading,
     isError,
-  } = useGetUserVideos({ page: currentPage, limit: PAGE_LIMIT, sortBy, order });
+  } = useGetUserVideosQuery({ page: currentPage, limit: PAGE_LIMIT, sortBy, order });
 
   if (isLoading)
     return <Loader />;
@@ -28,7 +28,7 @@ export function VideosDashboardPage() {
   if (isError)
     return <div>Something went wrong</div>;
 
-  if (!response || !response.data || !response.paginationMeta) {
+  if (!data || !data.videos || !data.paginationMeta) {
     return <NoVideosFound />;
   }
 
@@ -39,10 +39,10 @@ export function VideosDashboardPage() {
         <div className="flex justify-end">
           <AddNoteForm />
         </div>
-        <VideosList videos={response.data} />
+        <VideosList videos={data.videos} />
         <PaginationComponent
           currentPage={currentPage}
-          totalPages={response.paginationMeta.totalPages}
+          totalPages={data.paginationMeta.totalPages}
           onPageChange={setPage}
         />
       </main>
