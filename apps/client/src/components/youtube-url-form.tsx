@@ -2,12 +2,14 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, ArrowRight, Play } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { extractVideoId } from "@/helpers";
 
 import { Form } from "./ui";
 
@@ -20,11 +22,7 @@ const youtubeUrlSchema = z.object({
     ),
 });
 
-interface IProps {
-  onSubmit: (videoUrl: string) => void;
-}
-
-export function YoutubeUrlForm({ onSubmit }: IProps) {
+export function YoutubeUrlForm() {
   const form = useForm({
     resolver: zodResolver(youtubeUrlSchema),
     defaultValues: {
@@ -32,7 +30,13 @@ export function YoutubeUrlForm({ onSubmit }: IProps) {
     },
   });
 
-  const handleSubmit = (formData: { youtubeUrl: string }) => onSubmit(formData.youtubeUrl);
+  const router = useRouter();
+
+  const handleSubmit = (formData: { youtubeUrl: string }) => {
+    const ytVideoId = extractVideoId(formData.youtubeUrl);
+
+    router.push(`/notes/create/${ytVideoId}`);
+  };
 
   return (
     <Form {...form}>

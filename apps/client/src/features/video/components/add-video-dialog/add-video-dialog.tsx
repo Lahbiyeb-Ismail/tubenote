@@ -15,10 +15,6 @@ export function AddVideoDialog() {
 
   const isAddVideoDialogOpen = isOpen && type === "add-video";
 
-  const onSubmit = (videoUrl: string) => {
-    console.log("Video URL submitted:", videoUrl);
-  };
-
   return (
     <Dialog open={isAddVideoDialogOpen} onOpenChange={closeDialog}>
       <DialogContent className="sm:max-w-md">
@@ -32,7 +28,7 @@ export function AddVideoDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        <YoutubeUrlForm onSubmit={onSubmit} />
+        <YoutubeUrlForm />
       </DialogContent>
     </Dialog>
   );

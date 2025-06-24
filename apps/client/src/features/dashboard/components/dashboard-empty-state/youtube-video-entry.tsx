@@ -1,20 +1,7 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-
 import { YoutubeUrlForm } from "@/components";
 import { Card, CardContent } from "@/components/ui/card";
-import { extractVideoId } from "@/helpers";
 
 export function YouTubeVideoEntry() {
-  const router = useRouter();
-
-  const onSubmit = (videoUrl: string) => {
-    const ytVideoId = extractVideoId(videoUrl);
-
-    router.push(`/notes/create/${ytVideoId}`);
-  };
-
   return (
     <Card className="bg-gradient-to-r from-red-50 to-pink-50 border-red-200 max-w-2xl mx-auto">
       <CardContent className="p-8 space-y-6">
@@ -25,7 +12,7 @@ export function YouTubeVideoEntry() {
           </p>
         </div>
 
-        <YoutubeUrlForm onSubmit={onSubmit} />
+        <YoutubeUrlForm />
       </CardContent>
     </Card>
 
