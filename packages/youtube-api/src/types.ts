@@ -10,7 +10,7 @@
  *
  * Not all sizes may be available for every resource.
  */
-interface Thumbnails {
+interface VideoThumbnails {
   default: ThumbnailSize;
   medium: ThumbnailSize;
   high: ThumbnailSize;
@@ -58,10 +58,16 @@ export interface VideoChapter {
  * large numbers that may exceed JavaScript's safe integer limit.
  *
  */
-interface VideoStatistics {
+export interface VideoStatistics {
   viewCount: string; // Total views of the video
   likeCount: string; // Total likes on the video
   commentCount: string; // Total comments on the video
+}
+
+interface ChannelThumbnails {
+  default: ThumbnailSize;
+  medium: ThumbnailSize;
+  high: ThumbnailSize;
 }
 
 /**
@@ -70,11 +76,11 @@ interface VideoStatistics {
  * @interface ChannelInfo
  */
 export interface ChannelInfo {
-  id: string; // The unique identifier of the channel
+  channelId: string; // The unique identifier of the channel
   title: string; // The name of the channel
   customUrl: string; // The custom URL of the channel
   description: string; // Description of the channel
-  thumbnails: Thumbnails; // Thumbnails for the channel
+  thumbnails: ChannelThumbnails; // Thumbnails for the channel
 }
 
 /**
@@ -89,19 +95,16 @@ export interface ChannelInfo {
  * @property {string} embedHtmlPlayer - HTML code for embedding the video player
  * @property {number} videoDuration - The duration of the video in seconds
  * @property {Thumbnails} thumbnails - Object containing different thumbnail sizes for the video
- * @property {VideoChapter[]} videoChapters - Array of chapters/segments in the video
  * @property {VideoStatistics} videoStatistics - Statistics about the video (views, likes, comments)
  */
 export interface YoutubeVideoData {
   youtubeId: string;
   title: string;
   description: string;
-  channelTitle: string;
   tags: string[];
   embedHtmlPlayer: string;
   videoDuration: number;
-  thumbnails: Thumbnails;
-  videoChapters: VideoChapter[];
+  thumbnails: VideoThumbnails;
   videoStatistics: VideoStatistics;
   channelInfo: ChannelInfo;
 }

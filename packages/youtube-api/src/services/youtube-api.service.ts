@@ -161,6 +161,23 @@ export class YoutubeApiService implements IYoutubeApiService {
     return chapters;
   }
 
+  /**
+   * Retrieves channel information from the YouTube API for a given channel ID.
+   *
+   * @param channelId - The unique identifier of the YouTube channel
+   * @returns A Promise that resolves to a ChannelInfo object containing channel details
+   * @throws {Error} When the API request fails or no channel is found for the given ID
+   *
+   * @remarks
+   * This method fetches channel data including title, custom URL, description, and thumbnails
+   * from the YouTube Data API v3 using the channels endpoint with the snippet part.
+   *
+   * @example
+   * ```typescript
+   * const channelInfo = await getVideoChannelInfo('UCchannelId123');
+   * console.log(channelInfo.title); // Channel title
+   * ```
+   */
   private async getVideoChannelInfo(channelId: string): Promise<ChannelInfo> {
     const res = await fetch(
       `${this.YOUTUBE_API_URL}/channels?id=${channelId}&key=${this.YOUTUBE_API_KEY}&part=snippet`,
@@ -176,7 +193,7 @@ export class YoutubeApiService implements IYoutubeApiService {
     }
 
     return {
-      id: data.items[0].id,
+      channelId,
       title: data.items[0].snippet.title,
       customUrl: data.items[0].snippet.customUrl,
       description: data.items[0].snippet.description,
@@ -185,20 +202,66 @@ export class YoutubeApiService implements IYoutubeApiService {
   }
 
   /**
-   * Retrieves detailed information about a YouTube video using the YouTube API.
+   * Retrieves video chapters from a YouTube video by analyzing its description.
+   *
+   * This method fetches video metadata from the YouTube Data API v3, extracts the video description,
+   * and parses it to identify timestamped chapters. The method also retrieves the video duration
+   * to validate chapter timestamps.
+   *
+   * @param ytVideoId - The YouTube video ID (11-character string from the video URL)
+   * @returns A promise that resolves to an array of VideoChapter objects containing chapter information
+   *
+   * @throws {Error} When the HTTP request fails (non-2xx status code)
+   * @throws {Error} When the video is not found or no data is available in the API response
+   *
+   * @example
+   * ```typescript
+   * const chapters = await youtubeService.getYoutubeVideoChapters('dQw4w9WgXcQ');
+   * console.log(chapters); // [{ title: 'Intro', startTime: 0, endTime: 30 }, ...]
+   * ```
+   */
+  async getYoutubeVideoChapters(ytVideoId: string): Promise<VideoChapter[]> {
+    const response = await fetch(
+      `${this.YOUTUBE_API_URL}/videos?id=${ytVideoId}&key=${this.YOUTUBE_API_KEY}&part=snippet,contentDetails`,
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data?.items?.length) {
+      throw new Error("Video not found or no data available");
+    }
+
+    const { description }
+      = data.items[0].snippet;
+
+    const isoDuration = data.items[0].contentDetails?.duration || "PT0S";
+    const videoDuration = this.parseISO8601Duration(isoDuration);
+
+    const videoChapters = this.extractVideoChapters(description, videoDuration);
+
+    return videoChapters;
+  }
+
+  /**
+   * Retrieves comprehensive video data from YouTube API for a given video ID.
    *
    * @param ytVideoId - The YouTube video ID to fetch data for
-   * @returns A Promise that resolves to a YoutubeVideoData object containing:
-   *   - youtubeId: The ID of the video
-   *   - title: The title of the video
-   *   - videoChapters: Extracted chapters from the video description
-   *   - description: Full description of the video
-   *   - channelTitle: Name of the channel that uploaded the video
-   *   - embedHtmlPlayer: HTML for embedding the video player
-   *   - tags: Array of tags associated with the video
-   *   - thumbnails: Object containing various thumbnail sizes and URLs
+   * @returns A Promise that resolves to YoutubeVideoData containing video metadata,
+   *          statistics, channel information, and embed HTML
    *
-   * @throws Error if the HTTP request fails or if the video cannot be found
+   * @throws {Error} When the HTTP request fails or returns a non-ok status
+   * @throws {Error} When the video is not found or no data is available
+   *
+   * @example
+   * ```typescript
+   * const videoData = await youtubeService.getYoutubeVideoData('dQw4w9WgXcQ');
+   * console.log(videoData.title); // Video title
+   * console.log(videoData.videoStatistics.viewCount); // View count
+   * ```
    */
   async getYoutubeVideoData(ytVideoId: string): Promise<YoutubeVideoData> {
     const response = await fetch(
@@ -215,29 +278,32 @@ export class YoutubeApiService implements IYoutubeApiService {
       throw new Error("Video not found or no data available");
     }
 
-    const { title, description, channelTitle, channelId, thumbnails, tags }
-      = data.items[0].snippet;
+    const { title, description, channelId, thumbnails, tags }
+        = data.items[0].snippet;
+
+    const { viewCount, likeCount, commentCount } = data.items[0].statistics;
 
     const { embedHtml: embedHtmlPlayer } = data.items[0].player;
 
     const isoDuration = data.items[0].contentDetails?.duration || "PT0S";
     const videoDuration = this.parseISO8601Duration(isoDuration);
 
-    const videoChapters = this.extractVideoChapters(description, videoDuration);
     const channelInfo = await this.getVideoChannelInfo(channelId);
 
     return {
       youtubeId: data.items[0].id,
       title,
-      videoChapters,
       description,
-      channelTitle,
       embedHtmlPlayer,
       tags,
       videoDuration,
       thumbnails,
       channelInfo,
-      videoStatistics: data.items[0].statistics,
+      videoStatistics: {
+        viewCount,
+        likeCount,
+        commentCount,
+      },
     };
   }
 }
