@@ -237,4 +237,32 @@ export class NoteRepository implements INoteRepository {
       { errorMessage: "Failed to count notes." },
     );
   }
+
+  /**
+   * Counts the total number of notes associated with a specific video for a given user.
+   *
+   * @param userId - The unique identifier of the user whose notes are being counted
+   * @param ytVideoId - The YouTube video ID to count notes for
+   * @param tx - Optional Prisma transaction client for database operations
+   * @returns A promise that resolves to the total count of notes for the specified user and video
+   * @throws Will throw an error if the database operation fails
+   */
+  async countByYtVideoId(
+    userId: string,
+    ytVideoId: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<number> {
+    const client = tx ?? this._db;
+
+    return handleAsyncOperation(
+      () =>
+        client.note.count({
+          where: {
+            userId,
+            youtubeId: ytVideoId,
+          },
+        }),
+      { errorMessage: "Failed to count notes." },
+    );
+  }
 }
