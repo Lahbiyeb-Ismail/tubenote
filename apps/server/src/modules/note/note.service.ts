@@ -206,4 +206,21 @@ export class NoteService implements INoteService {
       return { data, totalItems, totalPages };
     });
   }
+
+  /**
+   * Retrieves the count of notes associated with a specific YouTube video for a given user.
+   *
+   * @param userId - The unique identifier of the user
+   * @param ytVideoId - The YouTube video identifier
+   * @returns A promise that resolves to the number of notes associated with the video
+   *
+   * @example
+   * ```typescript
+   * const noteCount = await noteService.getNotesCountByVideo('user123', 'dQw4w9WgXcQ');
+   * console.log(`User has ${noteCount} notes for this video`);
+   * ```
+   */
+  async fetchNotesCountByVideoId(userId: string, ytVideoId: string): Promise<number> {
+    return this._noteRepository.countByYtVideoId(userId, ytVideoId);
+  }
 }
