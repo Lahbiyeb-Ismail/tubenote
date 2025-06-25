@@ -1,8 +1,4 @@
-import type { Response } from "express";
-
 import type { Note, Prisma } from "@tubenote/db";
-import type { IPaginatedData } from "@tubenote/types";
-
 import type {
   ICreateNoteDto,
   IFindManyDto,
@@ -10,6 +6,8 @@ import type {
   IParamIdDto,
   IUpdateNoteDto,
 } from "@tubenote/dtos";
+import type { IPaginatedData } from "@tubenote/types";
+import type { Response } from "express";
 
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
@@ -26,11 +24,11 @@ export interface INoteRepository {
    *
    * @returns A promise that resolves to the found note or null if no note is found.
    */
-  find(
+  find: (
     userId: string,
     noteId: string,
     tx?: Prisma.TransactionClient
-  ): Promise<Note | null>;
+  ) => Promise<Note | null>;
 
   /**
    * Creates a new note.
@@ -42,12 +40,12 @@ export interface INoteRepository {
    *
    * @returns A promise that resolves to the newly created note.
    */
-  create(
+  create: (
     userId: string,
     videoId: string,
     data: ICreateNoteDto,
     tx?: Prisma.TransactionClient
-  ): Promise<Note>;
+  ) => Promise<Note>;
 
   /**
    * Updates an existing note.
@@ -60,12 +58,12 @@ export interface INoteRepository {
    * @returns A promise that resolves to the updated note.
    * @throws {Error} - Throws an error if the update operation fails.
    */
-  update(
+  update: (
     userId: string,
     noteId: string,
     data: IUpdateNoteDto,
     tx?: Prisma.TransactionClient
-  ): Promise<Note>;
+  ) => Promise<Note>;
 
   /**
    * Deletes a note.
@@ -76,11 +74,11 @@ export interface INoteRepository {
    *
    * @returns A promise that resolves to the deleted note.
    */
-  delete(
+  delete: (
     userId: string,
     noteId: string,
     tx?: Prisma.TransactionClient
-  ): Promise<Note>;
+  ) => Promise<Note>;
 
   /**
    * Retrieves multiple notes with pagination.
@@ -91,11 +89,11 @@ export interface INoteRepository {
    *
    * @returns A promise that resolves to an array of notes.
    */
-  findMany(
+  findMany: (
     userId: string,
     findManyDto: IFindManyDto,
     tx?: Prisma.TransactionClient
-  ): Promise<Note[]>;
+  ) => Promise<Note[]>;
 
   /**
    * Retrieves multiple notes associated with a specific video.
@@ -107,12 +105,12 @@ export interface INoteRepository {
    *
    * @returns A promise that resolves to an array of notes.
    */
-  findManyByVideoId(
+  findManyByVideoId: (
     userId: string,
     videoId: string,
     findManyDto: IFindManyDto,
     tx?: Prisma.TransactionClient
-  ): Promise<Note[]>;
+  ) => Promise<Note[]>;
 
   /**
    * Counts the total number of notes for a specific user.
@@ -122,7 +120,22 @@ export interface INoteRepository {
    *
    * @returns A promise that resolves to the number of notes.
    */
-  count(userId: string, tx?: Prisma.TransactionClient): Promise<number>;
+  count: (userId: string, tx?: Prisma.TransactionClient) => Promise<number>;
+
+  /**
+   * Counts the total number of notes associated with a specific video for a given user.
+   *
+   * @param userId - The unique identifier of the user whose notes are being counted
+   * @param ytVideoId - The YouTube video ID to count notes for
+   * @param tx - Optional Prisma transaction client for database operations
+   *
+   * @returns A promise that resolves to the total count of notes for the specified user and video
+   */
+  countByYtVideoId: (
+    userId: string,
+    ytVideoId: string,
+    tx?: Prisma.TransactionClient,
+  ) => Promise<number>;
 }
 
 /**
@@ -138,11 +151,11 @@ export interface INoteService {
    *
    * @returns A promise that resolves to the found note.
    */
-  findNote(
+  findNote: (
     userId: string,
     noteId: string,
     tx?: Prisma.TransactionClient
-  ): Promise<Note>;
+  ) => Promise<Note>;
 
   /**
    * Creates a new note.
@@ -154,12 +167,12 @@ export interface INoteService {
    *
    * @returns A promise that resolves to the newly created note.
    */
-  createNote(
+  createNote: (
     userId: string,
     videoId: string,
     data: ICreateNoteDto,
     tx?: Prisma.TransactionClient
-  ): Promise<Note>;
+  ) => Promise<Note>;
 
   /**
    * Updates an existing note.
@@ -170,11 +183,11 @@ export interface INoteService {
    *
    * @returns A promise that resolves to the updated note.
    */
-  updateNote(
+  updateNote: (
     userId: string,
     noteId: string,
     data: IUpdateNoteDto
-  ): Promise<Note>;
+  ) => Promise<Note>;
 
   /**
    * Deletes a note.
@@ -184,7 +197,7 @@ export interface INoteService {
    *
    * @returns A promise that resolves to the deleted note.
    */
-  deleteNote(userId: string, noteId: string): Promise<Note>;
+  deleteNote: (userId: string, noteId: string) => Promise<Note>;
 
   /**
    * Fetches paginated notes for a user.
@@ -193,10 +206,10 @@ export interface INoteService {
    * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
    * @returns A promise that resolves to the paginated notes information.
    */
-  fetchUserNotes(
+  fetchUserNotes: (
     userId: string,
     findManyDto: IFindManyDto
-  ): Promise<IPaginatedData<Note>>;
+  ) => Promise<IPaginatedData<Note>>;
 
   /**
    * Fetches recent notes for a user.
@@ -206,7 +219,7 @@ export interface INoteService {
    *
    * @returns A promise that resolves to an array of recent notes.
    */
-  fetchRecentNotes(userId: string, findManyDto: IFindManyDto): Promise<Note[]>;
+  fetchRecentNotes: (userId: string, findManyDto: IFindManyDto) => Promise<Note[]>;
 
   /**
    * Fetches recently updated notes for a user.
@@ -216,10 +229,10 @@ export interface INoteService {
    *
    * @returns A promise that resolves to an array of recently updated notes.
    */
-  fetchRecentlyUpdatedNotes(
+  fetchRecentlyUpdatedNotes: (
     userId: string,
     findManyDto: IFindManyDto
-  ): Promise<Note[]>;
+  ) => Promise<Note[]>;
 
   /**
    * Fetches notes associated with a specific video with pagination.
@@ -230,11 +243,22 @@ export interface INoteService {
    *
    * @returns A promise that resolves to the paginated notes information.
    */
-  fetchNotesByVideoId(
+  fetchNotesByVideoId: (
     userId: string,
     videoId: string,
     findManyDto: IFindManyDto
-  ): Promise<IPaginatedData<Note>>;
+  ) => Promise<IPaginatedData<Note>>;
+
+  /**
+   * Fetches the count of notes associated with a specific YouTube video for a given user.
+   *
+   * @param userId - The unique identifier of the user.
+   * @param ytVideoId - The YouTube video identifier.
+   *
+   * @returns A promise that resolves to the number of notes associated with the video.
+   *
+   */
+  fetchNotesCountByVideoId: (userId: string, ytVideoId: string) => Promise<number>;
 }
 
 /**
@@ -248,10 +272,10 @@ export interface INoteController {
    * @param res - The response object used to send the HTTP response.
    * @returns A promise that resolves when the note is created.
    */
-  createNote(
+  createNote: (
     req: TypedRequest<ICreateNoteDto, IParamIdDto>,
     res: Response
-  ): Promise<void>;
+  ) => Promise<void>;
 
   /**
    * Handles updating an existing note.
@@ -260,10 +284,10 @@ export interface INoteController {
    * @param res - The response object used to send the HTTP response.
    * @returns A promise that resolves when the note is updated.
    */
-  updateNote(
+  updateNote: (
     req: TypedRequest<IUpdateNoteDto, IParamIdDto>,
     res: Response
-  ): Promise<void>;
+  ) => Promise<void>;
 
   /**
    * Handles deleting a note.
@@ -272,10 +296,10 @@ export interface INoteController {
    * @param res - The response object used to send the HTTP response.
    * @returns A promise that resolves when the note is deleted.
    */
-  deleteNote(
+  deleteNote: (
     req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
-  ): Promise<void>;
+  ) => Promise<void>;
 
   /**
    * Retrieves a note by its identifier.
@@ -284,10 +308,26 @@ export interface INoteController {
    * @param res - The response object used to send the HTTP response.
    * @returns A promise that resolves when the note is retrieved.
    */
-  getNoteById(
+  getNoteById: (
     req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
-  ): Promise<void>;
+  ) => Promise<void>;
+
+  /**
+   * Retrieves the count of notes associated with a specific YouTube video for the authenticated user.
+   *
+   * @param req - The typed request object containing user ID and video ID parameters
+   * @param req.userId - The authenticated user's ID
+   * @param req.params.id - The YouTube video ID to count notes for
+   * @param res - The Express response object
+   *
+   * @returns A Promise that resolves to void, sends a formatted JSON response with the notes count
+   *
+   */
+  getNotesCountByVideoId: (
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
+    res: Response,
+  ) => Promise<void>;
 
   /**
    * Retrieves paginated notes for the authenticated user.
@@ -296,10 +336,10 @@ export interface INoteController {
    * @param res - The response object used to send the HTTP response.
    * @returns A promise that resolves when the notes are retrieved.
    */
-  getUserNotes(
+  getUserNotes: (
     req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
     res: Response
-  ): Promise<void>;
+  ) => Promise<void>;
 
   /**
    * Retrieves the most recent notes for the authenticated user.
@@ -308,7 +348,7 @@ export interface INoteController {
    * @param res - The response object used to send the HTTP response.
    * @returns A promise that resolves when the recent notes are retrieved.
    */
-  getUserRecentNotes(req: TypedRequest, res: Response): Promise<void>;
+  getUserRecentNotes: (req: TypedRequest, res: Response) => Promise<void>;
 
   /**
    * Retrieves the most recently updated notes for the authenticated user.
@@ -317,7 +357,7 @@ export interface INoteController {
    * @param res - The response object used to send the HTTP response.
    * @returns A promise that resolves when the updated notes are retrieved.
    */
-  getRecentlyUpdatedNotes(req: TypedRequest, res: Response): Promise<void>;
+  getRecentlyUpdatedNotes: (req: TypedRequest, res: Response) => Promise<void>;
 
   /**
    * Retrieves notes associated with a specific video ID with pagination support.
@@ -326,8 +366,8 @@ export interface INoteController {
    * @param res - The response object used to send the HTTP response.
    * @returns A promise that resolves when the notes are retrieved.
    */
-  getNotesByVideoId(
+  getNotesByVideoId: (
     req: TypedRequest<EmptyRecord, IParamIdDto, IPaginationQueryDto>,
     res: Response
-  ): Promise<void>;
+  ) => Promise<void>;
 }
