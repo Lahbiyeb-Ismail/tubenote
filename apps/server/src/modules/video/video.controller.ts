@@ -114,44 +114,17 @@ export class VideoController implements IVideoController {
    *
    * @returns A JSON response with the video details.
    */
-  async saveVideoData(
+  async getVideoByYoutubeId(
     req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response,
   ) {
     const videoYoutubeId = req.params.id;
     const userId = req.userId;
 
-    const video = await this._videoService.saveVideo(userId, videoYoutubeId);
+    const video = await this._videoService.getVideoByYoutubeId(userId, videoYoutubeId);
 
     const formattedResponse
       = this._responseFormatter.formatSuccessResponse<Video>({
-        responseOptions: {
-          data: video,
-          message: "Video retrieved successfully.",
-        },
-      });
-
-    res.status(formattedResponse.statusCode).json(formattedResponse);
-  }
-
-  /**
-   * Retrieves a specific video by its ID for a specific user.
-   *
-   * @param req - The request object containing user ID and video ID parameters.
-   * @param res - The response object to send the result.
-   *
-   * @returns A JSON response with the video details.
-   */
-  async getVideoByYoutubeId(
-    req: TypedRequest<EmptyRecord, IParamIdDto>,
-    res: Response,
-  ) {
-    const videoYoutubeId = req.params.id;
-
-    const video = await this._videoService.getVideoByYoutubeId(videoYoutubeId);
-
-    const formattedResponse
-      = this._responseFormatter.formatSuccessResponse({
         responseOptions: {
           data: video,
           message: "Video retrieved successfully.",
