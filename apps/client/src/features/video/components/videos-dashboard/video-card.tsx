@@ -8,10 +8,10 @@ import {
   MoreVertical,
   Play,
   Share,
-  Star,
 } from "lucide-react";
 import Image from "next/image";
 
+import { Badge } from "@/components/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,12 +22,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useGetNotesCountByVideoIdQuery } from "@/features/note/queries";
+
+import { formatVideoDuration, formatVideoViewsCount } from "../../helpers";
 
 interface IProps {
   video: Video;
 }
 
 export function VideoCard({ video }: IProps) {
+  const { data } = useGetNotesCountByVideoIdQuery(video.youtubeId);
+
   return (
     <Card
       key={video.id}
@@ -61,8 +66,7 @@ export function VideoCard({ video }: IProps) {
 
           {/* Duration Badge */}
           <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
-            25:30
-            {/* {video.duration} */}
+            {formatVideoDuration(video.videoDuration)}
           </div>
 
           {/* Progress Bar */}
@@ -139,17 +143,14 @@ export function VideoCard({ video }: IProps) {
         <div className="space-y-3">
           <div className="flex items-start gap-3">
             <Avatar className="h-8 w-8 shrink-0">
-              {/* <AvatarImage src={video.channelAvatar || "/placeholder.svg"} />
-              <AvatarFallback>{video.channel[0]}</AvatarFallback> */}
-              <AvatarImage src="/placeholder.svg" />
-              <AvatarFallback>TM</AvatarFallback>
+              <AvatarImage src={video.channelInfo.thumbnails.default.url} />
+              <AvatarFallback>{video.channelInfo.title[0]}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-sm leading-tight line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              <h3 className="font-semibold text-sm leading-tight line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
                 {video.title}
               </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Traversy Media</p>
-              {/* <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">{video.channel}</p> */}
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">{video.channelInfo.title}</p>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -193,41 +194,40 @@ export function VideoCard({ video }: IProps) {
 
           <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">{video.description}</p>
 
-          <div className="flex items-center justify-between">
-            {/* <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
-                {video.category}
+          <div className="flex items-center gap-2 flex-wrap">
+            {video.tags.slice(0, 4).map(tag => (
+              <Badge
+                key={tag}
+                variant="outline"
+                className="text-xs hover:bg-blue-100 dark:hover:bg-blue-800 cursor-pointer truncate"
+              >
+                {tag}
               </Badge>
-              <Badge variant="outline" className={`text-xs ${getDifficultyColor(video.difficulty)}`}>
-                {video.difficulty}
-              </Badge>
-            </div> */}
-            <div className="flex items-center gap-1 text-xs text-slate-500">
-              <Eye className="h-3 w-3" />
-              1.2M
-              {/* {video.views} */}
-            </div>
+            ))}
           </div>
 
           <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <div className="flex items-center gap-1 text-xs text-slate-500">
+              <Eye className="h-3 w-3" />
+              {formatVideoViewsCount(video.videoStatistics.viewCount)}
+            </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1">
+              {/* <div className="flex items-center gap-1">
                 <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                {/* {video.rating} */}
                 4.5
-              </div>
+              </div> */}
               {12 > 0 && (
                 <div className="flex items-center gap-1">
                   <BookOpen className="h-3 w-3" />
-                  {/* {video.notesCount} */}
-                  12
+                  {data?.count}
                   {" "}
                   notes
                 </div>
               )}
             </div>
-            <span>{new Date(video.createdAt).toLocaleDateString()}</span>
           </div>
+
+          {/* <span>{new Date(video.createdAt).toLocaleDateString()}</span> */}
         </div>
       </CardContent>
     </Card>
