@@ -66,7 +66,7 @@ export class VideoService implements IVideoService {
     return this._videoRepository.count(userId);
   }
 
-  async saveVideo(userId: string, videoYoutubeId: string): Promise<Video> {
+  async getVideoByYoutubeId(userId: string, videoYoutubeId: string): Promise<Video> {
     if (!videoYoutubeId || !userId) {
       throw new BadRequestError(ERROR_MESSAGES.BAD_REQUEST);
     }
@@ -90,9 +90,5 @@ export class VideoService implements IVideoService {
       // Otherwise, link the existing video to the user.
       return this._linkVideoToUser(tx, existingVideo, userId);
     });
-  }
-
-  async getVideoByYoutubeId(videoYoutubeId: string): Promise<Video | null> {
-    return this._findVideoByYoutubeId(videoYoutubeId);
   }
 }
