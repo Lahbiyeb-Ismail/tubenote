@@ -152,6 +152,37 @@ export class NoteController implements INoteController {
   }
 
   /**
+   * Retrieves the count of notes associated with a specific YouTube video for the authenticated user.
+   *
+   * @param req - The typed request object containing user ID and video ID parameters
+   * @param req.userId - The authenticated user's ID
+   * @param req.params.id - The YouTube video ID to count notes for
+   * @param res - The Express response object
+   *
+   * @returns A Promise that resolves to void, sends a formatted JSON response with the notes count
+   *
+   */
+  async getNotesCountByVideoId(
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
+    res: Response,
+  ): Promise<void> {
+    const userId = req.userId;
+    const ytVideoId = req.params.id;
+
+    const notesCount = await this._noteService.fetchNotesCountByVideoId(userId, ytVideoId);
+
+    const formattedResponse
+      = this._responseFormatter.formatSuccessResponse<number>({
+        responseOptions: {
+          data: notesCount,
+          message: "Notes count retrieved successfully.",
+        },
+      });
+
+    res.status(formattedResponse.statusCode).json(formattedResponse);
+  }
+
+  /**
    * Retrieves the notes of a user with pagination.
    *
    * @param req - The request object containing the userId and pagination query parameters.
