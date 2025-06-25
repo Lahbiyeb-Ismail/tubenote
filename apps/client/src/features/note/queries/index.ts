@@ -2,6 +2,7 @@ export * from "./use-create-note-mutation";
 export * from "./use-delete-note-mutation";
 export * from "./use-get-note-by-id-query";
 export * from "./use-get-notes-by-video-id-query";
+export * from "./use-get-notes-count-by-video-id-query";
 export * from "./use-get-recent-notes-query";
 export * from "./use-get-recently-updated-notes-query";
 export * from "./use-get-user-notes-query";
