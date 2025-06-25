@@ -20,6 +20,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@tubenote/config-typescript": "workspace:*"
+    "@tubenote/config-typescript": "workspace:*",
+    "@tubenote/youtube-api": "workspace:*"
   }
 }

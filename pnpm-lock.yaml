@@ -454,6 +454,9 @@ importers:
       '@tubenote/config-typescript':
         specifier: workspace:*
         version: link:../config-typescript
+      '@tubenote/youtube-api':
+        specifier: workspace:*
+        version: link:../youtube-api
 
   packages/schemas:
     dependencies:
