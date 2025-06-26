@@ -4,11 +4,10 @@ import type { Note } from "@tubenote/db";
 
 import { useState } from "react";
 
-import { NoDataFound } from "@/components/dashboards";
+import { NoDataFound, PaginationControls } from "@/components/dashboards";
 import {
   Loader,
   MarkdownViewer,
-  PaginationComponent,
   ResizablePanels,
 } from "@/components/global";
 import { useGetNotesByVideoIdQuery } from "@/features/note/queries";
@@ -100,7 +99,7 @@ export function VideoPage({ videoId }: IPageProps) {
             )}
       </div>
 
-      <PaginationComponent
+      <PaginationControls
         currentPage={currentPage}
         onPageChange={setPage}
         totalPages={notesResponse.paginationMeta.totalPages}
