@@ -3,6 +3,7 @@ export * from "./dashboard-header";
 export * from "./header";
 export * from "./no-data-found";
 export * from "./notes-list-container";
+export * from "./pagination-controls";
 export * from "./search-and-filter-panel";
 export * from "./sidebar";
 export * from "./sidebar-link";
