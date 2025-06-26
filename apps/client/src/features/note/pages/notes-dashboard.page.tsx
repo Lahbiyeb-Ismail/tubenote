@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 
-import { DashboardHeader, SearchAndFilterPanel } from "@/components/dashboards";
-import { PaginationComponent } from "@/components/global";
+import { DashboardHeader, PaginationControls, SearchAndFilterPanel } from "@/components/dashboards";
 import { usePaginationQuery, useSortByQueries } from "@/hooks";
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils";
 
@@ -54,7 +53,7 @@ export function NotesDashboardPage() {
       {/* Pagination Component */}
       {data.notes.length >= PAGE_LIMIT
         ? (
-            <PaginationComponent
+            <PaginationControls
               currentPage={currentPage}
               totalPages={data.paginationMeta.totalPages}
               onPageChange={setPage}
