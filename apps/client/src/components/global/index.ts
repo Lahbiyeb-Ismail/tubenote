@@ -25,8 +25,6 @@ export * from "./max-width-wrapper";
 
 export * from "./navigation-header";
 
-export * from "./pagination";
-
 export * from "./resizable-panels";
 
 export * from "./save-button";
