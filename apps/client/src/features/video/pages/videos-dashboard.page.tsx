@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 
-import { DashboardHeader, SearchAndFilterPanel } from "@/components/dashboards";
-import { Loader, PaginationComponent } from "@/components/global";
+import { DashboardHeader, PaginationControls, SearchAndFilterPanel } from "@/components/dashboards";
 import { usePaginationQuery, useSortByQueries } from "@/hooks";
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
 
-import { NoVideosFound, VideosList } from "../components";
+import { NoVideosFound, VideosDashboardSkeleton, VideosList } from "../components";
 import { useGetUserVideosQuery } from "../queries";
 
 export function VideosDashboardPage() {
@@ -28,7 +27,7 @@ export function VideosDashboardPage() {
   } = useGetUserVideosQuery({ page: currentPage, limit: PAGE_LIMIT, sortBy, order });
 
   if (isLoading || !data)
-    return <Loader />;
+    return <VideosDashboardSkeleton />;
 
   if (data.videos.length === 0 || !data.paginationMeta) {
     return <NoVideosFound />;
@@ -48,7 +47,7 @@ export function VideosDashboardPage() {
       {/* Pagination Component */}
       {data.videos.length >= PAGE_LIMIT
         ? (
-            <PaginationComponent
+            <PaginationControls
               currentPage={currentPage}
               totalPages={data.paginationMeta.totalPages}
               onPageChange={setPage}
