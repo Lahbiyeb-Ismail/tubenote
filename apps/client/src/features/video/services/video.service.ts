@@ -8,6 +8,8 @@ import { asyncTryCatch } from "@tubenote/utils";
 import { extractVideoId } from "@/helpers";
 import { axiosInstance } from "@/lib";
 
+import type { VideoWithCount } from "../types";
+
 /**
  * Fetches video data for a given YouTube video URL.
  *
@@ -39,18 +41,17 @@ export async function saveVideoData(
 /**
  * Fetches video notes for a specific video ID with pagination.
  *
- * @param videoId - The unique identifier of the video.
  * @param paginationQuery - An object containing pagination parameters such as page, limit, order, and sortBy.
  * @returns A promise that resolves to an object containing the video notes data.
  * @throws An error if the request fails, including the error message from the server if available.
  */
 export async function getUserVideos(
   paginationQuery: IPaginationQueryDto,
-): Promise<IApiSuccessResponse<Video[]>> {
+): Promise<IApiSuccessResponse<VideoWithCount[]>> {
   const { page, limit, order, sortBy } = paginationQuery;
 
   const { data: response, error } = await asyncTryCatch(
-    axiosInstance.get<IApiSuccessResponse<Video[]>>(
+    axiosInstance.get<IApiSuccessResponse<VideoWithCount[]>>(
       `/videos?page=${page}&limit=${limit}&order=${order}&sortBy=${sortBy}`,
     ),
   );

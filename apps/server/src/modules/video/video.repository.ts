@@ -42,11 +42,22 @@ export class VideoRepository implements IVideoRepository {
     return handleAsyncOperation(
       () =>
         client.video.findMany({
-          where: { users: { every: { id: userId } } },
+          where: { userIds: { has: userId } },
           take: limit,
           skip,
           orderBy: {
             [sort.by]: sort.order,
+          },
+          include: {
+            _count: {
+              select: {
+                notes: {
+                  where: {
+                    userId,
+                  },
+                },
+              },
+            },
           },
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_FIND },

@@ -1,7 +1,6 @@
-import type { Video } from "@tubenote/db";
+import type { VideoWithCount } from "@/features/video/types";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { useGetNotesCountByVideoIdQuery } from "@/features/note/queries";
 
 import { VideoCardActionsMenu } from "./video-card-actions-menu";
 import { VideoCardChannelAvatar } from "./video-card-channel-avatar";
@@ -11,12 +10,10 @@ import { VideoCardTags } from "./video-card-tags";
 import { VideoCardThumbnail } from "./video-card-thumbnail";
 
 interface IProps {
-  video: Video;
+  video: VideoWithCount;
 }
 
 export function VideoCard({ video }: IProps) {
-  const { data: notesCount } = useGetNotesCountByVideoIdQuery(video.youtubeId);
-
   return (
     <Card
       key={video.id}
@@ -31,14 +28,14 @@ export function VideoCard({ video }: IProps) {
 
             <VideoCardInfo videoTitle={video.title} channelTitle={video.channelInfo.title} />
 
-            <VideoCardActionsMenu notesCount={notesCount?.count || 0} />
+            <VideoCardActionsMenu notesCount={video._count.notes} />
           </div>
 
           <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">{video.description}</p>
 
           <VideoCardTags videoTags={video.tags} />
 
-          <VideoCardStatistics viewsCount={video.videoStatistics.viewCount} notesCount={notesCount?.count || 0} />
+          <VideoCardStatistics viewsCount={video.videoStatistics.viewCount} notesCount={video._count.notes} />
         </div>
       </CardContent>
     </Card>
