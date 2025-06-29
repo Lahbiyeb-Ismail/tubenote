@@ -30,13 +30,7 @@ export function VideoCardThumbnail({ video }: IProps) {
             size="icon"
             className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 hover:bg-white text-black"
           >
-            {/* {playingVideo === video.id
-                    ? (
-                        <Pause className="h-5 w-5" />
-                      )
-                    : (
-                    )} */}
-            <Play className="h-5 w-5 ml-0.5" />
+            <Play className="h-5 w-5" />
           </Button>
         </div>
 

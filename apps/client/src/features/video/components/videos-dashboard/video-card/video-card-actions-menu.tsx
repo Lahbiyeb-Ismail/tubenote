@@ -4,6 +4,7 @@ import {
   Play,
   Trash2,
 } from "lucide-react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,9 +20,10 @@ interface IProps {
    * The number of notes associated with the video.
    */
   notesCount: number;
+  ytVideoId: string;
 }
 
-export function VideoCardActionsMenu({ notesCount }: IProps) {
+export function VideoCardActionsMenu({ notesCount, ytVideoId }: IProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -39,12 +41,14 @@ export function VideoCardActionsMenu({ notesCount }: IProps) {
           Watch
         </DropdownMenuItem>
 
-        <DropdownMenuItem className="cursor-pointer">
-          <BookOpen className="mr-2 h-4 w-4" />
-          View Notes (
-          {notesCount}
-          )
-        </DropdownMenuItem>
+        <Link href={`/videos/${ytVideoId}`}>
+          <DropdownMenuItem className="cursor-pointer">
+            <BookOpen className="mr-2 h-4 w-4" />
+            View Notes (
+            {notesCount}
+            )
+          </DropdownMenuItem>
+        </Link>
 
         <DropdownMenuSeparator />
 
