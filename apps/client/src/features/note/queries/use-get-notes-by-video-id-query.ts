@@ -4,7 +4,7 @@ import type { IPaginationQueryDto } from "@tubenote/dtos";
 
 import { useQuery } from "@tanstack/react-query";
 
-import { useAuthStore } from "@/features/auth/store";
+import { useAuth } from "@/features/auth/hooks";
 
 import { getNotesByVideoId } from "../services";
 
@@ -12,12 +12,12 @@ export function useGetNotesByVideoIdQuery({
   videoId,
   paginationQuery,
 }: { videoId: string; paginationQuery: IPaginationQueryDto }) {
-  const { status } = useAuthStore();
+  const { isAuthenticated } = useAuth();
 
   return useQuery({
     queryKey: ["video-notes", videoId, paginationQuery],
     queryFn: () => getNotesByVideoId(videoId, paginationQuery),
-    enabled: status === "authenticated",
+    enabled: isAuthenticated && !!videoId,
     select: data => ({
       notes: data.payload.data,
       paginationMeta: data.payload.paginationMeta,
