@@ -2,10 +2,6 @@
 
 import { useState } from "react";
 
-import { NoDataFound } from "@/components/dashboards";
-import {
-  Loader,
-} from "@/components/global";
 import { useGetNotesByVideoIdQuery } from "@/features/note/queries";
 import {
   VideoPlayer,
@@ -13,7 +9,7 @@ import {
 import { usePaginationQuery, useSortByQueries } from "@/hooks";
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
 
-import { VideoNotes, VideoPageHeader } from "./components";
+import { VideoNotes, VideoPageHeader, VideoPageSkeleton } from "./components";
 
 interface IPageProps {
   videoId: string;
@@ -27,29 +23,15 @@ export function VideoPage({ videoId }: IPageProps) {
   const { sortBy, order } = useSortByQueries({});
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: notesResponse, isLoading: isNotesLoading, isError: isNotesError } = useGetNotesByVideoIdQuery({
+  const { data: notesResponse, isLoading: isNotesLoading } = useGetNotesByVideoIdQuery({
     videoId,
     paginationQuery: { page: currentPage, limit: PAGE_LIMIT, sortBy, order },
   });
 
-  if (isNotesLoading) {
+  if (isNotesLoading || !notesResponse) {
     return (
-      <div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
-        <Loader />
-      </div>
+      <VideoPageSkeleton />
     );
-  }
-
-  if (isNotesError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center container max-w-4xl mx-auto px-4 py-8">
-        <h2>Failed to load video notes.</h2>
-      </div>
-    );
-  }
-
-  if (!notesResponse || !notesResponse.notes || !notesResponse.paginationMeta) {
-    return <NoDataFound title="You don't have any notes yet for this video." />;
   }
 
   return (
