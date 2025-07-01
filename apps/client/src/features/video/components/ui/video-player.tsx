@@ -81,6 +81,9 @@ export function VideoPlayer({ videoId }: VideoPlayerProps) {
     width: "100%",
     playerVars: {
       autoplay: 0,
+      iv_load_policy: 3, // Hide annotations
+      rel: 0, // Don't show related videos
+      showinfo: 0, // Hide video info
     },
   };
 
