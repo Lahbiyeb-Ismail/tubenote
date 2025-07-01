@@ -1,19 +1,28 @@
 "use client";
 
+import { useEffect } from "react";
+
 import { NotePageLayout } from "@/features/note/components";
 import { useNote } from "@/features/note/hooks";
 import { useGetVideoById } from "@/features/video/hooks";
-
-import { useNoteStore } from "../store";
+import { useVideoNoteStore } from "@/features/video/store";
 
 interface IPageProps {
   videoId: string;
 }
 
 export function CreateNotePage({ videoId }: IPageProps) {
-  const { noteTimestamp } = useNoteStore();
-  const { createNote, isCreatingNote } = useNote();
   const { data: videoData, isLoading } = useGetVideoById(videoId);
+
+  const { createNote, isCreatingNote } = useNote();
+  const { noteTimestamp, startNoteSync, stopNoteSync } = useVideoNoteStore();
+
+  useEffect(() => {
+    startNoteSync();
+    return () => {
+      stopNoteSync();
+    };
+  }, [startNoteSync, stopNoteSync]);
 
   const handleCreateNote = (title: string, content: string, category: string, tags: string[]) => {
     if (!videoData)

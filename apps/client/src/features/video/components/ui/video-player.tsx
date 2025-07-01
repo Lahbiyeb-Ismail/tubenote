@@ -15,7 +15,7 @@ export function VideoPlayer({ videoId }: VideoPlayerProps) {
   const playerRef = useRef<YouTubePlayerType | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { activeNote, playId } = useVideoNoteStore();
+  const { activeNote, playId, isSyncing, setNoteEndTime, setNoteStartTime } = useVideoNoteStore();
 
   useEffect(() => {
     if (activeNote && playerRef.current) {
@@ -48,6 +48,34 @@ export function VideoPlayer({ videoId }: VideoPlayerProps) {
     playerRef.current = target;
   };
 
+  const onPlay: YouTubeProps["onPlay"] = () => {
+    if (isSyncing) {
+      const currentTime = playerRef.current?.getCurrentTime();
+      if (currentTime) {
+        setNoteStartTime(currentTime);
+      }
+    }
+  };
+
+  const onStateChange: YouTubeProps["onStateChange"] = (event) => {
+    if (isSyncing) {
+      // Continuously update the end time while the video is playing
+      if (event.data === 1) { // Playing
+        intervalRef.current = setInterval(() => {
+          const currentTime = playerRef.current?.getCurrentTime();
+          if (currentTime) {
+            setNoteEndTime(currentTime);
+          }
+        }, 1000);
+      }
+      else { // Paused, ended, etc.
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+        }
+      }
+    }
+  };
+
   const opts: YouTubeProps["opts"] = {
     height: "100%",
     width: "100%",
@@ -62,6 +90,8 @@ export function VideoPlayer({ videoId }: VideoPlayerProps) {
         videoId={videoId}
         opts={opts}
         onReady={onPlayerReady}
+        onPlay={onPlay}
+        onStateChange={onStateChange}
         className="h-full w-full"
       />
     </div>
