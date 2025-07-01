@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Pagination,
   PaginationContent,
@@ -32,7 +30,7 @@ export function PaginationControls({
   }
 
   const pageNumbers = Array.from(
-    { length: totalPages },
+    { length: Math.min(totalPages, maxVisiblePages) },
     (_, i) => firstPage + i,
   );
 

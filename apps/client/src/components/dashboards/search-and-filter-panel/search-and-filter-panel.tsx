@@ -6,6 +6,7 @@ import {
   List,
   Search,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,13 +17,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks";
 
 const sortOptions = [
   { label: "Recently Created", value: "createdAt" },
   { label: "Recently Updated", value: "updatedAt" },
-  { label: "Title A-Z", value: "title-asc" },
-  { label: "Title Z-A", value: "title-desc" },
-  // { label: "Category", value: "category" },
+  // { label: "Title A-Z", value: "title-asc" },
+  // { label: "Title Z-A", value: "title-desc" },
 ];
 
 interface IProps {
@@ -48,6 +49,19 @@ export function SearchAndFilterPanel({
   viewMode,
   setViewMode,
 }: IProps) {
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
+  const debouncedLocalSearchQuery = useDebounce(localSearchQuery, 300);
+
+  useEffect(() => {
+    if (debouncedLocalSearchQuery !== searchQuery) {
+      setSearchQuery(debouncedLocalSearchQuery);
+    }
+  }, [debouncedLocalSearchQuery, setSearchQuery, searchQuery]);
+
+  useEffect(() => {
+    setLocalSearchQuery(searchQuery);
+  }, [searchQuery]);
+
   return (
     <div className="space-y-4 bg-white dark:bg-slate-900 rounded-lg shadow mb-6 p-4">
       <div className="flex flex-col md:flex-row gap-4">
@@ -55,9 +69,8 @@ export function SearchAndFilterPanel({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input
             placeholder={inputSearchPlaceholder}
-            // placeholder="Search notes, tags, or content..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
+            value={localSearchQuery}
+            onChange={e => setLocalSearchQuery(e.target.value)}
             className="pl-10"
           />
         </div>
@@ -110,26 +123,10 @@ export function SearchAndFilterPanel({
         </div>
       </div>
 
-      {/* Expandable Filters */}
       {showFilters && (
         <Card className="border-slate-200 dark:border-slate-800">
           <CardContent className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* <div>
-                <label className="text-sm font-medium mb-2 block">Category</label>
-                <div className="flex flex-wrap gap-2">
-                  {categories.map(category => (
-                    <Button
-                      key={category}
-                      variant={selectedCategory === category ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedCategory(category)}
-                    >
-                      {category}
-                    </Button>
-                  ))}
-                </div>
-              </div> */}
               <div>
                 <label className="text-sm font-medium mb-2 block">Date Range</label>
                 <Button variant="outline" className="w-full justify-start gap-2">

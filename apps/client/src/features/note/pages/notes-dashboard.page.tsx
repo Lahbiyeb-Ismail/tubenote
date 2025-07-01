@@ -1,43 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 import { DashboardHeader, PaginationControls, SearchAndFilterPanel } from "@/components/dashboards";
-import { usePaginationQuery, useSortByQueries } from "@/hooks";
+import { useUrlState } from "@/hooks";
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils";
 
 import { NoNotesFound } from "../components";
 import { NotesDashboardSkeleton, NotesList } from "../components/notes-dashboard";
-import { useGetUserNotesQuery } from "../queries";
+import { useGetUserNotesQuery, useSearchNotesQuery } from "../queries";
 
 export function NotesDashboardPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  // const [selectedCategory, setSelectedCategory] = useState("All");
-  const [sortBy, setSortBy] = useState("createdAt");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  // const [selectedNotes, setSelectedNotes] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useUrlState("q", "");
+  const [sortBy, setSortBy] = useUrlState("sortBy", "createdAt");
+  const [order] = useUrlState("order", "desc");
+  const [page, setPage] = useUrlState("page", DEFAULT_PAGE);
+  const [viewMode, setViewMode] = useUrlState<"grid" | "list">("view", "grid");
   const [showFilters, setShowFilters] = useState(false);
-  // const [activeTab, setActiveTab] = useState("all");
 
-  const { currentPage, setPage } = usePaginationQuery({
-    defaultPage: DEFAULT_PAGE,
-  });
-
-  const { order } = useSortByQueries({});
-
-  const { data, isLoading: isNotesLoading } = useGetUserNotesQuery({
-    page: currentPage,
+  const { data: notesData, isLoading: isNotesLoading } = useGetUserNotesQuery({
+    page,
     limit: PAGE_LIMIT,
     sortBy,
     order,
   });
 
-  if (isNotesLoading || !data)
-    return <NotesDashboardSkeleton />;
+  const { data: searchData, isLoading: isSearchLoading } = useSearchNotesQuery(
+    searchQuery,
+    {
+      page,
+      limit: PAGE_LIMIT,
+      sortBy,
+      order,
+    },
+  );
 
-  if (data.notes.length === 0 || !data.paginationMeta) {
+  if (notesData?.notes.length === 0) {
     return <NoNotesFound />;
   }
+
+  const isLoading = isNotesLoading || isSearchLoading;
+  const data = searchQuery ? searchData : notesData;
 
   return (
     <main className="container py-6">
@@ -45,21 +48,52 @@ export function NotesDashboardPage() {
       <DashboardHeader title="Your Notes 🗒" description="Manage and organize all your video notes in one place." />
 
       {/* Search and Filter Component */}
-      <SearchAndFilterPanel inputSearchPlaceholder="Search notes, tags, or content..." searchQuery={searchQuery} setSearchQuery={setSearchQuery} showFilters={showFilters} setShowFilters={setShowFilters} sortBy={sortBy} setSortBy={setSortBy} viewMode={viewMode} setViewMode={setViewMode} />
+      <SearchAndFilterPanel
+        inputSearchPlaceholder="Search notes, tags, or content..."
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        showFilters={showFilters}
+        setShowFilters={setShowFilters}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+      />
 
-      {/* Notes List */}
-      <NotesList viewMode={viewMode} notes={data.notes} />
-
-      {/* Pagination Component */}
-      {data.notes.length >= PAGE_LIMIT
+      {isLoading || !data
         ? (
-            <PaginationControls
-              currentPage={currentPage}
-              totalPages={data.paginationMeta.totalPages}
-              onPageChange={setPage}
-            />
+            <NotesDashboardSkeleton />
           )
-        : null}
+        : (
+            <Fragment>
+              {data.notes.length === 0
+                ? (
+                    <div className="flex flex-col items-center justify-center h-64">
+                      <h2 className="text-center text-gray-500">No notes found.</h2>
+                      <p className="text-center text-gray-400">
+                        Try adjusting your search or filters to find notes.
+                      </p>
+                    </div>
+                  )
+                : (
+                    <Fragment>
+                      {/* Notes List */}
+                      <NotesList viewMode={viewMode} notes={data.notes} />
+
+                      {/* Pagination Component */}
+                      {data.notes.length >= PAGE_LIMIT && data.paginationMeta
+                        ? (
+                            <PaginationControls
+                              currentPage={page}
+                              totalPages={data.paginationMeta.totalPages}
+                              onPageChange={setPage}
+                            />
+                          )
+                        : null}
+                    </Fragment>
+                  )}
+            </Fragment>
+          )}
     </main>
   );
 }

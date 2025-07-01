@@ -292,6 +292,39 @@ export async function getNotesByVideoId(
   return response.data;
 }
 
+/**
+ * Searches for notes based on a query string.
+ *
+ * @param query - The search query.
+ * @param paginationQuery - An object containing pagination and sorting parameters.
+ * @returns A promise that resolves to an API success response containing an array of notes.
+ * @throws An error if the request fails, including a specific error message if available.
+ */
+export async function searchNotes(
+  query: string,
+  paginationQuery: IPaginationQueryDto,
+): Promise<IApiSuccessResponse<Note[]>> {
+  const { page, limit, order, sortBy } = paginationQuery;
+
+  const { data: response, error } = await asyncTryCatch(
+    axiosInstance.get<IApiSuccessResponse<Note[]>>(
+      `/notes/search?q=${query}&page=${page}&limit=${limit}&order=${order}&sortBy=${sortBy}`,
+    ),
+  );
+
+  if (error) {
+    const axiosError = error as AxiosError<IApiErrorResponse>;
+
+    if (axiosError.response) {
+      throw new Error(axiosError.response.data.payload.message);
+    }
+
+    throw new Error("Failed to search notes.");
+  }
+
+  return response.data;
+}
+
 // export async function exportNoteAsPDF(noteId: string): Promise<Blob> {
 //   const { data: response, error } = await asyncTryCatch(
 //     axiosInstance.post<Blob>(

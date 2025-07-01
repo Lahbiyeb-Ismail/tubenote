@@ -6,4 +6,5 @@ export * from "./use-get-notes-count-by-video-id-query";
 export * from "./use-get-recent-notes-query";
 export * from "./use-get-recently-updated-notes-query";
 export * from "./use-get-user-notes-query";
+export * from "./use-search-notes-query";
 export * from "./use-update-note-mutation";

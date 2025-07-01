@@ -1,21 +1,23 @@
-import { DashboardHeaderSkeleton, PaginationControlsSkeleton, SearchAndFilterPanelSkeleton } from "@/components/dashboards";
+import { Fragment } from "react";
+
+import { PaginationControlsSkeleton } from "@/components/dashboards";
 
 import { NotesListSkeleton } from "./notes-list";
 
 export function NotesDashboardSkeleton() {
   return (
-    <main className="container py-6">
+    <Fragment>
       {/* Header Skeleton */}
-      <DashboardHeaderSkeleton />
+      {/* <DashboardHeaderSkeleton /> */}
 
       {/* Search and Filter Skeleton */}
-      <SearchAndFilterPanelSkeleton />
+      {/* <SearchAndFilterPanelSkeleton /> */}
 
       {/* Notes Grid/List Skeleton */}
       <NotesListSkeleton />
 
       {/* Pagination Skeleton */}
       <PaginationControlsSkeleton />
-    </main>
+    </Fragment>
   );
 }
