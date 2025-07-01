@@ -21,7 +21,7 @@ export function VideoNoteCard({ note, noteIndex }: IProps) {
 
   return (
     <Card
-      className={`group file:cursor-pointer transition-all duration-200 hover:shadow-md ${
+      className={`group hover:cursor-pointer transition-all duration-200 hover:shadow-md ${
         activeNote?.id === note.id
           ? "border-l-4 border-l-blue-500 bg-blue-50/50"
           : "hover:bg-slate-50 dark:hover:bg-slate-800"
@@ -51,12 +51,7 @@ export function VideoNoteCard({ note, noteIndex }: IProps) {
               <Badge variant="outline" className="text-xs px-1.5 py-0.5 space-x-1">
                 <Clock className="h-3 w-3" />
                 <span>{formatTimestamp(note.timestamp.start)}</span>
-              </Badge>
-
-              <span className="text-slate-400">|</span>
-
-              <Badge variant="outline" className="text-xs px-1.5 py-0.5 space-x-1">
-                <Clock className="h-3 w-3" />
+                <span className="text-slate-400"> - </span>
                 <span>{formatTimestamp(note.timestamp.end)}</span>
               </Badge>
 
