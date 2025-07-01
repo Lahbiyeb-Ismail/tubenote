@@ -265,4 +265,59 @@ export class NoteRepository implements INoteRepository {
       { errorMessage: "Failed to count notes." },
     );
   }
+
+  /**
+   * Searches for notes based on a query string.
+   *
+   * @param userId - The unique identifier of the user.
+   * @param query - The search query.
+   * @param findManyDto - Data transfer object containing pagination and sorting parameters.
+   * @param tx - Optional transaction client for database operations.
+   *
+   * @returns A promise that resolves to an array of notes.
+   */
+  async search(
+    userId: string,
+    query: string,
+    findManyDto: IFindManyDto,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Note[]> {
+    const client = tx ?? this._db;
+
+    const { limit, sort, skip } = findManyDto;
+
+    return handleAsyncOperation(
+      () =>
+        client.note.findMany({
+          where: {
+            userId,
+            OR: [
+              {
+                title: {
+                  contains: query,
+                  mode: "insensitive", // Case-insensitive search
+                },
+              },
+              {
+                content: {
+                  contains: query,
+                  mode: "insensitive", // Case-insensitive search
+                },
+              },
+              {
+                tags: {
+                  has: query, // Check if array contains the exact query
+                },
+              },
+            ],
+          },
+          take: limit,
+          skip,
+          orderBy: {
+            [sort.by]: sort.order,
+          },
+        }),
+      { errorMessage: "Failed to search notes." },
+    );
+  }
 }

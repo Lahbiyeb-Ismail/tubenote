@@ -4,6 +4,7 @@ import type {
   IFindManyDto,
   IPaginationQueryDto,
   IParamIdDto,
+  ISearchAndPaginationQueryDto,
   IUpdateNoteDto,
 } from "@tubenote/dtos";
 import type { IPaginatedData } from "@tubenote/types";
@@ -136,6 +137,23 @@ export interface INoteRepository {
     ytVideoId: string,
     tx?: Prisma.TransactionClient,
   ) => Promise<number>;
+
+  /**
+   * Searches for notes based on a query string.
+   *
+   * @param userId - The unique identifier of the user.
+   * @param query - The search query.
+   * @param findManyDto - Data transfer object containing pagination and sorting parameters.
+   * @param tx - Optional transaction client for database operations.
+   *
+   * @returns A promise that resolves to an array of notes.
+   */
+  search: (
+    userId: string,
+    query: string,
+    findManyDto: IFindManyDto,
+    tx?: Prisma.TransactionClient
+  ) => Promise<Note[]>;
 }
 
 /**
@@ -259,6 +277,21 @@ export interface INoteService {
    *
    */
   fetchNotesCountByVideoId: (userId: string, ytVideoId: string) => Promise<number>;
+
+  /**
+   * Searches for notes based on a query string.
+   *
+   * @param userId - The unique identifier of the user.
+   * @param query - The search query.
+   * @param findManyDto - The data transfer object containing pagination and sorting options.
+   *
+   * @returns {Promise<IPaginatedData<Note>>} A promise that resolves to an object containing the paginated notes, total number of notes, and total pages.
+   */
+  searchNotes: (
+    userId: string,
+    query: string,
+    findManyDto: IFindManyDto,
+  ) => Promise<IPaginatedData<Note>>;
 }
 
 /**
@@ -369,5 +402,17 @@ export interface INoteController {
   getNotesByVideoId: (
     req: TypedRequest<EmptyRecord, IParamIdDto, IPaginationQueryDto>,
     res: Response
+  ) => Promise<void>;
+
+  /**
+   * Searches for notes based on a query string.
+   *
+   * @param req - The request object containing the search query and pagination options.
+   * @param res - The response object used to send the HTTP status and search results.
+   * @returns A promise that resolves to void.
+   */
+  searchNotes: (
+    req: TypedRequest<EmptyRecord, EmptyRecord, ISearchAndPaginationQueryDto>,
+    res: Response,
   ) => Promise<void>;
 }

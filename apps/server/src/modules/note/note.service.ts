@@ -223,4 +223,29 @@ export class NoteService implements INoteService {
   async fetchNotesCountByVideoId(userId: string, ytVideoId: string): Promise<number> {
     return this._noteRepository.countByYtVideoId(userId, ytVideoId);
   }
+
+  /**
+   * Searches for notes based on a query string.
+   *
+   * @param userId - The unique identifier of the user.
+   * @param query - The search query.
+   * @param findManyDto - The data transfer object containing pagination and sorting options.
+   *
+   * @returns {Promise<IPaginatedData<Note>>} A promise that resolves to an object containing the paginated notes, total number of notes, and total pages.
+   */
+  async searchNotes(
+    userId: string,
+    query: string,
+    findManyDto: IFindManyDto,
+  ): Promise<IPaginatedData<Note>> {
+    return await this._prismaService.transaction(async (tx) => {
+      const data = await this._noteRepository.search(userId, query, findManyDto, tx);
+
+      const totalItems = await this._noteRepository.count(userId, tx);
+
+      const totalPages = Math.ceil(totalItems / findManyDto.limit);
+
+      return { data, totalItems, totalPages };
+    });
+  }
 }

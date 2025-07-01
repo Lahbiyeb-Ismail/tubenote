@@ -2,6 +2,7 @@ import {
   createNoteSchema,
   idParamSchema,
   paginationQuerySchema,
+  searchAndPaginationQuerySchema,
   updateNoteSchema,
 } from "@tubenote/schemas";
 import { Router } from "express";
@@ -33,6 +34,9 @@ noteRoutes
 noteRoutes
   .route("/count/:id")
   .get(validateRequest({ params: idParamSchema }), (req, res) => noteController.getNotesCountByVideoId(req, res));
+
+// - GET /search: Search for notes based on a query string.
+noteRoutes.route("/search").get(validateRequest({ query: searchAndPaginationQuerySchema }), (req, res) => noteController.searchNotes(req as any, res));
 
 // - GET /recently-updated: Get the recently updated notes for the authenticated user.
 noteRoutes
