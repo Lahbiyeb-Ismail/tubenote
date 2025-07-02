@@ -1,5 +1,5 @@
 import type { Prisma, Video } from "@tubenote/db";
-import type { ICreateVideoDto, IFindManyDto } from "@tubenote/dtos";
+import type { ICreateVideoDto, ISearchAndPaginationQueryDto } from "@tubenote/dtos";
 
 import { ERROR_MESSAGES } from "@tubenote/api-errors";
 import { inject, injectable } from "inversify";
@@ -32,21 +32,26 @@ export class VideoRepository implements IVideoRepository {
 
   async findMany(
     userId: string,
-    findManyDto: IFindManyDto,
+    queryOptions: ISearchAndPaginationQueryDto,
     tx?: Prisma.TransactionClient,
   ): Promise<Video[]> {
     const client = tx ?? this._db;
 
-    const { limit, skip, sort } = findManyDto;
+    const { limit, order, page, sortBy, q: searchQuery } = queryOptions;
+
+    const skip = (page - 1) * limit;
 
     return handleAsyncOperation(
       () =>
         client.video.findMany({
-          where: { userIds: { has: userId } },
+          where: { userIds: { has: userId }, OR: [
+            { title: { contains: searchQuery, mode: "insensitive" } },
+            { description: { contains: searchQuery, mode: "insensitive" } },
+          ] },
           take: limit,
           skip,
           orderBy: {
-            [sort.by]: sort.order,
+            [sortBy]: order,
           },
           include: {
             _count: {
@@ -64,7 +69,7 @@ export class VideoRepository implements IVideoRepository {
     );
   }
 
-  async count(userId: string, tx?: Prisma.TransactionClient): Promise<number> {
+  async count(userId: string, searchQuery?: string, tx?: Prisma.TransactionClient): Promise<number> {
     const client = tx ?? this._db;
 
     return handleAsyncOperation(
@@ -72,6 +77,10 @@ export class VideoRepository implements IVideoRepository {
         client.video.count({
           where: {
             userIds: { has: userId },
+            OR: [
+              { title: { contains: searchQuery, mode: "insensitive" } },
+              { description: { contains: searchQuery, mode: "insensitive" } },
+            ],
           },
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_COUNT },

@@ -1,37 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 import { DashboardHeader, PaginationControls, SearchAndFilterPanel } from "@/components/dashboards";
-import { usePaginationQuery, useSortByQueries } from "@/hooks";
+import { useUrlState } from "@/hooks";
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
 
 import { NoVideosFound, VideosDashboardSkeleton, VideosList } from "../components";
 import { useGetUserVideosQuery } from "../queries";
 
 export function VideosDashboardPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("createdAt");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [searchQuery, setSearchQuery] = useUrlState("q", "");
+  const [sortBy, setSortBy] = useUrlState("sortBy", "createdAt");
+  const [order] = useUrlState("order", "desc");
+  const [page, setPage] = useUrlState("page", DEFAULT_PAGE);
+  const [viewMode, setViewMode] = useUrlState<"grid" | "list">("view", "grid");
   const [showFilters, setShowFilters] = useState(false);
-
-  const { currentPage, setPage } = usePaginationQuery({
-    defaultPage: DEFAULT_PAGE,
-  });
-
-  const { order } = useSortByQueries({});
 
   const {
     data,
     isLoading,
-  } = useGetUserVideosQuery({ page: currentPage, limit: PAGE_LIMIT, sortBy, order });
+  } = useGetUserVideosQuery({ page, limit: PAGE_LIMIT, sortBy, order, q: searchQuery });
 
-  if (isLoading || !data)
-    return <VideosDashboardSkeleton />;
-
-  if (data.videos.length === 0 || !data.paginationMeta) {
+  if (!searchQuery && data?.videos.length === 0)
     return <NoVideosFound />;
-  }
 
   return (
     <main className="container py-6">
@@ -41,19 +33,40 @@ export function VideosDashboardPage() {
       {/* Search and Filter Component */}
       <SearchAndFilterPanel inputSearchPlaceholder="Search videos, tags, or content..." searchQuery={searchQuery} setSearchQuery={setSearchQuery} showFilters={showFilters} setShowFilters={setShowFilters} sortBy={sortBy} setSortBy={setSortBy} viewMode={viewMode} setViewMode={setViewMode} />
 
-      {/* Videos List */}
-      <VideosList viewMode={viewMode} videos={data.videos} />
-
-      {/* Pagination Component */}
-      {data.videos.length >= PAGE_LIMIT
+      {isLoading || !data
         ? (
-            <PaginationControls
-              currentPage={currentPage}
-              totalPages={data.paginationMeta.totalPages}
-              onPageChange={setPage}
-            />
+            <VideosDashboardSkeleton />
           )
-        : null}
+        : (
+            <Fragment>
+              {data.videos.length === 0
+                ? (
+                    <div className="flex flex-col items-center justify-center h-64">
+                      <h2 className="text-center text-gray-500">No Videos Found.</h2>
+                      <p className="text-center text-gray-400">
+                        Try adjusting your search or filters to find videos.
+                      </p>
+                    </div>
+                  )
+                : (
+                    <Fragment>
+                      {/* Videos List */}
+                      <VideosList viewMode={viewMode} videos={data.videos} />
+
+                      {/* Pagination Component */}
+                      {data.videos.length >= PAGE_LIMIT && data.paginationMeta
+                        ? (
+                            <PaginationControls
+                              currentPage={page}
+                              totalPages={data.paginationMeta.totalPages}
+                              onPageChange={setPage}
+                            />
+                          )
+                        : null}
+                    </Fragment>
+                  )}
+            </Fragment>
+          )}
     </main>
   );
 }

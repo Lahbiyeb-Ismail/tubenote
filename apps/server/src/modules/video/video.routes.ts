@@ -1,4 +1,4 @@
-import { idParamSchema, paginationQuerySchema } from "@tubenote/schemas";
+import { idParamSchema, searchAndPaginationQuerySchema } from "@tubenote/schemas";
 import { Router } from "express";
 
 import { isAuthenticated, validateRequest } from "@/middlewares";
@@ -13,10 +13,6 @@ videoRoutes.use(isAuthenticated);
 // - GET /: Get all videos for the authenticated user
 // - GET /count: Get the total count of videos for the authenticated user
 // - POST /: Create a new video (requires request body validation)
-videoRoutes
-  .route("/")
-  .get(validateRequest({ query: paginationQuerySchema }), (req, res) =>
-    videoController.getUserVideos(req, res));
 
 videoRoutes
   .route("/count")
@@ -27,5 +23,10 @@ videoRoutes
   .route("/:id")
   .get(validateRequest({ params: idParamSchema }), (req, res) =>
     videoController.getVideoByYoutubeId(req, res));
+
+videoRoutes
+  .route("/")
+  .get(validateRequest({ query: searchAndPaginationQuerySchema }), (req, res) =>
+    videoController.getUserVideos(req as any, res));
 
 export { videoRoutes };

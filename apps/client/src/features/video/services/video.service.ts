@@ -1,5 +1,5 @@
 import type { Video } from "@tubenote/db";
-import type { IPaginationQueryDto } from "@tubenote/dtos";
+import type { ISearchAndPaginationQueryDto } from "@tubenote/dtos";
 import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
 import type { AxiosError } from "axios";
 
@@ -41,18 +41,18 @@ export async function saveVideoData(
 /**
  * Fetches video notes for a specific video ID with pagination.
  *
- * @param paginationQuery - An object containing pagination parameters such as page, limit, order, and sortBy.
+ * @param searchParams - An object containing pagination parameters such as page, limit, order, and sortBy.
  * @returns A promise that resolves to an object containing the video notes data.
  * @throws An error if the request fails, including the error message from the server if available.
  */
 export async function getUserVideos(
-  paginationQuery: IPaginationQueryDto,
+  searchParams: ISearchAndPaginationQueryDto,
 ): Promise<IApiSuccessResponse<VideoWithCount[]>> {
-  const { page, limit, order, sortBy } = paginationQuery;
+  const { page, limit, order, sortBy, q } = searchParams;
 
   const { data: response, error } = await asyncTryCatch(
     axiosInstance.get<IApiSuccessResponse<VideoWithCount[]>>(
-      `/videos?page=${page}&limit=${limit}&order=${order}&sortBy=${sortBy}`,
+      `/videos?page=${page}&limit=${limit}&order=${order}&sortBy=${sortBy}&q=${q}`,
     ),
   );
 

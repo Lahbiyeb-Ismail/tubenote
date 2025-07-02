@@ -1,9 +1,8 @@
 import type { Prisma, Video } from "@tubenote/db";
 import type {
   ICreateVideoDto,
-  IFindManyDto,
-  IPaginationQueryDto,
   IParamIdDto,
+  ISearchAndPaginationQueryDto,
 } from "@tubenote/dtos";
 import type { IPaginatedData } from "@tubenote/types";
 import type { Response } from "express";
@@ -17,10 +16,10 @@ export interface IVideoRepository {
   ) => Promise<Video | null>;
   findMany: (
     userId: string,
-    findManyDto: IFindManyDto,
+    queryOptions: ISearchAndPaginationQueryDto,
     tx?: Prisma.TransactionClient
   ) => Promise<Video[]>;
-  count: (userId: string, tx?: Prisma.TransactionClient) => Promise<number>;
+  count: (userId: string, searchQuery?: string, tx?: Prisma.TransactionClient) => Promise<number>;
   create: (
     userId: string,
     data: ICreateVideoDto,
@@ -36,7 +35,7 @@ export interface IVideoRepository {
 export interface IVideoService {
   getUserVideos: (
     userId: string,
-    findManyDto: IFindManyDto
+    queryOptions: ISearchAndPaginationQueryDto,
   ) => Promise<IPaginatedData<Video>>;
   getUserVideosCount: (userId: string) => Promise<number>;
   getVideoByYoutubeId: (userId: string, videoYoutubeId: string) => Promise<Video>;
@@ -48,7 +47,7 @@ export interface IVideoController {
     res: Response
   ) => Promise<void>;
   getUserVideos: (
-    req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, ISearchAndPaginationQueryDto>,
     res: Response
   ) => Promise<void>;
   getUserVideosCount: (

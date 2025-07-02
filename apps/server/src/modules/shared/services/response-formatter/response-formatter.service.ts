@@ -269,6 +269,7 @@ export class ResponseFormatter implements IResponseFormatter {
         by: reqQuery.sortBy ?? "createdAt",
         order: reqQuery.order ?? "desc",
       },
+      searchQuery: reqQuery.q ?? "",
     };
   }
 }

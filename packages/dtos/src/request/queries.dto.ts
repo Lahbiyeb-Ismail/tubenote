@@ -9,10 +9,10 @@
  * @property {string} [order] - The order of sorting (e.g., 'asc' for ascending, 'desc' for descending).
  */
 export interface IPaginationQueryDto {
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  order?: string;
+  page: number;
+  limit: number;
+  sortBy: string;
+  order: string;
 }
 
 /**

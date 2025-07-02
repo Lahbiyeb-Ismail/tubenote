@@ -1,6 +1,6 @@
 "use client";
 
-import type { IPaginationQueryDto } from "@tubenote/dtos";
+import type { ISearchAndPaginationQueryDto } from "@tubenote/dtos";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -8,12 +8,12 @@ import { useAuth } from "@/features/auth/hooks";
 
 import { getUserVideos } from "../services";
 
-export function useGetUserVideosQuery(paginationQuery: IPaginationQueryDto) {
+export function useGetUserVideosQuery(searchQuery: ISearchAndPaginationQueryDto) {
   const { isAuthenticated } = useAuth();
 
   return useQuery({
-    queryKey: ["videos", paginationQuery],
-    queryFn: () => getUserVideos(paginationQuery),
+    queryKey: ["videos", searchQuery],
+    queryFn: () => getUserVideos(searchQuery),
     select: response => ({
       videos: response.payload.data,
       paginationMeta: response.payload.paginationMeta,

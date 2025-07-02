@@ -1,5 +1,5 @@
 import type { Prisma, Video } from "@tubenote/db";
-import type { IFindManyDto } from "@tubenote/dtos";
+import type { ISearchAndPaginationQueryDto } from "@tubenote/dtos";
 import type { IPaginatedData } from "@tubenote/types";
 
 import { BadRequestError, ERROR_MESSAGES } from "@tubenote/api-errors";
@@ -46,18 +46,20 @@ export class VideoService implements IVideoService {
 
   async getUserVideos(
     userId: string,
-    findManyDto: IFindManyDto,
+    queryOptions: ISearchAndPaginationQueryDto,
   ): Promise<IPaginatedData<Video>> {
     return this._prismaService.transaction(async (tx) => {
+      const { q: searchQuery } = queryOptions;
+
       const data = await this._videoRepository.findMany(
         userId,
-        findManyDto,
+        queryOptions,
         tx,
       );
 
-      const totalItems = await this._videoRepository.count(userId, tx);
+      const totalItems = await this._videoRepository.count(userId, searchQuery, tx);
 
-      const totalPages = Math.ceil(totalItems / findManyDto.limit);
+      const totalPages = Math.ceil(totalItems / queryOptions.limit);
       return { data, totalItems, totalPages };
     });
   }

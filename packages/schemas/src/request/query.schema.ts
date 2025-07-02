@@ -20,20 +20,34 @@ export const paginationQuerySchema = z
   .strict();
 
 /**
- * Schema for pagination and search query parameters.
- * This schema extends the pagination query schema to include a search query parameter.
- * @property {string} page - The page number for pagination. Must be a string representing a positive integer. Defaults to "1".
- * @property {string} limit - The number of items per page. Must be a string representing a positive integer. Defaults to "8".
- * @property {("createdAt" | "updatedAt")} sortBy - The field by which to sort the results. Can be either "createdAt" or "updatedAt". Defaults to "createdAt".
- * @property {("desc" | "asc")} order - The order in which to sort the results. Can be either "desc" for descending or "asc" for ascending. Defaults to "desc".
- * @property {string} q - The search query string. Must be a string with a minimum length of 2 and a maximum length of 100 characters.
+ * Schema for search and pagination query parameters.
+ *
+ * @description Validates and transforms query parameters for search functionality with pagination support.
+ * Includes validation for page number, limit, sorting options, and search query string.
+ *
+ * @property page - Page number as string, defaults to "1", transformed to number
+ * @property limit - Number of items per page as string, defaults to "9", transformed to number
+ * @property sortBy - Field to sort by, either "createdAt" or "updatedAt", defaults to "createdAt"
+ * @property order - Sort order, either "desc" or "asc", defaults to "desc"
+ * @property q - Search query string, max 100 characters, transforms "undefined" string to empty string
+ *
+ * @example
+ * ```typescript
+ * const result = searchAndPaginationQuerySchema.parse({
+ *   page: "2",
+ *   limit: "10",
+ *   sortBy: "updatedAt",
+ *   order: "asc",
+ *   q: "search term"
+ * });
+ * ```
  */
 export const searchAndPaginationQuerySchema = z
   .object({
-    page: z.string().regex(/^\d+$/).optional().default("1"),
-    limit: z.string().regex(/^\d+$/).optional().default("8"),
+    page: z.string().regex(/^\d+$/).optional().default("1").transform(val => +val),
+    limit: z.string().regex(/^\d+$/).optional().default("9").transform(val => +val),
     sortBy: z.enum(["createdAt", "updatedAt"]).optional().default("createdAt"),
     order: z.enum(["desc", "asc"]).optional().default("desc"),
-    q: z.string().min(1).max(100),
+    q: z.string().max(100).transform(val => val === "undefined" ? "" : val),
   })
   .strict();

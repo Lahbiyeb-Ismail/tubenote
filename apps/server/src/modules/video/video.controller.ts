@@ -1,5 +1,5 @@
 import type { Video } from "@tubenote/db";
-import type { IPaginationQueryDto, IParamIdDto } from "@tubenote/dtos";
+import type { IParamIdDto, ISearchAndPaginationQueryDto } from "@tubenote/dtos";
 import type { Response } from "express";
 
 import { youtubeTranscriptService } from "@tubenote/youtube-api";
@@ -44,31 +44,28 @@ export class VideoController implements IVideoController {
   }
 
   /**
-   * Retrieves a paginated list of videos for a specific user.
+   * Retrieves a paginated list of videos for the authenticated user.
    *
-   * @param req - The request object containing user ID and pagination query parameters.
-   * @param res - The response object to send the result.
+   * @param req - The typed request object containing user authentication information and pagination query parameters
+   * @param res - The Express response object used to send the paginated response
+   * @returns A Promise that resolves when the response is sent with the paginated video data
    *
-   * @returns A JSON response with the list of videos and pagination details.
+   * @throws Will return an error response if the user is not authenticated or if there's an issue retrieving the videos
+   *
    */
   async getUserVideos(
-    req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, ISearchAndPaginationQueryDto>,
     res: Response,
   ) {
     const userId = req.userId;
 
-    const findManyDto = this._responseFormatter.getPaginationQueries({
-      reqQuery: req.query,
-      itemsPerPage: 8,
-    });
-
     const paginatedData = await this._videoService.getUserVideos(
       userId,
-      findManyDto,
+      req.query,
     );
 
     const formattedResponse = this._responseFormatter.formatPaginatedResponse({
-      page: req.query.page || 1,
+      page: req.query.page,
       paginatedData,
       responseOptions: {
         message: "Videos retrieved successfully.",
