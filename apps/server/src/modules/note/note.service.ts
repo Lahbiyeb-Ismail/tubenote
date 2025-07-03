@@ -2,6 +2,7 @@ import type { Note, Prisma } from "@tubenote/db";
 import type {
   ICreateNoteDto,
   IFindManyDto,
+  ISearchAndPaginationQueryDto,
   IUpdateNoteDto,
 } from "@tubenote/dtos";
 import type { IPaginatedData } from "@tubenote/types";
@@ -123,55 +124,23 @@ export class NoteService implements INoteService {
    * Fetches the notes for a user based on the provided criteria.
    *
    * @param userId - The unique identifier of the user.
-   * @param findManyDto - The data transfer object containing the criteria for finding notes.
+   * @param queryOptions - Data transfer object containing pagination and sorting parameters.
    *
    * @returns {Promise<IPaginatedData<Note>>} A promise that resolves to an object containing the paginated notes, total number of notes, and total pages.
    */
   async fetchUserNotes(
     userId: string,
-    findManyDto: IFindManyDto,
+    queryOptions: ISearchAndPaginationQueryDto,
   ): Promise<IPaginatedData<Note>> {
     return await this._prismaService.transaction(async (tx) => {
-      const data = await this._noteRepository.findMany(userId, findManyDto, tx);
+      const data = await this._noteRepository.findMany(userId, queryOptions, tx);
 
-      const totalItems = await this._noteRepository.count(userId, tx);
+      const totalItems = await this._noteRepository.count(userId, queryOptions.q, tx);
 
-      const totalPages = Math.ceil(totalItems / findManyDto.limit);
+      const totalPages = Math.ceil(totalItems / queryOptions.limit);
 
       return { data, totalItems, totalPages };
     });
-  }
-
-  /**
-   * Retrieves recent notes for a user.
-   *
-   * @param userId - The unique identifier of the user.
-   * @param findManyDto - Data transfer object containing pagination, and sorting details.
-   *
-   * @returns {Promise<Note[]>} A promise that resolves to an array of recent notes.
-   */
-  async fetchRecentNotes(
-    userId: string,
-    findManyDto: IFindManyDto,
-  ): Promise<Note[]> {
-    return await this._noteRepository.findMany(userId, findManyDto);
-  }
-
-  /**
-   * Retrieves recently updated notes for a user.
-   *
-   * Note: This method currently uses the same repository method as fetchRecentNotes.
-   *
-   * @param userId - The unique identifier of the user.
-   * @param findManyDto - Data transfer object containing pagination, and sorting details.
-   *
-   * @returns {Promise<Note[]>} A promise that resolves to an array of recently updated notes.
-   */
-  async fetchRecentlyUpdatedNotes(
-    userId: string,
-    findManyDto: IFindManyDto,
-  ): Promise<Note[]> {
-    return await this._noteRepository.findMany(userId, findManyDto);
   }
 
   /**
@@ -199,7 +168,7 @@ export class NoteService implements INoteService {
         tx,
       );
 
-      const totalItems = await this._noteRepository.count(userId, tx);
+      const totalItems = await this._noteRepository.count(userId, "", tx);
 
       const totalPages = Math.ceil(totalItems / findManyDto.limit);
 
@@ -222,30 +191,5 @@ export class NoteService implements INoteService {
    */
   async fetchNotesCountByVideoId(userId: string, ytVideoId: string): Promise<number> {
     return this._noteRepository.countByYtVideoId(userId, ytVideoId);
-  }
-
-  /**
-   * Searches for notes based on a query string.
-   *
-   * @param userId - The unique identifier of the user.
-   * @param query - The search query.
-   * @param findManyDto - The data transfer object containing pagination and sorting options.
-   *
-   * @returns {Promise<IPaginatedData<Note>>} A promise that resolves to an object containing the paginated notes, total number of notes, and total pages.
-   */
-  async searchNotes(
-    userId: string,
-    query: string,
-    findManyDto: IFindManyDto,
-  ): Promise<IPaginatedData<Note>> {
-    return await this._prismaService.transaction(async (tx) => {
-      const data = await this._noteRepository.search(userId, query, findManyDto, tx);
-
-      const totalItems = await this._noteRepository.count(userId, tx);
-
-      const totalPages = Math.ceil(totalItems / findManyDto.limit);
-
-      return { data, totalItems, totalPages };
-    });
   }
 }

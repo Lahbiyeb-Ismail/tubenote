@@ -7,12 +7,6 @@ import { NotesListSkeleton } from "./notes-list";
 export function NotesDashboardSkeleton() {
   return (
     <Fragment>
-      {/* Header Skeleton */}
-      {/* <DashboardHeaderSkeleton /> */}
-
-      {/* Search and Filter Skeleton */}
-      {/* <SearchAndFilterPanelSkeleton /> */}
-
       {/* Notes Grid/List Skeleton */}
       <NotesListSkeleton />
 

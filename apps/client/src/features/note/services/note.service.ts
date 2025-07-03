@@ -2,6 +2,7 @@ import type { Note } from "@tubenote/db";
 import type {
   ICreateNoteDto,
   IPaginationQueryDto,
+  ISearchAndPaginationQueryDto,
   IUpdateNoteDto,
 } from "@tubenote/dtos";
 import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
@@ -50,24 +51,25 @@ export async function createNote({
 /**
  * Fetches the user's notes with pagination and sorting options.
  *
- * @param paginationQuery - An object containing pagination and sorting parameters:
+ * @param queryOptions - An object containing pagination and sorting parameters:
  *   - `page`: The page number to fetch.
  *   - `limit`: The number of items per page.
  *   - `order`: The order of sorting (e.g., 'asc' or 'desc').
  *   - `sortBy`: The field to sort the notes by.
+ *   - `q`: A search query string to filter notes by title or content.
  *
  * @returns A promise that resolves to an API success response containing an array of notes.
  *
  * @throws An error if the request fails. If the error is from the server, it includes the server's error message.
  */
 export async function getUserNotes(
-  paginationQuery: IPaginationQueryDto,
+  queryOptions: ISearchAndPaginationQueryDto,
 ): Promise<IApiSuccessResponse<Note[]>> {
-  const { page, limit, order, sortBy } = paginationQuery;
+  const { page, limit, order, sortBy, q } = queryOptions;
 
   const { data: response, error } = await asyncTryCatch(
     axiosInstance.get<IApiSuccessResponse<Note[]>>(
-      `/notes?page=${page}&limit=${limit}&order=${order}&sortBy=${sortBy}`,
+      `/notes?page=${page}&q=${q}&limit=${limit}&order=${order}&sortBy=${sortBy}`,
     ),
   );
 
@@ -211,58 +213,6 @@ export async function updateNote({
 }
 
 /**
- * Fetches the most recent notes from the server.
- *
- * @returns {Promise<IApiSuccessResponse<Note[]>>} A promise that resolves to the API success response containing an array of notes.
- * @throws {Error} Throws an error if the request fails. If the error is an Axios error with a response,
- * it throws the error message from the server. Otherwise, it throws a generic error message.
- */
-export async function getRecentNotes(): Promise<IApiSuccessResponse<Note[]>> {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.get<IApiSuccessResponse<Note[]>>("/notes/recent"),
-  );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-
-    throw new Error("Failed to fetch recent notes.");
-  }
-
-  return response.data;
-}
-
-/**
- * Fetches the list of recently updated notes from the server.
- *
- * @returns {Promise<IApiSuccessResponse<Note[]>>} A promise that resolves to the API success response containing an array of notes.
- * @throws {Error} Throws an error if the request fails. If the error is from the server, it includes the error message from the response payload.
- *
- */
-export async function getRecentlyUpdatedNotes(): Promise<
-  IApiSuccessResponse<Note[]>
-> {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.get<IApiSuccessResponse<Note[]>>("/notes/recently-updated"),
-  );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-
-    throw new Error("Failed to fetch recently updated notes.");
-  }
-
-  return response.data;
-}
-
-/**
  * Fetches notes associated with a specific video ID.
  *
  * @param videoId - The unique identifier of the video for which notes are to be retrieved.
@@ -291,60 +241,3 @@ export async function getNotesByVideoId(
 
   return response.data;
 }
-
-/**
- * Searches for notes based on a query string.
- *
- * @param query - The search query.
- * @param paginationQuery - An object containing pagination and sorting parameters.
- * @returns A promise that resolves to an API success response containing an array of notes.
- * @throws An error if the request fails, including a specific error message if available.
- */
-export async function searchNotes(
-  query: string,
-  paginationQuery: IPaginationQueryDto,
-): Promise<IApiSuccessResponse<Note[]>> {
-  const { page, limit, order, sortBy } = paginationQuery;
-
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.get<IApiSuccessResponse<Note[]>>(
-      `/notes/search?q=${query}&page=${page}&limit=${limit}&order=${order}&sortBy=${sortBy}`,
-    ),
-  );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-
-    throw new Error("Failed to search notes.");
-  }
-
-  return response.data;
-}
-
-// export async function exportNoteAsPDF(noteId: string): Promise<Blob> {
-//   const { data: response, error } = await asyncTryCatch(
-//     axiosInstance.post<Blob>(
-//       `/notes/export-pdf/${noteId}`,
-//       {},
-//       {
-//         responseType: "blob",
-//       }
-//     )
-//   );
-
-//   if (error) {
-//     const axiosError = error as AxiosError<IApiErrorResponse>;
-
-//     if (axiosError.response) {
-//       throw new Error(axiosError.response.data.payload.message);
-//     }
-
-//     throw new Error("Failed to export note as PDF.");
-//   }
-
-//   return response;
-// }

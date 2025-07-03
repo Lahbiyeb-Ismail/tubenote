@@ -191,89 +191,21 @@ export class NoteController implements INoteController {
    * @returns A promise that resolves to void.
    */
   async getUserNotes(
-    req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, ISearchAndPaginationQueryDto>,
     res: Response,
   ): Promise<void> {
     const userId = req.userId;
-
-    const findManyDto = this._responseFormatter.getPaginationQueries({
-      reqQuery: req.query,
-      itemsPerPage: 8,
-    });
 
     const paginatedData = await this._noteService.fetchUserNotes(
       userId,
-      findManyDto,
+      req.query,
     );
 
     const formattedResponse = this._responseFormatter.formatPaginatedResponse<Note>({
-      page: req.query.page ?? 1,
+      page: req.query.page,
       paginatedData,
       responseOptions: {
         message: "User notes retrieved successfully.",
-      },
-    });
-
-    res.status(formattedResponse.statusCode).json(formattedResponse);
-  }
-
-  /**
-   * Retrieves the most recent notes for a specific user.
-   *
-   * @param req - The request object containing the userId and pagination query parameters.
-   * @param res - The response object used to send the HTTP status and recent notes data.
-   * @returns A promise that resolves to void.
-   */
-  async getUserRecentNotes(
-    req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
-    res: Response,
-  ): Promise<void> {
-    const userId = req.userId;
-    const findManyDto = this._responseFormatter.getPaginationQueries({
-      reqQuery: req.query,
-      itemsPerPage: 2,
-    });
-
-    const notes = await this._noteService.fetchRecentNotes(userId, findManyDto);
-
-    const formattedResponse = this._responseFormatter.formatSuccessResponse<
-      Note[]
-    >({
-      responseOptions: {
-        data: notes,
-        message: "Recent notes retrieved successfully.",
-      },
-    });
-
-    res.status(formattedResponse.statusCode).json(formattedResponse);
-  }
-
-  /**
-   * Retrieves the most recently updated notes for the authenticated user.
-   *
-   * @param req - The request object containing the userId and pagination query parameters.
-   * @param res - The response object used to send the HTTP status and recently updated notes data.
-   * @returns A promise that resolves to void.
-   */
-  async getRecentlyUpdatedNotes(
-    req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
-    res: Response,
-  ): Promise<void> {
-    const userId = req.userId;
-
-    const findManyDto = this._responseFormatter.getPaginationQueries({
-      reqQuery: req.query,
-      itemsPerPage: 2,
-    });
-
-    const notes = await this._noteService.fetchRecentNotes(userId, findManyDto);
-
-    const formattedResponse = this._responseFormatter.formatSuccessResponse<
-      Note[]
-    >({
-      responseOptions: {
-        data: notes,
-        message: "Recent updated notes retrieved successfully.",
       },
     });
 
@@ -306,42 +238,6 @@ export class NoteController implements INoteController {
     );
 
     const formattedResponse = this._responseFormatter.formatPaginatedResponse({
-      page: req.query.page ?? 1,
-      paginatedData,
-      responseOptions: {
-        message: "Notes retrieved successfully.",
-      },
-    });
-
-    res.status(formattedResponse.statusCode).json(formattedResponse);
-  }
-
-  /**
-   * Searches for notes based on a query string.
-   *
-   * @param req - The request object containing the search query and pagination options.
-   * @param res - The response object used to send the HTTP status and search results.
-   * @returns A promise that resolves to void.
-   */
-  async searchNotes(
-    req: TypedRequest<EmptyRecord, EmptyRecord, ISearchAndPaginationQueryDto>,
-    res: Response,
-  ): Promise<void> {
-    const userId = req.userId;
-    const { q } = req.query;
-
-    const findManyDto = this._responseFormatter.getPaginationQueries({
-      reqQuery: req.query,
-      itemsPerPage: 8,
-    });
-
-    const paginatedData = await this._noteService.searchNotes(
-      userId,
-      q,
-      findManyDto,
-    );
-
-    const formattedResponse = this._responseFormatter.formatPaginatedResponse<Note>({
       page: req.query.page ?? 1,
       paginatedData,
       responseOptions: {

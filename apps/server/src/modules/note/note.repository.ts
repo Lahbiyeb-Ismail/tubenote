@@ -2,6 +2,7 @@ import type { Note, Prisma } from "@tubenote/db";
 import type {
   ICreateNoteDto,
   IFindManyDto,
+  ISearchAndPaginationQueryDto,
   IUpdateNoteDto,
 } from "@tubenote/dtos";
 
@@ -153,29 +154,53 @@ export class NoteRepository implements INoteRepository {
    * Retrieves multiple notes for a given user with pagination and sorting options.
    *
    * @param userId - The ID of the user whose notes are to be fetched.
-   * @param findManyDto - The DTO containing pagination and sorting options.
+   * @param queryOptions - Data transfer object containing pagination and sorting parameters.
+   *                      This includes parameters like `limit`, `page`, `sortBy`, and `order`.
+   *                      The `q` parameter is used for searching notes by title, content,
+   *                      or tags.
    *
    * @returns A Promise that resolves with an array of Notes.
    */
   async findMany(
     userId: string,
-    findManyDto: IFindManyDto,
+    queryOptions: ISearchAndPaginationQueryDto,
     tx?: Prisma.TransactionClient,
   ): Promise<Note[]> {
     const client = tx ?? this._db;
 
-    const { limit, sort, skip } = findManyDto;
+    const { limit, order, page, sortBy, q: searchQuery } = queryOptions;
+
+    const skip = (page - 1) * limit;
 
     return handleAsyncOperation(
       () =>
         client.note.findMany({
           where: {
             userId,
+            OR: [
+              {
+                title: {
+                  contains: searchQuery,
+                  mode: "insensitive", // Case-insensitive search
+                },
+              },
+              {
+                content: {
+                  contains: searchQuery,
+                  mode: "insensitive", // Case-insensitive search
+                },
+              },
+              {
+                tags: {
+                  has: searchQuery, // Check if array contains the exact query
+                },
+              },
+            ],
           },
           take: limit,
           skip,
           orderBy: {
-            [sort.by]: sort.order,
+            [sortBy]: order,
           },
         }),
       { errorMessage: "Failed to fetch user notes." },
@@ -222,9 +247,12 @@ export class NoteRepository implements INoteRepository {
    * Counts the number of notes for a given user.
    *
    * @param userId - The ID of the user whose notes are to be counted.
+   * @param searchQuery - Optional search query to filter notes by title, content, or tags.
+   * @param tx - Optional Prisma transaction client for database operations.
+   *
    * @returns A Promise that resolves with the count of notes.
    */
-  async count(userId: string, tx?: Prisma.TransactionClient): Promise<number> {
+  async count(userId: string, searchQuery?: string, tx?: Prisma.TransactionClient): Promise<number> {
     const client = tx ?? this._db;
 
     return handleAsyncOperation(
@@ -232,6 +260,25 @@ export class NoteRepository implements INoteRepository {
         client.note.count({
           where: {
             userId,
+            OR: [
+              {
+                title: {
+                  contains: searchQuery,
+                  mode: "insensitive", // Case-insensitive search
+                },
+              },
+              {
+                content: {
+                  contains: searchQuery,
+                  mode: "insensitive", // Case-insensitive search
+                },
+              },
+              {
+                tags: {
+                  has: searchQuery, // Check if array contains the exact query
+                },
+              },
+            ],
           },
         }),
       { errorMessage: "Failed to count notes." },

@@ -8,7 +8,7 @@ import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils";
 
 import { NoNotesFound } from "../components";
 import { NotesDashboardSkeleton, NotesList } from "../components/notes-dashboard";
-import { useGetUserNotesQuery, useSearchNotesQuery } from "../queries";
+import { useGetUserNotesQuery } from "../queries";
 
 export function NotesDashboardPage() {
   const [searchQuery, setSearchQuery] = useUrlState("q", "");
@@ -18,29 +18,17 @@ export function NotesDashboardPage() {
   const [viewMode, setViewMode] = useUrlState<"grid" | "list">("view", "grid");
   const [showFilters, setShowFilters] = useState(false);
 
-  const { data: notesData, isLoading: isNotesLoading } = useGetUserNotesQuery({
+  const { data: notesRes, isLoading: isNotesLoading } = useGetUserNotesQuery({
     page,
     limit: PAGE_LIMIT,
     sortBy,
     order,
+    q: searchQuery,
   });
 
-  const { data: searchData, isLoading: isSearchLoading } = useSearchNotesQuery(
-    searchQuery,
-    {
-      page,
-      limit: PAGE_LIMIT,
-      sortBy,
-      order,
-    },
-  );
-
-  if (notesData?.notes.length === 0) {
+  if (!searchQuery && notesRes?.notes.length === 0) {
     return <NoNotesFound />;
   }
-
-  const isLoading = isNotesLoading || isSearchLoading;
-  const data = searchQuery ? searchData : notesData;
 
   return (
     <main className="container py-6">
@@ -60,13 +48,13 @@ export function NotesDashboardPage() {
         setViewMode={setViewMode}
       />
 
-      {isLoading || !data
+      {isNotesLoading || !notesRes
         ? (
             <NotesDashboardSkeleton />
           )
         : (
             <Fragment>
-              {data.notes.length === 0
+              {notesRes.notes.length === 0
                 ? (
                     <div className="flex flex-col items-center justify-center h-64">
                       <h2 className="text-center text-gray-500">No notes found.</h2>
@@ -78,14 +66,14 @@ export function NotesDashboardPage() {
                 : (
                     <Fragment>
                       {/* Notes List */}
-                      <NotesList viewMode={viewMode} notes={data.notes} />
+                      <NotesList viewMode={viewMode} notes={notesRes.notes} />
 
                       {/* Pagination Component */}
-                      {data.notes.length >= PAGE_LIMIT && data.paginationMeta
+                      {notesRes.notes.length >= PAGE_LIMIT && notesRes.paginationMeta
                         ? (
                             <PaginationControls
                               currentPage={page}
-                              totalPages={data.paginationMeta.totalPages}
+                              totalPages={notesRes.paginationMeta.totalPages}
                               onPageChange={setPage}
                             />
                           )

@@ -85,14 +85,17 @@ export interface INoteRepository {
    * Retrieves multiple notes with pagination.
    *
    * @param userId - The unique identifier of the user.
-   * @param findManyDto - Data transfer object containing pagination and sorting parameters.
+   * @param queryOptions - Data transfer object containing pagination and sorting parameters.
+   *                      This includes parameters like `limit`, `page`, `sortBy`, and `order`.
+   *                      The `q` parameter is used for searching notes by title, content,
+   *                      or tags.
    * @param tx - Optional transaction client for database operations.
    *
    * @returns A promise that resolves to an array of notes.
    */
   findMany: (
     userId: string,
-    findManyDto: IFindManyDto,
+    queryOptions: ISearchAndPaginationQueryDto,
     tx?: Prisma.TransactionClient
   ) => Promise<Note[]>;
 
@@ -117,11 +120,12 @@ export interface INoteRepository {
    * Counts the total number of notes for a specific user.
    *
    * @param userId - The unique identifier of the user.
+   * @param searchQuery - Optional search query to filter notes by title, content, or tags.
    * @param tx - Optional transaction client for database operations.
    *
    * @returns A promise that resolves to the number of notes.
    */
-  count: (userId: string, tx?: Prisma.TransactionClient) => Promise<number>;
+  count: (userId: string, searchQuery?: string, tx?: Prisma.TransactionClient) => Promise<number>;
 
   /**
    * Counts the total number of notes associated with a specific video for a given user.
@@ -221,36 +225,13 @@ export interface INoteService {
    * Fetches paginated notes for a user.
    *
    * @param userId - The unique identifier of the user.
-   * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
+   * @param queryOptions - Data transfer object containing pagination, sorting, and filtering parameters.
    * @returns A promise that resolves to the paginated notes information.
    */
   fetchUserNotes: (
     userId: string,
-    findManyDto: IFindManyDto
+    queryOptions: ISearchAndPaginationQueryDto
   ) => Promise<IPaginatedData<Note>>;
-
-  /**
-   * Fetches recent notes for a user.
-   *
-   * @param userId - The unique identifier of the user.
-   * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
-   *
-   * @returns A promise that resolves to an array of recent notes.
-   */
-  fetchRecentNotes: (userId: string, findManyDto: IFindManyDto) => Promise<Note[]>;
-
-  /**
-   * Fetches recently updated notes for a user.
-   *
-   * @param userId - The unique identifier of the user.
-   * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
-   *
-   * @returns A promise that resolves to an array of recently updated notes.
-   */
-  fetchRecentlyUpdatedNotes: (
-    userId: string,
-    findManyDto: IFindManyDto
-  ) => Promise<Note[]>;
 
   /**
    * Fetches notes associated with a specific video with pagination.
@@ -277,21 +258,6 @@ export interface INoteService {
    *
    */
   fetchNotesCountByVideoId: (userId: string, ytVideoId: string) => Promise<number>;
-
-  /**
-   * Searches for notes based on a query string.
-   *
-   * @param userId - The unique identifier of the user.
-   * @param query - The search query.
-   * @param findManyDto - The data transfer object containing pagination and sorting options.
-   *
-   * @returns {Promise<IPaginatedData<Note>>} A promise that resolves to an object containing the paginated notes, total number of notes, and total pages.
-   */
-  searchNotes: (
-    userId: string,
-    query: string,
-    findManyDto: IFindManyDto,
-  ) => Promise<IPaginatedData<Note>>;
 }
 
 /**
@@ -370,27 +336,9 @@ export interface INoteController {
    * @returns A promise that resolves when the notes are retrieved.
    */
   getUserNotes: (
-    req: TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, ISearchAndPaginationQueryDto>,
     res: Response
   ) => Promise<void>;
-
-  /**
-   * Retrieves the most recent notes for the authenticated user.
-   *
-   * @param req - The request object containing the user details.
-   * @param res - The response object used to send the HTTP response.
-   * @returns A promise that resolves when the recent notes are retrieved.
-   */
-  getUserRecentNotes: (req: TypedRequest, res: Response) => Promise<void>;
-
-  /**
-   * Retrieves the most recently updated notes for the authenticated user.
-   *
-   * @param req - The request object containing the user details.
-   * @param res - The response object used to send the HTTP response.
-   * @returns A promise that resolves when the updated notes are retrieved.
-   */
-  getRecentlyUpdatedNotes: (req: TypedRequest, res: Response) => Promise<void>;
 
   /**
    * Retrieves notes associated with a specific video ID with pagination support.
@@ -402,17 +350,5 @@ export interface INoteController {
   getNotesByVideoId: (
     req: TypedRequest<EmptyRecord, IParamIdDto, IPaginationQueryDto>,
     res: Response
-  ) => Promise<void>;
-
-  /**
-   * Searches for notes based on a query string.
-   *
-   * @param req - The request object containing the search query and pagination options.
-   * @param res - The response object used to send the HTTP status and search results.
-   * @returns A promise that resolves to void.
-   */
-  searchNotes: (
-    req: TypedRequest<EmptyRecord, EmptyRecord, ISearchAndPaginationQueryDto>,
-    res: Response,
   ) => Promise<void>;
 }
