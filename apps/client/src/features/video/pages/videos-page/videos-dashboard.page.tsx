@@ -6,8 +6,8 @@ import { DashboardHeader, PaginationControls, SearchAndFilterPanel } from "@/com
 import { useUrlState } from "@/hooks";
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
 
-import { NoVideosFound, VideosDashboardSkeleton, VideosList } from "../components";
-import { useGetUserVideosQuery } from "../queries";
+import { useGetUserVideosQuery } from "../../queries";
+import { NoVideosFound, VideosDashboardSkeleton, VideosList } from "./components";
 
 export function VideosDashboardPage() {
   const [searchQuery, setSearchQuery] = useUrlState("q", "");

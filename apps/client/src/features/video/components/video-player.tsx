@@ -5,7 +5,7 @@ import type { YouTubePlayer as YouTubePlayerType, YouTubeProps } from "react-you
 import { useEffect, useRef } from "react";
 import YouTube from "react-youtube";
 
-import { useVideoNoteStore } from "../../store";
+import { useVideoNoteStore } from "../store";
 
 interface VideoPlayerProps {
   videoId?: string;
