@@ -5,7 +5,7 @@ import { Fragment, useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 
-import { UserNotificationSettings, UserPasswordSettings, UserPrivacySettings } from "../components/settings";
+import { UserNotificationSettings, UserPasswordSettings, UserPrivacySettings } from "./components";
 
 export function UserSettingsPage() {
   const [activeTab, setActiveTab] = useState("notifications");

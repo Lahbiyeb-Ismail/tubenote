@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { FormInput } from "@/components/global";
 import { Button, Form } from "@/components/ui";
 
-import { useUpdatePassword } from "../../hooks";
+import { useUpdatePassword } from "../../../hooks";
 
 export function UpdatePasswordForm() {
   const form = useForm<IUpdatePasswordDto>({

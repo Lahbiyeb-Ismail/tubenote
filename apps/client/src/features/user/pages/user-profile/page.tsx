@@ -2,6 +2,7 @@
 
 import { Fragment, useState } from "react";
 
+import { useGetCurrentUser } from "../../hooks";
 import {
   EditProfileContainer,
   UserAchievementsOverview,
@@ -10,8 +11,7 @@ import {
   UserProfileSkeleton,
   UserRecentActivity,
   UserStatisticsOverview,
-} from "../components/profile";
-import { useGetCurrentUser } from "../hooks";
+} from "./components";
 
 export function UserProfilePage() {
   const [isEditing, setIsEditing] = useState(false);

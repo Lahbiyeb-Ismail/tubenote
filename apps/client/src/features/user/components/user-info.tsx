@@ -3,12 +3,12 @@ import { AlertTriangle, Calendar, CheckCircle, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type UserInfoProps = {
+interface UserInfoProps {
   username: string;
   email: string;
   isEmailVerified: boolean;
   createdAt: Date;
-};
+}
 
 export function UserInfo({
   username,
@@ -31,11 +31,13 @@ export function UserInfo({
           <Label htmlFor="email">Email</Label>
           <div className="flex items-center">
             <Input id="email" value={email} readOnly className="flex-grow" />
-            {isEmailVerified ? (
-              <CheckCircle className="ml-2 text-green-500" />
-            ) : (
-              <AlertTriangle className="ml-2 text-yellow-500" />
-            )}
+            {isEmailVerified
+              ? (
+                  <CheckCircle className="ml-2 text-green-500" />
+                )
+              : (
+                  <AlertTriangle className="ml-2 text-yellow-500" />
+                )}
           </div>
         </div>
         <div>
