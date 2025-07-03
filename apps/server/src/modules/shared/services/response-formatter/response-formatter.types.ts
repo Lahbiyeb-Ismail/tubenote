@@ -1,4 +1,4 @@
-import type { IFindManyDto, IPaginationQueryDto } from "@tubenote/dtos";
+import type { IFindManyDto, ISearchAndPaginationQueryDto } from "@tubenote/dtos";
 import type {
   IApiErrorResponse,
   IApiSuccessResponse,
@@ -13,7 +13,7 @@ export interface IGetPaginationQueriesOptions {
   /**
    * The request query object containing pagination parameters.
    */
-  reqQuery: IPaginationQueryDto;
+  reqQuery: ISearchAndPaginationQueryDto;
 
   /**
    * The number of items to display per page.
@@ -167,14 +167,14 @@ export interface IResponseFormatter {
   /**
    * Formats a successful API response with the provided data and options.
    */
-  formatSuccessResponse<T>(
+  formatSuccessResponse: <T>(
     formatOptions: IFormatResponseOptions<T>
-  ): IApiSuccessResponse<T>;
+  ) => IApiSuccessResponse<T>;
 
   /**
    * Formats an error API response with the provided error details.
    */
-  formatErrorResponse(options: IFormatErrorResponseOptions): IApiErrorResponse;
+  formatErrorResponse: (options: IFormatErrorResponseOptions) => IApiErrorResponse;
 
   /**
    * Formats a paginated API response.
@@ -183,9 +183,9 @@ export interface IResponseFormatter {
    * @param formatOptions - Options for formatting the paginated response.
    * @returns The formatted paginated API response containing an array of data.
    */
-  formatPaginatedResponse<T>(
+  formatPaginatedResponse: <T>(
     formatOptions: IFormatPaginatedResponseOptions<T>
-  ): IApiSuccessResponse<T[]>;
+  ) => IApiSuccessResponse<T[]>;
 
   /**
    * Retrieves pagination query parameters based on the provided options.
@@ -193,5 +193,5 @@ export interface IResponseFormatter {
    * @param options - Options for generating pagination queries.
    * @returns An object containing pagination query parameters.
    */
-  getPaginationQueries(options: IGetPaginationQueriesOptions): IFindManyDto;
+  getPaginationQueries: (options: IGetPaginationQueriesOptions) => IFindManyDto;
 }

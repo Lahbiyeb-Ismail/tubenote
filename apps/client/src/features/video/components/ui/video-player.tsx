@@ -1,61 +1,101 @@
 "use client";
 
-import { useState } from "react";
-import YouTube, { type YouTubeProps } from "react-youtube";
+import type { YouTubePlayer as YouTubePlayerType, YouTubeProps } from "react-youtube";
 
-import { useNoteStore } from "@/features/note/store";
+import { useEffect, useRef } from "react";
+import YouTube from "react-youtube";
 
-type VideoPlayerProps = {
+import { useVideoNoteStore } from "../../store";
+
+interface VideoPlayerProps {
   videoId?: string;
-};
+}
 
 export function VideoPlayer({ videoId }: VideoPlayerProps) {
-  const [startTime, setStartTime] = useState<number>(0);
+  const playerRef = useRef<YouTubePlayerType | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const {
-    note,
-    noteActions: { setNoteTimestamp },
-  } = useNoteStore();
+  const { activeNote, playId, isSyncing, setNoteEndTime, setNoteStartTime } = useVideoNoteStore();
+
+  useEffect(() => {
+    if (activeNote && playerRef.current) {
+      playerRef.current.seekTo(activeNote.timestamp.start);
+      playerRef.current.playVideo();
+
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+
+      intervalRef.current = setInterval(() => {
+        const currentTime = playerRef.current?.getCurrentTime();
+        if (currentTime && currentTime >= activeNote.timestamp.end) {
+          playerRef.current?.pauseVideo();
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+          }
+        }
+      }, 1000);
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [activeNote, playId]);
 
   const onPlayerReady: YouTubeProps["onReady"] = ({ target }) => {
-    if (note) {
-      target.seekTo(note.timestamp.start);
+    playerRef.current = target;
+  };
+
+  const onPlay: YouTubeProps["onPlay"] = () => {
+    if (isSyncing) {
+      const currentTime = playerRef.current?.getCurrentTime();
+      if (currentTime) {
+        setNoteStartTime(currentTime);
+      }
     }
   };
 
-  const onPlay: YouTubeProps["onPlay"] = ({ target }) => {
-    const time = target.getCurrentTime();
-
-    setStartTime(time);
+  const onStateChange: YouTubeProps["onStateChange"] = (event) => {
+    if (isSyncing) {
+      // Continuously update the end time while the video is playing
+      if (event.data === 1) { // Playing
+        intervalRef.current = setInterval(() => {
+          const currentTime = playerRef.current?.getCurrentTime();
+          if (currentTime) {
+            setNoteEndTime(currentTime);
+          }
+        }, 1000);
+      }
+      else { // Paused, ended, etc.
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+        }
+      }
+    }
   };
 
-  const onPause: YouTubeProps["onPause"] = ({ target }) => {
-    const time = target.getCurrentTime();
-
-    setNoteTimestamp({
-      start: startTime,
-      end: time,
-    });
-  };
-
-  const opts = {
+  const opts: YouTubeProps["opts"] = {
     height: "100%",
     width: "100%",
     playerVars: {
-      // https://developers.google.com/youtube/player_parameters
-      autoplay: 1,
+      autoplay: 0,
+      iv_load_policy: 3, // Hide annotations
+      rel: 0, // Don't show related videos
+      showinfo: 0, // Hide video info
     },
   };
 
   return (
-    <div className="h-full">
+    <div className="h-full w-full">
       <YouTube
         videoId={videoId}
-        style={{ height: "100%" }}
         opts={opts}
         onReady={onPlayerReady}
-        onPause={onPause}
         onPlay={onPlay}
+        onStateChange={onStateChange}
+        className="h-full w-full"
       />
     </div>
   );

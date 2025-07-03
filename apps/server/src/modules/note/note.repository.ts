@@ -2,6 +2,7 @@ import type { Note, Prisma } from "@tubenote/db";
 import type {
   ICreateNoteDto,
   IFindManyDto,
+  ISearchAndPaginationQueryDto,
   IUpdateNoteDto,
 } from "@tubenote/dtos";
 
@@ -153,29 +154,53 @@ export class NoteRepository implements INoteRepository {
    * Retrieves multiple notes for a given user with pagination and sorting options.
    *
    * @param userId - The ID of the user whose notes are to be fetched.
-   * @param findManyDto - The DTO containing pagination and sorting options.
+   * @param queryOptions - Data transfer object containing pagination and sorting parameters.
+   *                      This includes parameters like `limit`, `page`, `sortBy`, and `order`.
+   *                      The `q` parameter is used for searching notes by title, content,
+   *                      or tags.
    *
    * @returns A Promise that resolves with an array of Notes.
    */
   async findMany(
     userId: string,
-    findManyDto: IFindManyDto,
+    queryOptions: ISearchAndPaginationQueryDto,
     tx?: Prisma.TransactionClient,
   ): Promise<Note[]> {
     const client = tx ?? this._db;
 
-    const { limit, sort, skip } = findManyDto;
+    const { limit, order, page, sortBy, q: searchQuery } = queryOptions;
+
+    const skip = (page - 1) * limit;
 
     return handleAsyncOperation(
       () =>
         client.note.findMany({
           where: {
             userId,
+            OR: [
+              {
+                title: {
+                  contains: searchQuery,
+                  mode: "insensitive", // Case-insensitive search
+                },
+              },
+              {
+                content: {
+                  contains: searchQuery,
+                  mode: "insensitive", // Case-insensitive search
+                },
+              },
+              {
+                tags: {
+                  has: searchQuery, // Check if array contains the exact query
+                },
+              },
+            ],
           },
           take: limit,
           skip,
           orderBy: {
-            [sort.by]: sort.order,
+            [sortBy]: order,
           },
         }),
       { errorMessage: "Failed to fetch user notes." },
@@ -222,9 +247,12 @@ export class NoteRepository implements INoteRepository {
    * Counts the number of notes for a given user.
    *
    * @param userId - The ID of the user whose notes are to be counted.
+   * @param searchQuery - Optional search query to filter notes by title, content, or tags.
+   * @param tx - Optional Prisma transaction client for database operations.
+   *
    * @returns A Promise that resolves with the count of notes.
    */
-  async count(userId: string, tx?: Prisma.TransactionClient): Promise<number> {
+  async count(userId: string, searchQuery?: string, tx?: Prisma.TransactionClient): Promise<number> {
     const client = tx ?? this._db;
 
     return handleAsyncOperation(
@@ -232,9 +260,111 @@ export class NoteRepository implements INoteRepository {
         client.note.count({
           where: {
             userId,
+            OR: [
+              {
+                title: {
+                  contains: searchQuery,
+                  mode: "insensitive", // Case-insensitive search
+                },
+              },
+              {
+                content: {
+                  contains: searchQuery,
+                  mode: "insensitive", // Case-insensitive search
+                },
+              },
+              {
+                tags: {
+                  has: searchQuery, // Check if array contains the exact query
+                },
+              },
+            ],
           },
         }),
       { errorMessage: "Failed to count notes." },
+    );
+  }
+
+  /**
+   * Counts the total number of notes associated with a specific video for a given user.
+   *
+   * @param userId - The unique identifier of the user whose notes are being counted
+   * @param ytVideoId - The YouTube video ID to count notes for
+   * @param tx - Optional Prisma transaction client for database operations
+   * @returns A promise that resolves to the total count of notes for the specified user and video
+   * @throws Will throw an error if the database operation fails
+   */
+  async countByYtVideoId(
+    userId: string,
+    ytVideoId: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<number> {
+    const client = tx ?? this._db;
+
+    return handleAsyncOperation(
+      () =>
+        client.note.count({
+          where: {
+            userId,
+            youtubeId: ytVideoId,
+          },
+        }),
+      { errorMessage: "Failed to count notes." },
+    );
+  }
+
+  /**
+   * Searches for notes based on a query string.
+   *
+   * @param userId - The unique identifier of the user.
+   * @param query - The search query.
+   * @param findManyDto - Data transfer object containing pagination and sorting parameters.
+   * @param tx - Optional transaction client for database operations.
+   *
+   * @returns A promise that resolves to an array of notes.
+   */
+  async search(
+    userId: string,
+    query: string,
+    findManyDto: IFindManyDto,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Note[]> {
+    const client = tx ?? this._db;
+
+    const { limit, sort, skip } = findManyDto;
+
+    return handleAsyncOperation(
+      () =>
+        client.note.findMany({
+          where: {
+            userId,
+            OR: [
+              {
+                title: {
+                  contains: query,
+                  mode: "insensitive", // Case-insensitive search
+                },
+              },
+              {
+                content: {
+                  contains: query,
+                  mode: "insensitive", // Case-insensitive search
+                },
+              },
+              {
+                tags: {
+                  has: query, // Check if array contains the exact query
+                },
+              },
+            ],
+          },
+          take: limit,
+          skip,
+          orderBy: {
+            [sort.by]: sort.order,
+          },
+        }),
+      { errorMessage: "Failed to search notes." },
     );
   }
 }

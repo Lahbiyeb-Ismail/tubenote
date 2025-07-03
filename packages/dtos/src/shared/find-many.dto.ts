@@ -16,6 +16,11 @@ export interface IFindManyDto {
    * The number of entities to skip (optional).
    */
   skip: number;
+
+  /**
+   * The search query for filtering results (optional).
+   */
+  searchQuery?: string;
 }
 
 /**

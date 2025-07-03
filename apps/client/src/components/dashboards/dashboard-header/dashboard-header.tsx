@@ -2,7 +2,7 @@ import { Download, Plus } from "lucide-react";
 
 import { useDialogStore } from "@/stores";
 
-import { Button } from "../ui";
+import { Button } from "../../ui";
 
 interface IProps {
   title: string;

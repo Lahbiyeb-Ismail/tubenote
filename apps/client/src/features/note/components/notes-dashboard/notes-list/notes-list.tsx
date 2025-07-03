@@ -2,10 +2,10 @@ import type { Note } from "@tubenote/db";
 
 import dynamic from "next/dynamic";
 
-import { NoteCard } from "../note-card";
+import { NoteCard } from "../../note-card";
 
 const NoteDeletionDialog = dynamic(
-  () => import("../note-deletion-dialog").then(mod => mod.NoteDeletionDialog),
+  () => import("../../note-deletion-dialog").then(mod => mod.NoteDeletionDialog),
   { ssr: false, loading: () => <div className="hidden">Loading...</div> },
 );
 

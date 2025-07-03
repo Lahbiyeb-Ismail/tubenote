@@ -131,20 +131,34 @@ model Video {
   youtubeId       String   @unique
   title           String
   description     String
-  channelTitle    String
   embedHtmlPlayer String
+  videoDuration   Int // Duration in seconds
   tags            String[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  thumbnails Thumbnails
-  notes      Note[]
+  videoStatistics VideoStatistics
+  thumbnails      VideoThumbnails
+  channelInfo     ChannelInfo
+  notes           Note[]
 
   userIds String[] @db.ObjectId
   users   User[]   @relation(fields: [userIds], references: [id])
 }
 
-type Thumbnails {
+type VideoStatistics {
+  viewCount        String
+  likeCount        String
+  commentCount     String // Note: commentCount is not always available in the API
+}
+
+type ThumbnailSize {
+  url    String
+  width  Int
+  height Int
+}
+
+type VideoThumbnails {
   default  ThumbnailSize
   medium   ThumbnailSize
   high     ThumbnailSize
@@ -152,8 +166,17 @@ type Thumbnails {
   maxres   ThumbnailSize
 }
 
-type ThumbnailSize {
-  url    String
-  width  Int
-  height Int
+type ChannelThumbnails {
+  default  ThumbnailSize
+  medium   ThumbnailSize
+  high     ThumbnailSize
+}
+
+
+type ChannelInfo {
+  channelId String 
+  title String
+  customUrl  String
+  description String
+  thumbnails  ChannelThumbnails
 }

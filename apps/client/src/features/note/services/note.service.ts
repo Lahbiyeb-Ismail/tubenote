@@ -1,12 +1,13 @@
-import type { AxiosError } from "axios";
-
 import type { Note } from "@tubenote/db";
 import type {
   ICreateNoteDto,
   IPaginationQueryDto,
+  ISearchAndPaginationQueryDto,
   IUpdateNoteDto,
 } from "@tubenote/dtos";
 import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
+import type { AxiosError } from "axios";
+
 import { asyncTryCatch } from "@tubenote/utils";
 
 import { axiosInstance } from "@/lib";
@@ -14,7 +15,7 @@ import { axiosInstance } from "@/lib";
 /**
  * Creates a new note associated with a specific video.
  *
- * @param {Object} params - The parameters for creating a note.
+ * @param {object} params - The parameters for creating a note.
  * @param {string} params.videoId - The ID of the video to associate the note with.
  * @param {ICreateNoteDto} params.createNoteData - The data for the note to be created.
  *
@@ -30,8 +31,8 @@ export async function createNote({
   const { data: response, error } = await asyncTryCatch(
     axiosInstance.post<IApiSuccessResponse<Note>>(
       `/notes/${videoId}`,
-      createNoteData
-    )
+      createNoteData,
+    ),
   );
 
   if (error) {
@@ -50,25 +51,26 @@ export async function createNote({
 /**
  * Fetches the user's notes with pagination and sorting options.
  *
- * @param paginationQuery - An object containing pagination and sorting parameters:
+ * @param queryOptions - An object containing pagination and sorting parameters:
  *   - `page`: The page number to fetch.
  *   - `limit`: The number of items per page.
  *   - `order`: The order of sorting (e.g., 'asc' or 'desc').
  *   - `sortBy`: The field to sort the notes by.
+ *   - `q`: A search query string to filter notes by title or content.
  *
  * @returns A promise that resolves to an API success response containing an array of notes.
  *
  * @throws An error if the request fails. If the error is from the server, it includes the server's error message.
  */
 export async function getUserNotes(
-  paginationQuery: IPaginationQueryDto
+  queryOptions: ISearchAndPaginationQueryDto,
 ): Promise<IApiSuccessResponse<Note[]>> {
-  const { page, limit, order, sortBy } = paginationQuery;
+  const { page, limit, order, sortBy, q } = queryOptions;
 
   const { data: response, error } = await asyncTryCatch(
     axiosInstance.get<IApiSuccessResponse<Note[]>>(
-      `/notes?page=${page}&limit=${limit}&order=${order}&sortBy=${sortBy}`
-    )
+      `/notes?page=${page}&q=${q}&limit=${limit}&order=${order}&sortBy=${sortBy}`,
+    ),
   );
 
   if (error) {
@@ -92,10 +94,10 @@ export async function getUserNotes(
  * @throws {Error} If the request fails, an error is thrown with a message indicating the failure reason.
  */
 export async function deleteNote(
-  noteId: string
+  noteId: string,
 ): Promise<IApiSuccessResponse<null>> {
   const { data: response, error } = await asyncTryCatch(
-    axiosInstance.delete<IApiSuccessResponse<null>>(`/notes/${noteId}`)
+    axiosInstance.delete<IApiSuccessResponse<null>>(`/notes/${noteId}`),
   );
 
   if (error) {
@@ -119,10 +121,10 @@ export async function deleteNote(
  * @throws An error if the request fails, including a specific error message if available.
  */
 export async function getNoteById(
-  noteId: string
+  noteId: string,
 ): Promise<IApiSuccessResponse<Note>> {
   const { data: response, error } = await asyncTryCatch(
-    axiosInstance.get<IApiSuccessResponse<Note>>(`/notes/${noteId}`)
+    axiosInstance.get<IApiSuccessResponse<Note>>(`/notes/${noteId}`),
   );
 
   if (error) {
@@ -137,6 +139,45 @@ export async function getNoteById(
 
   return response.data;
 }
+
+/**
+ * Retrieves the count of notes associated with a specific YouTube video.
+ *
+ * @param ytVideoId - The YouTube video ID to get the notes count for
+ * @returns A promise that resolves to an API success response containing the notes count as a number
+ * @throws {Error} When the API request fails or returns an error response
+ * @throws {Error} When there's a network or connection issue with the message "Failed to fetch notes count for this youtube video."
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   const response = await getNotesCountByVideoId("dQw4w9WgXcQ");
+ *   console.log(`Notes count: ${response.payload}`);
+ * } catch (error) {
+ *   console.error("Error fetching notes count:", error.message);
+ * }
+ * ```
+ */
+export async function getNotesCountByVideoId(
+  ytVideoId: string,
+): Promise<IApiSuccessResponse<number>> {
+  const { data: response, error } = await asyncTryCatch(
+    axiosInstance.get<IApiSuccessResponse<number>>(`/notes/count/${ytVideoId}`),
+  );
+
+  if (error) {
+    const axiosError = error as AxiosError<IApiErrorResponse>;
+
+    if (axiosError.response) {
+      throw new Error(axiosError.response.data.payload.message);
+    }
+
+    throw new Error("Failed to fetch notes count for this youtube video.");
+  }
+
+  return response.data;
+}
+
 /**
  * Updates a note by its ID.
  *
@@ -154,8 +195,8 @@ export async function updateNote({
   const { data: response, error } = await asyncTryCatch(
     axiosInstance.patch<IApiSuccessResponse<Note>>(
       `/notes/${noteId}`,
-      updateData
-    )
+      updateData,
+    ),
   );
 
   if (error) {
@@ -172,58 +213,6 @@ export async function updateNote({
 }
 
 /**
- * Fetches the most recent notes from the server.
- *
- * @returns {Promise<IApiSuccessResponse<Note[]>>} A promise that resolves to the API success response containing an array of notes.
- * @throws {Error} Throws an error if the request fails. If the error is an Axios error with a response,
- * it throws the error message from the server. Otherwise, it throws a generic error message.
- */
-export async function getRecentNotes(): Promise<IApiSuccessResponse<Note[]>> {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.get<IApiSuccessResponse<Note[]>>("/notes/recent")
-  );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-
-    throw new Error("Failed to fetch recent notes.");
-  }
-
-  return response.data;
-}
-
-/**
- * Fetches the list of recently updated notes from the server.
- *
- * @returns {Promise<IApiSuccessResponse<Note[]>>} A promise that resolves to the API success response containing an array of notes.
- * @throws {Error} Throws an error if the request fails. If the error is from the server, it includes the error message from the response payload.
- *
- */
-export async function getRecentlyUpdatedNotes(): Promise<
-  IApiSuccessResponse<Note[]>
-> {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.get<IApiSuccessResponse<Note[]>>("/notes/recently-updated")
-  );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-
-    throw new Error("Failed to fetch recently updated notes.");
-  }
-
-  return response.data;
-}
-
-/**
  * Fetches notes associated with a specific video ID.
  *
  * @param videoId - The unique identifier of the video for which notes are to be retrieved.
@@ -232,12 +221,12 @@ export async function getRecentlyUpdatedNotes(): Promise<
  */
 export async function getNotesByVideoId(
   videoId: string,
-  paginationQuery: IPaginationQueryDto
+  paginationQuery: IPaginationQueryDto,
 ): Promise<IApiSuccessResponse<Note[]>> {
   const { data: response, error } = await asyncTryCatch(
     axiosInstance.get<IApiSuccessResponse<Note[]>>(`/notes/video/${videoId}`, {
       params: paginationQuery,
-    })
+    }),
   );
 
   if (error) {
@@ -252,27 +241,3 @@ export async function getNotesByVideoId(
 
   return response.data;
 }
-
-// export async function exportNoteAsPDF(noteId: string): Promise<Blob> {
-//   const { data: response, error } = await asyncTryCatch(
-//     axiosInstance.post<Blob>(
-//       `/notes/export-pdf/${noteId}`,
-//       {},
-//       {
-//         responseType: "blob",
-//       }
-//     )
-//   );
-
-//   if (error) {
-//     const axiosError = error as AxiosError<IApiErrorResponse>;
-
-//     if (axiosError.response) {
-//       throw new Error(axiosError.response.data.payload.message);
-//     }
-
-//     throw new Error("Failed to export note as PDF.");
-//   }
-
-//   return response;
-// }

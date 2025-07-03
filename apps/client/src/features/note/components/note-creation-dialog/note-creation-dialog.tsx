@@ -9,7 +9,7 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
-import { useGetUserVideos } from "@/features/video/hooks";
+import { useGetUserVideosQuery } from "@/features/video/queries";
 import { extractVideoId } from "@/helpers";
 import { useDialogStore } from "@/stores";
 import { validateYouTubeUrl } from "@/utils";
@@ -32,7 +32,7 @@ export function NoteCreationDialog() {
 
   const router = useRouter();
 
-  const { data: videosData } = useGetUserVideos({
+  const { data: videosResponse } = useGetUserVideosQuery({
     page: 1,
     limit: 8,
     sortBy: "createdAt",
@@ -98,7 +98,7 @@ export function NoteCreationDialog() {
 
         <div className="space-y-6">
           {/* Option Selection */}
-          <NoteCreationDialogOptions option={option} setOption={setOption} videos={videosData?.data as Video[]} />
+          <NoteCreationDialogOptions option={option} setOption={setOption} videos={videosResponse?.videos as Video[]} />
 
           {/* YouTube URL Input */}
           {option === "new" && (
@@ -112,7 +112,7 @@ export function NoteCreationDialog() {
           {/* Existing Video Selection */}
           {option === "existing" && (
             <NoteCreationDialogVideoSelection
-              videos={videosData?.data as Video[]}
+              videos={videosResponse?.videos as Video[]}
               selectedVideoId={selectedVideoId}
               setSelectedVideoId={setSelectedVideoId}
             />

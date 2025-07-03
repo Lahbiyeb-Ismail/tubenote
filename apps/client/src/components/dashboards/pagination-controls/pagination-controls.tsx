@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Pagination,
   PaginationContent,
@@ -10,17 +8,17 @@ import {
   PaginationPrevious,
 } from "@/components/ui";
 
-interface PaginationProps {
+interface IProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
 }
 
-export function PaginationComponent({
+export function PaginationControls({
   currentPage,
   totalPages,
   onPageChange,
-}: PaginationProps) {
+}: IProps) {
   const maxVisiblePages = 5;
   const halfDisplayedPageCount = Math.floor(maxVisiblePages / 2);
 
@@ -32,8 +30,8 @@ export function PaginationComponent({
   }
 
   const pageNumbers = Array.from(
-    { length: totalPages },
-    (_, i) => firstPage + i
+    { length: Math.min(totalPages, maxVisiblePages) },
+    (_, i) => firstPage + i,
   );
 
   return (
@@ -44,7 +42,8 @@ export function PaginationComponent({
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              if (currentPage > 1) onPageChange(currentPage - 1);
+              if (currentPage > 1)
+                onPageChange(currentPage - 1);
             }}
           />
         </PaginationItem>
@@ -66,7 +65,7 @@ export function PaginationComponent({
           </>
         )}
 
-        {pageNumbers.map((pageNumber) => (
+        {pageNumbers.map(pageNumber => (
           <PaginationItem key={pageNumber}>
             <PaginationLink
               href="#"
@@ -103,7 +102,8 @@ export function PaginationComponent({
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              if (currentPage < totalPages) onPageChange(currentPage + 1);
+              if (currentPage < totalPages)
+                onPageChange(currentPage + 1);
             }}
           />
         </PaginationItem>

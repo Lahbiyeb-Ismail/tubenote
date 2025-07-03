@@ -1,6 +1,6 @@
 "use client";
 
-import type { Note, Timestamp } from "@tubenote/db";
+import type { Note } from "@tubenote/db";
 
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
@@ -8,7 +8,6 @@ import { immer } from "zustand/middleware/immer";
 interface NoteState {
   note: Note | undefined;
   selectedNoteId: string | null;
-  noteTimestamp: Timestamp;
   isCreating: boolean;
   isUpdating: boolean;
   isDeleting: boolean;
@@ -20,7 +19,6 @@ interface NoteStore extends NoteState {
   noteActions: {
     setNote: (note: Note | undefined) => void;
     setNoteId: (id: string | null) => void;
-    setNoteTimestamp: (timestamp: Timestamp) => void;
     setCreating: (isCreating: boolean) => void;
     setUpdating: (isUpdating: boolean) => void;
     setDeleting: (isDeleting: boolean) => void;
@@ -32,10 +30,6 @@ interface NoteStore extends NoteState {
 export const useNoteStore = create<NoteStore>()(
   immer(set => ({
     note: undefined,
-    noteTimestamp: {
-      start: 0,
-      end: 0,
-    },
     selectedNoteId: null,
     isCreating: false,
     isUpdating: false,
@@ -47,11 +41,6 @@ export const useNoteStore = create<NoteStore>()(
       setNote: (note: Note | undefined) =>
         set((state) => {
           state.note = note;
-        }),
-
-      setNoteTimestamp: timestamp =>
-        set((state) => {
-          state.noteTimestamp = timestamp;
         }),
 
       setNoteId: id =>

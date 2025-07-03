@@ -18,3 +18,36 @@ export const paginationQuerySchema = z
     order: z.enum(["desc", "asc"]).optional().default("desc"),
   })
   .strict();
+
+/**
+ * Schema for search and pagination query parameters.
+ *
+ * @description Validates and transforms query parameters for search functionality with pagination support.
+ * Includes validation for page number, limit, sorting options, and search query string.
+ *
+ * @property page - Page number as string, defaults to "1", transformed to number
+ * @property limit - Number of items per page as string, defaults to "9", transformed to number
+ * @property sortBy - Field to sort by, either "createdAt" or "updatedAt", defaults to "createdAt"
+ * @property order - Sort order, either "desc" or "asc", defaults to "desc"
+ * @property q - Search query string, max 100 characters, transforms "undefined" string to empty string
+ *
+ * @example
+ * ```typescript
+ * const result = searchAndPaginationQuerySchema.parse({
+ *   page: "2",
+ *   limit: "10",
+ *   sortBy: "updatedAt",
+ *   order: "asc",
+ *   q: "search term"
+ * });
+ * ```
+ */
+export const searchAndPaginationQuerySchema = z
+  .object({
+    page: z.string().regex(/^\d+$/).optional().default("1").transform(val => +val),
+    limit: z.string().regex(/^\d+$/).optional().default("9").transform(val => +val),
+    sortBy: z.enum(["createdAt", "updatedAt"]).optional().default("createdAt"),
+    order: z.enum(["desc", "asc"]).optional().default("desc"),
+    q: z.string().max(100).transform(val => val === "undefined" ? "" : val),
+  })
+  .strict();

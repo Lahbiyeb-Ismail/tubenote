@@ -1,10 +1,24 @@
 "use client";
 
 import { DashboardHeader } from "@/components/dashboards";
+import { useGetUserVideosCountQuery } from "@/features/video/queries";
 
-import { Charts, KeyMetrics, LearningGoals, MonthlyProgress, QuickActions, RecentActivity, StudyStreak } from "../components";
+import { Charts, DashboardSkeleton, KeyMetrics, LearningGoals, MonthlyProgress, QuickActions, RecentActivity, StudyStreak } from "../components";
+import { DashboardEmptyState } from "../components/dashboard-empty-state";
 
 export function DashboardPage() {
+  const {
+    data: videosCount,
+    isLoading,
+  } = useGetUserVideosCountQuery();
+
+  if (isLoading)
+    return <DashboardSkeleton />;
+
+  if (videosCount === 0) {
+    return <DashboardEmptyState />;
+  }
+
   return (
     <main className="container py-6">
       {/* Welcome Section */}
