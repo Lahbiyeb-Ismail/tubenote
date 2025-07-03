@@ -4,7 +4,7 @@ import { ChevronDown, LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
 
 import { useAuth } from "@/features/auth/hooks";
-import { useGetCurrentUser } from "@/features/user/hooks";
+import { useGetCurrentUserQuery } from "@/features/user/queries";
 
 import { Avatar, AvatarFallback, AvatarImage, Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui";
 import { UserProfileMenuSkeleton } from "./user-profile-menu-skeleton";
@@ -13,7 +13,7 @@ import { UserProfileMenuSkeleton } from "./user-profile-menu-skeleton";
 const FALLBACK_PROFILE_IMAGE_URL = "https://github.com/shadcn.png";
 
 export function UserProfileMenu() {
-  const { data: user, isPending: isLoadingUser } = useGetCurrentUser();
+  const { data: user, isPending: isLoadingUser } = useGetCurrentUserQuery();
 
   const { logout, isLogoutLoading } = useAuth();
 

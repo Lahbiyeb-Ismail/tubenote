@@ -9,7 +9,7 @@ import { useAuthStore } from "@/features/auth/store";
 
 import { getCurrentUser } from "../services";
 
-export function useGetCurrentUser(): UseQueryResult<User, Error> {
+export function useGetCurrentUserQuery(): UseQueryResult<User, Error> {
   const { isAuthenticated } = useAuthStore();
 
   return useQuery({

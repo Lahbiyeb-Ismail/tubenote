@@ -10,16 +10,16 @@ import { useForm } from "react-hook-form";
 import { FormInput } from "@/components/global";
 import { Form } from "@/components/ui";
 import { Button } from "@/components/ui/button";
-
-import { useGetCurrentUser, useUpdateUser } from "../../hooks";
+import { useUser } from "@/features/user/hooks";
+import { useGetCurrentUserQuery } from "@/features/user/queries";
 
 interface IProps {
   onCancel: () => void;
 }
 
 export function EditProfileForm({ onCancel }: IProps) {
-  const { data: user } = useGetCurrentUser();
-  const { mutate: updateUser, isPending } = useUpdateUser();
+  const { data: user } = useGetCurrentUserQuery();
+  const { updateUser, isUpdatingUser } = useUser();
 
   const form = useForm<IUpdateUserDto>({
     resolver: zodResolver(updateUserSchema),
@@ -81,10 +81,10 @@ export function EditProfileForm({ onCancel }: IProps) {
           </Button>
           <Button
             type="submit"
-            disabled={isPending}
+            disabled={isUpdatingUser}
             className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600"
           >
-            {isPending ? "Saving..." : "Save Changes"}
+            {isUpdatingUser ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </form>

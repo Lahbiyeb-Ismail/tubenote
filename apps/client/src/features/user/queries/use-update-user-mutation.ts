@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 
 import { updateCurrentUser } from "../services";
 
-export function useUpdateUser() {
+export function useUpdateUserMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -14,15 +14,14 @@ export function useUpdateUser() {
     onSuccess: (response) => {
       const { payload } = response;
 
-      toast.dismiss("loadingToast");
-
       toast.success(payload.message);
-
-      queryClient.invalidateQueries({ queryKey: ["current-user"] });
     },
     onError(error) {
-      toast.dismiss("loadingToast");
       toast.error(error.message);
+    },
+    onSettled: () => {
+      toast.dismiss("loadingToast");
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
     },
   });
 }

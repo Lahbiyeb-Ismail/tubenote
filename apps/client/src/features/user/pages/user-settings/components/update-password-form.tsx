@@ -9,8 +9,7 @@ import { useForm } from "react-hook-form";
 
 import { FormInput } from "@/components/global";
 import { Button, Form } from "@/components/ui";
-
-import { useUpdatePassword } from "../../../hooks";
+import { useUser } from "@/features/user/hooks";
 
 export function UpdatePasswordForm() {
   const form = useForm<IUpdatePasswordDto>({
@@ -22,10 +21,10 @@ export function UpdatePasswordForm() {
     },
   });
 
-  const { mutate, isPending } = useUpdatePassword();
+  const { updatePassword, isUpdatingPassword } = useUser();
 
   const handleUpdatePassword = (data: IUpdatePasswordDto) => {
-    mutate(data);
+    updatePassword(data);
   };
 
   return (
@@ -61,10 +60,10 @@ export function UpdatePasswordForm() {
 
         <Button
           type="submit"
-          disabled={isPending}
+          disabled={isUpdatingPassword}
           className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 disabled:cursor-not-allowed"
         >
-          {isPending ? "Updating..." : "Update Password"}
+          {isUpdatingPassword ? "Updating..." : "Update Password"}
         </Button>
       </form>
     </Form>
