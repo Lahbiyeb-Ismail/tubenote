@@ -1,16 +1,3 @@
-import { CTA, FAQ, Features, Footer, Header, Hero, HowItWorks, Pricing } from "@/sections";
+import { LandingPage } from "@/features/landing-page";
 
-export default function Home() {
-  return (
-    <main className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
-      <Header />
-      <Hero />
-      <Features />
-      <HowItWorks />
-      <Pricing />
-      <FAQ />
-      <CTA />
-      <Footer />
-    </main>
-  );
-}
+export default LandingPage;
