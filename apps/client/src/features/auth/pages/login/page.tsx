@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 
-import { AuthPageLayout, LoginForm } from "../components";
+import { AuthPageLayout } from "../../components";
+import { LoginForm } from "./components";
 
 export function LoginPage() {
   return (

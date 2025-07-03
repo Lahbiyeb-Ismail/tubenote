@@ -2,7 +2,7 @@ import { AlertTriangle, CheckCircle } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle, Button } from "@/components/ui";
 
-import { useAuth } from "../../hooks";
+import { useAuth } from "../hooks";
 
 interface EmailConfirmationAlertProps {
   emailVerified: boolean;

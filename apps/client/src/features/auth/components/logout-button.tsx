@@ -2,7 +2,7 @@ import { LogOut } from "lucide-react";
 
 import { useUIStore } from "@/stores";
 
-import { useAuth } from "../../hooks";
+import { useAuth } from "../hooks";
 
 export function LogoutButton() {
   const { layout } = useUIStore();

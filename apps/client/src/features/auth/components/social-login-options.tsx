@@ -1,4 +1,4 @@
-import { GoogleAuthButton } from "../buttons";
+import { GoogleAuthButton } from "./";
 
 export function SocialLoginOptions() {
   return (

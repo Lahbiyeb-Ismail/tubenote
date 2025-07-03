@@ -9,10 +9,8 @@ import { useForm } from "react-hook-form";
 
 import { FormInput } from "@/components/global";
 import { Form } from "@/components/ui";
-
-import { useAuth } from "../../hooks";
-import { AuthSubmitButton } from "../buttons";
-import { ForgotPasswordLink } from "../links";
+import { AuthSubmitButton, ForgotPasswordLink } from "@/features/auth/components";
+import { useAuth } from "@/features/auth/hooks";
 
 export function LoginForm() {
   const form = useForm<ILoginDto>({

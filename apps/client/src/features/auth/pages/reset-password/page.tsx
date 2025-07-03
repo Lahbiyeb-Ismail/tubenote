@@ -7,9 +7,10 @@ import {
   AuthPageLayout,
   PasswordResetErrorState,
   PasswordResetLoadingState,
-  ResetPasswordForm,
-} from "../components";
-import { useVerifyPasswordResetTokenQuery } from "../queries";
+} from "@/features/auth/components";
+import { useVerifyPasswordResetTokenQuery } from "@/features/auth/queries";
+
+import { ResetPasswordForm } from "./components";
 
 export function ResetPasswordPage() {
   const { token } = useParams();

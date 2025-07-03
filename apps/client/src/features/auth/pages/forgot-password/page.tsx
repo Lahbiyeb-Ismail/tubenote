@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 
-import { AuthPageLayout, ForgotPasswordForm } from "../components";
+import { AuthPageLayout } from "@/features/auth/components";
+
+import { ForgotPasswordForm } from "./components";
 
 export function ForgotPasswordPage() {
   return (

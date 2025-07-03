@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 
-import { AuthPageLayout, RegisterForm } from "../components";
+import { AuthPageLayout } from "@/features/auth/components";
+
+import { RegisterForm } from "./components";
 
 export function RegisterPage() {
   return (
