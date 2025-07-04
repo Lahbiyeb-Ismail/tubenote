@@ -1,9 +1,9 @@
+import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
 import type { AxiosError } from "axios";
 
-import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
 import { asyncTryCatch } from "@tubenote/utils";
 
-import { axiosInstance } from "@/lib";
+import { axiosInstance } from "@/shared/lib";
 
 /**
  * Sends an verification email request to the server.
@@ -12,12 +12,12 @@ import { axiosInstance } from "@/lib";
  * @returns A promise that resolves to an object containing a message.
  */
 export async function sendVerificationEmail(
-  email: string
+  email: string,
 ): Promise<IApiSuccessResponse<null>> {
   const { data: response, error } = await asyncTryCatch(
     axiosInstance.post<IApiSuccessResponse<null>>("/send-verification-email", {
       email,
-    })
+    }),
   );
 
   if (error) {
@@ -26,7 +26,8 @@ export async function sendVerificationEmail(
     if (axiosError.response) {
       const { status, data } = axiosError.response;
       throw new Error(`Error ${status}: ${data.payload.message}`);
-    } else {
+    }
+    else {
       throw new Error("Network error: Unable to reset password.");
     }
   }

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import { getAuthStatusFromCookie, removeAuthStatusCookie, setAuthStatusCookie } from "@/utils";
+import { getAuthStatusFromCookie, removeAuthStatusCookie, setAuthStatusCookie } from "@/shared/utils";
 
 interface AuthStore {
   isAuthenticated: boolean;

@@ -1,11 +1,12 @@
-import axios, { type AxiosError } from "axios";
-
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
-import { asyncTryCatch } from "@tubenote/utils";
+import type { AxiosError } from "axios";
 
-import { axiosInstance } from "@/lib";
-import { API_URL } from "@/utils";
+import { asyncTryCatch } from "@tubenote/utils";
+import axios from "axios";
+
+import { API_URL } from "@/shared/constants";
+import { axiosInstance } from "@/shared/lib";
 
 /**
  * Registers a new user with the provided registration credentials.
@@ -14,20 +15,21 @@ import { API_URL } from "@/utils";
  * @returns A promise that resolves to the registration response.
  */
 export async function registerUser(
-  registerDto: IRegisterDto
+  registerDto: IRegisterDto,
 ): Promise<IApiSuccessResponse<string>> {
   const { data: responseData, error } = await asyncTryCatch(
     axios.post<IApiSuccessResponse<string>>(
       `${API_URL}/auth/register`,
-      registerDto
-    )
+      registerDto,
+    ),
   );
 
   if (error) {
     const axiosError = error as AxiosError<IApiErrorResponse>;
     if (axiosError.response) {
       throw new Error(axiosError.response.data.payload.message);
-    } else {
+    }
+    else {
       throw new Error("Registration failed. Please try again.");
     }
   }
@@ -42,19 +44,20 @@ export async function registerUser(
  * @returns A promise that resolves to the login response.
  */
 export async function loginUser(
-  loginDto: ILoginDto
+  loginDto: ILoginDto,
 ): Promise<IApiSuccessResponse<string>> {
   const { data: responseData, error } = await asyncTryCatch(
     axios.post<IApiSuccessResponse<string>>(`${API_URL}/auth/login`, loginDto, {
       withCredentials: true,
-    })
+    }),
   );
 
   if (error) {
     const axiosError = error as AxiosError<IApiErrorResponse>;
     if (axiosError.response) {
       throw new Error(axiosError.response.data.payload.message);
-    } else {
+    }
+    else {
       throw new Error("Login failed. Please try again.");
     }
   }
@@ -73,14 +76,15 @@ export async function loginUser(
  */
 export async function logoutUser(): Promise<IApiSuccessResponse<null>> {
   const { data: responseData, error } = await asyncTryCatch(
-    axiosInstance.post<IApiSuccessResponse<null>>(`${API_URL}/auth/logout`)
+    axiosInstance.post<IApiSuccessResponse<null>>(`${API_URL}/auth/logout`),
   );
 
   if (error) {
     const axiosError = error as AxiosError<IApiErrorResponse>;
     if (axiosError.response) {
       throw new Error(axiosError.response.data.payload.message);
-    } else {
+    }
+    else {
       throw new Error("Logout failed. Please try again.");
     }
   }
@@ -102,15 +106,16 @@ export async function refreshAccessToken(): Promise<
     axios.post<IApiSuccessResponse<string>>(
       `${API_URL}/auth/refresh`,
       {},
-      { withCredentials: true }
-    )
+      { withCredentials: true },
+    ),
   );
 
   if (error) {
     const axiosError = error as AxiosError<IApiErrorResponse>;
     if (axiosError.response) {
       throw new Error(axiosError.response.data.payload.message);
-    } else {
+    }
+    else {
       throw new Error("Refresh failed. Please try again.");
     }
   }
@@ -125,21 +130,22 @@ export async function refreshAccessToken(): Promise<
  * @returns A promise that resolves to the access token as a string.
  */
 export async function exchangeOauthCodeForAuthTokens(
-  code: string
+  code: string,
 ): Promise<IApiSuccessResponse<string>> {
   const { data: responseData, error } = await asyncTryCatch(
     axios.post<IApiSuccessResponse<string>>(
       `${API_URL}/oauth/exchange-oauth-code`,
       { code },
-      { withCredentials: true }
-    )
+      { withCredentials: true },
+    ),
   );
 
   if (error) {
     const axiosError = error as AxiosError<IApiErrorResponse>;
     if (axiosError.response) {
       throw new Error(axiosError.response.data.payload.message);
-    } else {
+    }
+    else {
       throw new Error("Exchange failed. Please try again.");
     }
   }

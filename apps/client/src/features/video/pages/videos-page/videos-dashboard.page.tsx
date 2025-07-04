@@ -2,9 +2,9 @@
 
 import { Fragment, useState } from "react";
 
-import { DashboardHeader, PaginationControls, SearchAndFilterPanel } from "@/components/dashboards";
-import { useUrlState } from "@/hooks";
-import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
+import { DashboardHeader, PaginationControls, SearchAndFilterPanel } from "@/shared/components";
+import { DEFAULT_PAGE, PAGE_LIMIT } from "@/shared/constants";
+import { useUrlState } from "@/shared/hooks";
 
 import { useGetUserVideosQuery } from "../../queries";
 import { NoVideosFound, VideosDashboardSkeleton, VideosList } from "./components";

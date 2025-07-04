@@ -1,8 +1,8 @@
 "use client";
 
-import { Loader, MarkdownViewer, ResizablePanels } from "@/components/global";
 import { VideoPlayer } from "@/features/video/components";
-import { useToggleVideoPlayer } from "@/hooks";
+import { Loader, MarkdownViewer, ResizablePanels } from "@/shared/components";
+import { useToggleVideoPlayer } from "@/shared/hooks";
 
 import {
   NoteNotFound,

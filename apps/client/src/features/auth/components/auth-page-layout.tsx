@@ -2,8 +2,6 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Fragment } from "react";
 
-import { BackgroundAnimation } from "@/components";
-import { Logo } from "@/components/global";
 import {
   Button,
   Card,
@@ -13,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui";
+import { BackgroundAnimation, Logo } from "@/shared/components";
 
 import { SocialLoginOptions } from "./social-login-options";
 

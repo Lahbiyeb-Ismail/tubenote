@@ -7,9 +7,9 @@ import { updatePasswordSchema } from "@tubenote/schemas";
 import { Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { FormInput } from "@/components/global";
 import { Button, Form } from "@/components/ui";
 import { useUser } from "@/features/user/hooks";
+import { FormInput } from "@/shared/components";
 
 export function UpdatePasswordForm() {
   const form = useForm<IUpdatePasswordDto>({

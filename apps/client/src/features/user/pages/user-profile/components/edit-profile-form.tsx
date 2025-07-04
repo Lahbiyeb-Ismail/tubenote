@@ -7,11 +7,11 @@ import { updateUserSchema } from "@tubenote/schemas";
 import { Mail, User } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { FormInput } from "@/components/global";
 import { Form } from "@/components/ui";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/features/user/hooks";
 import { useGetCurrentUserQuery } from "@/features/user/queries";
+import { FormInput } from "@/shared/components";
 
 interface IProps {
   onCancel: () => void;

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui";
-import { GOOGLE_REDIRECT_URI } from "@/utils/constants";
+import { GOOGLE_REDIRECT_URI } from "@/shared/constants";
 
 export function GoogleAuthButton() {
   const handleGoogleAuth = () => {

@@ -7,10 +7,10 @@ import { loginSchema } from "@tubenote/schemas";
 import { Lock, Mail } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { FormInput } from "@/components/global";
 import { Form } from "@/components/ui";
 import { AuthSubmitButton, ForgotPasswordLink } from "@/features/auth/components";
 import { useAuth } from "@/features/auth/hooks";
+import { FormInput } from "@/shared/components";
 
 export function LoginForm() {
   const form = useForm<ILoginDto>({

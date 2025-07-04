@@ -1,4 +1,4 @@
-import { CTA, FAQ, Features, Footer, Header, Hero, HowItWorks, Pricing } from "./components";
+import { CTA, FAQ, Features, Footer, Header, Hero, HowItWorks, PricingPlans } from "./sections";
 
 export function LandingPage() {
   return (
@@ -7,7 +7,7 @@ export function LandingPage() {
       <Hero />
       <Features />
       <HowItWorks />
-      <Pricing />
+      <PricingPlans />
       <FAQ />
       <CTA />
       <Footer />

@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 
-import { PaginationControlsSkeleton } from "@/components/dashboards";
+import { PaginationControlsSkeleton } from "@/shared/components";
 
 import { VideosListSkeleton } from "./videos-list";
 

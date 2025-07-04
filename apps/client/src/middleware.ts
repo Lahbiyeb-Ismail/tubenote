@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { AUTH_STATUS_COOKIE } from "./utils/auth-cookies";
+import type { NextRequest } from "next/server";
+
+import { NextResponse } from "next/server";
+
+import { AUTH_STATUS_COOKIE } from "@/shared/utils";
 
 // Define routes that require authentication
 const PROTECTED_ROUTES = [
@@ -33,9 +36,9 @@ export function middleware(request: NextRequest) {
 
   // Skip middleware for API routes, static files, and public assets
   if (
-    pathname.startsWith(API_ROUTES_PREFIX) ||
-    pathname.startsWith("/_next") ||
-    pathname.includes(".")
+    pathname.startsWith(API_ROUTES_PREFIX)
+    || pathname.startsWith("/_next")
+    || pathname.includes(".")
   ) {
     return NextResponse.next();
   }
@@ -46,12 +49,12 @@ export function middleware(request: NextRequest) {
 
   // Check if the route requires authentication
   const isProtectedRoute = PROTECTED_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
+    route => pathname === route || pathname.startsWith(`${route}/`),
   );
 
   // Check if it's a public route (login, register, etc.)
   const isPublicRoute = PUBLIC_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
+    route => pathname === route || pathname.startsWith(`${route}/`),
   );
 
   // If it's a protected route and user is not authenticated, redirect to login

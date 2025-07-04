@@ -3,7 +3,7 @@
 import { CheckCircle, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { HomeButton } from "@/components/global";
+import { HomeButton } from "@/shared/components";
 
 export default function VerifyEmail() {
   const [email, setEmail] = useState("");
@@ -27,7 +27,8 @@ export default function VerifyEmail() {
             Verify Your Email
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            We've sent a verification link to{" "}
+            We've sent a verification link to
+            {" "}
             <span className="font-medium text-indigo-600">{email}</span>
           </p>
         </div>

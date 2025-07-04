@@ -7,10 +7,10 @@ import { passwordBodySchema } from "@tubenote/schemas";
 import { Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { FormInput } from "@/components/global";
 import { Form } from "@/components/ui";
 import { AuthSubmitButton } from "@/features/auth/components";
 import { useAuth } from "@/features/auth/hooks";
+import { FormInput } from "@/shared/components";
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const form = useForm<IPasswordBodyDto>({

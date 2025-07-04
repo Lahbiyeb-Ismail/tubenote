@@ -5,8 +5,8 @@ import type { AxiosError } from "axios";
 
 import { asyncTryCatch } from "@tubenote/utils";
 
-import { extractVideoId } from "@/helpers";
-import { axiosInstance } from "@/lib";
+import { axiosInstance } from "@/shared/lib";
+import { extractVideoId } from "@/shared/utils";
 
 import type { VideoWithCount } from "../types";
 

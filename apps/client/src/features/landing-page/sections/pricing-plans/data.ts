@@ -1,0 +1,57 @@
+export const pricingPlans = [
+  {
+    name: "Free",
+    price: "$0",
+    period: "forever",
+    description: "Perfect for getting started with video note-taking",
+    features: [
+      "Up to 10 video notes per month",
+      "Basic timestamping",
+      "Text notes only",
+      "Personal use only",
+      "Standard support",
+    ],
+    buttonText: "Get Started",
+    buttonVariant: "outline" as const,
+    popular: false,
+  },
+  {
+    name: "Pro",
+    price: "$9.99",
+    period: "month",
+    description: "Ideal for students and professionals",
+    features: [
+      "Unlimited video notes",
+      "Advanced timestamping",
+      "Rich text formatting",
+      "Note sharing & collaboration",
+      "Video annotations",
+      "Export to PDF/Word",
+      "Priority support",
+    ],
+    buttonText: "Start Free Trial",
+    buttonVariant: "default" as const,
+    popular: true,
+  },
+  {
+    name: "Team",
+    price: "$29.99",
+    period: "month",
+    description: "Best for teams and organizations",
+    features: [
+      "Everything in Pro",
+      "Team workspaces",
+      "Admin dashboard",
+      "User management",
+      "Advanced analytics",
+      "Custom integrations",
+      "24/7 premium support",
+      "Custom branding",
+    ],
+    buttonText: "Contact Sales",
+    buttonVariant: "outline" as const,
+    popular: false,
+  },
+];
+
+export type PricingPlan = (typeof pricingPlans)[number];

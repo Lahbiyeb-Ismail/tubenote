@@ -7,10 +7,10 @@ import { registerSchema } from "@tubenote/schemas";
 import { Lock, Mail, User } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { FormInput } from "@/components/global";
 import { Form } from "@/components/ui";
 import { AuthSubmitButton } from "@/features/auth/components";
 import { useAuth } from "@/features/auth/hooks";
+import { FormInput } from "@/shared/components";
 
 export function RegisterForm() {
   const form = useForm<IRegisterDto>({

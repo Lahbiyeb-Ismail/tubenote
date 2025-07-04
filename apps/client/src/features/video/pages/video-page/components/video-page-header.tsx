@@ -1,8 +1,8 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 
-import { NavigateBackButton } from "@/components";
 import { Button } from "@/components/ui";
+import { NavigateBackButton } from "@/shared/components";
 
 interface IProps {
   ytVideoId: string;

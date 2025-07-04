@@ -2,13 +2,13 @@
 
 import dynamic from "next/dynamic";
 
-import { AppMDXEditor } from "@/components/editor";
-import {
-  Loader,
-  ResizablePanels,
-} from "@/components/global";
 import { useEditorContent } from "@/features/note/hooks";
 import { VideoPlayer } from "@/features/video/components";
+import {
+  AppMDXEditor,
+  Loader,
+  ResizablePanels,
+} from "@/shared/components";
 
 import { NoteActionHeader } from "../note-action-header";
 

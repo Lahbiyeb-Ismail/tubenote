@@ -1,6 +1,5 @@
 import { Youtube } from "lucide-react";
 
-import { YoutubeUrlForm } from "@/components";
 import {
   Dialog,
   DialogContent,
@@ -8,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { YoutubeUrlForm } from "@/shared/components";
 import { useDialogStore } from "@/stores";
 
 export function AddVideoDialog() {

@@ -1,5 +1,5 @@
-import { YoutubeUrlForm } from "@/components";
 import { Card, CardContent } from "@/components/ui/card";
+import { YoutubeUrlForm } from "@/shared/components";
 
 export function YouTubeVideoEntry() {
   return (

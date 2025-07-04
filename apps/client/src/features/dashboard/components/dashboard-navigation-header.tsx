@@ -1,7 +1,7 @@
 import { BookOpen, LayoutDashboard, Search, User, Video } from "lucide-react";
 
-import { NavigationHeader, UserProfileMenu } from "@/components";
 import { Input } from "@/components/ui";
+import { NavigationHeader, UserProfileMenu } from "@/shared/components";
 
 const dashboardNavLinks = [{
   href: "/dashboard",
