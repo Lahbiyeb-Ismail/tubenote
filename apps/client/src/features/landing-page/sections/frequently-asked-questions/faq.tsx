@@ -1,13 +1,23 @@
-import { FAQAccordion, FAQHeader } from "./components";
+import { SectionContainer, SectionHeader } from "../../components";
+import { FAQAccordion } from "./components";
 
 export function FAQ() {
   return (
-    <section id="faq" className="py-20 px-4 bg-white/30">
-      <div className="container mx-auto max-w-4xl">
-        <FAQHeader />
+    <SectionContainer sectionId="faq" backgroundColorClass="bg-white/30" containerClass="max-w-4xl">
+      <SectionHeader
+        badgeText="FAQS"
+        badgeClassName="bg-teal-100 text-teal-700 hover:bg-teal-100 dark:bg-teal-900/30 dark:text-teal-400"
+        description="Everything you need to know about TubeNote"
+        title={
+          {
+            text: "Frequently Asked",
+            highlight: "Questions",
+            highlightClassName: "from-purple-600 to-pink-500",
+          }
+        }
+      />
 
-        <FAQAccordion />
-      </div>
-    </section>
+      <FAQAccordion />
+    </SectionContainer>
   );
 }
