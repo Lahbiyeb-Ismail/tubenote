@@ -3,7 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
-import { sendVerificationEmail } from "../services";
+import { sendVerificationEmail } from "../api";
 
 export function useSendVerificationEmailMutation() {
   return useMutation({

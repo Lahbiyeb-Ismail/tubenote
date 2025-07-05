@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { loginUser } from "../services";
+import { loginUser } from "../api";
 import { useAuthStore } from "../store";
 
 export function useLoginMutation() {

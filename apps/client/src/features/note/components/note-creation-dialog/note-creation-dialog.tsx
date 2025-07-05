@@ -10,9 +10,8 @@ import {
   DialogContent,
 } from "@/components/ui/dialog";
 import { useGetUserVideosQuery } from "@/features/video/queries";
-import { extractVideoId } from "@/helpers";
+import { extractVideoId, validateYouTubeUrl } from "@/shared/utils";
 import { useDialogStore } from "@/stores";
-import { validateYouTubeUrl } from "@/utils";
 
 import { NoteCreationDialogFooter } from "./note-creation-dialog-footer";
 import { NoteCreationDialogHeader } from "./note-creation-dialog-header";

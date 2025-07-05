@@ -2,9 +2,9 @@
 
 import { Fragment, useState } from "react";
 
-import { DashboardHeader, PaginationControls, SearchAndFilterPanel } from "@/components/dashboards";
-import { useUrlState } from "@/hooks";
-import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils";
+import { DashboardHeader, PaginationControls, SearchAndFilterPanel } from "@/shared/components";
+import { DEFAULT_PAGE, PAGE_LIMIT } from "@/shared/constants";
+import { useUrlState } from "@/shared/hooks";
 
 import { NoNotesFound } from "../components";
 import { NotesDashboardSkeleton, NotesList } from "../components/notes-dashboard";

@@ -2,8 +2,8 @@
 
 import { ArrowLeftRight, Save } from "lucide-react";
 
-import { NavigateBackButton } from "@/components";
 import { Button } from "@/components/ui";
+import { NavigateBackButton } from "@/shared/components";
 import { useDialogStore } from "@/stores";
 
 import { useEditorPositionStore } from "../../store";

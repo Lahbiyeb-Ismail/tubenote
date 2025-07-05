@@ -1,7 +1,7 @@
 "use client";
 
-import { DashboardHeader } from "@/components/dashboards";
 import { useGetUserVideosCountQuery } from "@/features/video/queries";
+import { DashboardHeader } from "@/shared/components";
 
 import { Charts, DashboardSkeleton, KeyMetrics, LearningGoals, MonthlyProgress, QuickActions, RecentActivity, StudyStreak } from "../components";
 import { DashboardEmptyState } from "../components/dashboard-empty-state";

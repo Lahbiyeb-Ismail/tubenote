@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
-import { exchangeOauthCodeForAuthTokens } from "../services";
+import { exchangeOauthCodeForAuthTokens } from "../api";
 import { useAuthStore } from "../store";
 
 export function useOauthTokenExchangeMutation() {

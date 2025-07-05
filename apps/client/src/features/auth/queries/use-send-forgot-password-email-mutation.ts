@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { sendForgotPasswordEmail } from "../services";
+import { sendForgotPasswordEmail } from "../api";
 
 export function useSendForgotPasswordEmailMutation() {
   const router = useRouter();

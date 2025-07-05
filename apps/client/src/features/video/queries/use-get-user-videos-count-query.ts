@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useAuth } from "@/features/auth/hooks";
 
-import { getUserVideosCount } from "../services";
+import { getUserVideosCount } from "../api";
 
 export function useGetUserVideosCountQuery() {
   const { isAuthenticated } = useAuth();

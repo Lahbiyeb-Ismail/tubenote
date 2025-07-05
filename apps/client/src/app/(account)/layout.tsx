@@ -1,4 +1,4 @@
-import { NavigateBackButton } from "@/components";
+import { NavigateBackButton } from "@/shared/components";
 
 interface IProps {
   children: React.ReactNode;

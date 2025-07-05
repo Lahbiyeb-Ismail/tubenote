@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useVideoNoteStore } from "@/features/video/store";
-import { formatTimestamp, fromDistanceToNow } from "@/helpers";
+import { formatTimestamp, fromDistanceToNow } from "@/shared/utils";
 
 interface IProps {
   note: Note;

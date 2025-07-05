@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useAuth } from "@/features/auth/hooks";
 
-import { getUserNotes } from "../services";
+import { getUserNotes } from "../api";
 
 export function useGetUserNotesQuery(queryOptions: ISearchAndPaginationQueryDto) {
   const { isAuthenticated } = useAuth();

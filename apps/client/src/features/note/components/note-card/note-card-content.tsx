@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
-import { fromDistanceToNow } from "@/helpers";
+import { fromDistanceToNow } from "@/shared/utils";
 
 interface IProps {
   note: Note;

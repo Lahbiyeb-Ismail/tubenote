@@ -1,6 +1,6 @@
 import { BookOpen, LayoutDashboard, User, Video } from "lucide-react";
 
-import { NavLink } from "@/components";
+import { NavLink } from "@/shared/components";
 
 export function DashboardNavLinks() {
   return (

@@ -6,8 +6,8 @@ import { useGetNotesByVideoIdQuery } from "@/features/note/queries";
 import {
   VideoPlayer,
 } from "@/features/video/components";
-import { usePaginationQuery, useSortByQueries } from "@/hooks";
-import { DEFAULT_PAGE, PAGE_LIMIT } from "@/utils/constants";
+import { DEFAULT_PAGE, PAGE_LIMIT } from "@/shared/constants";
+import { usePaginationQuery, useSortByQueries } from "@/shared/hooks";
 
 import { VideoNotes, VideoPageHeader, VideoPageSkeleton } from "./components";
 

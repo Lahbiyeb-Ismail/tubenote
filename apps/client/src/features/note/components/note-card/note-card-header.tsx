@@ -10,7 +10,7 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { CardHeader } from "@/components/ui/card";
-import { formatTimestamp } from "@/helpers";
+import { formatTimestamp } from "@/shared/utils";
 
 import { NoteCardActionsMenu } from "./note-card-actions-menu";
 

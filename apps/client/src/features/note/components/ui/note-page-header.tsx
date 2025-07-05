@@ -2,8 +2,8 @@ import { Edit2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { Fragment } from "react";
 
-import { NavigateBackButton } from "@/components";
 import { Button } from "@/components/ui";
+import { NavigateBackButton } from "@/shared/components";
 
 interface NotePageHeaderProps {
   noteId: string;
