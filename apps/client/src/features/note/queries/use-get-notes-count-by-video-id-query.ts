@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getNotesCountByVideoId } from "../services";
+import { getNotesCountByVideoId } from "../api";
 
 export function useGetNotesCountByVideoIdQuery(ytVideoId: string) {
   return useQuery({

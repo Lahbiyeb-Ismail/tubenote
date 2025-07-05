@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
-import { updatePassword } from "../services";
+import { updatePassword } from "../api";
 
 export function useUpdatePasswordMutation() {
   const queryClient = useQueryClient();

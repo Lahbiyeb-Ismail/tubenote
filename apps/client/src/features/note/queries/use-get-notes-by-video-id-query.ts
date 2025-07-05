@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useAuth } from "@/features/auth/hooks";
 
-import { getNotesByVideoId } from "../services";
+import { getNotesByVideoId } from "../api";
 
 export function useGetNotesByVideoIdQuery({
   videoId,

@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 import { useDialogStore } from "@/stores";
 
-import { deleteNote } from "../services";
+import { deleteNote } from "../api";
 import { useNoteStore } from "../store";
 
 export function useDeleteNoteMutation() {

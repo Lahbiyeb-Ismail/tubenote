@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { verifyPasswordResetToken } from "../services";
+import { verifyPasswordResetToken } from "../api";
 
 export function useVerifyPasswordResetTokenQuery(token: string) {
   return useQuery({

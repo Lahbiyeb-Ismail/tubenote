@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 import { useUserStore } from "@/features/user/store";
 
-import { logoutUser } from "../services";
+import { logoutUser } from "../api";
 import { useAuthStore } from "../store";
 
 export function useLogoutMutation() {

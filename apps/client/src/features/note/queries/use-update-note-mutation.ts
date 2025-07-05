@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 import { useDialogStore } from "@/stores";
 
-import { updateNote } from "../services";
+import { updateNote } from "../api";
 import { useNoteStore } from "../store";
 
 export function useUpdateNoteMutation() {

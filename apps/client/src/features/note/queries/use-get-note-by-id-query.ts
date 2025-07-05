@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getNoteById } from "../services";
+import { getNoteById } from "../api";
 
 export function useGetNoteByIdQuery(noteId: string) {
   return useQuery({

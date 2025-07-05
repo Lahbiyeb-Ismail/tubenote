@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 import { setStorageValue } from "@/shared/utils";
 
-import { registerUser } from "../services";
+import { registerUser } from "../api";
 import { useAuthStore } from "../store";
 
 export function useRegisterMutation() {

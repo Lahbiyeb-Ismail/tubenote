@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useAuthStore } from "@/features/auth/store";
 
-import { getCurrentUser } from "../services";
+import { getCurrentUser } from "../api";
 
 export function useGetCurrentUserQuery(): UseQueryResult<User, Error> {
   const { isAuthenticated } = useAuthStore();

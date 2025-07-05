@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useAuth } from "@/features/auth/hooks";
 
-import { getUserVideos } from "../services";
+import { getUserVideos } from "../api";
 
 export function useGetUserVideosQuery(searchQuery: ISearchAndPaginationQueryDto) {
   const { isAuthenticated } = useAuth();
