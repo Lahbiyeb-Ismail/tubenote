@@ -1,5 +1,5 @@
-import { DashboardHeaderSkeleton } from "@/components/dashboards";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DashboardHeaderSkeleton } from "@/shared/components";
 
 export function VideoPageSkeleton() {
   return (

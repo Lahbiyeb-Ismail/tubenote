@@ -3,35 +3,34 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
-interface LayoutState {
+interface UIState {
   isGridLayout: boolean;
   isSidebarOpen: boolean;
-}
-
-interface UIState {
-  layout: LayoutState;
-  actions: {
-    // Layout actions
-    toggleLayout: () => void;
-    toggleSidebar: () => void;
-  };
+  isMobileMenuOpen: boolean;
+  toggleLayout: () => void;
+  toggleSidebar: () => void;
+  setIsMobileMenuOpen: (open: boolean) => void;
 }
 
 export const useUIStore = create<UIState>()(
   immer(set => ({
-    layout: {
-      isGridLayout: true,
-      isSidebarOpen: false,
-    },
-    actions: {
-      toggleLayout: () =>
-        set((state) => {
-          state.layout.isGridLayout = !state.layout.isGridLayout;
-        }),
-      toggleSidebar: () =>
-        set((state) => {
-          state.layout.isSidebarOpen = !state.layout.isSidebarOpen;
-        }),
-    },
+    isGridLayout: true,
+    isSidebarOpen: false,
+    isMobileMenuOpen: false,
+
+    toggleLayout: () =>
+      set((state) => {
+        state.isGridLayout = !state.isGridLayout;
+      }),
+
+    toggleSidebar: () =>
+      set((state) => {
+        state.isSidebarOpen = !state.isSidebarOpen;
+      }),
+
+    setIsMobileMenuOpen: (open: boolean) =>
+      set((state) => {
+        state.isMobileMenuOpen = open;
+      }),
   })),
 );

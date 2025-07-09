@@ -1,35 +1,57 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-import { Logo } from "@/shared/components";
+import { AuthNavActions, Logo } from "@/shared/components";
 
 import { NavLink } from "./nav-link";
 
+const MobileMenu = dynamic(
+  () => import("./mobile-menu").then(mod => mod.MobileMenu),
+  { ssr: false },
+);
+
 interface IProps {
-  navLinks: Array<{ href: string; label: string; icon?: React.ComponentType<React.SVGProps<SVGSVGElement>> }>;
-  children: React.ReactNode;
+  navItems: Array<{ href: string; label: string; icon?: React.ComponentType<React.SVGProps<SVGSVGElement>> }>;
 }
 
-export function NavigationHeader({ navLinks, children }: IProps) {
+export function NavigationHeader({ navItems }: IProps) {
+  const pathname = usePathname();
+
+  const isActive = (href: string) => {
+    if (href === "/")
+      return pathname === "/";
+    return pathname.startsWith(href);
+  };
+
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur-sm dark:bg-slate-950/80 dark:border-slate-800">
-      <div className="container flex h-16 items-center">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between">
+        {/* Logo */}
         <Link href="/">
           <Logo />
         </Link>
 
-        <div className="w-full flex items-center justify-between gap-4">
-          <nav className="hidden md:flex items-center gap-6 ml-8">
-            {navLinks.map(link => (
-              <NavLink key={link.href} href={link.href}>
-                {link.icon && <link.icon className="h-4 w-4" />}
-                {link.label}
-              </NavLink>
-            ))}
-          </nav>
-          {children}
-        </div>
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-6">
+          {navItems.map(item => (
+            <NavLink
+              key={item.href}
+              href={item.href}
+            >
+              {item.icon && <item.icon className="size-4" />}
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Desktop Actions */}
+        <AuthNavActions />
+
+        {/* Mobile Menu */}
+        <MobileMenu navItems={navItems} isActive={isActive} />
       </div>
     </header>
   );
