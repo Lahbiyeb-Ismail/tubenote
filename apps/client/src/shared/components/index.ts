@@ -1,4 +1,5 @@
 export * from "./auth-nav-actions";
+export * from "./authenticated-nav-items";
 export * from "./authentication-buttons";
 export * from "./background-animation";
 export * from "./card-content";

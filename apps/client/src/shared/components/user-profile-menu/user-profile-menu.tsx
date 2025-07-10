@@ -14,9 +14,10 @@ const FALLBACK_PROFILE_IMAGE_URL = "https://github.com/shadcn.png";
 
 interface IProps {
   variant?: "mobile" | "desktop";
+  closeMobileMenu?: () => void;
 }
 
-export function UserProfileMenu({ variant = "desktop" }: IProps) {
+export function UserProfileMenu({ variant = "desktop", closeMobileMenu }: IProps) {
   const { data: user, isPending: isLoadingUser } = useGetCurrentUserQuery();
 
   const { logout, isLogoutLoading } = useAuth();
@@ -87,21 +88,21 @@ export function UserProfileMenu({ variant = "desktop" }: IProps) {
 
       <div className="flex flex-col space-y-2 mt-2">
         <Button variant="ghost" className="justify-start" size="sm" asChild>
-          <Link href="/dashboard">
+          <Link href="/dashboard" onClick={closeMobileMenu}>
             <LayoutDashboard className="mr-2 h-4 w-4" />
             <span>Dashboard</span>
           </Link>
         </Button>
 
         <Button variant="ghost" className="justify-start" size="sm" asChild>
-          <Link href="/profile">
+          <Link href="/profile" onClick={closeMobileMenu}>
             <User className="mr-2 h-4 w-4" />
             <span>Profile</span>
           </Link>
         </Button>
 
         <Button variant="ghost" className="justify-start" size="sm" asChild>
-          <Link href="/settings">
+          <Link href="/settings" onClick={closeMobileMenu}>
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
           </Link>
@@ -109,7 +110,16 @@ export function UserProfileMenu({ variant = "desktop" }: IProps) {
 
         <Separator className="my-2" />
 
-        <Button variant="ghost" className="justify-start" size="sm" onClick={() => logout()} disabled={isLogoutLoading}>
+        <Button
+          variant="ghost"
+          className="justify-start"
+          size="sm"
+          onClick={() => {
+            logout();
+            closeMobileMenu?.();
+          }}
+          disabled={isLogoutLoading}
+        >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </Button>

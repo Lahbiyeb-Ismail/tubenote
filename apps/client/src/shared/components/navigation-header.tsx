@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 import { AuthNavActions, Logo } from "@/shared/components";
 
@@ -18,14 +17,6 @@ interface IProps {
 }
 
 export function NavigationHeader({ navItems }: IProps) {
-  const pathname = usePathname();
-
-  const isActive = (href: string) => {
-    if (href === "/")
-      return pathname === "/";
-    return pathname.startsWith(href);
-  };
-
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
@@ -35,15 +26,12 @@ export function NavigationHeader({ navItems }: IProps) {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
+        <nav className="hidden md:flex items-center space-x-4">
           {navItems.map(item => (
             <NavLink
               key={item.href}
-              href={item.href}
-            >
-              {item.icon && <item.icon className="size-4" />}
-              {item.label}
-            </NavLink>
+              navItem={item}
+            />
           ))}
         </nav>
 
@@ -51,7 +39,7 @@ export function NavigationHeader({ navItems }: IProps) {
         <AuthNavActions />
 
         {/* Mobile Menu */}
-        <MobileMenu navItems={navItems} isActive={isActive} />
+        <MobileMenu navItems={navItems} />
       </div>
     </header>
   );

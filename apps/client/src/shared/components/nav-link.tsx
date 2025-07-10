@@ -3,21 +3,27 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Button } from "@/components/ui";
+import { cn } from "@/lib";
 
 interface IProps {
-  href: string;
-  children: React.ReactNode;
+  navItem: {
+    href: string;
+    label: string;
+    icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  };
+  className?: string;
+  onClick?: () => void;
 }
 
-export function NavLink({ href, children }: IProps) {
-  const isActive = href === usePathname();
+export function NavLink({ navItem, className, onClick }: IProps) {
+  const pathname = usePathname();
+
+  const isActive = navItem.href === pathname;
 
   return (
-    <Link href={href}>
-      <Button variant="ghost" className={`gap-2  dark:bg-slate-800 ${isActive ? "bg-slate-100" : ""}`}>
-        {children}
-      </Button>
+    <Link href={navItem.href} className={cn(`flex items-center gap-2 font-medium transition-colors hover:text-primary p-2 rounded-md  dark:bg-slate-800 ${isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-accent"}`, className)} onClick={onClick}>
+      {navItem.icon && <navItem.icon className="size-4" />}
+      <span>{navItem.label}</span>
     </Link>
   );
 }

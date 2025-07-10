@@ -1,7 +1,4 @@
-"use client";
-
 import { Menu } from "lucide-react";
-import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -9,10 +6,10 @@ import { useAuth } from "@/features/auth/hooks";
 import { useUIStore } from "@/stores";
 
 import { AuthenticationButtons } from "./authentication-buttons";
+import { NavLink } from "./nav-link";
 import { UserProfileMenu } from "./user-profile-menu";
 
 interface IProps {
-  isActive: (href: string) => boolean;
   navItems: Array<{
     href: string;
     label: string;
@@ -20,7 +17,7 @@ interface IProps {
   }>;
 }
 
-export function MobileMenu({ isActive, navItems }: IProps) {
+export function MobileMenu({ navItems }: IProps) {
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useUIStore();
   const { isAuthenticated } = useAuth();
 
@@ -37,22 +34,17 @@ export function MobileMenu({ isActive, navItems }: IProps) {
         <div className="flex flex-col space-y-4 mt-6">
           <nav className="flex flex-col space-y-2">
             {navItems.map(item => (
-              <Link
+              <NavLink
                 key={item.href}
-                href={item.href}
+                navItem={item}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`text-sm font-medium transition-colors hover:text-primary p-2 rounded-md ${
-                  isActive(item.href) ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-accent"
-                }`}
-              >
-                {item.label}
-              </Link>
+              />
             ))}
           </nav>
 
           {isAuthenticated
             ? (
-                <UserProfileMenu variant="mobile" />
+                <UserProfileMenu variant="mobile" closeMobileMenu={() => setIsMobileMenuOpen(false)} />
               )
             : (
                 <div className="border-t pt-4 space-y-2">
