@@ -21,7 +21,7 @@ export function NavLink({ navItem, className, onClick }: IProps) {
   const isActive = navItem.href === pathname;
 
   return (
-    <Link href={navItem.href} className={cn(`flex items-center gap-2 font-medium transition-colors hover:text-primary p-2 rounded-md  dark:bg-slate-800 ${isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-accent"}`, className)} onClick={onClick}>
+    <Link href={navItem.href} className={cn(`flex items-center gap-2 font-medium transition-colors hover:text-primary p-2 rounded-md  dark:bg-slate-800 ${isActive ? "text-primary bg-primary/10" : "text-muted-foreground "}`, className)} onClick={onClick}>
       {navItem.icon && <navItem.icon className="size-4" />}
       <span>{navItem.label}</span>
     </Link>
