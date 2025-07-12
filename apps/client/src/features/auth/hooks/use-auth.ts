@@ -4,7 +4,7 @@ import { useLoginMutation, useLogoutMutation, useOauthTokenExchangeMutation, use
 import { useAuthStore } from "../store";
 
 export function useAuth() {
-  const { isAuthenticated, isLoading, error, clearError } = useAuthStore();
+  const { isAuthenticated, isLoading, error } = useAuthStore();
 
   const loginMutation = useLoginMutation();
   const registerMutation = useRegisterMutation();
@@ -19,7 +19,6 @@ export function useAuth() {
     isAuthenticated,
     isLoading,
     error,
-    clearError,
 
     // Login
     login: loginMutation.mutate,

@@ -14,8 +14,7 @@ export function useLogoutMutation() {
 
   const { userActions } = useUserStore();
 
-  const { setUnAuthenticated, setError } = useAuthStore();
-  const { setUser } = userActions;
+  const { authActions } = useAuthStore();
 
   return useMutation({
     mutationFn: logoutUser,
@@ -29,8 +28,8 @@ export function useLogoutMutation() {
 
       toast.success(payload.message);
 
-      setUnAuthenticated();
-      setUser(undefined);
+      authActions.setAuthStatus(false);
+      userActions.setUser(undefined);
 
       // Redirect to Home page after successful logout
       router.push("/");
@@ -40,7 +39,7 @@ export function useLogoutMutation() {
 
       toast.error(error.message);
 
-      setError(error.message);
+      authActions.setError(error.message);
     },
   });
 }

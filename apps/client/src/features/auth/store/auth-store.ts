@@ -1,62 +1,44 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
-import { getAuthStatusFromCookie, removeAuthStatusCookie, setAuthStatusCookie } from "@/shared/utils";
-
-interface AuthStore {
+interface AuthStoreState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  setAuthenticated: () => void;
-  setUnAuthenticated: () => void;
+
+}
+
+interface AuthStoreActions {
+  setAuthStatus: (isAuthenticated: boolean) => void;
   setError: (error: string) => void;
   clearError: () => void;
-  initialize: () => void;
+}
+
+interface AuthStore extends AuthStoreState {
+  authActions: AuthStoreActions;
 }
 
 export const useAuthStore = create<AuthStore>()(
-  persist(set => ({
+  set => ({
     isAuthenticated: false,
     isLoading: false,
     error: null,
 
-    setAuthenticated: () => {
-      setAuthStatusCookie("authenticated");
+    authActions: {
+      setAuthStatus: (isAuthenticated: boolean) => {
+        set({
+          isAuthenticated,
+          isLoading: false,
+          error: null,
+        });
+      },
 
-      set({
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    },
-    setUnAuthenticated: () => {
-      removeAuthStatusCookie();
+      setError: (error: string) => {
+        set({ isAuthenticated: false, isLoading: false, error });
+      },
 
-      set({
-        isAuthenticated: false,
-        isLoading: false,
-      });
+      clearError: () => {
+        set({ error: null });
+      },
     },
-
-    setError: (error: string) => {
-      set({ error });
-    },
-
-    clearError: () => {
-      set({ error: null });
-    },
-    initialize: () => {
-      const isAuthenticated = getAuthStatusFromCookie();
-
-      set({
-        isAuthenticated,
-        isLoading: false,
-      });
-    },
-  }), {
-    name: "auth-storage",
-    // Only persist isAuthenticated, not loading states or errors
-    partialize: state => ({
-      isAuthenticated: state.isAuthenticated,
-    }),
   }),
 );
