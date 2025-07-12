@@ -2,7 +2,7 @@
 
 import { Fragment, useState } from "react";
 
-import { useGetCurrentUserQuery } from "../../queries";
+import { useUser } from "../../hooks";
 import {
   EditProfileContainer,
   UserAchievementsOverview,
@@ -16,9 +16,9 @@ import {
 export function UserProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
 
-  const { data: user, isPending } = useGetCurrentUserQuery();
+  const { user, isUserLoading } = useUser();
 
-  if (isPending || !user)
+  if (isUserLoading || !user)
     return <UserProfileSkeleton />;
 
   return (
