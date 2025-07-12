@@ -42,11 +42,10 @@ const config = {
         "secondary-700": "#BE185D", // Darker pink (700-level shade) - pink-700
 
         // Accent Colors
-        "accent": "#0f172a", // Conversion moments only - amber-500
-        "accent-50": "#FFFBEB", // Light amber (50-level shade) - amber-50
-        "accent-100": "#FEF3C7", // Light amber (100-level shade) - amber-100
-        "accent-500": "#F59E0B", // Medium amber (500-level shade) - amber-500
-        "accent-600": "#D97706", // Dark amber (600-level shade) - amber-600
+        "accent": {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
 
         // Background Colors
         "background": "#FFFFFF", // Clean canvas for content - white
@@ -82,6 +81,11 @@ const config = {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
+
+         popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        }
       },
       fontSize: {
         "xs": ["0.75rem", { lineHeight: "1rem" }],
