@@ -1,4 +1,5 @@
 import { NavigateBackButton } from "@/shared/components";
+import { withAuth } from "@/shared/HOC/with-auth";
 
 interface IProps {
   children: React.ReactNode;
@@ -15,4 +16,4 @@ function Layout({ children }: IProps) {
   );
 }
 
-export default Layout;
+export default withAuth(Layout);

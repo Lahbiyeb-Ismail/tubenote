@@ -34,12 +34,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthInitializer>
-          <ReactQueryProvider>
+        <ReactQueryProvider>
+          <AuthInitializer>
             <Toaster />
             {children}
-          </ReactQueryProvider>
-        </AuthInitializer>
+          </AuthInitializer>
+        </ReactQueryProvider>
       </body>
     </html>
   );

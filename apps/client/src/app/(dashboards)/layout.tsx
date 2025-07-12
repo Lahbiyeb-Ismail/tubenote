@@ -4,6 +4,7 @@ import { BookOpen, LayoutDashboard, User, Video } from "lucide-react";
 import dynamic from "next/dynamic";
 
 import { NavigationHeader } from "@/shared/components";
+import { withAuth } from "@/shared/HOC/with-auth";
 
 const NoteCreationDialog = dynamic(
   () => import("@/features/note/components").then(mod => mod.NoteCreationDialog),
@@ -48,4 +49,4 @@ function Layout({ children }: LayoutProps) {
   );
 }
 
-export default Layout;
+export default withAuth(Layout);
