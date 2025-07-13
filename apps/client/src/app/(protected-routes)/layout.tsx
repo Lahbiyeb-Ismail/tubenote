@@ -1,19 +1,32 @@
 "use client";
 
-import { Fragment } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-import { withAuth } from "@/shared/HOC";
+import { useGetCurrentUserQuery } from "@/features/user/queries";
+import { Loader } from "@/shared/components";
 
 interface IProps {
   children: React.ReactNode;
 }
 
-function Layout({ children }: IProps) {
-  return (
-    <Fragment>
-      {children}
-    </Fragment>
-  );
-}
+export default function ProtectedLayout({ children }: IProps) {
+  const router = useRouter();
+  const { isPending, isError, isSuccess } = useGetCurrentUserQuery();
 
-export default withAuth(Layout);
+  useEffect(() => {
+    if (!isPending && isError) {
+      router.push("/login");
+    }
+  }, [isPending, isError, router]);
+
+  if (isPending || isError) {
+    return <Loader />; // Or preferably, a layout-specific skeleton
+  }
+
+  if (isSuccess) {
+    return <>{children}</>;
+  }
+
+  return null;
+}
