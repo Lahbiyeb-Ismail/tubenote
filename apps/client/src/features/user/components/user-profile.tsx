@@ -1,4 +1,5 @@
-import { useGetCurrentUserQuery } from "../queries";
+import { useSession } from "@/features/auth/hooks";
+
 import { UserAvatar } from "./";
 
 interface UserProfileProps {
@@ -6,7 +7,7 @@ interface UserProfileProps {
 }
 
 export function UserProfile({ isOpen }: UserProfileProps) {
-  const { data: user, isLoading } = useGetCurrentUserQuery();
+  const { user, isLoading } = useSession();
 
   if (isLoading || !user)
     return null;

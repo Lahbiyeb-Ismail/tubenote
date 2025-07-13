@@ -2,7 +2,7 @@ import { Menu } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useGetCurrentUserQuery } from "@/features/user/queries";
+import { useSession } from "@/features/auth/hooks";
 import { useUIStore } from "@/stores";
 
 import { AuthenticationButtons } from "./authentication-buttons";
@@ -19,7 +19,7 @@ interface IProps {
 
 export function MobileMenu({ navItems }: IProps) {
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useUIStore();
-  const { isSuccess: isAuthenticated } = useGetCurrentUserQuery();
+  const { isAuthenticated } = useSession();
 
   return (
     <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>

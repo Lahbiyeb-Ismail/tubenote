@@ -16,15 +16,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui";
-import { useAuth } from "@/features/auth/hooks";
+import { useAuth, useSession } from "@/features/auth/hooks";
 import { UserAvatar } from "@/features/user/components";
-import { useGetCurrentUserQuery } from "@/features/user/queries";
 
 export function DropDownNavbar() {
-  const { data: currentUser, isLoading } = useGetCurrentUserQuery();
+  const { user, isLoading } = useSession();
   const { logout, isLogoutLoading } = useAuth();
 
-  if (isLoading || !currentUser)
+  if (isLoading || !user)
     return null;
 
   return (
@@ -32,17 +31,17 @@ export function DropDownNavbar() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-            <UserAvatar user={currentUser} />
+            <UserAvatar user={user} />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56 mt-2" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">
-                {currentUser?.username}
+                {user.username}
               </p>
               <p className="text-xs leading-none text-muted-foreground">
-                {currentUser?.email}
+                {user.email}
               </p>
             </div>
           </DropdownMenuLabel>

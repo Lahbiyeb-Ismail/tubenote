@@ -1,10 +1,10 @@
 "use client";
 
-import { useGetCurrentUserQuery } from "@/features/user/queries";
+import { useSession } from "@/features/auth/hooks";
 import { AuthenticatedNavItems, AuthenticationButtons } from "@/shared/components";
 
 export function AuthNavActions() {
-  const { isSuccess: isAuthenticated } = useGetCurrentUserQuery();
+  const { isAuthenticated } = useSession();
 
   return (
     <div className="hidden md:flex items-center space-x-4">
