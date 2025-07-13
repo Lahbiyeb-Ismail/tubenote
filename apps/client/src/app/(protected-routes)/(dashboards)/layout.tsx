@@ -4,7 +4,6 @@ import { BookOpen, LayoutDashboard, User, Video } from "lucide-react";
 import dynamic from "next/dynamic";
 
 import { NavigationHeader } from "@/shared/components";
-import { withAuth } from "@/shared/HOC/with-auth";
 
 const NoteCreationDialog = dynamic(
   () => import("@/features/note/components").then(mod => mod.NoteCreationDialog),
@@ -20,7 +19,7 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-function Layout({ children }: LayoutProps) {
+export default function Layout({ children }: LayoutProps) {
   const dashboardNavItems = [{
     href: "/dashboard",
     label: "Dashboard",
@@ -48,5 +47,3 @@ function Layout({ children }: LayoutProps) {
     </div>
   );
 }
-
-export default withAuth(Layout);
