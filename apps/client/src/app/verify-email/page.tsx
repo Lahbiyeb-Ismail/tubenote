@@ -1,18 +1,22 @@
 "use client";
 
 import { CheckCircle, Mail } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 import { HomeButton } from "@/shared/components";
 
 export default function VerifyEmail() {
-  const [email, setEmail] = useState("");
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
+
+  const router = useRouter();
 
   useEffect(() => {
-    // Retrieve the email from localStorage or any other state management solution
-    const userEmail = localStorage.getItem("userEmail") || "your email";
-    setEmail(userEmail);
-  }, []);
+    if (!email) {
+      router.push("/register");
+    }
+  }, [email, router]);
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">

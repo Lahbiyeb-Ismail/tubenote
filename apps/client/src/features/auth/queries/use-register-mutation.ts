@@ -4,8 +4,6 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { setStorageValue } from "@/shared/utils";
-
 import { registerUser } from "../api";
 
 export function useRegisterMutation() {
@@ -21,9 +19,7 @@ export function useRegisterMutation() {
 
       toast.success(payload.message);
 
-      setStorageValue("userEmail", payload.data);
-
-      router.push("/verify-email");
+      router.push(`/verify-email?email=${encodeURIComponent(payload.data)}`);
     },
     onError: (error) => {
       toast.error(error.message);
