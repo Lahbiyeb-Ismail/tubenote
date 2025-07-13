@@ -5,7 +5,7 @@ import { Toaster } from "react-hot-toast";
 
 import "./globals.css";
 
-// import { AuthInitializer } from "@/features/auth/components";
+import { AuthInitializer } from "@/features/auth/components";
 import { ReactQueryProvider } from "@/providers";
 
 const geistSans = localFont({
@@ -35,10 +35,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ReactQueryProvider>
-          {/* <AuthInitializer> */}
+          <AuthInitializer />
           <Toaster />
           {children}
-          {/* </AuthInitializer> */}
         </ReactQueryProvider>
       </body>
     </html>
