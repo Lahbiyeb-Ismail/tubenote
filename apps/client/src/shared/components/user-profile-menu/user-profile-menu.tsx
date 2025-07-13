@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage, Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, Separator } from "@/components/ui";
 import { useAuth } from "@/features/auth/hooks";
-import { useUser } from "@/features/user/hooks";
+import { useGetCurrentUserQuery } from "@/features/user/queries";
 
 import { UserProfileMenuSkeleton } from "./user-profile-menu-skeleton";
 
@@ -18,7 +18,7 @@ interface IProps {
 }
 
 export function UserProfileMenu({ variant = "desktop", closeMobileMenu }: IProps) {
-  const { user, isUserLoading } = useUser();
+  const { data: user, isLoading: isUserLoading } = useGetCurrentUserQuery();
 
   const { logout, isLogoutLoading } = useAuth();
 
