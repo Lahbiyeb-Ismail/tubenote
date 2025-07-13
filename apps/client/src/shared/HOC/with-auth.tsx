@@ -1,104 +1,61 @@
 "use client";
 
-import type React from "react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
-import { useAuth } from "@/features/auth/hooks";
+import { useGetCurrentUserQuery } from "@/features/user/queries";
 
 import { Loader } from "../components";
 
 /**
- * Configuration options for the withAuth HOC
- * @interface WithAuthOptions
- */
-export interface WithAuthOptions {
-  /**
-   * The path to redirect to if the user is not authenticated
-   * @default "/login"
-   */
-  redirectTo?: string;
-
-  /**
-   * Whether to include the current path as a return URL parameter
-   * @default true
-   */
-  includeReturnUrl?: boolean;
-
-  /**
-   * Role(s) required to access the component
-   * @default undefined
-   */
-  requiredRoles?: string | string[];
-}
-
-/**
- * Higher-Order Component that protects routes requiring authentication
+ * Higher-order component that provides authentication protection for React components.
  *
- * @param WrappedComponent - The component to wrap with authentication logic
- * @param options - Configuration options for authentication behavior
- * @returns A new component with authentication protection
+ * This HOC wraps a component and ensures that only authenticated users can access it.
+ * It automatically redirects unauthenticated users to the login page and displays a
+ * loader during authentication checks.
+ *
+ * @template P - The props type of the wrapped component
+ * @param WrappedComponent - The React component to be wrapped with authentication protection
+ * @returns A new component that renders the wrapped component only if the user is authenticated
  *
  * @example
- * // Basic usage
- * const ProtectedPage = withAuth(MyPage);
+ * ```tsx
+ * const ProtectedDashboard = withAuth(Dashboard);
  *
- * @example
- * // With custom options
- * const AdminPage = withAuth(AdminDashboard, {
- *   redirectTo: "/auth/login",
- *   requiredRoles: "admin",
- *   LoadingComponent: MyCustomLoader
- * });
+ * function App() {
+ *   return <ProtectedDashboard />;
+ * }
+ * ```
+ *
+ * @remarks
+ * - Shows a loading spinner while authentication status is being checked
+ * - Automatically redirects to "/login" if authentication fails
+ * - Only renders the wrapped component when user is successfully authenticated
+ * - Preserves the original component's display name for debugging purposes
  */
-export function withAuth<P extends object>(
-  WrappedComponent: React.ComponentType<P>,
-  options: WithAuthOptions = {},
-) {
-  const {
-    redirectTo = "/login",
-    includeReturnUrl = true,
-  } = options;
-
-  // Use a meaningful display name for debugging
-  const displayName
-    = WrappedComponent.displayName || WrappedComponent.name || "Component";
-
+export function withAuth<P extends object>(WrappedComponent: React.ComponentType<P>) {
   function WithAuth(props: P) {
     const router = useRouter();
-    const pathname = usePathname();
-
-    const { isAuthenticated } = useAuth();
-    const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
+    const { isPending, isError, isSuccess } = useGetCurrentUserQuery();
 
     useEffect(() => {
-      // Check if user is authenticated
-      if (!isAuthenticated) {
-        // Build redirect URL with return path if needed
-        let redirectPath = redirectTo;
-        if (includeReturnUrl && pathname) {
-          const returnUrl = encodeURIComponent(pathname);
-          redirectPath = `${redirectTo}?returnUrl=${returnUrl}`;
-        }
-
-        router.push(redirectPath);
-        return;
+      if (isError) {
+        router.push("/login");
       }
+    }, [isError, router]);
 
-      setIsAuthorized(true);
-    }, [isAuthenticated, router, pathname, setIsAuthorized]);
-
-    // Show nothing if not authorized (redirect is in progress)
-    if (!isAuthorized) {
-      return <Loader />;
+    if (isPending || isError) {
+      return <Loader />; // Show loader while checking auth status or redirecting
     }
 
-    // User is authenticated and authorized, render the protected component
-    return <WrappedComponent {...props} />;
+    if (isSuccess) {
+      // User is authenticated, render the component
+      return <WrappedComponent {...props} />;
+    }
+
+    return null; // Should not be reached in normal flow
   }
 
-  WithAuth.displayName = `withAuth(${displayName})`;
-
+  WithAuth.displayName = `withAuth(${(WrappedComponent.displayName || WrappedComponent.name || "Component")})`;
   return WithAuth;
 }
