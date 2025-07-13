@@ -7,11 +7,9 @@ import toast from "react-hot-toast";
 import { setStorageValue } from "@/shared/utils";
 
 import { registerUser } from "../api";
-import { useAuthStore } from "../store";
 
 export function useRegisterMutation() {
   const router = useRouter();
-  const { setError } = useAuthStore();
 
   return useMutation({
     mutationFn: registerUser,
@@ -29,8 +27,6 @@ export function useRegisterMutation() {
     },
     onError: (error) => {
       toast.error(error.message);
-
-      setError(error.message);
     },
     onSettled: () => {
       // Clean up loading states regardless of outcome

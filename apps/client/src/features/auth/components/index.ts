@@ -1,4 +1,3 @@
-export * from "./auth-initializer";
 export * from "./auth-page-layout";
 export * from "./auth-submit-button";
 export * from "./email-confirmation-alert";
