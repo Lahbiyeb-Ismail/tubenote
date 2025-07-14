@@ -1,9 +1,6 @@
 import type { User } from "@tubenote/db";
 import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/dtos";
-import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
-import type { AxiosError } from "axios";
-
-import { asyncTryCatch } from "@tubenote/utils";
+import type { IApiSuccessResponse } from "@tubenote/types";
 
 import { axiosInstance } from "@/shared/lib";
 
@@ -15,20 +12,7 @@ import { axiosInstance } from "@/shared/lib";
  * the error message from the server is thrown. Otherwise, a generic error message is thrown.
  */
 export async function getCurrentUser(): Promise<IApiSuccessResponse<User>> {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.get<IApiSuccessResponse<User>>("/users/me"),
-  );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-    else {
-      throw new Error("Failed to fetch user data.");
-    }
-  }
+  const response = await axiosInstance.get<IApiSuccessResponse<User>>("/users/me");
 
   return response.data;
 }
@@ -44,20 +28,7 @@ export async function getCurrentUser(): Promise<IApiSuccessResponse<User>> {
 export async function updateCurrentUser(
   updateUserData: IUpdateUserDto,
 ): Promise<IApiSuccessResponse<User>> {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.patch<IApiSuccessResponse<User>>("/users/me", updateUserData),
-  );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-    else {
-      throw new Error("Failed to update user data.");
-    }
-  }
+  const response = await axiosInstance.patch<IApiSuccessResponse<User>>("/users/me", updateUserData);
 
   return response.data;
 }
@@ -73,23 +44,10 @@ export async function updateCurrentUser(
 export async function updatePassword(
   updatePasswordData: IUpdatePasswordDto,
 ): Promise<IApiSuccessResponse<User>> {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.patch<IApiSuccessResponse<User>>(
-      "/users/update-password",
-      updatePasswordData,
-    ),
+  const response = await axiosInstance.patch<IApiSuccessResponse<User>>(
+    "/users/update-password",
+    updatePasswordData,
   );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-    else {
-      throw new Error("Failed to update user data.");
-    }
-  }
 
   return response.data;
 }

@@ -1,9 +1,5 @@
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
-import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
-import type { AxiosError } from "axios";
-
-import { asyncTryCatch } from "@tubenote/utils";
-import axios from "axios";
+import type { IApiSuccessResponse } from "@tubenote/types";
 
 import { API_URL } from "@/shared/constants";
 import { axiosInstance } from "@/shared/lib";
@@ -17,24 +13,12 @@ import { axiosInstance } from "@/shared/lib";
 export async function registerUser(
   registerDto: IRegisterDto,
 ): Promise<IApiSuccessResponse<string>> {
-  const { data: responseData, error } = await asyncTryCatch(
-    axios.post<IApiSuccessResponse<string>>(
-      `${API_URL}/auth/register`,
-      registerDto,
-    ),
+  const response = await axiosInstance.post<IApiSuccessResponse<string>>(
+    `${API_URL}/auth/register`,
+    registerDto,
   );
 
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-    else {
-      throw new Error("Registration failed. Please try again.");
-    }
-  }
-
-  return responseData.data;
+  return response.data;
 }
 
 /**
@@ -46,23 +30,11 @@ export async function registerUser(
 export async function loginUser(
   loginDto: ILoginDto,
 ): Promise<IApiSuccessResponse<string>> {
-  const { data: responseData, error } = await asyncTryCatch(
-    axios.post<IApiSuccessResponse<string>>(`${API_URL}/auth/login`, loginDto, {
-      withCredentials: true,
-    }),
-  );
+  const response = await axiosInstance.post<IApiSuccessResponse<string>>(`${API_URL}/auth/login`, loginDto, {
+    withCredentials: true,
+  });
 
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-    else {
-      throw new Error("Login failed. Please try again.");
-    }
-  }
-
-  return responseData.data;
+  return response.data;
 }
 
 /**
@@ -75,21 +47,9 @@ export async function loginUser(
  * is complete.
  */
 export async function logoutUser(): Promise<IApiSuccessResponse<null>> {
-  const { data: responseData, error } = await asyncTryCatch(
-    axiosInstance.post<IApiSuccessResponse<null>>(`${API_URL}/auth/logout`),
-  );
+  const response = await axiosInstance.post<IApiSuccessResponse<null>>(`${API_URL}/auth/logout`);
 
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-    else {
-      throw new Error("Logout failed. Please try again.");
-    }
-  }
-
-  return responseData.data;
+  return response.data;
 }
 
 /**
@@ -102,25 +62,11 @@ export async function logoutUser(): Promise<IApiSuccessResponse<null>> {
 export async function refreshAccessToken(): Promise<
   IApiSuccessResponse<string>
 > {
-  const { data: responseData, error } = await asyncTryCatch(
-    axios.post<IApiSuccessResponse<string>>(
-      `${API_URL}/auth/refresh`,
-      {},
-      { withCredentials: true },
-    ),
+  const response = await axiosInstance.post<IApiSuccessResponse<string>>(
+    `${API_URL}/auth/refresh`,
   );
 
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-    else {
-      throw new Error("Refresh failed. Please try again.");
-    }
-  }
-
-  return responseData.data;
+  return response.data;
 }
 
 /**
@@ -132,23 +78,10 @@ export async function refreshAccessToken(): Promise<
 export async function exchangeOauthCodeForAuthTokens(
   code: string,
 ): Promise<IApiSuccessResponse<string>> {
-  const { data: responseData, error } = await asyncTryCatch(
-    axios.post<IApiSuccessResponse<string>>(
-      `${API_URL}/oauth/exchange-oauth-code`,
-      { code },
-      { withCredentials: true },
-    ),
+  const response = await axiosInstance.post<IApiSuccessResponse<string>>(
+    `${API_URL}/oauth/exchange-oauth-code`,
+    { code },
   );
 
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-    else {
-      throw new Error("Exchange failed. Please try again.");
-    }
-  }
-
-  return responseData.data;
+  return response.data;
 }
