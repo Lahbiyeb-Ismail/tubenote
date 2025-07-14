@@ -13,32 +13,32 @@ import { SidebarLogo, SidebarNav } from "./";
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { layout, actions } = useUIStore();
+  const { toggleSidebar, isSidebarOpen } = useUIStore();
 
   return (
     <aside
       className={`fixed left-0 top-0 flex h-full flex-col py-6 bg-white p-2 shadow-lg transition-all duration-300 ${
-        layout.isSidebarOpen ? "w-64" : "w-20"
+        isSidebarOpen ? "w-64" : "w-20"
       }`}
     >
       <div className="flex items-center justify-between mb-6">
         <Link href="/">
-          <SidebarLogo isOpen={layout.isSidebarOpen} />
+          <SidebarLogo isOpen={isSidebarOpen} />
         </Link>
-        <Button variant="ghost" size="icon" onClick={actions.toggleSidebar}>
+        <Button variant="ghost" size="icon" onClick={toggleSidebar}>
           <ChevronRight
-            className={`transition-transform duration-300 ${layout.isSidebarOpen ? "rotate-180" : ""}`}
+            className={`transition-transform duration-300 ${isSidebarOpen ? "rotate-180" : ""}`}
           />
         </Button>
       </div>
-      <SidebarNav isOpen={layout.isSidebarOpen} pathname={pathname} />
+      <SidebarNav isOpen={isSidebarOpen} pathname={pathname} />
       <ul
         className={`mt-auto border-t pt-3 space-y-2 transition-all duration-300 ${
-          layout.isSidebarOpen ? "px-4" : "px-0"
+          isSidebarOpen ? "px-4" : "px-0"
         }`}
       >
         <LogoutButton />
-        <UserProfile isOpen={layout.isSidebarOpen} />
+        <UserProfile isOpen={isSidebarOpen} />
       </ul>
     </aside>
   );

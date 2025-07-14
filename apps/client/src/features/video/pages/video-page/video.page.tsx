@@ -1,13 +1,11 @@
 "use client";
 
-import { useState } from "react";
-
 import { useGetNotesByVideoIdQuery } from "@/features/note/queries";
 import {
   VideoPlayer,
 } from "@/features/video/components";
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/shared/constants";
-import { usePaginationQuery, useSortByQueries } from "@/shared/hooks";
+import { useUrlState } from "@/shared/hooks";
 
 import { VideoNotes, VideoPageHeader, VideoPageSkeleton } from "./components";
 
@@ -16,12 +14,10 @@ interface IPageProps {
 }
 
 export function VideoPage({ videoId }: IPageProps) {
-  const { currentPage } = usePaginationQuery({
-    defaultPage: DEFAULT_PAGE,
-  });
-
-  const { sortBy, order } = useSortByQueries({});
-  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage] = useUrlState("page", DEFAULT_PAGE);
+  const [sortBy] = useUrlState("sortBy", "createdAt");
+  const [order] = useUrlState("order", "desc");
+  const [searchQuery, setSearchQuery] = useUrlState("searchQuery", "");
 
   const { data: notesResponse, isLoading: isNotesLoading } = useGetNotesByVideoIdQuery({
     videoId,
