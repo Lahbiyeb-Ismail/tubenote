@@ -24,11 +24,11 @@
     --color-secondary-700: #be185d; /* Darker pink (700-level shade) - pink-700 */
 
     /* Accent Colors */
-    --color-accent: 210 40% 96.1%; /* Conversion moments only - amber-500 */
-    --color-accent-50: #fffbeb; /* Light amber (50-level shade) - amber-50 */
-    --color-accent-100: #fef3c7; /* Light amber (100-level shade) - amber-100 */
-    --color-accent-500: #f59e0b; /* Medium amber (500-level shade) - amber-500 */
-    --color-accent-600: #d97706; /* Dark amber (600-level shade) - amber-600 */
+    /* --color-accent: 210 40% 96.1%; Conversion moments only - amber-500 */
+    /* --color-accent-50: #fffbeb; /* Light amber (50-level shade) - amber-50 */
+    /* --color-accent-100: #fef3c7; Light amber (100-level shade) - amber-100 */
+    /* --color-accent-500: #f59e0b; Medium amber (500-level shade) - amber-500 */
+    /* --color-accent-600: #d97706; Dark amber (600-level shade) - amber-600 */
 
     /* Background Colors */
     --color-background: #ffffff; /* Clean canvas for content - white */
@@ -61,6 +61,12 @@
     --color-border-focus: #6366f1; /* Active form states - indigo-500 */
 
     --radius: 0.5rem;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
   }
 }
 

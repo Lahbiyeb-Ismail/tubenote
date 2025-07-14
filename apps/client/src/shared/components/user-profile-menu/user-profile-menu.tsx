@@ -4,8 +4,7 @@ import { LayoutDashboard, LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage, Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, Separator } from "@/components/ui";
-import { useAuth } from "@/features/auth/hooks";
-import { useGetCurrentUserQuery } from "@/features/user/queries";
+import { useAuth, useSession } from "@/features/auth/hooks";
 
 import { UserProfileMenuSkeleton } from "./user-profile-menu-skeleton";
 
@@ -18,11 +17,11 @@ interface IProps {
 }
 
 export function UserProfileMenu({ variant = "desktop", closeMobileMenu }: IProps) {
-  const { data: user, isPending: isLoadingUser } = useGetCurrentUserQuery();
+  const { user, isLoading: isUserLoading } = useSession();
 
   const { logout, isLogoutLoading } = useAuth();
 
-  if (isLoadingUser || !user)
+  if (isUserLoading || !user)
     return <UserProfileMenuSkeleton />;
 
   const userProfilePicture = user.profilePicture ?? FALLBACK_PROFILE_IMAGE_URL;

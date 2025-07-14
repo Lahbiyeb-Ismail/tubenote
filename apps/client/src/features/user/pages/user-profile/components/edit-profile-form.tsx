@@ -9,8 +9,8 @@ import { useForm } from "react-hook-form";
 
 import { Form } from "@/components/ui";
 import { Button } from "@/components/ui/button";
+import { useSession } from "@/features/auth/hooks";
 import { useUser } from "@/features/user/hooks";
-import { useGetCurrentUserQuery } from "@/features/user/queries";
 import { FormInput } from "@/shared/components";
 
 interface IProps {
@@ -18,8 +18,8 @@ interface IProps {
 }
 
 export function EditProfileForm({ onCancel }: IProps) {
-  const { data: user } = useGetCurrentUserQuery();
   const { updateUser, isUpdatingUser } = useUser();
+  const { user } = useSession();
 
   const form = useForm<IUpdateUserDto>({
     resolver: zodResolver(updateUserSchema),

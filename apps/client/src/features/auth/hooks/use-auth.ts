@@ -1,11 +1,8 @@
 "use client";
 
 import { useLoginMutation, useLogoutMutation, useOauthTokenExchangeMutation, useRegisterMutation, useResetPasswordMutation, useSendForgotPasswordEmailMutation, useSendVerificationEmailMutation } from "../queries";
-import { useAuthStore } from "../store";
 
 export function useAuth() {
-  const { isAuthenticated, isLoading, error, clearError } = useAuthStore();
-
   const loginMutation = useLoginMutation();
   const registerMutation = useRegisterMutation();
   const logoutMutation = useLogoutMutation();
@@ -15,12 +12,6 @@ export function useAuth() {
   const oauthExchangeTokenMutation = useOauthTokenExchangeMutation();
 
   return {
-    // Auth state
-    isAuthenticated,
-    isLoading,
-    error,
-    clearError,
-
     // Login
     login: loginMutation.mutate,
     loginAsync: loginMutation.mutateAsync,

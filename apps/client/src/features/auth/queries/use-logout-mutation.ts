@@ -1,21 +1,14 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { useUserStore } from "@/features/user/store";
-
 import { logoutUser } from "../api";
-import { useAuthStore } from "../store";
 
 export function useLogoutMutation() {
+  const queryClient = useQueryClient();
   const router = useRouter();
-
-  const { userActions } = useUserStore();
-
-  const { setUnAuthenticated, setError } = useAuthStore();
-  const { setUser } = userActions;
 
   return useMutation({
     mutationFn: logoutUser,
@@ -29,8 +22,7 @@ export function useLogoutMutation() {
 
       toast.success(payload.message);
 
-      setUnAuthenticated();
-      setUser(undefined);
+      queryClient.setQueryData(["current-user"], null);
 
       // Redirect to Home page after successful logout
       router.push("/");
@@ -39,8 +31,6 @@ export function useLogoutMutation() {
       toast.dismiss("loadingToast");
 
       toast.error(error.message);
-
-      setError(error.message);
     },
   });
 }

@@ -5,13 +5,10 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 import { loginUser } from "../api";
-import { useAuthStore } from "../store";
 
 export function useLoginMutation() {
   const queryClient = useQueryClient();
   const router = useRouter();
-
-  const { setAuthenticated, setError } = useAuthStore();
 
   return useMutation({
     mutationFn: loginUser,
@@ -27,8 +24,6 @@ export function useLoginMutation() {
 
       toast.success(payload.message);
 
-      setAuthenticated();
-
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
 
       // Redirect to dashboard after successful login
@@ -36,8 +31,6 @@ export function useLoginMutation() {
     },
     onError: (error) => {
       toast.error(error.message);
-
-      setError(error.message);
     },
     onSettled: () => {
       // Clean up loading states regardless of outcome

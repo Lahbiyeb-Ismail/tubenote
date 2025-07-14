@@ -1,2 +1,2 @@
 export * from "./use-auth";
-export * from "./use-auth-error-handler";
+export * from "./use-session";

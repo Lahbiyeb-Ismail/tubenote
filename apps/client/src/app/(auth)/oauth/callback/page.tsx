@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { use, useEffect, useRef } from "react";
+import { use, useEffect } from "react";
 
-import { useAuth } from "@/features/auth/hooks";
+import { useOauthTokenExchangeMutation } from "@/features/auth/queries";
 
 interface IPageProps {
   searchParams: Promise<{ [key: string]: string | undefined }>;
@@ -12,43 +12,32 @@ interface IPageProps {
 export default function AuthCallback({ searchParams }: IPageProps) {
   const router = useRouter();
   const { code } = use(searchParams);
-
-  const {
-    oauthExchangeToken,
-    isOauthExchangeTokenLoading,
-    oauthExchangeTokenError,
-  } = useAuth();
-
-  const exchangeAttempted = useRef(false);
+  const { mutate, isPending, isSuccess, isError, error } = useOauthTokenExchangeMutation();
 
   useEffect(() => {
-    function exchangeOauthCodeWithAccessToken() {
-      if (exchangeAttempted.current)
-        return;
-
-      exchangeAttempted.current = true;
-
-      if (!code) {
-        setTimeout(() => router.push("/"), 2000);
-        return;
-      }
-
-      oauthExchangeToken(code);
-
-      if (oauthExchangeTokenError) {
-        setTimeout(() => router.push("/"), 2000);
-      }
+    if (code) {
+      mutate(code);
     }
+    else {
+      router.push("/"); // Or an error page
+    }
+  }, [code, mutate, router]);
 
-    exchangeOauthCodeWithAccessToken();
-  }, [code, router, oauthExchangeToken, oauthExchangeTokenError]);
+  useEffect(() => {
+    if (isSuccess) {
+      router.push("/dashboard");
+    }
+    if (isError) {
+      router.push("/"); // Or a login-failed page
+    }
+  }, [isSuccess, isError, router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="rounded-lg bg-white p-8 shadow-lg">
-        {isOauthExchangeTokenLoading && "Processing authentication..."}
-        {oauthExchangeTokenError && "Authentication failed. Please try again."}
-        {!oauthExchangeTokenError && "Authentication successful. Redirecting..."}
+        {isPending && "Processing authentication..."}
+        {isError && `Authentication failed: ${error.message}`}
+        {isSuccess && "Authentication successful. Redirecting..."}
       </div>
     </div>
   );

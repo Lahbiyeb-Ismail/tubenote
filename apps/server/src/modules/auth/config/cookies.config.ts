@@ -44,10 +44,12 @@ export const refreshTokenCookieConfig: CookieOptions = {
  * @property {boolean} httpOnly - Indicates if the cookie is accessible only through the HTTP protocol.
  * @property {boolean} sameSite - Indicates if the cookie is restricted to the same site.
  * @property {boolean} secure - Indicates if the cookie is only to be sent over HTTPS.
+ * @property {string | undefined} domain - Indicates the domain for which the cookie is valid.
  * This is true if the environment is production.
  */
 export const clearAuthTokenCookieConfig: CookieOptions = {
   httpOnly: true,
-  sameSite: "none",
+  sameSite: "lax",
   secure: envConfig.node_env === "production",
+  domain: new URL(envConfig.client.url).hostname,
 };
