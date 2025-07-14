@@ -1,29 +1,32 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+
+import { useAppToast } from "@/shared/hooks";
 
 import { updatePassword } from "../api";
 
 export function useUpdatePasswordMutation() {
   const queryClient = useQueryClient();
 
+  const { showErrorToast, showSuccessToast, showLoadingToast, dismissToast } = useAppToast({});
+
   return useMutation({
     mutationFn: updatePassword,
     onMutate: () => {
-      toast.loading("Updating password...", { id: "loadingToast" });
+      showLoadingToast({ message: "Updating password...", toastId: "loadingToast" });
     },
     onSuccess: (response) => {
       const { payload } = response;
 
-      toast.success(payload.message);
+      showSuccessToast({ message: payload.message || "Password updated successfully!" });
+      queryClient.invalidateQueries({ queryKey: ["logout-user"] });
     },
     onError: (error) => {
-      toast.error(error.message);
+      showErrorToast({ message: error.message || "Failed to update password." });
     },
     onSettled: () => {
-      toast.dismiss("loadingToast");
-      queryClient.invalidateQueries({ queryKey: ["logout-user"] });
+      dismissToast({ toastId: "loadingToast" });
     },
   });
 }

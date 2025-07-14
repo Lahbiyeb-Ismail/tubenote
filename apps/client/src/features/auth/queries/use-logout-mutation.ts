@@ -2,7 +2,8 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+
+import { useAppToast } from "@/shared/hooks";
 
 import { logoutUser } from "../api";
 
@@ -10,17 +11,17 @@ export function useLogoutMutation() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
+  const { showErrorToast, showSuccessToast, showLoadingToast, dismissToast } = useAppToast({});
+
   return useMutation({
     mutationFn: logoutUser,
     onMutate: () => {
-      toast.loading("Logging out...", { id: "loadingToast" });
+      showLoadingToast({ message: "Logging out...", toastId: "logging_out_loading" });
     },
     onSuccess: (responseData) => {
       const { payload } = responseData;
 
-      toast.dismiss("loadingToast");
-
-      toast.success(payload.message);
+      showSuccessToast({ message: payload.message || "Logout successful!" });
 
       queryClient.setQueryData(["current-user"], null);
 
@@ -28,9 +29,11 @@ export function useLogoutMutation() {
       router.push("/");
     },
     onError(error) {
-      toast.dismiss("loadingToast");
-
-      toast.error(error.message);
+      showErrorToast({ message: error.message || "Logout failed. Please try again." });
+    },
+    onSettled: () => {
+      // Clean up loading states regardless of outcome
+      dismissToast({ toastId: "logging_out_loading" });
     },
   });
 }

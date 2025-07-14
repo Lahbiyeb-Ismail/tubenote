@@ -2,13 +2,16 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+
+import { useAppToast } from "@/shared/hooks";
 
 import { loginUser } from "../api";
 
 export function useLoginMutation() {
   const queryClient = useQueryClient();
   const router = useRouter();
+
+  const { showErrorToast, showSuccessToast, showLoadingToast, dismissToast } = useAppToast({});
 
   return useMutation({
     mutationFn: loginUser,
@@ -17,12 +20,12 @@ export function useLoginMutation() {
       // Cancel any outgoing refetches
       queryClient.cancelQueries({ queryKey: ["current-user"] });
 
-      toast.loading("Logging in...", { id: "loadingToast" });
+      showLoadingToast({ message: "Logging in...", toastId: "logging_loading" });
     },
     onSuccess: async (responseData) => {
       const { payload } = responseData;
 
-      toast.success(payload.message);
+      showSuccessToast({ message: payload.message || "Login successful!" });
 
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
 
@@ -30,11 +33,11 @@ export function useLoginMutation() {
       router.push("/dashboard");
     },
     onError: (error) => {
-      toast.error(error.message);
+      showErrorToast({ message: error.message || "Login failed. Please try again." });
     },
     onSettled: () => {
       // Clean up loading states regardless of outcome
-      toast.dismiss("loadingToast");
+      dismissToast({ toastId: "logging_loading" });
     },
   });
 }
