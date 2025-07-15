@@ -34,7 +34,7 @@ const envSchema = z.object({
   REDIS_PASSWORD: z.string(),
   REDIS_USERNAME: z.string(),
   REDIS_HOST: z.string(),
-  REDIS_PORT: z.string(),
+  REDIS_PORT: z.string().regex(/^\d+$/, { message: "REDIS_PORT must be a number" }),
 });
 
 type EnvSchema = z.infer<typeof envSchema>;
