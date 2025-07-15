@@ -1,84 +1,129 @@
 import { injectable } from "inversify";
-import NodeCache from "node-cache";
+import Redis from "ioredis";
 
 import type { ICacheService } from "./cache.types";
 
-/**
- * Service for managing a cache using NodeCache.
- *
- * This service provides methods to set, get, delete, and flush cache entries,
- * as well as retrieve cache statistics.
- *
- * @implements {ICacheService}
- */
+import { envConfig } from "../../config";
+
 @injectable()
 export class CacheService implements ICacheService {
-  private cache: NodeCache;
+  private client: Redis;
 
   /**
-   * Initializes a new instance of the cache service.
-   * Default TTL is set to 500 seconds.
+   * Initializes the cache service with a Redis client connection.
+   *
+   * Sets up a Redis client using configuration from envConfig with the following settings:
+   * - Host and port from environment configuration
+   * - Password authentication if provided
+   * - Maximum of 3 retry attempts per request
+   * - Error event listener for logging Redis connection errors
+   *
+   * @throws {Error} If Redis connection fails or configuration is invalid
    */
   constructor() {
-    this.cache = new NodeCache({
-      stdTTL: 500, // Default TTL
-      checkperiod: 100, // Check for expired keys every 100 seconds
+    this.client = new Redis({
+      host: envConfig.redis.host,
+      port: +envConfig.redis.port,
+      password: envConfig.redis.password,
+      maxRetriesPerRequest: 3,
     });
+
+    this.client.on("error", err => console.error("Redis Client Error", err));
   }
 
   /**
-   * Sets a value in the cache with the specified key.
+   * Retrieves a value from the cache by key and deserializes it from JSON.
    *
-   * @template T - The type of the value to be cached.
-   * @param {string} key - The key under which the value should be stored.
-   * @param {T} value - The value to be stored in the cache.
-   * @param {number} [ttl] - Optional time-to-live for the cached item in seconds.
-   * @returns {boolean} - Returns true if the value was successfully set in the cache.
+   * @template T - The expected type of the cached value
+   * @param key - The cache key to retrieve the value for
+   * @returns A promise that resolves to the cached value of type T, or undefined if the key doesn't exist
+   *
    */
-  set<T>(key: string, value: T, ttl: number = 500): boolean {
-    return this.cache.set(key, value, ttl);
+  async get<T>(key: string): Promise<T | undefined> {
+    const data = await this.client.get(key);
+    if (data) {
+      return JSON.parse(data) as T;
+    }
+    return undefined;
   }
 
   /**
-   * Retrieves a value from the cache.
+   * Sets a value in the cache with an optional time-to-live (TTL).
    *
-   * @template T - The type of the value to retrieve.
-   * @param {string} key - The key of the value to retrieve.
-   * @returns {T | undefined} - The value associated with the key, or undefined if the key does not exist.
+   * @template T - The type of the value to be cached
+   * @param key - The cache key to store the value under
+   * @param value - The value to be cached (will be JSON serialized)
+   * @param ttl - Optional time-to-live in seconds. If provided, the key will expire after this duration
+   * @returns A promise that resolves to true if the operation was successful, false otherwise
+   *
    */
-  get<T>(key: string): T | undefined {
-    return this.cache.get<T>(key);
+  async set<T>(key: string, value: T, ttl?: number): Promise<boolean> {
+    const stringValue = JSON.stringify(value);
+    if (ttl) {
+      const result = await this.client.set(key, stringValue, "EX", ttl);
+      return result === "OK";
+    }
+    const result = await this.client.set(key, stringValue);
+    return result === "OK";
   }
 
   /**
-   * Deletes the cache entry for the specified key.
+   * Deletes a key from the cache.
    *
-   * @param {string} key - The key of the cache entry to delete.
-   * @returns {number} - The number of entries that were removed.
+   * @param key - The cache key to delete
+   * @returns A promise that resolves to the number of keys that were deleted (0 or 1)
    */
-  del(key: string): number {
-    return this.cache.del(key);
+  async del(key: string): Promise<number> {
+    return this.client.del(key);
   }
 
   /**
-   * Clears all the cached data.
+   * Flushes all data from the cache by removing all keys from all databases.
+   * This operation is irreversible and will permanently delete all cached data.
    *
-   * This method flushes all the entries in the cache, effectively clearing it.
-   * Use this method when you need to invalidate all cached data.
-   *
-   * @returns {void}
+   * @returns A promise that resolves when the flush operation is complete
+   * @throws {Error} If the cache client is not available or the flush operation fails
    */
-  flush(): void {
-    this.cache.flushAll();
+  async flush(): Promise<void> {
+    await this.client.flushall();
   }
 
   /**
-   * Retrieves the statistics of the cache.
+   * Retrieves Redis cache statistics including key count, hits, and misses.
    *
-   * @returns {NodeCache.Stats} An object containing various statistics about the cache,
-   * such as the number of keys, hits, misses, and other relevant metrics.
+   * This method fetches Redis server information and parses it to extract
+   * relevant cache performance metrics.
+   *
+   * @returns {Promise<any>} A promise that resolves to an object containing:
+   * - `keys`: Number of keys in database 0 (defaults to 0 if db0 doesn't exist)
+   * - `hits`: Total number of cache hits (keyspace_hits)
+   * - `misses`: Total number of cache misses (keyspace_misses)
+   *
+   * @example
+   * ```typescript
+   * const stats = await cacheService.getStats();
+   * console.log(`Cache has ${stats.keys} keys with ${stats.hits} hits and ${stats.misses} misses`);
+   * ```
    */
-  getStats(): NodeCache.Stats {
-    return this.cache.getStats();
+  async getStats(): Promise<any> {
+    const info = await this.client.info();
+    // Parse the info string to get relevant stats
+    const lines = info.split("\r\n");
+    const stats: Record<string, any> = {};
+
+    lines.forEach((line) => {
+      if (line && !line.startsWith("#")) {
+        const parts = line.split(":");
+        if (parts.length === 2) {
+          stats[parts[0]] = parts[1];
+        }
+      }
+    });
+
+    return {
+      keys: stats.db0 ? +stats.db0.split(",")[0].split("=")[1] : 0,
+      hits: +stats.keyspace_hits,
+      misses: +stats.keyspace_misses,
+    };
   }
 }
