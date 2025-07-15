@@ -5,10 +5,7 @@ import type {
   ISearchAndPaginationQueryDto,
   IUpdateNoteDto,
 } from "@tubenote/dtos";
-import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
-import type { AxiosError } from "axios";
-
-import { asyncTryCatch } from "@tubenote/utils";
+import type { IApiSuccessResponse } from "@tubenote/types";
 
 import { axiosInstance } from "@/shared/lib";
 
@@ -28,22 +25,10 @@ export async function createNote({
 }: { videoId: string; createNoteData: ICreateNoteDto }): Promise<
   IApiSuccessResponse<Note>
 > {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.post<IApiSuccessResponse<Note>>(
-      `/notes/${videoId}`,
-      createNoteData,
-    ),
+  const response = await axiosInstance.post<IApiSuccessResponse<Note>>(
+    `/notes/${videoId}`,
+    createNoteData,
   );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-
-    throw new Error("Failed to create note");
-  }
 
   return response.data;
 }
@@ -67,21 +52,9 @@ export async function getUserNotes(
 ): Promise<IApiSuccessResponse<Note[]>> {
   const { page, limit, order, sortBy, q } = queryOptions;
 
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.get<IApiSuccessResponse<Note[]>>(
-      `/notes?page=${page}&q=${q}&limit=${limit}&order=${order}&sortBy=${sortBy}`,
-    ),
+  const response = await axiosInstance.get<IApiSuccessResponse<Note[]>>(
+    `/notes?page=${page}&q=${q}&limit=${limit}&order=${order}&sortBy=${sortBy}`,
   );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-
-    throw new Error("Failed to fetch notes.");
-  }
 
   return response.data;
 }
@@ -96,19 +69,7 @@ export async function getUserNotes(
 export async function deleteNote(
   noteId: string,
 ): Promise<IApiSuccessResponse<null>> {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.delete<IApiSuccessResponse<null>>(`/notes/${noteId}`),
-  );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-
-    throw new Error("Failed to delete note.");
-  }
+  const response = await axiosInstance.delete<IApiSuccessResponse<null>>(`/notes/${noteId}`);
 
   return response.data;
 }
@@ -123,19 +84,7 @@ export async function deleteNote(
 export async function getNoteById(
   noteId: string,
 ): Promise<IApiSuccessResponse<Note>> {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.get<IApiSuccessResponse<Note>>(`/notes/${noteId}`),
-  );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-
-    throw new Error("Failed to fetch note.");
-  }
+  const response = await axiosInstance.get<IApiSuccessResponse<Note>>(`/notes/${noteId}`);
 
   return response.data;
 }
@@ -161,30 +110,19 @@ export async function getNoteById(
 export async function getNotesCountByVideoId(
   ytVideoId: string,
 ): Promise<IApiSuccessResponse<number>> {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.get<IApiSuccessResponse<number>>(`/notes/count/${ytVideoId}`),
-  );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-
-    throw new Error("Failed to fetch notes count for this youtube video.");
-  }
+  const response = await axiosInstance.get<IApiSuccessResponse<number>>(`/notes/count/${ytVideoId}`);
 
   return response.data;
 }
 
 /**
- * Updates a note by its ID.
+ * Updates an existing note with the provided data.
  *
- * @param noteId - The unique identifier of the note to update.
- * @param updateData - The data to update the note with, adhering to the `IUpdateNoteDto` interface.
- * @returns A promise that resolves to an API success response containing the updated note.
- * @throws An error if the request fails, including a specific error message if available.
+ * @param params - The parameters for updating the note
+ * @param params.noteId - The unique identifier of the note to update
+ * @param params.updateData - The data to update the note with, conforming to IUpdateNoteDto interface
+ * @returns A promise that resolves to an API success response containing the updated Note object
+ * @throws Will throw an error if the API request fails or if the note is not found
  */
 export async function updateNote({
   noteId,
@@ -192,22 +130,11 @@ export async function updateNote({
 }: { noteId: string; updateData: IUpdateNoteDto }): Promise<
   IApiSuccessResponse<Note>
 > {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.patch<IApiSuccessResponse<Note>>(
-      `/notes/${noteId}`,
-      updateData,
-    ),
+  const response = await
+  axiosInstance.patch<IApiSuccessResponse<Note>>(
+    `/notes/${noteId}`,
+    updateData,
   );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-
-    throw new Error("Failed to update note.");
-  }
 
   return response.data;
 }
@@ -223,21 +150,10 @@ export async function getNotesByVideoId(
   videoId: string,
   paginationQuery: IPaginationQueryDto,
 ): Promise<IApiSuccessResponse<Note[]>> {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.get<IApiSuccessResponse<Note[]>>(`/notes/video/${videoId}`, {
-      params: paginationQuery,
-    }),
-  );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      throw new Error(axiosError.response.data.payload.message);
-    }
-
-    throw new Error("Failed to fetch notes for video.");
-  }
+  const response = await
+  axiosInstance.get<IApiSuccessResponse<Note[]>>(`/notes/video/${videoId}`, {
+    params: paginationQuery,
+  });
 
   return response.data;
 }

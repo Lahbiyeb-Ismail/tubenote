@@ -2,8 +2,8 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
 
+import { useAppToast } from "@/shared/hooks";
 import { useDialogStore } from "@/stores";
 
 import { createNote } from "../api";
@@ -16,11 +16,13 @@ export function useCreateNoteMutation() {
   const { noteActions } = useNoteStore();
   const { closeDialog } = useDialogStore();
 
+  const { showErrorToast, showSuccessToast, showLoadingToast, dismissToast } = useAppToast({});
+
   return useMutation({
     mutationFn: createNote,
     onMutate: () => {
       // Show a loading toast
-      toast.loading("Saving note...", { id: "loadingToast" });
+      showLoadingToast({ message: "Saving note...", toastId: "loadingToast" });
 
       noteActions.setCreating(true);
     },
@@ -28,19 +30,20 @@ export function useCreateNoteMutation() {
       const { payload } = response;
 
       // Show success toast
-      toast.success(payload.message);
+      showSuccessToast({ message: payload.message || "Note created successfully!" });
+
       // Invalidate notes query to refetch notes
       queryClient.invalidateQueries({ queryKey: ["notes"] });
 
       router.push(`/notes/${payload.data.id}`);
     },
     onError: (error) => {
-      toast.error(error.message);
+      showErrorToast({ message: error.message || "Failed to create note." });
 
       noteActions.setError(error);
     },
     onSettled: () => {
-      toast.dismiss("loadingToast");
+      dismissToast({ toastId: "loadingToast" });
       noteActions.setCreating(false);
       closeDialog();
     },

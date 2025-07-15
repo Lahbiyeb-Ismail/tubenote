@@ -2,30 +2,33 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+
+import { useAppToast } from "@/shared/hooks";
 
 import { sendForgotPasswordEmail } from "../api";
 
 export function useSendForgotPasswordEmailMutation() {
   const router = useRouter();
 
+  const { showErrorToast, showSuccessToast, showLoadingToast, dismissToast } = useAppToast({});
+
   return useMutation({
     mutationFn: sendForgotPasswordEmail,
     onMutate: () => {
-      toast.loading("Sending...", { id: "loadingToast" });
+      showLoadingToast({ message: "Sending...", toastId: "loadingToast" });
     },
     onSuccess: async (response) => {
       const { payload } = response;
 
-      toast.dismiss("loadingToast");
-
-      toast.success(payload.message);
+      showSuccessToast({ message: payload.message || "Password reset email sent!" });
 
       router.push("/forgot-password/done");
     },
     onError: (error) => {
-      toast.dismiss("loadingToast");
-      toast.error(error.message);
+      showErrorToast({ message: error.message || "Failed to send password reset email." });
+    },
+    onSettled: () => {
+      dismissToast({ toastId: "loadingToast" });
     },
   });
 }

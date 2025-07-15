@@ -2,32 +2,35 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+
+import { useAppToast } from "@/shared/hooks";
 
 import { resetPassword } from "../api";
 
 export function useResetPasswordMutation() {
   const router = useRouter();
 
+  const { showErrorToast, showSuccessToast, showLoadingToast, dismissToast } = useAppToast({});
+
   return useMutation({
     mutationFn: resetPassword,
     onMutate: () => {
-      toast.loading("Sending...", { id: "loadingToast" });
+      showLoadingToast({ message: "Sending...", toastId: "loadingToast" });
     },
     onSuccess: async (response) => {
       const { payload } = response;
 
-      toast.dismiss("loadingToast");
-
-      toast.success(payload.message);
+      showSuccessToast({ message: payload.message || "Password reset successful!" });
 
       // Redirect to login page with success message
       router.push("/login?resetSuccess=true");
     },
     onError: (error) => {
-      toast.dismiss("loadingToast");
-
-      toast.error(error.message);
+      showErrorToast({ message: error.message || "Password reset failed. Please try again." });
+    },
+    onSettled: () => {
+      // Clean up loading states regardless of outcome
+      dismissToast({ toastId: "loadingToast" });
     },
   });
 }

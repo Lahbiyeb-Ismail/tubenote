@@ -1,7 +1,4 @@
-import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
-import type { AxiosError } from "axios";
-
-import { asyncTryCatch } from "@tubenote/utils";
+import type { IApiSuccessResponse } from "@tubenote/types";
 
 import { axiosInstance } from "@/shared/lib";
 
@@ -14,57 +11,35 @@ import { axiosInstance } from "@/shared/lib";
 export async function sendForgotPasswordEmail(
   email: string,
 ): Promise<IApiSuccessResponse<null>> {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.post<IApiSuccessResponse<null>>("/auth/forgot-password", {
-      email,
-    }),
-  );
+  const response = await axiosInstance.post<IApiSuccessResponse<null>>("/auth/forgot-password", {
+    email,
+  });
 
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      const { status, data } = axiosError.response;
-      throw new Error(`Error ${status}: ${data.payload.message}`);
-    }
-    else {
-      throw new Error("Network error: Unable to send password reset email.");
-    }
-  }
   return response.data;
 }
 
 /**
- * Resets the user's password using the provided token.
+ * Resets a user's password using a password reset token.
  *
- * @param password - The new password to set for the user.
- * @param token - The token used to authorize the password reset.
- * @returns A promise that resolves to an object containing a message.
+ * @param params - The parameters for resetting the password
+ * @param params.token - The password reset token received via email or other secure channel
+ * @param params.password - The new password to set for the user account
+ *
+ * @returns A promise that resolves to an API success response with null data
+ *
+ * @throws Will throw an error if the token is invalid, expired, or if the API request fails
+ *
  */
 export async function resetPassword({
   token,
   password,
 }: { token: string; password: string }): Promise<IApiSuccessResponse<null>> {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.post<IApiSuccessResponse<null>>(
-      `/auth/reset-password/${token}`,
-      {
-        password,
-      },
-    ),
+  const response = await axiosInstance.post<IApiSuccessResponse<null>>(
+    `/auth/reset-password/${token}`,
+    {
+      password,
+    },
   );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      const { status, data } = axiosError.response;
-      throw new Error(`Error ${status}: ${data.payload.message}`);
-    }
-    else {
-      throw new Error("Network error: Unable to reset password.");
-    }
-  }
 
   return response.data;
 }
@@ -78,23 +53,9 @@ export async function resetPassword({
 export async function verifyPasswordResetToken(
   token: string,
 ): Promise<IApiSuccessResponse<null>> {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.get<IApiSuccessResponse<null>>(
-      `/auth/reset-password/${token}/verify`,
-    ),
+  const response = await axiosInstance.get<IApiSuccessResponse<null>>(
+    `/auth/reset-password/${token}/verify`,
   );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    if (axiosError.response) {
-      const { status, data } = axiosError.response;
-      throw new Error(`Error ${status}: ${data.payload.message}`);
-    }
-    else {
-      throw new Error("Network error: Unable to verify password reset token.");
-    }
-  }
 
   return response.data;
 }

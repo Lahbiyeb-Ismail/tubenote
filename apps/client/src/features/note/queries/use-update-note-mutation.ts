@@ -2,8 +2,8 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
 
+import { useAppToast } from "@/shared/hooks";
 import { useDialogStore } from "@/stores";
 
 import { updateNote } from "../api";
@@ -16,10 +16,12 @@ export function useUpdateNoteMutation() {
   const { closeDialog } = useDialogStore();
   const { noteActions } = useNoteStore();
 
+  const { showErrorToast, showSuccessToast, showLoadingToast, dismissToast } = useAppToast({});
+
   return useMutation({
     mutationFn: updateNote,
     onMutate: () => {
-      toast.loading("Updating note...", { id: "loadingToast" });
+      showLoadingToast({ message: "Updating note...", toastId: "loadingToast" });
 
       noteActions.setUpdating(true);
     },
@@ -27,7 +29,7 @@ export function useUpdateNoteMutation() {
       const { payload } = response;
       const noteId = payload.data.id;
 
-      toast.success(payload.message);
+      showSuccessToast({ message: payload.message || "Note updated successfully!" });
 
       queryClient.invalidateQueries({
         queryKey: ["note", noteId],
@@ -40,12 +42,12 @@ export function useUpdateNoteMutation() {
       router.push(`/notes/${noteId}`);
     },
     onError: (error) => {
-      toast.error(error.message);
+      showErrorToast({ message: error.message || "Failed to update note." });
 
       noteActions.setError(error);
     },
     onSettled: () => {
-      toast.dismiss("loadingToast");
+      dismissToast({ toastId: "loadingToast" });
       noteActions.setUpdating(false);
       closeDialog();
     },

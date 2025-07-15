@@ -1,9 +1,6 @@
 import type { Video } from "@tubenote/db";
 import type { ISearchAndPaginationQueryDto } from "@tubenote/dtos";
-import type { IApiErrorResponse, IApiSuccessResponse } from "@tubenote/types";
-import type { AxiosError } from "axios";
-
-import { asyncTryCatch } from "@tubenote/utils";
+import type { IApiSuccessResponse } from "@tubenote/types";
 
 import { axiosInstance } from "@/shared/lib";
 import { extractVideoId } from "@/shared/utils";
@@ -22,18 +19,7 @@ export async function saveVideoData(
 ): Promise<IApiSuccessResponse<Video>> {
   const youtubeVideoId = extractVideoId(youtubeVideoUrl);
 
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.post<IApiSuccessResponse<Video>>(`/videos/${youtubeVideoId}`),
-  );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    throw new Error(
-      axiosError.response?.data.payload.message
-      || "An error occurred while fetching video data.",
-    );
-  }
+  const response = await axiosInstance.post<IApiSuccessResponse<Video>>(`/videos/${youtubeVideoId}`);
 
   return response.data;
 }
@@ -50,20 +36,9 @@ export async function getUserVideos(
 ): Promise<IApiSuccessResponse<VideoWithCount[]>> {
   const { page, limit, order, sortBy, q } = searchParams;
 
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.get<IApiSuccessResponse<VideoWithCount[]>>(
-      `/videos?page=${page}&limit=${limit}&order=${order}&sortBy=${sortBy}&q=${q}`,
-    ),
+  const response = await axiosInstance.get<IApiSuccessResponse<VideoWithCount[]>>(
+    `/videos?page=${page}&limit=${limit}&order=${order}&sortBy=${sortBy}&q=${q}`,
   );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    throw new Error(
-      axiosError.response?.data.payload.message
-      || "An error occurred while fetching user videos.",
-    );
-  }
 
   return response.data;
 }
@@ -78,18 +53,7 @@ export async function getUserVideos(
 export async function getVideoById(
   videoId: string,
 ): Promise<IApiSuccessResponse<Video>> {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.get<IApiSuccessResponse<Video>>(`/videos/${videoId}`),
-  );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    throw new Error(
-      axiosError.response?.data.payload.message
-      || "An error occurred while fetching the video by ID.",
-    );
-  }
+  const response = await axiosInstance.get<IApiSuccessResponse<Video>>(`/videos/${videoId}`);
 
   return response.data;
 }
@@ -104,29 +68,9 @@ export async function getVideoById(
  * @throws {Error} Throws an error if the API request fails, with the error message from the server
  *                 or a default message if no specific error message is available
  *
- * @example
- * ```typescript
- * try {
- *   const response = await getUserVideosCount();
- *   console.log(`User has ${response.payload} videos`);
- * } catch (error) {
- *   console.error('Failed to fetch video count:', error.message);
- * }
- * ```
  */
 export async function getUserVideosCount(): Promise<IApiSuccessResponse<number>> {
-  const { data: response, error } = await asyncTryCatch(
-    axiosInstance.get<IApiSuccessResponse<number>>("/videos/count"),
-  );
-
-  if (error) {
-    const axiosError = error as AxiosError<IApiErrorResponse>;
-
-    throw new Error(
-      axiosError.response?.data.payload.message
-      || "An error occurred while fetching videos count.",
-    );
-  }
+  const response = await axiosInstance.get<IApiSuccessResponse<number>>("/videos/count");
 
   return response.data;
 }

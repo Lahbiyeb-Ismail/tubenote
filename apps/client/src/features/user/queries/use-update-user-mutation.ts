@@ -1,26 +1,29 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+
+import { useAppToast } from "@/shared/hooks";
 
 import { updateCurrentUser } from "../api";
 
 export function useUpdateUserMutation() {
   const queryClient = useQueryClient();
 
+  const { showErrorToast, showSuccessToast, showLoadingToast, dismissToast } = useAppToast({});
+
   return useMutation({
     mutationFn: updateCurrentUser,
     onMutate: () => {
-      toast.loading("Updating user...", { id: "loadingToast" });
+      showLoadingToast({ message: "Updating user...", toastId: "loadingToast" });
     },
     onSuccess: (response) => {
       const { payload } = response;
 
-      toast.success(payload.message);
+      showSuccessToast({ message: payload.message || "User updated successfully!" });
     },
     onError(error) {
-      toast.error(error.message);
+      showErrorToast({ message: error.message || "Failed to update user." });
     },
     onSettled: () => {
-      toast.dismiss("loadingToast");
+      dismissToast({ toastId: "loadingToast" });
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
     },
   });
