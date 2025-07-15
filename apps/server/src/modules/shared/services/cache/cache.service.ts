@@ -1,6 +1,9 @@
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import Redis from "ioredis";
 
+import { TYPES } from "@/config/inversify/types";
+
+import type { ILoggerService } from "../logger";
 import type { ICacheService } from "./cache.types";
 
 import { envConfig } from "../../config";
@@ -20,7 +23,7 @@ export class CacheService implements ICacheService {
    *
    * @throws {Error} If Redis connection fails or configuration is invalid
    */
-  constructor() {
+  constructor(@inject(TYPES.LoggerService) private logger: ILoggerService) {
     this.client = new Redis({
       host: envConfig.redis.host,
       port: +envConfig.redis.port,
@@ -40,10 +43,18 @@ export class CacheService implements ICacheService {
    *
    */
   async get<T>(key: string): Promise<T | undefined> {
+    this.logger.debug(`Cache: Retrieving value for key: ${key}`);
+
+    if (!key) {
+      this.logger.warn("Cache: Attempted to get value for an empty key");
+      return undefined;
+    }
+
     const data = await this.client.get(key);
     if (data) {
       return JSON.parse(data) as T;
     }
+
     return undefined;
   }
 
@@ -58,6 +69,13 @@ export class CacheService implements ICacheService {
    *
    */
   async set<T>(key: string, value: T, ttl?: number): Promise<boolean> {
+    this.logger.debug(`Cache: Setting value for key: ${key} with TTL: ${ttl}`);
+
+    if (typeof value === "undefined" || value === null) {
+      this.logger.warn(`Cache: Attempted to set undefined or null value for key: ${key}`);
+      return false;
+    }
+
     const stringValue = JSON.stringify(value);
     if (ttl) {
       const result = await this.client.set(key, stringValue, "EX", ttl);
@@ -74,6 +92,13 @@ export class CacheService implements ICacheService {
    * @returns A promise that resolves to the number of keys that were deleted (0 or 1)
    */
   async del(key: string): Promise<number> {
+    this.logger.debug(`Cache: Deleting key: ${key}`);
+
+    if (!key) {
+      this.logger.warn("Cache: Attempted to delete an empty key");
+      return 0;
+    }
+
     return this.client.del(key);
   }
 
@@ -85,6 +110,8 @@ export class CacheService implements ICacheService {
    * @throws {Error} If the cache client is not available or the flush operation fails
    */
   async flush(): Promise<void> {
+    this.logger.debug("Cache: Flushing all keys from the cache");
+
     await this.client.flushall();
   }
 
