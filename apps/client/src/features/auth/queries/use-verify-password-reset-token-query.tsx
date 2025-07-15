@@ -17,5 +17,7 @@ export function useVerifyPasswordResetTokenQuery(token: string) {
     refetchOnReconnect: false,
     // Don't retry on failure
     retry: false,
+    // Throw an error if the query fails
+    throwOnError: true,
   });
 }

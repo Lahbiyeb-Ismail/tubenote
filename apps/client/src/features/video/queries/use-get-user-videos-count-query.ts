@@ -12,5 +12,6 @@ export function useGetUserVideosCountQuery() {
     // The data is considered fresh for 5 minutes, after which it will be refetched.
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
+    throwOnError: true,
   });
 }
