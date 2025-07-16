@@ -31,6 +31,10 @@ const envSchema = z.object({
   SMTP_USER: z.string(),
   SMTP_PASSWORD: z.string(),
   EMAIL_FROM: z.string(),
+  REDIS_PASSWORD: z.string(),
+  REDIS_USERNAME: z.string(),
+  REDIS_HOST: z.string(),
+  REDIS_PORT: z.string().regex(/^\d+$/, { message: "REDIS_PORT must be a number" }),
 });
 
 type EnvSchema = z.infer<typeof envSchema>;
@@ -38,13 +42,14 @@ type EnvSchema = z.infer<typeof envSchema>;
 function validateEnv(env: NodeJS.ProcessEnv): EnvSchema {
   try {
     return envSchema.parse(env);
-  } catch (error) {
+  }
+  catch (error) {
     if (error instanceof z.ZodError) {
       const errorMessages = error.issues.map(
-        (issue) => `${issue.path.join(".")}: ${issue.message}`
+        issue => `${issue.path.join(".")}: ${issue.message}`,
       );
       throw new Error(
-        `Environment variable validation error: \n${errorMessages.join("\n")}`
+        `Environment variable validation error: \n${errorMessages.join("\n")}`,
       );
     }
     throw error;
@@ -108,5 +113,11 @@ export const envConfig = {
       },
     },
     from: validatedEnv.EMAIL_FROM,
+  },
+  redis: {
+    username: validatedEnv.REDIS_USERNAME,
+    password: validatedEnv.REDIS_PASSWORD,
+    host: validatedEnv.REDIS_HOST,
+    port: validatedEnv.REDIS_PORT,
   },
 } as const;

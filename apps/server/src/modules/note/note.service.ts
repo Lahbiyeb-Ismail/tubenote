@@ -10,7 +10,7 @@ import type { IPaginatedData } from "@tubenote/types";
 import { ERROR_MESSAGES, NotFoundError } from "@tubenote/api-errors";
 import { inject, injectable } from "inversify";
 
-import type { IPrismaService } from "@/modules/shared/services";
+import type { ICacheService, IPrismaService } from "@/modules/shared/services";
 
 import { TYPES } from "@/config/inversify/types";
 
@@ -33,6 +33,7 @@ export class NoteService implements INoteService {
   constructor(
     @inject(TYPES.NoteRepository) private _noteRepository: INoteRepository,
     @inject(TYPES.PrismaService) private _prismaService: IPrismaService,
+    @inject(TYPES.CacheService) private _cacheService: ICacheService,
   ) {}
 
   /**
@@ -50,11 +51,20 @@ export class NoteService implements INoteService {
     noteId: string,
     tx?: Prisma.TransactionClient,
   ): Promise<Note> {
+    const cacheKey = `note:${userId}:${noteId}`;
+    const cachedNote = await this._cacheService.get<Note>(cacheKey);
+
+    if (cachedNote) {
+      return cachedNote;
+    }
+
     const note = await this._noteRepository.find(userId, noteId, tx);
 
     if (!note) {
       throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
+
+    await this._cacheService.set(cacheKey, note, 60 * 60); // Cache for 1 hour
 
     return note;
   }
@@ -75,7 +85,12 @@ export class NoteService implements INoteService {
     data: ICreateNoteDto,
     tx?: Prisma.TransactionClient,
   ): Promise<Note> {
-    return await this._noteRepository.create(userId, videoId, data, tx);
+    const note = await this._noteRepository.create(userId, videoId, data, tx);
+
+    // Invalidate relevant caches
+    await this._cacheService.del(`noteCount:${userId}:${videoId}`); // Invalidate note count for video
+
+    return note;
   }
 
   /**
@@ -94,9 +109,12 @@ export class NoteService implements INoteService {
     data: IUpdateNoteDto,
   ): Promise<Note> {
     return await this._prismaService.transaction(async (tx) => {
-      await this.findNote(userId, noteId, tx);
+      const updatedNote = await this._noteRepository.update(userId, noteId, data, tx);
 
-      return this._noteRepository.update(userId, noteId, data, tx);
+      // Invalidate relevant caches
+      await this._cacheService.del(`note:${userId}:${noteId}`);
+
+      return updatedNote;
     });
   }
 
@@ -114,9 +132,13 @@ export class NoteService implements INoteService {
    */
   async deleteNote(userId: string, noteId: string): Promise<Note> {
     return await this._prismaService.transaction(async (tx) => {
-      await this.findNote(userId, noteId, tx);
+      const deletedNote = await this._noteRepository.delete(userId, noteId, tx);
 
-      return this._noteRepository.delete(userId, noteId, tx);
+      // Invalidate relevant caches
+      await this._cacheService.del(`note:${userId}:${noteId}`);
+      await this._cacheService.del(`noteCount:${userId}:${deletedNote.videoId}`);
+
+      return deletedNote;
     });
   }
 
@@ -190,6 +212,17 @@ export class NoteService implements INoteService {
    * ```
    */
   async fetchNotesCountByVideoId(userId: string, ytVideoId: string): Promise<number> {
-    return this._noteRepository.countByYtVideoId(userId, ytVideoId);
+    const cacheKey = `noteCount:${userId}:${ytVideoId}`;
+    const cachedCount = await this._cacheService.get<number>(cacheKey);
+
+    if (cachedCount !== undefined) {
+      return cachedCount;
+    }
+
+    const count = await this._noteRepository.countByYtVideoId(userId, ytVideoId);
+
+    await this._cacheService.set(cacheKey, count, 60 * 60); // Cache for 1 hour
+
+    return count;
   }
 }
