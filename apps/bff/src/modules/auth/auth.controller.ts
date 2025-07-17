@@ -32,11 +32,7 @@ export class AuthController {
   }
 
   async logout(req: Request, res: Response) {
-    const sessionId = req.cookies.session_id;
-
-    if (!sessionId) {
-      return res.status(400).json({ message: "You must be logged in to log out" });
-    }
+    const sessionId = req.sessionId;
 
     try {
       const data = await authService.logout(sessionId);
@@ -50,11 +46,7 @@ export class AuthController {
   }
 
   async refresh(req: Request, res: Response) {
-    const sessionId = req.cookies.session_id;
-
-    if (!sessionId) {
-      return res.status(400).json({ message: "You must be logged in to refresh" });
-    }
+    const sessionId = req.sessionId;
 
     try {
       const { sessionId: newSessionId, data } = await authService.refresh(sessionId);
