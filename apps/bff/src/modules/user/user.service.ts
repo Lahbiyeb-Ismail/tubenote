@@ -1,8 +1,6 @@
 import type { IApiSuccessResponse } from "@tubenote/types";
 
-import axios from "axios";
-
-import { envConfig } from "@/config";
+import { axiosInstance } from "@/lib/axios";
 import { redisSessionService } from "@/services";
 
 export class UserService {
@@ -13,9 +11,10 @@ export class UserService {
       throw new Error("You must be logged in to view your profile");
     }
 
-    const userRes = await axios.get<IApiSuccessResponse<any>>(`${envConfig.backend_api.url}/users/me`, {
+    const userRes = await axiosInstance.get<IApiSuccessResponse<any>>(`/users/me`, {
       headers: {
-        Authorization: `Bearer ${sessionData.accessToken}`,
+        "Authorization": `Bearer ${sessionData.accessToken}`,
+        "X-Session-ID": sessionId,
       },
       withCredentials: true,
     });

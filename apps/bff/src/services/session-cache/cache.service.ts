@@ -55,19 +55,6 @@ export class RedisSessionService implements IRedisSessionService {
     return result === "OK";
   }
 
-  async updateSession(sessionId: string, data: ISessionData, ttl: number): Promise<boolean> {
-    console.log(`Cache: Updating session for ID: ${sessionId}`);
-
-    if (!sessionId || !data) {
-      console.warn("Cache: Attempted to update session with invalid ID or data");
-      return false;
-    }
-
-    const result = await this.client.set(sessionId, JSON.stringify(data), "EX", ttl);
-
-    return result === "OK";
-  }
-
   /**
    * Retrieves session data from Redis cache by session ID.
    *

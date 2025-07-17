@@ -4,18 +4,25 @@ import type { IApiSuccessResponse } from "@tubenote/types";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 
+import type { ISessionData } from "@/services";
+
 import { envConfig } from "@/config";
+import { axiosInstance } from "@/lib/axios";
 import { redisSessionService } from "@/services";
 
 export class AuthService {
+  async getSession(sessionId: string): Promise<ISessionData | null> {
+    return redisSessionService.getSession(sessionId);
+  }
+
   async register(credentials: IRegisterDto): Promise<IApiSuccessResponse<string>> {
-    const registerRes = await axios.post<IApiSuccessResponse<string>>(`${envConfig.backend_api.url}/auth/register`, credentials);
+    const registerRes = await axiosInstance.post<IApiSuccessResponse<string>>(`/auth/register`, credentials);
 
     return registerRes.data;
   }
 
   async login(credentials: ILoginDto): Promise<{ sessionId: string; data: IApiSuccessResponse<null> }> {
-    const loginRes = await axios.post<IApiSuccessResponse<{ accessToken: string; refreshToken: string }>>(`${envConfig.backend_api.url}/auth/login`, credentials);
+    const loginRes = await axiosInstance.post<IApiSuccessResponse<{ accessToken: string; refreshToken: string }>>(`/auth/login`, credentials);
 
     const authTokens = loginRes.data.payload.data;
 
@@ -40,9 +47,10 @@ export class AuthService {
     }
 
     // Call backend API to revoke refresh token
-    const logoutRes = await axios.post<IApiSuccessResponse<null>>(`${envConfig.backend_api.url}/auth/logout`, { refreshToken: sessionData.refreshToken }, {
+    const logoutRes = await axiosInstance.post<IApiSuccessResponse<null>>(`${envConfig.backend_api.url}/auth/logout`, { refreshToken: sessionData.refreshToken }, {
       headers: {
-        Authorization: `Bearer ${sessionData.accessToken}`,
+        "Authorization": `Bearer ${sessionData.accessToken}`,
+        "X-Session-ID": sessionId,
       },
       withCredentials: true,
     });
@@ -69,7 +77,7 @@ export class AuthService {
 
     const newAuthTokens = refreshRes.data.payload.data;
 
-    await redisSessionService.updateSession(sessionId, newAuthTokens, 60 * 60 * 24 * 1000); // 24 hours
+    await redisSessionService.createSession(sessionId, newAuthTokens, 60 * 60 * 24 * 1000); // 24 hours
 
     return { sessionId, data: {
       ...refreshRes.data,

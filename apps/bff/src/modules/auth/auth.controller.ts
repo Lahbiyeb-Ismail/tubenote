@@ -51,6 +51,8 @@ export class AuthController {
     try {
       const { sessionId: newSessionId, data } = await authService.refresh(sessionId);
 
+      console.log("AccessToken Refreshed Successfully:", newSessionId);
+
       res.cookie("session_id", newSessionId, sessionIdCookieConfig);
       res.status(data.statusCode).json(data);
     }
