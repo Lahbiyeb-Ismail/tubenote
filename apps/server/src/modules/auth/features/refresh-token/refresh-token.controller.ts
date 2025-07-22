@@ -7,14 +7,6 @@ import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
 import { TYPES } from "@/config/inversify/types";
-import {
-  accessTokenCookieConfig,
-  refreshTokenCookieConfig,
-} from "@/modules/auth/config";
-import {
-  ACCESS_TOKEN_NAME,
-  REFRESH_TOKEN_NAME,
-} from "@/modules/auth/constants";
 
 import type {
   IRefreshTokenController,
@@ -39,8 +31,12 @@ export class RefreshTokenController implements IRefreshTokenController {
    * @throws {UnauthorizedError} If the refresh token is not provided.
    */
   async refreshAuthTokens(req: TypedRequest, res: Response): Promise<void> {
-    const cookies = req.cookies;
+    const authHeader = req.headers.authorization;
     const clientContext = req.clientContext;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
+    }
 
     const deviceId = [
       req.headers["user-agent"],
@@ -50,13 +46,13 @@ export class RefreshTokenController implements IRefreshTokenController {
 
     const ipAddress = req.clientIp as string;
 
-    const userRefreshToken = cookies[REFRESH_TOKEN_NAME];
+    const userRefreshToken = authHeader.split(" ")[1];
 
     if (!userRefreshToken || typeof userRefreshToken !== "string") {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    const { accessToken, refreshToken }
+    const authTokens
       = await this._refreshTokenService.refreshTokens(
         userRefreshToken,
         deviceId,
@@ -64,7 +60,13 @@ export class RefreshTokenController implements IRefreshTokenController {
         clientContext,
       );
 
-    res.cookie(ACCESS_TOKEN_NAME, accessToken, accessTokenCookieConfig);
-    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
+    const formattedRes = this._responseFormatter.formatSuccessResponse({
+      responseOptions: {
+        message: "Tokens refreshed successfully",
+        data: authTokens,
+      },
+    });
+
+    res.status(formattedRes.statusCode).json(formattedRes);
   }
 }
