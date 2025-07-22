@@ -7,14 +7,6 @@ import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
 import { TYPES } from "@/config/inversify/types";
-import {
-  accessTokenCookieConfig,
-  refreshTokenCookieConfig,
-} from "@/modules/auth/config";
-import {
-  ACCESS_TOKEN_NAME,
-  REFRESH_TOKEN_NAME,
-} from "@/modules/auth/constants";
 import { envConfig } from "@/modules/shared/config";
 
 import type { IOAuthAuthorizationCodeDto, IOauthLoginDto } from "./dtos";
@@ -103,19 +95,16 @@ export class OAuthController implements IOAuthController {
   ): Promise<void> {
     const { code } = req.body;
 
-    const { accessToken, refreshToken }
+    const authTokens
       = await this._oauthService.exchangeOauthCodeForTokens(code);
 
     const formattedResponse
-      = this._responseFormatter.formatSuccessResponse<string>({
+      = this._responseFormatter.formatSuccessResponse<{ accessToken: string; refreshToken: string }>({
         responseOptions: {
           message: "Access token exchanged successfully.",
-          data: accessToken,
+          data: authTokens,
         },
       });
-
-    res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
-    res.cookie(ACCESS_TOKEN_NAME, accessToken, accessTokenCookieConfig);
 
     res.status(formattedResponse.statusCode).json(formattedResponse);
   }
