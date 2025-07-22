@@ -1,37 +1,28 @@
 // Import reflect-metadata to enable decorators
 import "reflect-metadata";
 
-// Import the container from inversify
-import { container } from "@/config/inversify/container";
-import { TYPES } from "@/config/inversify/types";
-
 // Import service interfaces directly
 import type {
   IAuthController,
   IAuthService,
   IJwtService,
-} from "@/modules/auth";
-
-import type { ILocalAuthController, ILocalAuthService } from "@/modules/auth";
-
-import type { IOAuthController, IOAuthService } from "@/modules/auth";
-
-import type {
+  ILocalAuthController,
+  ILocalAuthService,
+  IOAuthController,
+  IOAuthService,
   IRefreshTokenController,
   IRefreshTokenService,
-} from "@/modules/auth";
-
-import type {
+  IResetPasswordController,
+  IResetPasswordService,
   IVerifyEmailController,
   IVerifyEmailRepository,
   IVerifyEmailService,
 } from "@/modules/auth";
-
 import type {
-  IResetPasswordController,
-  IResetPasswordService,
-} from "@/modules/auth";
-
+  INoteController,
+  INoteRepository,
+  INoteService,
+} from "@/modules/note";
 import type {
   ICacheService,
   ICryptoService,
@@ -41,7 +32,6 @@ import type {
   IRateLimitService,
   IResponseFormatter,
 } from "@/modules/shared/services";
-
 import type {
   IUserController,
   IUserRepository,
@@ -51,105 +41,103 @@ import type {
   IAccountRepository,
   IAccountService,
 } from "@/modules/user/features/account/account.types";
-
-import type {
-  INoteController,
-  INoteRepository,
-  INoteService,
-} from "@/modules/note";
 import type {
   IVideoController,
   IVideoRepository,
   IVideoService,
 } from "@/modules/video";
 
+// Import the container from inversify
+import { container } from "@/config/inversify/container";
+import { TYPES } from "@/config/inversify/types";
+
 // Initialize the services using the container
 // We're initializing these here to ensure they're created before being used
 // This helps break circular dependencies
 export const authService = container.get<IAuthService>(TYPES.AuthService);
 export const authController = container.get<IAuthController>(
-  TYPES.AuthController
+  TYPES.AuthController,
 );
 
 export const localAuthService = container.get<ILocalAuthService>(
-  TYPES.LocalAuthService
+  TYPES.LocalAuthService,
 );
 export const localAuthController = container.get<ILocalAuthController>(
-  TYPES.LocalAuthController
+  TYPES.LocalAuthController,
 );
 
 export const oauthService = container.get<IOAuthService>(TYPES.OAuthService);
 export const oauthController = container.get<IOAuthController>(
-  TYPES.OAuthController
+  TYPES.OAuthController,
 );
 
 export const refreshTokenService = container.get<IRefreshTokenService>(
-  TYPES.RefreshTokenService
+  TYPES.RefreshTokenService,
 );
 export const refreshTokenController = container.get<IRefreshTokenController>(
-  TYPES.RefreshTokenController
+  TYPES.RefreshTokenController,
 );
 
 export const verifyEmailController = container.get<IVerifyEmailController>(
-  TYPES.VerifyEmailController
+  TYPES.VerifyEmailController,
 );
 export const verifyEmailService = container.get<IVerifyEmailService>(
-  TYPES.VerifyEmailService
+  TYPES.VerifyEmailService,
 );
 export const verifyEmailRepository = container.get<IVerifyEmailRepository>(
-  TYPES.VerifyEmailRepository
+  TYPES.VerifyEmailRepository,
 );
 
 export const resetPasswordService = container.get<IResetPasswordService>(
-  TYPES.ResetPasswordService
+  TYPES.ResetPasswordService,
 );
 export const resetPasswordController = container.get<IResetPasswordController>(
-  TYPES.ResetPasswordController
+  TYPES.ResetPasswordController,
 );
 
 export const userController = container.get<IUserController>(
-  TYPES.UserController
+  TYPES.UserController,
 );
 export const userService = container.get<IUserService>(TYPES.UserService);
 export const userRepository = container.get<IUserRepository>(
-  TYPES.UserRepository
+  TYPES.UserRepository,
 );
 
 export const accountService = container.get<IAccountService>(
-  TYPES.AccountService
+  TYPES.AccountService,
 );
 export const accountRepository = container.get<IAccountRepository>(
-  TYPES.AccountRepository
+  TYPES.AccountRepository,
 );
 
 export const videoController = container.get<IVideoController>(
-  TYPES.VideoController
+  TYPES.VideoController,
 );
 export const videoService = container.get<IVideoService>(TYPES.VideoService);
 export const videoRepository = container.get<IVideoRepository>(
-  TYPES.VideoRepository
+  TYPES.VideoRepository,
 );
 
 export const noteController = container.get<INoteController>(
-  TYPES.NoteController
+  TYPES.NoteController,
 );
 export const noteService = container.get<INoteService>(TYPES.NoteService);
 export const noteRepository = container.get<INoteRepository>(
-  TYPES.NoteRepository
+  TYPES.NoteRepository,
 );
 
 export const cacheService = container.get<ICacheService>(TYPES.CacheService);
 export const rateLimitService = container.get<IRateLimitService>(
-  TYPES.RateLimitService
+  TYPES.RateLimitService,
 );
 export const prismaService = container.get<IPrismaService>(TYPES.PrismaService);
 export const loggerService = container.get<ILoggerService>(TYPES.LoggerService);
 export const cryptoService = container.get<ICryptoService>(TYPES.CryptoService);
 export const responseFormatter = container.get<IResponseFormatter>(
-  TYPES.ResponseFormatter
+  TYPES.ResponseFormatter,
 );
 export const mailSenderService = container.get<IMailSenderService>(
-  TYPES.MailSenderService
+  TYPES.MailSenderService,
 );
 
 export const jwtService = container.get<IJwtService>(TYPES.JwtService);
