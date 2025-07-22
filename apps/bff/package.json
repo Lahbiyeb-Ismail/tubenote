@@ -11,19 +11,22 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@tubenote/api-errors": "workspace:*",
     "axios": "^1.10.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "express": "^4.21.2",
+    "express-async-errors": "^3.1.1",
     "helmet": "^8.0.0",
+    "http-status": "^1.8.1",
     "ioredis": "^5.6.1",
     "uuid": "^11.1.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@tubenote/dtos": "workspace:*",
     "@tubenote/config-typescript": "workspace:*",
+    "@tubenote/dtos": "workspace:*",
     "@tubenote/types": "workspace:*",
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
