@@ -1,20 +1,20 @@
-import { TYPES } from "@/config/inversify/types";
 import { inject, injectable } from "inversify";
 import jwt from "jsonwebtoken";
 
+import type { IAuthResponseDto } from "@/modules/auth/dtos";
 import type { ILoggerService } from "@/modules/shared/services";
 import type { JwtPayload } from "@/modules/shared/types";
 
+import { TYPES } from "@/config/inversify/types";
 import {
   ACCESS_TOKEN_EXPIRES_IN,
   ACCESS_TOKEN_SECRET,
   REFRESH_TOKEN_EXPIRES_IN,
   REFRESH_TOKEN_SECRET,
 } from "@/modules/auth/constants";
-import type { IAuthResponseDto } from "@/modules/auth/dtos";
 
 import type { ISignTokenDto, IVerifyTokenDto } from "./dtos";
-import type { IJwtService, IVerifyResult } from "./jwt.types";
+import type { IJwtService } from "./jwt.types";
 
 @injectable()
 export class JwtService implements IJwtService {
@@ -22,26 +22,20 @@ export class JwtService implements IJwtService {
   private readonly MIN_TOKEN_VALIDITY_MS: number = 3 * 60 * 1000; // 3 minutes
 
   constructor(
-    @inject(TYPES.LoggerService) private readonly _loggerService: ILoggerService
+    @inject(TYPES.LoggerService) private readonly _loggerService: ILoggerService,
   ) {}
 
-  verify(verifyTokenDto: IVerifyTokenDto): IVerifyResult {
+  verify(verifyTokenDto: IVerifyTokenDto): JwtPayload | Error {
     const { token, secret } = verifyTokenDto;
 
     try {
       const jwtPayload = jwt.verify(token, secret) as JwtPayload;
 
-      return {
-        jwtPayload,
-        isError: false,
-        error: null,
-      };
-    } catch (err) {
-      return {
-        jwtPayload: null,
-        isError: true,
-        error: err instanceof Error ? err : new Error(String(err)),
-      };
+      return jwtPayload;
+    }
+    catch (err) {
+      this._loggerService.error(`JWT verification failed: ${err}`);
+      throw new Error(`JWT verification failed: ${err}`);
     }
   }
 
@@ -104,8 +98,8 @@ export class JwtService implements IJwtService {
     if (timeRemainingMs < this.MIN_TOKEN_VALIDITY_MS) {
       this._loggerService.warn(
         `Token is expiring soon. Remaining validity: ${Math.floor(
-          timeRemainingMs / 1000
-        )} seconds.`
+          timeRemainingMs / 1000,
+        )} seconds.`,
       );
 
       return true;
