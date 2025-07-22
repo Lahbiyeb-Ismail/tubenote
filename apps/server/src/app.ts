@@ -40,7 +40,7 @@ app.use(express.urlencoded({ extended: true }));
 // Configure CORS middleware
 app.use(
   cors({
-    origin: ["http://localhost:3000"], // Specify the allowed origin(s) for requests
+    origin: [envConfig.client.url, envConfig.bff_api.url], // Specify the allowed origin(s) for requests
     credentials: true, // Allow sending cookies along with the requests
   }),
 );
