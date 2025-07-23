@@ -1,11 +1,11 @@
-import Redis from "ioredis";
+import { RedisCacheService } from "@tubenote/redis-cache";
 
-import type { IRedisSessionService, ISessionData } from "./cache.types";
+import type { IRedisSessionService, ISessionData } from "./session-cache.types";
 
 import { envConfig } from "../../config";
 
-export class RedisSessionService implements IRedisSessionService {
-  private client: Redis;
+export class SessionCacheService implements IRedisSessionService {
+  private redisCache: RedisCacheService;
 
   /**
    * Initializes the cache service with a Redis client connection.
@@ -19,14 +19,12 @@ export class RedisSessionService implements IRedisSessionService {
    * @throws {Error} If Redis connection fails or configuration is invalid
    */
   constructor() {
-    this.client = new Redis({
+    this.redisCache = new RedisCacheService({
       host: envConfig.redis.host,
       port: +envConfig.redis.port,
       password: envConfig.redis.password,
       maxRetriesPerRequest: 3,
     });
-
-    this.client.on("error", err => console.error("Redis Client Error", err));
   }
 
   /**
@@ -44,15 +42,7 @@ export class RedisSessionService implements IRedisSessionService {
    * - Uses Redis SET command with EX flag for automatic expiration
    */
   async createSession(sessionId: string, data: ISessionData, ttl: number): Promise<boolean> {
-    console.log(`Cache: Creating session for ID: ${sessionId} with TTL: ${ttl}`);
-
-    if (!sessionId || !data) {
-      console.warn("Cache: Attempted to create session with invalid ID or data");
-      return false;
-    }
-
-    const result = await this.client.set(sessionId, JSON.stringify(data), "EX", ttl);
-    return result === "OK";
+    return this.redisCache.set(sessionId, data, ttl);
   }
 
   /**
@@ -67,17 +57,8 @@ export class RedisSessionService implements IRedisSessionService {
    * - Parses the stored JSON string back into an object
    * - Logs a warning when attempting to retrieve with an empty session ID
    */
-  async getSession(sessionId: string): Promise<ISessionData | null> {
-    console.log(`Cache: Retrieving session for ID: ${sessionId}`);
-
-    if (!sessionId) {
-      console.warn("Cache: Attempted to retrieve session with empty ID");
-      return null;
-    }
-
-    const data = await this.client.get(sessionId);
-
-    return data ? JSON.parse(data) : null;
+  async getSession(sessionId: string): Promise<ISessionData | undefined> {
+    return this.redisCache.get(sessionId);
   }
 
   /**
@@ -98,13 +79,6 @@ export class RedisSessionService implements IRedisSessionService {
    * ```
    */
   async deleteSession(sessionId: string): Promise<number> {
-    console.log(`Cache: Deleting session for ID: ${sessionId}`);
-
-    if (!sessionId) {
-      console.warn("Cache: Attempted to delete a session with empty ID");
-      return 0;
-    }
-
-    return this.client.del(sessionId);
+    return this.redisCache.del(sessionId);
   }
 }

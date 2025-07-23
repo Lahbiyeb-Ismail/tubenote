@@ -28,9 +28,9 @@ export interface IRedisSessionService {
    * Retrieves session data from Redis by session ID.
    *
    * @param sessionId - Unique identifier for the session to retrieve
-   * @returns Promise that resolves to session data if found, null if session doesn't exist or has expired
+   * @returns Promise that resolves to session data if found, undefined if session doesn't exist or has expired
    */
-  getSession: (sessionId: string) => Promise<ISessionData | null>;
+  getSession: (sessionId: string) => Promise<ISessionData | undefined>;
 
   /**
    * Deletes a session from Redis by session ID.
