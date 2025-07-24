@@ -17,4 +17,30 @@ export class UserController {
       res.status(error.status || 500).json(error);
     }
   }
+
+  async updateCurrentUser(req: Request, res: Response) {
+    const sessionId = req.sessionId;
+
+    try {
+      const data = await userService.updateUser(sessionId, req.body);
+
+      res.status(data.statusCode).json(data);
+    }
+    catch (error: any) {
+      res.status(error.status || 500).json(error);
+    }
+  }
+
+  async updateUserPassword(req: Request, res: Response) {
+    const sessionId = req.sessionId;
+
+    try {
+      const data = await userService.updatePassword(sessionId, req.body);
+
+      res.status(data.statusCode).json(data);
+    }
+    catch (error: any) {
+      res.status(error.status || 500).json(error);
+    }
+  }
 }

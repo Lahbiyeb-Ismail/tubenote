@@ -7,6 +7,10 @@ import { UserController } from "./user.controller";
 const userRoutes: Router = Router();
 const userController = new UserController();
 
-userRoutes.get("/me", validateSessionMiddleware, userController.getCurrentUser);
+userRoutes.use(validateSessionMiddleware);
+
+userRoutes.route("/me").get(userController.getCurrentUser).patch(userController.updateCurrentUser);
+
+userRoutes.route("/update-password").patch(userController.updateUserPassword);
 
 export { userRoutes };
