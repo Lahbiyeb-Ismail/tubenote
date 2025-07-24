@@ -5,11 +5,11 @@ import { UnauthorizedError } from "@tubenote/api-errors";
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
-import type { ACCESS_TOKEN_NAME, clearAuthTokenCookieConfig, type IAuthControllerOptions, IAuthService, REFRESH_TOKEN_NAME } from "@/modules/auth";
+import type { ACCESS_TOKEN_NAME, clearAuthTokenCookieConfig, IAuthService, REFRESH_TOKEN_NAME } from "@/modules/auth";
 import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
-import { AuthController } from "@/modules/auth";
+import type { AuthController } from "../auth.controller";
 
 describe("authController", () => {
   let controller: AuthController;
@@ -18,11 +18,6 @@ describe("authController", () => {
 
   const req = mock<TypedRequest>();
   const res = mock<Response>();
-
-  const controllerOptions: IAuthControllerOptions = {
-    authService,
-    responseFormatter,
-  };
 
   const MOCK_USER_ID = "user-id-123";
   const MOCK_REFRESH_TOKEN_VALUE = "refresh-token-123";
@@ -34,12 +29,7 @@ describe("authController", () => {
     // Create a fresh mock for authService.logoutUser.
     authService.logoutUser.mockResolvedValue(undefined);
 
-    // Reset singleton instance for isolation.
-    // @ts-expect-error: Resetting private static property for testing purposes.
-    AuthController._instance = undefined;
-
     // Initialize the controller instance.
-    controller = AuthController.getInstance(controllerOptions);
 
     req.cookies = {
       [REFRESH_TOKEN_NAME]: MOCK_REFRESH_TOKEN_VALUE,
@@ -51,19 +41,7 @@ describe("authController", () => {
     res.sendStatus.mockReturnThis();
     res.json.mockReturnThis();
     res.status.mockReturnThis();
-  });
-
-  describe("singleton Behavior", () => {
-    it("should create a new instance if none exists", () => {
-      const instance = AuthController.getInstance(controllerOptions);
-      expect(instance).toBeInstanceOf(AuthController);
-    });
-
-    it("should return the same instance on subsequent calls", () => {
-      const instance1 = AuthController.getInstance(controllerOptions);
-      const instance2 = AuthController.getInstance(controllerOptions);
-      expect(instance1).toBe(instance2);
-    });
+    res.header.mockReturnThis();
   });
 
   describe("logout", () => {

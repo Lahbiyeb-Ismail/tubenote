@@ -6,7 +6,7 @@ export default {
       useESM: true,
     },
   },
-  moduleNameMapping: {
+  moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
     "^@/config/(.*)$": "<rootDir>/src/config/$1",
     "^@/middlewares/(.*)$": "<rootDir>/src/middlewares/$1",

@@ -1,35 +1,17 @@
 import { mock, mockReset } from "jest-mock-extended";
 
+import type { ILogoutDto, IRefreshTokenService } from "@/modules/auth";
+
 import {
   AuthService,
-  type ILogoutDto,
-  type IRefreshTokenService,
+
 } from "@/modules/auth";
 
-describe("AuthService", () => {
+describe("authService", () => {
   const refreshTokenService = mock<IRefreshTokenService>();
-
-  const options = { refreshTokenService };
 
   beforeEach(() => {
     mockReset(refreshTokenService);
-
-    // Reset singleton instance before each test to ensure a clean state.
-    // @ts-ignore: resetting the private _instance for testing purposes
-    AuthService._instance = undefined;
-  });
-
-  describe("Singleton behavior", () => {
-    it("should create a new instance if none exists", () => {
-      const instance = AuthService.getInstance(options);
-      expect(instance).toBeInstanceOf(AuthService);
-    });
-
-    it("should return the same instance on subsequent calls", () => {
-      const instance1 = AuthService.getInstance(options);
-      const instance2 = AuthService.getInstance(options);
-      expect(instance1).toBe(instance2);
-    });
   });
 
   describe("logoutUser", () => {
@@ -41,7 +23,7 @@ describe("AuthService", () => {
     };
 
     beforeEach(() => {
-      authService = AuthService.getInstance(options);
+      authService = new AuthService(refreshTokenService);
     });
 
     it("should successfully logout a user when valid userId and refreshToken are provided", async () => {
@@ -51,7 +33,7 @@ describe("AuthService", () => {
 
       expect(refreshTokenService.deleteToken).toHaveBeenCalledWith(
         validLogoutDto.userId,
-        validLogoutDto.refreshToken
+        validLogoutDto.refreshToken,
       );
 
       expect(refreshTokenService.deleteToken).toHaveBeenCalledTimes(1);
@@ -61,16 +43,16 @@ describe("AuthService", () => {
       const errorMessage = "Delete tokens failure";
 
       refreshTokenService.deleteToken.mockRejectedValue(
-        new Error(errorMessage)
+        new Error(errorMessage),
       );
 
       await expect(authService.logoutUser(validLogoutDto)).rejects.toThrow(
-        errorMessage
+        errorMessage,
       );
 
       expect(refreshTokenService.deleteToken).toHaveBeenCalledWith(
         validLogoutDto.userId,
-        validLogoutDto.refreshToken
+        validLogoutDto.refreshToken,
       );
     });
   });

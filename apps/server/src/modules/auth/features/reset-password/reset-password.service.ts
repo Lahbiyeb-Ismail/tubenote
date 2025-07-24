@@ -37,12 +37,12 @@ export class ResetPasswordService implements IResetPasswordService {
 
     const resetToken = this._cryptoService.generateSecureToken();
 
-    const setResult = this._cacheService.set<{ userId: string }>(resetToken, {
+    await this._cacheService.set<{ userId: string }>(resetToken, {
       userId: user.id,
     });
 
     this._loggerService.info(
-      `Reset token generated for user ${user.id} and set in cache: ${setResult}`,
+      `Reset token generated for user ${user.id} and set in cache`,
     );
 
     await this._mailSenderService.sendResetPasswordEmail(
@@ -54,9 +54,10 @@ export class ResetPasswordService implements IResetPasswordService {
   async resetPassword(token: string, password: string): Promise<void> {
     const userId = await this.verifyResetToken(token);
 
-    const deleteResult = this._cacheService.del(token);
+    await this._cacheService.del(token);
+
     this._loggerService.warn(
-      `Remove reset token ${token} from cache: ${deleteResult}`,
+      `Remove reset token ${token} from cache`,
     );
 
     await this._userService.resetUserPassword(userId, password);
@@ -65,7 +66,7 @@ export class ResetPasswordService implements IResetPasswordService {
   }
 
   async verifyResetToken(token: string): Promise<string> {
-    const tokenData = this._cacheService.get<{ userId: string }>(token);
+    const tokenData = await this._cacheService.get<{ userId: string }>(token);
 
     if (
       !tokenData

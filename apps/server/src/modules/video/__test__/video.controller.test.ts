@@ -21,13 +21,7 @@ describe("videoController", () => {
   const responseFormatter = mock<IResponseFormatter>();
   const videoService = mock<IVideoService>();
 
-  const videoController = VideoController.getInstance({
-    responseFormatter,
-    videoService,
-  });
-
-  const mockUserId = "user_id_123";
-  const mockVideoId = "video_id_456";
+  const videoController = new VideoController(responseFormatter, videoService);
 
   const mockRequest
     = mock<TypedRequest<EmptyRecord, EmptyRecord, IPaginationQueryDto>>();

@@ -1,28 +1,19 @@
 import type { IPaginatedData, IPaginationMeta } from "@tubenote/types";
 
-import { ResponseFormatter } from "../response-formatter.service";
-
 import type {
   IResponseOptions,
   ISanitizationOptions,
   ISanitizationRule,
 } from "../response-formatter.types";
 
-describe("ResponseFormatter", () => {
+import { ResponseFormatter } from "../response-formatter.service";
+
+describe("responseFormatter", () => {
   let responseFormatter: ResponseFormatter;
 
   beforeEach(() => {
     // Get a fresh instance for each test
-    responseFormatter = ResponseFormatter.getInstance();
-  });
-
-  describe("getInstance", () => {
-    it("should return a singleton instance", () => {
-      const instance1 = ResponseFormatter.getInstance();
-      const instance2 = ResponseFormatter.getInstance();
-
-      expect(instance1).toBe(instance2);
-    });
+    responseFormatter = new ResponseFormatter();
   });
 
   describe("sanitizeData", () => {
@@ -143,11 +134,11 @@ describe("ResponseFormatter", () => {
 
       expect(responseFormatter.isFieldSensitive("password", rules)).toBe(true);
       expect(responseFormatter.isFieldSensitive("userPassword", rules)).toBe(
-        true
+        true,
       );
       expect(responseFormatter.isFieldSensitive("PASSWORD", rules)).toBe(true);
       expect(responseFormatter.isFieldSensitive("exactMatch", rules)).toBe(
-        true
+        true,
       );
     });
 
@@ -160,7 +151,7 @@ describe("ResponseFormatter", () => {
       expect(responseFormatter.isFieldSensitive("username", rules)).toBe(false);
       expect(responseFormatter.isFieldSensitive("pass", rules)).toBe(false);
       expect(responseFormatter.isFieldSensitive("notExactMatch", rules)).toBe(
-        false
+        false,
       );
     });
 
@@ -585,7 +576,7 @@ describe("ResponseFormatter", () => {
   });
 
   // Integration tests that combine multiple methods
-  describe("Integration tests", () => {
+  describe("integration tests", () => {
     it("should correctly format and sanitize a paginated response", () => {
       // Setup test data
       const page = 2;
@@ -633,10 +624,10 @@ describe("ResponseFormatter", () => {
 
       // Verify sensitive data was removed
       expect(
-        response.payload.data && response.payload.data[0]?.password
+        response.payload.data && response.payload.data[0]?.password,
       ).toBeUndefined();
       expect(
-        response.payload.data && response.payload.data[1]?.password
+        response.payload.data && response.payload.data[1]?.password,
       ).toBeUndefined();
     });
 

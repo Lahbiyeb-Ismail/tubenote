@@ -6,7 +6,6 @@ import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
 import type { IAuthResponseDto } from "@/modules/auth/dtos";
-import type { IResponseFormatter } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
 import {
@@ -19,19 +18,15 @@ import {
   REFRESH_TOKEN_NAME,
 } from "@/modules/auth/constants";
 
-import type { IRefreshTokenService } from "../refresh-token.types";
-
 import { RefreshTokenController } from "../refresh-token.controller";
 
 describe("refreshTokenController", () => {
   // Mock the refresh token service
-  const refreshTokenService = mock<IRefreshTokenService>();
-  const responseFormatter = mock<IResponseFormatter>();
 
-  const refreshTokenController = RefreshTokenController.getInstance({
+  const refreshTokenController = new RefreshTokenController(
     refreshTokenService,
     responseFormatter,
-  });
+  );
 
   const req = mock<TypedRequest>();
   const res = mock<Response>();

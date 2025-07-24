@@ -1,11 +1,13 @@
 import type { Request, Response } from "express";
+
 import httpStatus from "http-status";
 import request from "supertest";
 
 import app from "@/app";
+
 import { oauthController } from "../oauth.module";
 
-describe("OAuth Routes", () => {
+describe("oAuth Routes", () => {
   const mockResponse = {
     message: "Access token exchanged successfully",
     accessToken: "mocked-access-token",
@@ -20,12 +22,12 @@ describe("OAuth Routes", () => {
     (oauthController.exchangeOauthCodeForTokens as jest.Mock) = jest.fn();
     (
       oauthController.exchangeOauthCodeForTokens as jest.Mock
-    ).mockImplementation(async (_req: Request, res: Response) => {
+    ).mockImplementation(async (_req, res) => {
       res.json(mockResponse);
     });
   });
 
-  describe("POST /api/v1/oauth/exchange-oauth-code", () => {
+  describe("pOST /api/v1/oauth/exchange-oauth-code", () => {
     it("should exchange a valid OAuth code for tokens and return an access token", async () => {
       // Arrange: Provide a valid request body.
       const validBody = { code: "valid-oauth-code" };
@@ -79,10 +81,9 @@ describe("OAuth Routes", () => {
     it.each(disallowedMethods)(
       "should not accept %s method",
       async (method) => {
-        await (request(app) as any)
-          [method]("/api/v1/oauth/exchange-oauth-code")
+        await (request(app) as any)[method]("/api/v1/oauth/exchange-oauth-code")
           .expect(httpStatus.NOT_FOUND);
-      }
+      },
     );
   });
 });

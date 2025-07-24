@@ -10,9 +10,17 @@ import type { TypedRequest } from "@/modules/shared/types";
 import { envConfig } from "@/modules/shared/config";
 
 import type { IOAuthAuthorizationCodeDto, IOauthLoginDto } from "../dtos";
-import type { IOAuthControllerOptions, IOAuthService } from "../oauth.types";
+import type { IOAuthService } from "../oauth.types";
 
 import { OAuthController } from "../oauth.controller";
+
+const mockUserDeviceId = "test-device-id";
+const mockUserIpAddress = "127.0.0.1";
+
+const mockClientContext = {
+  clientType: "web",
+  userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+};
 
 describe("oAuthController", () => {
   let controller: OAuthController;
@@ -23,11 +31,6 @@ describe("oAuthController", () => {
   const oauthCodeReq = mock<TypedRequest<IOAuthAuthorizationCodeDto>>();
 
   const res = mock<Response>();
-
-  const controllerOptions: IOAuthControllerOptions = {
-    oauthService,
-    responseFormatter,
-  };
 
   const authResponse: IAuthResponseDto = {
     accessToken: "test-access-token",
@@ -49,27 +52,10 @@ describe("oAuthController", () => {
     res.redirect.mockReturnThis();
     res.json.mockReturnThis();
 
-    // Reset the singleton instance for isolation.
-    // @ts-expect-error: resetting private static property for testing purposes.
-    OAuthController._instance = undefined;
-
     // Create an instance of the OAuthController.
-    controller = OAuthController.getInstance(controllerOptions);
+    controller = new OAuthController(oauthService, responseFormatter);
 
     jest.clearAllMocks();
-  });
-
-  describe("singleton Behavior", () => {
-    it("should create a new instance if none exists", () => {
-      const instance = OAuthController.getInstance(controllerOptions);
-      expect(instance).toBeInstanceOf(OAuthController);
-    });
-
-    it("should return the same instance on subsequent calls", () => {
-      const instance1 = OAuthController.getInstance(controllerOptions);
-      const instance2 = OAuthController.getInstance(controllerOptions);
-      expect(instance1).toBe(instance2);
-    });
   });
 
   describe("oauthLogin", () => {
@@ -97,9 +83,11 @@ describe("oAuthController", () => {
       );
     });
 
-    it("should handle OAuth login successfully by setting refresh token cookie and redirecting with temporary code", async () => {
+    it("should handle OAuth login successfully by redirecting with temporary code", async () => {
       // Arrange: simulate a valid authenticated request.
       oauthLoginreq.user = oauthLoginDto;
+
+      oauthService.handleOAuthLogin.mockResolvedValue("temporary-oauth-code");
 
       // Act
       await controller.oauthLogin(oauthLoginreq, res);
@@ -108,6 +96,9 @@ describe("oAuthController", () => {
       expect(oauthService.handleOAuthLogin).toHaveBeenCalledWith(
         oauthLoginDto.createUserDto,
         oauthLoginDto.createAccountDto,
+        mockUserDeviceId,
+        mockUserIpAddress,
+        mockClientContext,
       );
 
       // Verify that the user is redirected with a temporary code.

@@ -2,11 +2,11 @@ import type { Video, YoutubeVideoData } from "@tubenote/types";
 
 import type { IPrismaService } from "@/modules/shared/services";
 
-import { VideoService } from "../video.service";
-
 import type { IVideoRepository, IVideoService } from "../video.types";
 
-describe("VideoService methods tests cases", () => {
+import { VideoService } from "../video.service";
+
+describe("videoService methods tests cases", () => {
   let videoService: IVideoService;
   let mockVideoRepository: IVideoRepository;
 
@@ -142,6 +142,10 @@ describe("VideoService methods tests cases", () => {
 
   const mockVideosCount = mockVideos.length;
 
+  beforeAll(() => {
+    jest.clearAllMocks();
+  });
+
   beforeEach(() => {
     mockVideoRepository = {
       create: jest.fn().mockResolvedValue(mockNewVideo),
@@ -155,33 +159,29 @@ describe("VideoService methods tests cases", () => {
       transaction: jest.fn(),
     };
 
-    videoService = VideoService.getInstance({
-      videoRepository: mockVideoRepository,
-      prismaService: mockPrismaService as IPrismaService,
-    });
+    videoService = new VideoService(
+      mockVideoRepository,
+      mockPrismaService as IPrismaService,
+    );
   });
 
-  beforeAll(() => {
-    jest.clearAllMocks();
-  });
-
-  describe("VideoService - getYoutubeVideoData", () => {
+  describe("videoService - getYoutubeVideoData", () => {
     it("should throw proper error for network failures", async () => {
-      jest.spyOn(global, "fetch").mockRejectedValue(new Error("Network error"));
+      jest.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network error"));
 
       await expect(
-        videoService.getYoutubeVideoData("valid_id")
+        videoService.getYoutubeVideoData("valid_id"),
       ).rejects.toThrow("Network error");
     });
 
     it("should handle malformed YouTube API response", async () => {
-      jest.spyOn(global, "fetch").mockResolvedValue({
+      jest.spyOn(globalThis, "fetch").mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ items: [{}] }), // Missing required fields
       } as Response);
 
       await expect(
-        videoService.getYoutubeVideoData("valid_id")
+        videoService.getYoutubeVideoData("valid_id"),
       ).rejects.toThrow(Error);
     });
   });
@@ -416,7 +416,7 @@ describe("VideoService methods tests cases", () => {
   //   });
 
   //   it("should handle YouTube API errors gracefully", async () => {
-  //     jest.spyOn(global, "fetch").mockResolvedValue({
+  //     jest.spyOn(globalThis, "fetch").mockResolvedValue({
   //       ok: false,
   //       status: 403,
   //     } as Response);
@@ -427,7 +427,7 @@ describe("VideoService methods tests cases", () => {
   //   });
 
   //   it("should handle empty YouTube API response", async () => {
-  //     jest.spyOn(global, "fetch").mockResolvedValue({
+  //     jest.spyOn(globalThis, "fetch").mockResolvedValue({
   //       ok: true,
   //       json: () => Promise.resolve({ items: [] }),
   //     } as Response);
@@ -456,7 +456,7 @@ describe("VideoService methods tests cases", () => {
   //   });
 
   //   it("should handle invalid YouTube API response structure", async () => {
-  //     jest.spyOn(global, "fetch").mockResolvedValue({
+  //     jest.spyOn(globalThis, "fetch").mockResolvedValue({
   //       ok: true,
   //       json: () => Promise.resolve({ invalid: "response" }),
   //     } as Response);

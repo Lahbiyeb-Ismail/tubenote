@@ -1,19 +1,20 @@
-import { type Response } from "express";
+import type { IParamTokenDto } from "@tubenote/dtos";
+import type { IApiSuccessResponse } from "@tubenote/types";
+import type { Response } from "express";
+
 import httpStatus from "http-status";
 import { mock, mockReset } from "jest-mock-extended";
 
 import type { IResponseFormatter } from "@/modules/shared/services";
 import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 
-import type { IParamTokenDto } from "@tubenote/dtos";
-import type { IApiSuccessResponse } from "@tubenote/types";
-import { VerifyEmailController } from "../verify-email.controller";
 import type {
-  IVerifyEmailControllerOptions,
   IVerifyEmailService,
 } from "../verify-email.types";
 
-describe("VerifyEmailController", () => {
+import { VerifyEmailController } from "../verify-email.controller";
+
+describe("verifyEmailController", () => {
   let controller: VerifyEmailController;
 
   const verifyEmailService = mock<IVerifyEmailService>();
@@ -21,11 +22,6 @@ describe("VerifyEmailController", () => {
 
   const verifyReq = mock<TypedRequest<EmptyRecord, IParamTokenDto>>();
   const res = mock<Response>();
-
-  const controllerOptions: IVerifyEmailControllerOptions = {
-    verifyEmailService,
-    responseFormatter,
-  };
 
   const validResetToken = "valid_reset_token";
 
@@ -36,11 +32,10 @@ describe("VerifyEmailController", () => {
     // Create fresh mocks for the verifyEmailService methods
     verifyEmailService.verifyUserEmail.mockResolvedValue(undefined);
 
-    // Reset singleton instance for isolation.
-    // @ts-ignore: resetting private static property for testing purposes.
-    VerifyEmailController._instance = undefined;
-
-    controller = VerifyEmailController.getInstance(controllerOptions);
+    controller = new VerifyEmailController(
+      verifyEmailService,
+      responseFormatter,
+    );
 
     verifyReq.params = {
       token: validResetToken,
@@ -48,19 +43,6 @@ describe("VerifyEmailController", () => {
 
     res.status.mockReturnThis();
     res.json.mockReturnThis();
-  });
-
-  describe("Singleton Instance", () => {
-    it("should create a new instance if none exists", () => {
-      const instance = VerifyEmailController.getInstance(controllerOptions);
-      expect(instance).toBeInstanceOf(VerifyEmailController);
-    });
-
-    it("should return the same instance on subsequent calls", () => {
-      const instance1 = VerifyEmailController.getInstance(controllerOptions);
-      const instance2 = VerifyEmailController.getInstance(controllerOptions);
-      expect(instance1).toBe(instance2);
-    });
   });
 
   describe("verifyEmail", () => {
@@ -81,7 +63,7 @@ describe("VerifyEmailController", () => {
 
       // Assert
       expect(verifyEmailService.verifyUserEmail).toHaveBeenCalledWith(
-        validResetToken
+        validResetToken,
       );
       expect(res.status).toHaveBeenCalledWith(formattedRes.statusCode);
       expect(res.json).toHaveBeenCalledWith(formattedRes);
@@ -94,7 +76,7 @@ describe("VerifyEmailController", () => {
 
       // Act & Assert
       await expect(controller.verifyEmail(verifyReq, res)).rejects.toThrow(
-        error
+        error,
       );
     });
   });

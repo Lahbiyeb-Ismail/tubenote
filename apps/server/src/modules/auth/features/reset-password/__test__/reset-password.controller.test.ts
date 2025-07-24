@@ -23,7 +23,6 @@ import type { EmptyRecord, TypedRequest } from "@/modules/shared/types";
 import { AUTH_RATE_LIMIT_CONFIG } from "@/modules/auth/config";
 
 import type {
-  IResetPasswordControllerOptions,
   IResetPasswordService,
 } from "../reset-password.types";
 
@@ -36,13 +35,6 @@ describe("resetPasswordController", () => {
   const responseFormatter = mock<IResponseFormatter>();
   const rateLimitService = mock<IRateLimitService>();
   const loggerService = mock<ILoggerService>();
-
-  const controllerOptions: IResetPasswordControllerOptions = {
-    resetPasswordService,
-    responseFormatter,
-    rateLimitService,
-    loggerService,
-  };
 
   const forgotReq = mock<TypedRequest<IEmailBodyDto>>();
   const resetReq = mock<TypedRequest<IPasswordBodyDto, IParamTokenDto>>();
@@ -78,12 +70,12 @@ describe("resetPasswordController", () => {
     resetPasswordService.resetPassword.mockResolvedValue(undefined);
     resetPasswordService.verifyResetToken.mockResolvedValue("user_id_001");
 
-    // Reset the singleton instance for isolation.
-    // @ts-expect-error: resetting private static property for testing purposes.
-    ResetPasswordController._instance = undefined;
-
-    // Create the controller instance using the provided controllerOptions.
-    controller = ResetPasswordController.getInstance(controllerOptions);
+    controller = new ResetPasswordController(
+      resetPasswordService,
+      responseFormatter,
+      rateLimitService,
+      loggerService,
+    );
 
     forgotReq.body = { email: "test@example.com" };
     resetReq.body = { password: "newSecurePassword1!" };
@@ -96,19 +88,6 @@ describe("resetPasswordController", () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe("singleton behavior", () => {
-    it("should create a new instance if none exists", () => {
-      const instance = ResetPasswordController.getInstance(controllerOptions);
-      expect(instance).toBeInstanceOf(ResetPasswordController);
-    });
-
-    it("should return the same instance on subsequent calls", () => {
-      const instance1 = ResetPasswordController.getInstance(controllerOptions);
-      const instance2 = ResetPasswordController.getInstance(controllerOptions);
-      expect(instance1).toBe(instance2);
-    });
   });
 
   describe("forgotPassword", () => {

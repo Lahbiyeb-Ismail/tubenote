@@ -8,7 +8,7 @@ import { JwtService } from "../jwt.service";
 
 describe("jwtService", () => {
   const loggerService = mock<ILoggerService>();
-  const jwtService = JwtService.getInstance({ loggerService });
+  const jwtService = new JwtService({ loggerService });
 
   const mockUserId = "user-id-123";
   const mockValidTokenSecret = "valid-token-secret";

@@ -11,8 +11,6 @@ import type {
 } from "@/modules/shared/services";
 import type { IUserService } from "@/modules/user";
 
-import type { IResetPasswordServiceOptions } from "../reset-password.types";
-
 import { ResetPasswordService } from "../reset-password.service";
 
 describe("resetPasswordService", () => {
@@ -23,14 +21,6 @@ describe("resetPasswordService", () => {
   const loggerService = mock<ILoggerService>();
 
   let resetPasswordService: ResetPasswordService;
-
-  const serviceOptions: IResetPasswordServiceOptions = {
-    userService,
-    cryptoService,
-    cacheService,
-    mailSenderService,
-    loggerService,
-  };
 
   const mockEmail = "test@example.com";
   const mockUserId = "user-id-123";
@@ -44,6 +34,7 @@ describe("resetPasswordService", () => {
     profilePicture: null,
     createdAt: new Date(),
     updatedAt: new Date(),
+    videoIds: [],
   };
 
   const mockValidToken = "valid-reset-token";
@@ -55,11 +46,16 @@ describe("resetPasswordService", () => {
     mockReset(mailSenderService);
     mockReset(loggerService);
 
-    // Reset the singleton instance for isolation.
-    // @ts-expect-error: resetting private static property for testing purposes.
-    ResetPasswordService._instance = undefined;
+    // Reset all mocks before each test
+    jest.resetAllMocks();
 
-    resetPasswordService = ResetPasswordService.getInstance(serviceOptions);
+    resetPasswordService = new ResetPasswordService(
+      userService,
+      cryptoService,
+      cacheService,
+      mailSenderService,
+      loggerService,
+    );
   });
 
   describe("sendResetToken", () => {
@@ -82,7 +78,7 @@ describe("resetPasswordService", () => {
       // Arrange: simulate a verified user.
       userService.getUserByEmail.mockResolvedValue(mockUser);
 
-      cryptoService.generateRandomSecureToken.mockReturnValue(mockValidToken);
+      (cryptoService.generateSecureToken as jest.Mock).mockReturnValue(mockValidToken);
 
       // Act
       await resetPasswordService.sendResetToken(mockEmail);
@@ -90,7 +86,7 @@ describe("resetPasswordService", () => {
       // Assert
       expect(userService.getUserByEmail).toHaveBeenCalledWith(mockEmail);
 
-      expect(cryptoService.generateRandomSecureToken).toHaveBeenCalled();
+      expect(cryptoService.generateSecureToken).toHaveBeenCalled();
 
       expect(cacheService.set).toHaveBeenCalledWith(mockValidToken, {
         userId: mockUserId,
@@ -110,7 +106,7 @@ describe("resetPasswordService", () => {
 
       userService.getUserByEmail.mockResolvedValue(mockUser);
 
-      cryptoService.generateRandomSecureToken.mockReturnValue(mockValidToken);
+      cryptoService.generateSecureToken.mockReturnValue(mockValidToken);
 
       mailSenderService.sendResetPasswordEmail.mockRejectedValue(error);
 
@@ -123,7 +119,7 @@ describe("resetPasswordService", () => {
   describe("verifyResetToken", () => {
     it("should throw BadRequestError if no token data exists in cache", async () => {
       // Arrange: token not found.
-      cacheService.get.mockReturnValue(null);
+      cacheService.get.mockResolvedValue(undefined);
 
       // Act & Assert
       await expect(
@@ -136,7 +132,7 @@ describe("resetPasswordService", () => {
 
     it("should throw BadRequestError if token data is invalid (missing userId)", async () => {
       // Arrange: token data exists but without valid userId.
-      cacheService.get.mockReturnValue({ userId: null });
+      cacheService.get.mockResolvedValue({ userId: null });
 
       // Act & Assert
       await expect(
@@ -149,7 +145,7 @@ describe("resetPasswordService", () => {
 
     it("should return userId if token data is valid", async () => {
       // Arrange: token data with a valid userId.
-      cacheService.get.mockReturnValue({ userId: mockUserId });
+      cacheService.get.mockResolvedValue({ userId: mockUserId });
 
       // Act
       const userId = await resetPasswordService.verifyResetToken("valid-token");
@@ -160,14 +156,14 @@ describe("resetPasswordService", () => {
 
     it("should throw error if cached token data is malformed", async () => {
       // Missing userId
-      cacheService.get.mockReturnValue({});
+      cacheService.get.mockResolvedValue({});
 
       await expect(
         resetPasswordService.verifyResetToken(mockValidToken),
       ).rejects.toThrow(BadRequestError);
 
       // Invalid userId type
-      cacheService.get.mockReturnValue({ userId: 12345 });
+      cacheService.get.mockResolvedValue({ userId: 12345 });
       await expect(
         resetPasswordService.verifyResetToken(mockValidToken),
       ).rejects.toThrow(BadRequestError);
@@ -188,7 +184,7 @@ describe("resetPasswordService", () => {
   describe("resetPassword", () => {
     it("should verify the reset token, delete it from cache, and reset the user's password", async () => {
       // Arrange: simulate valid token data.
-      cacheService.get.mockReturnValue({ userId: mockUserId });
+      cacheService.get.mockResolvedValue({ userId: mockUserId });
       const testToken = "valid-token";
       const newPassword = "newPassword123";
 
@@ -213,7 +209,7 @@ describe("resetPasswordService", () => {
 
     it("should propagate errors thrown by verifyResetToken", async () => {
       // Arrange: simulate invalid token so that verifyResetToken throws an error.
-      cacheService.get.mockReturnValue(null);
+      cacheService.get.mockResolvedValue(undefined);
       const testToken = "invalid-token";
       const newPassword = "newPassword123";
 

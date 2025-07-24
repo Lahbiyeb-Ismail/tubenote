@@ -18,7 +18,7 @@ import type { ICryptoService, IPrismaService } from "@/modules/shared/services";
 
 import type { IAccountService } from "../features/account/account.types";
 import type { ICreateAccountDto } from "../features/account/dtos";
-import type { IUserRepository, IUserServiceOptions } from "../user.types";
+import type { IUserRepository } from "../user.types";
 
 import { UserService } from "../user.service";
 
@@ -30,13 +30,6 @@ describe("userService", () => {
   const accountService = mock<IAccountService>();
   const cryptoService = mock<ICryptoService>();
   const prismaService = mock<IPrismaService>();
-
-  const serviceOptions: IUserServiceOptions = {
-    userRepository,
-    accountService,
-    prismaService,
-    cryptoService,
-  };
 
   const mockUserId = "user_id_001";
   const mockUserEmail = "test@example.com";
@@ -70,29 +63,19 @@ describe("userService", () => {
 
     mockTx = {} as Prisma.TransactionClient;
 
-    // Reset singleton instance before each test to ensure a clean state.
-    // @ts-expect-error: resetting the private _instance for testing purposes
-    UserService._instance = undefined;
-
     // Create a new instance for each test
-    userService = UserService.getInstance(serviceOptions);
+    userService = new UserService(
+      userRepository,
+      accountService,
+      prismaService,
+      cryptoService,
+      mock(), // Mock IRefreshTokenService
+      mock(), // Mock ICacheService
+    );
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe("singleton behavior", () => {
-    it("should create a new instance when none exists", () => {
-      const instance1 = UserService.getInstance(serviceOptions);
-      expect(instance1).toBeInstanceOf(UserService);
-    });
-
-    it("should return the existing instance when called multiple times", () => {
-      const instance1 = UserService.getInstance(serviceOptions);
-      const instance2 = UserService.getInstance(serviceOptions);
-      expect(instance1).toBe(instance2);
-    });
   });
 
   describe("userService - getUserById", () => {

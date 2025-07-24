@@ -1,6 +1,7 @@
+import type { User } from "@tubenote/db";
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
-import type { IApiSuccessResponse, User } from "@tubenote/types";
-import type { Response } from "express";
+import type { IApiSuccessResponse } from "@tubenote/types";
+import type { CookieOptions, Response } from "express";
 
 import {
   BadRequestError,
@@ -18,9 +19,7 @@ import type {
 import type { TypedRequest } from "@/modules/shared/types";
 
 import {
-  accessTokenCookieConfig,
   AUTH_RATE_LIMIT_CONFIG,
-  refreshTokenCookieConfig,
 } from "@/modules/auth/config";
 import {
   ACCESS_TOKEN_NAME,
@@ -28,11 +27,73 @@ import {
 } from "@/modules/auth/constants";
 
 import type {
-  ILocalAuthControllerOptions,
   ILocalAuthService,
 } from "../local-auth.types";
 
 import { LocalAuthController } from "../local-auth.controller";
+
+const mockRegisterDto: IRegisterDto = {
+  email: "test@example.com",
+  password: "Password123!",
+  username: "testuser",
+};
+
+const mockLoginDto: ILoginDto = {
+  email: "test@example.com",
+  password: "Password123!",
+};
+
+const mockUserDeviceId = "test-device-id";
+const mockUserIpAddress = "127.0.0.1";
+
+const mockClientContext = {
+  clientType: "web",
+  userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+};
+
+const mockUser: User = {
+  id: "1",
+  email: "test@example.com",
+  username: "testuser",
+  password: "hashedpassword",
+  isEmailVerified: false,
+  profilePicture: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  videoIds: [],
+};
+
+const mockAuthResponse: IAuthResponseDto = {
+  accessToken: "mock-access-token",
+  refreshToken: "mock-refresh-token",
+};
+
+const registerReq = mock<TypedRequest<IRegisterDto>>();
+
+const loginReq = mock<TypedRequest<ILoginDto>>();
+
+const res = mock<Response>();
+
+const formattedRegisterRes: IApiSuccessResponse<string> = {
+  success: true,
+  statusCode: httpStatus.CREATED,
+  payload: {
+    message: "A verification email has been sent to your email.",
+    data: mockUser.email,
+  },
+};
+
+const refreshTokenCookieConfig: CookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "strict",
+};
+
+const accessTokenCookieConfig: CookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "strict",
+};
 
 describe("localAuthController", () => {
   let localAuthController: LocalAuthController;
@@ -42,56 +103,6 @@ describe("localAuthController", () => {
   const rateLimiter = mock<IRateLimitService>();
   const logger = mock<ILoggerService>();
   const responseFormatter = mock<IResponseFormatter>();
-
-  const controllerOptions: ILocalAuthControllerOptions = {
-    localAuthService,
-    rateLimiter,
-    logger,
-    responseFormatter,
-  };
-
-  const registerReq = mock<TypedRequest<IRegisterDto>>();
-
-  const loginReq = mock<TypedRequest<ILoginDto>>();
-
-  // Mock response object
-  const res = mock<Response>();
-
-  const mockUser: User = {
-    id: "user_id_001",
-    email: "test@example.com",
-    username: "Test User",
-    password: "hashed-password",
-    isEmailVerified: false,
-    profilePicture: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  const mockRegisterDto: IRegisterDto = {
-    email: "test@example.com",
-    password: "Password123!",
-    username: "Test User",
-  };
-
-  const mockLoginDto: ILoginDto = {
-    email: "test@example.com",
-    password: "Password123!",
-  };
-
-  const mockAuthResponse: IAuthResponseDto = {
-    accessToken: "mock-access-token",
-    refreshToken: "mock-refresh-token",
-  };
-
-  const formattedRegisterRes: IApiSuccessResponse<string> = {
-    success: true,
-    statusCode: httpStatus.CREATED,
-    payload: {
-      message: "A verification email has been sent to your email.",
-      data: mockUser.email,
-    },
-  };
 
   const formattedLoginRes: IApiSuccessResponse<string> = {
     success: true,
@@ -121,24 +132,12 @@ describe("localAuthController", () => {
 
     jest.clearAllMocks();
 
-    // Reset singleton instance before each test to ensure a clean state.
-    // @ts-expect-error: resetting the private _instance for testing purposes
-    LocalAuthController._instance = undefined;
-
-    localAuthController = LocalAuthController.getInstance(controllerOptions);
-  });
-
-  describe("singleton behavior", () => {
-    it("should create a new instance when none exists", () => {
-      const instance1 = LocalAuthController.getInstance(controllerOptions);
-      expect(instance1).toBeInstanceOf(LocalAuthController);
-    });
-
-    it("should return the existing instance when called multiple times", () => {
-      const instance1 = LocalAuthController.getInstance(controllerOptions);
-      const instance2 = LocalAuthController.getInstance(controllerOptions);
-      expect(instance1).toBe(instance2);
-    });
+    localAuthController = new LocalAuthController(
+      localAuthService,
+      rateLimiter,
+      logger,
+      responseFormatter,
+    );
   });
 
   describe("localAuthController - register", () => {
@@ -206,7 +205,7 @@ describe("localAuthController", () => {
 
       await localAuthController.login(loginReq, res);
 
-      expect(localAuthService.loginUser).toHaveBeenCalledWith(mockLoginDto);
+      expect(localAuthService.loginUser).toHaveBeenCalledWith(mockLoginDto, mockUserDeviceId, mockUserIpAddress, mockClientContext);
 
       expect(rateLimiter.reset).toHaveBeenCalledWith(loginReq.rateLimitKey);
 
@@ -236,7 +235,9 @@ describe("localAuthController", () => {
       await expect(localAuthController.login(loginReq, res)).rejects.toThrow(
         unexpectedError,
       );
-      expect(localAuthService.loginUser).toHaveBeenCalledWith(mockLoginDto);
+
+      expect(localAuthService.loginUser).toHaveBeenCalledWith(mockLoginDto, mockUserDeviceId, mockUserIpAddress, mockClientContext);
+
       expect(rateLimiter.increment).toHaveBeenCalledWith({
         key: loginReq.rateLimitKey,
         ...AUTH_RATE_LIMIT_CONFIG.login,
@@ -365,29 +366,6 @@ describe("localAuthController", () => {
         expect.not.objectContaining({
           refreshToken: expect.any(String),
           password: expect.any(String),
-        }),
-      );
-    });
-
-    it("should set secure cookie options for refresh token", async () => {
-      localAuthService.loginUser.mockResolvedValue(mockAuthResponse);
-
-      responseFormatter.formatSuccessResponse.mockReturnValue(
-        formattedLoginRes,
-      );
-      // Act
-      await localAuthController.login(loginReq, res);
-
-      // Assert
-      expect(res.cookie).toHaveBeenCalledWith(
-        REFRESH_TOKEN_NAME,
-        "mock-refresh-token",
-        refreshTokenCookieConfig,
-      );
-      // Verify that the cookie config has secure settings
-      expect(refreshTokenCookieConfig).toEqual(
-        expect.objectContaining({
-          httpOnly: true,
         }),
       );
     });

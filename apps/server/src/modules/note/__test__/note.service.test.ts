@@ -18,10 +18,7 @@ describe("noteService methods test", () => {
   const mockNoteRepository = mock<INoteRepository>();
   const mockPrismaService = mock<IPrismaService>();
 
-  const noteService = NoteService.getInstance({
-    noteRepository: mockNoteRepository,
-    prismaService: mockPrismaService,
-  });
+  const noteService = new NoteService(mockNoteRepository, mockPrismaService);
 
   beforeEach(() => {
     mockReset(mockNoteRepository);

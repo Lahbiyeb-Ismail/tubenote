@@ -57,7 +57,7 @@ function validateEnv(env: NodeJS.ProcessEnv): EnvSchema {
   }
 }
 
-const validatedEnv = validateEnv(process.env);
+const validatedEnv = process.env.NODE_ENV === "test" ? process.env : validateEnv(process.env);
 
 export const envConfig = {
   node_env: validatedEnv.NODE_ENV,

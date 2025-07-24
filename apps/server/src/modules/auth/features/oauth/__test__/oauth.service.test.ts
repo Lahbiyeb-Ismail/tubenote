@@ -19,7 +19,6 @@ import { stringToDate } from "@/modules/shared/utils";
 
 import type { IRefreshTokenService, RefreshToken } from "../../refresh-token";
 import type { IOauthLoginDto } from "../dtos";
-import type { IOAuthServiceOptions } from "../oauth.types";
 
 import { OAuthService } from "../oauth.service";
 
@@ -39,17 +38,6 @@ describe("oAuthService", () => {
   const cryptoService = mock<ICryptoService>();
   const cacheService = mock<ICacheService>();
   const loggerService = mock<ILoggerService>();
-
-  const serviceOptions: IOAuthServiceOptions = {
-    prismaService,
-    userService,
-    accountService,
-    refreshTokenService,
-    jwtService,
-    cryptoService,
-    cacheService,
-    loggerService,
-  };
 
   const mockExistingUserId = "existing_user_id";
   const mockToken = "test-refresh-token";
@@ -120,52 +108,17 @@ describe("oAuthService", () => {
     cacheService.set.mockReturnValue(true);
     cacheService.del.mockReturnValue(1);
 
-    // Reset singleton instance for isolation.
-    // @ts-expect-error: resetting private static property for testing purposes.
-    OAuthService._instance = undefined;
-
     // Create an instance of OAuthService using the mocks.
-    oauthService = OAuthService.getInstance(serviceOptions);
-  });
-
-  describe("singleton Behavior", () => {
-    it("should create a new instance if none exists", () => {
-      const instance = OAuthService.getInstance({
-        prismaService,
-        userService,
-        accountService,
-        refreshTokenService,
-        jwtService,
-        cryptoService,
-        cacheService,
-        loggerService,
-      });
-      expect(instance).toBeInstanceOf(OAuthService);
-    });
-
-    it("should return the same instance on subsequent calls", () => {
-      const instance1 = OAuthService.getInstance({
-        prismaService,
-        userService,
-        accountService,
-        refreshTokenService,
-        jwtService,
-        cryptoService,
-        cacheService,
-        loggerService,
-      });
-      const instance2 = OAuthService.getInstance({
-        prismaService,
-        userService,
-        accountService,
-        refreshTokenService,
-        jwtService,
-        cryptoService,
-        cacheService,
-        loggerService,
-      });
-      expect(instance1).toBe(instance2);
-    });
+    oauthService = new OAuthService(
+      prismaService,
+      userService,
+      accountService,
+      refreshTokenService,
+      jwtService,
+      cryptoService,
+      cacheService,
+      loggerService,
+    );
   });
 
   describe("generateTemporaryOAuthCode", () => {

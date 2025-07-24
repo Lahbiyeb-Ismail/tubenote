@@ -13,7 +13,7 @@ import type {
 } from "@/modules/shared/services";
 import type { TypedRequest } from "@/modules/shared/types";
 
-import type { IUserControllerOptions, IUserService } from "../user.types";
+import type { IUserService } from "../user.types";
 
 import { UserController } from "../user.controller";
 
@@ -24,13 +24,6 @@ describe("userController tests", () => {
   const responseFormatter = mock<IResponseFormatter>();
   const rateLimitService = mock<IRateLimitService>();
   const loggerService = mock<ILoggerService>();
-
-  const controllerOptions: IUserControllerOptions = {
-    userService,
-    responseFormatter,
-    rateLimitService,
-    loggerService,
-  };
 
   const req = mock<TypedRequest>();
   const res = mock<Response>();
@@ -82,28 +75,16 @@ describe("userController tests", () => {
     updatePasswordReq.userId = mockUserId;
     updatePasswordReq.rateLimitKey = `${mockUserId}:password-update`;
 
-    // Reset singleton instance before each test to ensure a clean state.
-    // @ts-expect-error: resetting the private _instance for testing purposes
-    UserController._instance = undefined;
-
-    userController = UserController.getInstance(controllerOptions);
+    userController = new UserController(
+      userService,
+      responseFormatter,
+      rateLimitService,
+      loggerService,
+    );
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe("singleton Behavior", () => {
-    it("should create a new instance when none exists", () => {
-      const instance1 = UserController.getInstance(controllerOptions);
-      expect(instance1).toBeInstanceOf(UserController);
-    });
-
-    it("should return the existing instance when called multiple times", () => {
-      const instance1 = UserController.getInstance(controllerOptions);
-      const instance2 = UserController.getInstance(controllerOptions);
-      expect(instance1).toBe(instance2);
-    });
   });
 
   describe("userController - getCurrentUser", () => {

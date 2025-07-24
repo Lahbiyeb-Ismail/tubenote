@@ -19,8 +19,6 @@ import type { ICreateRefreshTokenDto } from "../dtos";
 import type { RefreshToken } from "../refresh-token.model";
 import type { IRefreshTokenRepository } from "../refresh-token.types";
 
-import { RefreshTokenService } from "../refresh-token.service";
-
 jest.mock("@/modules/shared/utils", () => ({
   ...jest.requireActual("@/modules/shared/utils"),
   stringToDate: jest.fn(),
@@ -34,13 +32,6 @@ describe("refreshTokenService", () => {
   const jwtService = mock<IJwtService>();
 
   const loggerService = mock<ILoggerService>();
-
-  const refreshTokenService = RefreshTokenService.getInstance({
-    refreshTokenRepository,
-    prismaService,
-    jwtService,
-    loggerService,
-  });
 
   const mockUserId = "test-user-id";
   const mockToken = "test-refresh-token";
