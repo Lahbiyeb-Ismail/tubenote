@@ -4,17 +4,11 @@ import type { IApiSuccessResponse } from "@tubenote/types";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 
-import type { ISessionData } from "@/services";
-
 import { envConfig } from "@/config";
 import { axiosInstance } from "@/lib/axios";
 import { sessionCacheService } from "@/services";
 
 export class AuthService {
-  async getSession(sessionId: string): Promise<ISessionData | null> {
-    return sessionCacheService.getSession(sessionId);
-  }
-
   async register(credentials: IRegisterDto): Promise<IApiSuccessResponse<string>> {
     const registerRes = await axiosInstance.post<IApiSuccessResponse<string>>(`/auth/register`, credentials);
 
@@ -42,17 +36,15 @@ export class AuthService {
   async logout(sessionId: string): Promise<IApiSuccessResponse<null>> {
     const sessionData = await sessionCacheService.getSession(sessionId);
 
-    if (!sessionData || !sessionData.accessToken) {
-      throw new Error("You must be logged in to log out");
+    if (!sessionData || !sessionData.refreshToken) {
+      throw new Error("You must be logged in to refresh");
     }
 
-    // Call backend API to revoke refresh token
     const logoutRes = await axiosInstance.post<IApiSuccessResponse<null>>(`${envConfig.backend_api.url}/auth/logout`, { refreshToken: sessionData.refreshToken }, {
       headers: {
         "Authorization": `Bearer ${sessionData.accessToken}`,
         "X-Session-ID": sessionId,
       },
-      withCredentials: true,
     });
 
     await sessionCacheService.deleteSession(sessionId);
@@ -60,7 +52,7 @@ export class AuthService {
     return logoutRes.data;
   }
 
-  async refresh(sessionId: string): Promise<{ sessionId: string; data: IApiSuccessResponse<null> }> {
+  async refresh(sessionId: string): Promise<{ sessionId: string; accessToken: string }> {
     const sessionData = await sessionCacheService.getSession(sessionId);
 
     if (!sessionData || !sessionData.refreshToken) {
@@ -79,12 +71,6 @@ export class AuthService {
 
     await sessionCacheService.createSession(sessionId, newAuthTokens, 60 * 60 * 24 * 1000); // 24 hours
 
-    return { sessionId, data: {
-      ...refreshRes.data,
-      payload: {
-        ...refreshRes.data.payload,
-        data: null,
-      },
-    } };
+    return { sessionId, accessToken: newAuthTokens.accessToken };
   }
 }

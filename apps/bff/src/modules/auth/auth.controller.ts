@@ -32,28 +32,12 @@ export class AuthController {
   }
 
   async logout(req: Request, res: Response) {
-    const sessionId = req.sessionId;
+    const sessionData = req.sessionData;
 
     try {
-      const data = await authService.logout(sessionId);
+      const data = await authService.logout(sessionData.sessionId);
 
       res.clearCookie("session_id");
-      res.status(data.statusCode).json(data);
-    }
-    catch (error: any) {
-      return res.status(error.status || 500).json(error);
-    }
-  }
-
-  async refresh(req: Request, res: Response) {
-    const sessionId = req.sessionId;
-
-    try {
-      const { sessionId: newSessionId, data } = await authService.refresh(sessionId);
-
-      console.log("AccessToken Refreshed Successfully:", newSessionId);
-
-      res.cookie("session_id", newSessionId, sessionIdCookieConfig);
       res.status(data.statusCode).json(data);
     }
     catch (error: any) {
