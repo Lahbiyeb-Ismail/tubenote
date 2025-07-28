@@ -1,13 +1,6 @@
-import {
-  createNoteSchema,
-  idParamSchema,
-  paginationQuerySchema,
-  searchAndPaginationQuerySchema,
-  updateNoteSchema,
-} from "@tubenote/schemas";
 import { Router } from "express";
 
-import { isAuthenticated, validateRequest } from "@/middlewares";
+import { isAuthenticated } from "@/middlewares";
 
 import { noteController } from "./note.module";
 
@@ -19,14 +12,10 @@ noteRoutes.use(isAuthenticated);
 // - GET /recent: Get the most recent notes for the authenticated user.
 noteRoutes
   .route("/count/:id")
-  .get(validateRequest({ params: idParamSchema }), (req, res) => noteController.getNotesCountByVideoId(req, res));
+  .get((req, res) => noteController.getNotesCountByVideoId(req, res));
 
 // - GET /video/:id: Get all notes for a specific video (requires request params validation).
 noteRoutes.route("/video/:id").get(
-  validateRequest({
-    params: idParamSchema,
-    query: paginationQuerySchema,
-  }),
   (req, res) => noteController.getNotesByVideoId(req as any, res),
 );
 
@@ -36,9 +25,8 @@ noteRoutes.route("/video/:id").get(
 // - DELETE /:id: Delete a specific note by its ID (requires request params validation).
 noteRoutes
   .route("/:id")
-  .all(validateRequest({ params: idParamSchema }))
-  .post(validateRequest({ body: createNoteSchema }), (req, res) => noteController.createNote(req, res))
-  .patch(validateRequest({ body: updateNoteSchema }), (req, res) =>
+  .post((req, res) => noteController.createNote(req, res))
+  .patch((req, res) =>
     noteController.updateNote(req, res))
   .get((req, res) => noteController.getNoteById(req, res))
   .delete((req, res) => noteController.deleteNote(req, res));
@@ -46,7 +34,7 @@ noteRoutes
 // - GET /: Get all notes for the authenticated user.
 noteRoutes
   .route("/")
-  .get(validateRequest({ query: searchAndPaginationQuerySchema }), (req, res) =>
+  .get((req, res) =>
     noteController.getUserNotes(req as any, res));
 
 export { noteRoutes };
