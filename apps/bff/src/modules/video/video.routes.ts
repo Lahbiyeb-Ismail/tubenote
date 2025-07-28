@@ -1,6 +1,8 @@
+import { idParamSchema, searchAndPaginationQuerySchema } from "@tubenote/schemas";
 import { Router } from "express";
 
 import { validateSessionMiddleware } from "@/middlewares/auth";
+import { validateRequest } from "@/middlewares/validation";
 
 import { VideoController } from "./video.controller";
 
@@ -16,10 +18,10 @@ videoRoutes
 
 videoRoutes
   .route("/:id")
-  .get(videoController.getVideoByYoutubeId);
+  .get(validateRequest({ params: idParamSchema }), videoController.getVideoByYoutubeId);
 
 videoRoutes
   .route("/")
-  .get(videoController.getUserVideos);
+  .get(validateRequest({ query: searchAndPaginationQuerySchema }), videoController.getUserVideos);
 
 export { videoRoutes };

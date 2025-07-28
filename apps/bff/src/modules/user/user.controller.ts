@@ -1,4 +1,7 @@
+import type { IUpdatePasswordDto, IUpdateUserDto } from "@tubenote/dtos";
 import type { Request, Response } from "express";
+
+import type { TypedRequest } from "@/types";
 
 import { UserService } from "./user.service";
 
@@ -18,7 +21,7 @@ export class UserController {
     }
   }
 
-  async updateCurrentUser(req: Request, res: Response) {
+  async updateCurrentUser(req: TypedRequest<IUpdateUserDto>, res: Response) {
     const sessionData = req.sessionData;
 
     try {
@@ -31,7 +34,7 @@ export class UserController {
     }
   }
 
-  async updateUserPassword(req: Request, res: Response) {
+  async updateUserPassword(req: TypedRequest<IUpdatePasswordDto>, res: Response) {
     const sessionData = req.sessionData;
 
     try {

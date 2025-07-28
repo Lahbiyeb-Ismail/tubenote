@@ -1,4 +1,7 @@
+import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 import type { Request, Response } from "express";
+
+import type { TypedRequest } from "@/types";
 
 import { AuthService } from "./auth.service";
 import { sessionIdCookieConfig } from "./config";
@@ -6,7 +9,7 @@ import { sessionIdCookieConfig } from "./config";
 const authService = new AuthService();
 
 export class AuthController {
-  async register(req: Request, res: Response) {
+  async register(req: TypedRequest<IRegisterDto>, res: Response) {
     try {
       const data = await authService.register(req.body);
 
@@ -17,7 +20,7 @@ export class AuthController {
     }
   }
 
-  async login(req: Request, res: Response) {
+  async login(req: TypedRequest<ILoginDto>, res: Response) {
     try {
       const { sessionId, data } = await authService.login(req.body);
 

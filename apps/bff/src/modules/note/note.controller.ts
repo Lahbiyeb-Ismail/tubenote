@@ -1,33 +1,39 @@
-import type { Request, Response } from "express";
+import type { ICreateNoteDto, IPaginationQueryDto, IParamIdDto, ISearchAndPaginationQueryDto, IUpdateNoteDto } from "@tubenote/dtos";
+import type { Response } from "express";
+
+import type { EmptyRecord, TypedRequest } from "@/types";
 
 import { NoteService } from "./note.service";
 
 const noteService = new NoteService();
 
 export class NoteController {
-  async getNotesCountByYtVideoId(req: Request, res: Response) {
+  async getNotesCountByYtVideoId(req: TypedRequest<EmptyRecord, IParamIdDto>, res: Response) {
     const sessionData = req.sessionData;
+    const ytVideoId = req.params.id;
 
     try {
-      const data = await noteService.countByYtVideoId(sessionData, req.body);
+      const data = await noteService.countByYtVideoId(sessionData, ytVideoId);
 
       res.status(data.statusCode).json(data);
     }
     catch (err: any) { res.status(err.status || 500).json(err); }
   }
 
-  async getNotesByVideoId(req: Request, res: Response) {
+  async getNotesByVideoId(req: TypedRequest<EmptyRecord, IParamIdDto, IPaginationQueryDto>, res: Response) {
     const sessionData = req.sessionData;
+    const videoId = req.params.id;
+    const queryOptions = req.query;
 
     try {
-      const data = await noteService.findAllByVideoId(sessionData, req.body);
+      const data = await noteService.findAllByVideoId(sessionData, videoId, queryOptions);
 
       res.status(data.statusCode).json(data);
     }
     catch (err: any) { res.status(err.status || 500).json(err); }
   }
 
-  async createNote(req: Request, res: Response) {
+  async createNote(req: TypedRequest<ICreateNoteDto, IParamIdDto>, res: Response) {
     const sessionData = req.sessionData;
     const videoId = req.params.id;
 
@@ -39,7 +45,7 @@ export class NoteController {
     catch (err: any) { res.status(err.status || 500).json(err); }
   }
 
-  async updateNote(req: Request, res: Response) {
+  async updateNote(req: TypedRequest<IUpdateNoteDto, IParamIdDto>, res: Response) {
     const sessionData = req.sessionData;
     const noteId = req.params.id;
 
@@ -51,31 +57,33 @@ export class NoteController {
     catch (err: any) { res.status(err.status || 500).json(err); }
   }
 
-  async getNoteById(req: Request, res: Response) {
+  async getNoteById(req: TypedRequest<EmptyRecord, IParamIdDto>, res: Response) {
     const sessionData = req.sessionData;
+    const noteId = req.params.id;
 
     try {
-      const data = await noteService.findByNoteId(sessionData, req.body);
+      const data = await noteService.findByNoteId(sessionData, noteId);
 
       res.status(data.statusCode).json(data);
     }
     catch (err: any) { res.status(err.status || 500).json(err); }
   }
 
-  async deleteNote(req: Request, res: Response) {
+  async deleteNote(req: TypedRequest<EmptyRecord, IParamIdDto>, res: Response) {
     const sessionData = req.sessionData;
+    const noteId = req.params.id;
 
     try {
-      const data = await noteService.delete(sessionData, req.body);
+      const data = await noteService.delete(sessionData, noteId);
 
       res.status(data.statusCode).json(data);
     }
     catch (err: any) { res.status(err.status || 500).json(err); }
   }
 
-  async getUserNotes(req: Request, res: Response) {
+  async getUserNotes(req: TypedRequest<EmptyRecord, EmptyRecord, ISearchAndPaginationQueryDto>, res: Response) {
     const sessionData = req.sessionData;
-    const queryOptions = req.query as any;
+    const queryOptions = req.query;
 
     try {
       const data = await noteService.findAll(sessionData, queryOptions);
