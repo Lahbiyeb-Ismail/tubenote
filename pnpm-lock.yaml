@@ -69,6 +69,12 @@ importers:
 
   apps/bff:
     dependencies:
+      '@tubenote/api-errors':
+        specifier: workspace:*
+        version: link:../../packages/api-errors
+      '@tubenote/redis-cache':
+        specifier: workspace:*
+        version: link:../../packages/redis-cache
       axios:
         specifier: ^1.10.0
         version: 1.10.0
@@ -84,12 +90,18 @@ importers:
       express:
         specifier: ^4.21.2
         version: 4.21.2
+      express-async-errors:
+        specifier: ^3.1.1
+        version: 3.1.1(express@4.21.2)
       helmet:
         specifier: ^8.0.0
         version: 8.1.0
-      ioredis:
-        specifier: ^5.6.1
-        version: 5.6.1
+      http-status:
+        specifier: ^1.8.1
+        version: 1.8.1
+      uuid:
+        specifier: ^11.1.0
+        version: 11.1.0
       zod:
         specifier: ^3.23.8
         version: 3.25.67
@@ -97,6 +109,15 @@ importers:
       '@tubenote/config-typescript':
         specifier: workspace:*
         version: link:../../packages/config-typescript
+      '@tubenote/db':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@tubenote/dtos':
+        specifier: workspace:*
+        version: link:../../packages/dtos
+      '@tubenote/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@types/cookie-parser':
         specifier: ^1.4.7
         version: 1.4.9(@types/express@4.17.23)
@@ -109,6 +130,9 @@ importers:
       '@types/node':
         specifier: ^20.2.3
         version: 20.19.1
+      '@types/uuid':
+        specifier: ^10.0.0
+        version: 10.0.0
       tsc-alias:
         specifier: ^1.7.0
         version: 1.8.16
@@ -293,6 +317,9 @@ importers:
       '@tubenote/dtos':
         specifier: workspace:*
         version: link:../../packages/dtos
+      '@tubenote/redis-cache':
+        specifier: workspace:*
+        version: link:../../packages/redis-cache
       '@tubenote/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas
@@ -341,9 +368,6 @@ importers:
       inversify:
         specifier: ^7.5.1
         version: 7.5.2(reflect-metadata@0.2.2)
-      ioredis:
-        specifier: ^5.6.1
-        version: 5.6.1
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
@@ -515,6 +539,25 @@ importers:
       '@tubenote/youtube-api':
         specifier: workspace:*
         version: link:../youtube-api
+
+  packages/redis-cache:
+    dependencies:
+      ioredis:
+        specifier: ^5.6.1
+        version: 5.6.1
+    devDependencies:
+      '@tubenote/config-typescript':
+        specifier: workspace:*
+        version: link:../config-typescript
+      '@types/node':
+        specifier: ^20.2.3
+        version: 20.19.1
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.0(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.3)(typescript@5.8.3)(yaml@2.8.0)
+      typescript:
+        specifier: ^5.7.2
+        version: 5.8.3
 
   packages/schemas:
     dependencies:
@@ -2645,6 +2688,9 @@ packages:
 
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
+
+  '@types/uuid@10.0.0':
+    resolution: {integrity: sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==}
 
   '@types/yargs-parser@21.0.3':
     resolution: {integrity: sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==}
@@ -9033,6 +9079,8 @@ snapshots:
   '@types/unist@2.0.11': {}
 
   '@types/unist@3.0.3': {}
+
+  '@types/uuid@10.0.0': {}
 
   '@types/yargs-parser@21.0.3': {}
 
