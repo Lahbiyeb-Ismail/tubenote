@@ -1,7 +1,6 @@
 import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 import type { IApiSuccessResponse } from "@tubenote/types";
 
-import { API_URL } from "@/shared/constants";
 import { axiosInstance } from "@/shared/lib";
 
 /**
@@ -14,7 +13,7 @@ export async function registerUser(
   registerDto: IRegisterDto,
 ): Promise<IApiSuccessResponse<string>> {
   const response = await axiosInstance.post<IApiSuccessResponse<string>>(
-    `${API_URL}/auth/register`,
+    `/auth/register`,
     registerDto,
   );
 
@@ -30,9 +29,7 @@ export async function registerUser(
 export async function loginUser(
   loginDto: ILoginDto,
 ): Promise<IApiSuccessResponse<string>> {
-  const response = await axiosInstance.post<IApiSuccessResponse<string>>(`${API_URL}/auth/login`, loginDto, {
-    withCredentials: true,
-  });
+  const response = await axiosInstance.post<IApiSuccessResponse<string>>(`/auth/login`, loginDto);
 
   return response.data;
 }
@@ -47,24 +44,7 @@ export async function loginUser(
  * is complete.
  */
 export async function logoutUser(): Promise<IApiSuccessResponse<null>> {
-  const response = await axiosInstance.post<IApiSuccessResponse<null>>(`${API_URL}/auth/logout`);
-
-  return response.data;
-}
-
-/**
- * Refreshes the access token by making a POST request to the refresh endpoint.
- *
- * @returns {Promise<void>} A promise that resolves when the access token is refreshed.
- *
- * @throws Will log an error message if the token refresh fails.
- */
-export async function refreshAccessToken(): Promise<
-  IApiSuccessResponse<string>
-> {
-  const response = await axiosInstance.post<IApiSuccessResponse<string>>(
-    `${API_URL}/auth/refresh`,
-  );
+  const response = await axiosInstance.post<IApiSuccessResponse<null>>(`/auth/logout`);
 
   return response.data;
 }
@@ -79,7 +59,7 @@ export async function exchangeOauthCodeForAuthTokens(
   code: string,
 ): Promise<IApiSuccessResponse<string>> {
   const response = await axiosInstance.post<IApiSuccessResponse<string>>(
-    `${API_URL}/oauth/exchange-oauth-code`,
+    `/oauth/exchange-oauth-code`,
     { code },
   );
 
