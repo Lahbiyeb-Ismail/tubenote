@@ -6,10 +6,10 @@ const noteService = new NoteService();
 
 export class NoteController {
   async getNotesCountByYtVideoId(req: Request, res: Response) {
-    const sessionId = req.sessionId;
+    const sessionData = req.sessionData;
 
     try {
-      const data = await noteService.countByYtVideoId(sessionId, req.body);
+      const data = await noteService.countByYtVideoId(sessionData, req.body);
 
       res.status(data.statusCode).json(data);
     }
@@ -17,10 +17,10 @@ export class NoteController {
   }
 
   async getNotesByVideoId(req: Request, res: Response) {
-    const sessionId = req.sessionId;
+    const sessionData = req.sessionData;
 
     try {
-      const data = await noteService.findAllByVideoId(sessionId, req.body);
+      const data = await noteService.findAllByVideoId(sessionData, req.body);
 
       res.status(data.statusCode).json(data);
     }
@@ -28,11 +28,11 @@ export class NoteController {
   }
 
   async createNote(req: Request, res: Response) {
-    const sessionId = req.sessionId;
+    const sessionData = req.sessionData;
     const videoId = req.params.id;
 
     try {
-      const data = await noteService.create(sessionId, req.body, videoId);
+      const data = await noteService.create(sessionData, req.body, videoId);
 
       res.status(data.statusCode).json(data);
     }
@@ -40,11 +40,11 @@ export class NoteController {
   }
 
   async updateNote(req: Request, res: Response) {
-    const sessionId = req.sessionId;
+    const sessionData = req.sessionData;
     const noteId = req.params.id;
 
     try {
-      const data = await noteService.update(sessionId, noteId, req.body);
+      const data = await noteService.update(sessionData, noteId, req.body);
 
       res.status(data.statusCode).json(data);
     }
@@ -52,10 +52,10 @@ export class NoteController {
   }
 
   async getNoteById(req: Request, res: Response) {
-    const sessionId = req.sessionId;
+    const sessionData = req.sessionData;
 
     try {
-      const data = await noteService.findByNoteId(sessionId, req.body);
+      const data = await noteService.findByNoteId(sessionData, req.body);
 
       res.status(data.statusCode).json(data);
     }
@@ -63,10 +63,10 @@ export class NoteController {
   }
 
   async deleteNote(req: Request, res: Response) {
-    const sessionId = req.sessionId;
+    const sessionData = req.sessionData;
 
     try {
-      const data = await noteService.delete(sessionId, req.body);
+      const data = await noteService.delete(sessionData, req.body);
 
       res.status(data.statusCode).json(data);
     }
@@ -74,11 +74,11 @@ export class NoteController {
   }
 
   async getUserNotes(req: Request, res: Response) {
-    const sessionId = req.sessionId;
+    const sessionData = req.sessionData;
     const queryOptions = req.query as any;
 
     try {
-      const data = await noteService.findAll(sessionId, queryOptions);
+      const data = await noteService.findAll(sessionData, queryOptions);
 
       res.status(data.statusCode).json(data);
     }
