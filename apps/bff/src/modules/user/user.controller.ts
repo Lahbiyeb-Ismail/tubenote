@@ -6,10 +6,10 @@ const userService = new UserService();
 
 export class UserController {
   async getCurrentUser(req: Request, res: Response) {
-    const sessionId = req.sessionId;
+    const sessionData = req.sessionData;
 
     try {
-      const data = await userService.getCurrentUser(sessionId);
+      const data = await userService.getCurrentUser(sessionData);
 
       res.status(data.statusCode).json(data);
     }
@@ -19,10 +19,10 @@ export class UserController {
   }
 
   async updateCurrentUser(req: Request, res: Response) {
-    const sessionId = req.sessionId;
+    const sessionData = req.sessionData;
 
     try {
-      const data = await userService.updateUser(sessionId, req.body);
+      const data = await userService.updateUser(sessionData, req.body);
 
       res.status(data.statusCode).json(data);
     }
@@ -32,10 +32,10 @@ export class UserController {
   }
 
   async updateUserPassword(req: Request, res: Response) {
-    const sessionId = req.sessionId;
+    const sessionData = req.sessionData;
 
     try {
-      const data = await userService.updatePassword(sessionId, req.body);
+      const data = await userService.updatePassword(sessionData, req.body);
 
       res.status(data.statusCode).json(data);
     }
