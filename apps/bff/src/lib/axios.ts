@@ -32,14 +32,10 @@ axiosInstance.interceptors.response.use(
         }
 
         // Attempt to refresh the token
-        await authService.refresh(sessionId);
+        const { accessToken } = await authService.refresh(sessionId);
 
-        // The authService.refresh method updates the session in Redis with the new tokens.
-        // We need to retrieve the new accessToken from the session to retry the original request.
-        const newSession = await authService.getSession(sessionId);
-
-        if (newSession?.accessToken) {
-          originalRequest.headers.Authorization = `Bearer ${newSession.accessToken}`;
+        if (accessToken) {
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           // Retry the original request with the new token
           return axiosInstance(originalRequest);
         }
@@ -48,6 +44,7 @@ axiosInstance.interceptors.response.use(
         // If the refresh token is also invalid, log the user out
         const authService = new AuthService();
         const sessionId = originalRequest.headers["X-Session-ID"] as string;
+
         if (sessionId) {
           await authService.logout(sessionId);
         }
