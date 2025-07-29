@@ -1,3 +1,16 @@
+/**
+ * Authentication error messages used throughout the application.
+ *
+ * Contains standardized error messages for common authentication scenarios
+ * including invalid credentials, authorization failures, and rate limiting.
+ *
+ * @example
+ * ```typescript
+ * throw new Error(AUTH_ERRORS.INVALID_CREDENTIALS);
+ * ```
+ *
+ * @readonly
+ */
 export const AUTH_ERRORS = {
   INVALID_CREDENTIALS:
     "The email or password you entered is incorrect. Please try again.",
