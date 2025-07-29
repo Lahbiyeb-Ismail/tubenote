@@ -25,8 +25,8 @@ export const paginationQuerySchema = z
  * @description Validates and transforms query parameters for search functionality with pagination support.
  * Includes validation for page number, limit, sorting options, and search query string.
  *
- * @property page - Page number as string, defaults to "1", transformed to number
- * @property limit - Number of items per page as string, defaults to "9", transformed to number
+ * @property page - Page number as string, defaults to "1"
+ * @property limit - Number of items per page as string, defaults to "9"
  * @property sortBy - Field to sort by, either "createdAt" or "updatedAt", defaults to "createdAt"
  * @property order - Sort order, either "desc" or "asc", defaults to "desc"
  * @property q - Search query string, max 100 characters, transforms "undefined" string to empty string
@@ -44,8 +44,8 @@ export const paginationQuerySchema = z
  */
 export const searchAndPaginationQuerySchema = z
   .object({
-    page: z.string().regex(/^\d+$/).optional().default("1").transform(val => +val),
-    limit: z.string().regex(/^\d+$/).optional().default("9").transform(val => +val),
+    page: z.string().regex(/^\d+$/).optional().default("1"),
+    limit: z.string().regex(/^\d+$/).optional().default("9"),
     sortBy: z.enum(["createdAt", "updatedAt"]).optional().default("createdAt"),
     order: z.enum(["desc", "asc"]).optional().default("desc"),
     q: z.string().max(100).transform(val => val === "undefined" ? "" : val),
