@@ -1,7 +1,7 @@
 import type { Prisma, Video } from "@tubenote/db";
 import type { ISearchAndPaginationQueryDto } from "@tubenote/dtos";
 import type { IPaginatedData } from "@tubenote/types";
-import type { IYoutubeVideo } from "@tubenote/youtube-api";
+import type { YoutubeVideoData } from "@tubenote/youtube-api";
 
 import { BadRequestError, ERROR_MESSAGES } from "@tubenote/api-errors";
 import { youtubeApiService } from "@tubenote/youtube-api";
@@ -68,7 +68,7 @@ export class VideoService implements IVideoService {
     youtubeVideoId: string,
   ): Promise<Video> {
     const youtubeCacheKey = `youtube:video:data:${youtubeVideoId}`;
-    let videoData = await this._cacheService.get<IYoutubeVideo>(youtubeCacheKey);
+    let videoData = await this._cacheService.get<YoutubeVideoData>(youtubeCacheKey);
 
     if (videoData) {
       this._loggerService.debug(
@@ -174,7 +174,7 @@ export class VideoService implements IVideoService {
         tx,
       );
 
-      const totalPages = Math.ceil(totalItems / queryOptions.limit);
+      const totalPages = Math.ceil(totalItems / +queryOptions.limit);
       return { data, totalItems, totalPages };
     });
   }
