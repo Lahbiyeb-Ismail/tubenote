@@ -1,8 +1,6 @@
 import type { Note, Prisma } from "@tubenote/db";
 import type {
   ICreateNoteDto,
-  IFindManyDto,
-  IPaginationQueryDto,
   IParamIdDto,
   ISearchAndPaginationQueryDto,
   IUpdateNoteDto,
@@ -104,7 +102,7 @@ export interface INoteRepository {
    *
    * @param userId - The unique identifier of the user.
    * @param videoId - The unique identifier of the video.
-   * @param findManyDto - Data transfer object containing the video ID along with pagination parameters.
+   * @param queryOtions - Data transfer object containing the video ID along with pagination parameters.
    * @param tx - Optional transaction client for database operations.
    *
    * @returns A promise that resolves to an array of notes.
@@ -112,7 +110,7 @@ export interface INoteRepository {
   findManyByVideoId: (
     userId: string,
     videoId: string,
-    findManyDto: IFindManyDto,
+    queryOptions: ISearchAndPaginationQueryDto,
     tx?: Prisma.TransactionClient
   ) => Promise<Note[]>;
 
@@ -141,23 +139,6 @@ export interface INoteRepository {
     ytVideoId: string,
     tx?: Prisma.TransactionClient,
   ) => Promise<number>;
-
-  /**
-   * Searches for notes based on a query string.
-   *
-   * @param userId - The unique identifier of the user.
-   * @param query - The search query.
-   * @param findManyDto - Data transfer object containing pagination and sorting parameters.
-   * @param tx - Optional transaction client for database operations.
-   *
-   * @returns A promise that resolves to an array of notes.
-   */
-  search: (
-    userId: string,
-    query: string,
-    findManyDto: IFindManyDto,
-    tx?: Prisma.TransactionClient
-  ) => Promise<Note[]>;
 }
 
 /**
@@ -238,14 +219,14 @@ export interface INoteService {
    *
    * @param userId - The unique identifier of the user.
    * @param videoId - The unique identifier of the video.
-   * @param findManyDto - Data transfer object containing pagination, sorting, and filtering parameters.
+   * @param queryOptions - Data transfer object containing pagination, sorting, and filtering parameters.
    *
    * @returns A promise that resolves to the paginated notes information.
    */
   fetchNotesByVideoId: (
     userId: string,
     videoId: string,
-    findManyDto: IFindManyDto
+    queryOptions: ISearchAndPaginationQueryDto
   ) => Promise<IPaginatedData<Note>>;
 
   /**
@@ -348,7 +329,7 @@ export interface INoteController {
    * @returns A promise that resolves when the notes are retrieved.
    */
   getNotesByVideoId: (
-    req: TypedRequest<EmptyRecord, IParamIdDto, IPaginationQueryDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto, ISearchAndPaginationQueryDto>,
     res: Response
   ) => Promise<void>;
 }

@@ -1,7 +1,6 @@
 import type { Note, Prisma } from "@tubenote/db";
 import type {
   ICreateNoteDto,
-  IFindManyDto,
   ISearchAndPaginationQueryDto,
   IUpdateNoteDto,
 } from "@tubenote/dtos";
@@ -159,7 +158,7 @@ export class NoteService implements INoteService {
 
       const totalItems = await this._noteRepository.count(userId, queryOptions.q, tx);
 
-      const totalPages = Math.ceil(totalItems / queryOptions.limit);
+      const totalPages = Math.ceil(totalItems / +queryOptions.limit);
 
       return { data, totalItems, totalPages };
     });
@@ -170,7 +169,7 @@ export class NoteService implements INoteService {
    *
    * @param userId - The unique identifier of the user.
    * @param videoId - The unique identifier of the video.
-   * @param findManyDto - The data transfer object containing pagination and sorting options.
+   * @param queryOptions - The data transfer object containing pagination and sorting options.
    * @returns A promise that resolves to an object containing the paginated notes, total number of notes, and total pages.
    *
    * @template IFindManyDto - Interface for the data transfer object that includes pagination and user information.
@@ -180,19 +179,19 @@ export class NoteService implements INoteService {
   async fetchNotesByVideoId(
     userId: string,
     videoId: string,
-    findManyDto: IFindManyDto,
+    queryOptions: ISearchAndPaginationQueryDto,
   ): Promise<IPaginatedData<Note>> {
     return await this._prismaService.transaction(async (tx) => {
       const data = await this._noteRepository.findManyByVideoId(
         userId,
         videoId,
-        findManyDto,
+        queryOptions,
         tx,
       );
 
       const totalItems = await this._noteRepository.count(userId, "", tx);
 
-      const totalPages = Math.ceil(totalItems / findManyDto.limit);
+      const totalPages = Math.ceil(totalItems / +queryOptions.limit);
 
       return { data, totalItems, totalPages };
     });
