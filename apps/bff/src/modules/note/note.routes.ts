@@ -1,4 +1,4 @@
-import { createNoteSchema, idParamSchema, paginationQuerySchema, searchAndPaginationQuerySchema, updateNoteSchema } from "@tubenote/schemas";
+import { createNoteSchema, idParamSchema, searchAndPaginationQuerySchema, updateNoteSchema } from "@tubenote/schemas";
 import { Router } from "express";
 
 import { validateSessionMiddleware } from "@/middlewares/auth";
@@ -19,9 +19,9 @@ noteRoutes
 noteRoutes.route("/video/:id").get(
   validateRequest({
     params: idParamSchema,
-    query: paginationQuerySchema,
+    query: searchAndPaginationQuerySchema,
   }),
-  noteController.getNotesByVideoId,
+  noteController.getNotesByVideoId as any,
 );
 
 noteRoutes
@@ -34,6 +34,6 @@ noteRoutes
 
 noteRoutes
   .route("/")
-  .get(validateRequest({ query: searchAndPaginationQuerySchema }), noteController.getUserNotes);
+  .get(validateRequest({ query: searchAndPaginationQuerySchema }), noteController.getUserNotes as any);
 
 export { noteRoutes };

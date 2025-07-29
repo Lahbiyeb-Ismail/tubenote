@@ -1,4 +1,4 @@
-import type { ICreateNoteDto, IPaginationQueryDto, IParamIdDto, ISearchAndPaginationQueryDto, IUpdateNoteDto } from "@tubenote/dtos";
+import type { ICreateNoteDto, IParamIdDto, ISearchAndPaginationQueryDto, IUpdateNoteDto } from "@tubenote/dtos";
 import type { Response } from "express";
 
 import type { EmptyRecord, TypedRequest } from "@/types";
@@ -20,7 +20,7 @@ export class NoteController {
     catch (err: any) { res.status(err.status || 500).json(err); }
   }
 
-  async getNotesByVideoId(req: TypedRequest<EmptyRecord, IParamIdDto, IPaginationQueryDto>, res: Response) {
+  async getNotesByVideoId(req: TypedRequest<EmptyRecord, IParamIdDto, ISearchAndPaginationQueryDto>, res: Response) {
     const sessionData = req.sessionData;
     const videoId = req.params.id;
     const queryOptions = req.query;

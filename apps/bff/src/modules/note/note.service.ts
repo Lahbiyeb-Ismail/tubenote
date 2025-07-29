@@ -1,5 +1,5 @@
 import type { Note } from "@tubenote/db";
-import type { ICreateNoteDto, IPaginationQueryDto, ISearchAndPaginationQueryDto, IUpdateNoteDto } from "@tubenote/dtos";
+import type { ICreateNoteDto, ISearchAndPaginationQueryDto, IUpdateNoteDto } from "@tubenote/dtos";
 import type { IApiSuccessResponse } from "@tubenote/types";
 
 import type { ISessionData } from "@/types";
@@ -18,7 +18,7 @@ export class NoteService {
     return noteRes.data;
   }
 
-  async findAllByVideoId(sessionData: ISessionData, videoId: string, queryOptions: IPaginationQueryDto): Promise<IApiSuccessResponse<Note[]>> {
+  async findAllByVideoId(sessionData: ISessionData, videoId: string, queryOptions: ISearchAndPaginationQueryDto): Promise<IApiSuccessResponse<Note[]>> {
     const noteRes = await axiosInstance.get<IApiSuccessResponse<Note[]>>(`/notes/video/${videoId}`, {
       params: queryOptions,
       headers: {
