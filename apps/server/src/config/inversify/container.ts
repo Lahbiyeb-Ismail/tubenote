@@ -1,119 +1,73 @@
 import "reflect-metadata";
 import { Container } from "inversify";
-import { TYPES } from "./types";
 
+// Auth Module
+import type {
+  IAuthController,
+  IAuthService,
+  IJwtService,
+  ILocalAuthController,
+  ILocalAuthService,
+  IOAuthController,
+  IOAuthService,
+  IRefreshTokenController,
+  IRefreshTokenRepository,
+  IRefreshTokenService,
+  IResetPasswordController,
+  IResetPasswordService,
+  IVerifyEmailController,
+  IVerifyEmailRepository,
+  IVerifyEmailService,
+} from "@/modules/auth";
+import type { INoteController, INoteRepository, INoteService } from "@/modules/note";
+import type { ICacheService, ICryptoService, ILoggerService, IMailSenderService, IPrismaService, IRateLimitService, IResponseFormatter } from "@/modules/shared/services";
+// User Module
+import type {
+  IUserController,
+  IUserRepository,
+  IUserService,
+} from "@/modules/user";
+// Account Module
+import type {
+  IAccountRepository,
+  IAccountService,
+} from "@/modules/user/features/account/account.types";
+import type { IVideoController, IVideoRepository, IVideoService } from "@/modules/video";
+
+import { AuthController, AuthService, JwtService, LocalAuthController, LocalAuthService, OAuthController, OAuthService, RefreshTokenController, RefreshTokenRepository, RefreshTokenService, ResetPasswordController, ResetPasswordService, VerifyEmailController, VerifyEmailRepository, VerifyEmailService } from "@/modules/auth";
+// Note Module
+import {
+  NoteController,
+  NoteRepository,
+  NoteService,
+} from "@/modules/note";
 // Import shared services
 import {
   CacheService,
   CryptoService,
-  type ICacheService,
-  type ICryptoService,
-  type ILoggerService,
-  type IMailSenderService,
-  type IPrismaService,
-  type IRateLimitService,
-  type IResponseFormatter,
   LoggerService,
   MailSenderService,
   PrismaService,
   ResponseFormatter,
 } from "@/modules/shared/services";
-
-// JWT Service
-import { IJwtService, JwtService } from "@/modules/auth";
-
-// Auth Module
+// Import RateLimitService
+import { RateLimitService } from "@/modules/shared/services/rate-limit/rate-limit.service";
 import {
-  AuthController,
-  AuthService,
-  IAuthController,
-  IAuthService,
-} from "@/modules/auth";
-
-// Local Auth Module
-import {
-  ILocalAuthController,
-  ILocalAuthService,
-  LocalAuthController,
-  LocalAuthService,
-} from "@/modules/auth";
-
-// OAuth Module
-import {
-  IOAuthController,
-  IOAuthService,
-  OAuthController,
-  OAuthService,
-} from "@/modules/auth";
-
-// RefreshToken Module
-import {
-  IRefreshTokenController,
-  IRefreshTokenRepository,
-  IRefreshTokenService,
-  RefreshTokenController,
-  RefreshTokenRepository,
-  RefreshTokenService,
-} from "@/modules/auth";
-
-// VerifyEmail Module
-import {
-  IVerifyEmailController,
-  IVerifyEmailRepository,
-  IVerifyEmailService,
-  VerifyEmailController,
-  VerifyEmailRepository,
-  VerifyEmailService,
-} from "@/modules/auth";
-
-// ResetPassword Module
-import {
-  type IResetPasswordController,
-  type IResetPasswordService,
-  ResetPasswordController,
-  ResetPasswordService,
-} from "@/modules/auth";
-
-// User Module
-import {
-  type IUserController,
-  type IUserRepository,
-  IUserService,
   UserController,
   UserRepository,
   UserService,
 } from "@/modules/user";
-
 import { AccountRepository } from "@/modules/user/features/account/account.repository";
 import { AccountService } from "@/modules/user/features/account/account.service";
-// Account Module
-import {
-  type IAccountRepository,
-  IAccountService,
-} from "@/modules/user/features/account/account.types";
-
-// Import RateLimitService
-import { RateLimitService } from "@/modules/shared/services/rate-limit/rate-limit.service";
-
 // Video Module
 import {
-  type IVideoController,
-  type IVideoRepository,
-  type IVideoService,
+
   VideoController,
   VideoRepository,
   VideoService,
 } from "@/modules/video";
 
-// Note Module
-import {
-  type INoteController,
-  type INoteRepository,
-  type INoteService,
-  NoteController,
-  NoteRepository,
-  NoteService,
-} from "@/modules/note";
+import { TYPES } from "./types";
 
 // Create and configure the container
 const container = new Container();
