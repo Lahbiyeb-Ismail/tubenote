@@ -1,276 +1,180 @@
 # TubeNote Server
 
-The TubeNote server is an Express.js application that provides the backend API for the TubeNote platform. It handles authentication, data storage, and business logic.
+The backend server for the TubeNote application. It is responsible for handling all API requests, user authentication, data management, and interaction with external services like the YouTube API.
 
-## Technologies
+## ✨ Features
 
-- **Express.js** - Web application framework
-- **TypeScript** - Typed JavaScript
-- **Prisma** - ORM for database access
-- **Inversify** - Dependency injection container
-- **Passport** - Authentication middleware
-- **JWT** - JSON Web Tokens for authentication
-- **Zod** - Schema validation
-- **Winston** - Logging
+-   **Authentication:** Robust authentication system supporting both local (email/password) and Google OAuth providers.
+-   **JWT-based Sessions:** Secure session management using JSON Web Tokens (JWT) with access and refresh token rotation.
+-   **Password Management:** Secure password handling, including password reset and update functionalities.
+-   **Email Verification:** Email verification flow to ensure user authenticity.
+-   **CRUD Operations:** Full CRUD capabilities for core application resources like Notes and Videos.
+-   **Rate Limiting:** Middleware to protect against brute-force attacks and abuse on sensitive endpoints.
+-   **YouTube Integration:** Fetches video data and transcripts from the YouTube API.
+-   **Modular Architecture:** Organized into distinct modules for features like `auth`, `user`, `video`, and `note` for better maintainability and scalability.
+-   **Dependency Injection:** Utilizes InversifyJS for managing dependencies and improving code testability.
+-   **Structured Logging:** Comprehensive logging with Winston for effective debugging and monitoring.
 
-## Features
+## 🚀 Tech Stack
 
-- RESTful API endpoints for notes, videos, and users
-- JWT-based authentication with refresh tokens
-- Google OAuth integration
-- Email verification
-- Password reset functionality
-- Prisma ORM for database interactions
-- Dependency injection for better testability
-- Comprehensive error handling
-- API request validation with Zod
+-   **Framework:** [Express.js](https://expressjs.com/)
+-   **Language:** [TypeScript](https://www.typescriptlang.org/)
+-   **Database ORM:** [Prisma](https://www.prisma.io/)
+-   **Authentication:** [Passport.js](http://www.passportjs.org/) (for Google OAuth), [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken)
+-   **Dependency Injection:** [InversifyJS](https://inversify.io/)
+-   **Caching:** [Redis](https://redis.io/) (via `@tubenote/redis-cache`)
+-   **Validation:** [Zod](https://zod.dev/)
+-   **Security:** [Helmet](https://helmetjs.github.io/), [bcryptjs](https://github.com/dcodeIO/bcrypt.js)
+-   **Logging:** [Winston](https://github.com/winstonjs/winston)
+-   **Emailing:** [Nodemailer](https://nodemailer.com/)
+-   **Templating:** [Handlebars](https://handlebarsjs.com/) for email templates.
 
-## Architecture
+## 📂 Folder & File Structure
 
-The server follows a modular architecture based on domain-driven design principles to ensure separation of concerns and maintainability:
+The server's source code is organized into a modular structure to promote separation of concerns and scalability.
 
-- **Modules**: The application is divided into domain-specific modules (auth, user, notes, videos)
-- **Layers**: Each module follows a layered architecture:
-  - **Controllers**: Handle HTTP requests and responses
-  - **Services**: Implement business logic and orchestrate operations
-  - **Repositories**: Encapsulate data access logic
-  - **DTOs**: Define data transfer objects for input/output
-  - **Types**: Define interfaces for dependency injection
+```
+src/
+├── app.ts                 # Express application setup, middleware, and routes
+├── index.ts               # Server entry point (starts the server)
+├──
+├── config/                # Configuration files
+│   ├── inversify/         # InversifyJS (DI container) setup
+│   └── service-provider/  # Service initialization and registration
+│
+├── middlewares/           # Custom Express middleware
+│   ├── auth/              # Authentication and authorization middleware
+│   ├── rate-limit/        # Rate limiting middleware
+│   ├── error.middleware.ts # Global error handler
+│   └── validate-request.middleware.ts # Zod-based request validation
+│
+├── modules/               # Core feature modules
+│   ├── auth/              # Authentication (local, OAuth, JWT, password reset)
+│   ├── user/              # User profile and account management
+│   ├── video/             # Video data management
+│   ├── note/              # Note management
+│   └── shared/            # Shared utilities, services, and types
+│
+└── templates/             # Handlebars email templates
+```
 
-### Dependency Injection
+## ⚙️ Setup and Installation
 
-TubeNote server uses Inversify to implement dependency injection, which:
-- Decouples components for easier testing
-- Centralizes service instantiation
-- Facilitates singleton pattern where appropriate
-- Allows for flexible configuration and mocking
+1.  **Prerequisites:** Ensure you have [Node.js](https://nodejs.org/) and [pnpm](https://pnpm.io/) installed.
+2.  **Install Dependencies:** From the root of the monorepo, run:
+    ```bash
+    pnpm install
+    ```
+3.  **Navigate to Server:**
+    ```bash
+    cd apps/server
+    ```
+4.  **Environment Variables:** Create a `.env` file by copying the example file.
+    ```bash
+    cp .env.example .env
+    ```
+5.  **Fill Environment Variables:** Open the `.env` file and fill in the required values as described in the section below.
 
-## Authentication System
+## 🔑 Environment Variable Configuration
 
-### Authentication Flow
+The `.env` file contains all the necessary environment variables for the server to run.
 
-The server implements a secure authentication system with multiple strategies:
+| Variable                          | Description                                                                                             | Example                                                    |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `NODE_ENV`                        | The application environment.                                                                            | `development`                                              |
+| `PORT`                            | The port on which the server will run.                                                                  | `8080`                                                     |
+| `SERVER_URL`                      | The base URL of the server.                                                                             | `http://localhost:8080`                                    |
+| `CLIENT_URL`                      | The URL of the client application (for CORS and redirects).                                             | `http://localhost:3000`                                    |
+| `SESSION_SECRET`                  | A secret key for signing session cookies.                                                               | `a-very-strong-and-long-secret`                            |
+| `DATABASE_URL`                    | The connection string for your database (e.g., PostgreSQL).                                             | `postgresql://user:password@localhost:5432/tubenote`       |
+| `ACCESS_TOKEN_COOKIE_NAME`        | The name of the cookie for the access token.                                                            | `access_token`                                             |
+| `ACCESS_TOKEN_SECRET`             | The secret key for signing access tokens.                                                               | `your-access-token-secret`                                 |
+| `ACCESS_TOKEN_EXPIRES_IN`         | The expiration time for access tokens.                                                                  | `15m`                                                      |
+| `REFRESH_TOKEN_COOKIE_NAME`       | The name of the cookie for the refresh token.                                                           | `refresh_token`                                            |
+| `REFRESH_TOKEN_SECRET`            | The secret key for signing refresh tokens.                                                              | `your-refresh-token-secret`                                |
+| `REFRESH_TOKEN_EXPIRES_IN`        | The expiration time for refresh tokens.                                                                 | `7d`                                                       |
+| `RESET_PASSWORD_TOKEN_SECRET`     | The secret for password reset tokens.                                                                   | `your-reset-password-secret`                               |
+| `RESET_PASSWORD_TOKEN_EXPIRES_IN` | The expiration time for password reset tokens.                                                          | `1h`                                                       |
+| `VERIFY_EMAIL_TOKEN_SECRET`       | The secret for email verification tokens.                                                               | `your-verify-email-secret`                                 |
+| `VERIFY_EMAIL_TOKEN_EXPIRES_IN`   | The expiration time for email verification tokens.                                                      | `1d`                                                       |
+| `HASH_ALGORITHM`                  | The hashing algorithm to use.                                                                           | `sha256`                                                   |
+| `YOUTUBE_API_URL`                 | The base URL for the YouTube Data API.                                                                  | `https://www.googleapis.com/youtube/v3`                    |
+| `YOUTUBE_API_KEY`                 | Your API key for the YouTube Data API.                                                                  | `your-youtube-api-key`                                     |
+| `GOOGLE_CLIENT_ID`                | The client ID for Google OAuth.                                                                         | `your-google-client-id.apps.googleusercontent.com`         |
+| `GOOGLE_CLIENT_SECRET`            | The client secret for Google OAuth.                                                                     | `your-google-client-secret`                                |
+| `GOOGLE_CALLBACK_URL`             | The callback URL for Google OAuth.                                                                      | `/api/v1/oauth/google/callback`                            |
+| `GOOGLE_REDIRECT_URI`             | The full redirect URI for Google OAuth.                                                                 | `http://localhost:8080/api/v1/oauth/google/callback`       |
+| `SMTP_HOST`                       | The hostname of your SMTP server.                                                                       | `smtp.gmail.com`                                           |
+| `SMTP_PORT`                       | The port of your SMTP server.                                                                           | `465`                                                      |
+| `SMTP_USER`                       | The username for your SMTP server.                                                                      | `your-email@example.com`                                   |
+| `SMTP_PASSWORD`                   | The password for your SMTP server.                                                                      | `your-smtp-password`                                       |
+| `EMAIL_FROM`                      | The "from" address for outgoing emails.                                                                 | `no-reply@tubenote.com`                                    |
+| `PYTHON_EXECUTABLE`               | The path to the Python executable for running scripts.                                                  | `python3`                                                  |
+| `SCRIPT_TIMEOUT`                  | The timeout for Python script execution in milliseconds.                                                | `30000`                                                    |
+| `REDIS_USERNAME`                  | The username for your Redis instance.                                                                   | `default`                                                  |
+| `REDIS_PASSWORD`                  | The password for your Redis instance.                                                                   | `your-redis-password`                                      |
+| `REDIS_HOST`                      | The hostname of your Redis instance.                                                                    | `localhost`                                                |
+| `REDIS_PORT`                      | The port of your Redis instance.                                                                        | `6379`                                                     |
 
-1. **Local Authentication** (Email/Password)
-   - User registration with email verification
-   - Password hashing using bcrypt
-   - Secure login with rate limiting to prevent brute force attacks
-   - JWT-based session management with refresh tokens
-
-2. **OAuth Authentication** (Google)
-   - Integration with Google OAuth for single sign-on
-   - Account linking with existing email accounts
-   - Automatic profile creation based on OAuth provider data
-
-### User Sessions
-
-Sessions are managed using a combined approach of:
-
-- **Access Tokens**: Short-lived JWTs (default: 20 minutes) sent as cookies for API authentication
-- **Refresh Tokens**: Long-lived tokens (default: 7 days) stored securely as HTTP-only cookies and in the database
-- **Token Rotation**: Each use of a refresh token invalidates it and issues a new one for enhanced security
-- **Device Tracking**: Sessions track device information for suspicious activity detection
-- **Token Revocation**: Ability to invalidate all sessions for a specific user
-
-### Security Measures
-
-- HTTP-only cookies with secure and SameSite flags
-- CSRF protection
-- Rate limiting on authentication endpoints
-- IP tracking for suspicious activity
-- Device fingerprinting for multi-device support
-- Automatic session invalidation on suspicious activity
-
-## Email Verification
-
-The email verification system ensures that only users with valid email addresses can fully access the platform:
-
-1. **Verification Process**:
-   - Upon registration, an unverified user account is created
-   - A unique verification token is generated and stored in the database with an expiration time
-   - A verification email with a secure token link is sent to the user's email
-   - The user clicks the link, which validates the token and marks the account as verified
-
-2. **Implementation Details**:
-   - Tokens are cryptographically secure and tied to specific user accounts
-   - Tokens expire after a configurable period (default: 24 hours)
-   - Verification status is required for sensitive operations
-   - Users can request new verification emails if the original expires
-
-## Password Reset Flow
-
-The password reset system provides a secure way for users to regain access to their accounts:
-
-1. **Request Phase**:
-   - User requests a password reset by providing their email
-   - System verifies the email exists and is verified
-   - A secure reset token is generated and stored in a cache with expiration
-   - Reset email with token link is sent to the user's email
-
-2. **Reset Phase**:
-   - User clicks the link and provides a new password
-   - System validates the token from the URL
-   - Password is updated after validation
-   - All existing sessions are invalidated for security
-   - User receives confirmation of password change
-
-3. **Security Considerations**:
-   - Tokens are single-use and expire after a configurable period
-   - Rate limiting prevents abuse of the reset mechanism
-   - Email notifications are sent when passwords are changed
-   - Cache-based storage prevents database pollution with expired tokens
-
-## Data Models
-
-The primary data models in the system include:
-
-- **User**: Core user information and authentication details
-- **Account**: OAuth provider connections and credentials
-- **RefreshToken**: Session management and token tracking
-- **EmailVerificationToken**: Email verification status tracking
-- **Note**: User-created notes linked to specific videos
-- **Video**: Metadata for videos that users have annotated
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js (v18 or later)
-- pnpm (v8 or later)
-- PostgreSQL or other supported database
+## ▶️ Running the Application
 
 ### Development
 
-1. Install dependencies:
-   ```bash
-   pnpm install
-   ```
-
-2. Create an `.env` file with the following variables:
-   ```
-   # Server
-   PORT=8000
-   NODE_ENV=development
-   API_URL=http://localhost:8000/api
-   CLIENT_URL=http://localhost:3000
-
-   # Database
-   DATABASE_URL="postgresql://username:password@localhost:5432/tubenote"
-
-   # JWT
-   ACCESS_TOKEN_SECRET=your_access_token_secret
-   REFRESH_TOKEN_SECRET=your_refresh_token_secret
-   ACCESS_TOKEN_EXPIRE=20m
-   REFRESH_TOKEN_EXPIRE=7d
-   REFRESH_TOKEN_COOKIE_NAME=refresh_token
-
-   # Email
-   SMTP_HOST=smtp.example.com
-   SMTP_PORT=587
-   SMTP_USER=your_email@example.com
-   SMTP_PASS=your_email_password
-   EMAIL_FROM=noreply@tubenote.com
-
-   # Google OAuth
-   GOOGLE_CLIENT_ID=your_google_client_id
-   GOOGLE_CLIENT_SECRET=your_google_client_secret
-   GOOGLE_CALLBACK_URL=http://localhost:8000/api/auth/google/callback
-   ```
-
-3. Generate Prisma client:
-   ```bash
-   pnpm prisma:generate
-   ```
-
-4. Push database schema:
-   ```bash
-   pnpm prisma:push
-   ```
-
-5. Start the development server:
-   ```bash
-   pnpm dev
-   ```
-
-## Project Structure
-
-- `src/` - Source code
-  - `app.ts` - Express application setup
-  - `index.ts` - Server entry point
-  - `config/` - Configuration files
-  - `middlewares/` - Express middlewares
-  - `modules/` - Application modules (controllers, services, repositories)
-    - `auth/` - Authentication and authorization
-    - `user/` - User management
-    - `note/` - Note management
-    - `video/` - Video management
-    - `shared/` - Shared utilities and services
-  - `templates/` - Email templates
-- `prisma/` - Prisma schema and migrations
-- `logs/` - Application logs
-
-## API Endpoints
-
-### Authentication
-
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login user
-- `POST /api/auth/refresh` - Refresh access token
-- `POST /api/auth/logout` - Logout user
-- `GET /api/auth/google` - Google OAuth login
-- `GET /api/auth/google/callback` - Google OAuth callback
-- `GET /api/auth/verify-email/:token` - Verify email address
-- `POST /api/auth/send-verification-email` - Resend verification email
-- `POST /api/auth/forgot-password` - Request password reset
-- `POST /api/auth/reset-password/:token` - Reset password with token
-
-### User Management
-
-- `GET /api/users/me` - Get current user profile
-- `PATCH /api/users/me` - Update user profile
-- `PATCH /api/users/update-password` - Update password
-
-### Notes and Videos
-
-- `GET /api/notes` - Get user notes
-- `POST /api/notes` - Create a new note
-- `GET /api/notes/:id` - Get a specific note
-- `PUT /api/notes/:id` - Update a note
-- `DELETE /api/notes/:id` - Delete a note
-- `GET /api/videos/:videoId/notes` - Get notes for a specific video
-
-## Testing
+To run the server in development mode with hot-reloading:
 
 ```bash
-# Run all tests
-pnpm test
-
-# Run tests in watch mode
-pnpm test:watch
+pnpm dev
 ```
 
-## Error Handling
+The server will be available at `http://localhost:8080` (or the port specified in your `.env` file).
 
-The server implements a comprehensive error handling system:
+### Production
 
-- Custom error classes for different types of errors
-- Consistent error response format
-- Detailed logging for debugging
-- Graceful handling of unexpected errors
+To build and run the server for production:
 
-## Rate Limiting
+```bash
+# 1. Build the application
+pnpm build
 
-The server implements rate limiting on sensitive endpoints:
+# 2. Start the server
+pnpm start
+```
 
-- Authentication endpoints (login, register, password reset)
-- Profile update endpoints
-- Based on IP address and/or user ID when authenticated
+## 📜 Scripts
 
-## Logging
+The following scripts are available in the `package.json`:
 
-The application uses Winston for logging with the following setup:
+-   `pnpm dev`: Starts the server in development mode using `tsx` for hot-reloading.
+-   `pnpm build`: Compiles the TypeScript code to JavaScript in the `dist` directory.
+-   `pnpm start`: Starts the production server from the compiled code in `dist`.
+-   `pnpm test`: Runs the test suite using Jest.
 
-- Different log levels based on environment
-- File-based logs with rotation
-- Console logs during development
-- Error tracking and alerting in production
+## 🧪 Testing
+
+Tests are written using [Jest](https://jestjs.io/). To run the test suite, execute:
+
+```bash
+pnpm test
+```
+
+## 📖 API Documentation
+
+The API is versioned and all routes are prefixed with `/api/v1`.
+
+### Main API Routes:
+
+-   `/api/v1/auth`: Handles local authentication, logout, password reset, and email verification.
+-   `/api/v1/oauth`: Manages OAuth flows (e.g., Google).
+-   `/api/v1/videos`: Provides endpoints for video-related data.
+-   `/api/v1/notes`: Endpoints for creating, reading, updating, and deleting notes.
+-   `/api/v1/users`: Manages user profile information.
+
+For detailed endpoint specifications, please refer to the route definitions within each module in the `src/modules` directory.
+
+## 🤝 Contribution
+
+Contributions are welcome! Please follow the guidelines in the main `CONTRIBUTING.md` file of the repository.
+
+## 📄 License
+
+This project is licensed under the **MIT License**. See the [LICENSE](./LICENSE) file for details.
