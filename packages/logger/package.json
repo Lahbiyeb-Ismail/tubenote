@@ -1,0 +1,25 @@
+{
+  "name": "@tubenote/logger",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "tsup": "^8.4.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@tubenote/config-typescript": "workspace:*",
+    "@types/node": "^20.2.3",
+    "typescript": "^5.7.2"
+  }
+}
