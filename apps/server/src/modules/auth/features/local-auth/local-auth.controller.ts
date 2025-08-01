@@ -14,14 +14,8 @@ import type { TypedRequest } from "@/modules/shared/types";
 
 import { TYPES } from "@/config/inversify/types";
 import {
-  accessTokenCookieConfig,
   AUTH_RATE_LIMIT_CONFIG,
-  refreshTokenCookieConfig,
 } from "@/modules/auth/config";
-import {
-  ACCESS_TOKEN_NAME,
-  REFRESH_TOKEN_NAME,
-} from "@/modules/auth/constants";
 
 import type {
   ILocalAuthController,
@@ -92,7 +86,7 @@ export class LocalAuthController implements ILocalAuthController {
     const ipAddress = req.clientIp as string;
 
     try {
-      const { accessToken, refreshToken }
+      const authTokens
         = await this._localAuthService.loginUser(
           req.body,
           deviceId,
@@ -101,18 +95,15 @@ export class LocalAuthController implements ILocalAuthController {
         );
 
       const formattedResponse
-        = this._responseFormatter.formatSuccessResponse<string>({
+        = this._responseFormatter.formatSuccessResponse<{ accessToken: string; refreshToken: string }>({
           responseOptions: {
             message: "Login successful",
-            data: accessToken,
+            data: authTokens,
           },
         });
 
       // Reset rate limiters on successful login
       await this._rateLimiter.reset(rateLimitKey);
-
-      res.cookie(REFRESH_TOKEN_NAME, refreshToken, refreshTokenCookieConfig);
-      res.cookie(ACCESS_TOKEN_NAME, accessToken, accessTokenCookieConfig);
 
       res.status(formattedResponse.statusCode).json(formattedResponse);
     }

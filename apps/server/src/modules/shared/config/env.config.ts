@@ -8,6 +8,7 @@ const envSchema = z.object({
   PORT: z.string({ message: "PORT must be a string" }).default("8080"),
   SERVER_URL: z.string({ message: "SERVER_URL must be a string" }),
   CLIENT_URL: z.string({ message: "CLIENT_URL must be a string" }),
+  BFF_API_URL: z.string({ message: "BFF_API_URL must be a string" }).url(),
   SESSION_SECRET: z.string().min(8),
   ACCESS_TOKEN_NAME: z.string().default("access_token"),
   ACCESS_TOKEN_SECRET: z.string().min(8),
@@ -67,6 +68,9 @@ export const envConfig = {
   },
   client: {
     url: validatedEnv.CLIENT_URL,
+  },
+  bff_api: {
+    url: validatedEnv.BFF_API_URL,
   },
   jwt: {
     access_token: {

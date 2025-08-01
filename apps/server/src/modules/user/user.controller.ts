@@ -16,11 +16,6 @@ import { TYPES } from "@/config/inversify/types";
 
 import type { IUserController, IUserService } from "./user.types";
 
-import {
-  ACCESS_TOKEN_NAME,
-  clearAuthTokenCookieConfig,
-  REFRESH_TOKEN_NAME,
-} from "../auth";
 import { USER_RATE_LIMIT_CONFIG } from "./config";
 
 /**
@@ -120,9 +115,6 @@ export class UserController implements IUserController {
         });
 
       await this._rateLimitService.reset(req.rateLimitKey);
-
-      res.clearCookie(ACCESS_TOKEN_NAME, clearAuthTokenCookieConfig);
-      res.clearCookie(REFRESH_TOKEN_NAME, clearAuthTokenCookieConfig);
 
       res.status(formattedResponse.statusCode).json(formattedResponse);
     }
