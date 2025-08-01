@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@tubenote/config-typescript": "workspace:*",
+    "@tubenote/db": "workspace:*",
     "@tubenote/dtos": "workspace:*",
     "@tubenote/types": "workspace:*",
     "@types/cookie-parser": "^1.4.7",
