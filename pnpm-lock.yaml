@@ -72,6 +72,9 @@ importers:
       '@tubenote/api-errors':
         specifier: workspace:*
         version: link:../../packages/api-errors
+      '@tubenote/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
       '@tubenote/redis-cache':
         specifier: workspace:*
         version: link:../../packages/redis-cache
@@ -320,6 +323,9 @@ importers:
       '@tubenote/dtos':
         specifier: workspace:*
         version: link:../../packages/dtos
+      '@tubenote/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
       '@tubenote/redis-cache':
         specifier: workspace:*
         version: link:../../packages/redis-cache
@@ -401,9 +407,6 @@ importers:
       uuid:
         specifier: ^11.0.5
         version: 11.1.0
-      winston:
-        specifier: ^3.17.0
-        version: 3.17.0
       zod:
         specifier: ^3.23.8
         version: 3.25.67
@@ -542,6 +545,25 @@ importers:
       '@tubenote/youtube-api':
         specifier: workspace:*
         version: link:../youtube-api
+
+  packages/logger:
+    dependencies:
+      tsup:
+        specifier: ^8.4.0
+        version: 8.5.0(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.3)(typescript@5.8.3)(yaml@2.8.0)
+      winston:
+        specifier: ^3.17.0
+        version: 3.17.0
+    devDependencies:
+      '@tubenote/config-typescript':
+        specifier: workspace:*
+        version: link:../config-typescript
+      '@types/node':
+        specifier: ^20.2.3
+        version: 20.19.1
+      typescript:
+        specifier: ^5.7.2
+        version: 5.8.3
 
   packages/redis-cache:
     dependencies:
