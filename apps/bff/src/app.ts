@@ -1,3 +1,5 @@
+import "express-async-errors";
+
 import type { Express } from "express";
 
 import cookieParser from "cookie-parser";
@@ -6,6 +8,7 @@ import express from "express";
 import helmet from "helmet";
 
 import { envConfig } from "./config";
+import { globalErrorHandler, notFoundRoute } from "./middlewares/errors";
 import { appRoutes } from "./routes";
 
 const app: Express = express();
@@ -28,5 +31,9 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api", appRoutes);
+
+// ?: Global Error middleware
+app.use(notFoundRoute);
+app.use(globalErrorHandler);
 
 export default app;
