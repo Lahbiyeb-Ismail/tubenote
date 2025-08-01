@@ -1,3 +1,17 @@
+/**
+ * Collection of standardized error messages related to email operations.
+ *
+ * @remarks
+ * This object contains reusable error messages for common email-related scenarios
+ * including validation, verification, registration, and delivery issues.
+ *
+ * @example
+ * ```typescript
+ * throw new Error(EMAIL_ERRORS.INVALID_FORMAT);
+ * ```
+ *
+ * @public
+ */
 export const EMAIL_ERRORS = {
   ALREADY_EXISTS:
     "The email address provided is already associated with another account.",

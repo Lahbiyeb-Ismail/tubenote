@@ -4,6 +4,11 @@ import type { IRedisSessionService, ISessionData } from "./session-cache.types";
 
 import { envConfig } from "../../config";
 
+/**
+ * Service for managing user sessions in Redis cache.
+ * Provides methods to create, retrieve, and delete sessions.
+ * Uses Redis as the underlying storage mechanism.
+ */
 export class SessionCacheService implements IRedisSessionService {
   private redisCache: RedisCacheService;
 

@@ -6,9 +6,32 @@ import { validateRequest } from "@/middlewares/validation";
 
 import { NoteController } from "./note.controller";
 
-const noteController = new NoteController();
-
+/**
+ * Note routes module that defines all HTTP endpoints for note-related operations.
+ * All routes require session validation middleware for authentication.
+ *
+ * @module NoteRoutes
+ *
+ * Routes:
+ * - GET /count/:id - Get count of notes for a specific YouTube video ID
+ * - GET /video/:id - Get paginated notes for a specific video with search capability
+ * - GET /:id - Get a specific note by ID
+ * - DELETE /:id - Delete a specific note by ID
+ * - POST /:id - Create a new note for a specific video
+ * - PATCH /:id - Update an existing note
+ * - GET / - Get paginated user notes with search capability
+ *
+ * @requires validateSessionMiddleware - Applied to all routes for authentication
+ * @uses NoteController - Controller instance handling business logic
+ * @validation Uses various schemas for request validation:
+ *   - idParamSchema: Validates ID parameters
+ *   - searchAndPaginationQuerySchema: Validates search and pagination query parameters
+ *   - createNoteSchema: Validates note creation request body
+ *   - updateNoteSchema: Validates note update request body
+ */
 const noteRoutes: Router = Router();
+
+const noteController = new NoteController();
 
 noteRoutes.use(validateSessionMiddleware);
 

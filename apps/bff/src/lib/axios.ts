@@ -4,6 +4,20 @@ import { envConfig } from "@/config";
 import { AuthService } from "@/modules/auth";
 import axios from "axios";
 
+/**
+ * Axios instance configured for backend API communication.
+ *
+ * This instance is pre-configured with:
+ * - Base URL from environment configuration
+ * - Credentials included in cross-origin requests
+ *
+ * @example
+ * ```typescript
+ * // Use for API calls
+ * const response = await axiosInstance.get('/users');
+ * const userData = await axiosInstance.post('/auth/login', credentials);
+ * ```
+ */
 const axiosInstance = axios.create({
   baseURL: envConfig.backend_api.url,
   withCredentials: true,
@@ -23,6 +37,15 @@ axiosInstance.interceptors.response.use(
 
       try {
         const authService = new AuthService();
+        /**
+         * Extracts the session identifier from the request headers.
+         * This session ID is used by the interceptor to track user sessions
+         * and maintain authentication state across API requests.
+         *
+         * @remarks
+         * The session ID is expected to be passed in the "X-Session-ID" header
+         * by the client and is used for session management and request correlation.
+         */
         const sessionId = originalRequest.headers["X-Session-ID"] as string;
 
         console.log("Session ID for refresh:", sessionId);

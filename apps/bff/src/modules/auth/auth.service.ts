@@ -8,13 +8,37 @@ import { envConfig } from "@/config";
 import { axiosInstance } from "@/lib/axios";
 import { sessionCacheService } from "@/services";
 
+/**
+ * Service class for handling authentication operations including user registration,
+ * login, logout, and token refresh functionality.
+ *
+ * This service manages user sessions through a cache system and communicates
+ * with the backend authentication API to handle JWT tokens.
+ */
 export class AuthService {
+  /**
+   * Registers a new user with the provided credentials.
+   *
+   * @param credentials - The registration data containing user information
+   * @returns A promise that resolves to an API success response with a string payload
+   * @throws Will throw an error if the registration request fails
+   */
   async register(credentials: IRegisterDto): Promise<IApiSuccessResponse<string>> {
     const registerRes = await axiosInstance.post<IApiSuccessResponse<string>>(`/auth/register`, credentials);
 
     return registerRes.data;
   }
 
+  /**
+   * Authenticates a user with the provided login credentials and creates a new session.
+   *
+   * The method exchanges user credentials for authentication tokens, stores them in a
+   * session cache, and returns a session ID along with sanitized response data.
+   *
+   * @param credentials - The login credentials (username/email and password)
+   * @returns A promise that resolves to an object containing the session ID and API response with null payload
+   * @throws Will throw an error if the login request fails
+   */
   async login(credentials: ILoginDto): Promise<{ sessionId: string; data: IApiSuccessResponse<null> }> {
     const loginRes = await axiosInstance.post<IApiSuccessResponse<{ accessToken: string; refreshToken: string }>>(`/auth/login`, credentials);
 
@@ -33,6 +57,16 @@ export class AuthService {
     } };
   }
 
+  /**
+   * Logs out a user by invalidating their session and revoking their tokens.
+   *
+   * This method retrieves the session data, calls the backend logout endpoint
+   * to revoke the refresh token, and removes the session from the cache.
+   *
+   * @param sessionId - The unique session identifier
+   * @returns A promise that resolves to an API success response with null payload
+   * @throws Will throw an error if the user is not logged in or if the logout request fails
+   */
   async logout(sessionId: string): Promise<IApiSuccessResponse<null>> {
     const sessionData = await sessionCacheService.getSession(sessionId);
 
@@ -52,6 +86,16 @@ export class AuthService {
     return logoutRes.data;
   }
 
+  /**
+   * Refreshes the authentication tokens for an active session.
+   *
+   * This method uses the stored refresh token to obtain new access and refresh tokens
+   * from the backend API, then updates the session cache with the new tokens.
+   *
+   * @param sessionId - The unique session identifier
+   * @returns A promise that resolves to an object containing the session ID and new access token
+   * @throws Will throw an error if the user is not logged in or if the refresh request fails
+   */
   async refresh(sessionId: string): Promise<{ sessionId: string; accessToken: string }> {
     const sessionData = await sessionCacheService.getSession(sessionId);
 
