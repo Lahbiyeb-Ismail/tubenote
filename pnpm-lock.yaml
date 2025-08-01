@@ -75,6 +75,9 @@ importers:
       '@tubenote/redis-cache':
         specifier: workspace:*
         version: link:../../packages/redis-cache
+      '@tubenote/schemas':
+        specifier: workspace:*
+        version: link:../../packages/schemas
       axios:
         specifier: ^1.10.0
         version: 1.10.0

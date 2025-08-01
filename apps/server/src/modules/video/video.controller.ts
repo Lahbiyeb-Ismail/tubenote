@@ -65,7 +65,7 @@ export class VideoController implements IVideoController {
     );
 
     const formattedResponse = this._responseFormatter.formatPaginatedResponse({
-      page: req.query.page,
+      page: +req.query.page,
       paginatedData,
       responseOptions: {
         message: "Videos retrieved successfully.",

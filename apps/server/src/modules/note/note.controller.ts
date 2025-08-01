@@ -1,7 +1,6 @@
 import type { Note } from "@tubenote/db";
 import type {
   ICreateNoteDto,
-  IPaginationQueryDto,
   IParamIdDto,
   ISearchAndPaginationQueryDto,
   IUpdateNoteDto,
@@ -202,7 +201,7 @@ export class NoteController implements INoteController {
     );
 
     const formattedResponse = this._responseFormatter.formatPaginatedResponse<Note>({
-      page: req.query.page,
+      page: +req.query.page,
       paginatedData,
       responseOptions: {
         message: "User notes retrieved successfully.",
@@ -220,25 +219,21 @@ export class NoteController implements INoteController {
    * @returns A promise that resolves to void.
    */
   async getNotesByVideoId(
-    req: TypedRequest<EmptyRecord, IParamIdDto, IPaginationQueryDto>,
+    req: TypedRequest<EmptyRecord, IParamIdDto, ISearchAndPaginationQueryDto>,
     res: Response,
   ): Promise<void> {
     const userId = req.userId;
     const videoId = req.params.id;
-
-    const findManyDto = this._responseFormatter.getPaginationQueries({
-      reqQuery: req.query,
-      itemsPerPage: 8,
-    });
+    const queryOptions = req.query;
 
     const paginatedData = await this._noteService.fetchNotesByVideoId(
       userId,
       videoId,
-      findManyDto,
+      queryOptions,
     );
 
     const formattedResponse = this._responseFormatter.formatPaginatedResponse({
-      page: req.query.page ?? 1,
+      page: +req.query.page,
       paginatedData,
       responseOptions: {
         message: "Notes retrieved successfully.",

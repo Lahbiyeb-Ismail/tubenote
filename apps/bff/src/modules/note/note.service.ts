@@ -18,8 +18,9 @@ export class NoteService {
     return noteRes.data;
   }
 
-  async findAllByVideoId(sessionData: ISessionData, videoId: string): Promise<IApiSuccessResponse<Note[]>> {
+  async findAllByVideoId(sessionData: ISessionData, videoId: string, queryOptions: ISearchAndPaginationQueryDto): Promise<IApiSuccessResponse<Note[]>> {
     const noteRes = await axiosInstance.get<IApiSuccessResponse<Note[]>>(`/notes/video/${videoId}`, {
+      params: queryOptions,
       headers: {
         "Authorization": `Bearer ${sessionData.accessToken}`,
         "X-Session-ID": sessionData.sessionId,
@@ -74,9 +75,8 @@ export class NoteService {
   }
 
   async findAll(sessionData: ISessionData, queryOptions: ISearchAndPaginationQueryDto): Promise<IApiSuccessResponse<Note[]>> {
-    const { page, q, limit, order, sortBy } = queryOptions;
-
-    const noteRes = await axiosInstance.get<IApiSuccessResponse<Note[]>>(`/notes?page=${page}&q=${q}&limit=${limit}&order=${order}&sortBy=${sortBy}`, {
+    const noteRes = await axiosInstance.get<IApiSuccessResponse<Note[]>>("/notes", {
+      params: queryOptions,
       headers: {
         "Authorization": `Bearer ${sessionData.accessToken}`,
         "X-Session-ID": sessionData.sessionId,

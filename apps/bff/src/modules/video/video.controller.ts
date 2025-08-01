@@ -1,4 +1,7 @@
+import type { IParamIdDto, ISearchAndPaginationQueryDto } from "@tubenote/dtos";
 import type { Request, Response } from "express";
+
+import type { EmptyRecord, TypedRequest } from "@/types";
 
 import { VideoService } from "./video.service";
 
@@ -6,11 +9,11 @@ const videoService = new VideoService();
 
 export class VideoController {
   async getUserVideos(
-    req: Request,
+    req: TypedRequest<EmptyRecord, EmptyRecord, ISearchAndPaginationQueryDto>,
     res: Response,
   ) {
     const sessionData = req.sessionData;
-    const queryOptions = req.query as any;
+    const queryOptions = req.query;
 
     const data = await videoService.findAll(
       sessionData,
@@ -32,7 +35,7 @@ export class VideoController {
   }
 
   async getVideoByYoutubeId(
-    req: Request,
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response,
   ) {
     const sessionData = req.sessionData;

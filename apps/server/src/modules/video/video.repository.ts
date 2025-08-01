@@ -39,7 +39,7 @@ export class VideoRepository implements IVideoRepository {
 
     const { limit, order, page, sortBy, q: searchQuery } = queryOptions;
 
-    const skip = (page - 1) * limit;
+    const skip = (+page - 1) * +limit;
 
     return handleAsyncOperation(
       () =>
@@ -48,7 +48,7 @@ export class VideoRepository implements IVideoRepository {
             { title: { contains: searchQuery, mode: "insensitive" } },
             { description: { contains: searchQuery, mode: "insensitive" } },
           ] },
-          take: limit,
+          take: +limit,
           skip,
           orderBy: {
             [sortBy]: order,
