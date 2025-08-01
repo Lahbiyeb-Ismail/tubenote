@@ -72,6 +72,9 @@ importers:
       '@tubenote/api-errors':
         specifier: workspace:*
         version: link:../../packages/api-errors
+      '@tubenote/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
       '@tubenote/redis-cache':
         specifier: workspace:*
         version: link:../../packages/redis-cache
