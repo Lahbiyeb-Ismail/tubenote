@@ -8,11 +8,11 @@ import type { ISessionData } from "@/services";
 
 import { envConfig } from "@/config";
 import { axiosInstance } from "@/lib/axios";
-import { redisSessionService } from "@/services";
+import { sessionCacheService } from "@/services";
 
 export class AuthService {
   async getSession(sessionId: string): Promise<ISessionData | null> {
-    return redisSessionService.getSession(sessionId);
+    return sessionCacheService.getSession(sessionId);
   }
 
   async register(credentials: IRegisterDto): Promise<IApiSuccessResponse<string>> {
@@ -28,7 +28,7 @@ export class AuthService {
 
     const sessionId = uuidv4();
 
-    await redisSessionService.createSession(sessionId, authTokens, 60 * 60 * 24 * 1000); // 24 hours
+    await sessionCacheService.createSession(sessionId, authTokens, 60 * 60 * 24 * 1000); // 24 hours
 
     return { sessionId, data: {
       ...loginRes.data,
@@ -40,7 +40,7 @@ export class AuthService {
   }
 
   async logout(sessionId: string): Promise<IApiSuccessResponse<null>> {
-    const sessionData = await redisSessionService.getSession(sessionId);
+    const sessionData = await sessionCacheService.getSession(sessionId);
 
     if (!sessionData || !sessionData.accessToken) {
       throw new Error("You must be logged in to log out");
@@ -55,13 +55,13 @@ export class AuthService {
       withCredentials: true,
     });
 
-    await redisSessionService.deleteSession(sessionId);
+    await sessionCacheService.deleteSession(sessionId);
 
     return logoutRes.data;
   }
 
   async refresh(sessionId: string): Promise<{ sessionId: string; data: IApiSuccessResponse<null> }> {
-    const sessionData = await redisSessionService.getSession(sessionId);
+    const sessionData = await sessionCacheService.getSession(sessionId);
 
     if (!sessionData || !sessionData.refreshToken) {
       throw new Error("You must be logged in to refresh");
@@ -77,7 +77,7 @@ export class AuthService {
 
     const newAuthTokens = refreshRes.data.payload.data;
 
-    await redisSessionService.createSession(sessionId, newAuthTokens, 60 * 60 * 24 * 1000); // 24 hours
+    await sessionCacheService.createSession(sessionId, newAuthTokens, 60 * 60 * 24 * 1000); // 24 hours
 
     return { sessionId, data: {
       ...refreshRes.data,

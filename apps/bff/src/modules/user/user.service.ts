@@ -1,11 +1,11 @@
 import type { IApiSuccessResponse } from "@tubenote/types";
 
 import { axiosInstance } from "@/lib/axios";
-import { redisSessionService } from "@/services";
+import { sessionCacheService } from "@/services";
 
 export class UserService {
   async getCurrentUser(sessionId: string): Promise<IApiSuccessResponse<any>> {
-    const sessionData = await redisSessionService.getSession(sessionId);
+    const sessionData = await sessionCacheService.getSession(sessionId);
 
     if (!sessionData || !sessionData.accessToken) {
       throw new Error("You must be logged in to view your profile");

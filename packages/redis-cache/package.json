@@ -1,0 +1,25 @@
+{
+  "name": "@tubenote/redis-cache",
+  "version": "1.0.0",
+  "description": "A shared Redis cache service for TubeNote.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "ioredis": "^5.6.1"
+  },
+  "devDependencies": {
+    "@tubenote/config-typescript": "workspace:*",
+    "typescript": "^5.7.2",
+    "tsup": "^8.4.0",
+    "@types/node": "^20.2.3"
+  }
+}

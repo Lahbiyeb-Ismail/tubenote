@@ -1,16 +1,11 @@
-import { RedisCacheService } from "@tubenote/redis-cache";
-import { inject, injectable } from "inversify";
+import type { RedisOptions } from "ioredis";
 
-import { TYPES } from "@/config/inversify/types";
+import Redis from "ioredis";
 
-import type { ILoggerService } from "../logger";
-import type { ICacheService } from "./cache.types";
+import type { IRedisCacheService } from "./redis-cache.types";
 
-import { envConfig } from "../../config";
-
-@injectable()
-export class CacheService implements ICacheService {
-  private redisCache: RedisCacheService;
+export class RedisCacheService implements IRedisCacheService {
+  private client: Redis;
 
   /**
    * Initializes the cache service with a Redis client connection.
@@ -23,13 +18,10 @@ export class CacheService implements ICacheService {
    *
    * @throws {Error} If Redis connection fails or configuration is invalid
    */
-  constructor(@inject(TYPES.LoggerService) private logger: ILoggerService) {
-    this.redisCache = new RedisCacheService({
-      host: envConfig.redis.host,
-      port: +envConfig.redis.port,
-      password: envConfig.redis.password,
-      maxRetriesPerRequest: 3,
-    });
+  constructor(redisOptions: RedisOptions) {
+    this.client = new Redis(redisOptions);
+
+    this.client.on("error", err => console.error("Redis Client Error", err));
   }
 
   /**
@@ -41,7 +33,20 @@ export class CacheService implements ICacheService {
    *
    */
   async get<T>(key: string): Promise<T | undefined> {
-    return this.redisCache.get<T>(key);
+    // this.logger.debug(`Cache: Retrieving value for key: ${key}`);
+
+    if (!key) {
+      // this.logger.warn("Cache: Attempted to get value for an empty key");
+      return undefined;
+    }
+
+    const data = await this.client.get(key);
+
+    if (data) {
+      return JSON.parse(data) as T;
+    }
+
+    return undefined;
   }
 
   /**
@@ -55,7 +60,23 @@ export class CacheService implements ICacheService {
    *
    */
   async set<T>(key: string, value: T, ttl?: number): Promise<boolean> {
-    return this.redisCache.set(key, value, ttl);
+    // this.logger.debug(`Cache: Setting value for key: ${key} with TTL: ${ttl}`);
+
+    if (typeof value === "undefined" || value === null) {
+      // this.logger.warn(`Cache: Attempted to set undefined or null value for key: ${key}`);
+      return false;
+    }
+
+    const stringValue = JSON.stringify(value);
+
+    if (ttl) {
+      const result = await this.client.set(key, stringValue, "EX", ttl);
+      return result === "OK";
+    }
+
+    const result = await this.client.set(key, stringValue);
+
+    return result === "OK";
   }
 
   /**
@@ -65,7 +86,14 @@ export class CacheService implements ICacheService {
    * @returns A promise that resolves to the number of keys that were deleted (0 or 1)
    */
   async del(key: string): Promise<number> {
-    return this.redisCache.del(key);
+    // this.logger.debug(`Cache: Deleting key: ${key}`);
+
+    if (!key) {
+      // this.logger.warn("Cache: Attempted to delete an empty key");
+      return 0;
+    }
+
+    return this.client.del(key);
   }
 
   /**
@@ -76,7 +104,9 @@ export class CacheService implements ICacheService {
    * @throws {Error} If the cache client is not available or the flush operation fails
    */
   async flush(): Promise<void> {
-    await this.redisCache.flush();
+    // this.logger.debug("Cache: Flushing all keys from the cache");
+
+    await this.client.flushall();
   }
 
   /**
@@ -97,6 +127,24 @@ export class CacheService implements ICacheService {
    * ```
    */
   async getStats(): Promise<any> {
-    return this.redisCache.getStats();
+    const info = await this.client.info();
+    // Parse the info string to get relevant stats
+    const lines = info.split("\r\n");
+    const stats: Record<string, any> = {};
+
+    lines.forEach((line) => {
+      if (line && !line.startsWith("#")) {
+        const parts = line.split(":");
+        if (parts.length === 2) {
+          stats[parts[0]] = parts[1];
+        }
+      }
+    });
+
+    return {
+      keys: stats.db0 ? +stats.db0.split(",")[0].split("=")[1] : 0,
+      hits: +stats.keyspace_hits,
+      misses: +stats.keyspace_misses,
+    };
   }
 }
