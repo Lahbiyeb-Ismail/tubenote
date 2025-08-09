@@ -58,7 +58,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
 
     return handleAsyncOperation(
       () =>
-        client.refreshToken.findUnique({
+        client.refreshToken.findFirst({
           where: {
             token,
             expiresAt: { gt: new Date() },
@@ -73,6 +73,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
    * Marks a refresh token as revoked in the database.
    *
    * @param tokenId - The ID of the token to be marked as revoked.
+   * @param revocationReason - The reason for revoking the token.
    * @param tx - Optional transaction client for database operations.
    *
    * @returns A promise that resolves when the token is successfully marked as revoked.
