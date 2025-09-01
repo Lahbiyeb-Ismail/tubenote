@@ -4,8 +4,6 @@ import type { ILoginDto, IRegisterDto } from "@tubenote/dtos";
 import {
   ERROR_MESSAGES,
   ForbiddenError,
-  NotFoundError,
-  UnauthorizedError,
 } from "@tubenote/api-errors";
 import { inject, injectable } from "inversify";
 
@@ -91,29 +89,17 @@ export class LocalAuthService implements ILocalAuthService {
 
     // Get the user first to check if they exist
     const user = await this._userService.getUserByEmail(email);
+    let isPasswordValid = false;
 
-    if (!user) {
-      this._loggerService.warn("Login attempt with non-existent email", {
-        email,
+    if (user) {
+      isPasswordValid = await this._cryptoService.validateHashMatch({
+        unhashedValue: password,
+        hashedValue: user.password,
       });
-
-      throw new NotFoundError(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
     }
 
-    if (!user.isEmailVerified) {
-      throw new UnauthorizedError(ERROR_MESSAGES.NOT_VERIFIED);
-    }
-
-    const isPasswordMatch = await this._cryptoService.validateHashMatch({
-      unhashedValue: password,
-      hashedValue: user.password,
-    });
-
-    if (!isPasswordMatch) {
-      this._loggerService.warn("Failed login attempt - invalid password", {
-        userId: user.id,
-        email,
-      });
+    if (!user || !isPasswordValid || !user.isEmailVerified) {
+      this._loggerService.warn("Invalid login attempt");
 
       throw new ForbiddenError(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
@@ -128,10 +114,7 @@ export class LocalAuthService implements ILocalAuthService {
 
     const accessToken = this._jwtService.generateAccessToken(user.id);
 
-    this._loggerService.info("User logged in successfully", {
-      userId: user.id,
-      email,
-    });
+    this._loggerService.info("User logged in successfully");
 
     return { accessToken, refreshToken };
   }
