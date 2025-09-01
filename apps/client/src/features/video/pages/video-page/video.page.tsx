@@ -21,7 +21,7 @@ export function VideoPage({ videoId }: IPageProps) {
 
   const { data: notesResponse, isLoading: isNotesLoading } = useGetNotesByVideoIdQuery({
     videoId,
-    paginationQuery: { page: currentPage, limit: PAGE_LIMIT, sortBy, order },
+    paginationQuery: { page: currentPage, limit: PAGE_LIMIT, sortBy, order, q: searchQuery },
   });
 
   if (isNotesLoading || !notesResponse) {

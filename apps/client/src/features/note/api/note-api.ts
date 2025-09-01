@@ -1,7 +1,6 @@
 import type { Note } from "@tubenote/db";
 import type {
   ICreateNoteDto,
-  IPaginationQueryDto,
   ISearchAndPaginationQueryDto,
   IUpdateNoteDto,
 } from "@tubenote/dtos";
@@ -148,7 +147,7 @@ export async function updateNote({
  */
 export async function getNotesByVideoId(
   videoId: string,
-  paginationQuery: IPaginationQueryDto,
+  paginationQuery: ISearchAndPaginationQueryDto,
 ): Promise<IApiSuccessResponse<Note[]>> {
   const response = await
   axiosInstance.get<IApiSuccessResponse<Note[]>>(`/notes/video/${videoId}`, {

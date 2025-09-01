@@ -1,6 +1,6 @@
 "use client";
 
-import type { IPaginationQueryDto } from "@tubenote/dtos";
+import type { ISearchAndPaginationQueryDto } from "@tubenote/dtos";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -9,7 +9,7 @@ import { getNotesByVideoId } from "../api";
 export function useGetNotesByVideoIdQuery({
   videoId,
   paginationQuery,
-}: { videoId: string; paginationQuery: IPaginationQueryDto }) {
+}: { videoId: string; paginationQuery: ISearchAndPaginationQueryDto }) {
   return useQuery({
     queryKey: ["video-notes", videoId, paginationQuery],
     queryFn: () => getNotesByVideoId(videoId, paginationQuery),
