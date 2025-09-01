@@ -61,4 +61,15 @@ export class VideoService {
 
     return res.data;
   }
+
+  async getVideoTranscript(sessionData: ISessionData, ytVideoId: string): Promise<IApiSuccessResponse<string>> {
+    const res = await axiosInstance.get<IApiSuccessResponse<string>>(`/videos/${ytVideoId}/transcript`, {
+      headers: {
+        "Authorization": `Bearer ${sessionData.accessToken}`,
+        "X-Session-ID": sessionData.sessionId,
+      },
+    });
+
+    return res.data;
+  }
 }

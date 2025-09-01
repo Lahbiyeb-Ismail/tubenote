@@ -33,6 +33,9 @@ videoRoutes
   .route("/count")
   .get(videoController.getUserVideosCount);
 
+videoRoutes.route("/:id/transcript")
+  .get(validateRequest({ params: idParamSchema }), videoController.getVideoTranscript);
+
 videoRoutes
   .route("/:id")
   .get(validateRequest({ params: idParamSchema }), videoController.getVideoByYoutubeId);

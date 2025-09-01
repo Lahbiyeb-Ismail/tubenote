@@ -70,4 +70,16 @@ export class VideoController {
 
     res.status(data.statusCode).json(data);
   }
+
+  async getVideoTranscript(
+    req: TypedRequest<EmptyRecord, IParamIdDto>,
+    res: Response,
+  ) {
+    const sessionData = req.sessionData;
+    const ytVideoId = req.params.id;
+
+    const data = await videoService.getVideoTranscript(sessionData, ytVideoId);
+
+    res.status(data.statusCode).json(data);
+  }
 }
