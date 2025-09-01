@@ -3,6 +3,7 @@
 import { useGetNotesByVideoIdQuery } from "@/features/note/queries";
 import {
   VideoPlayer,
+  VideoTranscript,
 } from "@/features/video/components";
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/shared/constants";
 import { useUrlState } from "@/shared/hooks";
@@ -37,11 +38,15 @@ export function VideoPage({ videoId }: IPageProps) {
       />
 
       <div className="container py-6 overflow-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-8rem)]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <VideoNotes notes={notesResponse.notes} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
-          <div className="lg:col-span-2 flex flex-col space-y-4 relative">
-            <VideoPlayer videoId={videoId} />
+          <div className="lg:col-span-2 flex flex-col space-y-6">
+            <div className="aspect-video">
+              <VideoPlayer videoId={videoId} />
+            </div>
+
+            <VideoTranscript videoId={videoId} />
           </div>
         </div>
       </div>

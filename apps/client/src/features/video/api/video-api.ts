@@ -74,3 +74,22 @@ export async function getUserVideosCount(): Promise<IApiSuccessResponse<number>>
 
   return response.data;
 }
+
+/**
+ * Retrieves the transcript for a specific video.
+ *
+ * @param videoId - The unique identifier of the video to get the transcript for
+ * @returns A promise that resolves to an API success response containing the video transcript data
+ * @throws Will throw an error if the API request fails or the video is not found
+ *
+ * @example
+ * ```typescript
+ * const transcript = await getVideoTranscript('video123');
+ * console.log(transcript.data);
+ * ```
+ */
+export async function getVideoTranscript(videoId: string): Promise<IApiSuccessResponse<any>> {
+  const response = await axiosInstance.get<IApiSuccessResponse<any>>(`/videos/${videoId}/transcript`);
+
+  return response.data;
+}
