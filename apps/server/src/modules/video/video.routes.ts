@@ -18,6 +18,10 @@ videoRoutes
   .get((req, res) =>
     videoController.getUserVideosCount(req, res));
 
+videoRoutes.route("/:id/transcript")
+  .get((req, res) =>
+    videoController.getVideoTranscript(req, res));
+
 videoRoutes
   .route("/:id")
   .get((req, res) =>

@@ -23,7 +23,7 @@ export class VideoController implements IVideoController {
     private _responseFormatter: IResponseFormatter,
   ) {}
 
-  async getYoutubeVideoTranscript(req: TypedRequest<EmptyRecord, IParamIdDto>, res: Response) {
+  async getVideoTranscript(req: TypedRequest<EmptyRecord, IParamIdDto>, res: Response) {
     const ytVideoId = req.params.id;
     const { language, format, timestamps, startTime, endTime } = req.query;
 
@@ -40,7 +40,14 @@ export class VideoController implements IVideoController {
       request,
     );
 
-    res.json(transcript);
+    const formattedResponse = this._responseFormatter.formatSuccessResponse({
+      responseOptions: {
+        data: transcript,
+        message: "Transcript retrieved successfully.",
+      },
+    });
+
+    res.status(formattedResponse.statusCode).json(formattedResponse);
   }
 
   /**

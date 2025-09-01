@@ -42,7 +42,7 @@ export interface IVideoService {
 }
 
 export interface IVideoController {
-  getYoutubeVideoTranscript: (
+  getVideoTranscript: (
     req: TypedRequest<EmptyRecord, IParamIdDto>,
     res: Response
   ) => Promise<void>;
