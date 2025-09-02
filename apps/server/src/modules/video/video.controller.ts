@@ -1,5 +1,5 @@
 import type { Video } from "@tubenote/db";
-import type { IParamIdDto, ISearchAndPaginationQueryDto } from "@tubenote/dtos";
+import type { IParamIdDto, ISearchAndPaginationQueryDto, IVideoTranscriptQueryDto } from "@tubenote/dtos";
 import type { Response } from "express";
 
 import { youtubeTranscriptService } from "@tubenote/youtube-api";
@@ -23,21 +23,9 @@ export class VideoController implements IVideoController {
     private _responseFormatter: IResponseFormatter,
   ) {}
 
-  async getVideoTranscript(req: TypedRequest<EmptyRecord, IParamIdDto>, res: Response) {
-    const ytVideoId = req.params.id;
-    const { language, format, timestamps, startTime, endTime } = req.query;
-
-    const request = {
-      ytVideoId,
-      language: language as string,
-      format: (format as "text" | "json") || "text",
-      timestamps: timestamps === "true",
-      startTime: startTime as string,
-      endTime: endTime as string,
-    };
-
+  async getVideoTranscript(req: TypedRequest<EmptyRecord, EmptyRecord, IVideoTranscriptQueryDto>, res: Response) {
     const transcript = await youtubeTranscriptService.getTranscript(
-      request,
+      req.query,
     );
 
     const formattedResponse = this._responseFormatter.formatSuccessResponse({

@@ -3,6 +3,7 @@ import type {
   ICreateVideoDto,
   IParamIdDto,
   ISearchAndPaginationQueryDto,
+  IVideoTranscriptQueryDto,
 } from "@tubenote/dtos";
 import type { IPaginatedData } from "@tubenote/types";
 import type { Response } from "express";
@@ -43,7 +44,7 @@ export interface IVideoService {
 
 export interface IVideoController {
   getVideoTranscript: (
-    req: TypedRequest<EmptyRecord, IParamIdDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IVideoTranscriptQueryDto>,
     res: Response
   ) => Promise<void>;
   getUserVideos: (

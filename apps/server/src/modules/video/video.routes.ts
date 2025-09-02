@@ -1,6 +1,11 @@
+import type { IVideoTranscriptQueryDto } from "@tubenote/dtos";
+import type { Response } from "express";
+
 import { Router } from "express";
 
 import { isAuthenticated } from "@/middlewares";
+
+import type { EmptyRecord, TypedRequest } from "../shared/types";
 
 import { videoController } from "./video.module";
 
@@ -18,8 +23,8 @@ videoRoutes
   .get((req, res) =>
     videoController.getUserVideosCount(req, res));
 
-videoRoutes.route("/:id/transcript")
-  .get((req, res) =>
+videoRoutes.route("/transcript")
+  .get((req: TypedRequest<EmptyRecord, EmptyRecord, IVideoTranscriptQueryDto>, res: Response) =>
     videoController.getVideoTranscript(req, res));
 
 videoRoutes
