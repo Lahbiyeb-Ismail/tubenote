@@ -1,4 +1,4 @@
-import type { IParamIdDto, ISearchAndPaginationQueryDto } from "@tubenote/dtos";
+import type { IParamIdDto, ISearchAndPaginationQueryDto, IVideoTranscriptQueryDto } from "@tubenote/dtos";
 import type { Request, Response } from "express";
 
 import type { EmptyRecord, TypedRequest } from "@/types";
@@ -72,13 +72,12 @@ export class VideoController {
   }
 
   async getVideoTranscript(
-    req: TypedRequest<EmptyRecord, IParamIdDto>,
+    req: TypedRequest<EmptyRecord, EmptyRecord, IVideoTranscriptQueryDto>,
     res: Response,
   ) {
     const sessionData = req.sessionData;
-    const ytVideoId = req.params.id;
 
-    const data = await videoService.getVideoTranscript(sessionData, ytVideoId);
+    const data = await videoService.getVideoTranscript(sessionData, req.query);
 
     res.status(data.statusCode).json(data);
   }

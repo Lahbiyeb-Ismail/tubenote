@@ -1,5 +1,5 @@
 import type { Video } from "@tubenote/db";
-import type { ISearchAndPaginationQueryDto } from "@tubenote/dtos";
+import type { ISearchAndPaginationQueryDto, IVideoTranscriptQueryDto } from "@tubenote/dtos";
 import type { IApiSuccessResponse } from "@tubenote/types";
 
 import type { ISessionData } from "@/types";
@@ -62,12 +62,13 @@ export class VideoService {
     return res.data;
   }
 
-  async getVideoTranscript(sessionData: ISessionData, ytVideoId: string): Promise<IApiSuccessResponse<string>> {
-    const res = await axiosInstance.get<IApiSuccessResponse<string>>(`/videos/${ytVideoId}/transcript`, {
+  async getVideoTranscript(sessionData: ISessionData, transcriptQueries: IVideoTranscriptQueryDto): Promise<IApiSuccessResponse<string>> {
+    const res = await axiosInstance.get<IApiSuccessResponse<string>>("/videos/transcript", {
       headers: {
         "Authorization": `Bearer ${sessionData.accessToken}`,
         "X-Session-ID": sessionData.sessionId,
       },
+      params: transcriptQueries,
     });
 
     return res.data;
