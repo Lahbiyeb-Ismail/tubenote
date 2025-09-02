@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 
 import { useEditorContent } from "@/features/note/hooks";
-import { VideoPlayer } from "@/features/video/components";
+import { VideoPlayer, VideoTranscript } from "@/features/video/components";
 import {
   AppMDXEditor,
   Loader,
@@ -92,6 +92,8 @@ export function NotePageLayout({
               )}
         </ResizablePanelGroup> */}
       </div>
+
+      <VideoTranscript videoId={videoId} />
 
       <SaveNoteDialog noteTitle={noteTitle} noteTags={noteTags} noteCategory={noteCategory} isSaving={isSavingNote} onSaveNote={handleSaveSubmit} />
     </div>

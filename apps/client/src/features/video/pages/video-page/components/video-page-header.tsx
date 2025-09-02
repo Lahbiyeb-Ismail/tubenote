@@ -12,14 +12,14 @@ export function VideoPageHeader({
   ytVideoId,
 }: IProps) {
   return (
-    <header className="bg-card border-b border-border sticky top-0 z-40">
+    <header className="bg-card border-b border-border sticky top-0 z-40 bg-white backdrop-blur-md">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <NavigateBackButton href="/videos" btnText="Back to Videos" />
 
           <div className="flex items-center space-x-2">
             <Link href={`/notes/create/${ytVideoId}`}>
-              <Button className="flex items-center space-x-1">
+              <Button className="flex items-center space-x-1 text-white">
                 <Plus className="h-4 w-4" />
                 <span>Add Note</span>
               </Button>
