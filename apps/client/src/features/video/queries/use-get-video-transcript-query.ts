@@ -1,5 +1,7 @@
 "use client";
 
+import type { IVideoTranscriptQueryDto } from "@tubenote/dtos";
+
 import { useQuery } from "@tanstack/react-query";
 
 import { getVideoTranscript } from "../api";
@@ -10,10 +12,10 @@ import { getVideoTranscript } from "../api";
  * @param isExtracting - Whether transcript extraction is in progress
  * @returns Query result with transcript data
  */
-export function useGetVideoTranscriptQuery(videoId: string, isExtracting: boolean) {
+export function useGetVideoTranscriptQuery(transcriptQueries: IVideoTranscriptQueryDto, isExtracting: boolean) {
   return useQuery({
-    queryKey: ["videoTranscript", videoId],
-    queryFn: () => getVideoTranscript(videoId),
+    queryKey: ["videoTranscript", transcriptQueries],
+    queryFn: () => getVideoTranscript(transcriptQueries),
     select: response => ({
       transcript: response.payload.data.data.transcript,
     }),

@@ -1,5 +1,5 @@
 import type { Video } from "@tubenote/db";
-import type { ISearchAndPaginationQueryDto } from "@tubenote/dtos";
+import type { ISearchAndPaginationQueryDto, IVideoTranscriptQueryDto } from "@tubenote/dtos";
 import type { IApiSuccessResponse } from "@tubenote/types";
 
 import { axiosInstance } from "@/shared/lib";
@@ -88,8 +88,10 @@ export async function getUserVideosCount(): Promise<IApiSuccessResponse<number>>
  * console.log(transcript.data);
  * ```
  */
-export async function getVideoTranscript(videoId: string): Promise<IApiSuccessResponse<any>> {
-  const response = await axiosInstance.get<IApiSuccessResponse<any>>(`/videos/${videoId}/transcript`);
+export async function getVideoTranscript(transcriptQueries: IVideoTranscriptQueryDto): Promise<IApiSuccessResponse<any>> {
+  const response = await axiosInstance.get<IApiSuccessResponse<any>>(`/videos/transcript`, {
+    params: transcriptQueries,
+  });
 
   return response.data;
 }

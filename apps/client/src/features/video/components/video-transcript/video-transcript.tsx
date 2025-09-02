@@ -18,7 +18,7 @@ interface VideoTranscriptProps {
 
 export function VideoTranscript({ videoId }: VideoTranscriptProps) {
   const [isExtracting, setIsExtracting] = useState(false);
-  const { data, isLoading, error } = useGetVideoTranscriptQuery(videoId, isExtracting);
+  const { data, isLoading, error } = useGetVideoTranscriptQuery({ ytVideoId: videoId, language: "en", format: "text", timestamps: true }, isExtracting);
 
   if (isLoading) {
     return (
