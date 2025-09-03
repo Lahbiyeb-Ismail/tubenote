@@ -28,6 +28,9 @@ model User {
   accounts                Account[]
   refreshTokens           RefreshToken[]
   emailVerificationTokens EmailVerificationToken[]
+  activities              UserActivity[]
+  studyStreak             StudyStreak?
+  stats                   UserStats?
 
   videoIds String[] @db.ObjectId
   videos   Video[]  @relation(fields: [videoIds], references: [id])
@@ -179,4 +182,53 @@ type ChannelInfo {
   customUrl  String
   description String
   thumbnails  ChannelThumbnails
+}
+
+enum ActivityType {
+  NOTE_CREATED
+  NOTE_UPDATED
+  NOTE_DELETED
+  VIDEO_WATCHED
+  VIDEO_BOOKMARKED
+  STUDY_SESSION_STARTED
+  STUDY_SESSION_ENDED
+}
+
+model UserActivity {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String       @db.ObjectId
+  type        ActivityType
+  metadata    Json?        // Flexible data for different activity types
+  duration    Int?         // Study time in minutes (for study sessions)
+  createdAt   DateTime     @default(now())
+  
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, type, createdAt])
+}
+
+model StudyStreak {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String    @unique @db.ObjectId
+  currentStreak   Int       @default(0)
+  longestStreak   Int       @default(0)
+  lastActivityDate DateTime?
+  streakData      Json      @default("[]") // Array of recent activity days
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserStats {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String   @unique @db.ObjectId
+  totalNotes      Int      @default(0)
+  totalVideos     Int      @default(0)
+  totalStudyTime  Int      @default(0) // in minutes
+  currentStreak   Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
