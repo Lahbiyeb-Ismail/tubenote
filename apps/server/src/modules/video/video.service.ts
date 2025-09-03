@@ -84,14 +84,14 @@ export class VideoService implements IVideoService {
       await this._cacheService.set(youtubeCacheKey, videoData, 86400);
     }
 
-    const video = await this._videoRepository.create(userId, videoData, tx);
+    const userVideosCountCacheKey = `videos:count:${userId}`;
 
-    // Invalidate user's video count cache
-    const userVideosCountCacheKey = `user:${userId}:videos:count`;
     await this._cacheService.del(userVideosCountCacheKey);
     this._loggerService.debug(
       `Cache invalidated for key: ${userVideosCountCacheKey}`,
     );
+
+    const video = await this._videoRepository.create(userId, videoData, tx);
 
     return video;
   }
@@ -196,19 +196,20 @@ export class VideoService implements IVideoService {
    * ```
    */
   async getUserVideosCount(userId: string): Promise<number> {
-    const cacheKey = `user:${userId}:videos:count`;
+    const cacheKey = `videos:count:${userId}`;
     const cachedCount = await this._cacheService.get<number>(cacheKey);
 
     if (cachedCount !== undefined) {
       this._loggerService.debug(
-        `Cache HIT for user videos count for userId: ${userId}`,
+        `Cache HIT for videos count for userId: ${userId}`,
       );
       return cachedCount;
     }
 
     this._loggerService.debug(
-      `Cache MISS for user videos count for userId: ${userId}`,
+      `Cache MISS for videos count for userId: ${userId}`,
     );
+
     const count = await this._videoRepository.count(userId);
 
     // Cache for 1 hour

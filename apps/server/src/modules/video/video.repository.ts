@@ -75,13 +75,7 @@ export class VideoRepository implements IVideoRepository {
     return handleAsyncOperation(
       () =>
         client.video.count({
-          where: {
-            userIds: { has: userId },
-            OR: [
-              { title: { contains: searchQuery, mode: "insensitive" } },
-              { description: { contains: searchQuery, mode: "insensitive" } },
-            ],
-          },
+          where: { userIds: { has: userId } },
         }),
       { errorMessage: ERROR_MESSAGES.FAILED_TO_COUNT },
     );
