@@ -1,6 +1,11 @@
 // Import reflect-metadata to enable decorators
 import "reflect-metadata";
 
+import type {
+  IAnalyticsController,
+  IAnalyticsRepository,
+  IAnalyticsService,
+} from "@/modules/analytics";
 // Import service interfaces directly
 import type {
   IAuthController,
@@ -124,6 +129,16 @@ export const noteController = container.get<INoteController>(
 export const noteService = container.get<INoteService>(TYPES.NoteService);
 export const noteRepository = container.get<INoteRepository>(
   TYPES.NoteRepository,
+);
+
+export const analyticsController = container.get<IAnalyticsController>(
+  TYPES.AnalyticsController,
+);
+export const analyticsService = container.get<IAnalyticsService>(
+  TYPES.AnalyticsService,
+);
+export const analyticsRepository = container.get<IAnalyticsRepository>(
+  TYPES.AnalyticsRepository,
 );
 
 export const cacheService = container.get<ICacheService>(TYPES.CacheService);

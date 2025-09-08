@@ -53,4 +53,9 @@ export const TYPES = {
   NoteController: Symbol.for("NoteController"),
   NoteService: Symbol.for("NoteService"),
   NoteRepository: Symbol.for("NoteRepository"),
+
+  // Analytics Module
+  AnalyticsController: Symbol.for("AnalyticsController"),
+  AnalyticsService: Symbol.for("AnalyticsService"),
+  AnalyticsRepository: Symbol.for("AnalyticsRepository"),
 };

@@ -16,6 +16,7 @@ import requestIp from "request-ip";
 // Import from our service provider which uses the DI container
 import "@/config/service-provider";
 import { errorHandler, notFoundRoute } from "@/middlewares";
+import { analyticsRoutes } from "@/modules/analytics";
 import { authRoutes, oauthRoutes } from "@/modules/auth";
 import { noteRoutes } from "@/modules/note";
 import { envConfig } from "@/modules/shared/config";
@@ -83,6 +84,7 @@ app.get("/", (_req, res) => {
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/oauth", oauthRoutes);
+app.use("/api/v1/analytics", analyticsRoutes);
 app.use("/api/v1/videos", videoRoutes);
 app.use("/api/v1/notes", noteRoutes);
 app.use("/api/v1/users", userRoutes);

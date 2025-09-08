@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { Container } from "inversify";
 
+import type { IAnalyticsController, IAnalyticsRepository, IAnalyticsService } from "@/modules/analytics";
 // Auth Module
 import type {
   IAuthController,
@@ -34,6 +35,12 @@ import type {
 } from "@/modules/user/features/account/account.types";
 import type { IVideoController, IVideoRepository, IVideoService } from "@/modules/video";
 
+// Analytics Module
+import {
+  AnalyticsController,
+  AnalyticsRepository,
+  AnalyticsService,
+} from "@/modules/analytics";
 import { AuthController, AuthService, JwtService, LocalAuthController, LocalAuthService, OAuthController, OAuthService, RefreshTokenController, RefreshTokenRepository, RefreshTokenService, ResetPasswordController, ResetPasswordService, VerifyEmailController, VerifyEmailRepository, VerifyEmailService } from "@/modules/auth";
 // Note Module
 import {
@@ -226,6 +233,20 @@ function bootstrapContainer() {
   container
     .bind<INoteController>(TYPES.NoteController)
     .to(NoteController)
+    .inSingletonScope();
+
+  // Bind analytics services
+  container
+    .bind<IAnalyticsRepository>(TYPES.AnalyticsRepository)
+    .to(AnalyticsRepository)
+    .inSingletonScope();
+  container
+    .bind<IAnalyticsService>(TYPES.AnalyticsService)
+    .to(AnalyticsService)
+    .inSingletonScope();
+  container
+    .bind<IAnalyticsController>(TYPES.AnalyticsController)
+    .to(AnalyticsController)
     .inSingletonScope();
 
   return container;
