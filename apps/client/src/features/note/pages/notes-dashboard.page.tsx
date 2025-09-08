@@ -5,12 +5,15 @@ import { Fragment, useState } from "react";
 import { DashboardHeader, PaginationControls, SearchAndFilterPanel } from "@/shared/components";
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/shared/constants";
 import { useUrlState } from "@/shared/hooks";
+import { useDialogStore } from "@/stores";
 
 import { NoNotesFound } from "../components";
 import { NotesDashboardSkeleton, NotesList } from "../components/notes-dashboard";
 import { useGetUserNotesQuery } from "../queries";
 
 export function NotesDashboardPage() {
+  const { openDialog } = useDialogStore();
+
   const [searchQuery, setSearchQuery] = useUrlState("q", "");
   const [sortBy, setSortBy] = useUrlState("sortBy", "createdAt");
   const [order] = useUrlState("order", "desc");
@@ -19,8 +22,8 @@ export function NotesDashboardPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   const { data: notesRes, isLoading: isNotesLoading } = useGetUserNotesQuery({
-    page,
-    limit: PAGE_LIMIT,
+    page: String(page),
+    limit: String(PAGE_LIMIT),
     sortBy,
     order,
     q: searchQuery,
@@ -33,7 +36,14 @@ export function NotesDashboardPage() {
   return (
     <main className="container py-6">
       {/* Page Header */}
-      <DashboardHeader title="Your Notes 🗒" description="Manage and organize all your video notes in one place." />
+      <DashboardHeader
+        title="Your Notes 🗒"
+        description="Manage and organize all your video notes in one place."
+        buttonProps={{
+          onClick: () => openDialog("create-note"),
+          label: "New Note",
+        }}
+      />
 
       {/* Search and Filter Component */}
       <SearchAndFilterPanel
