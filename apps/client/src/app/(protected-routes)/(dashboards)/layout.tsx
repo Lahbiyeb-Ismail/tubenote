@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, LayoutDashboard, User, Video } from "lucide-react";
+import { BookOpen, User, Video } from "lucide-react";
 import dynamic from "next/dynamic";
 
 import { NavigationHeader } from "@/shared/components";
@@ -20,23 +20,23 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const dashboardNavItems = [{
-    href: "/dashboard",
-    label: "Dashboard",
-    icon: LayoutDashboard,
-  }, {
-    href: "/videos",
-    label: "Videos",
-    icon: Video,
-  }, {
-    href: "/notes",
-    label: "Notes",
-    icon: BookOpen,
-  }, {
-    href: "/profile",
-    label: "Profile",
-    icon: User,
-  }];
+  const dashboardNavItems = [
+    {
+      href: "/notes",
+      label: "Notes",
+      icon: BookOpen,
+    },
+    {
+      href: "/videos",
+      label: "Videos",
+      icon: Video,
+    },
+    {
+      href: "/profile",
+      label: "Profile",
+      icon: User,
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">

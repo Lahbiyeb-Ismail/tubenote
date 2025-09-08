@@ -5,7 +5,6 @@ import {
   Globe,
   HelpCircle,
   Home,
-  LayoutDashboard,
   Mail,
   PlayCircle,
   Settings,
@@ -47,7 +46,6 @@ export const howItWorksSteps = [
 
 export const footerQuickLinks = [
   { icon: Home, text: "Home", link: "/" },
-  { icon: LayoutDashboard, text: "Dashboard", link: "/dashboard" },
   { icon: FileText, text: "Notes", link: "/notes" },
   { icon: Video, text: "Video", link: "/video" },
 ] as const;
@@ -60,7 +58,6 @@ export const footerSupportLinks = [
 ] as const;
 
 export const sidebarMenuLinks = [
-  { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
   { name: "Videos", icon: Video, href: "/videos" },
   { name: "Notes", icon: FileText, href: "/notes" },
   { name: "Profile", icon: User, href: "/profile" },
@@ -74,7 +71,6 @@ interface NavItem {
 }
 
 export const navItems: NavItem[] = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Notes", href: "/notes", icon: FileText },
   { name: "Videos", href: "/videos", icon: Video },
 ];

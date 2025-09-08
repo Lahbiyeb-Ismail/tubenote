@@ -18,16 +18,16 @@ export default function NotFound() {
       description: "Return to homepage",
     },
     {
-      href: "/dashboard",
-      icon: Video,
-      label: "Dashboard",
-      description: "View your videos",
-    },
-    {
       href: "/notes",
       icon: FileText,
       label: "Notes",
       description: "Browse your notes",
+    },
+    {
+      href: "/videos",
+      icon: Video,
+      label: "Videos",
+      description: "View your videos",
     },
     {
       href: "/settings",

@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, LogOut, Settings, User } from "lucide-react";
+import { FileText, LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage, Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, Separator } from "@/components/ui";
@@ -87,9 +87,9 @@ export function UserProfileMenu({ variant = "desktop", closeMobileMenu }: IProps
 
       <div className="flex flex-col space-y-2 mt-2">
         <Button variant="ghost" className="justify-start" size="sm" asChild>
-          <Link href="/dashboard" onClick={closeMobileMenu}>
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
+          <Link href="/notes" onClick={closeMobileMenu}>
+            <FileText className="mr-2 h-4 w-4" />
+            <span>Notes</span>
           </Link>
         </Button>
 

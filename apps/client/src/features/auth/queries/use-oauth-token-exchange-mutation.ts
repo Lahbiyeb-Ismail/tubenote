@@ -19,8 +19,8 @@ export function useOauthTokenExchangeMutation() {
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
 
-      // Redirect to dashboard after successful login
-      router.push("/dashboard");
+      // Redirect to notes page after successful login
+      router.push("/notes");
     },
     onError: (error) => {
       console.log("Error exchanging OAuth token:", error);
