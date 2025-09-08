@@ -4,8 +4,6 @@ import {
   ArrowUpDown,
   Calendar,
   Filter,
-  Grid3X3,
-  List,
   Search,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -20,6 +18,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/shared/hooks";
+
+import { LayoutModeSwitcher } from "../layout-mode-switcher";
 
 const sortOptions = [
   { label: "Recently Created", value: "createdAt" },
@@ -104,24 +104,11 @@ export function SearchAndFilterPanel({
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <div className="flex items-center border rounded-lg">
-            <Button
-              variant={viewMode === "grid" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("grid")}
-              className="rounded-r-none"
-            >
-              <Grid3X3 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("list")}
-              className="rounded-l-none"
-            >
-              <List className="h-4 w-4" />
-            </Button>
-          </div>
+
+          <LayoutModeSwitcher
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+          />
         </div>
       </div>
 
