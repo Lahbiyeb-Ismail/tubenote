@@ -1,16 +1,17 @@
-import { Download, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { useDialogStore } from "@/stores";
+import { PrimaryButton } from "../primary-btn";
 
 interface IProps {
   title: string;
   description: string;
+  buttonProps: {
+    onClick: () => void;
+    label: string;
+  };
 }
 
-export function DashboardHeader({ title, description }: IProps) {
-  const { openDialog } = useDialogStore();
-
+export function DashboardHeader({ title, description, buttonProps }: IProps) {
   return (
     <div className="mb-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -20,16 +21,8 @@ export function DashboardHeader({ title, description }: IProps) {
             {description}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button className="gap-2 bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700" onClick={() => openDialog("create-note")}>
-            <Plus className="h-4 w-4" />
-            New Note
-          </Button>
-          <Button variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Export Data
-          </Button>
-        </div>
+
+        <PrimaryButton label={buttonProps.label} onClick={buttonProps.onClick} icon={Plus} />
       </div>
     </div>
   );

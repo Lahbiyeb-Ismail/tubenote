@@ -5,11 +5,14 @@ import { Fragment, useState } from "react";
 import { DashboardHeader, PaginationControls, SearchAndFilterPanel } from "@/shared/components";
 import { DEFAULT_PAGE, PAGE_LIMIT } from "@/shared/constants";
 import { useUrlState } from "@/shared/hooks";
+import { useDialogStore } from "@/stores";
 
 import { useGetUserVideosQuery } from "../../queries";
 import { NoVideosFound, VideosDashboardSkeleton, VideosList } from "./components";
 
 export function VideosDashboardPage() {
+  const { openDialog } = useDialogStore();
+
   const [searchQuery, setSearchQuery] = useUrlState("q", "");
   const [sortBy, setSortBy] = useUrlState("sortBy", "createdAt");
   const [order] = useUrlState("order", "desc");
@@ -20,7 +23,7 @@ export function VideosDashboardPage() {
   const {
     data,
     isLoading,
-  } = useGetUserVideosQuery({ page, limit: PAGE_LIMIT, sortBy, order, q: searchQuery });
+  } = useGetUserVideosQuery({ page: String(page), limit: String(PAGE_LIMIT), sortBy, order, q: searchQuery });
 
   if (!searchQuery && data?.videos.length === 0)
     return <NoVideosFound />;
@@ -28,7 +31,14 @@ export function VideosDashboardPage() {
   return (
     <main className="container py-6">
       {/* Page Header */}
-      <DashboardHeader title="Video Library 📼" description="Discover, watch, and organize your learning videos" />
+      <DashboardHeader
+        title="Video Library 📼"
+        description="Discover, watch, and organize your learning videos"
+        buttonProps={{
+          onClick: () => openDialog("add-video"),
+          label: "New Video",
+        }}
+      />
 
       {/* Search and Filter Component */}
       <SearchAndFilterPanel inputSearchPlaceholder="Search videos, tags, or content..." searchQuery={searchQuery} setSearchQuery={setSearchQuery} showFilters={showFilters} setShowFilters={setShowFilters} sortBy={sortBy} setSortBy={setSortBy} viewMode={viewMode} setViewMode={setViewMode} />
