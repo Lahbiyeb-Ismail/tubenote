@@ -2,7 +2,6 @@ export const quickLinks = {
   title: "Quick Links",
   links: [
     { name: "Home", href: "/" },
-    { name: "Dashboard", href: "/dashboard" },
     { name: "Notes", href: "/notes" },
     { name: "Videos", href: "/videos" },
   ],

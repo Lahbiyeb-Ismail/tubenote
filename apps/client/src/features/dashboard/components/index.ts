@@ -1,5 +1,4 @@
 export * from "./charts";
-export * from "./dashboard-navigation-header";
 export * from "./dashboard-skeleton";
 export * from "./key-metric-card";
 export * from "./key-metrics";

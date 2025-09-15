@@ -25,7 +25,7 @@ export default function AuthCallback({ searchParams }: IPageProps) {
 
   useEffect(() => {
     if (isSuccess) {
-      router.push("/dashboard");
+      router.push("/notes");
     }
     if (isError) {
       router.push("/"); // Or a login-failed page

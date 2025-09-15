@@ -1,6 +1,5 @@
 import {
   FileText,
-  LayoutDashboard,
   LogOut,
   Settings,
   Video,
@@ -46,12 +45,6 @@ export function DropDownNavbar() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator className="block md:hidden" />
-          <Link href="/dashboard">
-            <DropdownMenuItem className="flex items-center cursor-pointer md:hidden">
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              <span>Dashboard</span>
-            </DropdownMenuItem>
-          </Link>
           <Link href="/notes">
             <DropdownMenuItem className="flex items-center cursor-pointer md:hidden">
               <FileText className="mr-2 h-4 w-4" />

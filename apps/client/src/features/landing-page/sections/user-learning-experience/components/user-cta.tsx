@@ -11,9 +11,9 @@ export function UserCTA() {
         Join thousands of learners who've transformed their video learning experience
       </p>
 
-      <Link href="/dashboard" className="bg-white text-primary px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-250 flex items-center justify-center max-w-fit mx-auto">
+      <Link href="/notes" className="bg-white text-primary px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-250 flex items-center justify-center max-w-fit mx-auto">
         <ArrowRight size={24} className="mr-2" />
-        See the Solution
+        Start Taking Notes
       </Link>
     </div>
   );
