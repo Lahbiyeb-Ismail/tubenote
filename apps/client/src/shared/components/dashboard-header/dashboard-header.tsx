@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { PrimaryButton } from "../primary-btn";
 
 interface IProps {
   title: string;
@@ -21,12 +21,8 @@ export function DashboardHeader({ title, description, buttonProps }: IProps) {
             {description}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button className="gap-2 bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white" onClick={buttonProps.onClick}>
-            <Plus className="h-4 w-4" />
-            {buttonProps.label}
-          </Button>
-        </div>
+
+        <PrimaryButton label={buttonProps.label} onClick={buttonProps.onClick} icon={Plus} />
       </div>
     </div>
   );

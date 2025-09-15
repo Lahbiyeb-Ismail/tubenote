@@ -1,8 +1,7 @@
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash } from "lucide-react";
 import { Fragment } from "react";
 
 import {
-  Button,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -10,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui";
+import { PrimaryButton, SecondaryButton } from "@/shared/components";
 import { useDialogStore } from "@/stores";
 
 import { useNote } from "../../hooks";
@@ -38,12 +38,9 @@ export function NoteDeletionDialog() {
                 </DialogHeader>
 
                 <DialogFooter>
-                  <Button variant="outline" onClick={closeDialog}>
-                    Cancel
-                  </Button>
-                  <Button variant="destructive" onClick={() => deleteNote(noteId)}>
-                    Delete
-                  </Button>
+                  <SecondaryButton label="Cancel" onClick={closeDialog} />
+
+                  <PrimaryButton label="Delete" onClick={() => deleteNote(noteId)} icon={Trash} />
                 </DialogFooter>
               </Fragment>
             )}

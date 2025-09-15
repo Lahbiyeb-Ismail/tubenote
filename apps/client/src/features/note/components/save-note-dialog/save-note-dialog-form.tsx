@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SecondaryButton } from "@/shared/components";
 import { useDialogStore } from "@/stores";
 
 const categories = [
@@ -142,10 +143,9 @@ export function SaveNoteDialogForm({ noteTitle, noteCategory, noteTags, onSaveNo
         )}
       </div>
 
-      <div className="flex items-center justify-end space-x-2">
-        <Button variant="outline" onClick={closeDialog}>
-          Cancel
-        </Button>
+      <div className="flex items-center justify-end gap-2">
+        <SecondaryButton label="Cancel" onClick={closeDialog} />
+
         <Button type="submit" disabled={isSaving}>
           <Save className="h-4 w-4 mr-2" />
           Save Note

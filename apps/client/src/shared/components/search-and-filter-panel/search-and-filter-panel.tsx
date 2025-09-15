@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/shared/hooks";
 
 import { LayoutModeSwitcher } from "../layout-mode-switcher";
+import { SecondaryButton } from "../secondary-btn";
 
 const sortOptions = [
   { label: "Recently Created", value: "createdAt" },
@@ -77,14 +78,8 @@ export function SearchAndFilterPanel({
           />
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setShowFilters(!showFilters)}
-            className={`gap-2 ${showFilters ? "bg-slate-100 dark:bg-slate-800" : ""}`}
-          >
-            <Filter className="h-4 w-4" />
-            Filters
-          </Button>
+          <SecondaryButton label="Filters" icon={Filter} onClick={() => setShowFilters(!showFilters)} className={`gap-2 ${showFilters ? "bg-slate-100 dark:bg-slate-800" : ""}`} />
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="gap-2">
